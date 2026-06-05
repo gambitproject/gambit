@@ -35,7 +35,7 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
         (e.g. ``{"players": 2, "coins": 3, "fields": 2}`` for ``"blotto"``).
         See the `OpenSpiel game list
         <https://openspiel.readthedocs.io/en/latest/games.html>`_ for
-        available parameters per game. Defaults to an empty dict.
+        available parameters per game.
 
     Returns
     -------
