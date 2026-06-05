@@ -223,16 +223,7 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
   const Game efg = m_owner->GetDocument()->GetGame();
 
   int x, y;
-#if defined(__WXMSW__)
-  // The +12 here is designed to effectively make the hot spot on
-  // the cursor the center of the cursor image (they're currently
-  // 24 pixels wide).
-  m_owner->CalcUnscrolledPosition(p_x + 12, p_y + 12, &x, &y);
-#else
-  // Under GTK, there is an angle in the upper left-hand corner which
-  // serves to identify the hot spot.  Thus, no adjustment is used
   m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
-#endif // __WXMSW__ or defined(__WXMAC__)
 
   x = m_owner->DeviceToLayout(x);
   y = m_owner->DeviceToLayout(y);
@@ -991,7 +982,61 @@ void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
   }
 }
 
-#include "bitmaps/tree.xpm"
+namespace {
+
+wxCursor MakeTreeDragCursor()
+{
+  constexpr int width = 24;
+  constexpr int height = 24;
+
+  wxBitmap bitmap(width, height, 32);
+
+  {
+    wxMemoryDC dc(bitmap);
+    dc.SetBackground(*wxTRANSPARENT_BRUSH);
+    dc.Clear();
+
+    const wxColour stroke(70, 70, 70);
+    const wxColour fill(255, 255, 255);
+
+    dc.SetPen(wxPen(stroke, 2));
+    dc.SetBrush(wxBrush(fill, wxBRUSHSTYLE_SOLID));
+
+    // Simple subtree glyph: one parent node and two children.
+    dc.DrawCircle(7, 5, 3);
+    dc.DrawCircle(7, 18, 3);
+    dc.DrawCircle(18, 18, 3);
+
+    dc.SetPen(wxPen(stroke, 1));
+    dc.DrawLine(7, 8, 7, 15);
+    dc.DrawLine(10, 18, 15, 18);
+
+    dc.SelectObject(wxNullBitmap);
+  }
+
+  wxImage image = bitmap.ConvertToImage();
+  if (image.HasAlpha()) {
+    // Good.
+  }
+  else {
+    image.InitAlpha();
+  }
+
+  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, 0);
+  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, 0);
+
+  return wxCursor(image);
+}
+
+wxCursor MakeDragCursor(const wxBitmap &p_bitmap, int p_hotspotX, int p_hotspotY)
+{
+  wxImage image = p_bitmap.ConvertToImage();
+  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, p_hotspotX);
+  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, p_hotspotY);
+  return wxCursor(image);
+}
+
+} // namespace
 
 void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
@@ -1004,20 +1049,12 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     GameNode node = m_layout.NodeHitTest(x, y);
 
     if (node && !node->IsTerminal()) {
-      const wxBitmap bitmap(tree_xpm);
-#if defined(__WXMSW__) or defined(__WXMAC__)
-      const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-      wxIcon image;
-      image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
-
       wxString label;
       label << "N" << node->GetNumber();
       wxTextDataObject textData(label);
 
-      wxDropSource source(textData, this, image, image, image);
-      /*wxDragResult result =*/source.DoDragDrop(wxDrag_DefaultMove);
+      wxDropSource source(textData, this);
+      source.DoDragDrop(wxDrag_DefaultMove);
       return;
     }
     node = m_layout.OutcomeHitTest(x, y);
