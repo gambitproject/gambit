@@ -411,18 +411,18 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
 // OnKeyEvent -- handle keypress events.
 //
 // Navigation shortcuts:
-//     left arrow:   go to rendered ancestor of current node
-//     right arrow:  go to rendered descendant of current node
+//     left arrow:   go to rendered ancestor of selected node
+//     right arrow:  go to rendered descendant of selected node
 //     up arrow:     go to previous node at the same rendered level
 //     down arrow:   go to next node at the same rendered level
 //     ALT-up:       go to previous member of information set
 //     ALT-down:     go to next member of information set
 //     space:        ensure the selected node is visible
-//     'R', 'r':     select the root node and make it visible
+//     home:         select the root node and make it visible
 //
 // Editing shortcuts:
-//     'M', 'm':     edit the move at the current node
-//     'N', 'n':     edit the properties of the current node
+//     'M', 'm':     edit the move at the selected node
+//     return/enter: edit the properties of the selected node
 //
 // Payoff edit mode only:
 //     escape:       cancel edit of payoff
@@ -430,9 +430,7 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
 //
 void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
-  const GameNode selectNode = m_doc->GetSelectNode();
-
-  if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
+  if (p_event.GetKeyCode() == WXK_HOME) {
     m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
     FocusNode(m_doc->GetSelectNode());
     return;
@@ -443,7 +441,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       m_payoffEditor->EndEdit();
       return;
     }
-    else if (p_event.GetKeyCode() == WXK_TAB) {
+    if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
 
       const GameOutcome outcome = m_payoffEditor->GetOutcome();
@@ -486,6 +484,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
   // After this point, all events involve moving relative to selected node.
   // So if there isn't a selected node, the event doesn't apply
+  const GameNode selectNode = m_doc->GetSelectNode();
   if (!selectNode) {
     p_event.Skip();
     return;
@@ -498,8 +497,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     wxPostEvent(this, event);
     return;
   }
-  case 'N':
-  case 'n': {
+  case WXK_RETURN:
+  case WXK_NUMPAD_ENTER: {
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
     wxPostEvent(this, event);
     return;
