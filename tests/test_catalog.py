@@ -182,7 +182,7 @@ def test_catalog_games_include_descriptions():
 # ---------------------------------------------------------------------------
 
 _MOCK_NFG = gbt.Game.new_table([2, 2]).to_nfg()
-_MOCK_EFG = gbt.catalog.load("bagwell1995").to_efg()
+_MOCK_EFG = gbt.catalog.load("journals/geb/bagwell1995").to_efg()
 
 
 def _setup_pyspiel_mock(

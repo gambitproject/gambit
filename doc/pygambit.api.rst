@@ -20,6 +20,7 @@ Representation of games
    Infoset
    Action
    Strategy
+   Subgame
 
 
 Creating, reading, and writing games
@@ -109,6 +110,8 @@ Information about the game
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.subgames
+   Game.minimal_subgame
 
 .. autosummary::
    :toctree: api/
@@ -150,6 +153,14 @@ Information about the game
    Node.is_successor_of
    Node.plays
    Node.own_prior_action
+
+.. autosummary::
+   :toctree: api/
+
+   Subgame.game
+   Subgame.root
+   Subgame.parent
+   Subgame.children
 
 .. autosummary::
 

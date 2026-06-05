@@ -28,6 +28,7 @@
 #include <set>
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 
 #include "gambit.h"
@@ -285,6 +286,28 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 }
 
 //========================================================================
+//                      class GameSubgameRep
+//========================================================================
+
+GameSubgame GameSubgameRep::GetParent() const
+{
+  auto p = m_parent.lock();
+  return p;
+}
+
+GameSubgameRep::SubgameCollection GameSubgameRep::GetChildren() const
+{
+  return SubgameCollection(std::const_pointer_cast<GameSubgameRep>(shared_from_this()),
+                           &m_children);
+}
+
+GameSubgameRep::InfosetCollection GameSubgameRep::GetSubgameDifference() const
+{
+  return InfosetCollection(std::const_pointer_cast<GameSubgameRep>(shared_from_this()),
+                           &m_subgameDifference);
+}
+
+//========================================================================
 //                         class GameNodeRep
 //========================================================================
 
@@ -374,18 +397,13 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot() const
 {
-  // TODO: Currently O(S) per call where S = number of subgames.
-  // Will become O(1) when GameSubgameRep adds a back-pointer (like m_infoset).
   if (m_children.empty()) {
     return !GetParent();
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  if (tree_game->m_subgames.empty()) {
-    tree_game->BuildSubgameRoots();
-  }
-
-  return contains(tree_game->m_subgames, const_cast<GameNodeRep *>(this));
+  tree_game->BuildSubgameRoots();
+  return tree_game->m_subgameData.m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -858,6 +876,21 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
+GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
+{
+  if (p_infoset->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  BuildSubgameRoots();
+  auto *n = p_infoset->m_members.front().get();
+  auto it = m_subgameData.m_subgameByRoot.find(n);
+  while (it == m_subgameData.m_subgameByRoot.end()) {
+    n = n->m_parent;
+    it = m_subgameData.m_subgameByRoot.find(n);
+  }
+  return it->second;
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -923,7 +956,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
-  m_subgames.clear();
+  m_subgameData.Invalidate();
   m_computedValues = false;
 }
 
@@ -1129,7 +1162,11 @@ void GameTreeRep::BuildUnreachableNodes() const
 
 void GameTreeRep::BuildSubgameRoots() const
 {
-  if (!m_subgames.empty()) {
+  if (m_subgameData.m_valid) {
+    return;
+  }
+  if (m_root->IsTerminal()) {
+    m_subgameData.m_valid = true;
     return;
   }
 
@@ -1242,20 +1279,72 @@ void GameTreeRep::BuildSubgameRoots() const
   SpanVisitor span_visitor{disc, hull};
   WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
+  BridgeVisitor bridge_visitor{disc, hull, m_subgameData.m_subgamePostorder};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
+
+  // Phase 3: Build subgame tree with subgame differences
+  struct SubgameVisitor {
+    const std::unordered_set<GameNodeRep *> &m_roots;
+    std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> &m_cache;
+    GameTreeRep *m_game;
+    // Subgame roots on the current DFS path, innermost at back
+    std::vector<GameNodeRep *> m_stack;
+    std::unordered_set<GameInfosetRep *> m_infosetVisited;
+
+    DFSCallbackResult OnEnter(const GameNode &p_node, int)
+    {
+      if (p_node->IsTerminal()) {
+        return DFSCallbackResult::Continue;
+      }
+      GameNodeRep *node = p_node.get();
+      if (contains(m_roots, node)) {
+        auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
+        if (!m_stack.empty()) {
+          auto &parent_subgame = m_cache.at(m_stack.back());
+          subgame->m_parent = parent_subgame;
+          parent_subgame->m_children.push_back(subgame);
+        }
+        m_cache.emplace(node, std::move(subgame));
+        m_stack.push_back(node);
+      }
+      if (m_infosetVisited.insert(node->m_infoset).second) {
+        m_cache.at(m_stack.back())
+            ->m_subgameDifference.emplace_back(node->m_infoset->shared_from_this());
+      }
+      return DFSCallbackResult::Continue;
+    }
+
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      if (!m_stack.empty() && m_stack.back() == p_node.get()) {
+        m_stack.pop_back();
+      }
+      return DFSCallbackResult::Continue;
+    }
+
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    static void OnVisit(GameNode, int) {}
+  };
+
+  const std::unordered_set<GameNodeRep *> subgame_root_set(
+      m_subgameData.m_subgamePostorder.begin(), m_subgameData.m_subgamePostorder.end());
+
+  SubgameVisitor subgame_visitor{subgame_root_set, m_subgameData.m_subgameByRoot,
+                                 const_cast<GameTreeRep *>(this)};
+  WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
+  m_subgameData.m_valid = true;
 }
 
-std::vector<GameNode> GameTreeRep::GetSubgames() const
+std::vector<GameSubgame> GameTreeRep::GetSubgames() const
 {
-  if (m_subgames.empty()) {
-    BuildSubgameRoots();
-  }
-
-  std::vector<GameNode> result;
-  result.reserve(m_subgames.size());
-  for (auto *rep : m_subgames) {
-    result.emplace_back(rep->shared_from_this());
+  BuildSubgameRoots();
+  std::vector<GameSubgame> result;
+  result.reserve(m_subgameData.m_subgamePostorder.size());
+  for (auto *rep : m_subgameData.m_subgamePostorder) {
+    result.emplace_back(m_subgameData.m_subgameByRoot.at(rep));
   }
   return result;
 }

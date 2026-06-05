@@ -3,6 +3,7 @@
 ## [16.7.0] - unreleased
 
 ### Added
+- Implement `GameSubgameRep` (C++) and `Subgame` (Python), a first-class object representing a subgame. (#585)
 - Games can be materialised directly from OpenSpiel games if `pyspiel` is installed. (#917)
 
 ### Fixed
