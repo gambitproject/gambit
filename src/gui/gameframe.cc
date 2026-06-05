@@ -482,13 +482,13 @@ void GameFrame::MakeMenus()
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
 
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &in\tCtrl-+"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
                    _("Increase display magnification"), wxBitmap(zoomin_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out\tCtrl--"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
                    _("Decrease display magnification"), wxBitmap(zoomout_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Zoom 1:1\tCtrl-0"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
                    _("Set magnification to 1:1"), wxBitmap(zoom1_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMFIT, _("&Fit tree to window"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
                    _("Rescale to show entire tree in window"), wxBitmap(zoomfit_xpm));
 
   viewMenu->AppendSeparator();
@@ -517,7 +517,7 @@ void GameFrame::MakeMenus()
   AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
                    _("Compute Nash equilibria and refinements"), wxBitmap(calc_xpm));
 
-  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&Qre"), _("Compute quantal response equilibria"));
+  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
   AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About Gambit"), _("About Gambit"),
@@ -573,9 +573,10 @@ void GameFrame::MakeToolbar()
                      wxITEM_NORMAL, _("Zoom in"), _("Increase magnification"), nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, wxEmptyString, wxBitmap(zoomout_xpm), wxNullBitmap,
                      wxITEM_NORMAL, _("Zoom out"), _("Decrease magnification"), nullptr);
+    toolBar->AddTool(GBT_MENU_VIEW_ZOOM100, wxEmptyString, wxBitmap(zoom1_xpm), wxNullBitmap,
+                     wxITEM_NORMAL, _("Actual size"), _("Set magnification to 1:1"), nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT, wxEmptyString, wxBitmap(zoomfit_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Fit to window"), _("Set magnification to see entrie tree"),
-                     nullptr);
+                     wxITEM_NORMAL, _("Zoom to fit"), _("Fit the tree in the window"), nullptr);
   }
 
   toolBar->AddSeparator();
@@ -595,7 +596,7 @@ void GameFrame::MakeToolbar()
                      _("Display the reduced strategic representation of the game"), nullptr);
   }
   toolBar->AddTool(GBT_MENU_VIEW_PROFILES, wxEmptyString, wxBitmap(profiles_xpm), wxNullBitmap,
-                   wxITEM_NORMAL, _("View the list of computed strategy profiles"),
+                   wxITEM_CHECK, _("View the list of computed strategy profiles"),
                    _("Show or hide the list of computed strategy profiles"), nullptr);
   toolBar->AddTool(GBT_MENU_TOOLS_EQUILIBRIUM, wxEmptyString, wxBitmap(calc_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Compute Nash equilibria of this game"),
