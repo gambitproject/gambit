@@ -1,4 +1,8 @@
 import io
+import os
+import shutil
+import subprocess
+import tempfile
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -93,6 +97,102 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
             f"OpenSpiel game '{game_name}' has unsupported dynamics type "
             f"'{dynamics}' and cannot be exported to Gambit format."
         )
+
+
+def load_gamut(
+    game_class: str,
+    params: dict | None = None,
+    gamut_jar: Path | str | None = None,
+) -> gbt.Game:
+    """
+    Generate a game using the GAMUT game generator.
+
+    GAMUT (http://gamut.stanford.edu) is a Java-based suite of parameterised
+    game generators. This function calls GAMUT as an external process and
+    returns the resulting game as a :class:`~pygambit.Game` object.
+
+    Parameters
+    ----------
+    game_class : str
+        The GAMUT game class name (e.g. ``"RandomGame"``, ``"CovariantGame"``).
+        See the `GAMUT documentation <http://gamut.stanford.edu/documentation.htm>`_
+        for available game classes and their parameters.
+    params : dict, optional
+        Parameters forwarded to GAMUT as command-line flags. Each key becomes
+        ``-key``.  Values are handled as follows:
+
+        - ``True`` → flag with no value token
+          (e.g. ``{"normalize": True}`` → ``-normalize``)
+        - list or tuple → space-separated tokens
+          (e.g. ``{"actions": [3, 3]}`` → ``-actions 3 3``)
+        - anything else → single token
+          (e.g. ``{"players": 2}`` → ``-players 2``)
+
+        Multi-word GAMUT flags use underscores:
+        ``{"min_payoff": 0, "max_payoff": 100}``.
+    gamut_jar : pathlib.Path or str, optional
+        Path to ``gamut.jar``. If omitted, the ``GAMUT_JAR`` environment
+        variable is used. Raises :class:`FileNotFoundError` if neither is
+        supplied.
+
+    Returns
+    -------
+    Game
+        The generated game.
+
+    Raises
+    ------
+    RuntimeError
+        If ``java`` is not found on the system PATH.
+    FileNotFoundError
+        If ``gamut.jar`` cannot be located.
+    ValueError
+        If GAMUT exits with a non-zero return code (e.g. invalid game class
+        or parameters).
+    """
+    if shutil.which("java") is None:
+        raise RuntimeError(
+            "Java is required to run GAMUT. "
+            "Install Java and ensure 'java' is on your PATH."
+        )
+    if gamut_jar is None:
+        env_jar = os.environ.get("GAMUT_JAR")
+        if env_jar is None:
+            raise FileNotFoundError(
+                "gamut.jar not found. Provide the path via the 'gamut_jar' argument "
+                "or set the GAMUT_JAR environment variable. "
+                "Download GAMUT from http://gamut.stanford.edu/."
+            )
+        gamut_jar = Path(env_jar)
+    else:
+        gamut_jar = Path(gamut_jar)
+    if not gamut_jar.is_file():
+        raise FileNotFoundError(f"gamut.jar not found at {gamut_jar}")
+
+    cmd = ["java", "-jar", str(gamut_jar), "-g", game_class, "-output", "GambitOutput"]
+    if params:
+        for key, value in params.items():
+            cmd.append(f"-{key}")
+            if value is True:
+                pass  # boolean flags like -normalize, -int_payoffs take no value token
+            elif isinstance(value, (list, tuple)):
+                cmd.extend(str(v) for v in value)
+            else:
+                cmd.append(str(value))
+
+    with tempfile.NamedTemporaryFile(suffix=".nfg", delete=False) as tmp:
+        out_path = Path(tmp.name)
+    try:
+        cmd.extend(["-f", str(out_path)])
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise ValueError(
+                f"GAMUT failed for game class '{game_class}': "
+                f"{result.stderr.strip() or result.stdout.strip()}"
+            )
+        return gbt.read_nfg(str(out_path))
+    finally:
+        out_path.unlink(missing_ok=True)
 
 
 def load(slug: str) -> gbt.Game:

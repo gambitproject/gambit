@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -307,3 +308,98 @@ def test_openspiel_load_with_params(monkeypatch):
     )
     gbt.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
     mock_ps.load_game.assert_called_once_with("blotto", {"players": 2, "coins": 3, "fields": 2})
+
+
+# ---------------------------------------------------------------------------
+# GAMUT game generation tests (all mocked; Java and gamut.jar not required)
+# ---------------------------------------------------------------------------
+
+
+def _fake_gamut_run(nfg_content, returncode=0, stderr=""):
+    """Return a fake subprocess.run callable that writes nfg_content to the -f path."""
+    def _run(cmd, **kwargs):
+        if returncode == 0:
+            f_idx = cmd.index("-f")
+            Path(cmd[f_idx + 1]).write_text(nfg_content)
+        result = MagicMock()
+        result.returncode = returncode
+        result.stderr = stderr
+        result.stdout = ""
+        return result
+    return _run
+
+
+def test_load_gamut_success(monkeypatch, tmp_path):
+    """Happy path: GAMUT writes an NFG file and load_gamut returns a Game."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr("pygambit.catalog.subprocess.run", _fake_gamut_run(_MOCK_NFG))
+    game = gbt.catalog.load_gamut("RandomGame", gamut_jar=fake_jar)
+    assert isinstance(game, gbt.Game)
+
+
+def test_load_gamut_with_params(monkeypatch, tmp_path):
+    """params dict is translated correctly to GAMUT command-line flags."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    captured = {}
+
+    def _run(cmd, **kwargs):
+        captured["cmd"] = cmd
+        Path(cmd[cmd.index("-f") + 1]).write_text(_MOCK_NFG)
+        result = MagicMock()
+        result.returncode = 0
+        return result
+
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr("pygambit.catalog.subprocess.run", _run)
+    gbt.catalog.load_gamut(
+        "RandomGame",
+        params={"players": 2, "actions": [3, 3], "normalize": True, "min_payoff": 0},
+        gamut_jar=fake_jar,
+    )
+    cmd = captured["cmd"]
+    assert "-players" in cmd and cmd[cmd.index("-players") + 1] == "2"
+    assert "-actions" in cmd
+    actions_idx = cmd.index("-actions")
+    assert cmd[actions_idx + 1] == "3" and cmd[actions_idx + 2] == "3"
+    assert "-normalize" in cmd
+    normalize_idx = cmd.index("-normalize")
+    assert cmd[normalize_idx + 1] == "-min_payoff"  # no value token after -normalize
+    assert "-min_payoff" in cmd and cmd[cmd.index("-min_payoff") + 1] == "0"
+
+
+def test_load_gamut_no_java(monkeypatch, tmp_path):
+    """Missing java on PATH raises RuntimeError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: None)
+    with pytest.raises(RuntimeError, match="Java is required"):
+        gbt.catalog.load_gamut("RandomGame", gamut_jar=tmp_path / "gamut.jar")
+
+
+def test_load_gamut_jar_not_found(monkeypatch, tmp_path):
+    """Non-existent gamut_jar path raises FileNotFoundError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    with pytest.raises(FileNotFoundError, match="gamut.jar not found at"):
+        gbt.catalog.load_gamut("RandomGame", gamut_jar=tmp_path / "missing.jar")
+
+
+def test_load_gamut_no_jar_env(monkeypatch):
+    """With gamut_jar=None and GAMUT_JAR unset, raises FileNotFoundError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.delenv("GAMUT_JAR", raising=False)
+    with pytest.raises(FileNotFoundError, match="GAMUT_JAR"):
+        gbt.catalog.load_gamut("RandomGame")
+
+
+def test_load_gamut_gamut_fails(monkeypatch, tmp_path):
+    """Non-zero returncode from GAMUT raises ValueError naming the game class."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr(
+        "pygambit.catalog.subprocess.run",
+        _fake_gamut_run("", returncode=1, stderr="Unknown game class 'Bogus'"),
+    )
+    with pytest.raises(ValueError, match="Bogus"):
+        gbt.catalog.load_gamut("Bogus", gamut_jar=fake_jar)
