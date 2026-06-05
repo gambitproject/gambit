@@ -582,6 +582,112 @@ class TestGenerateRstTable:
 
 
 # ---------------------------------------------------------------------------
+# Tests for clean_stale_img_files
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.catalog_update
+class TestCleanStaleImgFiles:
+    """Tests for ``clean_stale_img_files(catalog_dir)``.
+
+    All tests construct a temporary catalog directory with hand-crafted game
+    files and img/ contents so they are completely isolated from the real
+    catalog on disk.
+    """
+
+    def _make_catalog(self, tmp_path):
+        """Return a minimal catalog dir with an img/ subdirectory."""
+        catalog_dir = tmp_path / "catalog"
+        (catalog_dir / "img").mkdir(parents=True)
+        (catalog_dir / "img" / ".gitkeep").touch()
+        return catalog_dir
+
+    def test_stale_file_is_removed(self, tmp_path):
+        """A file in img/ with no matching game file is deleted."""
+        catalog_dir = self._make_catalog(tmp_path)
+        stale = catalog_dir / "img" / "oldgame.png"
+        stale.touch()
+        update.clean_stale_img_files(catalog_dir)
+        assert not stale.exists()
+
+    def test_gitkeep_is_preserved(self, tmp_path):
+        """The .gitkeep sentinel is never removed, even when nothing else is kept."""
+        catalog_dir = self._make_catalog(tmp_path)
+        (catalog_dir / "img" / "oldgame.png").touch()
+        update.clean_stale_img_files(catalog_dir)
+        assert (catalog_dir / "img" / ".gitkeep").exists()
+
+    def test_expected_efg_files_are_kept(self, tmp_path):
+        """Image files that correspond to a current EFG game are not removed."""
+        catalog_dir = self._make_catalog(tmp_path)
+        (catalog_dir / "src").mkdir()
+        (catalog_dir / "src" / "game.efg").touch()
+        for ext in ["ef", "tex", "png", "pdf", "svg"]:
+            (catalog_dir / "img" / f"src/game.{ext}").parent.mkdir(parents=True, exist_ok=True)
+            (catalog_dir / "img" / f"src/game.{ext}").touch()
+        update.clean_stale_img_files(catalog_dir)
+        for ext in ["ef", "tex", "png", "pdf", "svg"]:
+            assert (catalog_dir / "img" / f"src/game.{ext}").exists()
+
+    def test_expected_nfg_files_are_kept(self, tmp_path):
+        """Image files for an NFG game (no .ef) are not removed."""
+        catalog_dir = self._make_catalog(tmp_path)
+        (catalog_dir / "src").mkdir()
+        (catalog_dir / "src" / "matrix.nfg").touch()
+        (catalog_dir / "img" / "src").mkdir()
+        for ext in ["tex", "png", "pdf", "svg"]:
+            (catalog_dir / "img" / f"src/matrix.{ext}").touch()
+        update.clean_stale_img_files(catalog_dir)
+        for ext in ["tex", "png", "pdf", "svg"]:
+            assert (catalog_dir / "img" / f"src/matrix.{ext}").exists()
+
+    def test_empty_directory_is_removed(self, tmp_path):
+        """A subdirectory of img/ that becomes empty after cleanup is also removed."""
+        catalog_dir = self._make_catalog(tmp_path)
+        stale_dir = catalog_dir / "img" / "oldgroup"
+        stale_dir.mkdir()
+        (stale_dir / "oldgame.png").touch()
+        update.clean_stale_img_files(catalog_dir)
+        assert not stale_dir.exists()
+
+    def test_nonempty_directory_is_kept(self, tmp_path):
+        """A subdirectory still containing expected files is not removed."""
+        catalog_dir = self._make_catalog(tmp_path)
+        (catalog_dir / "src").mkdir()
+        (catalog_dir / "src" / "game.efg").touch()
+        (catalog_dir / "img" / "src").mkdir()
+        for ext in ["ef", "tex", "png", "pdf", "svg"]:
+            (catalog_dir / "img" / f"src/game.{ext}").touch()
+        update.clean_stale_img_files(catalog_dir)
+        assert (catalog_dir / "img" / "src").is_dir()
+
+    def test_multi_variant_images_kept(self, tmp_path):
+        """Variant image files (e.g. {slug}__wide.*) are kept when the variant .ef exists."""
+        catalog_dir = self._make_catalog(tmp_path)
+        game_dir = catalog_dir / "src"
+        game_dir.mkdir()
+        (game_dir / "game.efg").touch()
+        (game_dir / "game.ef").touch()
+        (game_dir / "game__wide.ef").touch()  # triggers multi-variant
+        (catalog_dir / "img" / "src").mkdir()
+        for vkey in ["src/game", "src/game__wide"]:
+            for ext in ["ef", "tex", "png", "pdf", "svg"]:
+                p = catalog_dir / "img" / f"{vkey}.{ext}"
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.touch()
+        update.clean_stale_img_files(catalog_dir)
+        for vkey in ["src/game", "src/game__wide"]:
+            for ext in ["ef", "tex", "png", "pdf", "svg"]:
+                assert (catalog_dir / "img" / f"{vkey}.{ext}").exists()
+
+    def test_noop_when_img_absent(self, tmp_path):
+        """If catalog/img/ does not exist, the function returns without error."""
+        catalog_dir = tmp_path / "catalog"
+        catalog_dir.mkdir()
+        update.clean_stale_img_files(catalog_dir)  # must not raise
+
+
+# ---------------------------------------------------------------------------
 # Tests for update_makefile
 # ---------------------------------------------------------------------------
 

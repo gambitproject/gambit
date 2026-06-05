@@ -253,6 +253,61 @@ def generate_rst_table(
                 f.write("          \n")
 
 
+def clean_stale_img_files(catalog_dir: Path | None = None) -> None:
+    """Remove files and directories from catalog/img/ with no corresponding current game.
+
+    Computes the set of expected image files from the game files currently in
+    *catalog_dir* (all .efg and .nfg files, respecting multi-variant .ef conventions),
+    then removes anything in catalog/img/ that is not in that set.  Preserves
+    .gitkeep.  Empty directories left behind by file removal are also removed.
+
+    This is useful after switching branches that reorganise or remove catalog games,
+    to prevent stale images from persisting alongside the updated catalog.
+    """
+    catalog_dir = catalog_dir or CATALOG_DIR
+    img_dir = catalog_dir / "img"
+    if not img_dir.is_dir():
+        return
+
+    # Build the set of expected image file paths from the current catalog contents.
+    expected_files: set[Path] = set()
+    game_files = [
+        p
+        for p in list(catalog_dir.rglob("*.efg")) + list(catalog_dir.rglob("*.nfg"))
+        if img_dir not in p.parents  # exclude generated copies already inside img/
+    ]
+    for game_file in game_files:
+        slug = game_file.relative_to(catalog_dir).with_suffix("").as_posix()
+        fmt = game_file.suffix.lstrip(".")  # "efg" or "nfg"
+        ef_variants = catalog_ef_file_variants(slug, catalog_dir) if fmt == "efg" else None
+        if ef_variants:
+            for variant in ef_variants:
+                for ext in ["ef", "tex", "png", "pdf", "svg"]:
+                    expected_files.add(img_dir / f"{variant['variant_key']}.{ext}")
+        else:
+            exts = (["ef"] if fmt == "efg" else []) + ["tex", "png", "pdf", "svg"]
+            for ext in exts:
+                expected_files.add(img_dir / f"{slug}.{ext}")
+
+    # Remove unexpected files (preserving .gitkeep).
+    removed = 0
+    for path in img_dir.rglob("*"):
+        if path.is_file() and path.name != ".gitkeep" and path not in expected_files:
+            path.unlink()
+            removed += 1
+
+    # Remove empty directories, deepest first.
+    for path in sorted(img_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
+            removed += 1
+
+    if removed:
+        print(f"Removed {removed} stale item(s) from {img_dir}")
+    else:
+        print(f"No stale files in {img_dir}")
+
+
 def update_makefile(
     catalog_dir: Path | None = None,
     am_path: Path | None = None,
@@ -330,6 +385,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # Remove img/ files for games that no longer exist in the catalog.
+    clean_stale_img_files()
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
