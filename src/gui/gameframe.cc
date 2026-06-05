@@ -342,8 +342,16 @@ void GameFrame::OnUpdate()
   }
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
-  menuBar->Enable(GBT_MENU_VIEW_ZOOMIN, m_efgPanel && m_efgPanel->IsShown());
-  menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, m_efgPanel && m_efgPanel->IsShown());
+
+  const bool canZoomTree = m_efgPanel && m_efgPanel->IsShown();
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOM100, canZoomTree);
+
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
 }
 
 //--------------------------------------------------------------------
@@ -1112,15 +1120,19 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
     m_efgPanel->SetFocus();
   }
 
+  const bool canZoomTree = m_efgPanel && m_efgPanel->IsShown();
+
   GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOM100, canZoomTree);
   GetMenuBar()->Enable(GBT_MENU_TOOLS_DOMINANCE, m_nfgPanel->IsShown());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, !p_event.IsChecked());
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
 }
 
 //----------------------------------------------------------------------
