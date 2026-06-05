@@ -313,6 +313,7 @@ BEGIN_EVENT_TABLE(EfgDisplay, wxScrolledWindow)
 EVT_MOTION(EfgDisplay::OnMouseMotion)
 EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
 EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
+EVT_MAGNIFY(EfgDisplay::OnMagnify)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
 EVT_KEY_DOWN(EfgDisplay::OnKeyEvent)
 EVT_SIZE(EfgDisplay::OnSize)
@@ -640,9 +641,19 @@ void EfgDisplay::FitZoom()
   Refresh();
 }
 
+namespace {
+
+constexpr int kMinZoom = 10;
+constexpr int kMaxZoom = 150;
+constexpr int kZoomStep = 10;
+
+int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
+
+} // namespace
+
 void EfgDisplay::SetZoom(int p_zoom)
 {
-  m_zoom = p_zoom;
+  m_zoom = ClampZoom(p_zoom);
   AdjustScrollbarSteps();
   EnsureNodeVisible(m_doc->GetSelectNode());
   Refresh();
@@ -870,6 +881,13 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       wxPostEvent(this, event);
       return;
     }
+  }
+}
+
+void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
+{
+  if (const double factor = 1.0 + p_event.GetMagnification(); factor > 0.0) {
+    SetZoom(static_cast<int>(std::lround(GetZoom() * factor)));
   }
 }
 

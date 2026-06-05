@@ -70,6 +70,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void OnLeftClick(wxMouseEvent &);
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
+  void OnMagnify(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
   /// Payoff editor changes accepted with enter
   void OnAcceptPayoffEdit(wxCommandEvent &);
