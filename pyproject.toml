@@ -76,7 +76,7 @@ select = [
     "Q", # prefer double quotes
     "W291", # trailing-whitespace
 ]
-ignore = []
+ignore = ["E203"]
 
 fixable = ["ALL"]
 unfixable = []
