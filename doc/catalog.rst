@@ -60,3 +60,5 @@ GAMUT requires Java (install from `java.com <https://www.java.com/en/download/>`
 ``gamut.jar`` to be installed. Provide the path to ``gamut.jar`` via the ``gamut_jar``
 argument or the ``GAMUT_JAR`` environment variable. Download GAMUT from
 http://gamut.stanford.edu/.
+
+See the :doc:`GAMUT interoperability tutorial <tutorials/interoperability_tutorials/gamut>` for worked examples.
