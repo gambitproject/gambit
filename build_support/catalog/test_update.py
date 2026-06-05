@@ -695,7 +695,7 @@ class TestHierarchicalRstOutput:
         assert "   .. dropdown:: My Source\n   \n" in rst
         # Confirm :open: does not immediately follow the second-level dropdown
         src_idx = rst.index("   .. dropdown:: My Source")
-        assert ":open:" not in rst[src_idx : src_idx + 40]  # noqa: E203
+        assert ":open:" not in rst[src_idx:src_idx + 40]
 
     def test_game_dropdown_is_open(self, tmp_path, monkeypatch):
         """Individual game dropdowns carry ``:open:`` so game content is visible on expand."""
