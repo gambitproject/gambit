@@ -97,7 +97,7 @@ def test_is_successor_of():
 
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     """
-    Computes the path of action labels from the root to the given node.
+    Computes the path of action labels from a given node to the root.
     Returns a list of strings.
     """
     if not isinstance(node, gbt.Node):
@@ -227,6 +227,152 @@ def test_subgame_roots(test_case: SubgameRootsTestCase):
     actual_paths = [_get_path_of_action_labels(node) for node in actual_roots]
 
     assert sorted(actual_paths) == sorted(test_case.expected_paths)
+
+
+# ============================================================================
+#                          Subgame tree / GameSubgame
+# ============================================================================
+@dataclasses.dataclass
+class SubgameStructureTestCase:
+    """Expected subgame structure of a game.
+
+    `roots` lists each subgame root as a node->root action-label path, in the
+    postorder `game.subgames` is expected to produce (children before parents).
+
+    `parents` maps each subgame-root path to its expected parent path
+    (or None for the root subgame).
+
+    `children` maps each subgame-root path to the set of its child subgame paths.
+
+    `differences` maps each subgame-root path to the set of
+    (player_label, infoset_number) keys in that subgame's difference ---
+    the information sets belonging to the subgame but not to any child subgame.
+    """
+    factory: typing.Callable[[], gbt.Game]
+    roots: list[list[str]]
+    parents: dict[tuple[str, ...], tuple[str, ...] | None]
+    children: dict[tuple[str, ...], set[tuple[str, ...]]]
+    differences: dict[tuple[str, ...], set[tuple[str, int]]]
+
+
+SUBGAME_STRUCTURE_CASES = [
+    # ------------------------------------------------------------------------
+    #                    EF game with the only subgame
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameStructureTestCase(
+            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            roots=[[]],
+            parents={(): None},
+            children={(): set()},
+            differences={(): {("Player 1", 0), ("Player 1", 1), ("Player 2", 0)}},
+        ),
+        id="wichardt_no_nontrivial_subgames",
+    ),
+    # ------------------------------------------------------------------------
+    #                       Tree with eight subgames
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameStructureTestCase(
+            factory=functools.partial(games.read_from_file, "subgame-8-roots.efg"),
+            roots=[
+                ["L", "L", "L", "L", "L"],
+                ["R", "L", "L", "L", "L"],
+                ["L", "L", "L", "L"],
+                ["L", "L"],
+                ["R", "L"],
+                ["L"],
+                ["R"],
+                [],
+            ],
+            parents={
+                ("L", "L", "L", "L", "L"): ("L", "L", "L", "L"),
+                ("R", "L", "L", "L", "L"): ("L", "L", "L", "L"),
+                ("L", "L", "L", "L"): ("L", "L"),
+                ("L", "L"): ("L",),
+                ("R", "L"): ("L",),
+                ("L",): (),
+                ("R",): (),
+                (): None,
+            },
+            children={
+                ("L", "L", "L", "L", "L"): set(),
+                ("R", "L", "L", "L", "L"): set(),
+                ("L", "L", "L", "L"): {("L", "L", "L", "L", "L"),
+                                       ("R", "L", "L", "L", "L")},
+                ("L", "L"): {("L", "L", "L", "L")},
+                ("R", "L"): set(),
+                ("L",): {("L", "L"), ("R", "L")},
+                ("R",): set(),
+                (): {("L",), ("R",)},
+            },
+            differences={
+                ("L", "L", "L", "L", "L"): {
+                    ("Player 1", 3), ("Player 2", 2), ("Player 2", 3),
+                },
+                ("R", "L", "L", "L", "L"): {("Player 1", 4), ("Player 1", 5)},
+                ("L", "L", "L", "L"): {("Player 2", 1)},
+                ("L", "L"): {("Player 1", 1), ("Player 1", 2)},
+                ("R", "L"): {("Player 1", 6)},
+                ("L",): {("Player 2", 0)},
+                ("R",): {
+                    ("Player 1", 7), ("Player 1", 8), ("Player 1", 9),
+                    ("Player 2", 4), ("Player 2", 5), ("Player 2", 6),
+                },
+                (): {("Player 1", 0)},
+            },
+        ),
+        id="eight_subgames",
+    ),
+]
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_subgames_postorder_sequence(test_case: SubgameStructureTestCase):
+    """`game.subgames` produces the expected postorder sequence of roots."""
+    game = test_case.factory()
+    actual = [_get_path_of_action_labels(sg.root) for sg in game.subgames]
+    assert actual == test_case.roots
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_subgame_parent_links(test_case: SubgameStructureTestCase):
+    """Each subgame's `parent` matches the expected parent path."""
+    game = test_case.factory()
+    for sg in game.subgames:
+        path = tuple(_get_path_of_action_labels(sg.root))
+        parent_path = (
+            None if sg.parent is None
+            else tuple(_get_path_of_action_labels(sg.parent.root))
+        )
+        assert parent_path == test_case.parents[path]
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_subgame_children(test_case: SubgameStructureTestCase):
+    """Each subgame's `children` match the expected set of child paths."""
+    game = test_case.factory()
+    actual = {
+        tuple(_get_path_of_action_labels(sg.root)):
+            {tuple(_get_path_of_action_labels(c.root)) for c in sg.children}
+        for sg in game.subgames
+    }
+    assert actual == test_case.children
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
+    """`game.minimal_subgame(infoset)` returns the smallest subgame containing the infoset."""
+    game = test_case.factory()
+    expected_path_for_key = {
+        key: path
+        for path, keys in test_case.differences.items()
+        for key in keys
+    }
+    for infoset in game.infosets:
+        key = (infoset.player.label, infoset.number)
+        actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(infoset).root))
+        assert actual_path == expected_path_for_key[key]
 
 
 @pytest.mark.parametrize("game_file, expected_node_data", [
