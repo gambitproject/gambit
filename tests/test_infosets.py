@@ -104,7 +104,7 @@ PRIOR_ACTIONS_CASES = [
     ),
     pytest.param(
         PriorActionsTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             expected_results=[
                 ("Player 1", 0, {None}),
                 ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
@@ -178,7 +178,7 @@ ABSENT_MINDEDNESS_CASES = [
     ),
     pytest.param(
         AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             expected_am_paths=[]
         ),
         id="wichardt_forgetting_action"
