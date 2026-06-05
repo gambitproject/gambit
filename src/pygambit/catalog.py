@@ -1,3 +1,4 @@
+import io
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,80 @@ READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
+
+
+def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
+    """
+    Load a game from the OpenSpiel library.
+
+    Parameters
+    ----------
+    game_name : str
+        The short name of the OpenSpiel game (e.g. ``"matrix_rps"``,
+        ``"tiny_hanabi"``). Passed directly to ``pyspiel.load_game``.
+    params : dict, optional
+        Game parameters forwarded to ``pyspiel.load_game``
+        (e.g. ``{"players": 2, "coins": 3, "fields": 2}`` for ``"blotto"``).
+        See the `OpenSpiel game list
+        <https://openspiel.readthedocs.io/en/latest/games.html>`_ for
+        available parameters per game.
+
+    Returns
+    -------
+    gbt.Game
+        The loaded game.
+
+    Raises
+    ------
+    ImportError
+        If ``open_spiel`` is not installed.
+    ValueError
+        If the game's dynamics type is not supported for export, or if the
+        format exporter raises an error for this specific game.
+    Other exceptions from ``pyspiel.load_game`` propagate directly.
+        For example, ``pyspiel.SpielError`` is raised for unknown game names
+        or invalid/missing parameters.
+    """
+    try:
+        import pyspiel
+        from open_spiel.python.algorithms.gambit import export_gambit
+    except ImportError as exc:
+        raise ImportError(
+            "open_spiel is required to load OpenSpiel games. "
+            "Install it with: pip install open_spiel"
+        ) from exc
+
+    # Let pyspiel's own exceptions propagate unchanged — they already carry
+    # informative messages ("Unknown game '...'", "Unknown parameter '...'", etc.)
+    game = pyspiel.load_game(game_name, params or {})
+
+    dynamics = game.get_type().dynamics
+
+    # OpenSpiel's SEQUENTIAL corresponds to extensive-form (tree) games in Gambit;
+    # SIMULTANEOUS corresponds to normal-form (strategic-form) games.
+    if dynamics == pyspiel.GameType.Dynamics.SEQUENTIAL:
+        try:
+            efg_str = export_gambit(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to EFG format: {exc}"
+            ) from exc
+        return gbt.read_efg(io.StringIO(efg_str))
+
+    elif dynamics == pyspiel.GameType.Dynamics.SIMULTANEOUS:
+        try:
+            nfg_str = pyspiel.game_to_nfg_string(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to NFG format: {exc}"
+            ) from exc
+        return gbt.read_nfg(io.StringIO(nfg_str))
+
+    else:
+        raise ValueError(
+            f"OpenSpiel game '{game_name}' has unsupported dynamics type "
+            f"'{dynamics}' and cannot be exported to Gambit format."
+        )
 
 
 def load(slug: str) -> gbt.Game:
