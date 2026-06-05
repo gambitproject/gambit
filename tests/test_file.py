@@ -32,7 +32,7 @@ def test_efg_no_newline_end():
 
 
 def test_string_wrong_magic():
-    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
     file_text = file_text.replace("EFG", "")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
@@ -43,7 +43,7 @@ def test_string_wrong_magic():
 
 
 def test_efg_unsupported_version():
-    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
     file_text = file_text.replace("EFG 2", "EFG 1")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
@@ -51,7 +51,7 @@ def test_efg_unsupported_version():
 
 
 def test_efg_unsupported_precision():
-    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
     file_text = file_text.replace("EFG 2 R", "EFG 2 X")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
@@ -62,7 +62,7 @@ def test_efg_unsupported_precision():
 
 
 def test_efg_invalid_node_type():
-    file_text = gbt.catalog.load("selten1975/fig2").to_efg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_efg()
     file_text = file_text.replace('p "" 1 1', 'x "" 1 1')
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
@@ -70,7 +70,7 @@ def test_efg_invalid_node_type():
 
 
 def test_efg_payoffs_too_many():
-    file_text = gbt.catalog.load("selten1975/fig2").to_efg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_efg()
     file_text = file_text.replace("1, 1", "1, 2, 3")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
@@ -78,7 +78,7 @@ def test_efg_payoffs_too_many():
 
 
 def test_nfg_title_missing():
-    file_text = gbt.catalog.load("selten1975/fig2").to_nfg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_nfg()
     file_text = file_text.replace('"Selten (IJGT 1975) Figure 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)
@@ -86,7 +86,7 @@ def test_nfg_title_missing():
 
 
 def test_nfg_player_missing():
-    file_text = gbt.catalog.load("selten1975/fig2").to_nfg()
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_nfg()
     file_text = file_text.replace('"Player 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)

@@ -62,7 +62,7 @@ def test_infoset_add_action_error():
 def test_infoset_plays():
     """Verify `infoset.plays` returns plays reachable from a given infoset.
     """
-    game = gbt.catalog.load("selten1975/fig1")
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     list_nodes = list(game.nodes)
     list_infosets = list(game.infosets)
 
@@ -150,7 +150,7 @@ ABSENT_MINDEDNESS_CASES = [
     # Games without absent-mindedness
     pytest.param(
         AbsentMindednessTestCase(
-            factory=functools.partial(gbt.catalog.load, "selten1975/fig2"),
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/selten1975/fig2"),
             expected_am_paths=[]
         ),
         id="short_centipede_perfect_info"

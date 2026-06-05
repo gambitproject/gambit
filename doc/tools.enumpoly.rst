@@ -76,7 +76,7 @@ support of some set of equilibria.
 Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
 "Selten's horse"::
 
-   $ gambit-enumpoly -S catalog/selten1975/fig1.efg
+   $ gambit-enumpoly -S catalog/journals/ijgt/selten1975/fig1.efg
    Compute Nash equilibria by solving polynomial systems
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
