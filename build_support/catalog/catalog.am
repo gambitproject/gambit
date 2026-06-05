@@ -14,6 +14,7 @@ CATALOG_FILES = \
 	catalog/journals/geb/bagwell1995.efg \
 	catalog/journals/geb/gilboa1997/fig1.efg \
 	catalog/journals/geb/gilboa1997/fig2.efg \
+	catalog/journals/geb/wichardt2008.efg \
 	catalog/journals/ijgt/nau2004/sec3.nfg \
 	catalog/journals/ijgt/nau2004/sec4.nfg \
 	catalog/journals/ijgt/nau2004/sec5.nfg \
