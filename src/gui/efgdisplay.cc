@@ -407,22 +407,25 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
 }
 
 //
-// OnKeyEvent -- handle keypress events
-// Currently we support the following keys:
-//     left arrow:   go to parent of current node
-//     right arrow:  go to first child of current node
-//     up arrow:     go to previous sibling of current node
-//     down arrow:   go to next sibling of current node
+// OnKeyEvent -- handle keypress events.
+//
+// Navigation shortcuts:
+//     left arrow:   go to rendered ancestor of current node
+//     right arrow:  go to rendered descendant of current node
+//     up arrow:     go to previous node at the same rendered level
+//     down arrow:   go to next node at the same rendered level
 //     ALT-up:       go to previous member of information set
 //     ALT-down:     go to next member of information set
 //     space:        ensure the selected node is visible
-//     'R', 'r':     select the root node (and make it visible)
-//     delete:       delete the subtree rooted at current node
-//     backspace:    delete the parent of the current node
+//     'R', 'r':     select the root node and make it visible
+//
+// Editing shortcuts:
 //     'M', 'm':     edit the move at the current node
 //     'N', 'n':     edit the properties of the current node
+//
+// Payoff edit mode only:
 //     escape:       cancel edit of payoff
-//     tab:          accept edit of payoff, edit next payoff (if any)
+//     tab:          accept edit of payoff, edit next payoff if any
 //
 void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
@@ -533,16 +536,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   case WXK_SPACE:
     EnsureNodeVisible(m_doc->GetSelectNode());
     return;
-  case WXK_DELETE: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_TREE);
-    wxPostEvent(this, event);
-    return;
-  }
-  case WXK_BACK: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_PARENT);
-    wxPostEvent(this, event);
-    return;
-  }
   default:
     // If nothing else applies, let event propagate
     p_event.Skip();
