@@ -84,27 +84,11 @@ the tree. It is often efficient to create the structure once, and then
 copy it as needed elsewhere.
 
 Gambit provides a convenient idiom for this. Clicking on any
-nonterminal node and dragging to any terminal node implements a move
-operation, which moves the entire subtree rooted at the original,
-nonterminal node to the terminal node.
-
-To turn the operation into a copy operation:
-
-+ On Windows and Linux systems, hold down the :kbd:`Ctrl` key during
-  the operation.
-+ On OS X, hold down the :kbd:`Cmd` key when starting the
-  drag operation, then release prior to dropping.
-
-The entire subtree rooted at the original node is copied,
-starting at the terminal node. In this copy operation, each node in
-the copied image is placed in the same information set as the
-corresponding node in the original subtree.
-
-Copying a subtree to a terminal node in that subtree is also
-supported. In this case, the copying operation is halted when reaching
-the terminal node, to avoid an infinite loop. Thus, this feature
-can also be helpful in constructing multiple-stage games.
-
+nonterminal node and dragging to another node results in a context-aware
+popup menu.  Depending on the destination node, this menu offers
+the option of copying the subtree rooted at the original node, moving
+it entirely, or placing the destination node in the same information set
+as the source node.
 
 
 Removing parts of a game tree
@@ -204,21 +188,11 @@ payoff by pressing the :kbd:`Tab` key both stores the changes to the
 player's payoff, and advances the editor to the payoff for the next
 player at that outcome.
 
-Outcomes may also be moved or copied using a drag-and-drop idiom.
-Left-clicking and dragging an outcome to another node moves the
-outcome from the original node to the target node. Copying an outcome
-may be accomplished by doing this same action while holding down the
-Control (:kbd:`Ctrl`) key on the keyboard.
-
-
-
-When using the copy idiom described above, the action assigns the same
-outcome to both the involved nodes. Therefore, if subsequently the
-payoffs of the outcome are edited, the payoffs at both nodes will be
-modified. To copy the outcome in such a way that the outcome at the
-target node is a different outcome from the one at the source, but
-with the same payoffs, hold down the :kbd:`Shift` key instead of the
-:kbd:`Control` key while dragging.
+Outcomes may also be moved or copied using drag-and-drop.
+Left-clicking and dragging an outcome to another node pops up a
+context-aware menu which allows the outcome to be moved or copied, or
+to create a new outcome with the same payoffs as the original one at
+the new node.
 
 To remove an outcome from a node, click on the node, and
 select :menuselection:`Edit --> Remove outcome`.
