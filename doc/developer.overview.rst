@@ -3,7 +3,7 @@
 Overview of Gambit architecture
 ===============================
 
-The core of Gambit is a collection of C++ code for the representation and analysis of finite games.
+The core of Gambit is a library of C++ code for the representation and analysis of finite games.
 This code is organised into three directories:
 
 * ``src/core``: Generic functions, structures, and utility code which is not specific to
@@ -13,10 +13,6 @@ This code is organised into three directories:
 * ``src/solvers``: Implementation of algorithms for computation on games, principally for the
   computation of (exact or approximate) Nash equilibria.
 
-At present this core is referred to as a "collection" rather than a "library" as
-this is not (yet) packaged by the build system as a reusable C++ library with a documented,
-stable interface.
-
 Gambit is written to the C++17 standard.  Because Gambit is cross-platform, C++ library
 dependencies are avoided to facilitate development and packaging.
 
@@ -24,13 +20,18 @@ The principal way in which code is written to use Gambit is via the Python packa
 ``pygambit``.  In particular, testing is done via the Python test suite and ``pytest``,
 which therefore (indirectly) tests the C++ data structures and algorithms.
 Running ``make check`` has no effect (there are no tests defined in that build system).
+The test suite makes use of a variety of games, which are drawn from examples in
+the game theory literature and textbooks, as well as examples constructed specifically
+to test edge cases.  From Gambit 17, these are all curated as part of Gambit's
+:ref:`catalog of games <catalog>`.
 
 From Gambit 17, ``pygambit`` is also responsible for providing command-line interfaces to
 equilibrium computation and other facilities; previously the command-line wrappers were
 implemented in C++.
 
 Gambit's core is also incorporated into a graphical user interface, also written
-in C++ using wxWidgets (see ``src/gui``).  This is built by default by ``make``.
+in C++ using wxWidgets (see ``src/gui``).  This is built by ``make`` if an installation
+of a suitable version of wxWidgets is detected.
 
 This hybrid architecture aims to maintain some flexibility for future development, by
 
@@ -38,4 +39,5 @@ This hybrid architecture aims to maintain some flexibility for future developmen
     code using Gambit, the C++ implementations are kept separate from the Python wrapper
     so they can continue to be used directly in C++
 2.  Likewise, the graphical interface layer is kept cleanly separate from the core.
-    Development of graphical-based interfaces (different libraries, languages, browser-based interfaces) can be carried out without touching the core code.
+    Graphical-based interfaces (different libraries, languages,
+    browser-based interfaces) can be developed without touching the core code.
