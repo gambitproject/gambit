@@ -1222,7 +1222,7 @@ void GameTreeRep::BuildSubgameRoots() const
 
   // Phase 2: Reachability and detection
   struct BridgeVisitor {
-    const std::unordered_map<GameNodeRep *, Range> &m_disc;
+    std::unordered_map<GameNodeRep *, Range> &m_disc;
     const std::unordered_map<GameInfosetRep *, Range> &m_hull;
     std::vector<GameNodeRep *> &m_subgames;
     std::unordered_map<GameNodeRep *, Range> m_low;
@@ -1247,10 +1247,27 @@ void GameTreeRep::BuildSubgameRoots() const
 
       for (const auto &child : p_node->GetChildren()) {
         low.Merge(m_low.at(child.get()));
+        m_low.erase(child.get());
       }
 
       if (low == m_disc.at(node)) {
-        m_subgames.push_back(node);
+        // The `low == disc` test is exact only with distinct terminal spans. A single-action
+        // chain above a candidate node collapses the spans and can create false positives.
+        // Reject a node if some single-action ancestor's infoset (possibly the node's own)
+        // has a member in the node's subtree (possibly the node itself).
+        // Note that such an infoset is necessarily absent-minded.
+        bool spurious = false;
+        for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1 && !spurious;
+             anc = anc->m_parent) {
+          const auto &members = anc->m_infoset->m_members;
+          spurious = members.size() >= 2 &&
+                     std::any_of(members.begin(), members.end(), [&](const auto &member) {
+                       return member.get() != anc && member->IsSuccessorOf(p_node);
+                     });
+        }
+        if (!spurious) {
+          m_subgames.push_back(node);
+        }
       }
 
       return DFSCallbackResult::Continue;
