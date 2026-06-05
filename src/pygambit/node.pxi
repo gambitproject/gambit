@@ -325,14 +325,3 @@ class Subgame:
         .. versionadded:: 16.7.0
         """
         return [Subgame.wrap(child) for child in self.subgame.deref().GetChildren()]
-
-    @property
-    def difference(self) -> list[Infoset]:
-        """Returns the information sets in the subgame difference.
-
-        The subgame difference consists of information sets that belong
-        to this subgame but not to any of its child subgames.
-
-        .. versionadded:: 16.7.0
-        """
-        return [Infoset.wrap(infoset) for infoset in self.subgame.deref().GetSubgameDifference()]

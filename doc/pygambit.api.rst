@@ -152,6 +152,7 @@ Information about the game
    Node.player
    Node.is_successor_of
    Node.plays
+   Node.own_prior_action
 
 .. autosummary::
    :toctree: api/
@@ -160,7 +161,6 @@ Information about the game
    Subgame.root
    Subgame.parent
    Subgame.children
-   Subgame.difference
 
 .. autosummary::
 
