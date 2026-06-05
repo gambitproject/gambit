@@ -364,33 +364,34 @@ void EfgDisplay::MakeMenus()
 //                  EfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
-static GameNode PriorSameIset(const GameNode &n)
+namespace {
+GameNode PriorSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.begin()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n); node != members.begin()) {
     return *std::prev(node);
   }
   return nullptr;
 }
 
-static GameNode NextSameIset(const GameNode &n)
+GameNode NextSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.end()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n);
+      node != members.end() && std::next(node) != members.end()) {
     return *std::next(node);
   }
   return nullptr;
 }
+} // namespace
 
 void EfgDisplay::OnSize(wxSizeEvent &p_event)
 {
@@ -407,28 +408,29 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
 }
 
 //
-// OnKeyEvent -- handle keypress events
-// Currently we support the following keys:
-//     left arrow:   go to parent of current node
-//     right arrow:  go to first child of current node
-//     up arrow:     go to previous sibling of current node
-//     down arrow:   go to next sibling of current node
+// OnKeyEvent -- handle keypress events.
+//
+// Navigation shortcuts:
+//     left arrow:   go to rendered ancestor of selected node
+//     right arrow:  go to rendered descendant of selected node
+//     up arrow:     go to previous node at the same rendered level
+//     down arrow:   go to next node at the same rendered level
 //     ALT-up:       go to previous member of information set
 //     ALT-down:     go to next member of information set
 //     space:        ensure the selected node is visible
-//     'R', 'r':     select the root node (and make it visible)
-//     delete:       delete the subtree rooted at current node
-//     backspace:    delete the parent of the current node
-//     'M', 'm':     edit the move at the current node
-//     'N', 'n':     edit the properties of the current node
+//     home:         select the root node and make it visible
+//
+// Editing shortcuts:
+//     'M', 'm':     edit the move at the selected node
+//     return/enter: edit the properties of the selected node
+//
+// Payoff edit mode only:
 //     escape:       cancel edit of payoff
-//     tab:          accept edit of payoff, edit next payoff (if any)
+//     tab:          accept edit of payoff, edit next payoff if any
 //
 void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
-  const GameNode selectNode = m_doc->GetSelectNode();
-
-  if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
+  if (p_event.GetKeyCode() == WXK_HOME) {
     m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
     FocusNode(m_doc->GetSelectNode());
     return;
@@ -439,7 +441,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       m_payoffEditor->EndEdit();
       return;
     }
-    else if (p_event.GetKeyCode() == WXK_TAB) {
+    if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
 
       const GameOutcome outcome = m_payoffEditor->GetOutcome();
@@ -482,6 +484,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
   // After this point, all events involve moving relative to selected node.
   // So if there isn't a selected node, the event doesn't apply
+  const GameNode selectNode = m_doc->GetSelectNode();
   if (!selectNode) {
     p_event.Skip();
     return;
@@ -494,8 +497,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     wxPostEvent(this, event);
     return;
   }
-  case 'N':
-  case 'n': {
+  case WXK_RETURN:
+  case WXK_NUMPAD_ENTER: {
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
     wxPostEvent(this, event);
     return;
@@ -513,8 +516,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    const GameNode prior =
-        ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode) : PriorSameIset(selectNode));
+    const GameNode prior = ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode)
+                                                 : PriorSameInfoset(selectNode));
     if (prior) {
       m_doc->SetSelectNode(prior);
       EnsureNodeVisible(m_doc->GetSelectNode());
@@ -523,7 +526,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
   case WXK_DOWN: {
     const GameNode next =
-        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameIset(selectNode));
+        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameInfoset(selectNode));
     if (next) {
       m_doc->SetSelectNode(next);
       EnsureNodeVisible(m_doc->GetSelectNode());
@@ -533,16 +536,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   case WXK_SPACE:
     EnsureNodeVisible(m_doc->GetSelectNode());
     return;
-  case WXK_DELETE: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_TREE);
-    wxPostEvent(this, event);
-    return;
-  }
-  case WXK_BACK: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_PARENT);
-    wxPostEvent(this, event);
-    return;
-  }
   default:
     // If nothing else applies, let event propagate
     p_event.Skip();
