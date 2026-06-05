@@ -163,9 +163,9 @@ def load_gamut(
                 "or set the GAMUT_JAR environment variable. "
                 "Download GAMUT from http://gamut.stanford.edu/."
             )
-        gamut_jar = Path(env_jar)
+        gamut_jar = Path(env_jar).expanduser()
     else:
-        gamut_jar = Path(gamut_jar)
+        gamut_jar = Path(gamut_jar).expanduser()
     if not gamut_jar.is_file():
         raise FileNotFoundError(f"gamut.jar not found at {gamut_jar}")
 
