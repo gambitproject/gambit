@@ -890,22 +890,6 @@ GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
   return it->second;
 }
 
-bool GameTreeRep::IsAbsentMindedReentry(const GameNode &p_node) const
-{
-  if (p_node->GetGame().get() != this) {
-    throw MismatchException();
-  }
-
-  if (!m_unreachableNodes && !m_root->IsTerminal()) {
-    BuildUnreachableNodes();
-  }
-
-  return std::any_of(m_absentMindedReentries.begin(), m_absentMindedReentries.end(),
-                     [&](const auto &entry) {
-                       return entry.first == p_node->m_infoset && entry.second == p_node.get();
-                     });
-}
-
 std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentries() const
 {
   if (!m_ownPriorActionInfo) {

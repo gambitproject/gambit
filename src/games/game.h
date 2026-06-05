@@ -1055,14 +1055,6 @@ public:
     }
     return false;
   }
-  /// Returns whether the path from the root to p_node passes through its infoset more than once
-  virtual bool IsAbsentMindedReentry(const GameNode &p_node) const
-  {
-    if (p_node->GetGame().get() != this) {
-      throw MismatchException();
-    }
-    return false;
-  }
   /// Returns (infoset, node) pairs where the node is a reentry of an absent-minded infoset
   virtual std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const
   {

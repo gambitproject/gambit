@@ -126,8 +126,6 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
-  /// Returns whether the path from the root to p_node passes through its infoset more than once
-  bool IsAbsentMindedReentry(const GameNode &p_node) const override;
   std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const override;
   std::vector<GameSubgame> GetSubgames() const override;
   GameSubgame GetMinimalSubgame(const GameInfoset &) const override;
