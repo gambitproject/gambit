@@ -39,4 +39,3 @@ This hybrid architecture aims to maintain some flexibility for future developmen
     so they can continue to be used directly in C++
 2.  Likewise, the graphical interface layer is kept cleanly separate from the core.
     Development of graphical-based interfaces (different libraries, languages, browser-based interfaces) can be carried out without touching the core code.
-    libraries, languages, browser-based interfaces).
