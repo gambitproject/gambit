@@ -49,7 +49,7 @@ def test_game_add_players_nolabel():
 
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
-    (gbt.catalog.load("selten1975/fig2"), True),
+    (gbt.catalog.load("journals/ijgt/selten1975/fig2"), True),
     ("stripped_down_poker.efg", True),
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
     # - Centipede games
@@ -61,7 +61,7 @@ def test_game_add_players_nolabel():
 
     # Games with imperfect recall from files (game_input is a string)
     # - imperfect recall without absent-mindedness
-    ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
+    (gbt.catalog.load("journals/geb/wichardt2008"), False),  # forgetting past action
     ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
     ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
@@ -129,7 +129,7 @@ def test_outcome_index_exception_label():
         ),
         # 2 players; reduction possible for player 1; payoff ties
         (
-            gbt.catalog.load("selten1975/fig2"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig2"),
             [["1*", "21", "22"], ["1", "2"]],
             [
                 np.array([[1, 1], [0, 0], [0, 2]]),
@@ -147,7 +147,7 @@ def test_outcome_index_exception_label():
         ),
         # Selten's Horse: game with three players
         (
-            gbt.catalog.load("selten1975/fig1"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig1"),
             [["1", "2"], ["1", "2"], ["1", "2"]],
             [
                 np.array([[[1, 1], [4, 0]], [[3, 0], [3, 0]]]),
@@ -370,7 +370,7 @@ def test_outcome_index_exception_label():
         # I M P E R F E C T   R E C A L L --- commented out in the test suite
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
         # (
-        #    games.read_from_file("wichardt.efg"),
+        #    gbt.catalog.load("journals/geb/wichardt2008"),
         #    [["11", "12", "21", "22"], ["1", "2"]],
         #    [
         #        np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),

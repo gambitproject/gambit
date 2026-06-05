@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -500,22 +502,24 @@ EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
   wxWindowBase::Layout();
 }
 
+namespace {
+
+constexpr int kMinZoom = 10;
+constexpr int kMaxZoom = 150;
+constexpr int kZoomStep = 10;
+
+int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
+
+} // namespace
+
 void EfgPanel::OnViewZoomIn(wxCommandEvent &)
 {
-  int zoom = m_treeWindow->GetZoom();
-  if (zoom < 150) {
-    zoom += 10;
-  }
-  m_treeWindow->SetZoom(zoom);
+  m_treeWindow->SetZoom(ClampZoom(m_treeWindow->GetZoom() + kZoomStep));
 }
 
 void EfgPanel::OnViewZoomOut(wxCommandEvent &)
 {
-  int zoom = m_treeWindow->GetZoom();
-  if (zoom > 10) {
-    zoom -= 10;
-  }
-  m_treeWindow->SetZoom(zoom);
+  m_treeWindow->SetZoom(ClampZoom(m_treeWindow->GetZoom() - kZoomStep));
 }
 
 void EfgPanel::OnViewZoom100(wxCommandEvent &) { m_treeWindow->SetZoom(100); }
@@ -604,8 +608,6 @@ void EfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   auto posX = ((w - (maxX * scale)) / 2.0);
   auto posY = ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin(static_cast<int>(posX), static_cast<int>(posY));
-
-  printf("Drawing with scale %f\n", scale);
 
   // Draw!
   m_treeWindow->OnDraw(p_dc, scale);

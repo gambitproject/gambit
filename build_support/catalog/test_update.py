@@ -7,7 +7,7 @@ are completely isolated from the actual catalog on disk.
 
 Monkeypatching strategy
 -----------------------
-``update.py`` depends on three external resources that are replaced in tests:
+``update.py`` depends on four external resources that are replaced in tests:
 
 1. ``DRAW_TREE_SETTINGS_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
    ``catalog_draw_tree_settings`` reads controlled config without touching the
@@ -15,13 +15,18 @@ Monkeypatching strategy
    "DRAW_TREE_SETTINGS_CONFIG", yaml_file)`` replaces the module-level path for
    the duration of a single test and restores it automatically on teardown.
 
-2. ``generate_tex`` / ``generate_png`` / ``generate_pdf`` / ``generate_svg``
+2. ``CATALOG_HIERARCHY_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
+   ``load_hierarchy_labels`` reads controlled labels without touching the real
+   ``catalog_hierarchy.yaml``.  Swap via ``monkeypatch.setattr(update,
+   "CATALOG_HIERARCHY_CONFIG", yaml_file)``.
+
+3. ``generate_tex`` / ``generate_png`` / ``generate_pdf`` / ``generate_svg``
    (functions imported from ``draw_tree``) — replaced with no-ops or
    call-tracking lambdas.  This lets us test RST-generation logic without
    actually invoking LaTeX, and lets us assert whether image
    generation was triggered at all.
 
-3. ``catalog_dir`` (an argument to ``generate_rst_table`` and
+4. ``catalog_dir`` (an argument to ``generate_rst_table`` and
    ``update_makefile``) — both functions accept an optional ``catalog_dir``
    kwarg that defaults to the real ``CATALOG_DIR``.  Tests pass a
    ``tmp_path``-based directory instead, keeping all file I/O inside pytest's
@@ -579,6 +584,167 @@ class TestGenerateRstTable:
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
         assert calls == []
+
+
+# ---------------------------------------------------------------------------
+# Tests for hierarchy helpers and hierarchical RST output
+# ---------------------------------------------------------------------------
+
+# A minimal catalog_hierarchy.yaml used by hierarchy tests.
+_HIERARCHY_YAML = textwrap.dedent("""\
+    labels:
+      cat: "My Category"
+      cat/src: "My Source"
+""")
+
+
+@pytest.mark.catalog_update
+class TestHierarchyHelpers:
+    """Unit tests for ``load_hierarchy_labels``, ``_node_label``, and ``_build_slug_tree``."""
+
+    def test_load_hierarchy_labels_returns_dict(self, tmp_path, monkeypatch):
+        """``load_hierarchy_labels`` returns the labels dict from the YAML."""
+        yaml_file = tmp_path / "hier.yaml"
+        yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = update.load_hierarchy_labels()
+        assert labels["cat"] == "My Category"
+        assert labels["cat/src"] == "My Source"
+
+    def test_node_label_uses_yaml(self, tmp_path, monkeypatch):
+        """``_node_label`` returns the YAML label when the prefix is present."""
+        yaml_file = tmp_path / "hier.yaml"
+        yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = update.load_hierarchy_labels()
+        assert update._node_label("cat", labels) == "My Category"
+
+    def test_node_label_fallback_title_case(self, tmp_path, monkeypatch):
+        """``_node_label`` falls back to title-casing the last component."""
+        yaml_file = tmp_path / "hier.yaml"
+        yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = update.load_hierarchy_labels()
+        assert update._node_label("cat/unknownsrc", labels) == "Unknownsrc"
+
+    def test_build_slug_tree_single_game(self):
+        """A single-slug DataFrame builds a 2-level tree."""
+        df = _make_df(_efg_row("cat/src/game1"))
+        tree = update._build_slug_tree(df)
+        assert "cat" in tree
+        assert "src" in tree["cat"]
+        assert "game1" in tree["cat"]["src"]
+
+    def test_build_slug_tree_groups_siblings(self):
+        """Two slugs sharing a prefix are grouped under the same intermediate node."""
+        df = _make_df(_efg_row("cat/src/game1"), _efg_row("cat/src/game2"))
+        tree = update._build_slug_tree(df)
+        assert set(tree["cat"]["src"].keys()) == {"game1", "game2"}
+
+    def test_build_slug_tree_skips_unknown_format(self):
+        """Rows with unrecognised Format are excluded from the tree."""
+        row = {**_efg_row("cat/src/game1"), "Format": "xyz"}
+        df = _make_df(row)
+        assert update._build_slug_tree(df) == {}
+
+    def test_build_slug_tree_skips_empty_description(self):
+        """Rows with an empty description are excluded from the tree."""
+        df = _make_df(_efg_row("cat/src/game1", description=""))
+        assert update._build_slug_tree(df) == {}
+
+
+@pytest.mark.catalog_update
+class TestHierarchicalRstOutput:
+    """Tests that ``generate_rst_table`` produces correctly nested dropdown RST."""
+
+    def _mock_generates(self, monkeypatch):
+        for name in ["generate_tex", "generate_png", "generate_pdf", "generate_svg"]:
+            monkeypatch.setattr(update, name, lambda *a, **k: None)
+
+    def _write_hierarchy_yaml(self, tmp_path, content=_HIERARCHY_YAML):
+        yaml_file = tmp_path / "hier.yaml"
+        yaml_file.write_text(content, encoding="utf-8")
+        return yaml_file
+
+    def test_top_level_dropdown_is_open(self, tmp_path, monkeypatch):
+        """Top-level category dropdowns carry ``:open:`` so the first level is visible."""
+        self._mock_generates(monkeypatch)
+        hier_yaml = self._write_hierarchy_yaml(tmp_path)
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        catalog_dir = tmp_path / "catalog"
+        slug = "cat/src/game1"
+        _make_image_files(catalog_dir, slug, "efg")
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. dropdown:: My Category\n   :open:" in rst
+
+    def test_second_level_dropdown_is_not_open(self, tmp_path, monkeypatch):
+        """Sub-category dropdowns do NOT carry ``:open:`` so they are collapsed by default."""
+        self._mock_generates(monkeypatch)
+        hier_yaml = self._write_hierarchy_yaml(tmp_path)
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        catalog_dir = tmp_path / "catalog"
+        slug = "cat/src/game1"
+        _make_image_files(catalog_dir, slug, "efg")
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert "   .. dropdown:: My Source\n   \n" in rst
+        # Confirm :open: does not immediately follow the second-level dropdown
+        src_idx = rst.index("   .. dropdown:: My Source")
+        assert ":open:" not in rst[src_idx : src_idx + 40]
+
+    def test_game_dropdown_is_open(self, tmp_path, monkeypatch):
+        """Individual game dropdowns carry ``:open:`` so game content is visible on expand."""
+        self._mock_generates(monkeypatch)
+        hier_yaml = self._write_hierarchy_yaml(tmp_path)
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        catalog_dir = tmp_path / "catalog"
+        slug = "cat/src/game1"
+        _make_image_files(catalog_dir, slug, "efg")
+        df = _make_df(_efg_row(slug, title="My Game Title"))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert "      .. dropdown:: My Game Title\n         :open:" in rst
+
+    def test_sibling_games_both_appear_under_source(self, tmp_path, monkeypatch):
+        """Two games sharing a source prefix both appear nested under the source dropdown."""
+        self._mock_generates(monkeypatch)
+        hier_yaml = self._write_hierarchy_yaml(tmp_path)
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        catalog_dir = tmp_path / "catalog"
+        for slug in ["cat/src/game1", "cat/src/game2"]:
+            _make_image_files(catalog_dir, slug, "efg")
+        df = _make_df(
+            _efg_row("cat/src/game1", title="Game One"),
+            _efg_row("cat/src/game2", title="Game Two"),
+        )
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. dropdown:: My Category" in rst
+        assert "   .. dropdown:: My Source" in rst
+        assert "Game One" in rst
+        assert "Game Two" in rst
+
+    def test_no_list_table_in_output(self, tmp_path, monkeypatch):
+        """The new output does not use ``.. list-table::`` (replaced by nested dropdowns)."""
+        self._mock_generates(monkeypatch)
+        hier_yaml = self._write_hierarchy_yaml(tmp_path)
+        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        catalog_dir = tmp_path / "catalog"
+        slug = "cat/src/game1"
+        _make_image_files(catalog_dir, slug, "efg")
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. list-table::" not in rst
+        assert ".. contents::" not in rst
 
 
 # ---------------------------------------------------------------------------

@@ -89,7 +89,7 @@ See the :ref:`algorithm description <liap>` for full details.
 
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-liap -S catalog/selten1975/fig2.efg
+   $ gambit-liap -S catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by minimizing the Lyapunov function
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
