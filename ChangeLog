@@ -29,6 +29,8 @@
   they do not require it. (#80)
 - Clarified handling of .efg/.nfg/.gbt file types in graphical interface and refined warnings about
   unsaved work.  (#12)
+- Created and documented right-click context menu in the normal form pivot table, which makes the
+  mechanism for deleting a strategy more clear.  (#855)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
