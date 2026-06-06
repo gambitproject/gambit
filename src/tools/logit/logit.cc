@@ -213,7 +213,8 @@ int main(int argc, char *argv[])
     if (!game->IsTree() || useStrategic) {
       LogitQREMixedStrategyProfile last_profile(game);
       bool valid = false;
-      auto printer = [&last_profile, &valid, fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {       
+      auto printer = [&last_profile, &valid, fullGraph,
+                      decimals](const LogitQREMixedStrategyProfile &p) {
         last_profile = p;
         valid = true;
         if (fullGraph) {
@@ -225,23 +226,26 @@ int main(int argc, char *argv[])
         auto result =
             LogitStrategySolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
         if (result.empty()) {
-          if(valid){
-            std::cout << "Warning: Path tracing terminated due to error before reaching target lambda values. Last valid profile:\n";
+          if (valid) {
+            std::cout << "Warning: Path tracing terminated due to error before reaching target "
+                         "lambda values. Last valid profile:\n";
             PrintProfile(std::cout, decimals, last_profile, false);
           }
         }
         for (auto &profile : result) {
-            PrintProfile(std::cout, decimals, profile);
+          PrintProfile(std::cout, decimals, profile);
         }
-      }      
+      }
       else {
         auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
         if (result.empty()) {
-          if(valid){
-            std::cout << "Warning: Path tracing terminated due to error before reaching target lambda values. Last valid profile:\n";
+          if (valid) {
+            std::cout << "Warning: Path tracing terminated due to error before reaching target "
+                         "lambda values. Last valid profile:\n";
             PrintProfile(std::cout, decimals, last_profile, false);
           }
-        } else{
+        }
+        else {
           PrintProfile(std::cout, decimals, result.back(), true);
         }
       }
@@ -249,7 +253,8 @@ int main(int argc, char *argv[])
     else {
       LogitQREMixedBehaviorProfile last_profile(game);
       bool valid = false;
-      auto printer = [&last_profile, &valid, fullGraph, decimals](const LogitQREMixedBehaviorProfile &p) {    
+      auto printer = [&last_profile, &valid, fullGraph,
+                      decimals](const LogitQREMixedBehaviorProfile &p) {
         last_profile = p;
         valid = true;
         if (fullGraph) {
@@ -261,8 +266,9 @@ int main(int argc, char *argv[])
         auto result =
             LogitBehaviorSolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
         if (result.empty()) {
-          if(valid){
-            std::cout << "Warning: Path tracing terminated due to error before reaching target lambda values. Last valid profile:\n";
+          if (valid) {
+            std::cout << "Warning: Path tracing terminated due to error before reaching target "
+                         "lambda values. Last valid profile:\n";
             PrintProfile(std::cout, decimals, last_profile, false);
           }
         }
@@ -273,12 +279,13 @@ int main(int argc, char *argv[])
       else {
         auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);
         if (result.empty()) {
-          if(valid){
-            std::cout << "Warning: Path tracing terminated due to error before reaching target lambda values. Last valid profile:\n";
+          if (valid) {
+            std::cout << "Warning: Path tracing terminated due to error before reaching target "
+                         "lambda values. Last valid profile:\n";
             PrintProfile(std::cout, decimals, last_profile, false);
           }
         }
-        else{
+        else {
           PrintProfile(std::cout, decimals, result.back(), true);
         }
       }
