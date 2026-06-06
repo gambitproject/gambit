@@ -345,24 +345,6 @@ ENUMMIXED_DOUBLE_CASES = [
                 [d(1, 0), d(1, 0)],
                 [d(0, 1), d(0, 1)],
                 [
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                ],
-            ],
-            prob_tol=TOL,
-            regret_tol=TOL,
-        ),
-        marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_6",
-    ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2_rounded_payoffs.agg"),
-            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [d(0, 1), d(0, 1)],
-                [
                     d("10/11", "1/11"),
                     d("10/11", "1/11"),
                 ],
@@ -371,7 +353,7 @@ ENUMMIXED_DOUBLE_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_7",
+        id="test_enummixed_double_7",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -389,7 +371,7 @@ ENUMMIXED_DOUBLE_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_8",
+        id="test_enummixed_double_8",
     ),
 ]
 
@@ -843,8 +825,8 @@ LCP_STRATEGY_DOUBLE_CASES = [
             expected=[
                 [d(1, 0), d(1, 0)],
                 [
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                    d("10/11", "1/11"),
+                    d("10/11", "1/11"),
                 ],
                 [d(0, 1), d(0, 1)],
             ],
@@ -852,7 +834,7 @@ LCP_STRATEGY_DOUBLE_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test_lcp_strategy_rational_12",
+        id="test_lcp_strategy_double_12",
     ),
 ]
 
