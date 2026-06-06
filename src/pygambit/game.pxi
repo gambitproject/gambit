@@ -80,7 +80,7 @@ def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_efg, read_nfg, read_agg
+    read_efg, read_nfg, read_agg, read_bagg
     """
     return read_game(filepath_or_buffer, normalize_labels, parser=ParseGbtGame)
 
@@ -111,7 +111,7 @@ def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_nfg, read_agg
+    read_gbt, read_nfg, read_agg, read_bagg
     """
     return read_game(filepath_or_buffer, normalize_labels, parser=ParseEfgGame)
 
@@ -142,7 +142,7 @@ def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_efg, read_agg
+    read_gbt, read_efg, read_agg, read_bagg
     """
     return read_game(filepath_or_buffer, normalize_labels, parser=ParseNfgGame)
 
@@ -173,9 +173,40 @@ def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_efg, read_nfg
+    read_gbt, read_efg, read_nfg, read_bagg
     """
     return read_game(filepath_or_buffer, normalize_labels, parser=ParseAggGame)
+
+
+def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+              normalize_labels: bool = False) -> Game:
+    """Construct a game from its serialised representation in a BAGG file.
+
+    Parameters
+    ----------
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
+        The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+
+    See Also
+    --------
+    read_gbt, read_efg, read_nfg, read_agg
+    """
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseBaggGame)
 
 
 @cython.cclass
