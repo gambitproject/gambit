@@ -412,8 +412,8 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
         });
     ret.push_back(callback.GetProfiles().back());
     if (!result.status) {
-        return {};
-    }    
+      return {};
+    }
   }
   return ret;
 }
