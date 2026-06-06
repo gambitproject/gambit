@@ -364,7 +364,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
   EquationSystem system(game);
-  tracer.TracePath(
+  TracePathResult result = tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
         system.GetValue(p_point, p_lhs);
       },
@@ -376,6 +376,9 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
         return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
+  if (!result.status) {
+    return {};
+  }
   return callback.GetProfiles();
 }
 
@@ -395,7 +398,7 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
   std::list<LogitQREMixedStrategyProfile> ret;
   EquationSystem system(game);
   for (auto lam : p_targetLambda) {
-    tracer.TracePath(
+    TracePathResult result = tracer.TracePath(
         [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
           system.GetValue(p_point, p_lhs);
         },
@@ -408,6 +411,9 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
           return x.back() - lam;
         });
     ret.push_back(callback.GetProfiles().back());
+    if (!result.status) {
+        return {};
+    }    
   }
   return ret;
 }
