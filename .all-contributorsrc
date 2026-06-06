@@ -64,6 +64,15 @@
         "research",
         "code"
       ]
+    },
+    {
+      "login": "AndresFerCervell",
+      "name": "Andrés Fernández Cervell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/153729439?v=4",
+      "profile": "https://github.com/AndresFerCervell",
+      "contributions": [
+        "code"
+      ]
     }
   ]
 }

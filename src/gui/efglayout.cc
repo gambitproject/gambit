@@ -67,8 +67,28 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (p_selection == p_entry->m_node) ? 6 : 3,
-                                             wxPENSTYLE_SOLID));
+  const bool selected = (p_selection == p_entry->m_node);
+
+  if (selected) {
+    constexpr int selectionPadding = 6;
+    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+
+    p_dc.SetPen(*wxTRANSPARENT_PEN);
+    p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
+
+    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
+                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                selectionPadding);
+    }
+    else {
+      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
+                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       selectionSize);
+    }
+  }
+
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
 
   if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
@@ -104,6 +124,25 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
                      p_entry->m_size);
+  }
+
+  if (selected) {
+    constexpr int selectionPadding = 6;
+    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+
+    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
+
+    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
+                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                selectionPadding);
+    }
+    else {
+      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
+                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       selectionSize);
+    }
   }
 
   int textWidth, textHeight;

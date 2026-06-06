@@ -48,7 +48,7 @@ class NodeChildren:
     def __getitem__(self, action: int | str | Action) -> Node:
         """Returns the successor node which is reached after 'action' is played.
 
-        .. versionchanged: 16.5.0
+        .. versionchanged:: 16.5.0
             Previously indexing by string searched the labels of the child nodes,
             rather than referring to actions.  This implements the more natural
             interpretation that strings refer to action labels.
@@ -259,3 +259,69 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
+
+
+@cython.cclass
+class Subgame:
+    """A subgame in a ``Game``.
+
+    .. versionadded:: 16.7.0
+    """
+    subgame = cython.declare(c_GameSubgame)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Subgame outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(subgame: c_GameSubgame) -> Subgame:
+        obj: Subgame = Subgame.__new__(Subgame)
+        obj.subgame = subgame
+        return obj
+
+    def __repr__(self) -> str:
+        return f"Subgame(root={self.root})"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, Subgame) and
+            self.subgame.deref() == cython.cast(Subgame, other).subgame.deref()
+        )
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.subgame.deref())
+
+    @property
+    def game(self) -> Game:
+        """Gets the ``Game`` to which the subgame belongs.
+
+        .. versionadded:: 16.7.0
+        """
+        return Game.wrap(self.subgame.deref().GetGame())
+
+    @property
+    def root(self) -> Node:
+        """Returns the root node of the subgame.
+
+        .. versionadded:: 16.7.0
+        """
+        return Node.wrap(self.subgame.deref().GetRoot())
+
+    @property
+    def parent(self) -> typing.Optional[Subgame]:
+        """Returns the parent subgame, or None if this is the root subgame.
+
+        .. versionadded:: 16.7.0
+        """
+        parent: c_GameSubgame = self.subgame.deref().GetParent()
+        if parent != cython.cast(c_GameSubgame, NULL):
+            return Subgame.wrap(parent)
+        return None
+
+    @property
+    def children(self) -> list[Subgame]:
+        """Returns the immediate child subgames of this subgame.
+
+        .. versionadded:: 16.7.0
+        """
+        return [Subgame.wrap(child) for child in self.subgame.deref().GetChildren()]

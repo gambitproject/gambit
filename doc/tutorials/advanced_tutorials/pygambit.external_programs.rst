@@ -4,7 +4,7 @@ Using external programs to compute Nash equilibria
 .. TODO: this needs to be updated, see issue #561
 
 Because the problem of finding Nash equilibria can be expressed in various
-mathematical formulations (see [McKMcL96]_), it is helpful to make use
+mathematical formulations (see :cite:p:`McKMcL96`), it is helpful to make use
 of other software packages designed specifically for solving those problems.
 
 There are currently two integrations offered for using external programs to solve
@@ -27,7 +27,3 @@ processing.
 .. [#lrslib] http://cgm.cs.mcgill.ca/~avis/C/lrs.html
 
 .. [#phcpack] https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
-
-.. [McKMcL96] McKelvey, Richard D. and McLennan, Andrew M.  (1996) Computation of equilibria
-              in finite games.  In Handbook of Computational Economics, Volume 1,
-              pages 87-142.

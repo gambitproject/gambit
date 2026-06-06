@@ -483,7 +483,7 @@ class MixedStrategyProfile:
         )
 
     def liap_value(self) -> ProfileDType:
-        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
+        """Returns the Lyapunov value (see :cite:p:`McK91`) of the strategy profile.
 
         The Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.

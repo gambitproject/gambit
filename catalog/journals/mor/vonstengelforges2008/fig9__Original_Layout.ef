@@ -1,0 +1,23 @@
+player 1 name 1
+player 2 name 2
+level 0 node 1 player 0
+level 2 node 1 player 2 xshift -a=3.5 from 0,1 move \frac{1}{3}
+level 2 node 2 player 2 xshift -0.2 from 0,1 move \frac{1}{3}
+level 2 node 3 player 2 xshift a from 0,1 move \frac{1}{3}
+level 4 node 1 xshift 0 from 2,1 move x
+level 4 node 2 xshift -b=.7 from 2,2 move -x
+level 8 node 1 xshift 3b from 2,2 move y
+level 6 node 1 xshift -c=.65 from 4,1 move x payoffs 1 1
+level 6 node 2 xshift c from 4,1 move -x payoffs 0 0
+level 6 node 3 xshift -c from 4,2 move x payoffs 0 0
+level 6 node 4 xshift c from 4,2 move -x payoffs 1 1
+level 10 node 1 xshift -c from 8,1 move y payoffs 1 1
+level 10 node 2 xshift c from 8,1 move -y payoffs 0 0
+level 4 node 3 xshift -b from 2,3 move -x
+level 8 node 2 xshift 3b from 2,3 move -y
+level 6 node 5 xshift -c from 4,3 move x payoffs 0 0
+level 6 node 6 xshift c from 4,3 move -x payoffs 1 1
+level 10 node 3 xshift -c from 8,2 move y payoffs 0 0
+level 10 node 4 xshift c from 8,2 move -y payoffs 1 1
+iset 8,1 8,2 player 1
+iset 4,1 4,2 4,3 player 1

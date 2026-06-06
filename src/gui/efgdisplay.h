@@ -57,17 +57,19 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   int m_zoom;
   wxMenu *m_nodeMenu{nullptr};
   TreePayoffEditor *m_payoffEditor;
+  bool m_pendingInitialZoom{true};
 
-  // Private Functions
   void MakeMenus();
   void AdjustScrollbarSteps();
 
   /// @name Event handlers
   //@{
+  void OnSize(wxSizeEvent &);
   void OnMouseMotion(wxMouseEvent &);
   void OnLeftClick(wxMouseEvent &);
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
+  void OnMagnify(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
   /// Payoff editor changes accepted with enter
   void OnAcceptPayoffEdit(wxCommandEvent &);
@@ -81,6 +83,11 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
 
   void RefreshTree();
 
+  /// @brief Scroll the viewport such that the node is at the specified fraction of the viewport
+  void FocusNode(const GameNode &p_node, double p_xFrac = 0.5, double p_yFrac = 0.5);
+
+  void ZoomByFactor(double p_factor, const wxPoint &p_clientPoint);
+
 public:
   EfgDisplay(wxWindow *p_parent, GameDocument *p_doc);
 
@@ -88,8 +95,15 @@ public:
   void OnDraw(wxDC &, double);
 
   int GetZoom() const { return m_zoom; }
-  void SetZoom(int p_zoom);
+  void SetZoom(int p_zoom, bool p_keepSelectionVisible = true);
   void FitZoom();
+
+  double GetScale() const { return 0.01 * m_zoom; }
+  int LayoutToDevice(int p_value) const { return static_cast<int>(p_value * GetScale()); }
+  int DeviceToLayout(int p_value) const
+  {
+    return static_cast<int>(static_cast<double>(p_value) / GetScale());
+  }
 
   const TreeLayout &GetLayout() const { return m_layout; }
 

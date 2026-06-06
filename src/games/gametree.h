@@ -24,6 +24,7 @@
 #define GAMETREE_H
 
 #include "gameexpl.h"
+#include <unordered_map>
 
 namespace Gambit {
 
@@ -47,7 +48,25 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
-  mutable std::vector<GameNodeRep *> m_subgames;
+  // The subgames of the game, held in two synchronized forms:
+  // m_subgamePostorder for iteration (children before parents),
+  // m_subgameByRoot for O(1) lookup by root node and ownership of the GameSubgameRep objects.
+  struct SubgameData {
+    std::vector<GameNodeRep *> m_subgamePostorder;
+    std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> m_subgameByRoot;
+    bool m_valid{false};
+
+    void Invalidate()
+    {
+      for (const auto &[node, subgame] : m_subgameByRoot) {
+        subgame->Invalidate();
+      }
+      m_subgamePostorder.clear();
+      m_subgameByRoot.clear();
+      m_valid = false;
+    }
+  };
+  mutable SubgameData m_subgameData;
 
   /// @name Private auxiliary functions
   //@{
@@ -61,7 +80,8 @@ protected:
 
   /// @name Managing the representation
   //@{
-  void InvalidateNodeOrdering() const
+  /// Jointly invalidates the ordering of the nodes and the ordering of the information sets.
+  void InvalidateTreeOrdering() const
   {
     m_nodesOrdered = false;
     m_infosetsOrdered = false;
@@ -99,7 +119,8 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
-  std::vector<GameNode> GetSubgames() const override;
+  std::vector<GameSubgame> GetSubgames() const override;
+  GameSubgame GetMinimalSubgame(const GameInfoset &) const override;
   //@}
 
   /// @name Players
@@ -184,6 +205,7 @@ private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
   void BuildOwnPriorActions() const;
   void BuildUnreachableNodes() const;
+  void EnsureSubgames() const;
   void BuildSubgameRoots() const;
 };
 

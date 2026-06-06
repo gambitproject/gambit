@@ -101,18 +101,26 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 
 def test_write_html():
     game = gbt.Game.new_table([2, 2])
+    game.players[0].label = "Alice"
+    game.players[1].label = "Bob"
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
+    assert "Alice" in serialized_game
+    assert "Bob" in serialized_game
 
 
 def test_write_latex():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.Game.new_table([2, 2], title="Game title")
+    game.players[0].label = "Alice"
+    game.players[1].label = "Bob"
     serialized_game = game.to_latex()
-    assert serialized_game.startswith(r"\begin{game}")
+    assert "\\begin{game}" in serialized_game
+    assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game
+    assert "\\textbf{Game title}" in serialized_game
 
 
 def test_read_write_efg():
-    efg_game = games.read_from_file("e01.efg")
+    efg_game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     serialized_efg_game = efg_game.to_efg()
     deserialized_efg_game = gbt.read_efg(io.BytesIO(serialized_efg_game.encode()))
     double_serialized_efg_game = deserialized_efg_game.to_efg()
