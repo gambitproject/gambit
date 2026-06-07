@@ -326,7 +326,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
   EquationSystem system(game);
-  TracePathResult result = tracer.TracePath(
+  tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
         system.GetValue(p_point, p_lhs);
       },
@@ -338,9 +338,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         return RegretTerminationFunction(game, p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
-  if (!result.status) {
-    return {};
-  }
+
   return callback.GetProfiles();
 }
 
@@ -360,7 +358,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
   EquationSystem system(game);
   std::list<LogitQREMixedBehaviorProfile> ret;
   for (auto lam : p_targetLambda) {
-    TracePathResult result = tracer.TracePath(
+    tracer.TracePath(
         [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
           system.GetValue(p_point, p_lhs);
         },
@@ -372,9 +370,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
         [lam](const Vector<double> &x, const Vector<double> &) -> double {
           return x.back() - lam;
         });
-    if (!result.status) {
-      return {};
-    }
+
     ret.push_back(callback.GetProfiles().back());
   }
   return ret;
