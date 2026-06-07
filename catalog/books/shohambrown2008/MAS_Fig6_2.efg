@@ -2,7 +2,7 @@ EFG 2 R "Fig 6.2 from Shoham and Leyton-Brown (2008)" { "1" "2" }
 
 "
 Figure 6.2 from :cite:p:`ShoLeyB08`.
-This is a repeated game, where Prisoner’s Dilemma is played twice.
+This is a repeated game, where Prisoner's Dilemma is played twice.
 "
 
 p "" 1 6 "" { "C" "D" } 0

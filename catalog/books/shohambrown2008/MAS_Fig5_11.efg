@@ -2,7 +2,7 @@ EFG 2 R "Fig 5.11 from Shoham and Leyton-Brown (2008)" { "1" "2" }
 
 "
 Figure 5.11 from :cite:p:`ShoLeyB08`.
-The Prisoner’s Dilemma game in extensive form.
+The Prisoner's Dilemma game in extensive form.
 "
 
 p "" 1 2 "" { "C" "D" } 0
