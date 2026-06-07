@@ -1,0 +1,22 @@
+EFG 2 R "Fig 5.9 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 5.9 from :cite:p:`ShoLeyB08`.
+This is the centipede game. In this game two players alternate in making decisions, at each
+turn choosing between going down and ending the game or going across and
+continuing it.
+This example is usd to explain the criticisms of backward induction for finding subgame-perfect equilibrium.
+Note that centipede is also a parametrized game, with the parameter being the number of rounds.
+"
+
+p "" 1 1 "" { "A" "D" } 0
+t "" 1 "" { 1 0 }
+p "" 2 2 "" { "A" "D" } 0
+t "" 2 "" { 0 2 }
+p "" 1 3 "" { "A" "D" } 0
+t "" 3 "" { 3 1 }
+p "" 2 4 "" { "A" "D" } 0
+t "" 4 "" { 2 4 }
+p "" 1 5 "" { "A" "D" } 0
+t "" 5 "" { 4 3 }
+t "" 6 "" { 3 5 }

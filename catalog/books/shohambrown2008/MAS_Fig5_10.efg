@@ -1,0 +1,16 @@
+EFG 2 R "Fig 5.10 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 5.10 from :cite:p:`ShoLeyB08`.
+This is an example of an imperfect-information game.
+"
+
+p "" 1 2 "" { "L" "R" } 0
+p "" 2 3 "" { "A" "B" } 0
+p "" 1 1 "" { "l" "r" } 0
+t "" 1 "" { 0 0 }
+t "" 2 "" { 2 4 }
+p "" 1 1 0
+t "" 3 "" { 4 2 }
+t "" 4 "" { 0 0 }
+t "" 5 "" { 0 0 }
