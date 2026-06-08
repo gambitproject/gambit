@@ -1,0 +1,10 @@
+player 1 name 1
+player 2 name 2
+level 0 node 1 player 1 
+level 2 node 1 xshift -3.58 from 0,1 move C 
+level 2 node 2 xshift 3.58 from 0,1 move D 
+level 4 node 1 xshift -1.79 from 2,1 move c payoffs -1 -1
+level 4 node 2 xshift 1.79 from 2,1 move d payoffs -4 0
+level 4 node 3 xshift -1.79 from 2,2 move c payoffs 0 -4
+level 4 node 4 xshift 1.79 from 2,2 move d payoffs -3 -3
+iset 2,1 2,2 player 2

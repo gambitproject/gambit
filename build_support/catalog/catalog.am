@@ -1,14 +1,23 @@
 CATALOG_FILES = \
 	catalog/books/myerson1991/fig2_1.efg \
 	catalog/books/myerson1991/fig4_2.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_1.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_1.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_10.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_10.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_11.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_11.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_12.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_12.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_15.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_15.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_2.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_2.efg \
+	catalog/books/shohambrown2008/MAS_Fig5_9.ef \
 	catalog/books/shohambrown2008/MAS_Fig5_9.efg \
+	catalog/books/shohambrown2008/MAS_Fig6_2.ef \
 	catalog/books/shohambrown2008/MAS_Fig6_2.efg \
+	catalog/books/shohambrown2008/MAS_Fig6_8.ef \
 	catalog/books/shohambrown2008/MAS_Fig6_8.efg \
 	catalog/books/vonstengel2022/fig10.1.efg \
 	catalog/books/vonstengel2022/fig10.12.efg \
