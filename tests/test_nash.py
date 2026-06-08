@@ -163,7 +163,7 @@ ENUMPURE_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),
-            solver=functools.partial(gbt.nash.enumpure_solve),
+            solver=gbt.nash.enumpure_solve,
             expected=[
                 [d(1, 0), d(1, 0)],
                 [d(0, 1), d(0, 1)],
@@ -172,18 +172,53 @@ ENUMPURE_CASES = [
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_9",
     ),
-    # pytest.param(
-    # EquilibriumTestCase(
-    # factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
-    # solver=functools.partial(gbt.nash.enumpure_solve),
-    # expected=[
-    # [d(1, 0), d(1, 0)],
-    # [d(0, 1), d(0, 1)],
-    # ],
-    # ),
-    # marks=pytest.mark.nash_enumpure_strategy,
-    # id="test_enumpure_10",
-    # ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=gbt.nash.enumpure_solve,
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_10",
+    ),
+    # Bayesian Action graph games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
+            solver=gbt.nash.enumpure_solve,
+            expected=[
+                [
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+                [
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+                [
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_11",
+    ),
 ]
 
 
@@ -854,6 +889,26 @@ LOGIT_STRATEGY_CASES = [
         ),
         marks=pytest.mark.nash_logit_strategy,
         id="test_logic_strategy_1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
+            solver=functools.partial(gbt.nash.logit_solve, use_strategic=True),
+            expected=[
+                [
+                    [0.9124962637548039, 0.08750373624519617, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.9124962637547669, 0.08750373624523317, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.9124962637547208, 0.08750373624527921, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                ]
+            ],
+            prob_tol=TOL_HUGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_strategy,
+        id="test_logic_strategy_2",
     ),
 ]
 
@@ -2339,8 +2394,9 @@ LOGIT_BEHAVIOR_CASES = [
     ),
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file,
-                                      "chance_root_5_moves_no_nonterm_player_nodes.efg"),
+            factory=functools.partial(
+                games.read_from_file, "chance_root_5_moves_no_nonterm_player_nodes.efg"
+            ),
             solver=gbt.nash.logit_solve,
             expected=[
                 [[]]  # Zero-dimension edge case (two players)
