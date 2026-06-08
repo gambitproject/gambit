@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the accompanying paper and this archived snapshot."
+title: "Gambit 16.6.0 with Zobrist-flux subgame detection (IPL reproducibility artifact)"
+type: software
+authors:
+  - family-names: Kadnikov
+    given-names: Daniel A.
+    affiliation: "The Alan Turing Institute / University of Liverpool"
+  - family-names: Savani
+    given-names: Rahul
+    affiliation: "The Alan Turing Institute / University of Liverpool"
+  - family-names: Turocy
+    given-names: Theodore L.
+    affiliation: "The Alan Turing Institute / University of East Anglia"
+repository-code: "https://github.com/d-kad/gambit"
