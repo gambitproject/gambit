@@ -256,5 +256,4 @@ def test_strategy_action_raises_error_for_strategic_game():
 def test_player_actions_len():
     game = games.create_stripped_down_poker_efg()
     for player in game.players:
-        from_iter = len(list(player.actions))
-        assert len(player.actions) == from_iter
+        assert len(player.actions) == len(list(player.actions))
