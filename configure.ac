@@ -49,7 +49,7 @@ choke me
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-dnl LT_INIT
+LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])

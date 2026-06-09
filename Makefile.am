@@ -209,6 +209,80 @@ EXTRA_DIST = \
 	src/README.rst \
 	$(CATALOG_FILES)
 
+
+# =========================================================================
+# 1. Define the Libtool library and its public headers
+# =========================================================================
+lib_LTLIBRARIES = libgambit.la
+
+libgambit_la_SOURCES = \
+	${core_SOURCES} \
+	${game_SOURCES} \
+	${linalg_SOURCES} \
+	${gtracer_SOURCES}
+
+libgambit_la_LDFLAGS = -version-info 0:0:0
+
+# This installs headers while keeping their "core/", "games/", and "solvers/" folders intact
+nobase_include_HEADERS = \
+	src/gambit.h \
+	src/core/core.h \
+	src/core/util.h \
+	src/core/array.h \
+	src/core/vector.h \
+	src/core/segment.h \
+	src/core/recarray.h \
+	src/core/matrix.h \
+	src/core/integer.h \
+	src/core/rational.h \
+	src/core/function.h \
+	src/core/tinyxml.h \
+	src/games/gameagg.h \
+	src/games/gamebagg.h \
+	src/games/agg/gray.h \
+	src/games/agg/agg.h \
+	src/games/agg/bagg.h \
+	src/games/agg/proj_func.h \
+	src/games/agg/trie_map.h \
+	src/games/agg/trie_map.imp \
+	src/games/gameseq.h \
+	src/games/ndarray.h \
+	src/games/number.h \
+	src/games/gameobject.h \
+	src/games/game.h \
+	src/games/gameexpl.h \
+	src/games/gametable.h \
+	src/games/gametree.h \
+	src/games/behavspt.h \
+	src/games/behavpure.h \
+	src/games/behavmixed.h \
+	src/games/stratspt.h \
+	src/games/stratpure.h \
+	src/games/stratmixed.h \
+	src/games/writer.h \
+	src/games/layout.h \
+	src/games/nash.h \
+	src/solvers/linalg/btableau.h \
+	src/solvers/linalg/lpsolve.h \
+	src/solvers/linalg/lpsolve.imp \
+	src/solvers/linalg/lptab.h \
+	src/solvers/linalg/lptab.imp \
+	src/solvers/linalg/ludecomp.h \
+	src/solvers/linalg/ludecomp.imp \
+	src/solvers/linalg/tableau.h \
+	src/solvers/linalg/lemketab.h \
+	src/solvers/linalg/lemketab.imp \
+	src/solvers/linalg/lhtab.h \
+	src/solvers/linalg/lhtab.imp \
+	src/solvers/linalg/vertenum.h \
+	src/solvers/linalg/vertenum.imp \
+	src/solvers/gtracer/cmatrix.h \
+	src/solvers/gtracer/gnmgame.h \
+	src/solvers/gtracer/nfgame.h \
+	src/solvers/gtracer/aggame.h \
+	src/solvers/gtracer/gtracer.h
+
+# =========================================================================
 core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
@@ -245,7 +319,6 @@ agg_SOURCES = \
     src/games/agg/trie_map.cc
 
 game_SOURCES = \
-	src/gambit.h \
 	src/games/gameseq.cc \
 	src/games/gameseq.h \
 	src/games/ndarray.h \
@@ -344,13 +417,9 @@ AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
 ## Command-line tools
 
-gambit_convert_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/tools/convert/convert.cc
+gambit_convert_SOURCES = src/tools/convert/convert.cc
 
 gambit_enummixed_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
 	src/solvers/enummixed/clique.cc \
 	src/solvers/enummixed/clique.h \
 	src/solvers/enummixed/enummixed.cc \
@@ -364,7 +433,7 @@ gambit_nashsupport_SOURCES = \
 	src/solvers/nashsupport/nashsupport.h
 
 gambit_enumpoly_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
+	${gambit_nashsupport_SOURCES} \
 	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/poly.cc \
@@ -381,14 +450,11 @@ gambit_enumpoly_SOURCES = \
 	src/tools/enumpoly/enumpoly.cc
 
 gambit_enumpure_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/enumpure/enumpure.h \
 	src/tools/util.h \
 	src/tools/enumpure/enumpure.cc
 
 gambit_gnm_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${gtracer_SOURCES} \
 	src/solvers/gnm/gnm.cc \
 	src/solvers/gnm/gnm.h \
 	src/tools/gt/nfggt.cc \
@@ -404,8 +470,6 @@ gambit_ipa_SOURCES = \
 	src/tools/gt/nfgipa.cc
 
 gambit_lcp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
 	src/solvers/lcp/efglcp.cc \
 	src/solvers/lcp/nfglcp.cc \
 	src/solvers/lcp/lcp.h \
@@ -413,7 +477,6 @@ gambit_lcp_SOURCES = \
 	src/tools/lcp/lcp.cc
 
 gambit_liap_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/liap/efgliap.cc \
 	src/solvers/liap/nfgliap.cc \
 	src/solvers/liap/liap.h \
@@ -421,7 +484,6 @@ gambit_liap_SOURCES = \
 	src/tools/liap/liap.cc
 
 gambit_logit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/logit/logbehav.h \
 	src/solvers/logit/logbehav.imp \
 	src/solvers/logit/path.cc \
@@ -433,22 +495,18 @@ gambit_logit_SOURCES = \
 	src/tools/logit/logit.cc
 
 gambit_lp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
 	src/solvers/lp/lp.cc \
 	src/solvers/lp/lp.h \
 	src/tools/util.h \
 	src/tools/lp/lp.cc
 
 gambit_simpdiv_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/simpdiv/simpdiv.cc \
 	src/solvers/simpdiv/simpdiv.h \
 	src/tools/util.h \
 	src/tools/simpdiv/nfgsimpdiv.cc
 
 gambit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/labenski/src/sheetatr.cpp \
 	src/labenski/src/sheet.cpp \
 	src/labenski/src/sheetedg.cpp \
