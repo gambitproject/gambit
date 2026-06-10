@@ -33,6 +33,7 @@ Creating, reading, and writing games
    read_efg
    read_nfg
    read_agg
+   read_bagg
 
    Game.new_tree
    Game.new_table
