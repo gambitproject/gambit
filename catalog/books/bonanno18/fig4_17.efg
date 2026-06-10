@@ -1,0 +1,22 @@
+EFG 2 R "Fig 4.17 from Bonanno (2018)" { "Adele" "Ben" }
+"
+Fig 4.17 from :cite:p:`Gia18`.
+
+This is an example for chance moves in EFGs. 
+"
+
+c "" 1 "" { "Black" 1/3 "Red" 2/3 } 0
+p "" 1 1 "" { "Say Black" "Say Red" } 0
+p "" 2 1 "" { "Guess Black" "Guess Red" } 0
+t "" 1 "Ben correct" { -9, 9 }
+t "" 2 "Ben incorrect" { 9, -9 }
+p "" 2 2 "" { "Guess Black" "Guess Red" } 0
+t "" 1 "Ben correct" { -9, 9 }
+t "" 2 "Ben incorrect" { 9, -9 }
+p "" 1 2 "" { "Say Black" "Say Red" } 0
+p "" 2 1 "" { "Guess Black" "Guess Red" } 0
+t "" 2 "Ben incorrect" { 9, -9 }
+t "" 1 "Ben correct" { -9, 9 }
+p "" 2 2 "" { "Guess Black" "Guess Red" } 0
+t "" 2 "Ben incorrect" { 9, -9 }
+t "" 1 "Ben correct" { -9, 9 }

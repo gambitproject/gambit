@@ -1,0 +1,23 @@
+EFG 2 R "Fig 4.26 from Bonanno (2018)" { "Amy" "Bill" }
+"
+Fig 4.26 from :cite:p:`Gia18`.
+
+This is a simple auction where two players bid on a piece of paper. 
+We add the value of the object, which is not specified in the original description, since this is necessary for determining payoffs.
+"
+
+p "" 1 1 "" { "2" "3" } 0
+p "" 2 1 "" { "2" "3" } 0
+p "" 1 2 "" { "Pass" "Double" } 0
+t "" 1 "A2_B2_Pass" { 0, 8 }
+t "" 2 "A4_B2_Double" { 6, 0 }
+p "" 1 2 "" { "Pass" "Double" } 0
+t "" 3 "A2_B3_Pass" { 0, 7 }
+t "" 4 "A4_B3_Double" { 6, 0 }
+p "" 2 1 "" { "2" "3" } 0
+p "" 1 3 "" { "Pass" "Double" } 0
+t "" 5 "A3_B2_Pass" { 7, 0 }
+t "" 6 "A6_B2_Double" { 4, 0 }
+p "" 1 4 "" { "Pass" "Double" } 0
+t "" 7 "A3_B3_Pass" { 0, 7 }
+t "" 8 "A6_B3_Double" { 4, 0 }

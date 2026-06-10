@@ -1,0 +1,14 @@
+EFG 2 R "Fig 3.1 from Bonanno (2018)" { "Amy" "Beth" }
+"
+Fig 3.1 from :cite:p:`Gia18`.
+
+This is an ultimatum game. 
+"
+
+p "" 1 1 "" { "50-50" "70-30" } 0
+p "" 2 1 "" { "Accept" "Reject" } 0
+t "" 1 "50-50 Accept" { 50000, 50000 }
+t "" 2 "Litigation" { 40000, 20000 }
+p "" 2 2 "" { "Accept" "Reject" } 0
+t "" 3 "70-30 Accept" { 70000, 30000 }
+t "" 2 "Litigation" { 40000, 20000 }

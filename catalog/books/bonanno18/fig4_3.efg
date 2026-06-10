@@ -1,0 +1,22 @@
+EFG 2 R "Fig 4.3 from Bonanno (2018)" { "Ann" "Bob" "Carla" }
+"
+Fig 4.3 from :cite:p:`Gia18`.
+
+This is an example of imperfect-information games to explain information sets. 
+"
+
+p "" 1 1 "" { "Red" "Black" } 0
+p "" 2 1 "" { "Say Red" "Say Black" } 0
+p "" 3 1 "" { "Guess Red" "Guess Black" } 0
+t "" 1 "Carla correct" { -1, -1, 2 }
+t "" 2 "Carla incorrect" { 1, 1, -2 }
+p "" 3 2 "" { "Guess Red" "Guess Black" } 0
+t "" 1 "Carla correct" { -1, -1, 2 }
+t "" 2 "Carla incorrect" { 1, 1, -2 }
+p "" 2 2 "" { "Say Red" "Say Black" } 0
+p "" 3 1 "" { "Guess Red" "Guess Black" } 0
+t "" 2 "Carla incorrect" { 1, 1, -2 }
+t "" 1 "Carla correct" { -1, -1, 2 }
+p "" 3 2 "" { "Guess Red" "Guess Black" } 0
+t "" 2 "Carla incorrect" { 1, 1, -2 }
+t "" 1 "Carla correct" { -1, -1, 2 }

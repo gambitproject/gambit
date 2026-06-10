@@ -1,4 +1,14 @@
 CATALOG_FILES = \
+	catalog/books/bonanno18/fig12_18.efg \
+	catalog/books/bonanno18/fig3_1.efg \
+	catalog/books/bonanno18/fig3_10.efg \
+	catalog/books/bonanno18/fig3_17.efg \
+	catalog/books/bonanno18/fig4_17.efg \
+	catalog/books/bonanno18/fig4_19.efg \
+	catalog/books/bonanno18/fig4_26.efg \
+	catalog/books/bonanno18/fig4_3.efg \
+	catalog/books/bonanno18/fig4_40.efg \
+	catalog/books/bonanno18/fig4_5.efg \
 	catalog/books/myerson1991/fig2_1.efg \
 	catalog/books/myerson1991/fig4_2.efg \
 	catalog/books/shohambrown2008/fig5_1.efg \
