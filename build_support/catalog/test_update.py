@@ -148,6 +148,27 @@ def _make_image_files(catalog_dir, slug, fmt="efg"):
 
 
 # ---------------------------------------------------------------------------
+# Tests for catalog resource selection
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.catalog_update
+class TestCatalogResourceSelection:
+    """Tests for selecting the catalog source used by update.py."""
+
+    def test_use_catalog_dir_overrides_stale_package_catalog(self, tmp_path, monkeypatch):
+        """The updater points pygambit's catalog helpers at the local catalog dir."""
+        stale_catalog = tmp_path / "stale_catalog_data"
+        local_catalog = tmp_path / "catalog"
+        monkeypatch.setattr(update.gbt.catalog, "_CATALOG_RESOURCE", stale_catalog)
+
+        selected = update.use_catalog_dir(local_catalog)
+
+        assert selected == local_catalog
+        assert update.gbt.catalog._CATALOG_RESOURCE == local_catalog
+
+
+# ---------------------------------------------------------------------------
 # Tests for catalog_draw_tree_settings
 # ---------------------------------------------------------------------------
 
