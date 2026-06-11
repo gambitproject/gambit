@@ -303,3 +303,40 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.__setitem__(infoset_action, 0)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__getitem__(infoset)
+
+
+# ---------------------------------------------------------------------------
+# Label-only indexing test suite: integer indexing removed from all game collections.
+# match="16.7.0" pins the migration message itself, rather than a bare TypeError.
+# ---------------------------------------------------------------------------
+COLLECTION_GETTERS = [
+    pytest.param(lambda g: g.players, id="GamePlayers"),
+    pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
+    pytest.param(lambda g: g.strategies, id="GameStrategies"),
+    pytest.param(lambda g: g.infosets, id="GameInfosets"),
+    pytest.param(lambda g: g.actions, id="GameActions"),
+    pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
+    pytest.param(lambda g: g.players["Alice"].infosets, id="PlayerInfosets"),
+    pytest.param(lambda g: g.players["Alice"].actions, id="PlayerActions"),
+    pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].actions,
+                 id="InfosetActions"),
+    pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].members,
+                 id="InfosetMembers"),
+]
+
+
+@pytest.mark.parametrize("getter", COLLECTION_GETTERS)
+def test_collection_rejects_integer_indexing(getter):
+    collection = getter(games.create_stripped_down_poker_efg())
+    with pytest.raises(TypeError, match="16.7.0"):
+        _ = collection[0]
+
+
+def test_label_lookup_is_exact_match():
+    game = gbt.Game.new_table([2, 2])
+    alice, bob = game.players
+    alice.label = "Alice"
+    with pytest.raises(KeyError):
+        _ = game.players[" Alice "]
+    bob.label = " Bob "
+    assert game.players[" Bob "] == bob

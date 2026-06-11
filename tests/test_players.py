@@ -28,15 +28,6 @@ def test_player_index_by_string():
     assert game.players["Gaston"].label == "Gaston"
 
 
-def test_player_index_rejects_int():
-    game = gbt.Game.new_table([2, 2])
-    assert len(game.players) == 2
-    # Integer indexing was removed in 16.7.0; collections are label-keyed.
-    for bad_index in (0, 2, 3, -1):
-        with pytest.raises(TypeError):
-            _ = game.players[bad_index]
-
-
 def test_player_index_invalid():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(TypeError):
@@ -122,15 +113,6 @@ def test_player_strategy_by_label():
     pl1 = next(iter(game.players))
     next(iter(pl1.strategies)).label = "Cooperate"
     assert pl1.strategies["Cooperate"].label == "Cooperate"
-
-
-def test_player_strategy_rejects_int():
-    game = gbt.Game.new_table([2, 2])
-    pl1 = next(iter(game.players))
-    # Integer indexing was removed in 16.7.0; strategies are label-keyed.
-    for bad_index in (0, 42):
-        with pytest.raises(TypeError):
-            _ = pl1.strategies[bad_index]
 
 
 def test_player_strategy_bad_label():

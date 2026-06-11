@@ -1037,6 +1037,12 @@ def test_node_children_nonexistent_action():
         _ = game.root.children["Jack"]
 
 
+def test_node_children_rejects_int():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(TypeError, match="16.7.0"):
+        _ = game.root.children[0]
+
+
 def test_node_children_other_infoset_action():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):

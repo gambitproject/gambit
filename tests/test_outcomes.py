@@ -45,17 +45,7 @@ def test_outcome_index_label(game: gbt.Game, label: str):
 @pytest.mark.parametrize(
     "game", [gbt.Game.new_table([2, 2])]
 )
-def test_outcome_index_rejects_int(game: gbt.Game):
-    # Integer indexing was removed in 16.7.0; outcomes are label-keyed.
-    for bad_index in (0, 2 * len(game.outcomes)):
-        with pytest.raises(TypeError):
-            _ = game.outcomes[bad_index]
-
-
-@pytest.mark.parametrize(
-    "game", [gbt.Game.new_table([2, 2])]
-)
-def test_outcome_index_label_range(game: gbt.Game):
+def test_outcome_index_unmatched_label(game: gbt.Game):
     with pytest.raises(KeyError):
         _ = game.outcomes["not an outcome"]
 
