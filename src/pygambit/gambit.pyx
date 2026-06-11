@@ -25,7 +25,6 @@ import warnings
 import typing
 
 import cython
-import typing
 
 from .error import *
 
@@ -72,6 +71,43 @@ def _to_number(value: typing.Any) -> c_Number:
         except decimal.InvalidOperation:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
     return c_Number(value.encode("ascii"))
+
+
+@cython.cfunc
+def _resolve_by_label(collection, label, scope: str, kind: str, kind_plural: str):
+    """Resolve a member of a game collection by its text label.
+
+    Game collections are accessed by label, not by position.  Lookup is by exact
+    label match; no whitespace is stripped from `label` before comparison.
+    Failure modes:
+      * an ``int`` raises ``TypeError`` (integer indexing was removed in 16.7.0);
+      * any other non-``str`` raises ``TypeError``;
+      * an empty or all-whitespace label raises ``ValueError``;
+      * a label matching no member raises ``KeyError``;
+      * a label matching more than one member raises ``ValueError``.
+
+    The `label` parameter is left unannotated: a concrete type annotation is compiled by Cython
+    into an enforced argument check, raising a generic ``TypeError``
+    before this function's migration message runs.
+    """
+    if isinstance(label, int):
+        raise TypeError(
+            f"{scope} {kind_plural} cannot be indexed by position; reference a "
+            f"{kind} by its label, or iterate over the collection. "
+            f"(Integer indexing was removed in 16.7.0.)"
+        )
+    if not isinstance(label, str):
+        raise TypeError(
+            f"{kind} must be referenced by a str label, not {label.__class__.__name__}"
+        )
+    if not label.strip():
+        raise ValueError(f"{kind} label cannot be empty or all whitespace")
+    matches = [x for x in collection if x.label == label]
+    if not matches:
+        raise KeyError(f"{scope} has no {kind} with label '{label}'")
+    if len(matches) > 1:
+        raise ValueError(f"{scope} has multiple {kind_plural} with label '{label}'")
+    return matches[0]
 
 
 PlayerReference = Player | str
