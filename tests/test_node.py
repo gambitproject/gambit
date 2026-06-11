@@ -1018,9 +1018,22 @@ def test_node_children_action():
     assert game.root.children[game.root.infoset.actions["King"]] == list(game.root.children)[0]
 
 
+def test_node_children_empty_label():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError, match="empty or all whitespace"):
+        _ = game.root.children["   "]
+
+
+def test_node_children_terminal_node():
+    game = games.read_from_file("stripped_down_poker.efg")
+    terminal = next(n for n in game.nodes if n.is_terminal)
+    with pytest.raises(KeyError, match="No action with label"):
+        _ = terminal.children["Bet"]
+
+
 def test_node_children_nonexistent_action():
     game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError, match="No action with label 'Jack'"):
         _ = game.root.children["Jack"]
 
 
