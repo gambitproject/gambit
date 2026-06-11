@@ -111,6 +111,7 @@ Information about the game
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.__getitem__
    Game.subgames
    Game.minimal_subgame
 
