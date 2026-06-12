@@ -52,7 +52,7 @@ class InfosetMembers:
         ----------
         label : str
             The text label of the member node to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -104,7 +104,7 @@ class InfosetActions:
         ----------
         label : str
             The text label of the action to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------

@@ -307,7 +307,7 @@ class GameOutcomes:
         ----------
         label : str
             The text label of the outcome to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -359,7 +359,7 @@ class GamePlayers:
         ----------
         label : str
             The text label of the player to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -415,7 +415,7 @@ class GameActions:
         ----------
         label : str
             The text label of the action to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -466,7 +466,7 @@ class GameInfosets:
         ----------
         label : str
             The text label of the infoset to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -519,7 +519,7 @@ class GameStrategies:
         ----------
         label : str
             The text label of the strategy to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------

@@ -78,7 +78,7 @@ def _resolve_by_label(collection, label, scope: str, kind: str, kind_plural: str
     """Resolve a member of a game collection by its text label.
 
     Game collections are accessed by label, not by position.  Lookup is by exact
-    label match; no whitespace is stripped from `label` before comparison.
+    label match; leading/trailing whitespace is stripped from `label` before comparison.
     Failure modes:
       * an ``int`` raises ``TypeError`` (integer indexing was removed in 16.7.0);
       * any other non-``str`` raises ``TypeError``;
@@ -100,9 +100,10 @@ def _resolve_by_label(collection, label, scope: str, kind: str, kind_plural: str
         raise TypeError(
             f"{kind} must be referenced by a str label, not {label.__class__.__name__}"
         )
-    if not label.strip():
+    stripped_label = label.strip()
+    if not stripped_label:
         raise ValueError(f"{kind} label cannot be empty or all whitespace")
-    matches = [x for x in collection if x.label == label]
+    matches = [x for x in collection if x.label == stripped_label]
     if not matches:
         raise KeyError(f"{scope} has no {kind} with label '{label}'")
     if len(matches) > 1:

@@ -55,7 +55,7 @@ class PlayerInfosets:
         ----------
         label : str
             The text label of the infoset to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -108,7 +108,7 @@ class PlayerActions:
         ----------
         label : str
             The text label of the action to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------
@@ -161,7 +161,7 @@ class PlayerStrategies:
         ----------
         label : str
             The text label of the strategy to return.  Lookup is by exact match;
-            no whitespace is stripped from `label`.
+            leading/trailing whitespace is stripped from `label`.
 
         Raises
         ------

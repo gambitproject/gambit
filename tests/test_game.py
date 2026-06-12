@@ -332,11 +332,9 @@ def test_collection_rejects_integer_indexing(getter):
         _ = collection[0]
 
 
-def test_label_lookup_is_exact_match():
-    game = gbt.Game.new_table([2, 2])
-    alice, bob = game.players
+def test_label_lookup_strips_whitespace():
+    """Lookup strips leading/trailing whitespace from the query."""
+    g = gbt.Game.new_table([2, 2])
+    alice = next(iter(g.players))
     alice.label = "Alice"
-    with pytest.raises(KeyError):
-        _ = game.players[" Alice "]
-    bob.label = " Bob "
-    assert game.players[" Bob "] == bob
+    assert g.players["         Alice    "] == alice
