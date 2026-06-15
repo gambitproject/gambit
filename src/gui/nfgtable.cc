@@ -203,7 +203,21 @@ void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   }
 
   const wxSheetCoords coords = p_event.GetCoords();
-  m_table->DeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow());
+  if (IsLabelCell(coords)) {
+    p_event.Skip();
+    return;
+  }
+
+  wxMenu menu;
+  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
+  deleteItem->Enable(m_table->CanDeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow()));
+  menu.Bind(
+      wxEVT_MENU,
+      [this, coords](wxCommandEvent &) {
+        m_table->DeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow());
+      },
+      wxID_DELETE);
+  PopupMenu(&menu);
 }
 
 wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
@@ -405,7 +419,23 @@ void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   }
 
   const wxSheetCoords coords = p_event.GetCoords();
-  m_table->DeleteColHeaderStrategy(coords.GetRow(), coords.GetCol());
+  if (IsLabelCell(coords)) {
+    p_event.Skip();
+    return;
+  }
+
+  wxMenu menu;
+  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
+  deleteItem->Enable(m_table->CanDeleteColHeaderStrategy(coords.GetRow(), coords.GetCol()));
+
+  menu.Bind(
+      wxEVT_MENU,
+      [this, coords](wxCommandEvent &) {
+        m_table->DeleteColHeaderStrategy(coords.GetRow(), coords.GetCol());
+      },
+      wxID_DELETE);
+
+  PopupMenu(&menu);
 }
 
 void ColPlayerWidget::OnUpdate()
@@ -1264,6 +1294,18 @@ GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) 
 {
   auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
+}
+
+bool TableWidget::CanDeleteRowHeaderStrategy(int headerCol, int) const
+{
+  const int player = GetRowHeaderPlayer(headerCol);
+  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
+}
+
+bool TableWidget::CanDeleteColHeaderStrategy(int headerRow, int) const
+{
+  const int player = GetColHeaderPlayer(headerRow);
+  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
 }
 
 } // namespace Gambit::GUI

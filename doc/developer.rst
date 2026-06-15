@@ -9,6 +9,7 @@ This section contains information for developers who want to contribute to the G
 .. toctree::
    :maxdepth: 2
 
+   developer.overview
    developer.build
    developer.contributing
    developer.catalog

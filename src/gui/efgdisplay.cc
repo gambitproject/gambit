@@ -313,6 +313,7 @@ BEGIN_EVENT_TABLE(EfgDisplay, wxScrolledWindow)
 EVT_MOTION(EfgDisplay::OnMouseMotion)
 EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
 EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
+EVT_MAGNIFY(EfgDisplay::OnMagnify)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
 EVT_KEY_DOWN(EfgDisplay::OnKeyEvent)
 EVT_SIZE(EfgDisplay::OnSize)
@@ -364,33 +365,34 @@ void EfgDisplay::MakeMenus()
 //                  EfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
-static GameNode PriorSameIset(const GameNode &n)
+namespace {
+GameNode PriorSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.begin()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n); node != members.begin()) {
     return *std::prev(node);
   }
   return nullptr;
 }
 
-static GameNode NextSameIset(const GameNode &n)
+GameNode NextSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.end()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n);
+      node != members.end() && std::next(node) != members.end()) {
     return *std::next(node);
   }
   return nullptr;
 }
+} // namespace
 
 void EfgDisplay::OnSize(wxSizeEvent &p_event)
 {
@@ -407,28 +409,29 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
 }
 
 //
-// OnKeyEvent -- handle keypress events
-// Currently we support the following keys:
-//     left arrow:   go to parent of current node
-//     right arrow:  go to first child of current node
-//     up arrow:     go to previous sibling of current node
-//     down arrow:   go to next sibling of current node
+// OnKeyEvent -- handle keypress events.
+//
+// Navigation shortcuts:
+//     left arrow:   go to rendered ancestor of selected node
+//     right arrow:  go to rendered descendant of selected node
+//     up arrow:     go to previous node at the same rendered level
+//     down arrow:   go to next node at the same rendered level
 //     ALT-up:       go to previous member of information set
 //     ALT-down:     go to next member of information set
 //     space:        ensure the selected node is visible
-//     'R', 'r':     select the root node (and make it visible)
-//     delete:       delete the subtree rooted at current node
-//     backspace:    delete the parent of the current node
-//     'M', 'm':     edit the move at the current node
-//     'N', 'n':     edit the properties of the current node
+//     home:         select the root node and make it visible
+//
+// Editing shortcuts:
+//     'M', 'm':     edit the move at the selected node
+//     return/enter: edit the properties of the selected node
+//
+// Payoff edit mode only:
 //     escape:       cancel edit of payoff
-//     tab:          accept edit of payoff, edit next payoff (if any)
+//     tab:          accept edit of payoff, edit next payoff if any
 //
 void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
-  const GameNode selectNode = m_doc->GetSelectNode();
-
-  if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
+  if (p_event.GetKeyCode() == WXK_HOME) {
     m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
     FocusNode(m_doc->GetSelectNode());
     return;
@@ -439,7 +442,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       m_payoffEditor->EndEdit();
       return;
     }
-    else if (p_event.GetKeyCode() == WXK_TAB) {
+    if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
 
       const GameOutcome outcome = m_payoffEditor->GetOutcome();
@@ -482,6 +485,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
   // After this point, all events involve moving relative to selected node.
   // So if there isn't a selected node, the event doesn't apply
+  const GameNode selectNode = m_doc->GetSelectNode();
   if (!selectNode) {
     p_event.Skip();
     return;
@@ -494,8 +498,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     wxPostEvent(this, event);
     return;
   }
-  case 'N':
-  case 'n': {
+  case WXK_RETURN:
+  case WXK_NUMPAD_ENTER: {
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
     wxPostEvent(this, event);
     return;
@@ -513,8 +517,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    const GameNode prior =
-        ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode) : PriorSameIset(selectNode));
+    const GameNode prior = ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode)
+                                                 : PriorSameInfoset(selectNode));
     if (prior) {
       m_doc->SetSelectNode(prior);
       EnsureNodeVisible(m_doc->GetSelectNode());
@@ -523,7 +527,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
   case WXK_DOWN: {
     const GameNode next =
-        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameIset(selectNode));
+        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameInfoset(selectNode));
     if (next) {
       m_doc->SetSelectNode(next);
       EnsureNodeVisible(m_doc->GetSelectNode());
@@ -533,16 +537,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   case WXK_SPACE:
     EnsureNodeVisible(m_doc->GetSelectNode());
     return;
-  case WXK_DELETE: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_TREE);
-    wxPostEvent(this, event);
-    return;
-  }
-  case WXK_BACK: {
-    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_DELETE_PARENT);
-    wxPostEvent(this, event);
-    return;
-  }
   default:
     // If nothing else applies, let event propagate
     p_event.Skip();
@@ -612,16 +606,34 @@ void EfgDisplay::RefreshTree()
   Refresh();
 }
 
+constexpr int kScrollPixelsPerUnit = 1;
+
 void EfgDisplay::AdjustScrollbarSteps()
 {
-  int width, height;
-  GetClientSize(&width, &height);
+  int oldPixelsPerUnitX, oldPixelsPerUnitY;
+  GetScrollPixelsPerUnit(&oldPixelsPerUnitX, &oldPixelsPerUnitY);
 
   int scrollX, scrollY;
   GetViewStart(&scrollX, &scrollY);
 
-  SetScrollbars(50, 50, LayoutToDevice(m_layout.MaxX()) / 50 + 1,
-                LayoutToDevice(m_layout.MaxY()) / 50 + 1, scrollX, scrollY);
+  const int currentPixelX = scrollX * oldPixelsPerUnitX;
+  const int currentPixelY = scrollY * oldPixelsPerUnitY;
+
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  const int virtualWidth = LayoutToDevice(m_layout.MaxX());
+  const int virtualHeight = LayoutToDevice(m_layout.MaxY());
+
+  const int maxPixelX = std::max(0, virtualWidth - clientWidth);
+  const int maxPixelY = std::max(0, virtualHeight - clientHeight);
+
+  const int clampedPixelX = std::clamp(currentPixelX, 0, maxPixelX);
+  const int clampedPixelY = std::clamp(currentPixelY, 0, maxPixelY);
+
+  SetScrollbars(kScrollPixelsPerUnit, kScrollPixelsPerUnit,
+                virtualWidth / kScrollPixelsPerUnit + 1, virtualHeight / kScrollPixelsPerUnit + 1,
+                clampedPixelX / kScrollPixelsPerUnit, clampedPixelY / kScrollPixelsPerUnit);
 }
 
 void EfgDisplay::FitZoom()
@@ -640,12 +652,83 @@ void EfgDisplay::FitZoom()
   Refresh();
 }
 
-void EfgDisplay::SetZoom(int p_zoom)
+namespace {
+
+constexpr int kMinZoom = 10;
+constexpr int kMaxZoom = 150;
+constexpr int kZoomStep = 10;
+constexpr int kScrollPixelsPerUnit = 1;
+
+int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
+
+} // namespace
+
+void EfgDisplay::SetZoom(int p_zoom, bool p_keepSelectionVisible)
 {
-  m_zoom = p_zoom;
+  const int zoom = ClampZoom(p_zoom);
+  if (zoom == m_zoom) {
+    return;
+  }
+
+  m_zoom = zoom;
   AdjustScrollbarSteps();
-  EnsureNodeVisible(m_doc->GetSelectNode());
+
+  if (p_keepSelectionVisible) {
+    EnsureNodeVisible(m_doc->GetSelectNode());
+  }
+
   Refresh();
+}
+
+void EfgDisplay::ZoomByFactor(double p_factor, const wxPoint &p_clientPoint)
+{
+  if (p_factor <= 0.0) {
+    return;
+  }
+
+  const int oldZoom = GetZoom();
+  const int newZoom = ClampZoom(static_cast<int>(std::lround(oldZoom * p_factor)));
+
+  if (newZoom == oldZoom) {
+    return;
+  }
+
+  int unscrolledX, unscrolledY;
+  CalcUnscrolledPosition(p_clientPoint.x, p_clientPoint.y, &unscrolledX, &unscrolledY);
+
+  const double oldScale = GetZoom() / 100.0;
+  const double layoutX = unscrolledX / oldScale;
+  const double layoutY = unscrolledY / oldScale;
+
+  SetZoom(newZoom, false);
+
+  const double newScale = GetZoom() / 100.0;
+  const int targetUnscrolledX = static_cast<int>(std::lround(layoutX * newScale));
+  const int targetUnscrolledY = static_cast<int>(std::lround(layoutY * newScale));
+
+  int pixelsPerUnitX, pixelsPerUnitY;
+  GetScrollPixelsPerUnit(&pixelsPerUnitX, &pixelsPerUnitY);
+
+  if (pixelsPerUnitX <= 0 || pixelsPerUnitY <= 0) {
+    return;
+  }
+
+  const int targetScrollX = targetUnscrolledX - p_clientPoint.x;
+  const int targetScrollY = targetUnscrolledY - p_clientPoint.y;
+
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  int virtualWidth, virtualHeight;
+  GetVirtualSize(&virtualWidth, &virtualHeight);
+
+  const int maxPixelX = std::max(0, virtualWidth - clientWidth);
+  const int maxPixelY = std::max(0, virtualHeight - clientHeight);
+
+  const int clampedScrollX = std::clamp(targetScrollX, 0, maxPixelX);
+  const int clampedScrollY = std::clamp(targetScrollY, 0, maxPixelY);
+
+  Scroll(clampedScrollX / pixelsPerUnitX, clampedScrollY / pixelsPerUnitY);
 }
 
 void EfgDisplay::OnDraw(wxDC &p_dc)
@@ -870,6 +953,13 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       wxPostEvent(this, event);
       return;
     }
+  }
+}
+
+void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
+{
+  if (const double factor = 1.0 + p_event.GetMagnification(); factor > 0.0) {
+    ZoomByFactor(factor, p_event.GetPosition());
   }
 }
 

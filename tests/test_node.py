@@ -150,7 +150,7 @@ SUBGAME_ROOTS_CASES = [
     # ------------------------------------------------------------------------
     pytest.param(
         SubgameRootsTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             expected_paths=[[]]
         ),
         id="wichardt_no_nontrivial_subgames"
@@ -261,7 +261,7 @@ SUBGAME_STRUCTURE_CASES = [
     # ------------------------------------------------------------------------
     pytest.param(
         SubgameStructureTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             roots=[[]],
             parents={(): None},
             children={(): set()},
@@ -390,7 +390,7 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
         ]
     ),
     (
-        "wichardt.efg",
+        gbt.catalog.load("journals/geb/wichardt2008"),
         [
             ([], None),
             (["R"], ("Player 1", 0, "R")),
@@ -438,7 +438,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
     Tests `node.own_prior_action` for non-terminal nodes.
     Also verifies that all terminal nodes return None.
     """
-    game = games.read_from_file(game_file)
+    game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
 
     actual_node_data = []
 
@@ -461,7 +461,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
     # Games without absent-mindedness, where all nodes are reachable
-    ("wichardt.efg", []),
+    (gbt.catalog.load("journals/geb/wichardt2008"), []),
     ("subgames.efg", []),
 
     # An absent-minded driver game with an unreachable terminal node
@@ -482,7 +482,7 @@ def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[
     converting them to their action-label paths, and comparing the resulting
     list of paths against a known-correct list.
     """
-    game = games.read_from_file(game_file)
+    game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
     nodes = game.nodes
 
     actual_unreachable_paths = [
