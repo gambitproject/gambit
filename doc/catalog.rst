@@ -61,11 +61,12 @@ GAMUT requires Java (install from `java.com <https://www.java.com/en/download/>`
 argument or the ``GAMUT_JAR`` environment variable. Download GAMUT from
 http://gamut.stanford.edu/.
 
-To list all available GAMUT game classes and their descriptions::
+.. dropdown:: All 35 GAMUT game classes
 
-   pygambit.catalog.gamut_games()
+   .. jupyter-execute::
+      :hide-code:
 
-The returned DataFrame has columns ``Class``, ``Description``, and ``Players``
-(``"2"`` for two-player only, ``"n"`` for n-player).
+      import pygambit as gbt
+      gbt.catalog.gamut_games()
 
 See the :doc:`GAMUT interoperability tutorial <tutorials/interoperability_tutorials/gamut>` for worked examples.
