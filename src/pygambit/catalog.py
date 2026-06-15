@@ -195,6 +195,136 @@ def generate_gamut(
         out_path.unlink(missing_ok=True)
 
 
+_GAMUT_GAMES = [
+    {"Class": "ArmsRace",
+     "Description": "Arms race with cost and demand functions chosen by players.",
+     "Players": "n"},
+    {"Class": "BattleOfTheSexes",
+     "Description": "Coordination game where players prefer to meet but disagree on the venue.",
+     "Players": "2"},
+    {"Class": "BertrandOligopoly",
+     "Description": "Bertrand oligopoly with arbitrary cost and demand functions.",
+     "Players": "n"},
+    {"Class": "BidirectionalLEG",
+     "Description": "Bidirectional local-effect game on a specified graph.",
+     "Players": "n"},
+    {"Class": "Chicken",
+     "Description": "Classic 2x2 Chicken game.",
+     "Players": "2"},
+    {"Class": "CollaborationGame",
+     "Description": "Game where all players choosing the same action yields the highest payoffs.",
+     "Players": "n"},
+    {"Class": "CongestionGame",
+     "Description": "Congestion game where payoffs depend on how many players share facilities.",
+     "Players": "n"},
+    {"Class": "CoordinationGame",
+     "Description": "Pure coordination game rewarding matching action choices.",
+     "Players": "n"},
+    {"Class": "CournotDuopoly",
+     "Description": "Cournot duopoly with arbitrary cost and inverse demand functions.",
+     "Players": "2"},
+    {"Class": "CovariantGame",
+     "Description": "Game with payoffs whose cross-player correlation is set by a parameter r.",
+     "Players": "n"},
+    {"Class": "DispersionGame",
+     "Description": "Game where dispersed action choices are rewarded.",
+     "Players": "n"},
+    {"Class": "GrabTheDollar",
+     "Description": "Simultaneous competition to claim a prize first.",
+     "Players": "2"},
+    {"Class": "GreedyGame",
+     "Description": "Players each choose a subset from a set; payoffs depend on overlap.",
+     "Players": "2"},
+    {"Class": "GuessThirdsAve",
+     "Description": "Players guess a number trying to reach 2/3 of the average.",
+     "Players": "n"},
+    {"Class": "HawkAndDove",
+     "Description": "Classic 2x2 Hawk and Dove game.",
+     "Players": "2"},
+    {"Class": "LocationGame",
+     "Description": "Hotelling-style two-player location game on a street.",
+     "Players": "2"},
+    {"Class": "MajorityVoting",
+     "Description": "Majority voting game with arbitrary candidate utilities.",
+     "Players": "n"},
+    {"Class": "MatchingPennies",
+     "Description": "Classic 2x2 Matching Pennies game.",
+     "Players": "2"},
+    {"Class": "MinimumEffortGame",
+     "Description": "Payoffs depend on the minimum effort exerted across all players.",
+     "Players": "n"},
+    {"Class": "NPlayerChicken",
+     "Description": "N-player Chicken game with cooperation costs and collective rewards.",
+     "Players": "n"},
+    {"Class": "NPlayerPrisonersDilemma",
+     "Description": "N-player Prisoner's Dilemma with parameterised payoff functions.",
+     "Players": "n"},
+    {"Class": "PolymatrixGame",
+     "Description": "Polymatrix game formed by two-player edge games on a graph.",
+     "Players": "n"},
+    {"Class": "PrisonersDilemma",
+     "Description": "Classic 2x2 Prisoner's Dilemma.",
+     "Players": "2"},
+    {"Class": "RandomCompoundGame",
+     "Description": "Compound game whose payoffs are sums of random 2x2 sub-games.",
+     "Players": "n"},
+    {"Class": "RandomGame",
+     "Description": "Game with payoffs drawn uniformly at random.",
+     "Players": "n"},
+    {"Class": "RandomGraphicalGame",
+     "Description": "Random graphical game on a specified graph.",
+     "Players": "n"},
+    {"Class": "RandomLEG",
+     "Description": "Random local-effect game on a specified graph.",
+     "Players": "n"},
+    {"Class": "RandomZeroSum",
+     "Description": "Two-player zero-sum game with random payoffs.",
+     "Players": "2"},
+    {"Class": "RockPaperScissors",
+     "Description": "Classic Rock, Paper, Scissors game.",
+     "Players": "2"},
+    {"Class": "ShapleyGame",
+     "Description": "Shapley's original game; no stable equilibrium under replicator dynamics.",
+     "Players": "2"},
+    {"Class": "SimpleInspectionGame",
+     "Description": "Inspection game where players choose from different-sized subsets.",
+     "Players": "2"},
+    {"Class": "TravelersDilemma",
+     "Description": "Players claim a value; the lowest claim "
+                    "wins a reward, others receive a penalty.",
+     "Players": "n"},
+    {"Class": "TwoByTwoGame",
+     "Description": "2x2 game of a specified type per Rapoport's classification (type in 1-85).",
+     "Players": "2"},
+    {"Class": "UniformLEG",
+     "Description": "Local-effect game where all edges share the same local-effect function.",
+     "Players": "n"},
+    {"Class": "WarOfAttrition",
+     "Description": "Players choose concession times; payoffs "
+                    "depend on valuations and decrements.",
+     "Players": "2"},
+]
+
+
+def gamut_games() -> pd.DataFrame:
+    """
+    Return a DataFrame listing all 35 GAMUT game classes.
+
+    Each row describes one game class that can be passed to
+    :func:`generate_gamut` as the ``game_class`` argument.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns:
+
+        - ``"Class"``: the game class name to pass to :func:`generate_gamut`
+        - ``"Description"``: a short description of the game family
+        - ``"Players"``: ``"2"`` for two-player only, ``"n"`` for n-player
+    """
+    return pd.DataFrame.from_records(_GAMUT_GAMES, columns=["Class", "Description", "Players"])
+
+
 def load(slug: str) -> gbt.Game:
     """
     Load a game from the package catalog.

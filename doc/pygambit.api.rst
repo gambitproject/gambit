@@ -352,4 +352,5 @@ Catalog of games
    load
    load_openspiel
    generate_gamut
+   gamut_games
    games

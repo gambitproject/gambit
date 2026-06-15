@@ -403,3 +403,28 @@ def test_generate_gamut_gamut_fails(monkeypatch, tmp_path):
     )
     with pytest.raises(ValueError, match="Bogus"):
         gbt.catalog.generate_gamut("Bogus", gamut_jar=fake_jar)
+
+
+def test_gamut_games_returns_dataframe():
+    assert isinstance(gbt.catalog.gamut_games(), pd.DataFrame)
+
+
+def test_gamut_games_columns():
+    assert list(gbt.catalog.gamut_games().columns) == ["Class", "Description", "Players"]
+
+
+def test_gamut_games_count():
+    assert len(gbt.catalog.gamut_games()) == 35
+
+
+def test_gamut_games_known_classes():
+    classes = set(gbt.catalog.gamut_games()["Class"])
+    for name in [
+        "RandomGame", "BattleOfTheSexes", "CovariantGame",
+        "MajorityVoting", "PrisonersDilemma",
+    ]:
+        assert name in classes
+
+
+def test_gamut_games_players_values():
+    assert set(gbt.catalog.gamut_games()["Players"]) == {"2", "n"}
