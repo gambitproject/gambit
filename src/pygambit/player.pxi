@@ -48,7 +48,7 @@ class PlayerInfosets:
         for infoset in self.player.deref().GetInfosets():
             yield Infoset.wrap(infoset)
 
-    def __getitem__(self, label) -> Infoset:
+    def __getitem__(self, label: str) -> Infoset:
         """Returns the player's information set with text label `label`.
 
         Parameters
@@ -101,7 +101,7 @@ class PlayerActions:
         for infoset in self.player.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, label) -> Action:
+    def __getitem__(self, label: str) -> Action:
         """Returns the player's action with text label `label`.
 
         Parameters
@@ -154,7 +154,7 @@ class PlayerStrategies:
         for strategy in self.player.deref().GetStrategies():
             yield Strategy.wrap(strategy)
 
-    def __getitem__(self, label) -> Strategy:
+    def __getitem__(self, label: str) -> Strategy:
         """Returns the player's strategy with text label `label`.
 
         Parameters

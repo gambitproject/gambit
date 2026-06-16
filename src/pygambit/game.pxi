@@ -300,7 +300,7 @@ class GameOutcomes:
         for outcome in self.game.deref().GetOutcomes():
             yield Outcome.wrap(outcome)
 
-    def __getitem__(self, label) -> Outcome:
+    def __getitem__(self, label: str) -> Outcome:
         """Returns the outcome with text label `label`.
 
         Parameters
@@ -352,7 +352,7 @@ class GamePlayers:
         for player in self.game.deref().GetPlayers():
             yield Player.wrap(player)
 
-    def __getitem__(self, label) -> Player:
+    def __getitem__(self, label: str) -> Player:
         """Returns the player with text label `label`.
 
         Parameters
@@ -408,7 +408,7 @@ class GameActions:
         for infoset in self.game.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, label) -> Action:
+    def __getitem__(self, label: str) -> Action:
         """Returns the action with text label `label`.
 
         Parameters
@@ -459,7 +459,7 @@ class GameInfosets:
         for player in self.game.players:
             yield from player.infosets
 
-    def __getitem__(self, label) -> Infoset:
+    def __getitem__(self, label: str) -> Infoset:
         """Returns the information set with text label `label`.
 
         Parameters
@@ -512,7 +512,7 @@ class GameStrategies:
         for player in self.game.players:
             yield from player.strategies
 
-    def __getitem__(self, label) -> Strategy:
+    def __getitem__(self, label: str) -> Strategy:
         """Returns the strategy with text label `label`.
 
         Parameters

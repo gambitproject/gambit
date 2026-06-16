@@ -45,7 +45,7 @@ class InfosetMembers:
         for member in self.infoset.deref().GetMembers():
             yield Node.wrap(member)
 
-    def __getitem__(self, label) -> Node:
+    def __getitem__(self, label: str) -> Node:
         """Returns the member node with text label `label`.
 
         Parameters
@@ -97,7 +97,7 @@ class InfosetActions:
         for action in self.infoset.deref().GetActions():
             yield Action.wrap(action)
 
-    def __getitem__(self, label) -> Action:
+    def __getitem__(self, label: str) -> Action:
         """Returns the action at the information set with text label `label`.
 
         Parameters

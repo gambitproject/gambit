@@ -305,10 +305,6 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.__getitem__(infoset)
 
 
-# ---------------------------------------------------------------------------
-# Label-only indexing test suite: integer indexing removed from all game collections.
-# match="16.7.0" pins the migration message itself, rather than a bare TypeError.
-# ---------------------------------------------------------------------------
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
@@ -328,13 +324,5 @@ COLLECTION_GETTERS = [
 @pytest.mark.parametrize("getter", COLLECTION_GETTERS)
 def test_collection_rejects_integer_indexing(getter):
     collection = getter(games.create_stripped_down_poker_efg())
-    with pytest.raises(TypeError, match="16.7.0"):
+    with pytest.raises(TypeError):
         _ = collection[0]
-
-
-def test_label_lookup_strips_whitespace():
-    """Lookup strips leading/trailing whitespace from the query."""
-    g = gbt.Game.new_table([2, 2])
-    alice = next(iter(g.players))
-    alice.label = "Alice"
-    assert g.players["         Alice    "] == alice

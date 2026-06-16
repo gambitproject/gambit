@@ -74,36 +74,19 @@ def _to_number(value: typing.Any) -> c_Number:
 
 
 @cython.cfunc
-def _resolve_by_label(collection, label, scope: str, kind: str, kind_plural: str):
+def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural: str):
     """Resolve a member of a game collection by its text label.
 
-    Game collections are accessed by label, not by position.  Lookup is by exact
-    label match; leading/trailing whitespace is stripped from `label` before comparison.
+    Game collections are accessed by label, not by position.  Lookup is by exact label match.
+
     Failure modes:
-      * an ``int`` raises ``TypeError`` (integer indexing was removed in 16.7.0);
-      * any other non-``str`` raises ``TypeError``;
-      * an empty or all-whitespace label raises ``ValueError``;
+      * an empty label raises ``ValueError``;
       * a label matching no member raises ``KeyError``;
       * a label matching more than one member raises ``ValueError``.
-
-    The `label` parameter is left unannotated: a concrete type annotation is compiled by Cython
-    into an enforced argument check, raising a generic ``TypeError``
-    before this function's migration message runs.
     """
-    if isinstance(label, int):
-        raise TypeError(
-            f"{scope} {kind_plural} cannot be indexed by position; reference a "
-            f"{kind} by its label, or iterate over the collection. "
-            f"(Integer indexing was removed in 16.7.0.)"
-        )
-    if not isinstance(label, str):
-        raise TypeError(
-            f"{kind} must be referenced by a str label, not {label.__class__.__name__}"
-        )
-    stripped_label = label.strip()
-    if not stripped_label:
-        raise ValueError(f"{kind} label cannot be empty or all whitespace")
-    matches = [x for x in collection if x.label == stripped_label]
+    if not label:
+        raise ValueError(f"{kind} label cannot be empty")
+    matches = [x for x in collection if x.label == label]
     if not matches:
         raise KeyError(f"{scope} has no {kind} with label '{label}'")
     if len(matches) > 1:
