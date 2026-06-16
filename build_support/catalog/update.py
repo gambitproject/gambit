@@ -100,8 +100,12 @@ def _warn_missing_descriptions(df: pd.DataFrame) -> None:
     Games without descriptions are silently excluded from the catalog page by
     ``_build_slug_tree``.  This function makes that visible so contributors
     know to add a description before the game will appear.
+
+    ``test_games/`` entries are intentionally description-free and are exempt.
     """
     for _, row in df.iterrows():
+        if row["Game"].startswith("test_games/"):
+            continue
         if str(row.get("Description", "")).strip():
             continue
         print(

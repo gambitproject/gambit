@@ -955,3 +955,10 @@ class TestWarnMissingDescriptions:
         update._warn_missing_descriptions(df)
         err = capsys.readouterr().err
         assert err == ""
+
+    def test_test_games_without_description_does_not_warn(self, capsys):
+        """A test_games/ entry with no description is exempt and produces no warning."""
+        df = _make_df(_agg_row("test_games/2x2"))
+        update._warn_missing_descriptions(df)
+        err = capsys.readouterr().err
+        assert err == ""
