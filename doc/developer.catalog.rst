@@ -12,6 +12,8 @@ Currently supported representations are:
 
 - `.efg` for extensive form games
 - `.nfg` for normal form games
+- `.agg` for action-graph games
+- `.bagg` for Bayesian action-graph games
 
 .. important::
 
@@ -42,9 +44,10 @@ Currently supported representations are:
    .. code-block:: text
 
       catalog/
-        books/{author-year}/{game}.efg       # games from textbooks
+        books/{author-year}/{game}.efg            # games from textbooks
         journals/{venue}/{author-year}/{game}.efg  # games from journals (venue = geb, ijgt, mor, …)
         conf/{venue}/{author-year}/{game}.efg      # games from conferences
+        test_games/{game}.agg                      # test/example games (no descriptions required)
 
    The folder path determines the game's slug, used by the load function:
 
@@ -52,6 +55,14 @@ Currently supported representations are:
 
       pygambit.catalog.load("books/watson2013/exercise29_6")
       pygambit.catalog.load("journals/geb/bagwell1995")
+
+   .. note::
+
+      AGG (``.agg``) and BAGG (``.bagg``) games do not carry descriptions in their file format,
+      and no visualisation is generated for them.
+      Games without descriptions can be added to the ``test_games/`` top-level category and will
+      appear in the catalog hierarchy and documentation without a description block or image.
+      Games in the Books, Journals, and Conferences categories must still include a description.
 
    .. note::
 

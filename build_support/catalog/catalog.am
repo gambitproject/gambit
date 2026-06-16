@@ -29,4 +29,7 @@ CATALOG_FILES = \
 	catalog/journals/mor/vonstengelforges2008/fig9__Original_Layout.ef \
 	catalog/journals/other/reiley2008/fig1.efg \
 	catalog/journals/other/shapley1974/fig2.nfg \
-	catalog/journals/other/shapley1974/fig3.nfg
+	catalog/journals/other/shapley1974/fig3.nfg \
+	catalog/test_games/2x2.agg \
+	catalog/test_games/2x2_small_payoffs.agg \
+	catalog/test_games/Bayesian-Coffee-3-2-2-3.bagg

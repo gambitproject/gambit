@@ -6,6 +6,7 @@ labels:
   books: "Books"
   journals: "Journals"
   conf: "Conferences"
+  test_games: "Test Games"
   journals/geb: "Games and Economic Behavior (GEB)"
   journals/ijgt: "International Journal of Game Theory (IJGT)"
   journals/mor: "Mathematics of Operations Research (MOR)"

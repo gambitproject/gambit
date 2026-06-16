@@ -120,6 +120,20 @@ def _nfg_row(slug, title="Test NFG Game", description="A description."):
     }
 
 
+def _agg_row(slug, title="Test AGG Game"):
+    """Return a dict representing one row of the DataFrame for an AGG game.
+
+    AGG games have no description and no associated visuals.
+    """
+    return {
+        "Game": slug,
+        "Title": title,
+        "Description": "",
+        "Download": f":download:`{slug}.agg <../catalog/{slug}.agg>`",
+        "Format": "agg",
+    }
+
+
 def _make_df(*rows):
     """Build a DataFrame from one or more row dicts as ``generate_rst_table`` expects."""
     return pd.DataFrame(list(rows))
@@ -413,7 +427,7 @@ class TestGenerateRstTable:
         assert "Fake Game" not in rst
 
     def test_row_without_description_is_skipped(self, tmp_path, monkeypatch):
-        """A game with an empty description is not included in the RST output."""
+        """A non-test_games game with an empty description is not included in the RST output."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
         catalog_dir.mkdir()
@@ -422,6 +436,31 @@ class TestGenerateRstTable:
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "fakeauthor2000/fig1" not in rst
+
+    def test_test_games_row_without_description_is_included(self, tmp_path, monkeypatch):
+        """A test_games AGG game with no description still appears in the RST output."""
+        self._mock_generates(monkeypatch)
+        catalog_dir = tmp_path / "catalog"
+        catalog_dir.mkdir()
+        df = _make_df(_agg_row("test_games/my_agg_game", title="My AGG Game"))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert "My AGG Game" in rst
+        assert 'pygambit.catalog.load("test_games/my_agg_game")' in rst
+
+    def test_agg_row_produces_no_visualization(self, tmp_path, monkeypatch):
+        """An AGG game row produces no jupyter-execute block or image download links."""
+        self._mock_generates(monkeypatch)
+        catalog_dir = tmp_path / "catalog"
+        catalog_dir.mkdir()
+        df = _make_df(_agg_row("test_games/my_agg_game", title="My AGG Game"))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert "jupyter-execute" not in rst
+        assert ".png" not in rst
+        assert ".svg" not in rst
 
     def test_curated_ef_used_in_draw_tree_call(self, tmp_path, monkeypatch):
         """When a curated .ef file exists alongside the .efg, the RST draw_tree call
@@ -648,9 +687,16 @@ class TestHierarchyHelpers:
         assert update._build_slug_tree(df) == {}
 
     def test_build_slug_tree_skips_empty_description(self):
-        """Rows with an empty description are excluded from the tree."""
+        """Non-test_games rows with an empty description are excluded from the tree."""
         df = _make_df(_efg_row("cat/src/game1", description=""))
         assert update._build_slug_tree(df) == {}
+
+    def test_build_slug_tree_includes_test_games_empty_description(self):
+        """test_games rows with an empty description are included in the tree."""
+        df = _make_df(_agg_row("test_games/my_game"))
+        tree = update._build_slug_tree(df)
+        assert "test_games" in tree
+        assert "my_game" in tree["test_games"]
 
 
 @pytest.mark.catalog_update

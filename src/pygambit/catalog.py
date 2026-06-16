@@ -15,10 +15,19 @@ if not _CATALOG_RESOURCE.is_dir():
     if _repo_catalog.is_dir():
         _CATALOG_RESOURCE = _repo_catalog
 
-READERS = {
-    ".nfg": gbt.read_nfg,
-    ".efg": gbt.read_efg,
-}
+
+def _readers() -> dict:
+    readers = {
+        ".nfg": gbt.read_nfg,
+        ".efg": gbt.read_efg,
+        ".agg": gbt.read_agg,
+    }
+    if hasattr(gbt, "read_bagg"):
+        readers[".bagg"] = gbt.read_bagg
+    return readers
+
+
+READERS = _readers()
 
 
 def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
@@ -186,36 +195,58 @@ def games(
     """
     records: list[dict[str, Any]] = []
 
-    def check_filters(game: gbt.Game) -> bool:
+    def check_filters(game: gbt.Game, fmt: str) -> bool:
+        # AGG/BAGG games do not support payoff-level queries via the standard
+        # Game interface (they may segfault or throw); skip those filters for them.
+        agg_like = fmt in {"agg", "bagg"}
+
         if n_actions is not None:
             if not game.is_tree:
                 return False
             if len(game.actions) != n_actions:
                 return False
-        if n_contingencies is not None and len(game.contingencies) != n_contingencies:
-            return False
+        if n_contingencies is not None:
+            if agg_like:
+                return False
+            if len(game.contingencies) != n_contingencies:
+                return False
         if n_infosets is not None:
             if not game.is_tree:
                 return False
             if len(game.infosets) != n_infosets:
                 return False
-        if is_const_sum is not None and game.is_const_sum != is_const_sum:
-            return False
-        if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
-            return False
+        if is_const_sum is not None:
+            if agg_like:
+                return False
+            if game.is_const_sum != is_const_sum:
+                return False
+        if is_perfect_recall is not None:
+            if agg_like:
+                return False
+            if game.is_perfect_recall != is_perfect_recall:
+                return False
         if is_tree is not None and game.is_tree != is_tree:
             return False
-        if min_payoff is not None and game.min_payoff < min_payoff:
-            return False
-        if max_payoff is not None and game.max_payoff > max_payoff:
-            return False
+        if min_payoff is not None:
+            if agg_like:
+                return False
+            if game.min_payoff < min_payoff:
+                return False
+        if max_payoff is not None:
+            if agg_like:
+                return False
+            if game.max_payoff > max_payoff:
+                return False
         if n_nodes is not None:
             if not game.is_tree:
                 return False
             if len(game.nodes) != n_nodes:
                 return False
-        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
-            return False
+        if n_outcomes is not None:
+            if agg_like:
+                return False
+            if len(game.outcomes) != n_outcomes:
+                return False
         if n_players is not None and len(game.players) != n_players:
             return False
         return not (n_strategies is not None and len(game.strategies) != n_strategies)
@@ -223,14 +254,15 @@ def games(
     def append_record(
         slug: str,
         game: gbt.Game,
+        suffix: str,
     ) -> None:
         record = {
             "Game": slug,
-            "Title": game.title,
+            "Title": game.title or slug,
         }
         if include_descriptions:
             record["Description"] = game.description
-            ext = "efg" if game.is_tree else "nfg"
+            ext = suffix.lstrip(".")
             record["Download"] = f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`"
             record["Format"] = ext
         records.append(record)
@@ -250,8 +282,9 @@ def games(
 
         with as_file(resource_path) as path:
             game = reader(str(path))
-            if check_filters(game):
-                append_record(slug, game)
+            fmt = resource_path.suffix.lstrip(".")
+            if check_filters(game, fmt):
+                append_record(slug, game, resource_path.suffix)
 
     if include_descriptions:
         return pd.DataFrame.from_records(

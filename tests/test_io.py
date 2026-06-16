@@ -35,7 +35,7 @@ def test_read_nfg_invalid():
         gbt.read_nfg(game_path)
 
 
-@pytest.mark.parametrize("game_path", glob(os.path.join("tests", "test_games", "*.agg")))
+@pytest.mark.parametrize("game_path", glob(os.path.join("catalog", "test_games", "*.agg")))
 def test_read_agg(game_path):
     game = gbt.read_agg(game_path)
     assert isinstance(game, gbt.Game)
@@ -50,7 +50,7 @@ def test_read_agg_invalid():
 
 
 def test_read_bagg():
-    game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
+    game_path = os.path.join("catalog", "test_games", "Bayesian-Coffee-3-2-2-3.bagg")
     game = gbt.read_bagg(game_path)
     assert isinstance(game, gbt.Game)
 
