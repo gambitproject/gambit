@@ -1,5 +1,6 @@
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -91,6 +92,23 @@ def _node_label(prefix: str, labels: dict[str, str]) -> str:
     if prefix in labels:
         return labels[prefix]
     return Path(prefix).name.replace("_", " ").title()
+
+
+def _warn_missing_descriptions(df: pd.DataFrame) -> None:
+    """Print a warning to stderr for each game that lacks a description.
+
+    Games without descriptions are silently excluded from the catalog page by
+    ``_build_slug_tree``.  This function makes that visible so contributors
+    know to add a description before the game will appear.
+    """
+    for _, row in df.iterrows():
+        if str(row.get("Description", "")).strip():
+            continue
+        print(
+            f"WARNING: '{row['Game']}' has no description and will not appear in the catalog.\n"
+            f"Add a description to the game file to include it.",
+            file=sys.stderr,
+        )
 
 
 def _build_slug_tree(df: pd.DataFrame) -> dict:
@@ -337,9 +355,7 @@ def _supplement_unloadable_games(
                     "Game": slug,
                     "Title": slug,
                     "Description": "",
-                    "Download": (
-                        f":download:`{rel.name} <../catalog/{rel.as_posix()}>`"
-                    ),
+                    "Download": (f":download:`{rel.name} <../catalog/{rel.as_posix()}>`"),
                     "Format": fmt,
                 }
             )
@@ -452,6 +468,7 @@ if __name__ == "__main__":
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
     df = _supplement_unloadable_games(df, CATALOG_DIR)
+    _warn_missing_descriptions(df)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:

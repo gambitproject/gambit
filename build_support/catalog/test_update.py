@@ -931,3 +931,27 @@ class TestUpdateMakefile:
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert content.startswith("CATALOG_FILES =")
+
+
+@pytest.mark.catalog_update
+class TestWarnMissingDescriptions:
+    """Tests for ``_warn_missing_descriptions(df)``.
+
+    The function prints to stderr for each game in a supported format that has
+    an empty description.  Tests use ``capsys`` to capture stderr output.
+    """
+
+    def test_game_without_description_warns(self, capsys):
+        """A game with an empty description produces a WARNING on stderr."""
+        df = _make_df(_efg_row("journals/nobody2025/fig1", description=""))
+        update._warn_missing_descriptions(df)
+        err = capsys.readouterr().err
+        assert "WARNING" in err
+        assert "journals/nobody2025/fig1" in err
+
+    def test_game_with_description_does_not_warn(self, capsys):
+        """A game with a non-empty description produces no output."""
+        df = _make_df(_efg_row("journals/nobody2025/fig1"))
+        update._warn_missing_descriptions(df)
+        err = capsys.readouterr().err
+        assert err == ""
