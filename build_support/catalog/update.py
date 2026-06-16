@@ -102,13 +102,10 @@ def _warn_missing_descriptions(df: pd.DataFrame) -> None:
     know to add a description before the game will appear.
     """
     for _, row in df.iterrows():
-        if row.get("Format") not in SUPPORTED_GAME_FORMATS:
-            continue
         if str(row.get("Description", "")).strip():
             continue
-        slug = row["Game"]
         print(
-            f"WARNING: '{slug}' has no description and will not appear in the catalog.\n"
+            f"WARNING: '{row['Game']}' has no description and will not appear in the catalog.\n"
             f"Add a description to the game file to include it.",
             file=sys.stderr,
         )
