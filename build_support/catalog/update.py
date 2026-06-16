@@ -305,6 +305,49 @@ def _write_tree_level(
             )
 
 
+def _supplement_unloadable_games(
+    df: pd.DataFrame,
+    catalog_dir: Path,
+) -> pd.DataFrame:
+    """Add records for game formats supported by the catalog but not yet compiled.
+
+    When a reader (e.g. read_bagg) is absent from the compiled extension, the
+    corresponding extension is missing from gbt.catalog.READERS and
+    gbt.catalog.games() silently omits those files.  This function scans the
+    catalog directory for any such formats and builds minimal records so that
+    RST documentation is generated regardless of build state.
+    """
+    loadable_exts = {ext.lstrip(".") for ext in gbt.catalog.READERS}
+    missing_fmts = SUPPORTED_GAME_FORMATS - loadable_exts
+    if not missing_fmts:
+        return df
+
+    known_slugs = set(df["Game"].tolist()) if not df.empty else set()
+    extra: list[dict] = []
+    for fmt in sorted(missing_fmts):
+        for resource_path in sorted(catalog_dir.rglob(f"*.{fmt}")):
+            if not resource_path.is_file():
+                continue
+            rel = resource_path.relative_to(catalog_dir)
+            slug = rel.with_suffix("").as_posix()
+            if slug in known_slugs:
+                continue
+            extra.append(
+                {
+                    "Game": slug,
+                    "Title": slug,
+                    "Description": "",
+                    "Download": (
+                        f":download:`{rel.name} <../catalog/{rel.as_posix()}>`"
+                    ),
+                    "Format": fmt,
+                }
+            )
+    if not extra:
+        return df
+    return pd.concat([df, pd.DataFrame(extra)], ignore_index=True)
+
+
 def generate_rst_table(
     df: pd.DataFrame,
     rst_path: Path,
@@ -408,6 +451,7 @@ if __name__ == "__main__":
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
+    df = _supplement_unloadable_games(df, CATALOG_DIR)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:

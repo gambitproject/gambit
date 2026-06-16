@@ -799,6 +799,70 @@ class TestHierarchicalRstOutput:
 
 
 @pytest.mark.catalog_update
+class TestSupplementUnloadableGames:
+    """Tests for ``_supplement_unloadable_games(df, catalog_dir)``.
+
+    The function adds minimal DataFrame records for game formats that are listed
+    in ``SUPPORTED_GAME_FORMATS`` but absent from ``gbt.catalog.READERS``
+    (e.g. because the reader has not yet been compiled into the extension).
+    Tests here monkeypatch ``gbt.catalog.READERS`` to simulate that situation.
+    """
+
+    def test_missing_format_records_added(self, tmp_path, monkeypatch):
+        """Files whose extension is absent from READERS produce a minimal record."""
+        import pygambit as gbt
+
+        (tmp_path / "test_games").mkdir()
+        bagg_file = tmp_path / "test_games" / "example.bagg"
+        bagg_file.touch()
+
+        # Simulate read_bagg not being compiled by removing .bagg from READERS.
+        monkeypatch.setattr(gbt.catalog, "READERS", {k: v for k, v in gbt.catalog.READERS.items()
+                            if k != ".bagg"})
+
+        df = pd.DataFrame(columns=["Game", "Title", "Description", "Download", "Format"])
+        result = update._supplement_unloadable_games(df, tmp_path)
+
+        assert "test_games/example" in result["Game"].tolist()
+        row = result[result["Game"] == "test_games/example"].iloc[0]
+        assert row["Title"] == "test_games/example"
+        assert row["Format"] == "bagg"
+        assert "example.bagg" in row["Download"]
+
+    def test_already_loaded_slug_not_duplicated(self, tmp_path, monkeypatch):
+        """A slug already in the DataFrame is not added again."""
+        import pygambit as gbt
+
+        (tmp_path / "test_games").mkdir()
+        (tmp_path / "test_games" / "example.bagg").touch()
+
+        monkeypatch.setattr(gbt.catalog, "READERS", {k: v for k, v in gbt.catalog.READERS.items()
+                            if k != ".bagg"})
+
+        existing = pd.DataFrame([{
+            "Game": "test_games/example",
+            "Title": "Already loaded",
+            "Description": "",
+            "Download": ":download:`example.bagg <../catalog/test_games/example.bagg>`",
+            "Format": "bagg",
+        }])
+        result = update._supplement_unloadable_games(existing, tmp_path)
+        assert len(result[result["Game"] == "test_games/example"]) == 1
+
+    def test_no_missing_formats_returns_df_unchanged(self, tmp_path, monkeypatch):
+        """When all supported formats are in READERS, the DataFrame is returned unchanged."""
+        import pygambit as gbt
+
+        # Ensure all SUPPORTED_GAME_FORMATS are reported as loadable.
+        fake_readers = {f".{fmt}": lambda p: None for fmt in update.SUPPORTED_GAME_FORMATS}
+        monkeypatch.setattr(gbt.catalog, "READERS", fake_readers)
+
+        df = _make_df(_agg_row("test_games/mygame"))
+        result = update._supplement_unloadable_games(df, tmp_path)
+        assert len(result) == 1
+
+
+@pytest.mark.catalog_update
 class TestUpdateMakefile:
     """Tests for ``update_makefile(catalog_dir, am_path)``.
 
