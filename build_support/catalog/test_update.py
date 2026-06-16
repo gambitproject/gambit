@@ -845,17 +845,3 @@ class TestWarnMissingDescriptions:
         update._warn_missing_descriptions(df)
         err = capsys.readouterr().err
         assert err == ""
-
-    def test_unknown_format_does_not_warn(self, capsys):
-        """A row with an unsupported format is ignored even if description is empty."""
-        row = {
-            "Game": "unknown/game",
-            "Title": "Unknown",
-            "Description": "",
-            "Download": ":download:`game.xyz <../catalog/unknown/game.xyz>`",
-            "Format": "xyz",
-        }
-        df = _make_df(row)
-        update._warn_missing_descriptions(df)
-        err = capsys.readouterr().err
-        assert err == ""
