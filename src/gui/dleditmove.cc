@@ -29,10 +29,12 @@
 
 #include "gambit.h"
 #include "dleditmove.h"
+#include "valnumber.h"
 
 namespace Gambit::GUI {
 
 class ActionPanel final : public wxScrolledWindow {
+  std::vector<wxString> m_actionProbValues;
   std::vector<wxTextCtrl *> m_actionNames;
   std::vector<wxTextCtrl *> m_actionProbs;
 
@@ -50,6 +52,13 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
                      wxVSCROLL | wxTAB_TRAVERSAL)
 {
   const bool isChance = p_infoset->IsChanceInfoset();
+
+  if (isChance) {
+    m_actionProbValues.reserve(p_infoset->GetActions().size());
+    m_actionProbs.reserve(p_infoset->GetActions().size());
+  }
+  m_actionNames.reserve(p_infoset->GetActions().size());
+
   const int numColumns = isChance ? 3 : 2;
 
   auto *gridSizer = new wxFlexGridSizer(numColumns, 5, 10);
@@ -78,10 +87,13 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
     gridSizer->Add(name, 1, wxEXPAND);
 
     if (isChance) {
-      auto *probability = new wxTextCtrl(
-          this, wxID_ANY,
-          wxString(static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(),
-                   *wxConvCurrent));
+      m_actionProbValues.emplace_back(
+          static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(), *wxConvCurrent);
+
+      auto *probability =
+          new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
+                         NumberValidator(&m_actionProbValues.back(), Rational(0), Rational(1)));
+
       m_actionProbs.push_back(probability);
       gridSizer->Add(probability, 1, wxEXPAND);
     }
