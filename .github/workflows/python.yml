@@ -30,7 +30,7 @@ jobs:
           cd dist
           sdist=$(ls pygambit-*.tar.gz)
           pip install -v "${sdist}[test,doc]"
-          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.11.1"
+          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.11.0"
       - name: Run tests
         run: pytest --run-tutorials
 
