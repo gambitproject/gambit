@@ -327,6 +327,10 @@ void RowPlayerWidget::OnUpdate()
 bool RowPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                                          const wxPoint &p_pos)
 {
+  if (m_table->IsRowPlayerPlacementNoOp(p_index, p_player)) {
+    return false;
+  }
+
   const int placePlayerId = wxWindow::NewControlId();
 
   wxMenu menu;
@@ -581,6 +585,10 @@ void ColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 bool ColPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                                          const wxPoint &p_pos)
 {
+  if (m_table->IsColPlayerPlacementNoOp(p_index, p_player)) {
+    return false;
+  }
+
   const int placePlayerId = wxWindow::NewControlId();
 
   wxMenu menu;
@@ -1163,6 +1171,30 @@ bool TableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown();
 //=========================================================================
 //                      TableWidget: View state
 //=========================================================================
+
+bool TableWidget::IsRowPlayerPlacementNoOp(int p_index, int p_player) const
+{
+  for (int col = 0; col < NumRowPlayers(); ++col) {
+    if (GetRowHeaderPlayer(col) == p_player) {
+      const int currentIndex = col + 1;
+      return p_index == currentIndex || p_index == currentIndex + 1;
+    }
+  }
+
+  return false;
+}
+
+bool TableWidget::IsColPlayerPlacementNoOp(int p_index, int p_player) const
+{
+  for (int row = 0; row < NumColPlayers(); ++row) {
+    if (GetColHeaderPlayer(row) == p_player) {
+      const int currentIndex = row + 1;
+      return p_index == currentIndex || p_index == currentIndex + 1;
+    }
+  }
+
+  return false;
+}
 
 void TableWidget::SetRowPlayer(int index, int pl)
 {
