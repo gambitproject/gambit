@@ -24,114 +24,92 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/scrolwin.h>
 #include <wx/richmsgdlg.h>
-#include "wx/sheet/sheet.h"
 
 #include "gambit.h"
 #include "dleditmove.h"
-#include "renratio.h"
 
 namespace Gambit::GUI {
 
-class ActionSheet final : public wxSheet {
-  GameInfoset m_infoset{nullptr};
-  wxSheetCellAttr m_labelAttr;
-  wxFont m_labelFont, m_cellFont;
-
-  // Overriding wxSheet members
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
+class ActionPanel final : public wxScrolledWindow {
+  std::vector<wxTextCtrl *> m_actionNames;
+  std::vector<wxTextCtrl *> m_actionProbs;
 
 public:
-  ActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset);
+  ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset);
 
-  int NumActions() const { return GetNumberRows(); }
+  int NumActions() const { return static_cast<int>(m_actionNames.size()); }
 
-  wxString GetActionName(int p_act);
-  Array<Number> GetActionProbs();
+  wxString GetActionName(int p_act) const;
+  Array<Number> GetActionProbs() const;
 };
 
-ActionSheet::ActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset)
-  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset), m_labelFont(GetFont()),
-    m_cellFont(GetFont())
+ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
+  : wxScrolledWindow(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                     wxVSCROLL | wxTAB_TRAVERSAL)
 {
-  m_labelFont.MakeBold();
+  const bool isChance = p_infoset->IsChanceInfoset();
+  const int numColumns = isChance ? 3 : 2;
 
-  m_labelAttr = GetSheetRefData()->m_defaultRowLabelAttr;
-  m_labelAttr.SetFont(m_labelFont);
-  m_labelAttr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  m_labelAttr.SetOrientation(wxHORIZONTAL);
-  m_labelAttr.SetReadOnly(true);
+  auto *gridSizer = new wxFlexGridSizer(numColumns, 5, 10);
+  gridSizer->AddGrowableCol(1, 1);
+  if (isChance) {
+    gridSizer->AddGrowableCol(2, 1);
+  }
 
-  CreateGrid(p_infoset->GetActions().size(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
-  SetRowLabelWidth(40);
-  SetColLabelHeight(25);
-  SetColLabelValue(0, wxT("Label"));
-  if (p_infoset->IsChanceInfoset()) {
-    SetColLabelValue(1, wxT("Probability"));
+  gridSizer->AddSpacer(1);
+  gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
+  if (isChance) {
+    gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Probability")), 0,
+                   wxALIGN_CENTER_VERTICAL);
   }
 
   for (const auto &action : p_infoset->GetActions()) {
-    wxSheet::SetCellValue(wxSheetCoords(action->GetNumber() - 1, 0),
-                          wxString(action->GetLabel().c_str(), *wxConvCurrent));
-    if (p_infoset->IsChanceInfoset()) {
-      wxSheet::SetCellValue(
-          wxSheetCoords(action->GetNumber() - 1, 1),
+    wxString number;
+    number << action->GetNumber();
+
+    gridSizer->Add(new wxStaticText(this, wxID_STATIC, number), 0,
+                   wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+
+    auto *name =
+        new wxTextCtrl(this, wxID_ANY, wxString(action->GetLabel().c_str(), *wxConvCurrent));
+    m_actionNames.push_back(name);
+    gridSizer->Add(name, 1, wxEXPAND);
+
+    if (isChance) {
+      auto *probability = new wxTextCtrl(
+          this, wxID_ANY,
           wxString(static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(),
                    *wxConvCurrent));
+      m_actionProbs.push_back(probability);
+      gridSizer->Add(probability, 1, wxEXPAND);
     }
   }
-  SetDefaultColWidth(150);
-  AutoSizeRows();
-  // This addresses a regression in wxWidgets 2.9.5 with using grids and
-  // sheets in sizers.
-  InvalidateBestSize();
+
+  auto *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
+  SetSizer(topSizer);
+
+  SetScrollRate(0, FromDIP(10));
+  FitInside();
+
+  const wxSize bestSize = topSizer->CalcMin();
+  SetMinSize(wxSize(FromDIP(isChance ? 400 : 300), std::min(bestSize.GetHeight(), FromDIP(250))));
 }
 
-wxString ActionSheet::GetActionName(int p_act)
+wxString ActionPanel::GetActionName(int p_act) const
 {
-  if (IsCellEditControlCreated()) {
-    SaveEditControlValue();
-  }
-  if (IsCellEditControlShown()) {
-    HideCellEditControl();
-  }
-  return GetCellValue(wxSheetCoords(p_act - 1, 0));
+  return m_actionNames.at(p_act - 1)->GetValue();
 }
 
-Array<Number> ActionSheet::GetActionProbs()
+Array<Number> ActionPanel::GetActionProbs() const
 {
-  if (IsCellEditControlCreated()) {
-    SaveEditControlValue();
-  }
-  if (IsCellEditControlShown()) {
-    HideCellEditControl();
-  }
   Array<Number> probs(NumActions());
   for (int act = 1; act <= NumActions(); act++) {
-    probs[act] = Number(GetCellValue(wxSheetCoords(act - 1, 1)).ToStdString());
+    probs[act] = Number(m_actionProbs.at(act - 1)->GetValue().ToStdString());
   }
   return probs;
-}
-
-wxSheetCellAttr ActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
-{
-  if (IsLabelCell(p_coords)) {
-    return m_labelAttr;
-  }
-
-  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(m_cellFont);
-  attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  attr.SetOrientation(wxHORIZONTAL);
-  attr.SetReadOnly(false);
-  if (p_coords.GetCol() == 1) {
-    attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
-    attr.SetEditor(wxSheetCellEditor(new RationalEditorRefData()));
-  }
-  else {
-    attr.SetEditor(wxSheetCellEditor(new wxSheetCellTextEditorRefData()));
-  }
-  return attr;
 }
 
 //======================================================================
@@ -178,10 +156,10 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
 
   auto *actionBoxSizer =
-      new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxHORIZONTAL);
-  m_actionSheet = new ActionSheet(this, p_infoset);
-  actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
+      new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxVERTICAL);
+  m_actionPanel = new ActionPanel(this, p_infoset);
+  actionBoxSizer->Add(m_actionPanel, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(actionBoxSizer, 1, wxALL | wxEXPAND, 5);
 
   if (auto *buttons = CreateSeparatedButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttons, 0, wxALL | wxEXPAND, 5);
@@ -199,7 +177,7 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
     return;
   }
   try {
-    ValidateDistribution(m_actionSheet->GetActionProbs());
+    ValidateDistribution(m_actionPanel->GetActionProbs());
   }
   catch (ValueException &) {
     wxRichMessageDialog(this, "Probabilities must be nonnegative numbers summing to one.", "Error",
@@ -210,12 +188,13 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
   p_event.Skip();
 }
 
-int EditMoveDialog::NumActions() const { return m_actionSheet->NumActions(); }
+int EditMoveDialog::NumActions() const { return m_actionPanel->NumActions(); }
 
 wxString EditMoveDialog::GetActionName(int p_act) const
 {
-  return m_actionSheet->GetActionName(p_act);
+  return m_actionPanel->GetActionName(p_act);
 }
 
-Array<Number> EditMoveDialog::GetActionProbs() const { return m_actionSheet->GetActionProbs(); }
+Array<Number> EditMoveDialog::GetActionProbs() const { return m_actionPanel->GetActionProbs(); }
+
 } // namespace Gambit::GUI
