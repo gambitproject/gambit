@@ -88,7 +88,7 @@ class PlayerDropTarget : public wxTextDropTarget {
   EfgDisplay *m_owner;
   GameDocument *m_model;
 
-  bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
+  bool OnDropPlayer(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
   bool OnDropOutcome(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
   bool OnDropTreeNode(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
 
@@ -123,22 +123,18 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   }
 }
 
-bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text,
+                                    const wxPoint &p_pos)
 {
   long pl;
-  p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&pl)) {
+    return false;
+  }
+
   const Game efg = m_model->GetGame();
   const GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
-  if (p_node->IsTerminal()) {
-    m_model->DoInsertMove(p_node, player, 2);
-  }
-  else if (p_node->GetPlayer() == player) {
-    m_model->DoInsertAction(p_node);
-  }
-  else {
-    m_model->DoSetPlayer(p_node, player);
-  }
-  return true;
+
+  return m_owner->ShowPlayerDropMenu(p_node, player, p_pos);
 }
 
 bool PlayerDropTarget::OnDropOutcome(const GameNode &p_node, const wxString &p_text,
@@ -189,7 +185,7 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
     case 'N':
       return OnDropTreeNode(node, p_text, wxPoint(p_x, p_y));
     case 'P':
-      return OnDropPlayer(node, p_text);
+      return OnDropPlayer(node, p_text, wxPoint(p_x, p_y));
     case 'O':
       return OnDropOutcome(node, p_text, wxPoint(p_x, p_y));
     default:
@@ -256,6 +252,52 @@ void EfgDisplay::MakeMenus()
 
   m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties"), _("Edit properties of the game"));
+}
+
+bool EfgDisplay::ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlayer &p_player,
+                                    const wxPoint &p_pos)
+{
+  if (!p_targetNode || !p_player) {
+    return false;
+  }
+
+  const int operationId = wxWindow::NewControlId();
+
+  wxMenu menu;
+
+  if (p_targetNode->IsTerminal()) {
+    menu.Append(operationId, _("Insert move for this player"));
+  }
+  else if (p_targetNode->GetPlayer() == p_player) {
+    menu.Append(operationId, _("Insert action at this move"));
+  }
+  else {
+    menu.Append(operationId, _("Assign this move to this player"));
+  }
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != operationId) {
+    return false;
+  }
+
+  try {
+    if (p_targetNode->IsTerminal()) {
+      m_doc->DoInsertMove(p_targetNode, p_player, 2);
+    }
+    else if (p_targetNode->GetPlayer() == p_player) {
+      m_doc->DoInsertAction(p_targetNode);
+    }
+    else {
+      m_doc->DoSetPlayer(p_targetNode, p_player);
+    }
+
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
 }
 
 bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
