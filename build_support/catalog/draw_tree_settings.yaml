@@ -33,6 +33,7 @@ overrides:
     action_label_dist: 5.0
   books/shohambrown2008/fig5_12:
     action_label_dist: 5.0
+    width_scaling: 0.75
   books/shohambrown2008/fig6_2:
     action_label_dist: 5.0
   books/shohambrown2008/fig6_8:
@@ -80,7 +81,7 @@ overrides:
     vary_action_label_positions_choices:
     - 3
   books/bonanno18/fig4_40:
-    sublevel_scaling: 0
+    sublevel_scaling: 1
     shared_terminal_depth: true
     action_label_position_by: player
     label_bg:
