@@ -142,7 +142,7 @@ void OutcomeEditorPopup::LoadValues()
     m_labelCtrl->Clear();
 
     for (auto *ctrl : m_payoffCtrls) {
-      ctrl->Clear();
+      ctrl->SetValue(wxT("0"));
     }
 
     return;
@@ -243,12 +243,9 @@ void OutcomeEditorPopup::Cancel()
 
 bool OutcomeEditorPopup::Commit()
 {
-  if (!m_node || !m_node->GetOutcome()) {
+  if (!m_node) {
     return false;
   }
-
-  const GameOutcome outcome = m_node->GetOutcome();
-  const Game game = m_doc->GetGame();
 
   std::vector<wxString> payoffs;
   payoffs.reserve(m_payoffCtrls.size());
@@ -272,12 +269,7 @@ bool OutcomeEditorPopup::Commit()
   }
 
   try {
-    const wxString label = m_labelCtrl->GetValue();
-
-    //
-    // This document operation is introduced below.
-    //
-    m_doc->DoSetOutcomeData(outcome, label, payoffs);
+    m_doc->DoSetOutcomeData(m_node, m_labelCtrl->GetValue(), payoffs);
   }
   catch (const std::exception &ex) {
     ExceptionDialog(m_owner, ex.what()).ShowModal();
@@ -1174,49 +1166,21 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 
   node = m_layout.OutcomeHitTest(x, y);
   if (node) {
-    if (!node->GetOutcome()) {
-      // Retain the existing behaviour temporarily for outcomes which
-      // have not yet been created.
-      m_doc->DoNewOutcome(node);
-
-      wxClientDC dc(this);
-      PrepareDC(dc);
-      OnDraw(dc);
-
-      auto entry = m_layout.GetNodeEntry(node);
-      const wxRect rect = entry->GetPayoffExtent(1);
-
-      int xx, yy;
-      CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
-      const int width = LayoutToDevice(rect.width + 10);
-      const int height = LayoutToDevice(rect.height + 6);
-      m_payoffEditor->SetSize(xx, yy, width, height);
-      m_payoffEditor->BeginEdit(entry, 1);
-      return;
-    }
-
     int initialPlayer = 0;
 
-    auto entry = m_layout.GetNodeEntry(node);
-    for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
-      if (entry->GetPayoffExtent(player).Contains(x, y)) {
-        initialPlayer = static_cast<int>(player);
-        break;
+    if (node->GetOutcome()) {
+      auto entry = m_layout.GetNodeEntry(node);
+
+      for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
+        if (entry->GetPayoffExtent(player).Contains(x, y)) {
+          initialPlayer = static_cast<int>(player);
+          break;
+        }
       }
     }
 
     m_outcomeEditor->BeginEdit(node, initialPlayer);
     return;
-  }
-
-  if (m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL) {
-    node = m_layout.BranchAboveHitTest(x, y);
-    if (node) {
-      m_doc->SetSelectNode(node);
-      const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
-      wxPostEvent(this, event);
-      return;
-    }
   }
 
   if (m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL) {

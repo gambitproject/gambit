@@ -278,7 +278,7 @@ public:
   void DoNewOutcome(GameNode p_node);
   void DoNewOutcome(const PureStrategyProfile &p_profile);
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
-  void DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
+  void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);

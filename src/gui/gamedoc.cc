@@ -574,10 +574,10 @@ void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void GameDocument::DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
+void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                                     const std::vector<wxString> &p_payoffs)
 {
-  if (!p_outcome) {
+  if (!p_node) {
     return;
   }
 
@@ -593,14 +593,21 @@ void GameDocument::DoSetOutcomeData(const GameOutcome &p_outcome, const wxString
   }
 
   const std::string label = p_label.ToStdString();
+  GameOutcome outcome = p_node->GetOutcome();
 
-  bool changed = p_outcome->GetLabel() != label;
+  bool changed = !outcome;
 
-  for (size_t player = 1; player <= NumPlayers(); ++player) {
-    if (p_outcome->GetPayoff<Rational>(GetGame()->GetPlayer(player)) !=
-        parsedPayoffs[player - 1]) {
-      changed = true;
-      break;
+  if (outcome) {
+    changed = outcome->GetLabel() != label;
+
+    if (!changed) {
+      for (size_t player = 1; player <= NumPlayers(); ++player) {
+        if (outcome->GetPayoff<Rational>(GetGame()->GetPlayer(player)) !=
+            parsedPayoffs[player - 1]) {
+          changed = true;
+          break;
+        }
+      }
     }
   }
 
@@ -608,11 +615,15 @@ void GameDocument::DoSetOutcomeData(const GameOutcome &p_outcome, const wxString
     return;
   }
 
-  p_outcome->SetLabel(label);
+  if (!outcome) {
+    outcome = GetGame()->NewOutcome();
+    GetGame()->SetOutcome(p_node, outcome);
+  }
+
+  outcome->SetLabel(label);
 
   for (size_t player = 1; player <= NumPlayers(); ++player) {
-    p_outcome->SetPayoff(GetGame()->GetPlayer(player),
-                         Number(p_payoffs[player - 1].ToStdString()));
+    outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
   }
 
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
