@@ -77,17 +77,25 @@ Currently supported representations are:
       auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
       Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the ``.ef`` format.
 
+      In general, ``.ef`` files should only be added when the layout they provide differs significantly
+      from what DrawTree produces automatically; if the auto-generated layout is reasonable, there is
+      no need to include one.
+
+      If the game has an original layout from a published source (e.g. a textbook or journal article),
+      you **should** try to capture that layout in an ``.ef`` file — you can create it manually or
+      try passing the ``.ef`` format spec and a screenshot of the original to an AI to generate it.
+
       **Layout variants:** To display multiple layout variants on the catalog page (rendered as
       clickable tabs), commit additional ``.ef`` files using the ``{slug}__{label}.ef`` naming
       convention (double underscore separator), e.g.:
 
       .. code-block:: text
 
-         catalog/example/game.ef          # primary (tab label "Default")
-         catalog/example/game__wide.ef    # additional (tab label "Wide")
+         catalog/example/game.ef                     # primary (tab label "Default")
+         catalog/example/game__original_layout.ef    # additional (tab label "Original Layout")
 
       The label shown on each tab is derived automatically from the filename suffix: underscores
-      are replaced by spaces and the result is title-cased (e.g. ``__very_wide`` → "Very Wide").
+      are replaced by spaces and the result is title-cased (e.g. ``__alt_version`` → "Alt Version").
 
 3. **Update the build files:**
 
