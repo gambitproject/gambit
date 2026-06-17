@@ -21,13 +21,14 @@
 //
 
 #include <algorithm> // for std::min
-
+#include <vector>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif              // WX_PRECOMP
-#include <wx/dnd.h> // for drag-and-drop support
+#endif // WX_PRECOMP
+#include <wx/dnd.h>
 #include <wx/image.h>
+#include <wx/popupwin.h>
 
 #include "gambit.h"
 
@@ -37,6 +38,175 @@
 #include "valnumber.h"
 
 namespace Gambit::GUI {
+
+class OutcomeEditorPopup : public wxPopupTransientWindow {
+public:
+  OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc);
+
+  void BeginEdit(const GameNode &p_node, int p_initialPlayer = 0);
+
+protected:
+  void OnDismiss() override;
+
+private:
+  void BuildControls();
+  void LoadValues();
+  void PositionPopup();
+  void OnKeyDown(wxKeyEvent &p_event);
+
+  EfgDisplay *m_owner;
+  GameDocument *m_doc;
+
+  GameNode m_node;
+
+  wxTextCtrl *m_labelCtrl;
+  wxFlexGridSizer *m_gridSizer;
+  std::vector<wxTextCtrl *> m_payoffCtrls;
+
+  int m_initialPlayer{0};
+  bool m_cancelled{false};
+};
+
+OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
+  : wxPopupTransientWindow(p_owner, wxBORDER_SIMPLE), m_owner(p_owner), m_doc(p_doc),
+    m_labelCtrl(nullptr), m_gridSizer(nullptr)
+{
+  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+  BuildControls();
+
+  Bind(wxEVT_CHAR_HOOK, &OutcomeEditorPopup::OnKeyDown, this);
+}
+
+void OutcomeEditorPopup::BuildControls()
+{
+  auto *outerSizer = new wxBoxSizer(wxVERTICAL);
+
+  auto *heading = new wxStaticText(this, wxID_ANY, _("Outcome"));
+  wxFont headingFont = heading->GetFont();
+  headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+  heading->SetFont(headingFont);
+
+  outerSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(10));
+
+  m_gridSizer = new wxFlexGridSizer(2, FromDIP(6), FromDIP(10));
+  m_gridSizer->AddGrowableCol(1, 1);
+
+  m_gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
+
+  m_labelCtrl = new wxTextCtrl(this, wxID_ANY);
+  m_labelCtrl->SetMinSize(wxSize(FromDIP(180), -1));
+  m_gridSizer->Add(m_labelCtrl, 1, wxEXPAND);
+
+  auto *payoffHeading = new wxStaticText(this, wxID_ANY, _("Payoffs"));
+  wxFont payoffHeadingFont = payoffHeading->GetFont();
+  payoffHeadingFont.SetWeight(wxFONTWEIGHT_BOLD);
+  payoffHeading->SetFont(payoffHeadingFont);
+
+  outerSizer->Add(m_gridSizer, 0, wxEXPAND | wxALL, FromDIP(10));
+  outerSizer->Add(payoffHeading, 0, wxLEFT | wxRIGHT, FromDIP(10));
+
+  auto *payoffSizer = new wxFlexGridSizer(2, FromDIP(6), FromDIP(10));
+  payoffSizer->AddGrowableCol(1, 1);
+
+  const Game game = m_doc->GetGame();
+
+  for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
+    const GamePlayer gamePlayer = game->GetPlayer(player);
+
+    payoffSizer->Add(
+        new wxStaticText(this, wxID_ANY, wxString(gamePlayer->GetLabel().c_str(), *wxConvCurrent)),
+        0, wxALIGN_CENTER_VERTICAL);
+
+    auto *payoffCtrl = new wxTextCtrl(this, wxID_ANY);
+    payoffCtrl->SetValidator(NumberValidator(nullptr));
+    payoffCtrl->SetMinSize(wxSize(FromDIP(100), -1));
+
+    payoffSizer->Add(payoffCtrl, 1, wxEXPAND);
+    m_payoffCtrls.push_back(payoffCtrl);
+  }
+
+  outerSizer->Add(payoffSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(10));
+
+  SetSizerAndFit(outerSizer);
+}
+
+void OutcomeEditorPopup::LoadValues()
+{
+  const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
+
+  if (!outcome) {
+    m_labelCtrl->Clear();
+
+    for (auto *ctrl : m_payoffCtrls) {
+      ctrl->Clear();
+    }
+
+    return;
+  }
+
+  m_labelCtrl->SetValue(wxString(outcome->GetLabel().c_str(), *wxConvCurrent));
+
+  const Game game = m_doc->GetGame();
+
+  for (size_t player = 1; player <= m_payoffCtrls.size(); ++player) {
+    const std::string payoff = outcome->GetPayoff<std::string>(game->GetPlayer(player));
+
+    m_payoffCtrls[player - 1]->SetValue(wxString(payoff.c_str(), *wxConvCurrent));
+  }
+}
+
+void OutcomeEditorPopup::PositionPopup()
+{
+  auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
+  if (!entry) {
+    return;
+  }
+
+  int clientX, clientY;
+  m_owner->CalcScrolledPosition(m_owner->LayoutToDevice(entry->GetX() + 20),
+                                m_owner->LayoutToDevice(entry->GetY()), &clientX, &clientY);
+
+  const wxPoint screenPoint = m_owner->ClientToScreen(wxPoint(clientX, clientY));
+
+  Position(screenPoint, wxSize(FromDIP(8), FromDIP(8)));
+}
+
+void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
+{
+  m_node = p_node;
+  m_initialPlayer = p_initialPlayer;
+  m_cancelled = false;
+
+  LoadValues();
+  Fit();
+  PositionPopup();
+
+  Popup();
+
+  if (m_initialPlayer > 0 && m_initialPlayer <= static_cast<int>(m_payoffCtrls.size())) {
+    wxTextCtrl *ctrl = m_payoffCtrls[m_initialPlayer - 1];
+    ctrl->SetFocus();
+    ctrl->SelectAll();
+  }
+  else {
+    m_labelCtrl->SetFocus();
+    m_labelCtrl->SetInsertionPointEnd();
+  }
+}
+
+void OutcomeEditorPopup::OnDismiss() { m_node = nullptr; }
+
+void OutcomeEditorPopup::OnKeyDown(wxKeyEvent &p_event)
+{
+  if (p_event.GetKeyCode() == WXK_ESCAPE) {
+    m_cancelled = true;
+    Dismiss();
+    return;
+  }
+
+  p_event.Skip();
+}
+
 //--------------------------------------------------------------------------
 //                         class TreePayoffEditor
 //--------------------------------------------------------------------------
@@ -325,7 +495,8 @@ END_EVENT_TABLE()
 
 EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
   : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100),
-    m_payoffEditor(new TreePayoffEditor(this))
+    m_payoffEditor(new TreePayoffEditor(this)),
+    m_outcomeEditor(new OutcomeEditorPopup(this, p_doc))
 {
   wxWindow::SetBackgroundColour(wxColour(250, 250, 250));
 
@@ -897,10 +1068,10 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   node = m_layout.OutcomeHitTest(x, y);
   if (node) {
     if (!node->GetOutcome()) {
-      // Create a new outcome
+      // Retain the existing behaviour temporarily for outcomes which
+      // have not yet been created.
       m_doc->DoNewOutcome(node);
-      // Payoff rectangles are actually set during drawing, so
-      // force a refresh
+
       wxClientDC dc(this);
       PrepareDC(dc);
       OnDraw(dc);
@@ -917,21 +1088,17 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       return;
     }
 
-    // Editing an existing outcome
+    int initialPlayer = 0;
+
     auto entry = m_layout.GetNodeEntry(node);
-    for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-      const wxRect rect = entry->GetPayoffExtent(pl);
-      if (rect.Contains(x, y)) {
-        int xx, yy;
-        CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
-        const int width = LayoutToDevice(rect.width + 10);
-        const int height = LayoutToDevice(rect.height + 6);
-        m_payoffEditor->SetSize(xx, yy, width, height);
-        m_payoffEditor->BeginEdit(entry, pl);
-        return;
+    for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
+      if (entry->GetPayoffExtent(player).Contains(x, y)) {
+        initialPlayer = static_cast<int>(player);
+        break;
       }
     }
 
+    m_outcomeEditor->BeginEdit(node, initialPlayer);
     return;
   }
 

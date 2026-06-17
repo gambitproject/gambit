@@ -27,6 +27,9 @@
 #include "efglayout.h"
 
 namespace Gambit::GUI {
+
+class OutcomeEditorPopup;
+
 class TreePayoffEditor final : public wxTextCtrl {
   std::shared_ptr<NodeEntry> m_entry{nullptr};
   GameOutcome m_outcome;
@@ -57,6 +60,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   int m_zoom;
   wxMenu *m_nodeMenu{nullptr};
   TreePayoffEditor *m_payoffEditor;
+  OutcomeEditorPopup *m_outcomeEditor;
   bool m_pendingInitialZoom{true};
 
   void MakeMenus();
