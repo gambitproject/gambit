@@ -500,10 +500,13 @@ template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
 template <class T> void MixedBehaviorProfile<T>::ComputeBeliefs() const
 {
   m_cache.m_beliefs.clear();
-
+  // Normalise each member's realization probability by the infoset's upper-frontier probability
+  // (m_infosetProbs, computed in ComputeRealizationProbs), following Halpern and Pass (2021).
+  // For an absent-minded infoset the frontier excludes the reentry members, so the member beliefs
+  // may sum to above 1; for a non-absent-minded infoset the frontier is all members and this is
+  // the standard Selten (1975) normalization.
   for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
-    const T infosetProb = sum_function(
-        infoset->GetMembers(), [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+    const T infosetProb = m_cache.m_infosetProbs[infoset];
     if (infosetProb == static_cast<T>(0)) {
       continue;
     }
