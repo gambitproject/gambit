@@ -328,7 +328,7 @@ bool RowPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxStri
                                          const wxPoint &p_pos)
 {
   if (m_table->IsRowPlayerPlacementNoOp(p_index, p_player)) {
-    return false;
+    return true;
   }
 
   const int placePlayerId = wxWindow::NewControlId();
@@ -586,7 +586,7 @@ bool ColPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxStri
                                          const wxPoint &p_pos)
 {
   if (m_table->IsColPlayerPlacementNoOp(p_index, p_player)) {
-    return false;
+    return true;
   }
 
   const int placePlayerId = wxWindow::NewControlId();
