@@ -113,7 +113,7 @@ void TableWidgetBase::OnCellLeftClick(wxSheetEvent &p_event)
 }
 
 //=========================================================================
-//                class gbtTableWidgetDropTarget
+//                class TableWidgetDropTarget
 //=========================================================================
 
 //!
@@ -121,12 +121,11 @@ void TableWidgetBase::OnCellLeftClick(wxSheetEvent &p_event)
 //! communicates the location and text of the drop to its owner for
 //! further processing
 //!
-class gbtTableWidgetDropTarget : public wxTextDropTarget {
-private:
+class TableWidgetDropTarget : public wxTextDropTarget {
   TableWidgetBase *m_owner;
 
 public:
-  explicit gbtTableWidgetDropTarget(TableWidgetBase *p_owner) : m_owner(p_owner) {}
+  explicit TableWidgetDropTarget(TableWidgetBase *p_owner) : m_owner(p_owner) {}
 
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
   {
@@ -159,10 +158,13 @@ class RowPlayerWidget final : public TableWidgetBase {
 
   void OnCellRightClick(wxSheetEvent &);
 
+  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                          const wxPoint &p_pos);
+
 public:
   /// @name Lifecycle
   //@{
-  /// Constructorw
+  /// Constructor
   RowPlayerWidget(TableWidget *p_parent);
   //@}
 
@@ -187,7 +189,7 @@ RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent)
   SetScrollBarMode(SB_NEVER);
   SetGridLineColour(*wxBLACK);
 
-  wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
+  wxWindow::SetDropTarget(new TableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
@@ -322,28 +324,61 @@ void RowPlayerWidget::OnUpdate()
   Refresh();
 }
 
+bool RowPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                                         const wxPoint &p_pos)
+{
+  const int placePlayerId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(placePlayerId, p_label);
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != placePlayerId) {
+    return false;
+  }
+
+  try {
+    m_table->SetRowPlayer(p_index, p_player);
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
 bool RowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
-  if (p_text[0] == 'P') {
-    long pl;
-    p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (p_text.empty() || p_text[0] != 'P') {
+    return false;
+  }
 
-    if (m_table->NumRowPlayers() == 0) {
-      m_table->SetRowPlayer(1, pl);
-      return true;
+  long player;
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
+    return false;
+  }
+
+  if (m_table->NumRowPlayers() == 0) {
+    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as row player"),
+                              wxPoint(p_x, p_y));
+  }
+
+  for (int col = 0; col < GetNumberCols(); col++) {
+    const wxRect rect = CellToRect(wxSheetCoords(0, col));
+    const int existingPlayer = m_table->GetRowHeaderPlayer(col);
+    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
+
+    if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
+      return ShowPlayerDropMenu(col + 1, static_cast<int>(player),
+                                wxString::Format(_("Place before %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
 
-    for (int col = 0; col < GetNumberCols(); col++) {
-      const wxRect rect = CellToRect(wxSheetCoords(0, col));
-
-      if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
-        m_table->SetRowPlayer(col + 1, pl);
-        return true;
-      }
-      else if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
-        m_table->SetRowPlayer(col + 2, pl);
-        return true;
-      }
+    if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
+      return ShowPlayerDropMenu(col + 2, static_cast<int>(player),
+                                wxString::Format(_("Place after %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
   }
 
@@ -375,6 +410,9 @@ class ColPlayerWidget final : public TableWidgetBase {
 
   void OnCellRightClick(wxSheetEvent &);
 
+  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                          const wxPoint &p_pos);
+
 public:
   /// @name Lifecycle
   //@{
@@ -404,7 +442,7 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent)
   SetGridLineColour(*wxBLACK);
   wxWindow::SetBackgroundColour(*wxLIGHT_GREY);
 
-  wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
+  wxWindow::SetDropTarget(new TableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
@@ -540,28 +578,61 @@ void ColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 }
 
+bool ColPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                                         const wxPoint &p_pos)
+{
+  const int placePlayerId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(placePlayerId, p_label);
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != placePlayerId) {
+    return false;
+  }
+
+  try {
+    m_table->SetColPlayer(p_index, p_player);
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
 bool ColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
-  if (p_text[0] == 'P') {
-    long pl;
-    p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (p_text.empty() || p_text[0] != 'P') {
+    return false;
+  }
 
-    if (m_table->NumColPlayers() == 0) {
-      m_table->SetColPlayer(1, pl);
-      return true;
+  long player;
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
+    return false;
+  }
+
+  if (m_table->NumColPlayers() == 0) {
+    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as column player"),
+                              wxPoint(p_x, p_y));
+  }
+
+  for (int row = 0; row < GetNumberRows(); row++) {
+    const wxRect rect = CellToRect(wxSheetCoords(row, 0));
+    const int existingPlayer = m_table->GetColHeaderPlayer(row);
+    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
+
+    if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
+      return ShowPlayerDropMenu(row + 1, static_cast<int>(player),
+                                wxString::Format(_("Place before %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
 
-    for (int row = 0; row < GetNumberRows(); row++) {
-      const wxRect rect = CellToRect(wxSheetCoords(row, 0));
-
-      if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
-        m_table->SetColPlayer(row + 1, pl);
-        return true;
-      }
-      else if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
-        m_table->SetColPlayer(row + 2, pl);
-        return true;
-      }
+    if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
+      return ShowPlayerDropMenu(row + 2, static_cast<int>(player),
+                                wxString::Format(_("Place after %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
   }
 
