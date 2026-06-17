@@ -208,7 +208,7 @@ def _setup_pyspiel_mock(
     mock_export_fn = MagicMock()
     mock_game = MagicMock()
 
-    # Wire the dynamics attribute so the == comparison in load_openspiel resolves correctly.
+    # Wire the dynamics attribute so the == comparison in generate_openspiel resolves correctly.
     # MagicMock attribute access is idempotent: mock_ps.GameType.Dynamics.SEQUENTIAL always
     # returns the same object, so the equality check passes.
     if dynamics == "sequential":
@@ -244,35 +244,35 @@ def _setup_pyspiel_mock(
     return mock_ps, mock_export_fn
 
 
-def test_openspiel_load_efg_success(monkeypatch):
+def test_generate_openspiel_efg_success(monkeypatch):
     """Sequential (extensive-form) game: EFG export is used and returns a valid Game."""
     _setup_pyspiel_mock(monkeypatch, dynamics="sequential", efg_str=_MOCK_EFG)
-    game = gbt.catalog.load_openspiel("tiny_hanabi")
+    game = gbt.catalog.generate_openspiel("tiny_hanabi")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_nfg_success(monkeypatch):
+def test_generate_openspiel_nfg_success(monkeypatch):
     """Simultaneous (normal-form) game: NFG export is used and returns a valid Game."""
     _setup_pyspiel_mock(monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG)
-    game = gbt.catalog.load_openspiel("matrix_rps")
+    game = gbt.catalog.generate_openspiel("matrix_rps")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_import_error(monkeypatch):
+def test_generate_openspiel_import_error(monkeypatch):
     """Missing open_spiel raises ImportError with a helpful message."""
     monkeypatch.setitem(sys.modules, "pyspiel", None)
     with pytest.raises(ImportError, match="open_spiel"):
-        gbt.catalog.load_openspiel("matrix_rps")
+        gbt.catalog.generate_openspiel("matrix_rps")
 
 
-def test_openspiel_load_game_not_found(monkeypatch):
+def test_generate_openspiel_game_not_found(monkeypatch):
     """pyspiel.load_game errors propagate directly without wrapping."""
     _setup_pyspiel_mock(monkeypatch, load_raises=RuntimeError("Unknown game 'bogus_game'"))
     with pytest.raises(RuntimeError, match="Unknown game"):
-        gbt.catalog.load_openspiel("bogus_game")
+        gbt.catalog.generate_openspiel("bogus_game")
 
 
-def test_openspiel_load_efg_export_failure(monkeypatch):
+def test_generate_openspiel_efg_export_failure(monkeypatch):
     """EFG export failure on a sequential game raises ValueError with format context."""
     _setup_pyspiel_mock(
         monkeypatch,
@@ -280,10 +280,10 @@ def test_openspiel_load_efg_export_failure(monkeypatch):
         efg_raises=RuntimeError("export error"),
     )
     with pytest.raises(ValueError, match="EFG format"):
-        gbt.catalog.load_openspiel("tiny_hanabi")
+        gbt.catalog.generate_openspiel("tiny_hanabi")
 
 
-def test_openspiel_load_nfg_export_failure(monkeypatch):
+def test_generate_openspiel_nfg_export_failure(monkeypatch):
     """NFG export failure on a simultaneous game raises ValueError with format context."""
     _setup_pyspiel_mock(
         monkeypatch,
@@ -291,22 +291,22 @@ def test_openspiel_load_nfg_export_failure(monkeypatch):
         nfg_raises=RuntimeError("export error"),
     )
     with pytest.raises(ValueError, match="NFG format"):
-        gbt.catalog.load_openspiel("matrix_rps")
+        gbt.catalog.generate_openspiel("matrix_rps")
 
 
-def test_openspiel_load_unsupported_dynamics(monkeypatch):
+def test_generate_openspiel_unsupported_dynamics(monkeypatch):
     """A game with unsupported dynamics (e.g. MEAN_FIELD) raises ValueError."""
     _setup_pyspiel_mock(monkeypatch, dynamics="other")
     with pytest.raises(ValueError, match="unsupported dynamics"):
-        gbt.catalog.load_openspiel("some_mfg_game")
+        gbt.catalog.generate_openspiel("some_mfg_game")
 
 
-def test_openspiel_load_with_params(monkeypatch):
+def test_generate_openspiel_with_params(monkeypatch):
     """params dict is forwarded verbatim to pyspiel.load_game."""
     mock_ps, _ = _setup_pyspiel_mock(
         monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG
     )
-    gbt.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
+    gbt.catalog.generate_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
     mock_ps.load_game.assert_called_once_with("blotto", {"players": 2, "coins": 3, "fields": 2})
 
 

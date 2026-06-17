@@ -15,13 +15,13 @@ Games can also be generated on the fly from the GAMUT suite; see :ref:`Generatin
 .. rubric:: Loading OpenSpiel games
 
 Games from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ library
-can be loaded using :func:`pygambit.catalog.load_openspiel`:
+can be generated using :func:`pygambit.catalog.generate_openspiel`:
 
 .. code-block:: python
 
-   pygambit.catalog.load_openspiel("matrix_rps")
-   pygambit.catalog.load_openspiel("tiny_hanabi")
-   pygambit.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
+   pygambit.catalog.generate_openspiel("matrix_rps")
+   pygambit.catalog.generate_openspiel("tiny_hanabi")
+   pygambit.catalog.generate_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
 
 The ``params`` argument is forwarded directly to ``pyspiel.load_game``; see the
 `OpenSpiel game list <https://openspiel.readthedocs.io/en/latest/games.html>`_ for

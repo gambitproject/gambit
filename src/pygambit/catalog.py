@@ -25,9 +25,9 @@ READERS = {
 }
 
 
-def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
+def generate_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
     """
-    Load a game from the OpenSpiel library.
+    Generate a game using the OpenSpiel library.
 
     Parameters
     ----------
@@ -44,7 +44,7 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
     Returns
     -------
     gbt.Game
-        The loaded game.
+        The generated game.
 
     Raises
     ------
