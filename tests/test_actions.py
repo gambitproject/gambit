@@ -251,3 +251,9 @@ def test_strategy_action_raises_error_for_strategic_game():
 
     with pytest.raises(gbt.UndefinedOperationError):
         strategy.action(test_infoset)
+
+
+def test_player_actions_len():
+    game = games.create_stripped_down_poker_efg()
+    for player in game.players:
+        assert len(player.actions) == len(list(player.actions))
