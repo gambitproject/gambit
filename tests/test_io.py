@@ -49,6 +49,20 @@ def test_read_agg_invalid():
         gbt.read_agg(game_path)
 
 
+def test_read_bagg():
+    game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
+    game = gbt.read_bagg(game_path)
+    assert isinstance(game, gbt.Game)
+
+
+def test_read_bagg_invalid():
+    game_path = os.path.join(
+        "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+    )
+    with pytest.raises(ValueError):
+        gbt.read_bagg(game_path)
+
+
 def test_read_gbt_invalid():
     game_path = os.path.join(
         "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
