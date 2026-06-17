@@ -121,7 +121,7 @@ Currently supported representations are:
 
    .. tip::
 
-      If you encounter any issues with game files in your python environment not matching the current branch preventing the update script or docs build (step below) try running the following first:
+      If you encounter any issues with game files in your python environment not matching the current branch preventing the update script or docs build working (step below) try running the following first:
 
       .. code-block:: bash
 
