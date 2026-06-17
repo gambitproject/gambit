@@ -127,6 +127,11 @@ Currently supported representations are:
 
           git clean -fdX catalog/img doc/catalog_table.rst
 
+   .. tip::
+
+      If the game visuals for extensive form games need some work and you aren't sure which settings to change in ``build_support/catalog/draw_tree_settings.yaml``, try loading the EFG in the DrawTree GUI and adjusting the layout there.
+      There is an option to [download settings](https://www.gambit-project.org/draw_tree/gui/#exporting-and-reusing-settings) which can be used in the Gambit catalog.
+
 5. **[Optional] Test your updates to the documentation locally:**
 
    The previous step will (re)build your local copy of the Gambit Catalog RST page used by the documentation.
