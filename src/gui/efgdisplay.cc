@@ -44,6 +44,8 @@ public:
   OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc);
 
   void BeginEdit(const GameNode &p_node, int p_initialPlayer = 0);
+  bool Commit();
+  void Cancel();
 
 protected:
   void OnDismiss() override;
@@ -53,6 +55,7 @@ private:
   void LoadValues();
   void PositionPopup();
   void OnKeyDown(wxKeyEvent &p_event);
+  void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
 
   EfgDisplay *m_owner;
   GameDocument *m_doc;
@@ -65,6 +68,7 @@ private:
 
   int m_initialPlayer{0};
   bool m_cancelled{false};
+  bool m_dismissing{false};
 };
 
 OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
@@ -176,6 +180,7 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
   m_node = p_node;
   m_initialPlayer = p_initialPlayer;
   m_cancelled = false;
+  m_dismissing = false;
 
   LoadValues();
   Fit();
@@ -194,17 +199,114 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
   }
 }
 
-void OutcomeEditorPopup::OnDismiss() { m_node = nullptr; }
-
-void OutcomeEditorPopup::OnKeyDown(wxKeyEvent &p_event)
+void OutcomeEditorPopup::OnDismiss()
 {
-  if (p_event.GetKeyCode() == WXK_ESCAPE) {
-    m_cancelled = true;
-    Dismiss();
+  if (m_dismissing) {
     return;
   }
 
-  p_event.Skip();
+  if (m_cancelled) {
+    m_cancelled = false;
+    m_node = nullptr;
+    return;
+  }
+
+  Commit();
+}
+
+void OutcomeEditorPopup::OnKeyDown(wxKeyEvent &p_event)
+{
+  switch (p_event.GetKeyCode()) {
+  case WXK_ESCAPE:
+    Cancel();
+    return;
+
+  case WXK_RETURN:
+  case WXK_NUMPAD_ENTER:
+    Commit();
+    return;
+
+  default:
+    p_event.Skip();
+  }
+}
+
+void OutcomeEditorPopup::Cancel()
+{
+  if (!m_node) {
+    return;
+  }
+
+  m_cancelled = true;
+  Dismiss();
+}
+
+bool OutcomeEditorPopup::Commit()
+{
+  if (!m_node || !m_node->GetOutcome()) {
+    return false;
+  }
+
+  const GameOutcome outcome = m_node->GetOutcome();
+  const Game game = m_doc->GetGame();
+
+  std::vector<wxString> payoffs;
+  payoffs.reserve(m_payoffCtrls.size());
+
+  for (auto *ctrl : m_payoffCtrls) {
+    wxString value = ctrl->GetValue();
+
+    if (value.EndsWith(wxT("/"))) {
+      value.RemoveLast();
+    }
+
+    try {
+      lexical_cast<Rational>(value.ToStdString());
+    }
+    catch (const std::exception &) {
+      RestoreAfterFailedCommit(ctrl);
+      return false;
+    }
+
+    payoffs.push_back(value);
+  }
+
+  try {
+    const wxString label = m_labelCtrl->GetValue();
+
+    //
+    // This document operation is introduced below.
+    //
+    m_doc->DoSetOutcomeData(outcome, label, payoffs);
+  }
+  catch (const std::exception &ex) {
+    ExceptionDialog(m_owner, ex.what()).ShowModal();
+    return false;
+  }
+
+  m_dismissing = true;
+  Dismiss();
+  m_dismissing = false;
+  m_node = nullptr;
+
+  return true;
+}
+
+void OutcomeEditorPopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
+{
+  wxBell();
+
+  CallAfter([this, p_invalidCtrl]() {
+    if (!m_node) {
+      return;
+    }
+
+    PositionPopup();
+    Popup();
+
+    p_invalidCtrl->SetFocus();
+    p_invalidCtrl->SelectAll();
+  });
 }
 
 //--------------------------------------------------------------------------
@@ -737,8 +839,13 @@ void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 
 void EfgDisplay::PostPendingChanges()
 {
-  // FIXME: Save edit!
-  m_payoffEditor->EndEdit();
+  if (m_outcomeEditor->IsShown()) {
+    m_outcomeEditor->Commit();
+  }
+
+  if (m_payoffEditor->IsEditing()) {
+    m_payoffEditor->EndEdit();
+  }
 }
 
 void EfgDisplay::OnUpdate()
