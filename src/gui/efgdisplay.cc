@@ -62,6 +62,7 @@ private:
 
   GameNode m_node;
 
+  wxPanel *m_contentPanel;
   wxTextCtrl *m_labelCtrl;
   wxFlexGridSizer *m_gridSizer;
   std::vector<wxTextCtrl *> m_payoffCtrls;
@@ -72,10 +73,11 @@ private:
 };
 
 OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
-  : wxPopupTransientWindow(p_owner, wxBORDER_SIMPLE), m_owner(p_owner), m_doc(p_doc),
-    m_labelCtrl(nullptr), m_gridSizer(nullptr)
+  : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc),
+    m_contentPanel(nullptr), m_labelCtrl(nullptr)
 {
-  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
+
   BuildControls();
 
   Bind(wxEVT_CHAR_HOOK, &OutcomeEditorPopup::OnKeyDown, this);
@@ -83,33 +85,43 @@ OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
 
 void OutcomeEditorPopup::BuildControls()
 {
+  auto *popupSizer = new wxBoxSizer(wxVERTICAL);
+
+  m_contentPanel = new wxPanel(this);
+  m_contentPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
   auto *outerSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *heading = new wxStaticText(this, wxID_ANY, _("Outcome"));
+  auto *heading = new wxStaticText(m_contentPanel, wxID_ANY, _("Outcome"));
+
   wxFont headingFont = heading->GetFont();
   headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+  headingFont.SetPointSize(headingFont.GetPointSize() + 1);
   heading->SetFont(headingFont);
 
-  outerSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(10));
+  outerSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
 
-  m_gridSizer = new wxFlexGridSizer(2, FromDIP(6), FromDIP(10));
-  m_gridSizer->AddGrowableCol(1, 1);
+  auto *labelSizer = new wxFlexGridSizer(2, FromDIP(7), FromDIP(12));
+  labelSizer->AddGrowableCol(1, 1);
 
-  m_gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
+  labelSizer->Add(new wxStaticText(m_contentPanel, wxID_ANY, _("Label")), 0,
+                  wxALIGN_CENTER_VERTICAL);
 
-  m_labelCtrl = new wxTextCtrl(this, wxID_ANY);
+  m_labelCtrl = new wxTextCtrl(m_contentPanel, wxID_ANY);
   m_labelCtrl->SetMinSize(wxSize(FromDIP(180), -1));
-  m_gridSizer->Add(m_labelCtrl, 1, wxEXPAND);
+  labelSizer->Add(m_labelCtrl, 1, wxEXPAND);
 
-  auto *payoffHeading = new wxStaticText(this, wxID_ANY, _("Payoffs"));
+  outerSizer->Add(labelSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+
+  auto *payoffHeading = new wxStaticText(m_contentPanel, wxID_ANY, _("Payoffs"));
+
   wxFont payoffHeadingFont = payoffHeading->GetFont();
   payoffHeadingFont.SetWeight(wxFONTWEIGHT_BOLD);
   payoffHeading->SetFont(payoffHeadingFont);
 
-  outerSizer->Add(m_gridSizer, 0, wxEXPAND | wxALL, FromDIP(10));
-  outerSizer->Add(payoffHeading, 0, wxLEFT | wxRIGHT, FromDIP(10));
+  outerSizer->Add(payoffHeading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
 
-  auto *payoffSizer = new wxFlexGridSizer(2, FromDIP(6), FromDIP(10));
+  auto *payoffSizer = new wxFlexGridSizer(2, FromDIP(7), FromDIP(12));
   payoffSizer->AddGrowableCol(1, 1);
 
   const Game game = m_doc->GetGame();
@@ -117,11 +129,12 @@ void OutcomeEditorPopup::BuildControls()
   for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
     const GamePlayer gamePlayer = game->GetPlayer(player);
 
-    payoffSizer->Add(
-        new wxStaticText(this, wxID_ANY, wxString(gamePlayer->GetLabel().c_str(), *wxConvCurrent)),
-        0, wxALIGN_CENTER_VERTICAL);
+    payoffSizer->Add(new wxStaticText(m_contentPanel, wxID_ANY,
+                                      wxString(gamePlayer->GetLabel().c_str(), *wxConvCurrent)),
+                     0, wxALIGN_CENTER_VERTICAL);
 
-    auto *payoffCtrl = new wxTextCtrl(this, wxID_ANY);
+    auto *payoffCtrl = new wxTextCtrl(m_contentPanel, wxID_ANY);
+
     payoffCtrl->SetValidator(NumberValidator(nullptr));
     payoffCtrl->SetMinSize(wxSize(FromDIP(100), -1));
 
@@ -129,9 +142,13 @@ void OutcomeEditorPopup::BuildControls()
     m_payoffCtrls.push_back(payoffCtrl);
   }
 
-  outerSizer->Add(payoffSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(10));
+  outerSizer->Add(payoffSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, FromDIP(12));
 
-  SetSizerAndFit(outerSizer);
+  m_contentPanel->SetSizer(outerSizer);
+
+  popupSizer->Add(m_contentPanel, 1, wxEXPAND | wxALL, FromDIP(1));
+
+  SetSizerAndFit(popupSizer);
 }
 
 void OutcomeEditorPopup::LoadValues()
