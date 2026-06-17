@@ -110,17 +110,15 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   if (p_node->GetNumber() == p_id) {
     return p_node;
   }
-  else if (p_node->IsTerminal()) {
+  if (p_node->IsTerminal()) {
     return nullptr;
   }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      if (const auto node = GetNode(child, p_id)) {
-        return node;
-      }
+  for (const auto &child : p_node->GetChildren()) {
+    if (const auto node = GetNode(child, p_id)) {
+      return node;
     }
-    return nullptr;
   }
+  return nullptr;
 }
 
 bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text,
