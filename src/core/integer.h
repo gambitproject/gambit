@@ -40,9 +40,9 @@ struct IntegerRep // internal Integer representations
   unsigned short s[1]; // represented as ushort array starting here
 };
 
-// True if REP is staticly (or manually) allocated,
+// True if REP is statically or manually allocated,
 // and should not be deleted by an Integer destructor.
-#define STATIC_IntegerRep(rep) ((rep)->sz == 0)
+inline bool IsStaticIntegerRep(const IntegerRep *rep) noexcept { return rep->sz == 0; }
 
 extern IntegerRep *Ialloc(IntegerRep *, const unsigned short *, int, int, int);
 extern IntegerRep *Icalloc(IntegerRep *, int);
@@ -90,11 +90,11 @@ public:
   /// @name Lifecycle
   //@{
   Integer();
-  explicit Integer(int);
-  explicit Integer(long);
-  explicit Integer(unsigned long);
-  explicit Integer(IntegerRep *);
-  Integer(const Integer &);
+  explicit Integer(int y) : rep(Icopy_long(nullptr, y)) {}
+  explicit Integer(long y) : rep(Icopy_long(nullptr, y)) {}
+  explicit Integer(unsigned long y) : rep(Icopy_ulong(nullptr, y)) {}
+  explicit Integer(IntegerRep *r) : rep(r) {}
+  Integer(const Integer &y) : rep(Icopy(nullptr, y.rep)) {}
   ~Integer();
 
   Integer &operator=(const Integer &);
@@ -229,13 +229,10 @@ public:
   friend std::ostream &operator<<(std::ostream &s, const Integer &y);
 
   // error detection
-
-  int initialized() const;
-  void error(const char *msg) const;
-  int OK() const;
+  bool initialized() const { return rep != nullptr; }
+  static void error(const char *msg);
+  bool OK() const;
 };
-
-//  (These are declared inline)
 
 Integer abs(const Integer &); // absolute value
 Integer sqr(const Integer &); // square

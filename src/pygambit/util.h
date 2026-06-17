@@ -31,6 +31,7 @@
 #include <sstream>
 #include "gambit.h"
 #include "games/gameagg.h"
+#include "games/gamebagg.h"
 #include "games/nash.h"
 
 using namespace std;
@@ -59,6 +60,12 @@ Game ParseAggGame(std::string const &s, bool p_normalizeLabels)
 {
   std::istringstream f(s);
   return ReadAggFile(f);
+}
+
+Game ParseBaggGame(std::string const &s, bool p_normalizeLabels)
+{
+  std::istringstream f(s);
+  return ReadBaggFile(f);
 }
 
 std::string WriteEfgFile(const Game &p_game)

@@ -47,18 +47,11 @@ See the :ref:`algorithm description <enummixed>` for full details.
 
    Suppresses printing of the banner at program launch.
 
-.. cmdoption:: -L
 
-   Use `lrslib <http://cgm.cs.mcgill.ca/~avis/C/lrs.html>`_ by David Avis
-   to carry out the enumeration process.  This is an experimental
-   feature that has not been widely tested.
+Computing the equilibria, in mixed strategies, of
+the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
-Computing the equilibria, in mixed strategies, of :download:`e02.nfg
-<../contrib/games/e02.nfg>`, the reduced strategic form of the example
-in Figure 2 of Selten (International Journal of Game Theory,
-1975)
-
-   $ gambit-enummixed e02.nfg
+   $ gambit-enummixed catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by enumerating extreme points
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
@@ -66,11 +59,11 @@ in Figure 2 of Selten (International Journal of Game Theory,
    NE,1,0,0,1,0
    NE,1,0,0,1/2,1/2
 
-In fact, the game e02.nfg has a one-dimensional continuum of
+In fact, this game has a one-dimensional continuum of
 equilibria.  This fact can be observed by examining the connectedness
-information using the `-c` switch
+information using the ``-c`` switch::
 
-   $ gambit-enummixed -c e02.nfg
+   $ gambit-enummixed -c catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by enumerating extreme points
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

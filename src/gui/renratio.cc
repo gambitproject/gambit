@@ -191,7 +191,28 @@ IMPLEMENT_DYNAMIC_CLASS(RationalEditorRefData, wxSheetCellTextEditorRefData)
 void RationalEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler,
                                          wxSheet *sheet)
 {
-  wxSheetCellTextEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
+  // This implementation parallels the generic text editor, except adds centering of the text.
+  auto *textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                  wxTE_PROCESS_TAB | wxTE_CENTER | wxBORDER_NONE);
+  SetControl(textCtrl);
+  textCtrl->Bind(wxEVT_KILL_FOCUS, [sheet](wxFocusEvent &event) {
+    if (!sheet->IsTabTraversing()) {
+      sheet->CallAfter([sheet]() {
+        if (!sheet->IsTabTraversing() && sheet->IsCellEditControlShown()) {
+          sheet->DisableCellEditControl(true);
+          sheet->Refresh();
+        }
+      });
+    }
+    event.Skip();
+  });
+
+  // set max length allowed in the textctrl, if the parameter was set
+  if (m_maxChars != 0) {
+    textCtrl->SetMaxLength(m_maxChars);
+  }
+
+  wxSheetCellEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
   GetTextCtrl()->SetValidator(NumberValidator(nullptr));
 }
 

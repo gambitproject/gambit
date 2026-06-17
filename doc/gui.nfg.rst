@@ -52,7 +52,7 @@ presents such games by hierarchially listing the strategies of one or
 more players on both rows and columns.
 
 The hierarchical presentation of the table is similar to that of a
-contingency table in a spreadsheet application.
+pivot table.
 Here, Alice,
 shown in red, has her strategies listed on the rows of the table, and
 Bob, shown in blue, has his strategies listed on the columns of the
@@ -109,8 +109,8 @@ common convention in print.
 
 
 
-Adding players and strategies
------------------------------
+Changing players and strategies
+-------------------------------
 
 To add an additional player to the game, use the menu item
 :menuselection:`Edit --> Add player`,
@@ -124,6 +124,11 @@ to the left of that player's name.
 To edit the names of strategies, click on any cell in the strategic
 game table where the strategy label appears, and edit the label using
 the edit control.
+
+Right-clicking a strategy label creates a popup context menu.
+This menu offers the ability to delete the selected strategy
+from the game.  It is not possible to delete a player's only strategy.
+
 
 
 

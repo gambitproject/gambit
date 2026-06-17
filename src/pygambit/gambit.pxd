@@ -89,6 +89,11 @@ cdef extern from "games/game.h":
         bool operator !=(c_GameSequence) except +
         c_GameSequenceRep *deref "get"() except +RuntimeError
 
+    cdef cppclass c_GameSubgame "GameObjectPtr<GameSubgameRep>":
+        bool operator ==(c_GameSubgame) except +
+        bool operator !=(c_GameSubgame) except +
+        c_GameSubgameRep *deref "get"() except +RuntimeError
+
     cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
         shared_ptr[c_PureStrategyProfileRep] deref "operator->"() except +
         c_PureStrategyProfile(c_PureStrategyProfile) except +
@@ -244,6 +249,33 @@ cdef extern from "games/game.h":
         c_GameAction GetPriorAction() except +
         c_GameAction GetOwnPriorAction() except +
 
+    cdef cppclass c_GameSubgameRep "GameSubgameRep":
+        cppclass SubgameCollection:
+            cppclass iterator:
+                c_GameSubgame operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
+        cppclass InfosetCollection:
+            cppclass iterator:
+                c_GameInfoset operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
+        c_Game GetGame() except +
+        c_GameNode GetRoot() except +
+        c_GameSubgame GetParent() except +
+        SubgameCollection GetChildren() except +
+        InfosetCollection GetSubgameDifference() except +
+
     cdef cppclass c_GameRep "GameRep":
         cppclass Players:
             cppclass iterator:
@@ -340,6 +372,9 @@ cdef extern from "games/game.h":
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
+
+        c_GameSubgame GetMinimalSubgame(c_GameInfoset) except +
+        stdvector[c_GameSubgame] GetSubgames() except +
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +
@@ -456,6 +491,7 @@ cdef extern from "util.h":
     c_Game ParseEfgGame(string, bint) except +IOError
     c_Game ParseNfgGame(string, bint) except +IOError
     c_Game ParseAggGame(string, bint) except +IOError
+    c_Game ParseBaggGame(string, bint) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError

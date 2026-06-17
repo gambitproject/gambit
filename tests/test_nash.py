@@ -2259,6 +2259,20 @@ LOGIT_BEHAVIOR_CASES = [
         marks=pytest.mark.nash_logit_behavior,
         id="test_logit_behavior_01",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file,
+                                      "chance_root_5_moves_no_nonterm_player_nodes.efg"),
+            solver=gbt.nash.logit_solve,
+            expected=[
+                [[]]  # Zero-dimension edge case (two players)
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_behavior,
+        id="test_logit_behavior_degenerate",
+    ),
 ]
 
 
@@ -2469,7 +2483,7 @@ ENUMPURE_AGENT_CASES = [
     # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "myerson_fig_4_2.efg"),
+            factory=functools.partial(gbt.catalog.load, "books/myerson1991/fig4_2"),
             solver=functools.partial(gbt.nash.enumpure_agent_solve),
             expected=[[[d(1, 0), d(0, 1)], [d(0, 1)]], [[d(0, 1), d(0, 1)], [d(1, 0)]]],
         ),

@@ -1409,6 +1409,10 @@ public:
   void SetCaptureWindow(wxWindow *win);
   wxWindow *GetCaptureWindow() const { return m_winCapture; }
 
+  // Gambit-specific extension to support tab traversal
+  bool IsTabTraversing() const { return m_tabTraversing; }
+  void SetTabTraversing(bool p_tabTraversing) { m_tabTraversing = p_tabTraversing; }
+
 protected:
   bool DoUpdateRows(size_t row, int numRows, int update = wxSHEET_UpdateAll);
   bool DoUpdateCols(size_t col, int numCols, int update = wxSHEET_UpdateAll);
@@ -1487,6 +1491,8 @@ protected:
   // ------ functions to get/send data (see also public functions)
   bool GetModelValues();
   bool SetModelValues();
+
+  bool m_tabTraversing;
 
 private:
   void Init();
