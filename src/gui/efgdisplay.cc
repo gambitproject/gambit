@@ -302,50 +302,6 @@ void OutcomeEditorPopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
 }
 
 //--------------------------------------------------------------------------
-//                         class TreePayoffEditor
-//--------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(TreePayoffEditor, wxTextCtrl)
-EVT_CHAR(TreePayoffEditor::OnChar)
-END_EVENT_TABLE()
-
-TreePayoffEditor::TreePayoffEditor(wxWindow *p_parent)
-  : wxTextCtrl(p_parent, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER)
-{
-  wxWindowBase::SetValidator(NumberValidator(nullptr));
-  wxWindow::Show(false);
-}
-
-void TreePayoffEditor::BeginEdit(const std::shared_ptr<NodeEntry> &p_entry, int p_player)
-{
-  m_entry = p_entry;
-  m_outcome = p_entry->GetNode()->GetOutcome();
-  m_player = p_player;
-  SetValue(wxString(
-      m_outcome->GetPayoff<std::string>(p_entry->GetNode()->GetGame()->GetPlayer(p_player))
-          .c_str(),
-      *wxConvCurrent));
-  SetSize(wxSize(GetSize().GetWidth(), GetBestSize().GetHeight()));
-  SetSelection(-1, -1);
-  Show(true);
-  SetFocus();
-}
-
-void TreePayoffEditor::EndEdit() { Show(false); }
-
-void TreePayoffEditor::OnChar(wxKeyEvent &p_event)
-{
-  if (p_event.GetKeyCode() == WXK_TAB) {
-    // We handle the event and pass it to the parent
-    wxPostEvent(GetParent(), p_event);
-  }
-  else {
-    // Default processing
-    p_event.Skip();
-  }
-}
-
-//--------------------------------------------------------------------------
 //                       Bitmap drawing functions
 //--------------------------------------------------------------------------
 
@@ -589,16 +545,12 @@ END_EVENT_TABLE()
 
 EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
   : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100),
-    m_payoffEditor(new TreePayoffEditor(this)),
     m_outcomeEditor(new OutcomeEditorPopup(this, p_doc))
 {
   wxWindow::SetBackgroundColour(wxColour(250, 250, 250));
 
   wxWindow::SetDropTarget(new PlayerDropTarget(this));
   MakeMenus();
-
-  Connect(m_payoffEditor->GetId(), wxEVT_COMMAND_TEXT_ENTER,
-          wxCommandEventHandler(EfgDisplay::OnAcceptPayoffEdit));
   OnUpdate();
 }
 
@@ -702,52 +654,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     return;
   }
 
-  if (m_payoffEditor->IsEditing()) {
-    if (p_event.GetKeyCode() == WXK_ESCAPE) {
-      m_payoffEditor->EndEdit();
-      return;
-    }
-    if (p_event.GetKeyCode() == WXK_TAB) {
-      m_payoffEditor->EndEdit();
-
-      const GameOutcome outcome = m_payoffEditor->GetOutcome();
-      const int player = m_payoffEditor->GetPlayer();
-      const GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
-      try {
-        m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
-      }
-      catch (ValueException &) {
-        // For the moment, we will just silently discard edits which
-        // give payoffs that are not valid numbers
-        return;
-      }
-      catch (std::exception &ex) {
-        ExceptionDialog(this, ex.what()).ShowModal();
-        return;
-      }
-
-      // When we update views, the node entries get redone...
-      // Payoff rectangles are actually set during drawing, so
-      // force a refresh
-      wxClientDC dc(this);
-      PrepareDC(dc);
-      OnDraw(dc);
-
-      if (player < static_cast<int>(m_doc->NumPlayers())) {
-        auto entry = m_layout.GetNodeEntry(node);
-        const wxRect rect = entry->GetPayoffExtent(player + 1);
-        int xx, yy;
-        CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
-        const int width = LayoutToDevice(rect.width + 10);
-        const int height = LayoutToDevice(rect.height + 6);
-        m_payoffEditor->SetSize(xx, yy, width, height);
-        m_payoffEditor->BeginEdit(entry, player + 1);
-      }
-
-      return;
-    }
-  }
-
   // After this point, all events involve moving relative to selected node.
   // So if there isn't a selected node, the event doesn't apply
   const GameNode selectNode = m_doc->GetSelectNode();
@@ -808,23 +714,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
 }
 
-void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
-{
-  const GameOutcome outcome = m_payoffEditor->GetOutcome();
-  const int player = m_payoffEditor->GetPlayer();
-  wxString value = m_payoffEditor->GetValue();
-  if (value.EndsWith(_T("/"))) {
-    value = value.Left(value.length() - 1);
-  }
-  try {
-    m_doc->DoSetPayoff(outcome, player, value);
-    m_payoffEditor->EndEdit();
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
 //---------------------------------------------------------------------
 //           EfgDisplay: Implementing GameView members
 //---------------------------------------------------------------------
@@ -833,10 +722,6 @@ void EfgDisplay::PostPendingChanges()
 {
   if (m_outcomeEditor->IsShown()) {
     m_outcomeEditor->Commit();
-  }
-
-  if (m_payoffEditor->IsEditing()) {
-    m_payoffEditor->EndEdit();
   }
 }
 
