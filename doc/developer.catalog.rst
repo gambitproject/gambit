@@ -119,6 +119,14 @@ Currently supported representations are:
       - If haven't done an editable install of ``pygambit`` in your python environment, you'll need to re-install it before running the update script to include new games in the catalog module.
       - Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
 
+   .. tip::
+
+      If you encounter any issues with game files in your python environment not matching the current branch preventing the update script or docs build (step below) try running the following first:
+
+      .. code-block:: bash
+
+          git clean -fdX catalog/img doc/catalog_table.rst
+
 5. **[Optional] Test your updates to the documentation locally:**
 
    The previous step will (re)build your local copy of the Gambit Catalog RST page used by the documentation.
