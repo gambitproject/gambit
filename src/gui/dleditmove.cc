@@ -129,27 +129,29 @@ Array<Number> ActionPanel::GetActionProbs() const
 //======================================================================
 
 EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
-  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), m_infoset(p_infoset)
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_infoset(p_infoset)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
-                  wxALL | wxALIGN_CENTER, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_infosetName =
       new wxTextCtrl(this, wxID_ANY, wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
+  topSizer->Add(labelSizer, 0, wxEXPAND);
 
   {
     wxString label;
     label << _("Number of members: ") << p_infoset->GetMembers().size();
-    topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxALL | wxALIGN_CENTER, 5);
+    topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
   }
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
-                   wxALL | wxALIGN_CENTER, 5);
+                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_player = new wxChoice(this, wxID_ANY);
   if (p_infoset->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
@@ -165,18 +167,29 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
+  topSizer->Add(playerSizer, 0, wxEXPAND);
 
   auto *actionBoxSizer =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxVERTICAL);
   m_actionPanel = new ActionPanel(this, p_infoset);
+
+  const int visibleRows = std::min(static_cast<int>(p_infoset->GetActions().size()), 10);
+  const int rowHeight = FromDIP(32);
+  const int headerHeight = FromDIP(28);
+  m_actionPanel->SetMinSize(wxSize(FromDIP(p_infoset->IsChanceInfoset() ? 400 : 300),
+                                   headerHeight + visibleRows * rowHeight));
+
   actionBoxSizer->Add(m_actionPanel, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 1, wxALL | wxEXPAND, 5);
 
   if (auto *buttons = CreateSeparatedButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttons, 0, wxALL | wxEXPAND, 5);
   }
-  SetSizerAndFit(topSizer);
+
+  SetSizer(topSizer);
+  topSizer->SetSizeHints(this);
+  SetSize(GetBestSize());
+  SetMinSize(GetSize());
   CenterOnParent();
 
   Bind(wxEVT_BUTTON, &EditMoveDialog::OnOK, this, wxID_OK);
