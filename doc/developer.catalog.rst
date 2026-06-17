@@ -130,7 +130,7 @@ Currently supported representations are:
    .. tip::
 
       If the game visuals for extensive form games need some work and you aren't sure which settings to change in ``build_support/catalog/draw_tree_settings.yaml``, try loading the EFG in the DrawTree GUI and adjusting the layout there.
-      There is an option to [download settings](https://www.gambit-project.org/draw_tree/gui/#exporting-and-reusing-settings) which can be used in the Gambit catalog.
+      There is an option to `download settings <https://www.gambit-project.org/draw_tree/gui/#exporting-and-reusing-settings>`_ which can be used in the Gambit catalog.
 
 5. **[Optional] Test your updates to the documentation locally:**
 
