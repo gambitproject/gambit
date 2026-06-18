@@ -26,7 +26,6 @@
 #endif // WX_PRECOMP
 
 #include "efgprofile.h"
-#include "renratio.h" // for rational number rendering
 
 namespace Gambit::GUI {
 //-------------------------------------------------------------------------
@@ -34,26 +33,30 @@ namespace Gambit::GUI {
 //-------------------------------------------------------------------------
 
 BehaviorProfileList::BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), GameView(p_doc)
+  : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
-  SetRowLabelWidth(40);
-  SetColLabelHeight(25);
 
-  Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&BehaviorProfileList::OnLabelClick))));
+  SetRowLabelSize(40);
+  SetColLabelSize(25);
+  SetCornerLabelValue(wxT("#"));
 
-  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&BehaviorProfileList::OnCellClick))));
+  EnableEditing(false);
+  EnableDragGridSize(false);
+  EnableDragRowSize(false);
+  EnableDragColSize(false);
+
+  SetCellHighlightPenWidth(0);
+  SetCellHighlightROPenWidth(0);
+
+  Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &BehaviorProfileList::OnLabelClick, this);
+  Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BehaviorProfileList::OnCellClick, this);
+  Bind(wxEVT_GRID_SELECT_CELL, &BehaviorProfileList::OnSelectCell, this);
 }
 
 BehaviorProfileList::~BehaviorProfileList() = default;
 
-void BehaviorProfileList::OnLabelClick(wxSheetEvent &p_event)
+void BehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
     m_doc->SetCurrentProfile(p_event.GetRow() + 1);
@@ -64,32 +67,20 @@ void BehaviorProfileList::OnLabelClick(wxSheetEvent &p_event)
     const GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
     m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
   }
+
+  ClearSelection();
 }
 
-void BehaviorProfileList::OnCellClick(wxSheetEvent &p_event)
+void BehaviorProfileList::OnCellClick(wxGridEvent &p_event)
 {
   m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  ClearSelection();
 }
 
-wxString BehaviorProfileList::GetCellValue(const wxSheetCoords &p_coords)
+void BehaviorProfileList::OnSelectCell(wxGridEvent &p_event)
 {
-  if (IsRowLabelCell(p_coords)) {
-    wxString label;
-    label << (p_coords.GetRow() + 1);
-    return label;
-  }
-  if (IsColLabelCell(p_coords)) {
-    const GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
-    wxString label;
-    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
-    return label;
-  }
-  if (IsCornerLabelCell(p_coords)) {
-    return wxT("#");
-  }
-
-  return {m_doc->GetProfiles().GetActionProb(p_coords.GetCol() + 1, p_coords.GetRow() + 1).c_str(),
-          *wxConvCurrent};
+  p_event.Veto();
+  ClearSelection();
 }
 
 static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
@@ -98,71 +89,88 @@ static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());
 }
 
-wxSheetCellAttr BehaviorProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+void BehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
+{
+  if (GetNumberRows() > p_rows) {
+    DeleteRows(p_rows, GetNumberRows() - p_rows);
+  }
+  else if (GetNumberRows() < p_rows) {
+    AppendRows(p_rows - GetNumberRows());
+  }
+
+  if (GetNumberCols() > p_cols) {
+    DeleteCols(p_cols, GetNumberCols() - p_cols);
+  }
+  else if (GetNumberCols() < p_cols) {
+    AppendCols(p_cols - GetNumberCols());
+  }
+}
+
+void BehaviorProfileList::UpdateLabels()
+{
+  for (int row = 0; row < GetNumberRows(); ++row) {
+    wxString label;
+    label << (row + 1);
+    SetRowLabelValue(row, label);
+  }
+
+  for (int col = 0; col < GetNumberCols(); ++col) {
+    const GameAction action = m_doc->GetAction(col + 1);
+
+    wxString label;
+    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
+    SetColLabelValue(col, label);
+  }
+}
+
+void BehaviorProfileList::UpdateCells()
 {
   const int currentProfile = m_doc->GetCurrentProfile();
 
-  if (IsRowLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    if (p_coords.GetRow() + 1 == currentProfile) {
-      attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    }
-    else {
-      attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-    }
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-  if (IsColLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    if (p_coords.GetRow() > 0) {
-      attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
-    }
-    return attr;
-  }
-  if (IsCornerLabelCell(p_coords)) {
-    return GetSheetRefData()->m_defaultCornerLabelAttr;
-  }
+  const wxFont normalFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+  const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
-  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  if (p_coords.GetRow() + 1 == currentProfile) {
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  }
-  else {
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-  }
-  attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  attr.SetOrientation(wxHORIZONTAL);
-  attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
+  for (int row = 0; row < GetNumberRows(); ++row) {
+    for (int col = 0; col < GetNumberCols(); ++col) {
+      SetCellValue(
+          row, col,
+          wxString(m_doc->GetProfiles().GetActionProb(col + 1, row + 1).c_str(), *wxConvCurrent));
 
-  try {
-    const GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()));
-    if (action->GetInfoset()->GetNumber() % 2 == 0) {
-      attr.SetBackgroundColour(wxColour(250, 250, 250));
-    }
-    else {
-      attr.SetBackgroundColour(wxColour(225, 225, 225));
+      wxGridCellAttr *attr = new wxGridCellAttr;
+      attr->SetFont(row + 1 == currentProfile ? boldFont : normalFont);
+      attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+      attr->SetReadOnly(true);
+
+      try {
+        const GameAction action = m_doc->GetAction(col + 1);
+        attr->SetTextColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()));
+
+        if (action->GetInfoset()->GetNumber() % 2 == 0) {
+          attr->SetBackgroundColour(wxColour(250, 250, 250));
+        }
+        else {
+          attr->SetBackgroundColour(wxColour(225, 225, 225));
+        }
+      }
+      catch (std::out_of_range &) {
+        // If GetAction() throws this, just handle it silently; can occur
+        // when solving a trivial game via the strategic form
+      }
+
+      SetAttr(row, col, attr);
     }
   }
-  catch (std::out_of_range &) {
-    // If GetAction() throws this, just handle it silently; can occur
-    // when solving a trivial game via the strategic form
-  }
-  attr.SetReadOnly(true);
-  return attr;
 }
 
 void BehaviorProfileList::OnUpdate()
 {
   if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
-    DeleteRows(0, GetNumberRows());
+    if (GetNumberRows() > 0) {
+      DeleteRows(0, GetNumberRows());
+    }
+    if (GetNumberCols() > 0) {
+      DeleteCols(0, GetNumberCols());
+    }
     return;
   }
 
@@ -170,22 +178,15 @@ void BehaviorProfileList::OnUpdate()
   const int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();
-  if (GetNumberRows() > profiles.NumProfiles()) {
-    DeleteRows(0, GetNumberRows() - profiles.NumProfiles());
-  }
-  else if (GetNumberRows() < profiles.NumProfiles()) {
-    InsertRows(0, profiles.NumProfiles() - GetNumberRows());
-  }
 
-  if (GetNumberCols() > profileLength) {
-    DeleteCols(0, GetNumberCols() - profileLength);
-  }
-  else if (GetNumberCols() < profileLength) {
-    InsertCols(0, profileLength - GetNumberCols());
-  }
+  ResizeGrid(profiles.NumProfiles(), profileLength);
+  UpdateLabels();
+  UpdateCells();
 
   AutoSizeRows();
-  AutoSizeCols();
+  AutoSizeColumns();
+
+  ClearSelection();
 
   EndBatch();
 }
