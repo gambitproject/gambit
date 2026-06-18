@@ -36,12 +36,7 @@
   unsaved work.  (#12)
 - Created and documented right-click context menu in the normal form pivot table, which makes the
   mechanism for deleting a strategy more clear.  (#855)
-- In `pygambit`, indexing game object collections by integer position has been removed.
-  The collections `Game.players`, `Game.outcomes`, `Game.strategies`, `Game.infosets`,
-  `Game.actions`, `Player.strategies`, `Player.infosets`, `Player.actions`, `Infoset.actions`,
-  and `Infoset.members`, as well as `Node.children`, are indexed by string label, and indexing by
-  an integer now raises `TypeError`.
-  Indexing a `Game` by a contingency (e.g. `game[0, 1]`) is unchanged.
+- In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
