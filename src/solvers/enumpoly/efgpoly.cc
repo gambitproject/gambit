@@ -59,20 +59,20 @@ public:
 Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
                                          const std::map<GameSequence, int> &var)
 {
-  if (!p_sequence->action) {
+  if (!p_sequence->GetAction()) {
     return Polynomial<double>(p_data.space, 1);
   }
-  if (p_sequence->action != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
+  if (p_sequence->GetAction() != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
     return Polynomial<double>(p_data.space, var.at(p_sequence), 1);
   }
 
   Polynomial<double> equation(p_data.space);
-  for (auto seq : p_data.m_support.GetSequences(p_sequence->player)) {
+  for (auto seq : p_data.m_support.GetSequences(p_sequence->GetPlayer())) {
     if (seq == p_sequence) {
       continue;
     }
     if (const int constraint_coef =
-            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
+            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->GetAction())) {
       equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
     }
   }
@@ -85,8 +85,8 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
                                                                 m_support.GetPlayers().size()))
 {
   for (auto sequence : m_support.GetSequences()) {
-    if (sequence->action &&
-        (sequence->action != p_support.GetActions(sequence->GetInfoset()).back())) {
+    if (sequence->GetAction() &&
+        (sequence->GetAction() != p_support.GetActions(sequence->GetInfoset()).back())) {
       var[sequence] = var.size() + 1;
     }
   }
@@ -132,11 +132,11 @@ void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equa
 void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto sequence : p_data.m_support.GetSequences()) {
-    if (!sequence->action) {
+    if (!sequence->GetAction()) {
       continue;
     }
-    const auto &actions = p_data.m_support.GetActions(sequence->action->GetInfoset());
-    if (actions.size() > 1 && sequence->action == actions.back()) {
+    const auto &actions = p_data.m_support.GetActions(sequence->GetAction()->GetInfoset());
+    if (actions.size() > 1 && sequence->GetAction() == actions.back()) {
       p_equations.push_back(p_data.variables.at(sequence));
     }
   }

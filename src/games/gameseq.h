@@ -39,7 +39,6 @@ class GameSequenceForm {
   std::map<GameAction, GameSequence> m_correspondence;
 
   void BuildSequences();
-  void BuildSequences(const GameNode &, std::map<GamePlayer, GameSequence> &);
   void FillTableau();
   void FillTableau(const GameNode &, const Rational &, std::map<GamePlayer, GameSequence> &);
 
@@ -47,7 +46,9 @@ class GameSequenceForm {
   {
     Array<int> index(p_profile.size());
     for (auto player : GetPlayers()) {
-      index[player->GetNumber()] = p_profile.at(player)->number;
+      const auto &seqs = m_sequences.at(player);
+      auto loc = std::find(seqs.begin(), seqs.end(), p_profile.at(player));
+      index[player->GetNumber()] = loc - seqs.begin() + 1;
     }
     return index;
   }

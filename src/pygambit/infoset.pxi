@@ -45,19 +45,30 @@ class InfosetMembers:
         for member in self.infoset.deref().GetMembers():
             yield Node.wrap(member)
 
-    def __getitem__(self, index: int | str) -> Node:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Node label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Infoset has no member with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Infoset has multiple members with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Node.wrap(self.infoset.deref().GetMember(index + 1))
-        raise TypeError(f"Member index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Node:
+        """Returns the member node with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the member node to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the information set has no member with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one member has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a member by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Infoset", "member", "members")
 
 
 @cython.cclass
@@ -86,19 +97,31 @@ class InfosetActions:
         for action in self.infoset.deref().GetActions():
             yield Action.wrap(action)
 
-    def __getitem__(self, index: int | str) -> Action:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Action label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Infoset has no action with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Infoset has multiple actions with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Action.wrap(self.infoset.deref().GetAction(index + 1))
-        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Action:
+        """Returns the action at the information set with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the action to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the information set has no action with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one action at the information
+            set has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an action by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Infoset", "action", "actions")
 
 
 @cython.cclass

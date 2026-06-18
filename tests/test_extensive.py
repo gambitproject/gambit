@@ -99,8 +99,8 @@ def test_getting_payoff_by_label_string():
 
 def test_getting_payoff_by_player():
     game = games.read_from_file("sample_extensive_game.efg")
-    player1 = game.players[0]
-    player2 = game.players[1]
+    player1 = game.players["Player 1"]
+    player2 = game.players["Player 2"]
     assert game[[0, 0]][player1] == 2
     assert game[[0, 1]][player1] == 2
     assert game[[1, 0]][player1] == 4
@@ -390,11 +390,11 @@ def test_reduced_strategic_form(
     """
     arrays = game.to_arrays()
 
-    for i, player in enumerate(game.players):
-        assert strategy_labels[i] == [s.label for s in player.strategies]
-        # convert strings to rationals
-        exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
-        assert (arrays[i] == exp_array).all()
+    for player, labels, exp_raw, arr in zip(
+        game.players, strategy_labels, np_arrays_of_rsf, arrays, strict=True
+    ):
+        assert labels == [s.label for s in player.strategies]
+        assert (arr == games.vectorized_make_rational(exp_raw)).all()
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
-# FILE: src/python/gambit/gameiter.py
+# FILE: src/pygambit/gameiter.py
 # Iteration tools over games in pure Python
 #
 # This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,8 @@ class Contingencies:
             yield [list(player.strategies).index(self.cont[player])
                    for player in self.game.players]
         else:
-            nextpl = min(pl for (pl, player) in enumerate(self.game.players)
+            players = list(self.game.players)
+            nextpl = min(pl for (pl, player) in enumerate(players)
                          if player not in self.cont)
-            for strategy in self.game.players[nextpl].strategies:
+            for strategy in players[nextpl].strategies:
                 yield from self[strategy]

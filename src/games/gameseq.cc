@@ -27,43 +27,18 @@ using namespace Gambit;
 
 namespace Gambit {
 
-void GameSequenceForm::BuildSequences(const GameNode &n,
-                                      std::map<GamePlayer, GameSequence> &p_currentSequences)
-{
-  if (!n->GetInfoset()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (auto child : n->GetChildren()) {
-      BuildSequences(child, p_currentSequences);
-    }
-  }
-  else {
-    m_infosets.insert(n->GetInfoset());
-    auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
-    for (auto action : m_support.GetActions(n->GetInfoset())) {
-      if (m_correspondence.find(action) == m_correspondence.end()) {
-        m_sequences[n->GetPlayer()].emplace_back(std::make_shared<GameSequenceRep>(
-            n->GetPlayer(), action, m_sequences[n->GetPlayer()].size() + 1,
-            tmp_sequence.get_shared()));
-        m_correspondence[action] = m_sequences[n->GetPlayer()].back();
-      }
-      p_currentSequences[n->GetPlayer()] = m_correspondence[action];
-      BuildSequences(n->GetChild(action), p_currentSequences);
-    }
-    p_currentSequences[n->GetPlayer()] = tmp_sequence;
-  }
-}
-
 void GameSequenceForm::BuildSequences()
 {
-  std::map<GamePlayer, GameSequence> currentSequences;
-  for (auto player : GetPlayers()) {
-    m_sequences[player] = {
-        std::make_shared<GameSequenceRep>(player, nullptr, 1, std::weak_ptr<GameSequenceRep>())};
-    currentSequences[player] = m_sequences[player].front();
+  for (const auto &player : GetPlayers()) {
+    for (const auto &sequence : player->GetSequences()) {
+      if (!sequence->GetAction() || m_support.Contains(sequence->GetAction())) {
+        m_sequences[player].emplace_back(sequence);
+        if (sequence->GetAction()) {
+          m_correspondence[sequence->GetAction()] = sequence;
+        }
+      }
+    }
   }
-  BuildSequences(m_support.GetGame()->GetRoot(), currentSequences);
 }
 
 void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
@@ -87,7 +62,7 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
   }
   else {
     auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
-    m_constraints[{n->GetInfoset(), p_currentSequences.at(n->GetPlayer())->action}] = 1;
+    m_constraints[{n->GetInfoset(), p_currentSequences.at(n->GetPlayer())->GetAction()}] = 1;
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       m_constraints[{n->GetInfoset(), action}] = -1;
       p_currentSequences[n->GetPlayer()] = m_correspondence.at(action);
