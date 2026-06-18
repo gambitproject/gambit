@@ -93,7 +93,7 @@ ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
     m_behavProfiles = nullptr;
   }
 
-  m_mixedProfiles = new MixedProfileList(this, p_doc);
+  m_mixedProfiles = new MixedStrategyProfileList(this, p_doc);
   m_mixedProfiles->Show(false);
   topSizer->Add(m_mixedProfiles, 1, wxEXPAND, 0);
 
