@@ -165,7 +165,7 @@ class TestCatalogResourceSelection:
         selected = update.use_catalog_dir(local_catalog)
 
         assert selected == local_catalog
-        assert update.gbt.catalog._CATALOG_RESOURCE == local_catalog
+        assert local_catalog == update.gbt.catalog._CATALOG_RESOURCE
 
 
 # ---------------------------------------------------------------------------

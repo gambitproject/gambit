@@ -31,3 +31,60 @@ overrides:
     sublevel_scaling: 0.5
   journals/geb/gilboa1997/fig1:
     action_label_dist: 5.0
+  books/shohambrown2008/fig5_12:
+    action_label_dist: 5.0
+    width_scaling: 0.75
+  books/shohambrown2008/fig6_2:
+    action_label_dist: 5.0
+  books/shohambrown2008/fig6_8:
+    sublevel_scaling: 1
+    action_label_dist: 5.0
+  books/bonanno18/fig12_18:
+    scale_factor: 1.0
+    level_scaling: 1.0
+    sublevel_scaling: 1.0
+    width_scaling: 2.0
+    shared_terminal_depth: false
+    action_label_position_by: player
+    action_label_dist: 1.5
+    vary_action_label_positions: true
+    vary_action_label_positions_by: player
+    label_bg:
+      3: true
+    label_bg_opacity: 0.8
+    vary_action_label_positions_choices:
+    - 3
+  books/bonanno18/fig3_10:
+    width_scaling: 1.6
+  books/bonanno18/fig3_17:
+    action_label_position: 0.8
+  books/bonanno18/fig4_17:
+    sublevel_scaling: 1.0
+    action_label_position: 0.35
+    width_scaling: 1.25
+  books/bonanno18/fig4_19:
+    sublevel_scaling: 0
+    shared_terminal_depth: true
+    action_label_position_by: player
+    label_bg:
+      0: true
+    label_bg_color: white
+    label_bg_opacity: 0.8
+  books/bonanno18/fig4_3:
+    sublevel_scaling: 0.5
+    width_scaling: 1.25
+    action_label_position_by: player
+    vary_action_label_positions: true
+    vary_action_label_positions_by: player
+    label_bg:
+      3: true
+    vary_action_label_positions_choices:
+    - 3
+  books/bonanno18/fig4_40:
+    sublevel_scaling: 1
+    shared_terminal_depth: true
+    action_label_position_by: player
+    label_bg:
+      0: true
+    label_bg_color: white
+    label_bg_opacity: 0.8
