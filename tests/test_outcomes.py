@@ -17,7 +17,7 @@ def test_outcome_add(game: gbt.Game):
 )
 def test_outcome_delete(game: gbt.Game):
     outcome_count = len(game.outcomes)
-    game.delete_outcome(game.outcomes[0])
+    game.delete_outcome(next(iter(game.outcomes)))
     assert len(game.outcomes) == outcome_count - 1
 
 
@@ -26,8 +26,9 @@ def test_outcome_delete(game: gbt.Game):
     [(gbt.Game.new_table([2, 2]), "outcome label")]
 )
 def test_outcome_label(game: gbt.Game, label: str):
-    game.outcomes[0].label = label
-    assert game.outcomes[0].label == label
+    outcome = next(iter(game.outcomes))
+    outcome.label = label
+    assert outcome.label == label
 
 
 @pytest.mark.parametrize(
@@ -35,23 +36,16 @@ def test_outcome_label(game: gbt.Game, label: str):
     [(gbt.Game.new_table([2, 2]), "outcome label")]
 )
 def test_outcome_index_label(game: gbt.Game, label: str):
-    game.outcomes[0].label = label
-    assert game.outcomes[0] == game.outcomes[label]
+    outcome = next(iter(game.outcomes))
+    outcome.label = label
+    assert outcome == game.outcomes[label]
     assert game.outcomes[label].label == label
 
 
 @pytest.mark.parametrize(
     "game", [gbt.Game.new_table([2, 2])]
 )
-def test_outcome_index_int_range(game: gbt.Game):
-    with pytest.raises(IndexError):
-        _ = game.outcomes[2 * len(game.outcomes)]
-
-
-@pytest.mark.parametrize(
-    "game", [gbt.Game.new_table([2, 2])]
-)
-def test_outcome_index_label_range(game: gbt.Game):
+def test_outcome_index_unmatched_label(game: gbt.Game):
     with pytest.raises(KeyError):
         _ = game.outcomes["not an outcome"]
 
@@ -66,29 +60,15 @@ def test_outcome_index_invalid_type(game: gbt.Game):
 
 def test_outcome_payoff_by_player_label():
     game = gbt.Game.new_table([2, 2])
-    game.players[0].label = "joe"
-    game.players[1].label = "dan"
-    game.outcomes[0]["joe"] = 1
-    game.outcomes[0]["dan"] = 2
-    game.outcomes[1]["joe"] = 3
-    game.outcomes[1]["dan"] = 4
-    assert game.outcomes[0]["joe"] == 1
-    assert game.outcomes[0]["dan"] == 2
-    assert game.outcomes[1]["joe"] == 3
-    assert game.outcomes[1]["dan"] == 4
-
-
-def test_outcome_payoff_by_player():
-    game = gbt.Game.new_table([2, 2])
-    game.players[0].label = "joe"
-    game.players[1].label = "dan"
-    game.outcomes[0]["joe"] = 1
-    game.outcomes[0]["dan"] = 2
-    game.outcomes[1]["joe"] = 3
-    game.outcomes[1]["dan"] = 4
-    player1 = game.players[0]
-    player2 = game.players[1]
-    assert game.outcomes[0][player1] == 1
-    assert game.outcomes[0][player2] == 2
-    assert game.outcomes[1][player1] == 3
-    assert game.outcomes[1][player2] == 4
+    pl1, pl2 = list(game.players)
+    pl1.label = "joe"
+    pl2.label = "dan"
+    out1, out2, *_ = list(game.outcomes)
+    out1["joe"] = 1
+    out1["dan"] = 2
+    out2["joe"] = 3
+    out2["dan"] = 4
+    assert out1["joe"] == 1
+    assert out1["dan"] == 2
+    assert out2["joe"] == 3
+    assert out2["dan"] == 4

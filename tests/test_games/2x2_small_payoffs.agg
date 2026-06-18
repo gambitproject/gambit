@@ -1,4 +1,5 @@
 #AGG
+
 #number of players:
 2
 #number of action nodes:
@@ -29,5 +30,5 @@
 #now the payoff values: one row per action node.
 #For each row: first, the type of the payoff format
 #Then payoffs are given in lexicographical order of the input configurations
-0	35 -4
-0	-10 95
+0	4 -1
+0	-2 5
