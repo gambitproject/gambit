@@ -67,7 +67,8 @@ public:
 
 template <class T>
 NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
-  : ns1(p_game->GetPlayer(1)->NumSequences()), ns2(p_game->GetPlayer(2)->NumSequences()),
+  : ns1(p_game->GetPlayer(1)->GetSequences().size()),
+    ns2(p_game->GetPlayer(2)->GetSequences().size()),
     ni1(p_game->GetPlayer(1)->GetInfosets().size() + 1),
     ni2(p_game->GetPlayer(2)->GetInfosets().size() + 1),
     maxpay(p_game->GetMaxPayoff() + Rational(1))
