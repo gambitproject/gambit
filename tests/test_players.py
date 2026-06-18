@@ -149,14 +149,14 @@ def test_player_strategy_bad_type():
 
 def test_player_sequence_count():
     """Test the identity that the number of sequences is the number of actions plus one."""
-    game = gbt.catalog.load("myerson1991/fig2_1")
+    game = gbt.catalog.load("books/myerson1991/fig2_1")
     for player in game.players:
         action_count = sum(len(infoset.actions) for infoset in player.infosets)
         assert len(player.sequences) == action_count + 1
 
 
 def test_player_sequence_actions():
-    game = gbt.catalog.load("myerson1991/fig2_1")
+    game = gbt.catalog.load("books/myerson1991/fig2_1")
     player = game.players["Alice"]
     sequences = set(tuple(seq.actions) for seq in player.sequences)
     reference = (
@@ -167,7 +167,7 @@ def test_player_sequence_actions():
 
 
 def test_player_sequence_tree():
-    game = gbt.catalog.load("myerson1991/fig2_1")
+    game = gbt.catalog.load("books/myerson1991/fig2_1")
     player = game.players["Alice"]
     for seq in player.sequences:
         if not seq.parent:
