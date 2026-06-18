@@ -22,91 +22,102 @@ game, select :menuselection:`File --> New --> Strategic game`,
 or click the new strategic game icon on the toolbar.
 
 
+Displaying a strategic game
+===========================
 
-Navigating a strategic game
----------------------------
+Gambit displays a strategic game as a table. Each cell represents one
+strategy profile: one strategy choice for every player. The cell shows
+the payoffs that result when the players choose the strategies named by
+that cell's row and column labels.
 
-Gambit displays a strategic game in table form. All players are
-assigned to be either row players or column players, and the payoffs
-for each entry in the strategic game table correspond to the payoffs
-corresponding to the situation in which all the row players play the
-strategy specified on that row for them, and all the column players
-play the strategy specified on that column for them.
+For a two-player game, Gambit initially uses the familiar matrix
+arrangement. One player's strategies label the rows, and the other
+player's strategies label the columns.
 
-.. image::  screens/pd1.*
-            :width: 33%
-            :alt: a prisoner's dilemma game
-            :align: right
-            :target: _images/pd1.png
+.. image:: screens/pd1.*
+   :width: 50%
+   :alt: A two-player strategic game with Alice's strategies on the rows and Bob's strategies on the columns.
+   :align: center
+   :target: _images/pd1.png
 
-For games with two players, this presentation is by default configured
-to be similar to the standard presenation of strategic games as
-tables, in which one player is assigned to be the "row" player and the
-other the "column" player. However, Gambit permits a more flexible
-assignment, in which multiple players can be assigned to the rows and
-multiple players to the columns. This is of particular use for games
-with more than two players. In print, a three-player strategic game is
-usually presented as a collection of tables, with one player choosing
-the row, the second the column, and the third the table. Gambit
-presents such games by hierarchially listing the strategies of one or
-more players on both rows and columns.
+Each row-and-column combination identifies one strategy profile. For
+example, a cell in the row labelled ``Cooperate`` and the column
+labelled ``Defect`` represents the outcome in which the row player
+chooses ``Cooperate`` and the column player chooses ``Defect``.
 
-The hierarchical presentation of the table is similar to that of a
-pivot table.
-Here, Alice,
-shown in red, has her strategies listed on the rows of the table, and
-Bob, shown in blue, has his strategies listed on the columns of the
-table.
+The payoffs in each cell are colour-coded by player. In the standard
+two-player arrangement, Gambit displays the row player's payoff first
+and the column player's payoff second.
 
-The assignment of players to row and column roles is fully
-customizable. To change the assignment of a player, drag the person
-icon appearing to the left of the player's name on the player toolbar
-to either of the areas in the payoff table displaying the strategy
-labels.
 
-.. image::  screens/pd2.*
-            :width: 33%
-            :alt: a prisoner's dilemma game, with contingencies in
-                  list style
-            :align: right
-            :target: _images/pd2.png
+Row and column hierarchies
+--------------------------
 
-For example, dragging the player icon from the left of Bob's name in
-the list of players and dropping it on the right side of Alice's
-strategy label column changes the display of the game as in
-Here, the strategies are shown in a
-hierarchical format, enumerating the outcomes of the game first by
-Alice's (red) strategy choice, then by Bob's (blue) strategy choice.
+Games with more than two players require more than one strategy label
+to identify each row or column. Gambit handles this by allowing several
+players to be assigned to the rows, several players to be assigned to
+the columns, or both.
 
-Alternatively, the game can be displayed by listing the outcomes with
-Bob's strategy choice first, then Alice's. Drag Bob's player icon and
-drop it on the left side of Alice's strategy choices, and the game
-display changes to organize the outcomes first by Bob's action, then
-by Alice's.
+When several players are assigned to the same side of the table, their
+strategy labels form a hierarchy. Each level groups together the
+strategy combinations belonging to the players below it. This is
+similar to the hierarchical row and column labels used in a pivot table
+or a table with a multi-level index.
 
-The same dragging operation can be used to assign players to the
-columns. Assigning multiple players to the columns gives the same
-hierarchical presentation of those players' strategies. Dropping a
-player above another player's strategy labels assigns him to a higher
-level of the column player hierarchy; dropping a player below another
-player's strategy labels assigns him to a lower level of the column
-player hierarchy.
+For example, suppose Alice and Bob are both assigned to the rows. If
+Alice is above Bob in the row hierarchy, Gambit first groups the rows
+by Alice's strategy and then lists Bob's strategies within each group.
 
-.. image::  screens/pd3.*
-            :width: 33%
-            :alt: another view of the same prisoner's dilemma game.
-            :align: right
-            :target: _images/pd3.png
+.. image:: screens/pd2.*
+   :width: 50%
+   :alt: A strategic game with Alice and Bob arranged as two levels of hierarchical row labels.
+   :align: center
+   :target: _images/pd2.png
 
-As the assignment of players in the row and column
-hierarchies changes, the ordering of the payoffs in each cell of the
-table also changes. In all cases, the color-coding of the entries
-identifies the player to whom each payoff corresponds. The ordering
-convention is chosen so that for a two player game in which one player
-is a row player and the other a column player, the row player's payoff
-is shown first, followed by the column player, which is the most
-common convention in print.
+Reversing their order groups the rows first by Bob's strategy and then
+by Alice's. The strategy profiles and payoffs do not change; only their
+arrangement in the table changes.
 
+The same principle applies to the columns. A player placed at a higher
+level of the column hierarchy forms the outer grouping, while players
+at lower levels form groups within it.
+
+This arrangement provides a single table view of games that are often
+printed as a collection of separate payoff matrices. For example, a
+three-player game can be displayed with one player on the rows and two
+players in a column hierarchy, rather than as a separate matrix for
+each strategy of the third player.
+
+
+Rearranging the table
+---------------------
+
+To change the table arrangement, drag a player from the player list to
+the row-label or column-label area.
+
+When the drop menu appears, choose where to place the player in the row
+or column hierarchy. Gambit updates the display without changing the
+game itself.
+
+The available positions depend on the current arrangement. Placing a
+player before another player makes the moved player a higher level in
+the hierarchy; placing the player after another player makes the moved
+player a lower level.
+
+.. image:: screens/pd3.*
+   :width: 50%
+   :alt: The same strategic game displayed with a different ordering of its hierarchical strategy labels.
+   :align: center
+   :target: _images/pd3.png
+
+Changing the row and column hierarchies may also change the order in
+which payoffs appear within each cell. The colour of each payoff
+continues to identify the player to whom it belongs.
+
+.. note::
+
+   Rearranging the table changes only the presentation of the game. It
+   does not change the players, strategies, outcomes, or payoffs.
 
 
 Changing players and strategies
