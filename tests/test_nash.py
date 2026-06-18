@@ -893,7 +893,7 @@ LOGIT_STRATEGY_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
-            solver=functools.partial(gbt.nash.logit_solve, use_strategic=True),
+            solver=gbt.nash.logit_solve,
             expected=[
                 [
                     [0.9124962637548039, 0.08750373624519617, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -904,7 +904,7 @@ LOGIT_STRATEGY_CASES = [
                     [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 ]
             ],
-            prob_tol=TOL_HUGE,
+            prob_tol=TOL_LARGE,
             regret_tol=TOL_LARGE,
         ),
         marks=pytest.mark.nash_logit_strategy,
