@@ -908,7 +908,7 @@ LOGIT_STRATEGY_CASES = [
             regret_tol=TOL_LARGE,
         ),
         marks=pytest.mark.nash_logit_strategy,
-        id="test_logic_strategy_2",
+        id="test_logit_strategy_2",
     ),
 ]
 
