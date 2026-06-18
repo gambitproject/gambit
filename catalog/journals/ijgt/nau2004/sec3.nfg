@@ -1,0 +1,14 @@
+NFG 1 R "Battle of the Sexes" { "Player 1" "Player 2" }
+
+{ { "Top" "Bottom" }
+{ "Left" "Right" }
+}
+"The coordination game known as Battle of the Sexes (section 3 of :cite:p:`Nau2004`). Has three Nash equilibria: two pure-strategy (TL and BR) and one completely mixed."
+
+{
+{ "" 3, 2 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 2, 3 }
+}
+1 2 3 4

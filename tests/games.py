@@ -14,6 +14,10 @@ def read_from_file(fn: str) -> gbt.Game:
         return gbt.read_efg(pathlib.Path("tests/test_games") / fn)
     elif fn.endswith(".nfg"):
         return gbt.read_nfg(pathlib.Path("tests/test_games") / fn)
+    elif fn.endswith(".agg"):
+        return gbt.read_agg(pathlib.Path("tests/test_games") / fn)
+    elif fn.endswith(".bagg"):
+        return gbt.read_bagg(pathlib.Path("tests/test_games") / fn)
     else:
         raise ValueError(f"Unknown file extension in {fn}")
 

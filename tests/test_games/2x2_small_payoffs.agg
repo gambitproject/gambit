@@ -1,0 +1,34 @@
+#AGG
+
+#number of players:
+2
+#number of action nodes:
+2
+#number of func nodes:
+0
+
+#sizes of action sets:
+2 2
+
+#action sets:
+0 1
+0 1
+
+
+#the action graph:
+2 0 1
+2 1 0
+
+#the types of func nodes:
+#0: sum
+#1: existence
+#2: highest
+#3: lowest
+
+
+#the payoffs:
+#now the payoff values: one row per action node.
+#For each row: first, the type of the payoff format
+#Then payoffs are given in lexicographical order of the input configurations
+0	4 -1
+0	-2 5

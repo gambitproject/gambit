@@ -45,9 +45,9 @@ See the :ref:`algorithm description <lp>` for full details.
 
    Suppresses printing of the banner at program launch.
 
-Computing an equilibrium of the game :download:`2x2const.nfg
-<../contrib/games/2x2const.nfg>`, a game with two players with two
-strategies each, with a unique equilibrium in mixed strategies
+Computing an equilibrium of the game ``2x2const.nfg``,
+a game with two players with two
+strategies each, with a unique equilibrium in mixed strategies::
 
    $ gambit-lp 2x2const.nfg
    Compute Nash equilibria by solving a linear program

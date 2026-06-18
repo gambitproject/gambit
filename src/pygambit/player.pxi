@@ -82,7 +82,7 @@ class PlayerActions:
         return f"PlayerActions(player={self.player})"
 
     def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.player.actions)
+        return sum(len(s.actions) for s in self.player.infosets)
 
     def __iter__(self) -> typing.Iterator[Action]:
         for infoset in self.player.infosets:

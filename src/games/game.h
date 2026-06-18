@@ -58,6 +58,9 @@ using GamePlayer = GameObjectPtr<GamePlayerRep>;
 class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
 
+class GameSubgameRep;
+using GameSubgame = GameObjectPtr<GameSubgameRep>;
+
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
@@ -220,7 +223,7 @@ public:
   void Invalidate() { m_valid = false; }
 
   Game GetGame() const;
-  int GetNumber() const { return m_number; }
+  int GetNumber() const;
 
   GamePlayer GetPlayer() const;
 
@@ -618,6 +621,34 @@ inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_norm
   }
 }
 
+class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
+  friend class GameTreeRep;
+
+  bool m_valid{true};
+  GameRep *m_game;
+  GameNodeRep *m_root;
+  std::weak_ptr<GameSubgameRep> m_parent;
+  std::vector<std::shared_ptr<GameSubgameRep>> m_children;
+  std::vector<std::shared_ptr<GameInfosetRep>> m_subgameDifference;
+
+public:
+  using SubgameCollection = ElementCollection<GameSubgame, GameSubgameRep>;
+  using InfosetCollection = ElementCollection<GameSubgame, GameInfosetRep>;
+
+  GameSubgameRep(GameRep *p_game, GameNodeRep *p_root) : m_game(p_game), m_root(p_root) {}
+  ~GameSubgameRep() = default;
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
+  Game GetGame() const;
+  GameNode GetRoot() const { return m_root->shared_from_this(); }
+
+  GameSubgame GetParent() const;
+  SubgameCollection GetChildren() const;
+  InfosetCollection GetSubgameDifference() const;
+};
+
 enum class TraversalOrder { Preorder, Postorder };
 
 class CartesianProductSpace {
@@ -950,7 +981,9 @@ public:
     return false;
   }
   /// Returns a list of all subgame roots in the game
-  virtual std::vector<GameNode> GetSubgames() const { throw UndefinedException(); }
+  virtual std::vector<GameSubgame> GetSubgames() const { throw UndefinedException(); }
+  /// Returns the smallest subgame containing the information set
+  virtual GameSubgame GetMinimalSubgame(const GameInfoset &) const { throw UndefinedException(); }
 
   //@}
 
@@ -1256,6 +1289,12 @@ inline GameNode GameInfosetRep::GetMember(int p_index) const
   return m_members.at(p_index - 1);
 }
 
+inline int GameInfosetRep::GetNumber() const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_number;
+}
+
 inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
 {
   m_game->EnsureInfosetOrdering();
@@ -1273,6 +1312,8 @@ inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
   m_game->EnsureInfosetOrdering();
   return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
 }
+
+inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this(); }
 
 //=======================================================================
 

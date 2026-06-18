@@ -223,6 +223,7 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
                     });
     }
   }
+  IndexStrategies();
 }
 
 Game GameBAGGRep::Copy() const

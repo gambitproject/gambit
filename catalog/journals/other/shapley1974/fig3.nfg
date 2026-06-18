@@ -1,0 +1,23 @@
+NFG 1 R "Fig 3 from 'A Note on the Lemke-Howson Algorithm' (Shapley 1974)" { "1" "2" }
+
+{ { "1" "2" "3" }
+{ "1" "2" "3" }
+}
+"Fig 3 from :cite:p:`Shap74`. This bimatrix game has a pair of mixed-strategy equilibria
+that are inaccessible to the Lemke-Howson algorithm. That is, the two equilibria in this
+pair are connected to each other for all dropped labels, and can thus not be reached by
+any concatenation of paths from the artifical equilibrium, where the Lemke-Howson algorithm
+starts."
+
+{
+{ "" 0, 0 }
+{ "" 2, 3 }
+{ "" 3, 0 }
+{ "" 3, 2 }
+{ "" 2, 2 }
+{ "" 0, 0 }
+{ "" 0, 3 }
+{ "" 0, 0 }
+{ "" 1, 1 }
+}
+1 2 3 4 5 6 7 8 9

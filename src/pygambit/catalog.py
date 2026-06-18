@@ -1,3 +1,4 @@
+import io
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -7,12 +8,91 @@ import pandas as pd
 import pygambit as gbt
 
 # Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit")/"catalog_data"
+_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
+# This ensures that catalog files are included in editable installs too
+if not _CATALOG_RESOURCE.is_dir():
+    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
+    if _repo_catalog.is_dir():
+        _CATALOG_RESOURCE = _repo_catalog
 
 READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
+
+
+def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
+    """
+    Load a game from the OpenSpiel library.
+
+    Parameters
+    ----------
+    game_name : str
+        The short name of the OpenSpiel game (e.g. ``"matrix_rps"``,
+        ``"tiny_hanabi"``). Passed directly to ``pyspiel.load_game``.
+    params : dict, optional
+        Game parameters forwarded to ``pyspiel.load_game``
+        (e.g. ``{"players": 2, "coins": 3, "fields": 2}`` for ``"blotto"``).
+        See the `OpenSpiel game list
+        <https://openspiel.readthedocs.io/en/latest/games.html>`_ for
+        available parameters per game.
+
+    Returns
+    -------
+    gbt.Game
+        The loaded game.
+
+    Raises
+    ------
+    ImportError
+        If ``open_spiel`` is not installed.
+    ValueError
+        If the game's dynamics type is not supported for export, or if the
+        format exporter raises an error for this specific game.
+    Other exceptions from ``pyspiel.load_game`` propagate directly.
+        For example, ``pyspiel.SpielError`` is raised for unknown game names
+        or invalid/missing parameters.
+    """
+    try:
+        import pyspiel
+        from open_spiel.python.algorithms.gambit import export_gambit
+    except ImportError as exc:
+        raise ImportError(
+            "open_spiel is required to load OpenSpiel games. "
+            "Install it with: pip install open_spiel"
+        ) from exc
+
+    # Let pyspiel's own exceptions propagate unchanged — they already carry
+    # informative messages ("Unknown game '...'", "Unknown parameter '...'", etc.)
+    game = pyspiel.load_game(game_name, params or {})
+
+    dynamics = game.get_type().dynamics
+
+    # OpenSpiel's SEQUENTIAL corresponds to extensive-form (tree) games in Gambit;
+    # SIMULTANEOUS corresponds to normal-form (strategic-form) games.
+    if dynamics == pyspiel.GameType.Dynamics.SEQUENTIAL:
+        try:
+            efg_str = export_gambit(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to EFG format: {exc}"
+            ) from exc
+        return gbt.read_efg(io.StringIO(efg_str))
+
+    elif dynamics == pyspiel.GameType.Dynamics.SIMULTANEOUS:
+        try:
+            nfg_str = pyspiel.game_to_nfg_string(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to NFG format: {exc}"
+            ) from exc
+        return gbt.read_nfg(io.StringIO(nfg_str))
+
+    else:
+        raise ValueError(
+            f"OpenSpiel game '{game_name}' has unsupported dynamics type "
+            f"'{dynamics}' and cannot be exported to Gambit format."
+        )
 
 
 def load(slug: str) -> gbt.Game:
@@ -155,20 +235,23 @@ def games(
             record["Format"] = ext
         records.append(record)
 
-    # Add all the games stored as EFG/NFG files
-    for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
-        reader = READERS.get(resource_path.suffix)
+    # Add all the games stored as EFG/NFG files.
+    # Collect paths matching each supported extension, sort together to preserve
+    # a consistent alphabetical order, then load using the known reader.
+    for resource_path in sorted(
+        path
+        for suffix in READERS
+        for path in _CATALOG_RESOURCE.rglob(f"*{suffix}")
+        if path.is_file()
+    ):
+        reader = READERS[resource_path.suffix]
+        rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
+        slug = rel_path.with_suffix("").as_posix()
 
-        if reader is not None and resource_path.is_file():
-            # Calculate the path relative to the root resource
-            # and remove the suffix to get the "slug"
-            rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-            slug = rel_path.with_suffix("").as_posix()
-
-            with as_file(resource_path) as path:
-                game = reader(str(path))
-                if check_filters(game):
-                    append_record(slug, game)
+        with as_file(resource_path) as path:
+            game = reader(str(path))
+            if check_filters(game):
+                append_record(slug, game)
 
     if include_descriptions:
         return pd.DataFrame.from_records(
