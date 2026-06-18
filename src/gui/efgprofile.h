@@ -28,7 +28,7 @@
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
-class BehaviorProfileList final : public wxGrid, public GameView {
+class MixedBehaviorProfileList final : public wxGrid, public GameView {
   // Event handlers
   void OnLabelClick(wxGridEvent &);
   void OnCellClick(wxGridEvent &);
@@ -42,8 +42,8 @@ class BehaviorProfileList final : public wxGrid, public GameView {
   void OnUpdate() override;
 
 public:
-  BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc);
-  ~BehaviorProfileList() override;
+  MixedBehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  ~MixedBehaviorProfileList() override;
 };
 } // namespace Gambit::GUI
 

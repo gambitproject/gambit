@@ -72,7 +72,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   if (p_command->IsBehavior()) {
-    m_profileList = new BehaviorProfileList(this, m_doc);
+    m_profileList = new MixedBehaviorProfileList(this, m_doc);
   }
   else {
     m_profileList = new MixedStrategyProfileList(this, m_doc);

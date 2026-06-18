@@ -85,7 +85,7 @@ ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
   if (p_doc->IsTree()) {
-    m_behavProfiles = new BehaviorProfileList(this, p_doc);
+    m_behavProfiles = new MixedBehaviorProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
   }

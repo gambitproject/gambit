@@ -32,7 +32,7 @@ namespace Gambit::GUI {
 //              class BehaviorProfileList: Member functions
 //-------------------------------------------------------------------------
 
-BehaviorProfileList::BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc)
+MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc)
   : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
@@ -49,14 +49,14 @@ BehaviorProfileList::BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
 
-  Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &BehaviorProfileList::OnLabelClick, this);
-  Bind(wxEVT_GRID_CELL_LEFT_CLICK, &BehaviorProfileList::OnCellClick, this);
-  Bind(wxEVT_GRID_SELECT_CELL, &BehaviorProfileList::OnSelectCell, this);
+  Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &MixedBehaviorProfileList::OnLabelClick, this);
+  Bind(wxEVT_GRID_CELL_LEFT_CLICK, &MixedBehaviorProfileList::OnCellClick, this);
+  Bind(wxEVT_GRID_SELECT_CELL, &MixedBehaviorProfileList::OnSelectCell, this);
 }
 
-BehaviorProfileList::~BehaviorProfileList() = default;
+MixedBehaviorProfileList::~MixedBehaviorProfileList() = default;
 
-void BehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
+void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
     m_doc->SetCurrentProfile(p_event.GetRow() + 1);
@@ -71,13 +71,13 @@ void BehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
   ClearSelection();
 }
 
-void BehaviorProfileList::OnCellClick(wxGridEvent &p_event)
+void MixedBehaviorProfileList::OnCellClick(wxGridEvent &p_event)
 {
   m_doc->SetCurrentProfile(p_event.GetRow() + 1);
   ClearSelection();
 }
 
-void BehaviorProfileList::OnSelectCell(wxGridEvent &p_event)
+void MixedBehaviorProfileList::OnSelectCell(wxGridEvent &p_event)
 {
   p_event.Veto();
   ClearSelection();
@@ -89,7 +89,7 @@ static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());
 }
 
-void BehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
+void MixedBehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
 {
   if (GetNumberRows() > p_rows) {
     DeleteRows(p_rows, GetNumberRows() - p_rows);
@@ -106,7 +106,7 @@ void BehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
   }
 }
 
-void BehaviorProfileList::UpdateLabels()
+void MixedBehaviorProfileList::UpdateLabels()
 {
   for (int row = 0; row < GetNumberRows(); ++row) {
     wxString label;
@@ -123,7 +123,7 @@ void BehaviorProfileList::UpdateLabels()
   }
 }
 
-void BehaviorProfileList::UpdateCells()
+void MixedBehaviorProfileList::UpdateCells()
 {
   const int currentProfile = m_doc->GetCurrentProfile();
 
@@ -162,7 +162,7 @@ void BehaviorProfileList::UpdateCells()
   }
 }
 
-void BehaviorProfileList::OnUpdate()
+void MixedBehaviorProfileList::OnUpdate()
 {
   if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
     if (GetNumberRows() > 0) {
