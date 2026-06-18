@@ -513,7 +513,7 @@ def ipa_solve(
         for strategy in game.strategies:
             perturbation[strategy] = 0.0
         for player in game.players:
-            perturbation[player.strategies[0]] = 1.0
+            perturbation[next(iter(player.strategies))] = 1.0
     elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
         game = perturbation.game
     else:
@@ -595,7 +595,7 @@ def gnm_solve(
         for strategy in game.strategies:
             perturbation[strategy] = 0.0
         for player in game.players:
-            perturbation[player.strategies[0]] = 1.0
+            perturbation[next(iter(player.strategies))] = 1.0
     elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
         game = perturbation.game
     else:
