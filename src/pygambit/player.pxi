@@ -95,7 +95,7 @@ class PlayerActions:
         return f"PlayerActions(player={self.player})"
 
     def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.player.actions)
+        return sum(len(s.actions) for s in self.player.infosets)
 
     def __iter__(self) -> typing.Iterator[Action]:
         for infoset in self.player.infosets:
@@ -146,7 +146,7 @@ class PlayerStrategies:
     def __repr__(self) -> str:
         return f"PlayerStrategies(player={Player.wrap(self.player)})"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of strategies for the player in the game."""
         return self.player.deref().GetStrategies().size()
 
@@ -179,6 +179,33 @@ class PlayerStrategies:
             previously, leading/trailing whitespace was stripped from `label` before comparison.
         """
         return _resolve_by_label(self, label, "Player", "strategy", "strategies")
+
+
+@cython.cclass
+class PlayerSequences:
+    """The collection of sequences available to a player."""
+    player = cython.declare(c_GamePlayer)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create PlayerSequences outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(player: c_GamePlayer) -> PlayerSequences:
+        obj: PlayerSequences = PlayerSequences.__new__(PlayerSequences)
+        obj.player = player
+        return obj
+
+    def __repr__(self) -> str:
+        return f"PlayerSequences(player={Player.wrap(self.player)})"
+
+    def __len__(self) -> int:
+        """The number of sequences for the player in the game."""
+        return self.player.deref().GetSequences().size()
+
+    def __iter__(self) -> typing.Iterator[Sequence]:
+        for sequence in self.player.deref().GetSequences():
+            yield Sequence.wrap(sequence)
 
 
 @cython.cclass
@@ -246,8 +273,13 @@ class Player:
 
     @property
     def strategies(self) -> PlayerStrategies:
-        """Returns the set of strategies belonging to the player."""
+        """Returns the collection of strategies belonging to the player."""
         return PlayerStrategies.wrap(self.player)
+
+    @property
+    def sequences(self) -> PlayerSequences:
+        """Returns the collection of sequences belonging to the player."""
+        return PlayerSequences.wrap(self.player)
 
     @property
     def infosets(self) -> PlayerInfosets:
