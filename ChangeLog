@@ -25,6 +25,8 @@
 - Max regret is calculated correctly for strategy and behavior profiles on games with zero player
   strategies or actions (is defined to be 0 trivially)  (#904)
 - Corrected calculation of total number of actions for a player in `pygambit` (#938)
+- Corrected a regression in action graph games that left the internal data structure not fully initialised,
+  leading to segmentation faults.
 
 ### Changed
 - Added a new welcome/landing window on launching the GUI without a game.  This has the effect of
