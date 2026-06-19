@@ -292,7 +292,7 @@ When making a new release of Gambit, follow these steps:
    To verify the new entry will be extracted correctly before tagging, run the
    extraction script from the repository root::
 
-       python3 build_support/releases/extract_changelog.py X.Y.Z
+       python build_support/releases/extract_changelog.py X.Y.Z
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
 

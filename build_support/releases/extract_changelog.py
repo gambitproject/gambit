@@ -19,7 +19,7 @@ Usage
 -----
 Run from the repository root::
 
-    python3 build_support/releases/extract_changelog.py X.Y.Z
+    python build_support/releases/extract_changelog.py X.Y.Z
 
 Optional arguments::
 
