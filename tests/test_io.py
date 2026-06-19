@@ -49,6 +49,20 @@ def test_read_agg_invalid():
         gbt.read_agg(game_path)
 
 
+def test_read_bagg():
+    game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
+    game = gbt.read_bagg(game_path)
+    assert isinstance(game, gbt.Game)
+
+
+def test_read_bagg_invalid():
+    game_path = os.path.join(
+        "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+    )
+    with pytest.raises(ValueError):
+        gbt.read_bagg(game_path)
+
+
 def test_read_gbt_invalid():
     game_path = os.path.join(
         "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
@@ -101,8 +115,9 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 
 def test_write_html():
     game = gbt.Game.new_table([2, 2])
-    game.players[0].label = "Alice"
-    game.players[1].label = "Bob"
+    alice, bob = game.players
+    alice.label = "Alice"
+    bob.label = "Bob"
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
     assert "Alice" in serialized_game
@@ -111,8 +126,9 @@ def test_write_html():
 
 def test_write_latex():
     game = gbt.Game.new_table([2, 2], title="Game title")
-    game.players[0].label = "Alice"
-    game.players[1].label = "Bob"
+    alice, bob = game.players
+    alice.label = "Alice"
+    bob.label = "Bob"
     serialized_game = game.to_latex()
     assert "\\begin{game}" in serialized_game
     assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game

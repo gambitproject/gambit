@@ -33,6 +33,7 @@ Creating, reading, and writing games
    read_efg
    read_nfg
    read_agg
+   read_bagg
 
    Game.new_tree
    Game.new_table
@@ -125,7 +126,7 @@ Information about the game
    Player.is_chance
    Player.min_payoff
    Player.max_payoff
-   Player.strategies
+   Player.sequences
 
 .. autosummary::
    :toctree: api/
@@ -197,6 +198,13 @@ Information about the game
    Strategy.number
    Strategy.action
 
+.. autosummary::
+
+   :toctree: api/
+
+   Sequence.player
+   Sequence.parent
+   Sequence.actions
 
 Player behavior
 ...............

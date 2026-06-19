@@ -126,8 +126,10 @@ class Outcome:
 
 
 @cython.cclass
-class TreeGameOutcome:
-    """Represents an outcome in a strategic game derived from an extensive game."""
+class DerivedGameOutcome:
+    """Represents an outcome in a strategic game derived from a game in another representation.
+    Such outcomes are one-to-one with the set of pure strategy profiles.
+    """
     c_game = cython.declare(c_Game)
     psp = cython.declare(shared_ptr[c_PureStrategyProfile])
 
@@ -136,8 +138,8 @@ class TreeGameOutcome:
 
     @staticmethod
     @cython.cfunc
-    def wrap(game: c_Game, psp: shared_ptr[c_PureStrategyProfile]) -> TreeGameOutcome:
-        obj: TreeGameOutcome = TreeGameOutcome.__new__(TreeGameOutcome)
+    def wrap(game: c_Game, psp: shared_ptr[c_PureStrategyProfile]) -> DerivedGameOutcome:
+        obj: DerivedGameOutcome = DerivedGameOutcome.__new__(DerivedGameOutcome)
         obj.c_game = game
         obj.psp = psp
         return obj
@@ -152,8 +154,8 @@ class TreeGameOutcome:
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
-            isinstance(other, TreeGameOutcome) and
-            deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
+            isinstance(other, DerivedGameOutcome) and
+            deref(self.psp).deref() == deref(cython.cast(DerivedGameOutcome, other).psp).deref()
         )
 
     def __getitem__(self, player: Player | str) -> Rational:
