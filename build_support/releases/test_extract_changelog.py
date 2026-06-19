@@ -160,7 +160,7 @@ def test_version_header_format(lineno, line):
 
 @pytest.mark.parametrize(
     "lineno,line",
-    [(line_number, line) for line_number, line in _changelog_lines() if line.startswith("## ")],
+    [(line_number, line) for line_number, line in _changelog_lines() if line.startswith("### ")],
 )
 def test_section_header_type(lineno, line):
     """Every '### ' line must be one of the recognised Keep a Changelog types."""
