@@ -21,6 +21,17 @@ construction and analysis of finite extensive and strategic games.
          :color: secondary
          :expand:
 
+   .. grid-item-card:: 📦 Releases & Downloads
+      :columns: 3
+
+      Download Gambit for Windows, macOS, or Linux.
+
+      .. button-ref:: releases
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
 
    .. grid-item-card:: 🐍 PyGambit
       :columns: 3
@@ -106,6 +117,7 @@ construction and analysis of finite extensive and strategic games.
    :maxdepth: 1
 
    install
+   releases
    algorithms
    pygambit
    tools

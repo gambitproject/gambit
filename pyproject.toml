@@ -49,6 +49,7 @@ doc = [
     "jupyter_sphinx",
     "pyyaml",
     "sphinxcontrib-bibtex",
+    "myst-parser",
 ]
 
 [project.urls]

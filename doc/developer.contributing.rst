@@ -280,7 +280,9 @@ When making a new release of Gambit, follow these steps:
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
-3. Update the `ChangeLog` file with a summary of changes
+3. Update the ``ChangeLog`` file at the repository root with a summary of changes for this release.
+   This file is the single source of truth for release notes — it is surfaced in the documentation
+   (see :ref:`releases`) and used to populate the GitHub release automatically.
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
 
@@ -291,8 +293,10 @@ When making a new release of Gambit, follow these steps:
     git push origin maintX_Y
     git push origin --tags
 
-6. Create a new release on the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__, using the tag created in step 4.
-   Include a summary of changes from the `ChangeLog` file in the release notes.
+6. Pushing the tag triggers the ``release.yml`` GitHub Actions workflow, which automatically
+   reads the ``ChangeLog`` entry for the new version and creates the corresponding release on the
+   `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__ with those notes.
+   No manual action is required.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.
 

@@ -1,0 +1,49 @@
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          python3 - <<'EOF'
+          import re, sys, pathlib
+
+          tag = "${{ github.ref_name }}"          # e.g. v16.6.0
+          version = tag.lstrip("v")               # e.g. 16.6.0
+
+          text = pathlib.Path("ChangeLog").read_text()
+
+          # Match the section header, e.g. "## [16.6.0] - 2026-03-24"
+          pattern = re.compile(
+              rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)",
+              re.MULTILINE | re.DOTALL,
+          )
+          match = pattern.search(text)
+          if not match:
+              print(f"No ChangeLog entry found for version {version}", file=sys.stderr)
+              sys.exit(1)
+
+          notes = match.group(1).strip()
+          pathlib.Path("release_notes.md").write_text(notes)
+          print(f"Extracted release notes for {version}")
+          EOF
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Gambit ${{ github.ref_name }}" \
+            --notes-file release_notes.md
