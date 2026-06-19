@@ -26,43 +26,55 @@
 #endif // WX_PRECOMP
 
 #include "nfgprofile.h"
-#include "renratio.h" // for rational number rendering
 
 namespace Gambit::GUI {
 //-------------------------------------------------------------------------
 //              class MixedProfileList: Member functions
 //-------------------------------------------------------------------------
 
-MixedProfileList::MixedProfileList(wxWindow *p_parent, GameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), GameView(p_doc), m_showProbs(1), m_showPayoff(0)
+MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent, GameDocument *p_doc)
+  : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
-  SetRowLabelWidth(40);
-  SetColLabelHeight(25);
 
-  Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&MixedProfileList::OnLabelClick))));
+  SetRowLabelSize(40);
+  SetColLabelSize(25);
+  SetCornerLabelValue(wxT("#"));
 
-  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&MixedProfileList::OnCellClick))));
+  EnableEditing(false);
+  EnableDragGridSize(false);
+  EnableDragRowSize(false);
+  EnableDragColSize(false);
+
+  SetCellHighlightPenWidth(0);
+  SetCellHighlightROPenWidth(0);
+
+  Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &MixedStrategyProfileList::OnLabelClick, this);
+  Bind(wxEVT_GRID_CELL_LEFT_CLICK, &MixedStrategyProfileList::OnCellClick, this);
+  Bind(wxEVT_GRID_SELECT_CELL, &MixedStrategyProfileList::OnSelectCell, this);
 }
 
-MixedProfileList::~MixedProfileList() = default;
+MixedStrategyProfileList::~MixedStrategyProfileList() = default;
 
-void MixedProfileList::OnLabelClick(wxSheetEvent &p_event)
+void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
+    m_doc->SetCurrentProfile(p_event.GetRow() + 1);
   }
+
+  ClearSelection();
 }
 
-void MixedProfileList::OnCellClick(wxSheetEvent &p_event)
+void MixedStrategyProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
+  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  ClearSelection();
+}
+
+void MixedStrategyProfileList::OnSelectCell(wxGridEvent &p_event)
+{
+  p_event.Veto();
+  ClearSelection();
 }
 
 #ifdef UNUSED
@@ -81,42 +93,6 @@ static Gambit::GameStrategy GetStrategy(GameDocument *p_doc, int p_index)
 }
 #endif
 
-wxString MixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
-{
-  if (IsRowLabelCell(p_coords)) {
-    wxString label;
-    label << RowToProfile(p_coords.GetRow());
-    return label;
-  }
-  if (IsColLabelCell(p_coords)) {
-    int index = 0;
-    for (const auto &player : m_doc->GetGame()->GetPlayers()) {
-      for (const auto &strategy : player->GetStrategies()) {
-        if (index++ == p_coords.GetCol()) {
-          wxString label;
-          label << player->GetNumber() << ": " << strategy->GetLabel();
-          return label;
-        }
-      }
-    }
-    return wxT("");
-  }
-  if (IsCornerLabelCell(p_coords)) {
-    return wxT("#");
-  }
-
-  const int profile = RowToProfile(p_coords.GetRow());
-
-  if (IsProbabilityRow(p_coords.GetRow())) {
-    return {m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol() + 1, profile).c_str(),
-            *wxConvCurrent};
-  }
-  else {
-    return {m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol() + 1, profile).c_str(),
-            *wxConvCurrent};
-  }
-}
-
 static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
 {
   int index = 0;
@@ -130,56 +106,76 @@ static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
   return *wxBLACK;
 }
 
-wxSheetCellAttr MixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+void MixedStrategyProfileList::ResizeGrid(int p_rows, int p_cols)
+{
+  if (GetNumberRows() > p_rows) {
+    DeleteRows(p_rows, GetNumberRows() - p_rows);
+  }
+  else if (GetNumberRows() < p_rows) {
+    AppendRows(p_rows - GetNumberRows());
+  }
+
+  if (GetNumberCols() > p_cols) {
+    DeleteCols(p_cols, GetNumberCols() - p_cols);
+  }
+  else if (GetNumberCols() < p_cols) {
+    AppendCols(p_cols - GetNumberCols());
+  }
+}
+
+void MixedStrategyProfileList::UpdateLabels()
+{
+  for (int row = 0; row < GetNumberRows(); ++row) {
+    wxString label;
+    label << (row + 1);
+    SetRowLabelValue(row, label);
+  }
+
+  int index = 0;
+  for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      wxString label;
+      label << player->GetNumber() << ": " << strategy->GetLabel();
+      SetColLabelValue(index++, label);
+    }
+  }
+}
+
+void MixedStrategyProfileList::UpdateCells()
 {
   const int currentProfile = m_doc->GetCurrentProfile();
 
-  if (IsRowLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    if (RowToProfile(p_coords.GetRow()) == currentProfile) {
-      attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    }
-    else {
-      attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-    }
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-  else if (IsColLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
-    return attr;
-  }
-  else if (IsCornerLabelCell(p_coords)) {
-    return GetSheetRefData()->m_defaultCornerLabelAttr;
-  }
+  const wxFont normalFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+  const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
-  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  if (RowToProfile(p_coords.GetRow()) == currentProfile) {
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  }
-  else {
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-  }
-  attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-  attr.SetOrientation(wxHORIZONTAL);
-  attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
-  attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
+  for (int row = 0; row < GetNumberRows(); ++row) {
+    const int profile = row + 1;
 
-  attr.SetReadOnly(true);
-  return attr;
+    for (int col = 0; col < GetNumberCols(); ++col) {
+      SetCellValue(row, col,
+                   wxString(m_doc->GetProfiles().GetStrategyProb(col + 1, profile).c_str(),
+                            *wxConvCurrent));
+
+      wxGridCellAttr *attr = new wxGridCellAttr;
+      attr->SetFont(profile == currentProfile ? boldFont : normalFont);
+      attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+      attr->SetTextColour(GetPlayerColor(m_doc, col));
+      attr->SetReadOnly(true);
+
+      SetAttr(row, col, attr);
+    }
+  }
 }
 
-void MixedProfileList::OnUpdate()
+void MixedStrategyProfileList::OnUpdate()
 {
   if (m_doc->NumProfileLists() == 0) {
-    DeleteRows(0, GetNumberRows());
+    if (GetNumberRows() > 0) {
+      DeleteRows(0, GetNumberRows());
+    }
+    if (GetNumberCols() > 0) {
+      DeleteCols(0, GetNumberCols());
+    }
     return;
   }
 
@@ -187,31 +183,28 @@ void MixedProfileList::OnUpdate()
 
   BeginBatch();
 
-  const int newRows = profiles.NumProfiles() * (m_showProbs + m_showPayoff);
-  DeleteRows(0, GetNumberRows());
-  InsertRows(0, newRows);
+  const int newRows = profiles.NumProfiles();
+  const int newCols = m_doc->GetGame()->GetStrategies().size();
 
-  const int profileLength = m_doc->GetGame()->GetStrategies().size();
-  const int newCols = profileLength;
-  DeleteCols(0, GetNumberCols());
-  InsertCols(0, newCols);
-
-  for (int row = 0; row < GetNumberRows(); row += m_showProbs + m_showPayoff) {
-    SetCellSpan(wxSheetCoords(row, -1), wxSheetCoords(m_showProbs + m_showPayoff, 1));
-  }
+  ResizeGrid(newRows, newCols);
+  UpdateLabels();
+  UpdateCells();
 
   AutoSizeRows();
-  AutoSizeCols();
+  AutoSizeColumns();
 
-  int colSize = GetColWidth(0);
-  for (int col = 1; col < GetNumberCols(); col++) {
-    if (GetColWidth(col) > colSize) {
-      colSize = GetColWidth(col);
+  int colSize = 0;
+  for (int col = 0; col < GetNumberCols(); ++col) {
+    if (GetColSize(col) > colSize) {
+      colSize = GetColSize(col);
     }
   }
 
-  for (int col = 0; col < GetNumberCols(); SetColWidth(col++, colSize))
-    ;
+  for (int col = 0; col < GetNumberCols(); ++col) {
+    SetColSize(col, colSize);
+  }
+
+  ClearSelection();
 
   EndBatch();
 }
