@@ -65,9 +65,6 @@ The current stable release of Gambit is **|release|**.
     If your administrator privileges prevent this, use the Homebrew installation
     or build from source (see the :ref:`developer build instructions <building-from-source>`).
 
-    Signing and notarization for macOS releases is tracked in
-    `issue #712 <https://github.com/gambitproject/gambit/issues/712>`__.
-
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
 
