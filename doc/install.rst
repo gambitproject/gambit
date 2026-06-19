@@ -122,5 +122,8 @@ All past releases are available on the
 `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__.
 
 
+Changelog
+---------
+
 .. include:: ../ChangeLog
    :parser: myst_parser.sphinx_
