@@ -134,7 +134,8 @@ void MixedBehaviorProfileList::UpdateCells()
     for (int col = 0; col < GetNumberCols(); ++col) {
       SetCellValue(
           row, col,
-          wxString(m_doc->GetProfiles().GetActionProb(col + 1, row + 1).c_str(), *wxConvCurrent));
+          wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, row + 1).c_str(),
+                   *wxConvCurrent));
 
       wxGridCellAttr *attr = new wxGridCellAttr;
       attr->SetFont(row + 1 == currentProfile ? boldFont : normalFont);

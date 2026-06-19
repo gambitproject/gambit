@@ -59,7 +59,7 @@ MixedStrategyProfileList::~MixedStrategyProfileList() = default;
 void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->DoSelectProfile(RowToProfile(p_event.GetRow()));
+    m_doc->DoSelectProfile(p_event.GetRow() + 1);
   }
 
   ClearSelection();
@@ -67,7 +67,7 @@ void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 
 void MixedStrategyProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(p_event.GetRow() + 1);
   ClearSelection();
 }
 
@@ -152,9 +152,10 @@ void MixedStrategyProfileList::UpdateCells()
     const int profile = row + 1;
 
     for (int col = 0; col < GetNumberCols(); ++col) {
-      SetCellValue(row, col,
-                   wxString(m_doc->GetProfiles().GetStrategyProb(col + 1, profile).c_str(),
-                            *wxConvCurrent));
+      SetCellValue(
+          row, col,
+          wxString(m_doc->GetWorkspace().GetProfiles().GetStrategyProb(col + 1, profile).c_str(),
+                   *wxConvCurrent));
 
       wxGridCellAttr *attr = new wxGridCellAttr;
       attr->SetFont(profile == currentProfile ? boldFont : normalFont);
