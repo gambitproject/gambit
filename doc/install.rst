@@ -25,15 +25,14 @@ To install a specific older version::
 Releases & Downloads
 --------------------
 
-The current stable release of Gambit is **|release|**.
+The current stable release of Gambit is |release|.
 
 .. dropdown:: Install on Windows
    :class-container: sd-border-0
 
    1. **Download the installer:**
 
-      Download the `.msi` for Gambit |release| from the
-      `GitHub releases page <https://github.com/gambitproject/gambit/releases/tag/v|release|>`__.
+      Download the `.msi` for Gambit |release| from the |release_link|.
 
    2. **Run the installer:**
 
@@ -46,8 +45,7 @@ The current stable release of Gambit is **|release|**.
 
    1. **Download the .dmg installer:**
 
-      Download the `.dmg` for Gambit |release| from the
-      `GitHub releases page <https://github.com/gambitproject/gambit/releases/tag/v|release|>`__.
+      Download the `.dmg` for Gambit |release| from the |release_link|.
 
    2. **Install the application:**
 
@@ -84,8 +82,7 @@ The current stable release of Gambit is **|release|**.
 
    1. **Download the source tarball:**
 
-      Download the source tarball for Gambit |release| from the
-      `GitHub releases page <https://github.com/gambitproject/gambit/releases/tag/v|release|>`__.
+      Download the source tarball for Gambit |release| from the |release_link|.
 
    2. **Extract the tarball:**
 
