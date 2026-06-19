@@ -1,7 +1,7 @@
 .. _install:
 
 
-Install & Downloads
+Install
 ===================
 
 Users installing Gambit have several options depending on their needs and their operating system.
