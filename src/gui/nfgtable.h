@@ -308,6 +308,8 @@ public:
 
   /// Are we showing dominance indicators or not?
   bool ShowDominance() const;
+  bool IsRowPlayerPlacementNoOp(int p_index, int p_player) const;
+  bool IsColPlayerPlacementNoOp(int p_index, int p_player) const;
   //@}
 
   /// @name View state

@@ -27,7 +27,6 @@
 #include <wx/wx.h>
 #endif                   // WX_PRECOMP
 #include <wx/dnd.h>      // for drag-and-drop features
-#include <wx/image.h>    // for creating drag-and-drop cursor
 #include <wx/print.h>    // for printing support
 #include <wx/colordlg.h> // for picking player colors
 #include <wx/dcsvg.h>    // for SVG output
@@ -66,19 +65,10 @@ gbtTreePlayerIcon::gbtTreePlayerIcon(wxWindow *p_parent, int p_player)
 
 void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
 {
-  const wxBitmap bitmap(person_xpm);
-
-#if defined(__WXMSW__) or defined(__WXMAC__)
-  const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-  wxIcon image;
-  image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
-
   wxString label;
   label << "P" << m_player;
   wxTextDataObject textData(label);
-  wxDropSource source(textData, this, image, image, image);
+  wxDropSource source(textData, this);
   source.DoDragDrop(wxDrag_DefaultMove);
 }
 

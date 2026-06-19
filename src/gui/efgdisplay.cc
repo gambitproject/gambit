@@ -27,7 +27,6 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/dnd.h>
-#include <wx/image.h>
 #include <wx/popupwin.h>
 
 #include "gambit.h"
@@ -349,13 +348,9 @@ class PlayerDropTarget : public wxTextDropTarget {
   EfgDisplay *m_owner;
   GameDocument *m_model;
 
-  bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyNode(const GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveNode(const GameNode &p_node, const wxString &p_text);
-  bool OnDropInfoset(const GameNode &p_node, const wxString &p_text);
-  bool OnDropSetOutcome(const GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text);
+  bool OnDropPlayer(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
+  bool OnDropOutcome(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
+  bool OnDropTreeNode(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
 
 public:
   explicit PlayerDropTarget(EfgDisplay *p_owner)
@@ -375,121 +370,57 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   if (p_node->GetNumber() == p_id) {
     return p_node;
   }
-  else if (p_node->IsTerminal()) {
+  if (p_node->IsTerminal()) {
     return nullptr;
   }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      if (const auto node = GetNode(child, p_id)) {
-        return node;
-      }
+  for (const auto &child : p_node->GetChildren()) {
+    if (const auto node = GetNode(child, p_id)) {
+      return node;
     }
-    return nullptr;
   }
+  return nullptr;
 }
 
-bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text,
+                                    const wxPoint &p_pos)
 {
   long pl;
-  p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&pl)) {
+    return false;
+  }
+
   const Game efg = m_model->GetGame();
   const GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
-  if (p_node->IsTerminal()) {
-    m_model->DoInsertMove(p_node, player, 2);
-  }
-  else if (p_node->GetPlayer() == player) {
-    m_model->DoInsertAction(p_node);
-  }
-  else {
-    m_model->DoSetPlayer(p_node, player);
-  }
-  return true;
+
+  return m_owner->ShowPlayerDropMenu(p_node, player, p_pos);
 }
 
-bool PlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropOutcome(const GameNode &p_node, const wxString &p_text,
+                                     const wxPoint &p_pos)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
+
   const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
+  if (!srcNode || srcNode == p_node || !srcNode->GetOutcome()) {
     return false;
   }
-  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoCopyTree(p_node, srcNode);
-    return true;
-  }
-  return false;
+
+  return m_owner->ShowOutcomeDropMenu(p_node, srcNode, p_pos);
 }
 
-bool PlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropTreeNode(const GameNode &p_node, const wxString &p_text,
+                                      const wxPoint &p_pos)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
-    return false;
-  }
-  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoMoveTree(p_node, srcNode);
-    return true;
-  }
-  return false;
-}
 
-bool PlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
   const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
+  if (!srcNode || srcNode == p_node || srcNode->IsTerminal()) {
     return false;
   }
-  if (!p_node->IsTerminal() && p_node->GetChildren().size() == srcNode->GetChildren().size()) {
-    m_model->DoSetInfoset(p_node, srcNode->GetInfoset());
-    return true;
-  }
-  else if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoAppendMove(p_node, srcNode->GetInfoset());
-    return true;
-  }
-  return false;
-}
 
-bool PlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
-    return false;
-  }
-  m_model->DoSetOutcome(p_node, srcNode->GetOutcome());
-  return true;
-}
-
-bool PlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
-    return false;
-  }
-  m_model->DoSetOutcome(p_node, srcNode->GetOutcome());
-  m_model->DoSetOutcome(srcNode, nullptr);
-  return true;
-}
-
-bool PlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
-    return false;
-  }
-  m_model->DoCopyOutcome(p_node, srcNode->GetOutcome());
-  return true;
+  return m_owner->ShowTreeDropMenu(p_node, srcNode, p_pos);
 }
 
 bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
@@ -497,16 +428,7 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
   const Game efg = m_owner->GetDocument()->GetGame();
 
   int x, y;
-#if defined(__WXMSW__)
-  // The +12 here is designed to effectively make the hot spot on
-  // the cursor the center of the cursor image (they're currently
-  // 24 pixels wide).
-  m_owner->CalcUnscrolledPosition(p_x + 12, p_y + 12, &x, &y);
-#else
-  // Under GTK, there is an angle in the upper left-hand corner which
-  // serves to identify the hot spot.  Thus, no adjustment is used
   m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
-#endif // __WXMSW__ or defined(__WXMAC__)
 
   x = m_owner->DeviceToLayout(x);
   y = m_owner->DeviceToLayout(y);
@@ -518,20 +440,12 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
 
   try {
     switch (static_cast<char>(p_text[0])) {
+    case 'N':
+      return OnDropTreeNode(node, p_text, wxPoint(p_x, p_y));
     case 'P':
-      return OnDropPlayer(node, p_text);
-    case 'C':
-      return OnDropCopyNode(node, p_text);
-    case 'M':
-      return OnDropMoveNode(node, p_text);
-    case 'I':
-      return OnDropInfoset(node, p_text);
+      return OnDropPlayer(node, p_text, wxPoint(p_x, p_y));
     case 'O':
-      return OnDropSetOutcome(node, p_text);
-    case 'o':
-      return OnDropMoveOutcome(node, p_text);
-    case 'p':
-      return OnDropCopyOutcome(node, p_text);
+      return OnDropOutcome(node, p_text, wxPoint(p_x, p_y));
     default:
       return false;
     }
@@ -593,6 +507,163 @@ void EfgDisplay::MakeMenus()
 
   m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties"), _("Edit properties of the game"));
+}
+
+bool EfgDisplay::ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlayer &p_player,
+                                    const wxPoint &p_pos)
+{
+  if (!p_targetNode || !p_player) {
+    return false;
+  }
+
+  const int operationId = wxWindow::NewControlId();
+
+  wxMenu menu;
+
+  if (p_targetNode->IsTerminal()) {
+    menu.Append(operationId, _("Insert move for this player"));
+  }
+  else if (p_targetNode->GetPlayer() == p_player) {
+    menu.Append(operationId, _("Insert action at this move"));
+  }
+  else {
+    menu.Append(operationId, _("Assign this move to this player"));
+  }
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != operationId) {
+    return false;
+  }
+
+  try {
+    if (p_targetNode->IsTerminal()) {
+      m_doc->DoInsertMove(p_targetNode, p_player, 2);
+    }
+    else if (p_targetNode->GetPlayer() == p_player) {
+      m_doc->DoInsertAction(p_targetNode);
+    }
+    else {
+      m_doc->DoSetPlayer(p_targetNode, p_player);
+    }
+
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
+bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                                  const wxPoint &p_pos)
+{
+  if (!p_targetNode || !p_sourceNode || p_sourceNode->IsTerminal()) {
+    return false;
+  }
+
+  const bool canCopyOrMoveTree = p_targetNode->IsTerminal();
+  const bool canUseSameInfoset =
+      (!p_targetNode->IsTerminal() &&
+       p_targetNode->GetChildren().size() == p_sourceNode->GetChildren().size()) ||
+      p_targetNode->IsTerminal();
+
+  if (!canCopyOrMoveTree && !canUseSameInfoset) {
+    return false;
+  }
+
+  const int copyTreeId = wxWindow::NewControlId();
+  const int moveTreeId = wxWindow::NewControlId();
+  const int infosetId = wxWindow::NewControlId();
+
+  wxMenu menu;
+
+  if (canCopyOrMoveTree) {
+    menu.Append(copyTreeId, _("Copy subtree here"));
+    menu.Append(moveTreeId, _("Move subtree here"));
+  }
+
+  if (canUseSameInfoset) {
+    if (!menu.GetMenuItems().empty()) {
+      menu.AppendSeparator();
+    }
+
+    if (p_targetNode->IsTerminal()) {
+      menu.Append(infosetId, _("Insert move using same information set"));
+    }
+    else {
+      menu.Append(infosetId, _("Put node in same information set"));
+    }
+  }
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+
+  try {
+    if (selection == copyTreeId) {
+      m_doc->DoCopyTree(p_targetNode, p_sourceNode);
+      return true;
+    }
+    if (selection == moveTreeId) {
+      m_doc->DoMoveTree(p_targetNode, p_sourceNode);
+      return true;
+    }
+    if (selection == infosetId) {
+      if (!p_targetNode->IsTerminal()) {
+        m_doc->DoSetInfoset(p_targetNode, p_sourceNode->GetInfoset());
+      }
+      else {
+        m_doc->DoAppendMove(p_targetNode, p_sourceNode->GetInfoset());
+      }
+      return true;
+    }
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
+bool EfgDisplay::ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                                     const wxPoint &p_pos)
+{
+  if (!p_targetNode || !p_sourceNode || p_targetNode == p_sourceNode ||
+      !p_sourceNode->GetOutcome()) {
+    return false;
+  }
+
+  const int useSameOutcomeId = wxWindow::NewControlId();
+  const int copyOutcomeId = wxWindow::NewControlId();
+  const int moveOutcomeId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(useSameOutcomeId, _("Use same outcome here"));
+  menu.Append(copyOutcomeId, _("Copy outcome here"));
+  menu.AppendSeparator();
+  menu.Append(moveOutcomeId, _("Move outcome here"));
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+
+  try {
+    if (selection == useSameOutcomeId) {
+      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      return true;
+    }
+    if (selection == copyOutcomeId) {
+      m_doc->DoCopyOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      return true;
+    }
+    if (selection == moveOutcomeId) {
+      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      m_doc->DoSetOutcome(p_sourceNode, nullptr);
+      return true;
+    }
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
 }
 
 //---------------------------------------------------------------------
@@ -1103,9 +1174,6 @@ void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
   }
 }
 
-#include "bitmaps/tree.xpm"
-#include "bitmaps/move.xpm"
-
 void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
   if (p_event.LeftIsDown() && p_event.Dragging()) {
@@ -1117,93 +1185,24 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     GameNode node = m_layout.NodeHitTest(x, y);
 
     if (node && !node->IsTerminal()) {
-      const GamePlayer player = node->GetPlayer();
-      if (p_event.ControlDown()) {
-        // Copy subtree
-        const wxBitmap bitmap(tree_xpm);
-#if defined(__WXMSW__) or defined(__WXMAC__)
-        const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-        wxIcon image;
-        image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
+      wxString label;
+      label << "N" << node->GetNumber();
+      wxTextDataObject textData(label);
 
-        wxString label;
-        label << "C" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(true);
-      }
-      else if (p_event.ShiftDown()) {
-        // Copy move (information set)
-        // This should be the pawn icon!
-        const wxBitmap bitmap(move_xpm);
-#if defined(__WXMSW__) or defined(__WXMAC__)
-        const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-        wxIcon image;
-        image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
-
-        wxString label;
-        label << "I" << node->GetNumber();
-        wxTextDataObject textData(label);
-
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(wxDrag_DefaultMove);
-      }
-      else {
-        // Move subtree
-        const wxBitmap bitmap(tree_xpm);
-#if defined(__WXMSW__) or defined(__WXMAC__)
-        const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-        wxIcon image;
-        image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
-
-        wxString label;
-        label << "M" << node->GetNumber();
-        wxTextDataObject textData(label);
-
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(wxDrag_DefaultMove);
-      }
+      wxDropSource source(textData, this);
+      source.DoDragDrop(wxDrag_DefaultMove);
       return;
     }
 
     node = m_layout.OutcomeHitTest(x, y);
 
     if (node && node->GetOutcome()) {
-      const wxBitmap bitmap = MakeOutcomeBitmap();
-#if defined(__WXMSW__) or defined(__WXMAC__)
-      const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-      wxIcon image;
-      image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
+      wxString label;
+      label << "O" << node->GetNumber();
+      wxTextDataObject textData(label);
 
-      if (p_event.ControlDown()) {
-        wxString label;
-        label << "O" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(true);
-      }
-      else if (p_event.ShiftDown()) {
-        wxString label;
-        label << "p" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(true);
-      }
-      else {
-        wxString label;
-        label << "o" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(wxDrag_DefaultMove);
-      }
+      wxDropSource source(textData, this);
+      source.DoDragDrop(wxDrag_DefaultMove);
     }
   }
 }
