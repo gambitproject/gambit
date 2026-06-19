@@ -22,8 +22,8 @@ To install a specific older version::
 
 .. _releases:
 
-Releases & Downloads
---------------------
+Releases
+--------
 
 The current stable release of Gambit is |release|.
 
@@ -118,14 +118,9 @@ The current stable release of Gambit is |release|.
        equilibria.  It is strongly recommended that you install the Gambit
        executables to a directory in your path!
 
-Older releases
---------------
-
 All past releases are available on the
 `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__.
 
-Full changelog
---------------
 
 .. include:: ../ChangeLog
    :parser: myst_parser.sphinx_
