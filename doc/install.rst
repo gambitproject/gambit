@@ -127,9 +127,5 @@ All past releases are available on the
 Full changelog
 --------------
 
-.. toctree::
-   :hidden:
-
-   changelog
-
-:doc:`View full changelog <changelog>`
+.. include:: ../ChangeLog
+   :parser: myst_parser.sphinx_
