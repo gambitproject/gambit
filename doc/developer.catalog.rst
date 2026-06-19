@@ -69,27 +69,35 @@ Currently supported representations are:
 
          pygambit.catalog.load("books/watson2013/exercise29_6")
 
-   .. note::
+3. **[Optional] Add custom game layout(s):**
 
-      For extensive form games, you may optionally commit a curated ``.ef`` file alongside the ``.efg``
-      (e.g. ``catalog/source/game.ef``).
-      When present, ``update.py`` will use this file directly as input to DrawTree instead of
-      auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
-      Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the ``.ef`` format.
+   For extensive form games, you may optionally commit a curated ``.ef`` file alongside the ``.efg``
+   (e.g. ``catalog/source/game.ef``).
+   When present, ``update.py`` will use this file directly as input to DrawTree instead of
+   auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
+   Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the ``.ef`` format.
 
-      **Layout variants:** To display multiple layout variants on the catalog page (rendered as
-      clickable tabs), commit additional ``.ef`` files using the ``{slug}__{label}.ef`` naming
-      convention (double underscore separator), e.g.:
+   In general, ``.ef`` files should only be added when the layout they provide differs significantly
+   from what DrawTree produces automatically; if the auto-generated layout is reasonable, there is
+   no need to include one.
 
-      .. code-block:: text
+   If the game has an original layout from a published source (e.g. a textbook or journal article),
+   you **should** try to capture that layout in an ``.ef`` file — you can create it manually or
+   try passing the ``.ef`` format spec and a screenshot of the original to an AI to generate it.
 
-         catalog/example/game.ef          # primary (tab label "Default")
-         catalog/example/game__wide.ef    # additional (tab label "Wide")
+   **Layout variants:** To display multiple layout variants on the catalog page (rendered as
+   clickable tabs), commit additional ``.ef`` files using the ``{slug}__{label}.ef`` naming
+   convention (double underscore separator), e.g.:
 
-      The label shown on each tab is derived automatically from the filename suffix: underscores
-      are replaced by spaces and the result is title-cased (e.g. ``__very_wide`` → "Very Wide").
+   .. code-block:: text
 
-3. **Update the build files:**
+      catalog/example/game.ef                     # primary (tab label "Default")
+      catalog/example/game__original_layout.ef    # additional (tab label "Original Layout")
+
+   The label shown on each tab is derived automatically from the filename suffix: underscores
+   are replaced by spaces and the result is title-cased (e.g. ``__alt_version`` → "Alt Version").
+
+4. **Update the build files:**
 
    Ensure you have installed the package in editable mode to automatically pick up the new game file(s) in the ``pygambit.catalog`` module without reinstalling each time.
    Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
@@ -111,14 +119,27 @@ Currently supported representations are:
       - If haven't done an editable install of ``pygambit`` in your python environment, you'll need to re-install it before running the update script to include new games in the catalog module.
       - Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
 
-4. **[Optional] Test your updates to the documentation locally:**
+   .. tip::
+
+      If you encounter any issues with game files in your python environment not matching the current branch preventing the update script or docs build working (step below) try running the following first:
+
+      .. code-block:: bash
+
+          git clean -fdX catalog/img doc/catalog_table.rst
+
+   .. tip::
+
+      If the game visuals for extensive form games need some work and you aren't sure which settings to change in ``build_support/catalog/draw_tree_settings.yaml``, try loading the EFG in the DrawTree GUI and adjusting the layout there.
+      There is an option to `download settings <https://www.gambit-project.org/draw_tree/gui/#exporting-and-reusing-settings>`_ which can be used in the Gambit catalog.
+
+5. **[Optional] Test your updates to the documentation locally:**
 
    The previous step will (re)build your local copy of the Gambit Catalog RST page used by the documentation.
    You should then build the docs in the :ref:`usual way <editing-docs>`.
    Open the catalog page at ``doc/_build/html/catalog.html`` to view your changes.
    Iterate steps 2-4 as required.
 
-5. **Submit a pull request to GitHub with all changes.**
+6. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
    Ensure that any additions and changes to game files, ``build_support/catalog/draw_tree_settings.yaml``, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.

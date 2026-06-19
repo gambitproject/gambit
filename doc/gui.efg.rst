@@ -193,18 +193,12 @@ a :guilabel:`(u)` in light grey to the right of a node.
 To set the payoffs at a node, double-click on the
 :guilabel:`(u)` to the right
 of the node. This creates a new outcome at the node, with payoffs of
-zero for all players, and displays an editor to set the payoff of the
-first player.
+zero for all players, and pops up an editing panel for that outcome.
 
-The payoff to a player for an outcome can be edited by double-clicking
-on the payoff entry. This action creates a text edit control in which
-the payoff to that player can be modified. Edits to the payoff can be
-accepted by pressing the :kbd:`Enter` key. In addition, accepting the
-payoff by pressing the :kbd:`Tab` key both stores the changes to the
-player's payoff, and advances the editor to the payoff for the next
-player at that outcome.
+For nodes with existing outcomes, clicking on any of the displayed
+payoffs pops up an editing panel for that outcome.
 
-Outcomes may also be moved or copied using a drag-and-drop idiom.
+Outcomes may also be moved or copied using drag-and-drop.
 Left-clicking and dragging an outcome to another node moves the
 outcome from the original node to the target node. Copying an outcome
 may be accomplished by doing this same action while holding down the
