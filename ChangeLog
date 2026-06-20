@@ -39,6 +39,7 @@
 - Payoff editing in extensive games in the graphical interface is now done via a context popup window
   rather than text controls drawn (not always well!) over the game tree display.  (#947)
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
+- Refined the perturbation approach in `path.cc` to better handle paths on games with bifurcations. (#492)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
