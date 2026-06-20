@@ -153,7 +153,6 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   Matrix<double> b(x.size(), x.size() - 1);
   Matrix<double> q(x.size(), x.size());
 
-  // Obtain the tangent at the initial point
   p_jacobian(x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
@@ -163,7 +162,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      return {x.back(), x, false, "Stepsize fell below minimum threshold."};
+      return {x, false, "Stepsize fell below minimum threshold."};
     }
 
     // Predictor step
@@ -206,7 +205,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        return {x.back(), x, false, "Maximum iterations exceeded."};
+        return {x, false, "Maximum iterations exceeded."};
       }
     }
 
@@ -228,7 +227,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        return {x.back(), x, false, "Stepsize fell below minimum threshold."};
+        return {x, false, "Stepsize fell below minimum threshold."};
       }
       continue;
     }
@@ -270,7 +269,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       }
     }
   }
-  return {x.back(), x, true, "Path tracing terminated successfully."};
+  return {x, true, "Path tracing terminated successfully."};
 }
 
 } // end namespace Gambit

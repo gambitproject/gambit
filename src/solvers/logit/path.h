@@ -59,7 +59,6 @@ using CallbackFunctionType = std::function<void(const Vector<double> &)>;
 inline void NullCallbackFunction(const Vector<double> &) {}
 
 struct TracePathResult {
-  double final_parameter_value;
   Vector<double> final_point;
   bool status; // true if path tracing terminated successfully, false if it terminated due to error
   std::string message; // error message if status is false
