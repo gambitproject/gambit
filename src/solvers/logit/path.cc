@@ -145,7 +145,7 @@ void PathTracer::TracePath(
   double pert = 0.0;            // The current version of the perturbation being applied
   double pert_countdown = 0.0;  // How much longer (in arclength) to apply perturbation
   const double min_pert_countdown = 0.05; // Minimum amount of perturbation to apply.
-  double min_lambda = -1e-6;
+  const double min_lambda = -1e-6;
   // Minimum value for lambda when in previous iteration it was positive.
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
