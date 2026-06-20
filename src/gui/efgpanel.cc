@@ -20,12 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif                   // WX_PRECOMP
 #include <wx/dnd.h>      // for drag-and-drop features
-#include <wx/image.h>    // for creating drag-and-drop cursor
 #include <wx/print.h>    // for printing support
 #include <wx/colordlg.h> // for picking player colors
 #include <wx/dcsvg.h>    // for SVG output
@@ -64,19 +65,10 @@ gbtTreePlayerIcon::gbtTreePlayerIcon(wxWindow *p_parent, int p_player)
 
 void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
 {
-  const wxBitmap bitmap(person_xpm);
-
-#if defined(__WXMSW__) or defined(__WXMAC__)
-  const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-  wxIcon image;
-  image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
-
   wxString label;
   label << "P" << m_player;
   wxTextDataObject textData(label);
-  wxDropSource source(textData, this, image, image, image);
+  wxDropSource source(textData, this);
   source.DoDragDrop(wxDrag_DefaultMove);
 }
 
@@ -500,22 +492,24 @@ EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
   wxWindowBase::Layout();
 }
 
+namespace {
+
+constexpr int kMinZoom = 10;
+constexpr int kMaxZoom = 150;
+constexpr int kZoomStep = 10;
+
+int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
+
+} // namespace
+
 void EfgPanel::OnViewZoomIn(wxCommandEvent &)
 {
-  int zoom = m_treeWindow->GetZoom();
-  if (zoom < 150) {
-    zoom += 10;
-  }
-  m_treeWindow->SetZoom(zoom);
+  m_treeWindow->SetZoom(ClampZoom(m_treeWindow->GetZoom() + kZoomStep));
 }
 
 void EfgPanel::OnViewZoomOut(wxCommandEvent &)
 {
-  int zoom = m_treeWindow->GetZoom();
-  if (zoom > 10) {
-    zoom -= 10;
-  }
-  m_treeWindow->SetZoom(zoom);
+  m_treeWindow->SetZoom(ClampZoom(m_treeWindow->GetZoom() - kZoomStep));
 }
 
 void EfgPanel::OnViewZoom100(wxCommandEvent &) { m_treeWindow->SetZoom(100); }
@@ -604,8 +598,6 @@ void EfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   auto posX = ((w - (maxX * scale)) / 2.0);
   auto posY = ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin(static_cast<int>(posX), static_cast<int>(posY));
-
-  printf("Drawing with scale %f\n", scale);
 
   // Draw!
   m_treeWindow->OnDraw(p_dc, scale);

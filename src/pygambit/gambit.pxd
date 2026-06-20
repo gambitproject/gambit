@@ -46,6 +46,7 @@ cdef extern from "core/array.h":
 cdef extern from "games/game.h":
     cdef cppclass c_GameRep "GameRep"
     cdef cppclass c_GameStrategyRep "GameStrategyRep"
+    cdef cppclass c_GameSequenceRep "GameSequenceRep"
     cdef cppclass c_GameActionRep "GameActionRep"
     cdef cppclass c_GameInfosetRep "GameInfosetRep"
     cdef cppclass c_GamePlayerRep "GamePlayerRep"
@@ -79,7 +80,19 @@ cdef extern from "games/game.h":
         c_GameInfosetRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameStrategy "GameObjectPtr<GameStrategyRep>":
+        bool operator ==(c_GameStrategy) except +
+        bool operator !=(c_GameStrategy) except +
         c_GameStrategyRep *deref "get"() except +RuntimeError
+
+    cdef cppclass c_GameSequence "GameObjectPtr<GameSequenceRep>":
+        bool operator ==(c_GameSequence) except +
+        bool operator !=(c_GameSequence) except +
+        c_GameSequenceRep *deref "get"() except +RuntimeError
+
+    cdef cppclass c_GameSubgame "GameObjectPtr<GameSubgameRep>":
+        bool operator ==(c_GameSubgame) except +
+        bool operator !=(c_GameSubgame) except +
+        c_GameSubgameRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
         shared_ptr[c_PureStrategyProfileRep] deref "operator->"() except +
@@ -95,6 +108,11 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +
         c_GameAction GetAction(c_GameInfoset) except +
+
+    cdef cppclass c_GameSequenceRep "GameSequenceRep":
+        c_GamePlayer GetPlayer() except +
+        c_GameAction GetAction() except +
+        c_GameSequence GetParent() except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
@@ -164,6 +182,16 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Sequences:
+            cppclass iterator:
+                c_GameSequence operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         c_Game GetGame() except +
         int GetNumber() except +
         int IsChance() except +
@@ -173,6 +201,8 @@ cdef extern from "games/game.h":
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
+
+        Sequences GetSequences() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError
         Infosets GetInfosets() except +
@@ -219,6 +249,33 @@ cdef extern from "games/game.h":
         c_GameAction GetPriorAction() except +
         c_GameAction GetOwnPriorAction() except +
 
+    cdef cppclass c_GameSubgameRep "GameSubgameRep":
+        cppclass SubgameCollection:
+            cppclass iterator:
+                c_GameSubgame operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
+        cppclass InfosetCollection:
+            cppclass iterator:
+                c_GameInfoset operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
+        c_Game GetGame() except +
+        c_GameNode GetRoot() except +
+        c_GameSubgame GetParent() except +
+        SubgameCollection GetChildren() except +
+        InfosetCollection GetSubgameDifference() except +
+
     cdef cppclass c_GameRep "GameRep":
         cppclass Players:
             cppclass iterator:
@@ -249,7 +306,8 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
-        int IsTree() except +
+        bool IsTree() except +
+        bool IsAgg() except +
 
         string GetTitle() except +
         void SetTitle(string) except +
@@ -315,6 +373,9 @@ cdef extern from "games/game.h":
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
+
+        c_GameSubgame GetMinimalSubgame(c_GameInfoset) except +
+        stdvector[c_GameSubgame] GetSubgames() except +
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +
@@ -431,6 +492,7 @@ cdef extern from "util.h":
     c_Game ParseEfgGame(string, bint) except +IOError
     c_Game ParseNfgGame(string, bint) except +IOError
     c_Game ParseAggGame(string, bint) except +IOError
+    c_Game ParseBaggGame(string, bint) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError

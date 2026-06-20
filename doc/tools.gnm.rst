@@ -74,9 +74,9 @@ subsets of equilibria being found.
    not specified, only the equilibria found are reported.
 
 Computing an equilibrium of
-the reduced strategic form of the example in Figure 2 of [Sel75]_::
+the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-gnm catalog/selten1975/fig2.efg
+   $ gambit-gnm catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria using a global Newton method
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project

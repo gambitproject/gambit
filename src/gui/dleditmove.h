@@ -24,13 +24,13 @@
 #define GAMBIT_GUI_DLEDITMOVE_H
 
 namespace Gambit::GUI {
-class ActionSheet;
+class ActionPanel;
 
 class EditMoveDialog final : public wxDialog {
   GameInfoset m_infoset;
   wxChoice *m_player;
   wxTextCtrl *m_infosetName;
-  ActionSheet *m_actionSheet;
+  ActionPanel *m_actionPanel;
 
   void OnOK(wxCommandEvent &);
 

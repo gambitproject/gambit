@@ -113,7 +113,7 @@ void TableWidgetBase::OnCellLeftClick(wxSheetEvent &p_event)
 }
 
 //=========================================================================
-//                class gbtTableWidgetDropTarget
+//                class TableWidgetDropTarget
 //=========================================================================
 
 //!
@@ -121,12 +121,11 @@ void TableWidgetBase::OnCellLeftClick(wxSheetEvent &p_event)
 //! communicates the location and text of the drop to its owner for
 //! further processing
 //!
-class gbtTableWidgetDropTarget : public wxTextDropTarget {
-private:
+class TableWidgetDropTarget : public wxTextDropTarget {
   TableWidgetBase *m_owner;
 
 public:
-  explicit gbtTableWidgetDropTarget(TableWidgetBase *p_owner) : m_owner(p_owner) {}
+  explicit TableWidgetDropTarget(TableWidgetBase *p_owner) : m_owner(p_owner) {}
 
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
   {
@@ -159,10 +158,13 @@ class RowPlayerWidget final : public TableWidgetBase {
 
   void OnCellRightClick(wxSheetEvent &);
 
+  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                          const wxPoint &p_pos);
+
 public:
   /// @name Lifecycle
   //@{
-  /// Constructorw
+  /// Constructor
   RowPlayerWidget(TableWidget *p_parent);
   //@}
 
@@ -187,7 +189,7 @@ RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent)
   SetScrollBarMode(SB_NEVER);
   SetGridLineColour(*wxBLACK);
 
-  wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
+  wxWindow::SetDropTarget(new TableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
@@ -203,7 +205,21 @@ void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   }
 
   const wxSheetCoords coords = p_event.GetCoords();
-  m_table->DeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow());
+  if (IsLabelCell(coords)) {
+    p_event.Skip();
+    return;
+  }
+
+  wxMenu menu;
+  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
+  deleteItem->Enable(m_table->CanDeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow()));
+  menu.Bind(
+      wxEVT_MENU,
+      [this, coords](wxCommandEvent &) {
+        m_table->DeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow());
+      },
+      wxID_DELETE);
+  PopupMenu(&menu);
 }
 
 wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
@@ -308,28 +324,65 @@ void RowPlayerWidget::OnUpdate()
   Refresh();
 }
 
+bool RowPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                                         const wxPoint &p_pos)
+{
+  if (m_table->IsRowPlayerPlacementNoOp(p_index, p_player)) {
+    return true;
+  }
+
+  const int placePlayerId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(placePlayerId, p_label);
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != placePlayerId) {
+    return false;
+  }
+
+  try {
+    m_table->SetRowPlayer(p_index, p_player);
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
 bool RowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
-  if (p_text[0] == 'P') {
-    long pl;
-    p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (p_text.empty() || p_text[0] != 'P') {
+    return false;
+  }
 
-    if (m_table->NumRowPlayers() == 0) {
-      m_table->SetRowPlayer(1, pl);
-      return true;
+  long player;
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
+    return false;
+  }
+
+  if (m_table->NumRowPlayers() == 0) {
+    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as row player"),
+                              wxPoint(p_x, p_y));
+  }
+
+  for (int col = 0; col < GetNumberCols(); col++) {
+    const wxRect rect = CellToRect(wxSheetCoords(0, col));
+    const int existingPlayer = m_table->GetRowHeaderPlayer(col);
+    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
+
+    if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
+      return ShowPlayerDropMenu(col + 1, static_cast<int>(player),
+                                wxString::Format(_("Place before %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
 
-    for (int col = 0; col < GetNumberCols(); col++) {
-      const wxRect rect = CellToRect(wxSheetCoords(0, col));
-
-      if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
-        m_table->SetRowPlayer(col + 1, pl);
-        return true;
-      }
-      else if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
-        m_table->SetRowPlayer(col + 2, pl);
-        return true;
-      }
+    if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
+      return ShowPlayerDropMenu(col + 2, static_cast<int>(player),
+                                wxString::Format(_("Place after %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
   }
 
@@ -361,6 +414,9 @@ class ColPlayerWidget final : public TableWidgetBase {
 
   void OnCellRightClick(wxSheetEvent &);
 
+  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                          const wxPoint &p_pos);
+
 public:
   /// @name Lifecycle
   //@{
@@ -390,7 +446,7 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent)
   SetGridLineColour(*wxBLACK);
   wxWindow::SetBackgroundColour(*wxLIGHT_GREY);
 
-  wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
+  wxWindow::SetDropTarget(new TableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
@@ -405,7 +461,23 @@ void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   }
 
   const wxSheetCoords coords = p_event.GetCoords();
-  m_table->DeleteColHeaderStrategy(coords.GetRow(), coords.GetCol());
+  if (IsLabelCell(coords)) {
+    p_event.Skip();
+    return;
+  }
+
+  wxMenu menu;
+  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
+  deleteItem->Enable(m_table->CanDeleteColHeaderStrategy(coords.GetRow(), coords.GetCol()));
+
+  menu.Bind(
+      wxEVT_MENU,
+      [this, coords](wxCommandEvent &) {
+        m_table->DeleteColHeaderStrategy(coords.GetRow(), coords.GetCol());
+      },
+      wxID_DELETE);
+
+  PopupMenu(&menu);
 }
 
 void ColPlayerWidget::OnUpdate()
@@ -510,28 +582,65 @@ void ColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 }
 
+bool ColPlayerWidget::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
+                                         const wxPoint &p_pos)
+{
+  if (m_table->IsColPlayerPlacementNoOp(p_index, p_player)) {
+    return true;
+  }
+
+  const int placePlayerId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(placePlayerId, p_label);
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+  if (selection != placePlayerId) {
+    return false;
+  }
+
+  try {
+    m_table->SetColPlayer(p_index, p_player);
+    return true;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
 bool ColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
-  if (p_text[0] == 'P') {
-    long pl;
-    p_text.Right(p_text.Length() - 1).ToLong(&pl);
+  if (p_text.empty() || p_text[0] != 'P') {
+    return false;
+  }
 
-    if (m_table->NumColPlayers() == 0) {
-      m_table->SetColPlayer(1, pl);
-      return true;
+  long player;
+  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
+    return false;
+  }
+
+  if (m_table->NumColPlayers() == 0) {
+    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as column player"),
+                              wxPoint(p_x, p_y));
+  }
+
+  for (int row = 0; row < GetNumberRows(); row++) {
+    const wxRect rect = CellToRect(wxSheetCoords(row, 0));
+    const int existingPlayer = m_table->GetColHeaderPlayer(row);
+    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
+
+    if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
+      return ShowPlayerDropMenu(row + 1, static_cast<int>(player),
+                                wxString::Format(_("Place before %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
 
-    for (int row = 0; row < GetNumberRows(); row++) {
-      const wxRect rect = CellToRect(wxSheetCoords(row, 0));
-
-      if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
-        m_table->SetColPlayer(row + 1, pl);
-        return true;
-      }
-      else if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
-        m_table->SetColPlayer(row + 2, pl);
-        return true;
-      }
+    if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
+      return ShowPlayerDropMenu(row + 2, static_cast<int>(player),
+                                wxString::Format(_("Place after %s"), playerLabel),
+                                wxPoint(p_x, p_y));
     }
   }
 
@@ -567,6 +676,9 @@ class PayoffsWidget : public TableWidgetBase {
   //@{
   /// Implement custom tab-traversal behavior
   void OnKeyDown(wxKeyEvent &);
+  void OnCharHook(wxKeyEvent &);
+  void HandleTabTraversal(wxKeyEvent &);
+  void MoveEditorByTab(bool p_backwards);
   //@}
 
   /// Maps columns to corresponding player
@@ -593,6 +705,8 @@ PayoffsWidget::PayoffsWidget(TableWidget *p_parent)
   CreateGrid(0, 0);
   SetRowLabelWidth(1);
   SetColLabelHeight(1);
+
+  Bind(wxEVT_CHAR_HOOK, &PayoffsWidget::OnCharHook, this);
 }
 
 //
@@ -655,13 +769,17 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
-  auto player = m_table->GetPayoffPlayer(ColToPlayer(p_coords.GetCol()));
+  auto player = m_table->GetPayoffPlayer(p_coords.GetCol());
   return {lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->SetPayoffCellValue(p_coords, p_value);
+  wxString value = p_value;
+  if (value.EndsWith(_T("/"))) {
+    value = value.Left(value.length() - 1);
+  }
+  m_table->SetPayoffCellValue(p_coords, value);
 }
 
 wxSheetCellAttr PayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -732,54 +850,65 @@ void PayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 }
 
-//!
-//! Overriding default wxSheet behavior: when editing, accepting the
-//! edited value via the TAB key automatically moves the cursor to
-//! the right *and* creates the editor in the next cell.  In addition,
-//! tabbing off the rightmost cell entry automatically "wraps" to the
-//! next row.
-//!
-void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
+void PayoffsWidget::MoveEditorByTab(bool p_backwards)
 {
-  if (GetNumberRows() && GetNumberCols()) {
-    switch (p_event.GetKeyCode()) {
-    case WXK_TAB: {
-      if (IsCellEditControlCreated()) {
-        DisableCellEditControl(true);
-
-        int newRow = GetGridCursorRow(), newCol = GetGridCursorCol();
-
-        if (p_event.ShiftDown()) {
-          newCol--;
-          if (newCol < 0) {
-            newCol = GetNumberCols() - 1;
-            newRow--;
-            if (newRow < 0) {
-              newRow = GetNumberRows() - 1;
-            }
-          }
-        }
-        else {
-          newCol++;
-          if (newCol >= GetNumberCols()) {
-            newCol = 0;
-            newRow++;
-            if (newRow >= GetNumberRows()) {
-              newRow = 0;
-            }
-          }
-        }
-        SetGridCursorCell(wxSheetCoords(newRow, newCol));
-        MakeCellVisible(GetGridCursorCell());
-        EnableCellEditControl(GetGridCursorCell());
-      }
-      break;
-    }
-    default:
-      p_event.Skip();
-    }
+  if (!GetNumberRows() || !GetNumberCols() || !IsCellEditControlCreated()) {
+    return;
   }
+
+  SetTabTraversing(true);
+  try {
+    if (IsCellEditControlCreated()) {
+      DisableCellEditControl(true);
+    }
+
+    int newRow = GetGridCursorRow();
+    int newCol = GetGridCursorCol();
+
+    if (p_backwards) {
+      --newCol;
+      if (newCol < 0) {
+        newCol = GetNumberCols() - 1;
+        --newRow;
+        if (newRow < 0) {
+          newRow = GetNumberRows() - 1;
+        }
+      }
+    }
+    else {
+      ++newCol;
+      if (newCol >= GetNumberCols()) {
+        newCol = 0;
+        ++newRow;
+        if (newRow >= GetNumberRows()) {
+          newRow = 0;
+        }
+      }
+    }
+
+    SetGridCursorCell(wxSheetCoords(newRow, newCol));
+    MakeCellVisible(GetGridCursorCell());
+    EnableCellEditControl(GetGridCursorCell());
+  }
+  catch (...) {
+    SetTabTraversing(false);
+    throw;
+  }
+  SetTabTraversing(false);
 }
+
+void PayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
+{
+  if (p_event.GetKeyCode() != WXK_TAB || !IsCellEditControlCreated()) {
+    p_event.Skip();
+    return;
+  }
+  MoveEditorByTab(p_event.ShiftDown());
+}
+
+void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
+
+void PayoffsWidget::OnCharHook(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
 
 //=========================================================================
 //                       TableWidget: Lifecycle
@@ -1043,6 +1172,30 @@ bool TableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown();
 //                      TableWidget: View state
 //=========================================================================
 
+bool TableWidget::IsRowPlayerPlacementNoOp(int p_index, int p_player) const
+{
+  for (int col = 0; col < NumRowPlayers(); ++col) {
+    if (GetRowHeaderPlayer(col) == p_player) {
+      const int currentIndex = col + 1;
+      return p_index == currentIndex || p_index == currentIndex + 1;
+    }
+  }
+
+  return false;
+}
+
+bool TableWidget::IsColPlayerPlacementNoOp(int p_index, int p_player) const
+{
+  for (int row = 0; row < NumColPlayers(); ++row) {
+    if (GetColHeaderPlayer(row) == p_player) {
+      const int currentIndex = row + 1;
+      return p_index == currentIndex || p_index == currentIndex + 1;
+    }
+  }
+
+  return false;
+}
+
 void TableWidget::SetRowPlayer(int index, int pl)
 {
   m_layout->SetRowPlayer(index, pl);
@@ -1221,11 +1374,6 @@ void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString
   try {
     m_doc->DoSetPayoff(outcome, player, value);
   }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
-  }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }
@@ -1249,6 +1397,18 @@ GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) 
 {
   auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
+}
+
+bool TableWidget::CanDeleteRowHeaderStrategy(int headerCol, int) const
+{
+  const int player = GetRowHeaderPlayer(headerCol);
+  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
+}
+
+bool TableWidget::CanDeleteColHeaderStrategy(int headerRow, int) const
+{
+  const int player = GetColHeaderPlayer(headerRow);
+  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
 }
 
 } // namespace Gambit::GUI

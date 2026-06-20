@@ -11,58 +11,61 @@ from . import games
 
 def test_infoset_set_label():
     game = games.read_from_file("basic_extensive_game.efg")
-    game.players[0].infosets[0].label = "infoset 1"
-    assert game.players[0].infosets[0].label == "infoset 1"
+    game.root.infoset.label = "infoset 1"
+    assert game.root.infoset.label == "infoset 1"
 
 
 def test_infoset_player_retrieval():
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.players[0] == game.players[0].infosets[0].player
+    p1, *_ = game.players
+    assert p1 == game.root.infoset.player
 
 
 def test_infoset_node_precedes():
     game = games.read_from_file("basic_extensive_game.efg")
-    assert not game.players[0].infosets[0].precedes(game.root)
-    assert game.players[1].infosets[0].precedes(game.root.children[0])
+    assert not game.root.infoset.precedes(game.root)
+    assert game.root.children["U1"].infoset.precedes(game.root.children["U1"])
 
 
 def test_infoset_set_player():
     game = games.read_from_file("basic_extensive_game.efg")
-    game.set_player(game.root.infoset, game.players[1])
-    assert game.root.infoset.player == game.players[1]
+    _, p2, *_ = game.players
+    game.set_player(game.root.infoset, p2)
+    assert game.root.infoset.player == p2
 
 
 def test_infoset_set_player_mismatch():
     game = games.read_from_file("basic_extensive_game.efg")
     game2 = gbt.Game.new_tree(["Frank"])
     with pytest.raises(gbt.MismatchError):
-        game.set_player(game.root.infoset, game2.players[0])
+        game.set_player(game.root.infoset, next(iter(game2.players)))
 
 
 def test_infoset_add_action_end():
     game = games.read_from_file("basic_extensive_game.efg")
-    actions = list(game.players[0].infosets[0].actions)
-    game.add_action(game.players[0].infosets[0])
-    assert list(game.players[0].infosets[0].actions)[:-1] == actions
+    actions = list(game.root.infoset.actions)
+    game.add_action(game.root.infoset)
+    assert list(game.root.infoset.actions)[:-1] == actions
 
 
 def test_infoset_add_action_before():
     game = games.read_from_file("basic_extensive_game.efg")
-    actions = list(game.players[0].infosets[0].actions)
-    game.add_action(game.players[0].infosets[0], actions[0])
-    assert list(game.players[0].infosets[0].actions)[1:] == actions
+    actions = list(game.root.infoset.actions)
+    game.add_action(game.root.infoset, actions[0])
+    assert list(game.root.infoset.actions)[1:] == actions
 
 
 def test_infoset_add_action_error():
     game = games.read_from_file("basic_extensive_game.efg")
+    _, p2, *_ = game.players
     with pytest.raises(gbt.MismatchError):
-        game.add_action(game.players[0].infosets[0], game.players[1].infosets[0].actions[0])
+        game.add_action(game.root.infoset, next(iter(p2.infosets)).actions["U2"])
 
 
 def test_infoset_plays():
     """Verify `infoset.plays` returns plays reachable from a given infoset.
     """
-    game = gbt.catalog.load("selten1975/fig1")
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     list_nodes = list(game.nodes)
     list_infosets = list(game.infosets)
 
@@ -79,7 +82,8 @@ def test_infoset_plays():
 class PriorActionsTestCase:
     """TestCase for testing own_prior_actions."""
     factory: typing.Callable[[], gbt.Game]
-    expected_results: list[tuple]
+    # each tuple is (action_path_to_a_member_node, expected_prior_actions_set)
+    expected_results: list[tuple[list[str], set]]
 
 
 @dataclasses.dataclass
@@ -94,21 +98,21 @@ PRIOR_ACTIONS_CASES = [
         PriorActionsTestCase(
             factory=functools.partial(games.read_from_file, "binary_3_levels_generic_payoffs.efg"),
             expected_results=[
-                ("Player 1", 0, {None}),
-                ("Player 1", 1, {("Player 1", 0, "Left")}),
-                ("Player 1", 2, {("Player 1", 0, "Right")}),
-                ("Player 2", 0, {None}),
+                ([], {None}),
+                (["Left", "Left"], {("Player 1", 0, "Left")}),
+                (["Right", "Left"], {("Player 1", 0, "Right")}),
+                (["Left"], {None}),
             ]
         ),
         id="perfect_recall"
     ),
     pytest.param(
         PriorActionsTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             expected_results=[
-                ("Player 1", 0, {None}),
-                ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
-                ("Player 2", 0, {None}),
+                ([], {None}),
+                (["R"], {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
+                (["R", "r"], {None}),
             ]
         ),
         id="wichardt_forgetting_action"
@@ -117,19 +121,19 @@ PRIOR_ACTIONS_CASES = [
         PriorActionsTestCase(
             factory=functools.partial(games.read_from_file, "subgames.efg"),
             expected_results=[
-                ("Player 1", 0, {None}),
-                ("Player 1", 1, {None}),
-                ("Player 1", 2, {("Player 1", 1, "1")}),
-                ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
-                ("Player 1", 4, {("Player 1", 1, "2")}),
-                ("Player 1", 5, {("Player 1", 4, "2")}),
-                ("Player 1", 6, {("Player 1", 1, "2")}),
-                ("Player 2", 0, {None}),
-                ("Player 2", 1, {("Player 2", 0, "2")}),
-                ("Player 2", 2, {("Player 2", 1, "1")}),
-                ("Player 2", 3, {("Player 2", 2, "1")}),
-                ("Player 2", 4, {("Player 2", 2, "2")}),
-                ("Player 2", 5, {("Player 2", 4, "1")}),
+                (["1"], {None}),
+                (["2"], {None}),
+                (["2", "1", "2"], {("Player 1", 1, "1")}),
+                (["2", "2", "1", "1"], {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
+                (["2", "2", "1", "2"], {("Player 1", 1, "2")}),
+                (["2", "2", "1", "2", "2", "1"], {("Player 1", 4, "2")}),
+                (["2", "2", "2"], {("Player 1", 1, "2")}),
+                ([], {None}),
+                (["2", "1"], {("Player 2", 0, "2")}),
+                (["2", "2", "1"], {("Player 2", 1, "1")}),
+                (["2", "2", "1", "1", "1"], {("Player 2", 2, "1")}),
+                (["2", "2", "1", "2", "1"], {("Player 2", 2, "2")}),
+                (["2", "2", "1", "2", "2", "1", "1"], {("Player 2", 4, "1")}),
             ]
         ),
         id="four_subgames"
@@ -138,8 +142,8 @@ PRIOR_ACTIONS_CASES = [
         PriorActionsTestCase(
             factory=functools.partial(games.read_from_file, "AM-driver-subgame.efg"),
             expected_results=[
-                ("Player 1", 0, {None, ("Player 1", 0, "S")}),
-                ("Player 2", 0, {None}),
+                ([], {None, ("Player 1", 0, "S")}),
+                (["S", "T"], {None}),
             ]
         ),
         id="AM_driver"
@@ -150,7 +154,7 @@ ABSENT_MINDEDNESS_CASES = [
     # Games without absent-mindedness
     pytest.param(
         AbsentMindednessTestCase(
-            factory=functools.partial(gbt.catalog.load, "selten1975/fig2"),
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/selten1975/fig2"),
             expected_am_paths=[]
         ),
         id="short_centipede_perfect_info"
@@ -178,7 +182,7 @@ ABSENT_MINDEDNESS_CASES = [
     ),
     pytest.param(
         AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
             expected_am_paths=[]
         ),
         id="wichardt_forgetting_action"
@@ -224,13 +228,16 @@ def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
     Test `infoset.own_prior_actions`.
 
     Verifies that the set of prior actions (as player-infoset-label tuples)
-    matches the expected results.
+    matches the expected results.  Each infoset is identified by an action
+    path to one of its member nodes.
     """
     game = test_case.factory()
 
-    for player_label, infoset_num, expected_set in test_case.expected_results:
-        player = game.players[player_label]
-        infoset = player.infosets[infoset_num]
+    for path, expected_set in test_case.expected_results:
+        node = game.root
+        for action_label in path:
+            node = node.children[action_label]
+        infoset = node.infoset
 
         actual_actions = infoset.own_prior_actions
 

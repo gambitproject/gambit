@@ -159,6 +159,66 @@ ENUMPURE_CASES = [
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_8",
     ),
+    # Action graph games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2.agg"),
+            solver=gbt.nash.enumpure_solve,
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_9",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=gbt.nash.enumpure_solve,
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_10",
+    ),
+    # Bayesian Action graph games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
+            solver=gbt.nash.enumpure_solve,
+            expected=[
+                [
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+                [
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+                [
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0],
+                ],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_11",
+    ),
 ]
 
 
@@ -310,6 +370,43 @@ ENUMMIXED_DOUBLE_CASES = [
         ),
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enumixed_double_5",
+    ),
+    # Action graph games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("10/11", "1/11"),
+                    d("10/11", "1/11"),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_double_7",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("1/2", "1/2"),
+                    d("1/2", "1/2"),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_double_8",
     ),
 ]
 
@@ -753,6 +850,27 @@ LCP_STRATEGY_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_11",
     ),
+    # Action graph game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2.agg"),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=True, use_strategic=True, stop_after=None
+            ),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [
+                    d("10/11", "1/11"),
+                    d("10/11", "1/11"),
+                ],
+                [d(0, 1), d(0, 1)],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_12",
+    ),
 ]
 
 
@@ -771,6 +889,26 @@ LOGIT_STRATEGY_CASES = [
         ),
         marks=pytest.mark.nash_logit_strategy,
         id="test_logic_strategy_1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
+            solver=gbt.nash.logit_solve,
+            expected=[
+                [
+                    [0.9124962637548039, 0.08750373624519617, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.9124962637547669, 0.08750373624523317, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [0.9124962637547208, 0.08750373624527921, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                ]
+            ],
+            prob_tol=TOL_LARGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_strategy,
+        id="test_logit_strategy_2",
     ),
 ]
 
@@ -2158,16 +2296,13 @@ ENUMPOLY_BEHAVIOR_CASES = [
     # 3-player perfect info game to test behavior two off equilibrium path
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(
-                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
-            ),
+            factory=functools.partial(games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 # candidate,10,10,1000,10000
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
                 # candidate,01,00,0000,00000
-                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)],
-                 [d(1, 0, 0, 0, 0)]],
+                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2177,9 +2312,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
     ),
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(
-                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
-            ),
+            factory=functools.partial(games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
@@ -2258,6 +2391,21 @@ LOGIT_BEHAVIOR_CASES = [
         ),
         marks=pytest.mark.nash_logit_behavior,
         id="test_logit_behavior_01",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_root_5_moves_no_nonterm_player_nodes.efg"
+            ),
+            solver=gbt.nash.logit_solve,
+            expected=[
+                [[]]  # Zero-dimension edge case (two players)
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_behavior,
+        id="test_logit_behavior_degenerate",
     ),
 ]
 
@@ -2469,7 +2617,7 @@ ENUMPURE_AGENT_CASES = [
     # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(gbt.catalog.load, "myerson1991/fig4_2"),
+            factory=functools.partial(gbt.catalog.load, "books/myerson1991/fig4_2"),
             solver=functools.partial(gbt.nash.enumpure_agent_solve),
             expected=[[[d(1, 0), d(0, 1)], [d(0, 1)]], [[d(0, 1), d(0, 1)], [d(1, 0)]]],
         ),

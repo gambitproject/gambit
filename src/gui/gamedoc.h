@@ -152,7 +152,7 @@ class GameDocument {
 
   TreeRenderConfig m_style;
   GameNode m_selectNode;
-  bool m_modified;
+  bool m_gameModified, m_unsavedResults;
 
   StrategyDominanceStack m_stratSupports;
 
@@ -181,8 +181,11 @@ public:
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified() const { return m_modified; }
-  void SetModified(bool p_modified) { m_modified = p_modified; }
+  bool IsModified() const { return m_gameModified || m_unsavedResults; }
+  bool IsGameModified() const { return m_gameModified; }
+  bool AreResultsUnsaved() const { return m_unsavedResults; }
+  void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
+  void SetUnsavedResults(bool p_unsaved) { m_unsavedResults = p_unsaved; }
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
@@ -237,9 +240,18 @@ public:
   void PostPendingChanges();
 
   /// Operations on game model
-  void DoSave(const wxString &p_filename);
-  void DoExportEfg(const wxString &p_filename);
-  void DoExportNfg(const wxString &p_filename);
+  enum class GameSaveFormat { Efg, Nfg, Workbook };
+  GameSaveFormat GetCurrentSaveFormat() const
+  {
+    if (m_filename.EndsWith(".efg")) {
+      return GameSaveFormat::Efg;
+    }
+    if (m_filename.EndsWith(".nfg")) {
+      return GameSaveFormat::Nfg;
+    }
+    return GameSaveFormat::Workbook;
+  }
+  void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
   void DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
@@ -266,12 +278,34 @@ public:
   void DoNewOutcome(GameNode p_node);
   void DoNewOutcome(const PureStrategyProfile &p_profile);
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
+                        const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
 };
+
+inline GameDocument *NewTreeDocument()
+{
+  const Game efg = NewTree();
+  efg->SetTitle("Untitled Extensive Game");
+  efg->NewPlayer()->SetLabel("Player 1");
+  efg->NewPlayer()->SetLabel("Player 2");
+  return new GameDocument(efg);
+}
+
+inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
+{
+  const Game nfg = NewTable(p_dim);
+  nfg->SetTitle("Untitled Strategic Game");
+  int pl = 1;
+  for (auto player : nfg->GetPlayers()) {
+    player->SetLabel("Player " + std::to_string(pl++));
+  }
+  return new GameDocument(nfg);
+}
 
 class GameView {
 protected:

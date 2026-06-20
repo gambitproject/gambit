@@ -1,0 +1,19 @@
+EFG 2 R "Figure 10.1 from von Stengel (2022)" { "I" "II" }
+"
+Figure 10.1 from :cite:p:`vS22`.
+It is essentially a type of poker game.
+Its description as a competition between software firms is due to
+:cite:p:`TvS02`.
+"
+
+c "" 1 "" { "1/2" 1/2 "1/2" 1/2 } 0
+p "" 1 1 "" { "T" "B" } 0
+t "" 1 "" { 0 16 }
+p "" 2 1 "" { "a" "b" } 0
+t "" 2 "" { 12 4 }
+t "" 3 "" { -4 20 }
+p "" 1 2 "" { "C" "D" } 0
+t "" 4 "" { 0 16 }
+p "" 2 1 0
+t "" 5 "" { 12 4 }
+t "" 6 "" { 20 -4}

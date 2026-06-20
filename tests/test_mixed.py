@@ -18,9 +18,9 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     """Set the action probabilities in a strategy profile called ```profile``` according to a
     list with probabilities in the order of ```profile.game.strategies```
     """
-    for i, p in enumerate(probs):
+    for strategy, p in zip(profile.game.strategies, probs, strict=True):
         # assumes rationals given as strings
-        profile[profile.game.strategies[i]] = gbt.Rational(p) if rational_flag else p
+        profile[strategy] = gbt.Rational(p) if rational_flag else p
 
 
 @pytest.mark.parametrize(
@@ -1361,7 +1361,7 @@ def test_player_regret_max_regret_consistency(
         #################################################################################
         # Selten's horse
         (
-            gbt.catalog.load("selten1975/fig1"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig1"),
             [["4/9", "5/9"], ["1/11", "10/11"], ["8/9", "1/9"]],
             [["4/9", "5/9"], ["10/11", "1/11"], ["8/9", "1/9"]],
             gbt.Rational("4/9"),
@@ -1459,13 +1459,13 @@ def test_linearity_payoff_property(
         #################################################################################
         # Selten's horse
         (
-            gbt.catalog.load("selten1975/fig1"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig1"),
             [["4/9", "5/9"], ["6/11", "5/11"], ["4/7", "3/7"]],
             ZERO,
             True,
         ),
         (
-            gbt.catalog.load("selten1975/fig1"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig1"),
             [[4 / 9, 5 / 9], [6 / 11, 5 / 11], [4 / 7, 3 / 7]],
             TOL,
             False,
@@ -1613,10 +1613,10 @@ def _get_and_check_answers(
 
 
 # For 4x4 coord nfg:
-PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25)
-PROBS_2A_doub = (0.5, 0, 0.5, 0)
-PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4")
-PROBS_2A_rat = ("1/2", "0", "1/2", "0")
+PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25)
+PROBS_2A_doub = (0.5, 0, 0.5, 0, 0.5, 0, 0.5, 0)
+PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4", "1/4", "1/4", "1/4", "1/4")
+PROBS_2A_rat = ("1/2", "0", "1/2", "0", "1/2", "0", "1/2", "0")
 # For 2x2x2 nfg and stripped_down_poker efg (both have 6 strategies in total):
 PROBS_1B_doub = (0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
 PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)

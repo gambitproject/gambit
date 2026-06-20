@@ -10,7 +10,7 @@ Gambit provides command-line interfaces for each method for computing
 Nash equilibria.  These are suitable for scripting or calling from
 other programs.  This chapter describes the use of these programs.
 For a general overview of methods for computing equilibria,
-see the survey of [McKMcL96]_.
+see the survey of :cite:p:`McKMcL96`.
 
 The graphical interface also provides a frontend for calling these
 programs and evaluating their output.  Direct use of the command-line

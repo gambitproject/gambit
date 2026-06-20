@@ -49,7 +49,7 @@ def test_game_add_players_nolabel():
 
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
-    (gbt.catalog.load("selten1975/fig2"), True),
+    (gbt.catalog.load("journals/ijgt/selten1975/fig2"), True),
     ("stripped_down_poker.efg", True),
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
     # - Centipede games
@@ -61,7 +61,7 @@ def test_game_add_players_nolabel():
 
     # Games with imperfect recall from files (game_input is a string)
     # - imperfect recall without absent-mindedness
-    ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
+    (gbt.catalog.load("journals/geb/wichardt2008"), False),  # forgetting past action
     ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
     ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
@@ -99,8 +99,8 @@ def test_getting_payoff_by_label_string():
 
 def test_getting_payoff_by_player():
     game = games.read_from_file("sample_extensive_game.efg")
-    player1 = game.players[0]
-    player2 = game.players[1]
+    player1 = game.players["Player 1"]
+    player2 = game.players["Player 2"]
     assert game[[0, 0]][player1] == 2
     assert game[[0, 1]][player1] == 2
     assert game[[1, 0]][player1] == 4
@@ -129,7 +129,7 @@ def test_outcome_index_exception_label():
         ),
         # 2 players; reduction possible for player 1; payoff ties
         (
-            gbt.catalog.load("selten1975/fig2"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig2"),
             [["1*", "21", "22"], ["1", "2"]],
             [
                 np.array([[1, 1], [0, 0], [0, 2]]),
@@ -147,7 +147,7 @@ def test_outcome_index_exception_label():
         ),
         # Selten's Horse: game with three players
         (
-            gbt.catalog.load("selten1975/fig1"),
+            gbt.catalog.load("journals/ijgt/selten1975/fig1"),
             [["1", "2"], ["1", "2"], ["1", "2"]],
             [
                 np.array([[[1, 1], [4, 0]], [[3, 0], [3, 0]]]),
@@ -370,7 +370,7 @@ def test_outcome_index_exception_label():
         # I M P E R F E C T   R E C A L L --- commented out in the test suite
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
         # (
-        #    games.read_from_file("wichardt.efg"),
+        #    gbt.catalog.load("journals/geb/wichardt2008"),
         #    [["11", "12", "21", "22"], ["1", "2"]],
         #    [
         #        np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
@@ -390,11 +390,11 @@ def test_reduced_strategic_form(
     """
     arrays = game.to_arrays()
 
-    for i, player in enumerate(game.players):
-        assert strategy_labels[i] == [s.label for s in player.strategies]
-        # convert strings to rationals
-        exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
-        assert (arrays[i] == exp_array).all()
+    for player, labels, exp_raw, arr in zip(
+        game.players, strategy_labels, np_arrays_of_rsf, arrays, strict=True
+    ):
+        assert labels == [s.label for s in player.strategies]
+        assert (arr == games.vectorized_make_rational(exp_raw)).all()
 
 
 @pytest.mark.parametrize(

@@ -313,6 +313,9 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
                    double p_firstStep, double p_maxAccel,
                    MixedBehaviorObserverFunctionType p_observer)
 {
+  if (p_start.size() == 0) {
+    return {p_start};
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
@@ -321,7 +324,6 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   if (scale != 0.0) {
     p_regret *= scale;
   }
-
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
@@ -348,6 +350,9 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
                          double p_firstStep, double p_maxAccel,
                          MixedBehaviorObserverFunctionType p_observer)
 {
+  if (p_start.size() == 0) {
+    return {p_start};
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
@@ -382,6 +387,9 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
                       MixedBehaviorObserverFunctionType p_observer)
 {
   const LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
+  if (start.size() == 0) {
+    return start;
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);

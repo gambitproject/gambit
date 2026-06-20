@@ -305,6 +305,8 @@ public:
 
   /// Are we showing dominance indicators or not?
   bool ShowDominance() const;
+  bool IsRowPlayerPlacementNoOp(int p_index, int p_player) const;
+  bool IsColPlayerPlacementNoOp(int p_index, int p_player) const;
   //@}
 
   /// @name View state
@@ -423,8 +425,12 @@ public:
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
   void RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
   void RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
+
+  bool CanDeleteRowHeaderStrategy(int headerCol, int headerRow) const;
+  bool CanDeleteColHeaderStrategy(int headerRow, int headerCol) const;
   void DeleteRowHeaderStrategy(int headerCol, int headerRow);
   void DeleteColHeaderStrategy(int headerRow, int headerCol);
+
   void SetPayoffCellValue(const wxSheetCoords &coords, const wxString &value);
   //@}
 };

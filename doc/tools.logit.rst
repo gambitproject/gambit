@@ -76,9 +76,9 @@ See the :ref:`algorithm description <logit>` for full details.
 
 Computing the principal branch, in mixed strategies, of
 the reduced strategic form of the example
-in Figure 2 of [Sel75]_::
+in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-logit -S catalog/selten1975/fig2.efg
+   $ gambit-logit -S catalog/journals/ijgt/selten1975/fig2.efg
    Compute a branch of the logit equilibrium correspondence
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

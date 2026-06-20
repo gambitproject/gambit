@@ -87,9 +87,9 @@ See the :ref:`algorithm description <liap>` for full details.
    that is not a Nash equilibrium, are all output, in addition to any
    equilibria found.
 
-Computing an equilibrium in mixed strategies of the example in Figure 2 of [Sel75]_::
+Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-liap -S catalog/selten1975/fig2.efg
+   $ gambit-liap -S catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by minimizing the Lyapunov function
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
