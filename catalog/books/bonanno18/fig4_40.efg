@@ -1,0 +1,38 @@
+EFG 2 R "Fig 4.40 from Bonanno (2018)" { "Yvonne" "Zoe" }
+"
+Fig 4.40 from :cite:p:`Gia18`.
+
+This is a simplified poker game. 
+"
+
+c "" 1 "" { "Y:A,Z:B" 1/6 "Y:A,Z:C" 1/6 "Y:B,Z:A" 1/6 "Y:B,Z:C" 1/6 "Y:C,Z:A" 1/6 "Y:C,Z:B" 1/6 } 0
+p "" 1 1 "" { "Pass" "Bet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+p "" 2 1 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 2 "Yvonne wins big" { 2, -2 }
+p "" 1 1 "" { "Pass" "Bet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+p "" 2 2 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 2 "Yvonne wins big" { 2, -2 }
+p "" 1 2 "" { "Pass" "Bet" } 0
+t "" 3 "Zoe wins small" { -1, 1 }
+p "" 2 3 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 4 "Zoe wins big" { -2, 2 }
+p "" 1 2 "" { "Pass" "Bet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+p "" 2 2 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 2 "Yvonne wins big" { 2, -2 }
+p "" 1 3 "" { "Pass" "Bet" } 0
+t "" 3 "Zoe wins small" { -1, 1 }
+p "" 2 3 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 4 "Zoe wins big" { -2, 2 }
+p "" 1 3 "" { "Pass" "Bet" } 0
+t "" 3 "Zoe wins small" { -1, 1 }
+p "" 2 1 "" { "Fold" "Meet" } 0
+t "" 1 "Yvonne wins small" { 1, -1 }
+t "" 4 "Zoe wins big" { -2, 2 }

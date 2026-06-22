@@ -17,6 +17,17 @@ CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "catalog_hierarchy.yaml"
 SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
 
 
+def use_catalog_dir(catalog_dir: Path | None = None) -> Path:
+    """Point pygambit's catalog helpers at this checkout's catalog directory.
+
+    update.py is a source-tree maintenance script, so it should not read stale
+    package-data copies from an installed or previously built pygambit.
+    """
+    catalog_dir = catalog_dir or CATALOG_DIR
+    gbt.catalog._CATALOG_RESOURCE = catalog_dir
+    return catalog_dir
+
+
 def catalog_draw_tree_settings(slug: str) -> dict:
     """Return the draw_tree settings for a given catalog slug."""
     with open(DRAW_TREE_SETTINGS_CONFIG, encoding="utf-8") as f:
@@ -408,11 +419,18 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    catalog_dir = use_catalog_dir()
+
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
     _warn_missing_descriptions(df)
-    generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
+    generate_rst_table(
+        df,
+        CATALOG_RST_TABLE,
+        regenerate_images=args.regenerate_images,
+        catalog_dir=catalog_dir,
+    )
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
         # Update the Makefile.am with the current list of catalog files
-        update_makefile()
+        update_makefile(catalog_dir=catalog_dir)

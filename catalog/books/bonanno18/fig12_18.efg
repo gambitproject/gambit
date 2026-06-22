@@ -1,0 +1,23 @@
+EFG 2 R "Fig 12.18 from Bonanno (2018)" { "Player 1" "Player 2" "Player 3" }
+"
+Fig 12.18 from :cite:p:`Gia18`.
+
+This is a game from exercise 12.5. 
+"
+
+p "" 1 1 "" { "Off" "On" } 0
+p "" 2 1 "" { "Off" "On" } 0
+p "" 3 1 "" { "Guess (Off,Off)" "Guess (Off,On)" "Guess (On,Off)" } 0
+t "" 1 "All 200 (correct guess)" { 200, 200, 200 }
+t "" 2 "P1 correct, P2 wrong, P3 gets 50" { 100, 0, 50 }
+t "" 3 "P2 correct, P1 wrong, P3 gets 50" { 0, 100, 50 }
+p "" 3 1 "" { "Guess (Off,Off)" "Guess (Off,On)" "Guess (On,Off)" } 0
+t "" 2 "P1 correct, P2 wrong, P3 gets 50" { 100, 0, 50 }
+t "" 1 "All 200 (correct guess)" { 200, 200, 200 }
+t "" 4 "All 0 (guess entirely wrong)" { 0, 0, 0 }
+p "" 2 1 "" { "Off" "On" } 0
+p "" 3 1 "" { "Guess (Off,Off)" "Guess (Off,On)" "Guess (On,Off)" } 0
+t "" 3 "P2 correct, P1 wrong, P3 gets 50" { 0, 100, 50 }
+t "" 4 "All 0 (guess entirely wrong)" { 0, 0, 0 }
+t "" 1 "All 200 (correct guess)" { 200, 200, 200 }
+t "" 5 "Both On -> immediate payoffs" { 100, 100, 300 }

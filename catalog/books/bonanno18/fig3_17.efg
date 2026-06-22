@@ -1,0 +1,26 @@
+EFG 2 R "Fig 3.17 from Bonanno (2018)" { "A" "B" "C" }
+"
+Fig 3.17 from :cite:p:`Gia18`.
+
+This is a board voting game from exercise 3.2. 
+"
+
+p "" 1 1 "" { "Promote" "Keep" "Fire" } 0
+p "" 2 1 "" { "Accept" "Disagree" } 0
+t "" 1 "Promote" { 3, 1, 2 }
+p "" 3 1 "" { "Promote" "Keep" "Fire" } 0
+t "" 1 "Promote" { 3, 1, 2 }
+t "" 2 "Keep" { 2, 3, 1 }
+t "" 3 "Fire" { 1, 2, 3 }
+p "" 2 2 "" { "Accept" "Disagree" } 0
+t "" 2 "Keep" { 2, 3, 1 }
+p "" 3 2 "" { "Promote" "Keep" "Fire" } 0
+t "" 1 "Promote" { 3, 1, 2 }
+t "" 2 "Keep" { 2, 3, 1 }
+t "" 3 "Fire" { 1, 2, 3 }
+p "" 2 3 "" { "Accept" "Disagree" } 0
+t "" 3 "Fire" { 1, 2, 3 }
+p "" 3 3 "" { "Promote" "Keep" "Fire" } 0
+t "" 1 "Promote" { 3, 1, 2 }
+t "" 2 "Keep" { 2, 3, 1 }
+t "" 3 "Fire" { 1, 2, 3 }

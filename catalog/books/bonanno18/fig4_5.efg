@@ -1,0 +1,18 @@
+EFG 2 R "Fig 4.5 from Bonanno (2018)" { "Employer" "Yvonne" "Fran" }
+"
+Fig 4.5 from :cite:p:`Gia18`.
+
+This is a game where two players interview for the same job. Only one person will be hired. 
+"
+
+p "" 1 1 "" { "Call Yvonne" "Call Fran" } 0
+p "" 2 1 "" { "Accept" "Reject" } 0
+t "" 1 "Yvonne accepts first" { 1, 2, 1 }
+p "" 3 1 "" { "Accept" "Reject" } 0
+t "" 2 "Fran accepts recycled" { 1, 1, 0 }
+t "" 3 "Both reject (unfilled)" { 0, 1, 1 }
+p "" 3 1 "" { "Accept" "Reject" } 0
+t "" 4 "Fran accepts first" { 1, 1, 2 }
+p "" 2 1 "" { "Accept" "Reject" } 0
+t "" 5 "Yvonne accepts recycled" { 1, 0, 1 }
+t "" 3 "Both reject (unfilled)" { 0, 1, 1 }

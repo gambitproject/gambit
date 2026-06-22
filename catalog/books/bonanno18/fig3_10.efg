@@ -1,0 +1,12 @@
+EFG 2 R "Fig 3.10 from Bonanno (2018)" { "Entrant" "Incumbent" }
+"
+Fig 3.10 from :cite:p:`Gia18`.
+
+This is a market entry game. 
+"
+
+p "" 1 1 "" { "Enter" "Stay out" } 0
+p "" 2 1 "" { "Fight" "Accommodate" } 0
+t "" 2 "Fight (both 0)" { 0, 0 }
+t "" 3 "Accommodate (both 2)" { 2, 2 }
+t "" 1 "Stay out (Entrant=1, Incumbent=5)" { 1, 5 }

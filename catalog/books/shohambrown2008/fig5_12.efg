@@ -1,0 +1,16 @@
+EFG 2 R "Fig 5.12 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 5.12 from :cite:p:`ShoLeyB08`.
+A game with imperfect recall. 
+Please read carefully about the definition of perfect recall, which infers three types of imperfect recall.
+"
+
+
+p "" 1 1 "" { "L" "R" } 0
+p "" 1 1 0
+t "" 1 "" { 1 0 }
+t "" 2 "" { 100 100 }
+p "" 2 2 "" { "U" "D" } 0
+t "" 3 "" { 5 1 }
+t "" 4 "" { 2 2 }

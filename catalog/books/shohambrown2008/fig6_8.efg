@@ -1,0 +1,36 @@
+EFG 2 R "Fig 6.8 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 6.8 from :cite:p:`ShoLeyB08`.
+This is a Bayesian game, represented in EFG with Nature deciding the types.
+"
+
+c "" 5 "" { "MP" 1/4 "PD" 1/4 "Coord" 1/4 "BoS" 1/4 } 0
+p "" 1 1 "" { "U" "D" } 0
+p "" 2 3 "" { "L" "R" } 0
+t "" 1 "" { 2 0 }
+t "" 2 "" { 0 2 }
+p "" 2 3 0
+t "" 3 "" { 0 2 }
+t "" 4 "" { 2 0 }
+p "" 1 1 0
+p "" 2 4 "" { "L" "R" } 0
+t "" 5 "" { 2 2 }
+t "" 6 "" { 0 3 }
+p "" 2 4 0
+t "" 7 "" { 3 0 }
+t "" 8 "" { 1 1 }
+p "" 1 2 "" { "U" "D" } 0
+p "" 2 3 0
+t "" 9 "" { 2 2 }
+t "" 10 "" { 0 0 }
+p "" 2 3 0
+t "" 11 "" { 0 0 }
+t "" 12 "" { 1 1 }
+p "" 1 2 0
+p "" 2 4 0
+t "" 13 "" { 2 1 }
+t "" 14 "" { 0 0 }
+p "" 2 4 0
+t "" 15 "" { 0 0 }
+t "" 16 "" { 1 2 }
