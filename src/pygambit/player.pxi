@@ -247,7 +247,12 @@ class Player:
 
     @property
     def label(self) -> str:
-        """Gets or sets the text label of the player."""
+        """Gets or sets the text label of the player.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.player.deref().GetLabel().decode("ascii")
 
     @label.setter
