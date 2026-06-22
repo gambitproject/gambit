@@ -9,10 +9,26 @@ import pygambit as gbt
 from . import games
 
 
-def test_infoset_set_label():
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_infoset_set_label(label):
     game = games.read_from_file("basic_extensive_game.efg")
-    game.root.infoset.label = "infoset 1"
-    assert game.root.infoset.label == "infoset 1"
+    game.root.infoset.label = label
+    assert game.root.infoset.label == label
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_infoset_label_invalid_raises_valueerror(label):
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.root.infoset.label = label
+
+
+@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
+def test_infoset_label_non_ascii_rejected(label):
+    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(UnicodeEncodeError):
+        game.root.infoset.label = label
 
 
 def test_infoset_player_retrieval():
