@@ -49,6 +49,7 @@ doc = [
     "jupyter_sphinx",
     "pyyaml",
     "sphinxcontrib-bibtex",
+    "gtdraw",
 ]
 
 [project.urls]
