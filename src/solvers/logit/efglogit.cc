@@ -374,7 +374,6 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
         [lam](const Vector<double> &x, const Vector<double> &) -> double {
           return x.back() - lam;
         });
-
     ret.push_back(callback.GetProfiles().back());
   }
   return ret;
