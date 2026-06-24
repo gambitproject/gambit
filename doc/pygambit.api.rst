@@ -357,5 +357,7 @@ Catalog of games
    :toctree: api/
 
    load
-   load_openspiel
+   generate_openspiel
+   generate_gamut
+   gamut_games
    games
