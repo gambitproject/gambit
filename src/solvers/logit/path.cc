@@ -138,14 +138,16 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   const double c_eta = 0.1;      // perturbation to avoid cancellation
                                  // in calculating contraction rate
   double h = m_hStart;           // initial stepsize
-  const double c_hmin = 1.0e-8;  // minimal stepsize
-  const int c_maxIter = 100;     // maximum iterations in corrector
+  const double c_hmin = 1.0e-11; // minimal stepsize
+  const int c_maxIter = 400;     // maximum iterations in corrector
 
-  bool newton = false;             // using Newton steplength (for zero-finding)
-  const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
-  double pert = 0.0;               // The current version of the perturbation being applied
-  double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
-
+  bool newton = false;          // using Newton steplength (for zero-finding)
+  const double c_pert = 0.0001; // The size of perturbation to apply to avoid bifurcation traps
+  double pert = 0.0;            // The current version of the perturbation being applied
+  double pert_countdown = 0.0;  // How much longer (in arclength) to apply perturbation
+  const double min_pert_countdown = 0.05; // Minimum amount of perturbation to apply.
+  const double min_lambda = -1e-6;
+  // Minimum value for lambda when in previous iteration it was positive.
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.size()), newT(x.size());
@@ -180,11 +182,16 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       double dist;
 
       p_function(u, y);
-      y[1] += pert;
+      if (pert != 0.0) {
+        for (size_t i = 1; i <= y.size(); i++) {
+          // Symmetry breaking, perturbing all directions with an altenating sign
+          y[i] += pert * (i % 2 == 0 ? 1.0 : -1.0);
+        }
+      }
       NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
-        accept = false;
+        accept = false; // H(u,y) is too far from zero; reject PC step and reduce stepsize
         break;
       }
 
@@ -219,8 +226,14 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
         pert = c_pert;
-        pert_countdown = abs(2 * h);
+        pert_countdown = std::max(fabs(10.0 * h), min_pert_countdown);
       }
+    }
+
+    // If lambda was positive in the previous iteration, and we are now in the region of negative
+    // lambda, we are likely heading towards the wrong direction, so we reject this step and reduce
+    // the stepsize.
+    if (u.back() < min_lambda && x.back() >= 0.0) {
       accept = false;
     }
 
