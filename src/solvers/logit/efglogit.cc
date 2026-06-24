@@ -340,7 +340,6 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         return RegretTerminationFunction(game, p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
-
   return callback.GetProfiles();
 }
 
