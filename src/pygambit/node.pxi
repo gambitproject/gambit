@@ -96,6 +96,94 @@ class NodeChildren:
 
 
 @cython.cclass
+class NodeInfoset:
+    """The information set to which a node currently belongs.
+
+    A lazy, node-anchored view: holds the node and resolves its information set on each access,
+    so the value reflects the current state of the game even after the game is mutated.
+
+    .. versionadded:: 16.7.0
+    """
+    node = cython.declare(c_GameNode)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a NodeInfoset outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> NodeInfoset:
+        obj: NodeInfoset = NodeInfoset.__new__(NodeInfoset)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _resolve(self) -> Infoset:
+        if self.node.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
+            return None
+        return Infoset.wrap(self.node.deref().GetInfoset())
+
+    def resolve(self) -> Infoset:
+        """Return the information set this node currently belongs to.
+
+        Returns ``None`` if the node is terminal (belongs to no information set).
+        Unlike accessing this object's attributes, which proxy through to the
+        current information set lazily, this returns the resolved ``Infoset``
+        object (or ``None``) at the moment of the call.
+
+        .. versionadded:: 16.7.0
+        """
+        return self._resolve()
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(f"'NodeInfoset' object has no attribute '{name}'")
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                f"node's information set is currently None (terminal node); "
+                f"cannot access '{name}'"
+            )
+        return getattr(resolved, name)
+
+    @property
+    def label(self):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                "node's information set is currently None (terminal node); "
+                "cannot access 'label'"
+            )
+        return resolved.label
+
+    @label.setter
+    def label(self, value):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                "node's information set is currently None (terminal node); "
+                "cannot set 'label'"
+            )
+        resolved.label = value
+
+    def __repr__(self) -> str:
+        resolved = self._resolve()
+        return repr(resolved) if resolved is not None else "None"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        mine = self._resolve()
+        if isinstance(other, NodeInfoset):
+            other = cython.cast(NodeInfoset, other)._resolve()
+        if mine is None or other is None:
+            return mine is None and other is None
+        return mine == other
+
+    def __bool__(self) -> bool:
+        return self._resolve() is not None
+
+    __hash__ = None
+
+
+@cython.cclass
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
@@ -153,15 +241,19 @@ class Node:
         return Game.wrap(self.node.deref().GetGame())
 
     @property
-    def infoset(self) -> Infoset | None:
-        """The information set to which this node belongs.
+    def infoset(self) -> NodeInfoset:
+        """The infoset to which this node currently belongs.
 
-        If this is a terminal node, which belongs to no information set,
-        None is returned.
+        Returns a lazy, node-anchored view resolved on each access, so the value reflects
+        the current state of the game even if the game is mutated after this property is read.
+        For a terminal node, which belongs to no infoset, the view is falsy and
+        ``resolve()`` returns ``None``.
+
+        .. versionchanged:: 16.7.0
+            Returns a lazily-evaluated, node-anchored view rather than capturing
+            the infoset at the time of access.
         """
-        if self.node.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
-            return Infoset.wrap(self.node.deref().GetInfoset())
-        return None
+        return NodeInfoset.wrap(self.node)
 
     @property
     def player(self) -> Player | None:

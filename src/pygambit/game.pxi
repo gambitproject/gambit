@@ -1677,10 +1677,19 @@ class Game:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         TypeError
-            If `infoset` is not an `Infoset` or a `str`
+            If `infoset` is not an `Infoset`, ``NodeInfoset``, or a `str`
         ValueError
-            If `infoset` is an empty `str` or all spaces
+            If `infoset` is an empty `str` or all spaces, or is a ``NodeInfoset`` that
+            resolves to no information set (its node is terminal).
         """
+        if isinstance(infoset, NodeInfoset):
+            resolved = cython.cast(NodeInfoset, infoset)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no information set "
+                    f"(the node is terminal)"
+                )
+            infoset = resolved
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1766,7 +1775,7 @@ class Game:
         self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
             action.label = label
-        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
+        resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
