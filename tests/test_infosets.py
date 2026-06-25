@@ -260,7 +260,8 @@ def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
     game = test_case.factory()
 
     expected_infosets = {
-        _get_node_by_path(game, path).infoset for path in test_case.expected_am_paths
+        _get_node_by_path(game, path).infoset.resolve()
+        for path in test_case.expected_am_paths
         }
     actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
 

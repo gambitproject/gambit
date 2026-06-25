@@ -13,9 +13,29 @@ from . import games
 def test_get_infoset():
     """Test to ensure that we can retrieve an infoset for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.infoset is not None
-    assert game.root.children["U1"].infoset is not None
-    assert game.root.children["U1"].children["D2"].children["U3"].infoset is None
+    assert game.root.infoset
+    assert game.root.children["U1"].infoset
+    assert not game.root.children["U1"].children["D2"].children["U3"].infoset
+
+
+def test_infoset_equality_is_symmetric():
+    """A node-anchored infoset proxy and the resolved Infoset compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    proxy = game.root.infoset
+    infoset = proxy.resolve()
+    assert proxy == infoset
+    assert infoset == proxy
+
+
+def test_node_infoset_truthiness():
+    """A node-anchored infoset view is truthy iff the node currently has an
+    infoset, and tracks mutation across the terminal boundary."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = terminal.infoset
+    assert not proxy
+    game.append_move(terminal, game.players["Player 1"], ["a", "b"])
+    assert proxy
 
 
 def test_get_outcome():
@@ -534,12 +554,13 @@ def test_insert_move_error_player_mismatch():
 
 
 def test_node_leave_infoset():
-    """Test to ensure it's possible to remove a node from an infoset"""
+    """A node-anchored infoset proxy is lazy: it re-resolves after the node leaves its infoset."""
     game = games.read_from_file("basic_extensive_game.efg")
-    p2_infoset = game.root.children["U1"].infoset
-    assert len(p2_infoset.members) == 2
-    game.leave_infoset(game.root.children["U1"])
-    assert len(p2_infoset.members) == 1
+    node = game.root.children["U1"]
+    proxy = node.infoset
+    assert len(proxy.members) == 2
+    game.leave_infoset(node)
+    assert list(proxy.members) == [node]
 
 
 def test_node_delete_parent():
