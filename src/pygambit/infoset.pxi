@@ -145,11 +145,10 @@ class Infoset:
         else:
             return f"Infoset(player={self.player}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Infoset) and
-            self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Infoset):
+            return NotImplemented
+        return self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
