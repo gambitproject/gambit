@@ -51,18 +51,6 @@ The current stable release of Gambit is |release|.
 
       Double-click the `.dmg` file to mount it, then drag the Gambit application to your Applications folder.
 
-   .. warning::
-    Gambit's macOS application is **not signed or notarized** by Apple.
-    Gatekeeper will block opening it by default.
-
-    To open it anyway, right-click (or Control-click) the Gambit application and choose
-    **Open** from the context menu, then confirm in the dialog that appears.
-    Alternatively, go to **System Settings → Privacy & Security** and click **Open Anyway**
-    after the first blocked launch attempt.
-
-    If your administrator privileges prevent this, use the Homebrew installation
-    or build from source (see the :ref:`developer build instructions <building-from-source>`).
-
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
 
