@@ -22,7 +22,7 @@ def test_infoset_equality_is_symmetric():
     """A node-anchored infoset proxy and the resolved Infoset compare equal from either side."""
     game = games.read_from_file("basic_extensive_game.efg")
     proxy = game.root.infoset
-    infoset = proxy.resolve()
+    infoset = next(iter(game.infosets))
     assert proxy == infoset
     assert infoset == proxy
 
@@ -561,6 +561,16 @@ def test_node_leave_infoset():
     assert len(proxy.members) == 2
     game.leave_infoset(node)
     assert list(proxy.members) == [node]
+
+
+def test_node_infoset_becomes_null_when_truncated():
+    """A captured infoset proxy re-resolves to null after the node is truncated to a leaf."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    proxy = node.infoset
+    assert proxy
+    game.delete_tree(node)
+    assert not proxy
 
 
 def test_node_delete_parent():
