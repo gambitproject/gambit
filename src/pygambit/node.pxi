@@ -48,16 +48,16 @@ class NodeChildren:
     def __getitem__(self, action: str | Action) -> Node:
         """Returns the successor node which is reached after `action` is played.
 
-        `action` may be an ``Action`` at this node's information set, or its label.
+        `action` may be an ``Action`` at this node's infoset, or its label.
 
         Raises
         ------
         KeyError
             If `action` is a string and no action with that label exists at the node's
-            information set, or if the node is terminal.
+            infoset, or if the node is terminal.
         ValueError
             If `action` is an empty or all-whitespace string, or is an ``Action``
-            from a different information set.
+            from a different infoset.
         TypeError
             If `action` is not a ``str`` or an ``Action``.
 
@@ -85,7 +85,7 @@ class NodeChildren:
             try:
                 return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
             except IndexError:
-                raise ValueError("Action is from a different information set than node") from None
+                raise ValueError("Action is from a different infoset than node") from None
         if isinstance(action, int):
             raise TypeError(
                 "node children cannot be indexed by position; index by the action taken "
@@ -97,9 +97,9 @@ class NodeChildren:
 
 @cython.cclass
 class NodeInfoset:
-    """The information set to which a node currently belongs.
+    """The infoset to which a node currently belongs.
 
-    A lazy, node-anchored view: holds the node and resolves its information set on each access,
+    A lazy, node-anchored view: holds the node and resolves its infoset on each access,
     so the value reflects the current state of the game even after the game is mutated.
 
     .. versionadded:: 16.7.0
@@ -122,25 +122,13 @@ class NodeInfoset:
             return None
         return Infoset.wrap(self.node.deref().GetInfoset())
 
-    def resolve(self) -> Infoset:
-        """Return the information set this node currently belongs to.
-
-        Returns ``None`` if the node is terminal (belongs to no information set).
-        Unlike accessing this object's attributes, which proxy through to the
-        current information set lazily, this returns the resolved ``Infoset``
-        object (or ``None``) at the moment of the call.
-
-        .. versionadded:: 16.7.0
-        """
-        return self._resolve()
-
     def __getattr__(self, name):
         if name.startswith("_"):
             raise AttributeError(f"'NodeInfoset' object has no attribute '{name}'")
         resolved = self._resolve()
         if resolved is None:
             raise AttributeError(
-                f"node's information set is currently None (terminal node); "
+                f"node's infoset is currently None (terminal node); "
                 f"cannot access '{name}'"
             )
         return getattr(resolved, name)
@@ -150,7 +138,7 @@ class NodeInfoset:
         resolved = self._resolve()
         if resolved is None:
             raise AttributeError(
-                "node's information set is currently None (terminal node); "
+                "node's infoset is currently None (terminal node); "
                 "cannot access 'label'"
             )
         return resolved.label
@@ -160,7 +148,7 @@ class NodeInfoset:
         resolved = self._resolve()
         if resolved is None:
             raise AttributeError(
-                "node's information set is currently None (terminal node); "
+                "node's infoset is currently None (terminal node); "
                 "cannot set 'label'"
             )
         resolved.label = value
@@ -180,7 +168,10 @@ class NodeInfoset:
     def __bool__(self) -> bool:
         return self._resolve() is not None
 
-    __hash__ = None
+    def __hash__(self) -> int:
+        # Hash by the resolved infoset (transitional).
+        resolved = self._resolve()
+        return hash(resolved) if resolved is not None else 0
 
 
 @cython.cclass
@@ -246,12 +237,9 @@ class Node:
 
         Returns a lazy, node-anchored view resolved on each access, so the value reflects
         the current state of the game even if the game is mutated after this property is read.
-        For a terminal node, which belongs to no infoset, the view is falsy and
-        ``resolve()`` returns ``None``.
+        For a terminal node, which belongs to no infoset, the view is falsy and equals ``None``.
 
         .. versionchanged:: 16.7.0
-            Returns a lazily-evaluated, node-anchored view rather than capturing
-            the infoset at the time of access.
         """
         return NodeInfoset.wrap(self.node)
 
