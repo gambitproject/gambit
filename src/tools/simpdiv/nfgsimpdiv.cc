@@ -59,7 +59,6 @@ Array<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_c
   std::default_random_engine engine;
   Array<MixedStrategyProfile<Rational>> profiles;
   for (int i = 1; i <= p_count; i++) {
-    std::cout << "profile " << i << std::endl;
     profiles.push_back(p_game->NewRandomStrategyProfile(denom, engine));
   }
   return profiles;
