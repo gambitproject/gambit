@@ -5,8 +5,9 @@ import pygambit as gbt
 from . import games
 
 
-@pytest.mark.parametrize("game,label", [(games.create_stripped_down_poker_efg(), "random label")])
-def test_set_action_label(game: gbt.Game, label: str):
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_set_action_label(label: str):
+    game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
     action.label = label
     assert action.label == label
@@ -22,6 +23,23 @@ def test_set_duplicate_action_futurewarning():
     game = games.create_stripped_down_poker_efg()
     with pytest.warns(FutureWarning):
         next(iter(game.root.infoset.actions)).label = "Queen"
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_action_label_invalid_raises_valueerror(label: str):
+    game = games.create_stripped_down_poker_efg()
+    action = next(iter(game.root.infoset.actions))
+    with pytest.raises(ValueError):
+        action.label = label
+
+
+@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
+def test_action_label_non_ascii_rejected(label: str):
+    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+    game = games.create_stripped_down_poker_efg()
+    action = next(iter(game.root.infoset.actions))
+    with pytest.raises(UnicodeEncodeError):
+        action.label = label
 
 
 @pytest.mark.parametrize(

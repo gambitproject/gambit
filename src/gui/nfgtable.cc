@@ -1332,7 +1332,12 @@ void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wx
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
 
-  m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
+  try {
+    m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
@@ -1340,7 +1345,12 @@ void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wx
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
 
-  m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
+  try {
+    m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
