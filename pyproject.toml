@@ -49,6 +49,7 @@ doc = [
     "jupyter_sphinx",
     "pyyaml",
     "sphinxcontrib-bibtex",
+    "myst-parser",
     "gtdraw",
 ]
 
@@ -96,7 +97,7 @@ max-line-length = 99
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
-pythonpath = ["build_support/catalog"]
+pythonpath = ["build_support/catalog", "build_support/releases"]
 markers = [
     "nash_enumpure_strategy: tests of enumpure_solve in pure strategies",
     "nash_enumpure_agent: tests of enumpure_solve in pure behaviors",
