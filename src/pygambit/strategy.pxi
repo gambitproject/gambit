@@ -150,11 +150,6 @@ class Sequence:
         return f"Sequence(player={self.player}, actions={self.actions})"
 
     def __eq__(self, other: typing.Any) -> bool:
-        print("__eq__")
-        print(isinstance(other, Sequence))
-        print(type(other))
-        if isinstance(other, Sequence):
-            print(self.sequence.deref() == cython.cast(Sequence, other).sequence.deref())
         return (
             isinstance(other, Sequence) and
             self.sequence.deref() == cython.cast(Sequence, other).sequence.deref()
@@ -176,7 +171,6 @@ class Sequence:
     @property
     def parent(self) -> Sequence | None:
         """The parent (predecessor) of the sequence."""
-        print(self)
         if self.sequence.deref().GetParent() == cython.cast(c_GameSequence, NULL):
             return None
         return Sequence.wrap(self.sequence.deref().GetParent())
@@ -185,10 +179,7 @@ class Sequence:
     def children(self) -> list[Sequence]:
         """The immediate children (successors) of the sequence."""
         ret: list[Sequence] = []
-        print("Looking for children of", self)
         for seq in self.player.sequences:
-            print("Sequence", seq)
-            print("Parent", seq.parent)
             if seq.parent == self:
                 ret.append(seq)
         return ret
