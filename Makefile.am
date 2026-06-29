@@ -471,6 +471,8 @@ gambit_SOURCES = \
 	src/gui/analysis.h \
 	src/gui/app.cc \
 	src/gui/app.h \
+	src/gui/editlabel.cc \
+	src/gui/editlabel.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
 	src/gui/dlabout.cc \

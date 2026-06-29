@@ -23,13 +23,15 @@
 #ifndef GAMBIT_GUI_DLEDITMOVE_H
 #define GAMBIT_GUI_DLEDITMOVE_H
 
+#include "editlabel.h"
+
 namespace Gambit::GUI {
 class ActionPanel;
 
 class EditMoveDialog final : public wxDialog {
   GameInfoset m_infoset;
   wxChoice *m_player;
-  wxTextCtrl *m_infosetName;
+  LabelTextCtrl *m_infosetLabel;
   ActionPanel *m_actionPanel;
 
   void OnOK(wxCommandEvent &);
@@ -39,11 +41,11 @@ public:
   EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetInfosetName() const { return m_infosetName->GetValue(); }
+  wxString GetInfosetLabel() const { return m_infosetLabel->GetNormalizedValue(); }
   int GetPlayer() const { return (m_player->GetSelection() + 1); }
 
   int NumActions() const;
-  wxString GetActionName(int p_act) const;
+  wxString GetActionLabel(int p_act) const;
   Array<Number> GetActionProbs() const;
 };
 } // namespace Gambit::GUI
