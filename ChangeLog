@@ -39,6 +39,8 @@
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
 - Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
+- Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
+  improved warning messages on closing windows for games or workspaces with unsaved changes.
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
