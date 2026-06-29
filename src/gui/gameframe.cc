@@ -646,6 +646,9 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
   const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
 
+  // Rename this predicate as appropriate for your game model.
+  const bool isExtensiveGame = m_doc->GetGame()->IsTree();
+
   auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
       m_doc->DoSave(path, format);
@@ -660,13 +663,19 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
     return;
   }
 
+  const auto nativeFormat =
+      isExtensiveGame ? GameDocument::GameSaveFormat::Efg : GameDocument::GameSaveFormat::Nfg;
+
+  const wxString nativeExt = isExtensiveGame ? wxT("efg") : wxT("nfg");
+
+  const wxString nativeWildcard = isExtensiveGame ? wxT("Gambit extensive games (*.efg)|*.efg")
+                                                  : wxT("Gambit strategic games (*.nfg)|*.nfg");
+
   const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
 
   wxFileDialog dialog(
       this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
-      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+      wxT("Gambit workspaces (*.gbt)|*.gbt|") + nativeWildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() != wxID_OK) {
     return;
@@ -674,28 +683,41 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   wxFileName filename(dialog.GetPath());
 
+  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workspace;
+
   if (!filename.HasExt()) {
     switch (dialog.GetFilterIndex()) {
     case 0:
       filename.SetExt(wxT("gbt"));
+      format = GameDocument::GameSaveFormat::Workspace;
       break;
+
     case 1:
-      filename.SetExt(wxT("efg"));
+      filename.SetExt(nativeExt);
+      format = nativeFormat;
       break;
-    case 2:
-      filename.SetExt(wxT("nfg"));
-      break;
+
     default:
       break;
     }
   }
-  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workspace;
-  if (filename.GetExt() == wxT("efg")) {
-    format = GameDocument::GameSaveFormat::Efg;
+  else {
+    const wxString ext = filename.GetExt().Lower();
+
+    if (ext == wxT("gbt")) {
+      format = GameDocument::GameSaveFormat::Workspace;
+    }
+    else if (ext == nativeExt) {
+      format = nativeFormat;
+    }
+    else {
+      wxMessageBox(
+          _("The selected filename does not use a supported extension for this game type."),
+          _("Unsupported file type"), wxOK | wxICON_ERROR, this);
+      return;
+    }
   }
-  else if (filename.GetExt() == wxT("nfg")) {
-    format = GameDocument::GameSaveFormat::Nfg;
-  }
+
   doSave(filename.GetFullPath(), format);
 }
 
