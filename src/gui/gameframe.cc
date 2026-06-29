@@ -84,7 +84,7 @@ ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_behavProfiles = new MixedBehaviorProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
@@ -160,21 +160,21 @@ void AnalysisNotebook::ShowMixed(bool p_show) { m_profiles->ShowMixed(p_show); }
 
 void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
 {
-  m_doc->SetProfileList(p_event.GetSelection() + 1);
+  m_doc->DoSelectEquilibriumOutput(p_event.GetSelection() + 1);
 }
 
 void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
-  for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
+  for (int i = 1; i <= m_doc->GetWorkspace().NumProfileLists(); i++) {
     wxString label;
     label << wxT("Profiles ") << i;
     m_choices->Append(label);
   }
-  m_choices->SetSelection(m_doc->GetCurrentProfileList() - 1);
+  m_choices->SetSelection(m_doc->GetWorkspace().GetCurrentProfileList() - 1);
 
-  if (m_doc->GetCurrentProfileList() > 0) {
-    m_description->SetLabel(m_doc->GetProfiles().GetDescription());
+  if (m_doc->GetWorkspace().GetCurrentProfileList() > 0) {
+    m_description->SetLabel(m_doc->GetWorkspace().GetProfiles().GetDescription());
   }
 }
 
@@ -264,7 +264,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_efgPanel = new EfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);
     m_splitter->Initialize(m_efgPanel);
@@ -291,7 +291,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   SetSizer(topSizer);
   wxTopLevelWindowBase::Layout();
 
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_efgPanel->SetFocus();
   }
   else {
@@ -335,11 +335,11 @@ void GameFrame::OnUpdate()
 
   GetToolBar()->EnableTool(GBT_MENU_EDIT_NEWPLAYER, !m_efgPanel || m_efgPanel->IsShown());
 
-  menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->NumProfileLists() > 0);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->NumProfileLists() > 0);
+  menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
   GetToolBar()->EnableTool(GBT_MENU_FORMAT_DECIMALS_DELETE, m_doc->GetStyle().NumDecimals() > 1);
 
-  if (m_doc->NumProfileLists() == 0 && m_splitter->IsSplit()) {
+  if (m_doc->GetWorkspace().NumProfileLists() == 0 && m_splitter->IsSplit()) {
     m_splitter->Unsplit(m_analysisPanel);
   }
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
@@ -568,7 +568,7 @@ void GameFrame::MakeToolbar()
   toolBar->AddTool(GBT_MENU_EDIT_NEWPLAYER, wxEmptyString, wxBitmap(newplayer_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Add a new player"), _("Add a new player to the game"),
                    nullptr);
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxEmptyString, wxBitmap(zoomin_xpm), wxNullBitmap,
                      wxITEM_NORMAL, _("Zoom in"), _("Increase magnification"), nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, wxEmptyString, wxBitmap(zoomout_xpm), wxNullBitmap,
@@ -590,7 +590,7 @@ void GameFrame::MakeToolbar()
 
   toolBar->AddSeparator();
 
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxEmptyString, wxBitmap(table_xpm), wxNullBitmap,
                      wxITEM_CHECK, _("Display the reduced strategic representation of the game"),
                      _("Display the reduced strategic representation of the game"), nullptr);
@@ -630,7 +630,7 @@ void GameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(
       this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
-      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
           wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -646,6 +646,9 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
   const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
 
+  // Rename this predicate as appropriate for your game model.
+  const bool isExtensiveGame = m_doc->GetGame()->IsTree();
+
   auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
       m_doc->DoSave(path, format);
@@ -660,13 +663,19 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
     return;
   }
 
+  const auto nativeFormat =
+      isExtensiveGame ? GameDocument::GameSaveFormat::Efg : GameDocument::GameSaveFormat::Nfg;
+
+  const wxString nativeExt = isExtensiveGame ? wxT("efg") : wxT("nfg");
+
+  const wxString nativeWildcard = isExtensiveGame ? wxT("Gambit extensive games (*.efg)|*.efg|")
+                                                  : wxT("Gambit strategic games (*.nfg)|*.nfg|");
+
   const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
 
   wxFileDialog dialog(
       this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
-      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+      nativeWildcard + wxT("Gambit workspaces (*.gbt)|*.gbt"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() != wxID_OK) {
     return;
@@ -674,28 +683,41 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   wxFileName filename(dialog.GetPath());
 
+  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workspace;
+
   if (!filename.HasExt()) {
     switch (dialog.GetFilterIndex()) {
     case 0:
       filename.SetExt(wxT("gbt"));
+      format = GameDocument::GameSaveFormat::Workspace;
       break;
+
     case 1:
-      filename.SetExt(wxT("efg"));
+      filename.SetExt(nativeExt);
+      format = nativeFormat;
       break;
-    case 2:
-      filename.SetExt(wxT("nfg"));
-      break;
+
     default:
       break;
     }
   }
-  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workbook;
-  if (filename.GetExt() == wxT("efg")) {
-    format = GameDocument::GameSaveFormat::Efg;
+  else {
+    const wxString ext = filename.GetExt().Lower();
+
+    if (ext == wxT("gbt")) {
+      format = GameDocument::GameSaveFormat::Workspace;
+    }
+    else if (ext == nativeExt) {
+      format = nativeFormat;
+    }
+    else {
+      wxMessageBox(
+          _("The selected filename does not use a supported extension for this game type."),
+          _("Unsupported file type"), wxOK | wxICON_ERROR, this);
+      return;
+    }
   }
-  else if (filename.GetExt() == wxT("nfg")) {
-    format = GameDocument::GameSaveFormat::Nfg;
-  }
+
   doSave(filename.GetFullPath(), format);
 }
 
@@ -867,18 +889,18 @@ void GameFrame::OnFileExportSVG(wxCommandEvent &)
   }
 }
 
-void GameFrame::OnFileExit(wxCommandEvent &p_event)
+void GameFrame::OnFileExit(wxCommandEvent &)
 {
-  if (wxGetApp().AreDocumentsModified()) {
-    if (wxMessageBox(wxT("There are modified games.\n") wxT("Any unsaved changes will be lost!\n")
-                         wxT("Close anyway?"),
-                     _("Warning"), wxOK | wxCANCEL) == wxCANCEL) {
+  while (auto *topWindow = wxGetApp().GetTopWindow()) {
+    topWindow->Raise();
+    const auto before = wxGetApp().GetTopWindow();
+    topWindow->Close();
+
+    // The close was vetoed, or otherwise did not destroy/advance the top window.
+    // In that case, abort application exit.
+    if (wxGetApp().GetTopWindow() == before) {
       return;
     }
-  }
-
-  while (wxGetApp().GetTopWindow()) {
-    delete wxGetApp().GetTopWindow();
   }
 }
 
@@ -1201,7 +1223,7 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
     wxPostEvent(m_nfgPanel, p_event);
   }
   if (!p_event.IsChecked()) {
-    m_doc->TopStrategyElimLevel();
+    m_doc->DoTopDominanceLevel();
   }
 }
 
@@ -1291,18 +1313,17 @@ namespace {
 
 wxString CloseWarningMessage(GameDocument *p_doc)
 {
-  if (p_doc->IsGameModified() && !p_doc->AreResultsUnsaved()) {
+  if (p_doc->IsGameModified() && !p_doc->IsWorkspaceModified()) {
     return _("This game has unsaved changes.\n\n"
              "Close without saving?");
   }
-  if (!p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+  if (!p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
     return _("There are unsaved computational results.\n\n"
-             "These changes are not saved in ordinary game files.\n"
+             "These can be saved in a Gambit workspace file.\n"
              "Close without saving?");
   }
-  if (p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
-    return _("This game has unsaved changes, and there are unsaved computational results "
-             "unsaved computational results or workspace changes.\n\n"
+  if (p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
+    return _("This game has unsaved changes, and there are unsaved computational results.\n\n"
              "Close without saving?");
   }
   return wxEmptyString;

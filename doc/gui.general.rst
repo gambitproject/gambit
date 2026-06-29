@@ -80,30 +80,14 @@ versions dating back to release 0.94 in 1995. (Users interested in the
 details of these file formats can consult :ref:`file-formats`
 for more information.)
 
-Beginning with release 2005.12.xx, the graphical interface now reads
-and writes a new file format, which is referred to as a"Gambit
-workbook." This extended file format stores not only the
+The graphical interface reads and writes an extended format, referred to
+as a "Gambit workspace".
+This stores not only the
 representation of the game, but also additional information, including
 parameters for laying out the game tree, the colors assigned to
 players, any equilibria or other analysis done on the game, and so
-forth. So, for example, the workbook file can be used to store the
+forth. So, for example, the workspace file can be used to store the
 analysis of a game and then return to it. These files by convention
 end in the extension .gbt.
-
 The graphical interface will read files in all three formats: .gbt,
-.efg, and .nfg. The "Save" and "Save as" commands, however, always
-save in the Gambit workbook (.gbt) format. To save the game itself as
-an extensive (.efg) or strategic (.nfg) game, use the items on the
-"Export" submenu of the "File" menu. This is useful in interfacing
-with older versions of Gambit, with other tools which read and write
-those formats, and in using the underlying Gambit analysis command-
-line tools directly, as those programs accept .efg or .nfg game files.
-Users primarily interested in using Gambit solely via the graphical
-interface are encouraged to use the workbook (.gbt) format.
-
-
-
-As it is a new format, the Gambit workbook format is still under
-development and may change in details. It is intended that newer
-versions of the graphical interface will still be able to read
-workbook files written in older formats.
+.efg, and .nfg.

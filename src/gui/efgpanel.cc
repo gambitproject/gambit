@@ -180,7 +180,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent, GameDocument *p_doc, 
 
 void gbtTreePlayerPanel::OnUpdate()
 {
-  if (!m_doc->IsTree()) {
+  if (!m_doc->GetGame()->IsTree()) {
     return;
   }
 
@@ -191,36 +191,36 @@ void gbtTreePlayerPanel::OnUpdate()
       wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(), *wxConvCurrent));
 
   m_payoff->SetForegroundColour(color);
-  if (m_doc->GetCurrentProfile() > 0) {
-    const std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
+  if (m_doc->GetWorkspace().GetCurrentProfile() > 0) {
+    const std::string pay = m_doc->GetWorkspace().GetProfiles().GetPayoff(m_player);
     m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
 
     if (const GameNode node = m_doc->GetSelectNode()) {
       m_nodeValue->SetForegroundColour(color);
-      std::string value = m_doc->GetProfiles().GetNodeValue(node, m_player);
+      std::string value = m_doc->GetWorkspace().GetProfiles().GetNodeValue(node, m_player);
       m_nodeValue->SetLabel(wxT("Node value: ") + wxString(value.c_str(), *wxConvCurrent));
       GetSizer()->Show(m_nodeValue, true);
 
       if (node->GetInfoset() && node->GetPlayer()->GetNumber() == m_player) {
         m_nodeProb->SetForegroundColour(color);
-        value = m_doc->GetProfiles().GetRealizProb(node);
+        value = m_doc->GetWorkspace().GetProfiles().GetRealizProb(node);
         m_nodeProb->SetLabel(wxT("Node reached: ") + wxString(value.c_str(), *wxConvCurrent));
         GetSizer()->Show(m_nodeProb, true);
 
         m_infosetValue->SetForegroundColour(color);
-        value = m_doc->GetProfiles().GetInfosetValue(node);
+        value = m_doc->GetWorkspace().GetProfiles().GetInfosetValue(node);
         m_infosetValue->SetLabel(wxT("Infoset value: ") + wxString(value.c_str(), *wxConvCurrent));
         GetSizer()->Show(m_infosetValue, true);
 
         m_infosetProb->SetForegroundColour(color);
-        value = m_doc->GetProfiles().GetInfosetProb(node);
+        value = m_doc->GetWorkspace().GetProfiles().GetInfosetProb(node);
         m_infosetProb->SetLabel(wxT("Infoset reached: ") +
                                 wxString(value.c_str(), *wxConvCurrent));
         GetSizer()->Show(m_infosetProb, true);
 
         m_belief->SetForegroundColour(color);
-        value = m_doc->GetProfiles().GetBeliefProb(node);
+        value = m_doc->GetWorkspace().GetProfiles().GetBeliefProb(node);
         m_belief->SetLabel(wxT("Belief: ") + wxString(value.c_str(), *wxConvCurrent));
         GetSizer()->Show(m_belief, true);
       }
@@ -443,7 +443,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_d
 
   topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
 
-  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     m_playerPanels.push_back(new gbtTreePlayerPanel(this, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
@@ -454,13 +454,13 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_d
 
 void gbtTreePlayerToolbar::OnUpdate()
 {
-  while (m_playerPanels.size() < m_doc->NumPlayers()) {
+  while (m_playerPanels.size() < m_doc->GetGame()->NumPlayers()) {
     auto *panel = new gbtTreePlayerPanel(this, m_doc, m_playerPanels.size() + 1);
     m_playerPanels.push_back(panel);
     GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
   }
 
-  while (m_playerPanels.size() > m_doc->NumPlayers()) {
+  while (m_playerPanels.size() > m_doc->GetGame()->NumPlayers()) {
     gbtTreePlayerPanel *panel = m_playerPanels.back();
     GetSizer()->Detach(panel);
     panel->Destroy();

@@ -130,7 +130,7 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
   }
 
   auto *doc = new GameDocument(NewTree());
-  if (doc->LoadDocument(p_filename)) {
+  if (doc->LoadWorkspace(p_filename)) {
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
@@ -165,12 +165,6 @@ void Application::SetCurrentDir(const wxString &p_dir)
 {
   m_currentDir = p_dir;
   wxConfigBase::Get()->Write(_T("/General/CurrentDirectory"), p_dir);
-}
-
-bool Application::AreDocumentsModified() const
-{
-  return std::any_of(m_documents.begin(), m_documents.end(),
-                     std::mem_fn(&GameDocument::IsModified));
 }
 
 } // namespace Gambit::GUI
