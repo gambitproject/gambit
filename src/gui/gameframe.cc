@@ -668,14 +668,14 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   const wxString nativeExt = isExtensiveGame ? wxT("efg") : wxT("nfg");
 
-  const wxString nativeWildcard = isExtensiveGame ? wxT("Gambit extensive games (*.efg)|*.efg")
-                                                  : wxT("Gambit strategic games (*.nfg)|*.nfg");
+  const wxString nativeWildcard = isExtensiveGame ? wxT("Gambit extensive games (*.efg)|*.efg|")
+                                                  : wxT("Gambit strategic games (*.nfg)|*.nfg|");
 
   const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
 
   wxFileDialog dialog(
       this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      wxT("Gambit workspaces (*.gbt)|*.gbt|") + nativeWildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+      nativeWildcard + wxT("Gambit workspaces (*.gbt)|*.gbt"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() != wxID_OK) {
     return;
