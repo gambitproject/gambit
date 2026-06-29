@@ -112,6 +112,58 @@ public:
 };
 
 //=======================================================================
+//                       Validation of labels
+//=======================================================================
+
+/// @brief Returns whether p_label is a valid label for a game object.
+///
+/// A valid label either is the empty string (denoting the absence of a label),
+/// or consists only of printable ASCII characters and spaces, begins and ends
+/// with a printable character, and contains no two consecutive spaces.
+///
+/// @note The set of valid labels is intended to be widened to permit Unicode in
+///       a future version; this function is the single point at which the
+///       definition is enforced.
+inline bool IsValidLabel(const std::string &p_label)
+{
+  if (p_label.empty()) {
+    return true;
+  }
+  auto is_printable = [](unsigned char c) { return c >= 0x21 && c <= 0x7e; };
+  if (!is_printable(p_label.front()) || !is_printable(p_label.back())) {
+    return false;
+  }
+  bool previous_was_space = false;
+  for (const char ch : p_label) {
+    const auto c = static_cast<unsigned char>(ch);
+    if (c == ' ') {
+      if (previous_was_space) {
+        return false; // two consecutive spaces
+      }
+      previous_was_space = true;
+    }
+    else if (is_printable(c)) {
+      previous_was_space = false;
+    }
+    else {
+      return false; // tab, newline, other control, or non-ASCII byte
+    }
+  }
+  return true;
+}
+
+/// @brief Throws ValueException if p_label is not a valid label.
+/// @sa IsValidLabel
+inline void CheckLabel(const std::string &p_label)
+{
+  if (!IsValidLabel(p_label)) {
+    throw ValueException("Invalid label: a label may contain only printable ASCII "
+                         "characters and spaces, must not begin or end with a space, "
+                         "and must not contain two consecutive spaces");
+  }
+}
+
+//=======================================================================
 //             Classes representing objects in a game
 //=======================================================================
 
@@ -149,7 +201,11 @@ public:
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
 
   /// Gets the payoff associated with the outcome to the player
   template <class T> const T &GetPayoff(const GamePlayer &p_player) const;
@@ -184,7 +240,11 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
 
   bool Precedes(const GameNode &) const;
 };
@@ -229,7 +289,11 @@ public:
 
   bool IsChanceInfoset() const;
 
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -297,6 +361,7 @@ public:
   explicit GameStrategyRep(GamePlayerRep *p_player, int p_number, const std::string &p_label)
     : m_player(p_player), m_number(p_number), m_label(p_label)
   {
+    CheckLabel(p_label);
   }
   //@}
 
@@ -308,7 +373,11 @@ public:
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -406,7 +475,11 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -481,7 +554,11 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label)
+  {
+    CheckLabel(p_label);
+    m_label = p_label;
+  }
 
   int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)

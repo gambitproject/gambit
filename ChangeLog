@@ -1,5 +1,3 @@
-# Changelog
-
 ## [16.7.0] - unreleased
 
 ### Added
@@ -39,6 +37,8 @@
 - Payoff editing in extensive games in the graphical interface is now done via a context popup window
   rather than text controls drawn (not always well!) over the game tree display.  (#947)
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
+- Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
+  double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)

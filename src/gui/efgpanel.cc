@@ -32,6 +32,8 @@
 #include <wx/dcsvg.h>    // for SVG output
 
 #include "efgpanel.h"
+
+#include "dlexcept.h"
 #include "efgdisplay.h" // FIXME: communicate with tree window via events.
 #include "menuconst.h"
 #include "edittext.h"
@@ -282,14 +284,24 @@ void gbtTreePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+  try {
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void gbtTreePlayerPanel::PostPendingChanges()
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+    try {
+      m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+    }
+    catch (std::exception &ex) {
+      ExceptionDialog(this, ex.what()).ShowModal();
+    }
   }
 }
 
