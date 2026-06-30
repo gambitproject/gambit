@@ -231,11 +231,10 @@ class Player:
         else:
             return f"Player(game={self.game}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Player) and
-            self.player.deref() == cython.cast(Player, other).player.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Player):
+            return NotImplemented
+        return self.player.deref() == cython.cast(Player, other).player.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.player.deref())

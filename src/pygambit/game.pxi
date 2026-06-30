@@ -1476,27 +1476,21 @@ class Game:
     def _resolve_player(self,
                         player: typing.Any, funcname: str, argname: str = "player") -> Player:
         """Resolve an attempt to reference a player of the game.
-
-        Parameters
-        ----------
-        player : Any
-            An object to resolve as a reference to a player.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'player'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
+        ...
         TypeError
-            If `player` is not a `Player` or a `str`
+            If `player` is not a `Player`, ``NodePlayer``, or a `str`
         ValueError
-            If `player` is an empty `str` or all spaces
+            If `player` is an empty `str` or is a ``NodePlayer`` that resolves to no player
+            (terminal node).
         """
+        if isinstance(player, NodePlayer):
+            resolved = cython.cast(NodePlayer, player)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no player "
+                    f"(the node is terminal)"
+                )
+            player = resolved
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
