@@ -42,17 +42,38 @@ def test_get_outcome():
     """Test to ensure that we can retrieve an outcome for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
     assert (
-            game.root.children["U1"].children["D2"].children["U3"].outcome
-            == game.outcomes["Outcome 1"]
-        )
-    assert game.root.outcome is None
+        game.root.children["U1"].children["D2"].children["U3"].outcome
+        == game.outcomes["Outcome 1"]
+    )
+    assert not game.root.outcome
 
 
 def test_set_outcome_null():
-    """Test to set an outcome to the null outcome."""
+    """Setting an outcome to null leaves the node's outcome view falsy."""
     game = games.read_from_file("basic_extensive_game.efg")
-    game.set_outcome(game.root.children["U1"].children["U2"].children["U3"], None)
-    assert game.root.children["U1"].children["U2"].children["U3"].outcome is None
+    node = game.root.children["U1"].children["U2"].children["U3"]
+    game.set_outcome(node, None)
+    assert not node.outcome
+
+
+def test_node_outcome_subscript_tracks_mutation():
+    """Indexing the outcome view reads/writes the outcome's payoffs, reflecting mutation."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = node.outcome
+    player = game.players["Player 1"]
+    proxy[player] = 7
+    assert node.outcome[player] == 7
+
+
+def test_outcome_equality_is_symmetric():
+    """A node-anchored outcome view and the resolved Outcome compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = node.outcome
+    outcome = game.outcomes["Outcome 1"]
+    assert proxy == outcome
+    assert outcome == proxy
 
 
 def test_get_player():
