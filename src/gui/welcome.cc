@@ -212,8 +212,7 @@ bool WelcomeFrame::DoOpen()
   }
   const wxString filename = dialog.GetPath();
   wxGetApp().SetCurrentDir(wxPathOnly(filename));
-  wxGetApp().LoadFile(filename, this);
-  return true;
+  return wxGetApp().LoadFile(filename, this) == AppLoadResult::Success;
 }
 
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)

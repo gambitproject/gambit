@@ -25,7 +25,6 @@ import warnings
 import typing
 
 import cython
-import typing
 
 from .error import *
 
@@ -72,6 +71,27 @@ def _to_number(value: typing.Any) -> c_Number:
         except decimal.InvalidOperation:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
     return c_Number(value.encode("ascii"))
+
+
+@cython.cfunc
+def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural: str):
+    """Resolve a member of a game collection by its text label.
+
+    Game collections are accessed by label, not by position.  Lookup is by exact label match.
+
+    Failure modes:
+      * an empty label raises ``ValueError``;
+      * a label matching no member raises ``KeyError``;
+      * a label matching more than one member raises ``ValueError``.
+    """
+    if not label:
+        raise ValueError(f"{kind} label cannot be empty")
+    matches = [x for x in collection if x.label == label]
+    if not matches:
+        raise KeyError(f"{scope} has no {kind} with label '{label}'")
+    if len(matches) > 1:
+        raise ValueError(f"{scope} has multiple {kind_plural} with label '{label}'")
+    return matches[0]
 
 
 PlayerReference = Player | str

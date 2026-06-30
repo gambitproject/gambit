@@ -27,36 +27,14 @@
 #include "efglayout.h"
 
 namespace Gambit::GUI {
-class TreePayoffEditor final : public wxTextCtrl {
-  std::shared_ptr<NodeEntry> m_entry{nullptr};
-  GameOutcome m_outcome;
-  int m_player{0};
 
-  /// @name Event handlers
-  //@{
-  void OnChar(wxKeyEvent &);
-  //@}
-
-public:
-  explicit TreePayoffEditor(wxWindow *p_parent);
-
-  void BeginEdit(const std::shared_ptr<NodeEntry> &p_node, int p_player);
-  void EndEdit();
-
-  bool IsEditing() const { return IsShown(); }
-
-  std::shared_ptr<NodeEntry> GetNodeEntry() const { return m_entry; }
-  GameOutcome GetOutcome() const { return m_outcome; }
-  int GetPlayer() const { return m_player; }
-
-  DECLARE_EVENT_TABLE()
-};
+class OutcomeEditorPopup;
 
 class EfgDisplay final : public wxScrolledWindow, public GameView {
   TreeLayout m_layout;
   int m_zoom;
   wxMenu *m_nodeMenu{nullptr};
-  TreePayoffEditor *m_payoffEditor;
+  OutcomeEditorPopup *m_outcomeEditor;
   bool m_pendingInitialZoom{true};
 
   void MakeMenus();
@@ -71,8 +49,6 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void OnLeftDoubleClick(wxMouseEvent &);
   void OnMagnify(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
-  /// Payoff editor changes accepted with enter
-  void OnAcceptPayoffEdit(wxCommandEvent &);
   //@}
 
   /// @name Overriding GameView members
@@ -108,6 +84,13 @@ public:
   const TreeLayout &GetLayout() const { return m_layout; }
 
   void EnsureNodeVisible(const GameNode &);
+
+  bool ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlayer &p_player,
+                          const wxPoint &p_pos);
+  bool ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                        const wxPoint &p_pos);
+  bool ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                           const wxPoint &p_pos);
 
   DECLARE_EVENT_TABLE()
 };

@@ -100,7 +100,7 @@ template <class T> void AnalysisProfileList<T>::AddOutput(const wxString &p_outp
       auto profile =
           std::make_shared<MixedStrategyProfile<T>>(OutputToMixedProfile<T>(m_doc, p_output));
       m_mixedProfiles.push_back(profile);
-      if (m_doc->IsTree()) {
+      if (m_doc->GetGame()->IsTree()) {
         m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(*profile));
       }
       m_current = m_mixedProfiles.size();
@@ -120,7 +120,7 @@ template <class T> void AnalysisProfileList<T>::BuildNfg()
 
 template <class T> int AnalysisProfileList<T>::NumProfiles() const
 {
-  return (m_doc->IsTree()) ? m_behavProfiles.size() : m_mixedProfiles.size();
+  return (m_doc->GetGame()->IsTree()) ? m_behavProfiles.size() : m_mixedProfiles.size();
 }
 
 template <class T> void AnalysisProfileList<T>::Clear()
@@ -202,7 +202,7 @@ template <class T> std::string AnalysisProfileList<T>::GetPayoff(int pl, int p_i
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    if (m_doc->IsTree()) {
+    if (m_doc->GetGame()->IsTree()) {
       return lexical_cast<std::string>(
           m_behavProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
           m_doc->GetStyle().NumDecimals());
@@ -417,7 +417,7 @@ template <class T> void AnalysisProfileList<T>::Save(std::ostream &p_file) const
   p_file << static_cast<const char *>(m_description.mb_str()) << "\n";
   p_file << "</description>\n";
 
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
       p_file << "<profile type=\"behav\">\n";

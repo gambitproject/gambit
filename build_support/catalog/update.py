@@ -5,17 +5,16 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-from draw_tree import generate_pdf, generate_png, generate_svg, generate_tex
+from gtdraw import pdf, png, svg, tex
 
 import pygambit as gbt
 
 CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table.rst"
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
-DRAW_TREE_SETTINGS_CONFIG = Path(__file__).parent / "draw_tree_settings.yaml"
+GTDRAW_SETTINGS_CONFIG = Path(__file__).parent / "gtdraw_settings.yaml"
 CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "catalog_hierarchy.yaml"
 SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
-
 
 def use_catalog_dir(catalog_dir: Path | None = None) -> Path:
     """Point pygambit's catalog helpers at this checkout's catalog directory.
@@ -27,10 +26,9 @@ def use_catalog_dir(catalog_dir: Path | None = None) -> Path:
     gbt.catalog._CATALOG_RESOURCE = catalog_dir
     return catalog_dir
 
-
-def catalog_draw_tree_settings(slug: str) -> dict:
-    """Return the draw_tree settings for a given catalog slug."""
-    with open(DRAW_TREE_SETTINGS_CONFIG, encoding="utf-8") as f:
+def catalog_gtdraw_settings(slug: str) -> dict:
+    """Return the gtdraw settings for a given catalog slug."""
+    with open(GTDRAW_SETTINGS_CONFIG, encoding="utf-8") as f:
         config = yaml.safe_load(f)
     settings = dict(config["defaults"])
     overrides = config.get("overrides", {})
@@ -177,8 +175,8 @@ def _write_game_entry(
                     if variant["ef_path"].exists()
                     else gbt.catalog.load(slug)
                 )
-                for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
-                    func(source, save_to=str(viz_path), **catalog_draw_tree_settings(vkey))
+                for func in [tex, png, pdf, svg]:
+                    func(source, save_to=str(viz_path), **catalog_gtdraw_settings(vkey))
                 img_ef = catalog_dir / "img" / f"{vkey}.ef"
                 if not img_ef.exists() and variant["ef_path"].exists():
                     shutil.copy2(variant["ef_path"], img_ef)
@@ -196,8 +194,8 @@ def _write_game_entry(
             viz_path.parent.mkdir(parents=True, exist_ok=True)
             curated_ef = catalog_dir / f"{slug}.ef"
             source = str(curated_ef) if curated_ef.exists() else gbt.catalog.load(slug)
-            for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
-                func(source, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+            for func in [tex, png, pdf, svg]:
+                func(source, save_to=str(viz_path), **catalog_gtdraw_settings(slug))
             img_ef = catalog_dir / "img" / f"{slug}.ef"
             if not img_ef.exists() and curated_ef.exists():
                 shutil.copy2(curated_ef, img_ef)
@@ -239,7 +237,7 @@ def _write_game_entry(
             label = variant["label"]
             vkey = variant["variant_key"]
             settings_str = ", ".join(
-                f"{k}={v!r}" for k, v in catalog_draw_tree_settings(vkey).items()
+                f"{k}={v!r}" for k, v in catalog_gtdraw_settings(vkey).items()
             )
             f.write(f"{i2}.. tab-item:: {label}\n")
             f.write(f"{i2}\n")
@@ -247,11 +245,11 @@ def _write_game_entry(
             f.write(f"{i3}   :hide-code:\n")
             f.write(f"{i3}   \n")
             f.write(f"{i4}import pygambit\n")
-            f.write(f"{i4}from draw_tree import draw_tree\n")
+            f.write(f"{i4}from gtdraw import draw\n")
             if variant["ef_path"].exists():
-                f.write(f'{i4}draw_tree("../catalog/{vkey}.ef", {settings_str})\n')
+                f.write(f'{i4}draw("../catalog/{vkey}.ef", {settings_str})\n')
             else:
-                f.write(f'{i4}draw_tree(pygambit.catalog.load("{slug}"), {settings_str})\n')
+                f.write(f'{i4}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
             f.write(f"{i2}\n")
         f.write(f"{i1}\n")
     else:
@@ -259,19 +257,19 @@ def _write_game_entry(
         f.write(f"{i1}   :hide-code:\n")
         f.write(f"{i1}   \n")
         f.write(f"{i2}import pygambit\n")
-        f.write(f"{i2}from draw_tree import draw_tree\n")
+        f.write(f"{i2}from gtdraw import draw\n")
         if row["Format"] == "efg":
             settings_str = ", ".join(
-                f"{k}={v!r}" for k, v in catalog_draw_tree_settings(slug).items()
+                f"{k}={v!r}" for k, v in catalog_gtdraw_settings(slug).items()
             )
             curated_ef = catalog_dir / f"{slug}.ef"
             if curated_ef.exists():
-                f.write(f'{i2}draw_tree("../catalog/{slug}.ef", {settings_str})\n')
+                f.write(f'{i2}draw("../catalog/{slug}.ef", {settings_str})\n')
             else:
-                f.write(f'{i2}draw_tree(pygambit.catalog.load("{slug}"), {settings_str})\n')
+                f.write(f'{i2}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
         elif row["Format"] == "nfg":
             f.write(
-                f'{i2}draw_tree(pygambit.catalog.load("{slug}"), '
+                f'{i2}draw(pygambit.catalog.load("{slug}"), '
                 f'save_to="../catalog/img/{slug}.png")\n'
             )
         f.write(f"{i1}\n")
@@ -414,7 +412,7 @@ if __name__ == "__main__":
         help=(
             "Force regeneration of all game visualisation images (PNG, PDF, SVG, TeX), "
             "even if they already exist. Use this to pick up changes to game files or "
-            "draw_tree_settings.yaml."
+            "gtdraw_settings.yaml."
         ),
     )
     args = parser.parse_args()

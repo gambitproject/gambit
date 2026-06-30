@@ -72,10 +72,10 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   if (p_command->IsBehavior()) {
-    m_profileList = new BehaviorProfileList(this, m_doc);
+    m_profileList = new MixedBehaviorProfileList(this, m_doc);
   }
   else {
-    m_profileList = new MixedProfileList(this, m_doc);
+    m_profileList = new MixedStrategyProfileList(this, m_doc);
   }
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
@@ -100,7 +100,7 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
     m_doc->BuildNfg();
   }
 
-  m_doc->AddProfileList(p_command);
+  m_doc->DoAddEquilibriumOutput(p_command);
 
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();

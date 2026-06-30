@@ -45,8 +45,21 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, action: int | str | Action) -> Node:
-        """Returns the successor node which is reached after 'action' is played.
+    def __getitem__(self, action: str | Action) -> Node:
+        """Returns the successor node which is reached after `action` is played.
+
+        `action` may be an ``Action`` at this node's information set, or its label.
+
+        Raises
+        ------
+        KeyError
+            If `action` is a string and no action with that label exists at the node's
+            information set, or if the node is terminal.
+        ValueError
+            If `action` is an empty or all-whitespace string, or is an ``Action``
+            from a different information set.
+        TypeError
+            If `action` is not a ``str`` or an ``Action``.
 
         .. versionchanged:: 16.5.0
             Previously indexing by string searched the labels of the child nodes,
@@ -54,28 +67,32 @@ class NodeChildren:
             interpretation that strings refer to action labels.
 
             Relatedly, the collection can now be indexed by an Action object.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; index by the ``Action`` taken, or its label.
+            A label matching no action now raises ``KeyError``.
         """
         if isinstance(action, str):
             if not action.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
-                raise ValueError(f"No action with label '{action}' at node")
+                raise KeyError(f"No action with label '{action}' at node")
             for act in self.parent.deref().GetInfoset().deref().GetActions():
                 if act.deref().GetLabel().decode("ascii") == cython.cast(str, action):
                     return Node.wrap(self.parent.deref().GetChild(act))
-            raise ValueError(f"No action with label '{action}' at node")
+            raise KeyError(f"No action with label '{action}' at node")
         if isinstance(action, Action):
             try:
                 return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
             except IndexError:
-                raise ValueError(f"Action is from a different information set than node")
+                raise ValueError("Action is from a different information set than node") from None
         if isinstance(action, int):
-            if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
-                raise IndexError("Index out of range")
-            return Node.wrap(self.parent.deref().GetChild(
-                self.parent.deref().GetInfoset().deref().GetAction(action + 1)
-            ))
-        raise TypeError(f"Index must be int, str, or Action, not {action.__class__.__name__}")
+            raise TypeError(
+                "node children cannot be indexed by position; index by the action taken "
+                "(an Action or its label), or iterate. "
+                "(Integer indexing was removed in 16.7.0.)"
+            )
+        raise TypeError(f"Index must be a str label or an Action, not {action.__class__.__name__}")
 
 
 @cython.cclass
@@ -118,7 +135,12 @@ class Node:
 
     @property
     def label(self) -> str:
-        """The text label associated with the node."""
+        """The text label associated with the node.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.node.deref().GetLabel().decode("ascii")
 
     @label.setter

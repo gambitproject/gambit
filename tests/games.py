@@ -8,6 +8,14 @@ import numpy as np
 
 import pygambit as gbt
 
+# Label-validation fixtures.
+# VALID: accepted by the C++ validator.
+# INVALID: rejected by the validator -> ValueError (reach CheckLabel as ASCII bytes).
+# NON_ASCII: rejected at the pygambit ASCII encode boundary
+VALID_LABELS = ["x", "a b", "a b c"]
+INVALID_LABELS = [" x", "x ", " ", "a  b", "a\tb", "a\nb"]
+NON_ASCII_LABELS = ["é", "naïve"]
+
 
 def read_from_file(fn: str) -> gbt.Game:
     if fn.endswith(".efg"):
@@ -38,7 +46,10 @@ def create_efg_corresponding_to_bimatrix_game(
     g.append_move(g.root, "1", actions1)
     g.append_move(g.root.children, "2", actions2)
     for i, j in itertools.product(range(m), range(n)):
-        g.set_outcome(g.root.children[i].children[j], g.add_outcome([A[i, j], B[i, j]]))
+        g.set_outcome(
+            g.root.children[str(i)].children[str(j)],
+            g.add_outcome([A[i, j], B[i, j]])
+        )
     return g
 
 
@@ -64,10 +75,10 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     g = create_efg_corresponding_to_bimatrix_game(A, B, title)
 
     if variant == "missing term outcome":
-        g.delete_outcome(g.root.children[0].children[1].outcome)
+        g.delete_outcome(g.root.children["0"].children["1"].outcome)
     elif variant == "with neutral outcome":
         neutral = g.add_outcome([0, 0], label="neutral")
-        g.set_outcome(g.root.children[0], neutral)
+        g.set_outcome(g.root.children["0"], neutral)
 
     return g
 
@@ -382,17 +393,25 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
-    g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+    g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
+    g.set_outcome(
+        g.root.children["Trust"].children["Honor"],
+        g.add_outcome([1, 1], label="Trustworthy")
+        )
     if unique_NE_variant:
         g.set_outcome(
-            g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+            g.root.children["Trust"].children["Abuse"],
+            g.add_outcome(["1/2", 2], label="Untrustworthy")
         )
     else:
         g.set_outcome(
-            g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+            g.root.children["Trust"].children["Abuse"],
+            g.add_outcome([-1, 2], label="Untrustworthy")
         )
-    g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+    g.set_outcome(
+        g.root.children["Not trust"],
+        g.add_outcome([0, 0], label="Opt-out")
+        )
     return g
 
 
@@ -490,13 +509,13 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
-            g.set_outcome(current_node.children[0], g.add_outcome(payoffs))
+            g.set_outcome(current_node.children["Take"], g.add_outcome(payoffs))
             if t == self.N - 1:  # for last round, push payoffs
                 payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
                 if current_player == "2":
                     payoffs.reverse()
-                g.set_outcome(current_node.children[1], g.add_outcome(payoffs))
-            current_node = current_node.children[1]
+                g.set_outcome(current_node.children["Push"], g.add_outcome(payoffs))
+            current_node = current_node.children["Push"]
             current_player = "2" if current_player == "1" else "1"
         return g
 
@@ -632,8 +651,8 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         )
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
-            if not n.is_terminal and not n.children[0].is_terminal:
-                g.set_infoset(n.children[1], n.children[0].infoset)
+            if not n.is_terminal and not n.children["L"].is_terminal:
+                g.set_infoset(n.children["R"], n.children["L"].infoset)
         return g
 
     def reduced_strategic_form(self):

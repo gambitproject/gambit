@@ -23,8 +23,6 @@
 #include <sstream>
 #include <fstream>
 
-#include <wx/wxprec.h>
-
 #include "gambit.h"
 #include "core/tinyxml.h" // for XML parser for LoadDocument()
 
@@ -95,22 +93,133 @@ bool StrategyDominanceStack::PreviousLevel()
 }
 
 //=========================================================================
+//                          class AnalysisWorkspace
+//=========================================================================
+
+AnalysisWorkspace::AnalysisWorkspace(GameDocument *p_doc)
+  : m_doc(p_doc), m_stratSupports(p_doc, true), m_currentProfileList(0)
+{
+}
+
+void AnalysisWorkspace::Clear()
+{
+  m_stratSupports.Reset();
+  m_profiles.clear();
+  m_currentProfileList = 0;
+}
+
+void AnalysisWorkspace::ResetForGameChange()
+{
+  m_stratSupports.Reset();
+
+  // Even though modifications only to payoffs doesn't make the
+  // computed profiles invalid for the edited game, it does mean
+  // that, in general, they won't be Nash.  For now, to avoid confusion,
+  // we will wipe them out.
+  m_profiles.clear();
+  m_currentProfileList = 0;
+}
+
+void AnalysisWorkspace::BuildNfg()
+{
+  m_stratSupports.Reset();
+  std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
+}
+
+void AnalysisWorkspace::AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
+{
+  m_profiles.push_back(p_profs);
+  m_currentProfileList = m_profiles.size();
+}
+
+void AnalysisWorkspace::SelectEquilibriumOutput(int p_index) { m_currentProfileList = p_index; }
+
+void AnalysisWorkspace::SelectProfile(int p_profile)
+{
+  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
+}
+
+void AnalysisWorkspace::SetDominanceStrictness(bool p_strict)
+{
+  m_stratSupports.SetStrict(p_strict);
+}
+
+bool AnalysisWorkspace::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
+
+bool AnalysisWorkspace::NextDominanceLevel() { return m_stratSupports.NextLevel(); }
+
+void AnalysisWorkspace::PreviousDominanceLevel() { m_stratSupports.PreviousLevel(); }
+
+void AnalysisWorkspace::TopDominanceLevel() { m_stratSupports.TopLevel(); }
+
+bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
+
+int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
+
+void AnalysisWorkspace::Save(std::ostream &p_file) const
+{
+  std::for_each(m_profiles.begin(), m_profiles.end(),
+                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+}
+
+bool AnalysisWorkspace::Load(TiXmlNode *p_game)
+{
+  m_stratSupports.Reset();
+
+  m_profiles.clear();
+
+  for (TiXmlNode *analysis = p_game->FirstChild("analysis"); analysis;
+       analysis = analysis->NextSibling()) {
+    const char *type = analysis->ToElement()->Attribute("type");
+    // const char *rep = analysis->ToElement()->Attribute("rep");
+    if (type && !strcmp(type, "list")) {
+      // Read in a list of profiles
+      // We need to try to guess whether the profiles are float or rational
+      bool isFloat = false;
+      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
+           profile = profile->NextSiblingElement()) {
+        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
+            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
+          isFloat = true;
+          break;
+        }
+      }
+
+      if (isFloat) {
+        auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
+        plist->Load(analysis);
+        m_profiles.push_back(plist);
+      }
+      else {
+        auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
+        plist->Load(analysis);
+        m_profiles.push_back(plist);
+      }
+    }
+  }
+
+  m_currentProfileList = m_profiles.size();
+
+  return true;
+}
+
+//=========================================================================
 //                          class GameDocument
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_unsavedResults(false),
-    m_stratSupports(this, true), m_currentProfileList(0)
+  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_workspaceModified(false),
+    m_workspace(this)
 {
   wxGetApp().AddDocument(this);
 
   std::ostringstream s;
-  SaveDocument(s);
+  SaveWorkspace(s);
 }
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadDocument(const wxString &p_filename)
+bool GameDocument::LoadWorkspace(const wxString &p_filename)
 {
   TiXmlDocument doc(p_filename.mb_str());
   if (!doc.LoadFile()) {
@@ -158,41 +267,9 @@ bool GameDocument::LoadDocument(const wxString &p_filename)
     return false;
   }
 
-  m_stratSupports.Reset();
-
-  m_profiles.clear();
-
-  for (TiXmlNode *analysis = game->FirstChild("analysis"); analysis;
-       analysis = analysis->NextSibling()) {
-    const char *type = analysis->ToElement()->Attribute("type");
-    // const char *rep = analysis->ToElement()->Attribute("rep");
-    if (type && !strcmp(type, "list")) {
-      // Read in a list of profiles
-      // We need to try to guess whether the profiles are float or rational
-      bool isFloat = false;
-      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
-           profile = profile->NextSiblingElement()) {
-        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
-            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
-          isFloat = true;
-          break;
-        }
-      }
-
-      if (isFloat) {
-        auto plist = std::make_shared<AnalysisProfileList<double>>(this, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-      else {
-        auto plist = std::make_shared<AnalysisProfileList<Rational>>(this, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-    }
+  if (!m_workspace.Load(game)) {
+    return false;
   }
-
-  m_currentProfileList = m_profiles.size();
 
   TiXmlNode *colors = docroot->FirstChild("colors");
   if (colors) {
@@ -220,7 +297,7 @@ bool GameDocument::LoadDocument(const wxString &p_filename)
   return true;
 }
 
-void GameDocument::SaveDocument(std::ostream &p_file) const
+void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
   p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -249,31 +326,28 @@ void GameDocument::SaveDocument(std::ostream &p_file) const
     p_file << "</nfgfile>\n";
   }
 
-  std::for_each(m_profiles.begin(), m_profiles.end(),
-                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+  m_workspace.Save(p_file);
 
   p_file << "</game>\n";
 
   p_file << "</gambit:document>\n";
 }
 
-void GameDocument::UpdateViews(GameModificationType p_modifications)
+void GameDocument::NotifyChanged(GameModificationType p_modifications)
 {
-  if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS ||
-      p_modifications == GBT_DOC_MODIFIED_LABELS) {
-    m_gameModified = true;
+  m_gameModified |= HasModification(p_modifications, GameModificationType::GameForm |
+                                                         GameModificationType::GamePayoffs |
+                                                         GameModificationType::GameLabels);
+  m_workspaceModified |= HasModification(p_modifications, GameModificationType::Workspace);
+  if (HasModification(p_modifications,
+                      GameModificationType::GameForm | GameModificationType::GamePayoffs)) {
+    m_workspace.ResetForGameChange();
   }
-  if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
-    m_stratSupports.Reset();
+  UpdateViews();
+}
 
-    // Even though modifications only to payoffs doesn't make the
-    // computed profiles invalid for the edited game, it does mean
-    // that, in general, they won't be Nash.  For now, to avoid confusion,
-    // we will wipe them out.
-    m_profiles.clear();
-    m_currentProfileList = 0;
-  }
-
+void GameDocument::UpdateViews()
+{
   std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
 }
 
@@ -285,8 +359,7 @@ void GameDocument::PostPendingChanges()
 void GameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
-    m_stratSupports.Reset();
-    std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
+    m_workspace.BuildNfg();
   }
 }
 
@@ -308,63 +381,62 @@ GameAction GameDocument::GetAction(int p_index) const
 void GameDocument::SetStyle(const TreeRenderConfig &p_style)
 {
   m_style = p_style;
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  NotifyChanged(GameModificationType::Presentation);
 }
 
-void GameDocument::SetCurrentProfile(int p_profile)
+void GameDocument::DoSelectProfile(int p_profile)
 {
-  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.SelectProfile(p_profile);
+  UpdateViews();
 }
 
-void GameDocument::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
+void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
 {
-  m_profiles.push_back(p_profs);
-  m_currentProfileList = m_profiles.size();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.AddEquilibriumOutput(p_profs);
+  NotifyChanged(GameModificationType::Workspace);
 }
 
-void GameDocument::SetProfileList(int p_index)
+void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
 {
-  m_currentProfileList = p_index;
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  p_list.AddOutput(p_output);
+  NotifyChanged(GameModificationType::Workspace);
 }
 
-void GameDocument::SetStrategyElimStrength(bool p_strict)
+void GameDocument::DoSelectEquilibriumOutput(int p_index)
 {
-  m_stratSupports.SetStrict(p_strict);
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.SelectEquilibriumOutput(p_index);
+  UpdateViews();
 }
 
-bool GameDocument::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
-
-bool GameDocument::NextStrategyElimLevel()
+void GameDocument::DoSetDominanceStrictness(bool p_strict)
 {
-  const bool ret = m_stratSupports.NextLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.SetDominanceStrictness(p_strict);
+  UpdateViews();
+}
+
+bool GameDocument::DoNextDominanceLevel()
+{
+  const bool ret = m_workspace.NextDominanceLevel();
+  UpdateViews();
   return ret;
 }
 
-void GameDocument::PreviousStrategyElimLevel()
+void GameDocument::DoPreviousDominanceLevel()
 {
-  m_stratSupports.PreviousLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.PreviousDominanceLevel();
+  UpdateViews();
 }
 
-void GameDocument::TopStrategyElimLevel()
+void GameDocument::DoTopDominanceLevel()
 {
-  m_stratSupports.TopLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  m_workspace.TopDominanceLevel();
+  UpdateViews();
 }
-
-bool GameDocument::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
-
-int GameDocument::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
 void GameDocument::SetSelectNode(GameNode p_node)
 {
   m_selectNode = p_node;
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  UpdateViews();
 }
 
 //======================================================================
@@ -379,11 +451,11 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
                              static_cast<const char *>(p_filename.mb_str()));
   }
   switch (p_format) {
-  case GameSaveFormat::Workbook:
-    SaveDocument(file);
+  case GameSaveFormat::Workspace:
+    SaveWorkspace(file);
     m_filename = p_filename;
     m_gameModified = false;
-    m_unsavedResults = false;
+    m_workspaceModified = false;
     break;
 
   case GameSaveFormat::Efg:
@@ -397,14 +469,14 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
     m_gameModified = false;
     break;
   }
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
+  UpdateViews();
 }
 
 void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment)
 {
   m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
   m_game->SetDescription(static_cast<const char *>(p_comment.mb_str()));
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoNewPlayer()
@@ -414,67 +486,67 @@ void GameDocument::DoNewPlayer()
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
   }
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
 {
   p_player->SetLabel(p_label.ToStdString());
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
   m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 {
   m_game->DeleteStrategy(p_strategy);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
   p_strategy->SetLabel(p_label.ToStdString());
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
   p_infoset->SetLabel(p_label.ToStdString());
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
 {
   p_action->SetLabel(p_label.ToStdString());
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
 {
   m_game->SetChanceProbs(p_infoset, p_probs);
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->SetInfoset(p_node, p_infoset);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
   m_game->LeaveInfoset(p_node);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   m_game->Reveal(p_infoset, p_player);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoInsertAction(GameNode p_node)
@@ -484,43 +556,43 @@ void GameDocument::DoInsertAction(GameNode p_node)
   }
   const GameAction action = m_game->InsertAction(p_node->GetInfoset());
   action->SetLabel(std::to_string(action->GetNumber()));
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
   p_node->SetLabel(p_label.ToStdString());
-  UpdateViews(GBT_DOC_MODIFIED_LABELS);
+  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->AppendMove(p_node, p_infoset);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
   m_game->InsertMove(p_node, p_player, p_actions, true);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->InsertMove(p_node, p_infoset);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->CopyTree(p_destNode, p_srcNode);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->MoveTree(p_destNode, p_srcNode);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoDeleteParent(GameNode p_node)
@@ -529,13 +601,13 @@ void GameDocument::DoDeleteParent(GameNode p_node)
     return;
   }
   m_game->DeleteParent(p_node);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoDeleteTree(GameNode p_node)
 {
   m_game->DeleteTree(p_node);
-  UpdateViews(GBT_DOC_MODIFIED_GAME);
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
@@ -543,7 +615,7 @@ void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     m_game->SetPlayer(p_infoset, p_player);
-    UpdateViews(GBT_DOC_MODIFIED_GAME);
+    NotifyChanged(GameModificationType::GameForm);
   }
 }
 
@@ -552,26 +624,81 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     m_game->SetPlayer(p_node->GetInfoset(), p_player);
-    UpdateViews(GBT_DOC_MODIFIED_GAME);
+    NotifyChanged(GameModificationType::GameForm);
   }
 }
 
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
   m_game->SetOutcome(p_node, m_game->NewOutcome());
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
   p_profile->SetOutcome(m_game->NewOutcome());
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 {
   m_game->SetOutcome(p_node, p_outcome);
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
+                                    const std::vector<wxString> &p_payoffs)
+{
+  if (!p_node) {
+    return;
+  }
+
+  if (p_payoffs.size() != GetGame()->NumPlayers()) {
+    throw std::invalid_argument("Incorrect number of payoff values");
+  }
+
+  std::vector<Rational> parsedPayoffs;
+  parsedPayoffs.reserve(p_payoffs.size());
+
+  for (const auto &value : p_payoffs) {
+    parsedPayoffs.push_back(lexical_cast<Rational>(value.ToStdString()));
+  }
+
+  const std::string label = p_label.ToStdString();
+  GameOutcome outcome = p_node->GetOutcome();
+
+  bool changed = !outcome;
+
+  if (outcome) {
+    changed = outcome->GetLabel() != label;
+
+    if (!changed) {
+      for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
+        if (outcome->GetPayoff<Rational>(GetGame()->GetPlayer(player)) !=
+            parsedPayoffs[player - 1]) {
+          changed = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!changed) {
+    return;
+  }
+
+  if (!outcome) {
+    outcome = GetGame()->NewOutcome();
+    GetGame()->SetOutcome(p_node, outcome);
+  }
+
+  outcome->SetLabel(label);
+
+  for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
+    outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
+  }
+
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoRemoveOutcome(GameNode p_node)
@@ -580,7 +707,7 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
     return;
   }
   m_game->SetOutcome(p_node, nullptr);
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
@@ -591,19 +718,13 @@ void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
     outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
   }
   m_game->SetOutcome(p_node, outcome);
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
-  UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
-}
-
-void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
-{
-  p_list.AddOutput(p_output);
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
+  NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 } // namespace Gambit::GUI

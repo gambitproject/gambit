@@ -300,19 +300,30 @@ class GameOutcomes:
         for outcome in self.game.deref().GetOutcomes():
             yield Outcome.wrap(outcome)
 
-    def __getitem__(self, index: int | str) -> Outcome:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Outcome label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no outcome with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple outcomes with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Outcome.wrap(self.game.deref().GetOutcome(index + 1))
-        raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Outcome:
+        """Returns the outcome with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the outcome to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no outcome in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one outcome has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an outcome by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "outcome", "outcomes")
 
 
 @cython.cclass
@@ -341,22 +352,30 @@ class GamePlayers:
         for player in self.game.deref().GetPlayers():
             yield Player.wrap(player)
 
-    def __getitem__(self, index: int | str) -> Player:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Player label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no player with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple players with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            try:
-                return Player.wrap(self.game.deref().GetPlayer(index + 1))
-            except IndexError:
-                raise IndexError("Index out of range") from None
-        raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Player:
+        """Returns the player with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the player to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one player has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a player by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "player", "players")
 
     @property
     def chance(self) -> Player:
@@ -389,23 +408,30 @@ class GameActions:
         for infoset in self.game.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: int | str) -> Action:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Action label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no action with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple actions with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, action in enumerate(self):
-                if i == index:
-                    return action
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Action:
+        """Returns the action with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the action to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no action in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one action has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an action by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "action", "actions")
 
 
 @cython.cclass
@@ -433,23 +459,32 @@ class GameInfosets:
         for player in self.game.players:
             yield from player.infosets
 
-    def __getitem__(self, index: int | str) -> Infoset:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Infoset label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no infoset with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple infosets with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, infoset in enumerate(self):
-                if i == index:
-                    return infoset
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Infoset:
+        """Returns the information set with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the infoset to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no information set in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one information set has
+            label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an information set by its label,
+            or iterate over the collection.  String lookup now requires an exact match of the
+            label; previously, leading/trailing whitespace was stripped from `label` before
+            comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "infoset", "infosets")
 
 
 @cython.cclass
@@ -477,23 +512,30 @@ class GameStrategies:
         for player in self.game.players:
             yield from player.strategies
 
-    def __getitem__(self, index: int | str) -> Strategy:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Strategy label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no strategy with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple strategies with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, strat in enumerate(self):
-                if i == index:
-                    return strat
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Strategy:
+        """Returns the strategy with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the strategy to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no strategy in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one strategy has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a strategy by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "strategy", "strategies")
 
 
 @cython.cclass
@@ -981,28 +1023,50 @@ class Game:
             else:
                 return None
 
-    def __getitem__(self, i):
+    def __getitem__(self, contingency):
         """Returns the `Outcome` associated with a profile of pure strategies.
+
+        Each strategy in the profile may be given as a ``Strategy``, its text label,
+        or its integer index within the corresponding player's strategies.
+
+        Raises
+        ------
+        TypeError
+            If `contingency` is not a tuple-like object, or contains an element
+            that is not an ``int``, ``str``, or ``Strategy``.
+        KeyError
+            If the number of elements in `contingency` does not equal the
+            number of players.
+        IndexError
+            If an integer index is out of range for the corresponding player,
+            or a label or ``Strategy`` does not belong to that player.
+
+        .. note::
+            Unlike the game's object collections, strategies within a contingency can be referenced
+            by integer index, as a contingency is a coordinate in the players' strategy spaces;
+            labels and ``Strategy`` objects are also accepted.
         """
+        players = list(self.players)
         try:
-            if len(i) != len(self.players):
+            if len(contingency) != len(players):
                 raise KeyError("Number of strategies is not equal to the number of players")
         except TypeError:
-            raise TypeError("contingency must be a tuple-like object")
-        cont = [0 for _ in self.players]
-        for (pl, st) in enumerate(i):
+            raise TypeError("contingency must be a tuple-like object") from None
+        cont = [0 for _ in players]
+        for (pl, st) in enumerate(contingency):
+            player = players[pl]
             if isinstance(st, int):
-                if st < 0 or st >= len(self.players[pl].strategies):
+                if st < 0 or st >= len(player.strategies):
                     raise IndexError(f"Provided strategy index {st} out of range for player {pl}")
                 cont[pl] = st
             elif isinstance(st, str):
                 try:
-                    cont[pl] = [s.label for s in self.players[pl].strategies].index(st)
+                    cont[pl] = [s.label for s in player.strategies].index(st)
                 except ValueError:
                     raise IndexError(f"Provided strategy label '{st}' not defined")
             elif isinstance(st, Strategy):
                 try:
-                    cont[pl] = list(self.players[pl].strategies).index(st)
+                    cont[pl] = list(player.strategies).index(st)
                 except ValueError:
                     raise IndexError(f"Provided strategy '{st}' not available to player")
             else:
@@ -2146,9 +2210,9 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
+        label_bytes = (str(label) if label is not None else "").encode("ascii")
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player,
-                                          (str(label) if label is not None else "").encode())
+            self.game.deref().NewStrategy(resolved_player.player, label_bytes)
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:
