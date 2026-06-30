@@ -5,14 +5,14 @@ but not pure-strategy-reachable; likewise, both members of Player 2's infoset ar
 behavioural-strategy-reachable but not pure-strategy-reachable.
 Both are missed by re-entry detection that rides on pure-strategy reachability."
 
-p "" 1 1 "" { "1" "2" } 0
-p "" 1 2 "" { "1" "2" } 0
-p "" 1 1 "" { "1" "2" } 0
+p "" 1 1 "Absent-minded" { "1" "2" } 0
+p "" 1 2 "Second" { "1" "2" } 0
+p "" 1 1 "Absent-minded" { "1" "2" } 0
 t "" 1 "Outcome 1" { 1, -1 }
-p "" 1 1 "" { "1" "2" } 0
+p "" 1 1 "Absent-minded" { "1" "2" } 0
 t "" 2 "Outcome 2" { 2, -2 }
-p "" 2 1 "" { "1" "2" } 0
-p "" 2 1 "" { "1" "2" } 0
+p "" 2 1 "Player 2" { "1" "2" } 0
+p "" 2 1 "Player 2" { "1" "2" } 0
 t "" 3 "Outcome 3" { 3, -3 }
 t "" 4 "Outcome 4" { 4, -4 }
 t "" 5 "Outcome 5" { 5, -5 }
