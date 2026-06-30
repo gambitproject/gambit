@@ -121,15 +121,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .bagg format.
-inline Game ReadBaggFile(std::istream &in)
-{
-  try {
-    return std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(in));
-  }
-  catch (std::runtime_error &ex) {
-    throw InvalidFileException(ex.what());
-  }
-}
+Game ReadBaggFile(std::istream &in);
 
 } // end namespace Gambit
 

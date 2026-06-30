@@ -841,7 +841,7 @@ void NormalizeGameLabels(const Game &p_game)
   }
 }
 
-Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadEfgFile(std::istream &p_stream)
 {
   GameFileLexer parser(p_stream);
 
@@ -869,42 +869,34 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  if (p_normalizeLabels) {
-    NormalizeGameLabels(game);
-  }
+  NormalizeGameLabels(game);
   return game;
 }
 
-Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadNfgFile(std::istream &p_stream)
 {
   GameFileLexer parser(p_stream);
   TableFileGame data;
   ParseNfgHeader(parser, data);
   auto game = BuildNfg(parser, data);
-  if (p_normalizeLabels) {
-    NormalizeGameLabels(game);
-  }
+  NormalizeGameLabels(game);
   return game;
 }
 
-Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadGbtFile(std::istream &p_stream)
 {
   std::stringstream buffer;
   buffer << p_stream.rdbuf();
   auto game = GameXMLSavefile(buffer.str()).GetGame();
-  if (p_normalizeLabels) {
-    NormalizeGameLabels(game);
-  }
+  NormalizeGameLabels(game);
   return game;
 }
 
-Game ReadAggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadAggFile(std::istream &p_stream)
 {
   try {
     auto game = std::make_shared<GameAGGRep>(agg::AGG::makeAGG(p_stream));
-    if (p_normalizeLabels) {
-      NormalizeGameLabels(game);
-    }
+    NormalizeGameLabels(game);
     return game;
   }
   catch (std::runtime_error &ex) {
@@ -912,13 +904,11 @@ Game ReadAggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   }
 }
 
-Game ReadBaggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadBaggFile(std::istream &p_stream)
 {
   try {
     auto game = std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(p_stream));
-    if (p_normalizeLabels) {
-      NormalizeGameLabels(game);
-    }
+    NormalizeGameLabels(game);
     return game;
   }
   catch (std::runtime_error &ex) {
@@ -926,7 +916,7 @@ Game ReadBaggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   }
 }
 
-Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
+Game ReadGame(std::istream &p_file)
 {
   std::stringstream buffer;
   buffer << p_file.rdbuf();
@@ -947,10 +937,10 @@ Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
     }
     buffer.seekg(0, std::ios::beg);
     if (parser.GetLastText() == "NFG") {
-      return ReadNfgFile(buffer, p_normalizeLabels);
+      return ReadNfgFile(buffer);
     }
     if (parser.GetLastText() == "EFG") {
-      return ReadEfgFile(buffer, p_normalizeLabels);
+      return ReadEfgFile(buffer);
     }
     if (parser.GetLastText() == "#AGG") {
       return ReadAggFile(buffer);

@@ -238,7 +238,7 @@ SUBGAME_ROOTS_CASES = [
             factory=functools.partial(
                 games.read_from_file,
                 "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
-            expected_paths=[[], ["1"], ["1", "1"], ["1", "1", "1"]]
+            expected_paths=[[], ["1_2"], ["1_2", "1_3", "1_2"], ["1_3", "1_2"]]
         ),
         id="overlapping_infosets_inside_subgames_and_Nature_move"
     ),
