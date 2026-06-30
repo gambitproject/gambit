@@ -1534,10 +1534,19 @@ class Game:
         KeyError
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
-            If `outcome` is not an `Outcome` or a `str`
+            If `outcome` is not an `Outcome`, ``NodeOutcome``, or a `str`
         ValueError
-            If `outcome` is an empty `str` or all spaces
+            If `outcome` is an empty `str` or all spaces, or is a ``NodeOutcome`` that
+            resolves to no outcome (no outcome is attached to its node).
         """
+        if isinstance(outcome, NodeOutcome):
+            resolved = cython.cast(NodeOutcome, outcome)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no outcome "
+                    f"(no outcome is attached to the node)"
+                )
+            outcome = resolved
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1550,7 +1559,7 @@ class Game:
             try:
                 return self.outcomes[outcome]
             except KeyError:
-                raise KeyError(f"{funcname}(): no node with label '{outcome}'")
+                raise KeyError(f"{funcname}(): no outcome with label '{outcome}'")
         raise TypeError(
             f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
         )
