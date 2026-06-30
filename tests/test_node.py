@@ -80,7 +80,24 @@ def test_get_player():
     """Test to ensure that we can retrieve a player for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
     assert game.root.player == game.players["Player 1"]
-    assert game.root.children["U1"].children["D2"].children["U3"].player is None
+    assert not game.root.children["U1"].children["D2"].children["U3"].player
+
+
+def test_player_equality_is_symmetric():
+    """A node-anchored player view and the resolved Player compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    proxy = game.root.player
+    player = game.players["Player 1"]
+    assert proxy == player
+    assert player == proxy
+
+
+def test_node_player_resolves_chance():
+    """At a chance node the player view resolves to the chance player."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    chance_node = game.root
+    assert chance_node.player.is_chance
+    assert chance_node.player == game.players.chance
 
 
 def test_get_game():
