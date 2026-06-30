@@ -1,0 +1,54 @@
+% Four games with uniform chance and corrected player 2 information sets
+% Nature chooses among MP, PD, Coord, BoS with probability 1/4 each.
+player 0 name Nature
+player 1 name 1
+player 2 name 2
+
+% Nature root
+level 0 node 1 player 0
+
+% Nature moves: uniform distribution shown on each branch
+level 2 node 1 xshift -7.5 from 0,1 move MP~(1/4)
+level 2 node 2 xshift -2.5 from 0,1 move PD~(1/4)
+level 2 node 3 xshift 2.5 from 0,1 move Coord~(1/4)
+level 2 node 4 xshift 7.5 from 0,1 move BoS~(1/4)
+
+% Player 1 moves U/D
+level 4 node 1 xshift -1 from 2,1 move U
+level 4 node 2 xshift 1 from 2,1 move D
+level 4 node 3 xshift -1 from 2,2 move U
+level 4 node 4 xshift 1 from 2,2 move D
+level 4 node 5 xshift -1 from 2,3 move U
+level 4 node 6 xshift 1 from 2,3 move D
+level 4 node 7 xshift -1 from 2,4 move U
+level 4 node 8 xshift 1 from 2,4 move D
+
+% Player 2 moves L/R and payoffs, left-to-right as in the figure
+level 6 node 1 xshift -0.55 from 4,1 move L payoffs 2 0
+level 6 node 2 xshift 0.55 from 4,1 move R payoffs 0 2
+level 6 node 3 xshift -0.55 from 4,2 move L payoffs 0 2
+level 6 node 4 xshift 0.55 from 4,2 move R payoffs 2 0
+
+level 6 node 5 xshift -0.55 from 4,3 move L payoffs 2 2
+level 6 node 6 xshift 0.55 from 4,3 move R payoffs 0 3
+level 6 node 7 xshift -0.55 from 4,4 move L payoffs 3 0
+level 6 node 8 xshift 0.55 from 4,4 move R payoffs 1 1
+
+level 6 node 9 xshift -0.55 from 4,5 move L payoffs 2 2
+level 6 node 10 xshift 0.55 from 4,5 move R payoffs 0 0
+level 6 node 11 xshift -0.55 from 4,6 move L payoffs 0 0
+level 6 node 12 xshift 0.55 from 4,6 move R payoffs 1 1
+
+level 6 node 13 xshift -0.55 from 4,7 move L payoffs 2 1
+level 6 node 14 xshift 0.55 from 4,7 move R payoffs 0 0
+level 6 node 15 xshift -0.55 from 4,8 move L payoffs 0 0
+level 6 node 16 xshift 0.55 from 4,8 move R payoffs 1 2
+
+% Player 1 information sets
+iset 2,1 2,2 player 1
+iset 2,3 2,4 player 1
+
+% Player 2 information sets:
+% first and third are the same; second and fourth are the same.
+iset 4,1 4,2 4,5 4,6 player 2
+iset 4,3 4,4 4,7 4,8 player 2
