@@ -50,6 +50,7 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
+  mutable std::vector<std::pair<GameInfosetRep *, GameNodeRep *>> m_absentMindedReentries;
   // The subgames of the game, held in two synchronized forms:
   // m_subgamePostorder for iteration (children before parents),
   // m_subgameByRoot for O(1) lookup by root node and ownership of the GameSubgameRep objects.
@@ -125,6 +126,7 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
+  std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const override;
   std::vector<GameSubgame> GetSubgames() const override;
   GameSubgame GetMinimalSubgame(const GameInfoset &) const override;
   //@}

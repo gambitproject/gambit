@@ -64,7 +64,7 @@ def test_game_add_players_nolabel():
     (gbt.catalog.load("journals/geb/wichardt2008"), False),  # forgetting past action
     ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
-    ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
+    ("noPR-AM-driver-one-player.efg", False),  # 1 player, one infoset unreached
     ("noPR-AM-driver-two-players.efg", False),  # 2 players, one infoset unreached
     ("noPR-action-AM.efg", False),  # 2 players + forgetting past action; P1 has one infoset
     ("noPR-action-AM-two-hops.efg", False),  # 2 players, one AM-infoset each
