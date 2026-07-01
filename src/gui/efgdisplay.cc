@@ -125,7 +125,7 @@ void OutcomeEditorPopup::BuildControls()
 
   const Game game = m_doc->GetGame();
 
-  for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
+  for (size_t player = 1; player <= m_doc->GetGame()->NumPlayers(); ++player) {
     const GamePlayer gamePlayer = game->GetPlayer(player);
 
     payoffSizer->Add(new wxStaticText(m_contentPanel, wxID_ANY,
@@ -1144,7 +1144,7 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     if (node->GetOutcome()) {
       auto entry = m_layout.GetNodeEntry(node);
 
-      for (size_t player = 1; player <= m_doc->NumPlayers(); ++player) {
+      for (size_t player = 1; player <= m_doc->GetGame()->NumPlayers(); ++player) {
         if (entry->GetPayoffExtent(player).Contains(x, y)) {
           initialPlayer = static_cast<int>(player);
           break;

@@ -106,7 +106,7 @@ cdef extern from "games/game.h":
         int GetId() except +
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
         c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameSequenceRep "GameSequenceRep":
@@ -120,7 +120,7 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         cppclass Actions:
@@ -148,7 +148,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         c_GameAction GetAction(int) except +IndexError
         Actions GetActions() except +
@@ -197,7 +197,7 @@ cdef extern from "games/game.h":
         int IsChance() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
@@ -212,7 +212,7 @@ cdef extern from "games/game.h":
         int GetNumber() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         T GetPayoff[T](c_GamePlayer) except +IndexError
         void SetPayoff(c_GamePlayer, c_Number) except +IndexError
@@ -232,7 +232,7 @@ cdef extern from "games/game.h":
         int GetNumber() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         c_GameInfoset GetInfoset() except +
         c_GamePlayer GetPlayer() except +
@@ -333,7 +333,7 @@ cdef extern from "games/game.h":
         Nodes GetNodes() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError
-        c_GameStrategy NewStrategy(c_GamePlayer, string) except +
+        c_GameStrategy NewStrategy(c_GamePlayer, string) except +ValueError
         void DeleteStrategy(c_GameStrategy) except +
         int MixedProfileLength() except +
 

@@ -145,11 +145,10 @@ class Infoset:
         else:
             return f"Infoset(player={self.player}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Infoset) and
-            self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Infoset):
+            return NotImplemented
+        return self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
@@ -165,7 +164,12 @@ class Infoset:
 
     @property
     def label(self) -> str:
-        """Get or set the text label of the information set."""
+        """Get or set the text label of the information set.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.infoset.deref().GetLabel().decode("ascii")
 
     @label.setter

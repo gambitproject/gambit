@@ -21,7 +21,6 @@ construction and analysis of finite extensive and strategic games.
          :color: secondary
          :expand:
 
-
    .. grid-item-card:: 🐍 PyGambit
       :columns: 3
 

@@ -77,7 +77,7 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
                   wxALL, 5);
   }
 
-  if (m_doc->IsTree()) {
+  if (game->IsTree()) {
     if (game->IsPerfectRecall()) {
       boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is a game of perfect recall")), 0,
                     wxALL, 5);
