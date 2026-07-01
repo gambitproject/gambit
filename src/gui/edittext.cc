@@ -55,18 +55,19 @@ void StaticTextButton::OnLeftClick(wxMouseEvent &p_event)
 //                       class EditableText
 //=========================================================================
 
-EditableText::EditableText(wxWindow *p_parent, int p_id, const wxString &p_value,
-                           const wxPoint &p_position, const wxSize &p_size)
+EditableLabelText::EditableLabelText(wxWindow *p_parent, int p_id, const wxString &p_value,
+                                     const wxPoint &p_position, const wxSize &p_size)
   : wxPanel(p_parent, p_id, p_position, p_size)
 {
   m_staticText =
       new StaticTextButton(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxALIGN_LEFT);
   Connect(m_staticText->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(EditableText::OnClick));
+          wxCommandEventHandler(EditableLabelText::OnClick));
 
-  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxTE_PROCESS_ENTER);
+  m_textCtrl = new LabelTextCtrl(this, wxID_ANY, p_value, LabelCharacterPolicy::AsciiOnly,
+                                 wxPoint(0, 0), p_size, wxTE_PROCESS_ENTER);
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
-          wxCommandEventHandler(EditableText::OnAccept));
+          wxCommandEventHandler(EditableLabelText::OnAccept));
 
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
@@ -76,7 +77,7 @@ EditableText::EditableText(wxWindow *p_parent, int p_id, const wxString &p_value
   wxWindowBase::Layout();
 }
 
-void EditableText::BeginEdit()
+void EditableLabelText::BeginEdit()
 {
   m_textCtrl->SetValue(m_staticText->GetLabel());
   m_textCtrl->SetSelection(-1, -1);
@@ -86,10 +87,10 @@ void EditableText::BeginEdit()
   m_textCtrl->SetFocus();
 }
 
-void EditableText::EndEdit(bool p_accept)
+void EditableLabelText::EndEdit(bool p_accept)
 {
   if (p_accept) {
-    m_staticText->SetLabel(m_textCtrl->GetValue());
+    m_staticText->SetLabel(m_textCtrl->GetNormalizedValue());
   }
 
   GetSizer()->Show(m_textCtrl, false);
@@ -97,52 +98,52 @@ void EditableText::EndEdit(bool p_accept)
   GetSizer()->Layout();
 }
 
-wxString EditableText::GetValue() const
+wxString EditableLabelText::GetValue() const
 {
 
   if (GetSizer()->IsShown(m_textCtrl)) {
-    return m_textCtrl->GetValue();
+    return m_textCtrl->GetNormalizedValue();
   }
   else {
     return m_staticText->GetLabel();
   }
 }
 
-void EditableText::SetValue(const wxString &p_value)
+void EditableLabelText::SetValue(const wxString &p_value)
 {
   m_textCtrl->SetValue(p_value);
   m_staticText->SetLabel(p_value);
 }
 
-bool EditableText::SetForegroundColour(const wxColour &p_color)
+bool EditableLabelText::SetForegroundColour(const wxColour &p_color)
 {
   m_staticText->SetForegroundColour(p_color);
   m_textCtrl->SetForegroundColour(p_color);
   return true;
 }
 
-bool EditableText::SetBackgroundColour(const wxColour &p_color)
+bool EditableLabelText::SetBackgroundColour(const wxColour &p_color)
 {
   m_staticText->SetBackgroundColour(p_color);
   m_textCtrl->SetBackgroundColour(p_color);
   return true;
 }
 
-bool EditableText::SetFont(const wxFont &p_font)
+bool EditableLabelText::SetFont(const wxFont &p_font)
 {
   m_staticText->SetFont(p_font);
   m_textCtrl->SetFont(p_font);
   return true;
 }
 
-void EditableText::OnClick(wxCommandEvent &)
+void EditableLabelText::OnClick(wxCommandEvent &)
 {
   wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED);
   event.SetId(GetId());
   wxPostEvent(GetParent(), event);
 }
 
-void EditableText::OnAccept(wxCommandEvent &)
+void EditableLabelText::OnAccept(wxCommandEvent &)
 {
   EndEdit(true);
   wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER);

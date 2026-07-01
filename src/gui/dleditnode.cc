@@ -39,9 +39,9 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, 5);
-  m_nodeName =
-      new wxTextCtrl(this, wxID_ANY, wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
-  labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
+  m_nodeLabel =
+      new LabelTextCtrl(this, wxID_ANY, wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
+  labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
   auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);

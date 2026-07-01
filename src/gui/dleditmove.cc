@@ -30,20 +30,21 @@
 #include "gambit.h"
 #include "dleditmove.h"
 #include "valnumber.h"
+#include "editlabel.h"
 
 namespace Gambit::GUI {
 
 class ActionPanel final : public wxScrolledWindow {
   std::vector<wxString> m_actionProbValues;
-  std::vector<wxTextCtrl *> m_actionNames;
+  std::vector<LabelTextCtrl *> m_actionLabels;
   std::vector<wxTextCtrl *> m_actionProbs;
 
 public:
   ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset);
 
-  int NumActions() const { return static_cast<int>(m_actionNames.size()); }
+  int NumActions() const { return static_cast<int>(m_actionLabels.size()); }
 
-  wxString GetActionName(int p_act) const;
+  wxString GetActionLabel(int p_act) const;
   Array<Number> GetActionProbs() const;
 };
 
@@ -57,7 +58,7 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
     m_actionProbValues.reserve(p_infoset->GetActions().size());
     m_actionProbs.reserve(p_infoset->GetActions().size());
   }
-  m_actionNames.reserve(p_infoset->GetActions().size());
+  m_actionLabels.reserve(p_infoset->GetActions().size());
 
   const int numColumns = isChance ? 3 : 2;
 
@@ -82,8 +83,9 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
                    wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
     auto *name =
-        new wxTextCtrl(this, wxID_ANY, wxString(action->GetLabel().c_str(), *wxConvCurrent));
-    m_actionNames.push_back(name);
+        new LabelTextCtrl(this, wxID_ANY, wxString(action->GetLabel().c_str(), *wxConvCurrent),
+                          LabelCharacterPolicy::AsciiOnly);
+    m_actionLabels.push_back(name);
     gridSizer->Add(name, 1, wxEXPAND);
 
     if (isChance) {
@@ -110,9 +112,9 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
   SetMinSize(wxSize(FromDIP(isChance ? 400 : 300), std::min(bestSize.GetHeight(), FromDIP(250))));
 }
 
-wxString ActionPanel::GetActionName(int p_act) const
+wxString ActionPanel::GetActionLabel(int p_act) const
 {
-  return m_actionNames.at(p_act - 1)->GetValue();
+  return m_actionLabels.at(p_act - 1)->GetNormalizedValue();
 }
 
 Array<Number> ActionPanel::GetActionProbs() const
@@ -138,9 +140,10 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_infosetName =
-      new wxTextCtrl(this, wxID_ANY, wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
-  labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
+  m_infosetLabel =
+      new LabelTextCtrl(this, wxID_ANY, wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent),
+                        LabelCharacterPolicy::AsciiOnly);
+  labelSizer->Add(m_infosetLabel, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxEXPAND);
 
   {
@@ -215,9 +218,9 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
 
 int EditMoveDialog::NumActions() const { return m_actionPanel->NumActions(); }
 
-wxString EditMoveDialog::GetActionName(int p_act) const
+wxString EditMoveDialog::GetActionLabel(int p_act) const
 {
-  return m_actionPanel->GetActionName(p_act);
+  return m_actionPanel->GetActionLabel(p_act);
 }
 
 Array<Number> EditMoveDialog::GetActionProbs() const { return m_actionPanel->GetActionProbs(); }

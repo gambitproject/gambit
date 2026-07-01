@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GUI_EDITTEXT_H
 #define GAMBIT_GUI_EDITTEXT_H
 
+#include "editlabel.h"
+
 namespace Gambit::GUI {
 //!
 //! A StaticTextButton is a wxStaticText object that generates a
@@ -43,9 +45,9 @@ public:
 //! This control looks like a wxStaticText, but when clicked it shows
 //! a wxTextCtrl to edit the value.
 //!
-class EditableText : public wxPanel {
+class EditableLabelText : public wxPanel {
   StaticTextButton *m_staticText;
-  wxTextCtrl *m_textCtrl;
+  LabelTextCtrl *m_textCtrl;
 
   /// @name Event handlers
   //@{
@@ -56,8 +58,8 @@ class EditableText : public wxPanel {
   //@}
 
 public:
-  EditableText(wxWindow *p_parent, int p_id, const wxString &p_value, const wxPoint &p_position,
-               const wxSize &p_size);
+  EditableLabelText(wxWindow *p_parent, int p_id, const wxString &p_value,
+                    const wxPoint &p_position, const wxSize &p_size);
 
   bool IsEditing() const { return GetSizer()->IsShown(m_textCtrl); }
   void BeginEdit();

@@ -31,6 +31,8 @@
 #include "wx/sheet/sheet.h"
 
 #include "renratio.h" // special renderer for rational numbers
+#include "editlabel.h"
+#include "labelcell.h"
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
@@ -240,7 +242,9 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->RenameRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow(), p_value);
+  m_table->RenameRowHeaderStrategy(
+      p_coords.GetCol(), p_coords.GetRow(),
+      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
 }
 
 wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -252,6 +256,7 @@ wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetRowHeaderColCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetRowHeaderPlayer(p_coords.GetCol())));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
@@ -536,7 +541,9 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->RenameColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol(), p_value);
+  m_table->RenameColHeaderStrategy(
+      p_coords.GetRow(), p_coords.GetCol(),
+      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
 }
 
 wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -548,6 +555,7 @@ wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetColHeaderRowCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetColHeaderPlayer(p_coords.GetRow())));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
