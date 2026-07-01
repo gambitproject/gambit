@@ -73,7 +73,7 @@ void TablePlayerIcon::OnLeftClick(wxMouseEvent &)
 class TablePlayerPanel final : public wxPanel {
   GameDocument *m_doc;
   int m_player;
-  EditableText *m_playerLabel;
+  EditableLabelText *m_playerLabel;
   wxStaticText *m_payoff;
 
   /// @name Event handlers
@@ -133,7 +133,8 @@ TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel, Gam
   Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(TablePlayerPanel::OnSetColor));
 
-  m_playerLabel = new EditableText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(125, -1));
+  m_playerLabel =
+      new EditableLabelText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(125, -1));
   m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 5);
   Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
