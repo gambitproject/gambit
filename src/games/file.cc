@@ -319,6 +319,53 @@ public:
   }
 };
 
+/// Normalizes labels in place so the resulting set is distinct and nonempty:
+/// empty labels are given a suffix and repeated labels are de-duplicated by
+/// appending "_n", choosing the next n not already present in the scope.
+/// `p_get(element)` reads an element's label and `p_set(element, label)`
+/// writes it, so this works both on a container of game objects (via GetLabel/SetLabel)
+/// and on a container of raw label strings (read/write the string directly).
+template <class Container, class Getter, class Setter>
+void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
+{
+  // NOLINTBEGIN(misc-const-correctness)
+  std::map<std::string, std::size_t> counts;
+  std::set<std::string> used;
+  // NOLINTEND(misc-const-correctness)
+  for (auto &&element : p_container) {
+    counts[p_get(element)] += 1;
+    used.insert(p_get(element));
+  }
+  // NOLINTBEGIN(misc-const-correctness)
+  std::map<std::string, std::size_t> visited;
+  // NOLINTEND(misc-const-correctness)
+  for (auto &&element : p_container) {
+    const auto label = p_get(element);
+    // A special case: If only one label is the empty string we still want to
+    // convert it to "_1"
+    if (counts[label] == 1 && label != "") {
+      continue;
+    }
+    // Generate the next "label_n" that is not already used in this scope, so
+    // that e.g. {"x", "x", "x_1"} does not renumber to a duplicate "x_1".
+    std::string candidate;
+    do {
+      const auto index = ++visited[label];
+      candidate = label + "_" + std::to_string(index);
+    } while (used.count(candidate) > 0);
+    used.insert(candidate);
+    p_set(element, candidate);
+  }
+}
+
+/// Normalizes a list of raw label strings.
+template <class Container> void NormalizeLabelStrings(Container &p_labels)
+{
+  NormalizeLabels(
+      p_labels, [](const std::string &s) { return s; },
+      [](std::string &s, const std::string &v) { s = v; });
+}
+
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
@@ -473,10 +520,19 @@ public:
 void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
+  // Buffer the raw player labels so they can be normalized (made unique and nonempty)
+  // before the player objects are created.
+  // NOLINTBEGIN(misc-const-correctness)
+  std::vector<std::string> player_labels;
+  // NOLINTEND(misc-const-correctness)
   while (p_state.GetNextToken() == TOKEN_TEXT) {
-    p_game->NewPlayer()->SetLabel(p_state.GetLastText());
+    player_labels.push_back(p_state.GetLastText());
   }
   p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
+  NormalizeLabelStrings(player_labels);
+  for (const auto &label : player_labels) {
+    p_game->NewPlayer()->SetLabel(label);
+  }
 }
 
 void CheckOutcomeDefinition(const GameFileLexer &p_state, int p_outcomeId,
@@ -801,52 +857,22 @@ Game GameXMLSavefile::GetGame() const
   throw InvalidFileException("No game representation found in document");
 }
 
-template <class C> void NormalizeLabels(C &&p_container)
-{
-  // NOLINTBEGIN(misc-const-correctness)
-  std::map<std::string, std::size_t> counts;
-  std::set<std::string> used;
-  // NOLINTEND(misc-const-correctness)
-  for (const auto &element : p_container) {
-    counts[element->GetLabel()] += 1;
-    used.insert(element->GetLabel());
-  }
-  // NOLINTBEGIN(misc-const-correctness)
-  std::map<std::string, std::size_t> visited;
-  // NOLINTEND(misc-const-correctness)
-  for (auto element : p_container) {
-    const auto label = element->GetLabel();
-    // A special case: If only one label is the empty string we still want to
-    // convert it to "_1"
-    if (counts[label] == 1 && label != "") {
-      continue;
-    }
-    // Generate the next "label_n" that is not already used in this scope, so
-    // that e.g. {"x", "x", "x_1"} does not renumber to a duplicate "x_1".
-    std::string candidate;
-    do {
-      const auto index = ++visited[label];
-      candidate = label + "_" + std::to_string(index);
-    } while (used.count(candidate) > 0);
-    used.insert(candidate);
-    element->SetLabel(candidate);
-  }
-}
-
 void NormalizeGameLabels(const Game &p_game)
 {
-  NormalizeLabels(p_game->GetPlayers());
-  NormalizeLabels(p_game->GetOutcomes());
+  const auto get_label = [](const auto &e) { return e->GetLabel(); };
+  const auto set_label = [](const auto &e, const std::string &s) { e->SetLabel(s); };
+  NormalizeLabels(p_game->GetPlayers(), get_label, set_label);
+  NormalizeLabels(p_game->GetOutcomes(), get_label, set_label);
   if (p_game->IsTree()) {
     for (const auto &player : p_game->GetPlayersWithChance()) {
       for (const auto &infoset : player->GetInfosets()) {
-        NormalizeLabels(infoset->GetActions());
+        NormalizeLabels(infoset->GetActions(), get_label, set_label);
       }
     }
   }
   else {
     for (const auto &player : p_game->GetPlayers()) {
-      NormalizeLabels(player->GetStrategies());
+      NormalizeLabels(player->GetStrategies(), get_label, set_label);
     }
   }
 }
@@ -888,6 +914,25 @@ Game ReadNfgFile(std::istream &p_stream)
   GameFileLexer parser(p_stream);
   TableFileGame data;
   ParseNfgHeader(parser, data);
+  // Normalize player and strategy labels on the raw lists before the game is
+  // built, so labels are unique and nonempty at construction.
+  for (auto &player : data.m_players) {
+    NormalizeLabelStrings(player.m_strategies);
+  }
+  {
+    // NOLINTBEGIN(misc-const-correctness)
+    std::vector<std::string> player_labels;
+    // NOLINTEND(misc-const-correctness)
+    for (const auto &player : data.m_players) {
+      player_labels.push_back(player.m_name);
+    }
+    NormalizeLabelStrings(player_labels);
+    auto label_it = player_labels.begin();
+    for (auto &player : data.m_players) {
+      player.m_name = *label_it;
+      ++label_it;
+    }
+  }
   auto game = BuildNfg(parser, data);
   NormalizeGameLabels(game);
   return game;
