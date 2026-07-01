@@ -207,6 +207,8 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
+	src/solvers/hp/hp.cc \
+	src/solvers/hp/hp.h \
 	$(CATALOG_FILES)
 
 core_SOURCES = \
