@@ -1478,9 +1478,9 @@ class Game:
         """Resolve an attempt to reference a player of the game.
         ...
         TypeError
-            If `player` is not a `Player`, ``NodePlayer``, or a `str`
+            If `player` is not a `Player`, `NodePlayer`, or a `str`
         ValueError
-            If `player` is an empty `str` or is a ``NodePlayer`` that resolves to no player
+            If `player` is an empty `str` or is a `NodePlayer` that resolves to no player
             (terminal node).
         """
         if isinstance(player, NodePlayer):
@@ -1528,9 +1528,9 @@ class Game:
         KeyError
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
-            If `outcome` is not an `Outcome`, ``NodeOutcome``, or a `str`
+            If `outcome` is not an `Outcome`, `NodeOutcome`, or a `str`
         ValueError
-            If `outcome` is an empty `str` or all spaces, or is a ``NodeOutcome`` that
+            If `outcome` is an empty `str` or all spaces, or is a `NodeOutcome` that
             resolves to no outcome (no outcome is attached to its node).
         """
         if isinstance(outcome, NodeOutcome):
@@ -1680,9 +1680,9 @@ class Game:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         TypeError
-            If `infoset` is not an `Infoset`, ``NodeInfoset``, or a `str`
+            If `infoset` is not an `Infoset`, `NodeInfoset`, or a `str`
         ValueError
-            If `infoset` is an empty `str` or all spaces, or is a ``NodeInfoset`` that
+            If `infoset` is an empty `str` or all spaces, or is a `NodeInfoset` that
             resolves to no information set (its node is terminal).
         """
         if isinstance(infoset, NodeInfoset):
