@@ -100,6 +100,7 @@ cppgambit_logit = solver_library_config("cppgambit_logit", ["logit"])
 cppgambit_gtracer = solver_library_config("cppgambit_gtracer", ["gtracer", "ipa", "gnm"])
 cppgambit_simpdiv = solver_library_config("cppgambit_simpdiv", ["simpdiv"])
 cppgambit_enumpoly = solver_library_config("cppgambit_enumpoly", ["nashsupport", "enumpoly"])
+cppgambit_hp = solver_library_config("cppgambit_hp", ["hp"])
 
 
 libgambit = setuptools.Extension(
@@ -117,7 +118,7 @@ libgambit = setuptools.Extension(
 setuptools.setup(
     cmdclass={"build_py": GambitBuildPy},
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
-               cppgambit_gtracer, cppgambit_enumpoly,
+               cppgambit_gtracer, cppgambit_enumpoly, cppgambit_hp,
                cppgambit_games, cppgambit_core],
     ext_modules=Cython.Build.cythonize(libgambit,
                                        language_level="3str",

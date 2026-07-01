@@ -621,6 +621,10 @@ cdef extern from "solvers/logit/logit.h":
         double getitem "operator[]"(int) except +IndexError
 
 
+cdef extern from "solvers/hp/hp.h":
+    stdlist[c_MixedStrategyProfile[double]] HPStrategySolveWrapper(c_Game) except +RuntimeError
+
+
 cdef extern from "nash.h":
     stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double
