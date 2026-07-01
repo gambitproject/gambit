@@ -207,8 +207,6 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
-	src/solvers/hp/hp.cc \
-	src/solvers/hp/hp.h \
 	$(CATALOG_FILES)
 
 core_SOURCES = \
@@ -314,6 +312,10 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gtracer.cc \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
+
+hp_SOURCES = \
+	src/solvers/hp/hp.h \
+	src/solvers/hp/hp.cc
 
 if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++
