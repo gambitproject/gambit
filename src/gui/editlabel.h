@@ -38,16 +38,18 @@ class LabelTextCtrl final : public wxTextCtrl {
 
   static bool IsAsciiPrintable(wxUniChar p_char);
   static bool IsLabelWhitespace(wxUniChar p_char);
+  static bool IsAllowedNonWhitespace(wxUniChar p_char, LabelCharacterPolicy p_policy);
 
-  bool IsAllowedNonWhitespace(wxUniChar p_char) const;
-
-  wxString Normalize(const wxString &p_value, bool p_stripTrailing) const;
+  wxString NormalizeValue(const wxString &p_value, bool p_stripTrailing) const;
   void NormalizeInPlace(bool p_stripTrailing);
 
   void OnText(wxCommandEvent &p_event);
   void OnKillFocus(wxFocusEvent &p_event);
 
 public:
+  static wxString Normalize(const wxString &p_value, bool p_stripTrailing,
+                            LabelCharacterPolicy p_policy = LabelCharacterPolicy::AsciiOnly);
+
   LabelTextCtrl(wxWindow *p_parent, wxWindowID p_id, const wxString &p_value,
                 LabelCharacterPolicy p_policy = LabelCharacterPolicy::AsciiOnly,
                 const wxPoint &p_pos = wxDefaultPosition, const wxSize &p_size = wxDefaultSize,

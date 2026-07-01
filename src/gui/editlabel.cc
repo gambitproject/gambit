@@ -43,9 +43,9 @@ bool LabelTextCtrl::IsLabelWhitespace(wxUniChar p_char)
          p_char == '\f';
 }
 
-bool LabelTextCtrl::IsAllowedNonWhitespace(wxUniChar p_char) const
+bool LabelTextCtrl::IsAllowedNonWhitespace(wxUniChar p_char, LabelCharacterPolicy p_policy)
 {
-  switch (m_policy) {
+  switch (p_policy) {
   case LabelCharacterPolicy::AsciiOnly:
     return IsAsciiPrintable(p_char) && !IsLabelWhitespace(p_char);
 
@@ -57,7 +57,8 @@ bool LabelTextCtrl::IsAllowedNonWhitespace(wxUniChar p_char) const
   }
 }
 
-wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing) const
+wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing,
+                                  LabelCharacterPolicy p_policy)
 {
   wxString normalized;
   bool sawNonWhitespace = false;
@@ -77,7 +78,7 @@ wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing)
       continue;
     }
 
-    if (!IsAllowedNonWhitespace(ch)) {
+    if (!IsAllowedNonWhitespace(ch, p_policy)) {
       continue;
     }
 
