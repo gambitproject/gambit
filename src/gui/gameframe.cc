@@ -994,7 +994,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
   EditNodeDialog dialog(this, m_doc->GetSelectNode());
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
+      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeLabel());
       if (dialog.GetOutcome() > 0) {
         m_doc->DoSetOutcome(m_doc->GetSelectNode(),
                             m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));

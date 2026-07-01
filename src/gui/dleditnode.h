@@ -23,10 +23,12 @@
 #ifndef GAMBIT_GUI_DLEDITNODE_H
 #define GAMBIT_GUI_DLEDITNODE_H
 
+#include "editlabel.h"
+
 namespace Gambit::GUI {
 class EditNodeDialog final : public wxDialog {
   GameNode m_node;
-  wxTextCtrl *m_nodeName;
+  LabelTextCtrl *m_nodeLabel;
   wxChoice *m_outcome, *m_infoset;
   Array<GameInfoset> m_infosetList;
 
@@ -35,7 +37,7 @@ public:
   EditNodeDialog(wxWindow *p_parent, const GameNode &p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  wxString GetNodeName() const { return m_nodeName->GetValue(); }
+  wxString GetNodeLabel() const { return m_nodeLabel->GetValue(); }
   int GetOutcome() const { return m_outcome->GetSelection(); }
   GameInfoset GetInfoset() const;
 };
