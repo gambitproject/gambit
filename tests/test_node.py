@@ -709,11 +709,11 @@ def test_append_move_actions_list_of_mixed_node_references():
 
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
-    node1.label = " 000"
-    node_references = [" 000", node2]
+    node1.label = "000"
+    node_references = ["000", node2]
     game.append_move(node_references, "Player 3", ["B", "F", "S"])
 
-    assert node1.children["B"].parent.label == " 000"
+    assert node1.children["B"].parent.label == "000"
     assert len(node1.children) == 3
     assert len(node2.children) == 3
 
@@ -1047,6 +1047,27 @@ def test_node_children_other_infoset_action():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
         _ = game.root.children[game.root.children["King"].infoset.actions["Bet"]]
+
+
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_node_label_valid(label):
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = label
+    assert game.root.label == label
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_node_label_invalid_raises_valueerror(label):
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.root.label = label
+
+
+@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
+def test_node_label_non_ascii_rejected(label):
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(UnicodeEncodeError):
+        game.root.label = label
 
 
 @pytest.mark.parametrize(

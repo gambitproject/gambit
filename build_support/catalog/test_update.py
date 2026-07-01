@@ -9,10 +9,10 @@ Monkeypatching strategy
 -----------------------
 ``update.py`` depends on four external resources that are replaced in tests:
 
-1. ``DRAW_TREE_SETTINGS_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
-   ``catalog_draw_tree_settings`` reads controlled config without touching the
-   real ``draw_tree_settings.yaml``.  ``monkeypatch.setattr(update,
-   "DRAW_TREE_SETTINGS_CONFIG", yaml_file)`` replaces the module-level path for
+1. ``GTDRAW_SETTINGS_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
+   ``catalog_gtdraw_settings`` reads controlled config without touching the
+   real ``gtdraw_settings.yaml``.  ``monkeypatch.setattr(update,
+   "GTDRAW_SETTINGS_CONFIG", yaml_file)`` replaces the module-level path for
    the duration of a single test and restores it automatically on teardown.
 
 2. ``CATALOG_HIERARCHY_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
@@ -20,8 +20,8 @@ Monkeypatching strategy
    ``catalog_hierarchy.yaml``.  Swap via ``monkeypatch.setattr(update,
    "CATALOG_HIERARCHY_CONFIG", yaml_file)``.
 
-3. ``generate_tex`` / ``generate_png`` / ``generate_pdf`` / ``generate_svg``
-   (functions imported from ``draw_tree``) — replaced with no-ops or
+3. ``tex`` / ``png`` / ``pdf`` / ``svg``
+   (functions imported from ``gtdraw``) — replaced with no-ops or
    call-tracking lambdas.  This lets us test RST-generation logic without
    actually invoking LaTeX, and lets us assert whether image
    generation was triggered at all.
@@ -37,7 +37,7 @@ import textwrap
 
 import pytest
 
-pytest.importorskip("draw_tree")  # update.py imports draw_tree at module level
+pytest.importorskip("gtdraw")  # update.py imports gtdraw at module level
 pytest.importorskip("yaml")
 
 import pandas as pd  # noqa: E402
@@ -57,7 +57,7 @@ _YAML_DEFAULTS = {
     "sublevel_scaling": 0,
 }
 
-# A self-contained draw_tree_settings YAML config used by settings tests.
+# A self-contained gtdraw_settings YAML config used by settings tests.
 # Slugs are entirely fictional:
 #   "testgroup2000"       – group-level prefix covering testgroup2000/*
 #   "othergroup1999"      – group-level prefix covering othergroup1999/*
@@ -88,8 +88,8 @@ _YAML_CONFIG = textwrap.dedent("""\
 def _write_yaml(path, content=_YAML_CONFIG):
     """Write *content* to *path* and return *path*.
 
-    Used to create a temporary draw_tree_settings YAML file that can be
-    pointed at via ``monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG",
+    Used to create a temporary gtdraw_settings YAML file that can be
+    pointed at via ``monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG",
     path)`` without touching the real config file.
     """
     path.write_text(content, encoding="utf-8")
@@ -130,7 +130,7 @@ def _make_image_files(catalog_dir, slug, fmt="efg"):
 
     ``generate_rst_table`` checks that all expected image files exist before
     deciding whether to regenerate them.  Touching empty files satisfies that
-    check without requiring real draw_tree output, so tests that are not
+    check without requiring real gtdraw output, so tests that are not
     specifically about image generation can use this helper to set up the
     pre-existing-images state.
 
@@ -148,40 +148,40 @@ def _make_image_files(catalog_dir, slug, fmt="efg"):
 
 
 # ---------------------------------------------------------------------------
-# Tests for catalog_draw_tree_settings
+# Tests for catalog_gtdraw_settings
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.catalog_update
 class TestCatalogDrawTreeSettings:
-    """Unit tests for ``catalog_draw_tree_settings(slug) -> dict``.
+    """Unit tests for ``catalog_gtdraw_settings(slug) -> dict``.
 
     Each test writes a temporary YAML config and redirects the module-level
-    ``DRAW_TREE_SETTINGS_CONFIG`` path to it via ``monkeypatch.setattr``.
-    This means the real ``draw_tree_settings.yaml`` is never read or modified.
+    ``GTDRAW_SETTINGS_CONFIG`` path to it via ``monkeypatch.setattr``.
+    This means the real ``gtdraw_settings.yaml`` is never read or modified.
     """
 
     def test_no_override_returns_defaults(self, tmp_path, monkeypatch):
         """A slug with no matching entry in ``overrides`` returns the defaults verbatim."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("unknowngame/v1")
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = update.catalog_gtdraw_settings("unknowngame/v1")
         assert result == _YAML_DEFAULTS
 
     def test_exact_slug_override_applied(self, tmp_path, monkeypatch):
         """A key in ``overrides`` that exactly matches the slug is merged into defaults."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("testgroup2000/fig2")
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = update.catalog_gtdraw_settings("testgroup2000/fig2")
         assert result["action_label_position"] == pytest.approx(0.4)
         assert result["color_scheme"] == "gambit"  # defaults still present
 
     def test_prefix_slug_override_applied(self, tmp_path, monkeypatch):
         """A group-level key (e.g. ``"testgroup2000"``) matches any slug that starts with it."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
         # "testgroup2000/fig1" is not listed explicitly; it matches the group prefix
-        result = update.catalog_draw_tree_settings("testgroup2000/fig1")
+        result = update.catalog_gtdraw_settings("testgroup2000/fig1")
         assert result["sublevel_scaling"] == 1
 
     def test_specific_key_wins_over_group(self, tmp_path, monkeypatch):
@@ -203,19 +203,19 @@ class TestCatalogDrawTreeSettings:
                 sublevel_scaling: 2
         """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("testgroup2000/fig2")
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = update.catalog_gtdraw_settings("testgroup2000/fig2")
         assert result["sublevel_scaling"] == 2
 
     def test_group_override_does_not_bleed_to_other_game(self, tmp_path, monkeypatch):
         """A group-level override applies only to games whose slug starts with that prefix."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
         # "othergroup1999" override sets shared_terminal_depth = False
-        result_other = update.catalog_draw_tree_settings("othergroup1999/fig1")
+        result_other = update.catalog_gtdraw_settings("othergroup1999/fig1")
         assert result_other["shared_terminal_depth"] is False
         # "testgroup2000" has a different override; shared_terminal_depth should be True (default)
-        result_test = update.catalog_draw_tree_settings("testgroup2000/fig1")
+        result_test = update.catalog_gtdraw_settings("testgroup2000/fig1")
         assert result_test["shared_terminal_depth"] is True
 
     def test_no_overrides_section_returns_defaults(self, tmp_path, monkeypatch):
@@ -226,8 +226,8 @@ class TestCatalogDrawTreeSettings:
               sublevel_scaling: 0
         """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
-        monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("anygame/v1")
+        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = update.catalog_gtdraw_settings("anygame/v1")
         assert result == {"color_scheme": "gambit", "sublevel_scaling": 0}
 
 
@@ -343,12 +343,12 @@ class TestCatalogEfFileVariants:
 class TestGenerateRstTable:
     """Tests for ``generate_rst_table(df, rst_path, ...)``.
 
-    Image generation (generate_tex / generate_png / etc.) is mocked out so
+    Image generation (tex / png / etc.) is mocked out so
     that tests can run without LaTeX installed and without reading
     from the real catalog directory.
 
     ``_mock_generates`` uses ``monkeypatch.setattr`` to replace each of the
-    four draw_tree generate functions in the ``update`` module's namespace with
+    four gtdraw functions in the ``update`` module's namespace with
     a no-op.  Because the replacement is scoped to the test, the originals are
     automatically restored afterward.
 
@@ -360,11 +360,11 @@ class TestGenerateRstTable:
     """
 
     def _no_op_generate(self, *args, **kwargs):
-        """Stand-in for draw_tree generate_* functions; does nothing."""
+        """Stand-in for gtdraw functions; does nothing."""
 
     def _mock_generates(self, monkeypatch):
-        """Replace all four draw_tree image-generation functions with no-ops."""
-        for name in ["generate_tex", "generate_png", "generate_pdf", "generate_svg"]:
+        """Replace all four gtdraw image-generation functions with no-ops."""
+        for name in ["tex", "png", "pdf", "svg"]:
             monkeypatch.setattr(update, name, self._no_op_generate)
 
     def test_efg_row_produces_rst_with_slug_and_title(self, tmp_path, monkeypatch):
@@ -380,10 +380,10 @@ class TestGenerateRstTable:
         assert "Fake Author (2000) Figure 1" in rst
         assert f'pygambit.catalog.load("{slug}")' in rst
         assert f":download:`{slug}.efg" in rst  # source game file download link
-        assert f":download:`{slug}.ef" in rst  # draw_tree intermediate file download link
+        assert f":download:`{slug}.ef" in rst  # gtdraw intermediate file download link
 
     def test_nfg_row_produces_rst_with_save_to(self, tmp_path, monkeypatch):
-        """An NFG game row uses the ``save_to`` form of the draw_tree call (no .ef involved)."""
+        """An NFG game row uses the ``save_to`` form of the draw call (no .ef involved)."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor2001/matrix1"
@@ -423,8 +423,8 @@ class TestGenerateRstTable:
         rst = rst_path.read_text()
         assert "fakeauthor2000/fig1" not in rst
 
-    def test_curated_ef_used_in_draw_tree_call(self, tmp_path, monkeypatch):
-        """When a curated .ef file exists alongside the .efg, the RST draw_tree call
+    def test_curated_ef_used_in_draw_call(self, tmp_path, monkeypatch):
+        """When a curated .ef file exists alongside the .efg, the RST draw call
         references the .ef path directly rather than ``pygambit.catalog.load``."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
@@ -438,20 +438,20 @@ class TestGenerateRstTable:
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        # Find the draw_tree( call line in the jupyter-execute block
-        draw_tree_call = next(line for line in rst.splitlines() if "draw_tree(" in line)
-        assert f'"../catalog/{slug}.ef"' in draw_tree_call
-        assert "catalog.load" not in draw_tree_call
+        # Find the draw( call line in the jupyter-execute block
+        draw_call = next(line for line in rst.splitlines() if "draw(" in line)
+        assert f'"../catalog/{slug}.ef"' in draw_call
+        assert "catalog.load" not in draw_call
 
     def test_images_not_regenerated_when_all_exist(self, tmp_path, monkeypatch):
         """If all expected image files are already present and ``regenerate_images`` is
-        False, none of the draw_tree generate functions are called."""
+        False, none of the gtdraw image-generation functions are called."""
         calls = []
         # Replace generate_* with lambdas that record invocations
-        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")  # all images already exist
@@ -465,14 +465,14 @@ class TestGenerateRstTable:
         if the image files already exist.
 
         A curated .ef file is placed in the catalog dir so ``update.py`` uses it
-        as the draw_tree source rather than calling ``gbt.catalog.load``, which
+        as the gtdraw source rather than calling ``gbt.catalog.load``, which
         would require the real catalog to be present.
         """
         calls = []
-        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")
@@ -524,8 +524,8 @@ class TestGenerateRstTable:
         assert ".. tab-set::" in rst
         assert ".. tab-item:: Default" in rst
         assert ".. tab-item:: Wide" in rst
-        assert 'draw_tree(pygambit.catalog.load("fakevariant2001/fig1")' in rst
-        assert 'draw_tree("../catalog/fakevariant2001/fig1__wide.ef"' in rst
+        assert 'draw(pygambit.catalog.load("fakevariant2001/fig1")' in rst
+        assert 'draw("../catalog/fakevariant2001/fig1__wide.ef"' in rst
 
     def test_single_variant_efg_produces_no_tab_set(self, tmp_path, monkeypatch):
         """A single curated .ef file (or no .ef file) does not produce a ``tab-set``."""
@@ -548,10 +548,10 @@ class TestGenerateRstTable:
         Two variants × four generate functions = eight total calls.
         """
         calls = []
-        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2001/fig1"
         game_dir = catalog_dir / "fakevariant2001"
@@ -567,10 +567,10 @@ class TestGenerateRstTable:
         """If all variant image files already exist and ``regenerate_images`` is False,
         generate functions are not called."""
         calls = []
-        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2001/fig1"
         game_dir = catalog_dir / "fakevariant2001"
@@ -658,7 +658,7 @@ class TestHierarchicalRstOutput:
     """Tests that ``generate_rst_table`` produces correctly nested dropdown RST."""
 
     def _mock_generates(self, monkeypatch):
-        for name in ["generate_tex", "generate_png", "generate_pdf", "generate_svg"]:
+        for name in ["tex", "png", "pdf", "svg"]:
             monkeypatch.setattr(update, name, lambda *a, **k: None)
 
     def _write_hierarchy_yaml(self, tmp_path, content=_HIERARCHY_YAML):

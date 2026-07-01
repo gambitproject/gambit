@@ -848,6 +848,7 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
     return maximize_function(range, value_fn);
   });
 }
+
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
@@ -868,11 +869,9 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   if (p_infoset->GetGame().get() != this) {
     throw MismatchException();
   }
-
-  if (!m_unreachableNodes && !m_root->IsTerminal()) {
-    BuildUnreachableNodes();
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
   }
-
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
@@ -889,6 +888,23 @@ GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
     it = m_subgameData.m_subgameByRoot.find(n);
   }
   return it->second;
+}
+
+std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentries() const
+{
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
+  }
+  if (m_absentMindedReentries.empty()) {
+    return {};
+  }
+
+  std::vector<std::pair<GameInfoset, GameNode>> result;
+  result.reserve(m_absentMindedReentries.size());
+  for (const auto &[infoset, node] : m_absentMindedReentries) {
+    result.emplace_back(infoset->shared_from_this(), node->shared_from_this());
+  }
+  return result;
 }
 
 //------------------------------------------------------------------------
@@ -962,6 +978,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
   m_subgameData.Invalidate();
+  m_absentMindedReentries.clear();
   m_computedValues = false;
 }
 
@@ -1057,12 +1074,21 @@ void GameTreeRep::BuildOwnPriorActions() const
 {
   if (m_root->IsTerminal()) {
     m_ownPriorActionInfo = std::make_shared<OwnPriorActionInfo>();
+    m_absentMindedInfosets.clear();
+    m_absentMindedReentries.clear();
     return;
   }
 
   struct OwnPriorActionsVisitor {
     std::shared_ptr<OwnPriorActionInfo> m_info;
     std::map<GamePlayer, std::stack<GameAction>> m_priorActions;
+
+    // A node is a re-entry of its information set iff an ancestor on the current
+    // root-to-node path shares that information set.  m_pathMemberCount counts, per information
+    // set, how many nodes on the current path belong to it.
+    std::map<GameInfosetRep *, int> m_pathMemberCount;
+    std::set<GameInfosetRep *> m_absentMindedInfosets;
+    std::vector<std::pair<GameInfosetRep *, GameNodeRep *>> m_absentMindedReentries;
 
     explicit OwnPriorActionsVisitor(const GameTreeRep *p_game)
       : m_info(std::make_shared<OwnPriorActionInfo>())
@@ -1082,6 +1108,11 @@ void GameTreeRep::BuildOwnPriorActions() const
         m_info->infoset_map[infoset].insert(raw_prior);
 
         stack.emplace(nullptr);
+
+        if (m_pathMemberCount[infoset]++ > 0) {
+          m_absentMindedInfosets.insert(infoset);
+          m_absentMindedReentries.emplace_back(infoset, p_node.get());
+        }
       }
       return DFSCallbackResult::Continue;
     }
@@ -1097,6 +1128,7 @@ void GameTreeRep::BuildOwnPriorActions() const
     {
       if (auto *infoset = p_node->m_infoset) {
         m_priorActions.at(infoset->m_player->shared_from_this()).pop();
+        m_pathMemberCount[infoset]--;
       }
       return DFSCallbackResult::Continue;
     }
@@ -1110,6 +1142,8 @@ void GameTreeRep::BuildOwnPriorActions() const
           visitor);
 
   m_ownPriorActionInfo = visitor.m_info;
+  m_absentMindedInfosets = std::move(visitor.m_absentMindedInfosets);
+  m_absentMindedReentries = std::move(visitor.m_absentMindedReentries);
 }
 
 GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
@@ -1184,9 +1218,9 @@ void GameTreeRep::BuildUnreachableNodes() const
     }
 
     if (!child->IsTerminal()) {
-      // Check for Absent-Minded Re-entry of the infoset
+      // On a re-entry, a pure strategy replays the action chosen at the earlier visit,
+      // so only that branch is reachable; prune the rest.
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
-        m_absentMindedInfosets.insert(child->m_infoset);
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 

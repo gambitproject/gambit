@@ -29,6 +29,8 @@
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
+
+#include "dlexcept.h"
 #include "nfgtable.h"
 #include "menuconst.h"
 #include "edittext.h"
@@ -219,14 +221,24 @@ void TablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void TablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+  try {
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TablePlayerPanel::PostPendingChanges()
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+    try {
+      m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+    }
+    catch (std::exception &ex) {
+      ExceptionDialog(this, ex.what()).ShowModal();
+    }
   }
 }
 
