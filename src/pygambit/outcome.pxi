@@ -62,7 +62,12 @@ class Outcome:
 
     @property
     def label(self) -> str:
-        """The text label associated with this outcome."""
+        """The text label associated with this outcome.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.outcome.deref().GetLabel().decode("ascii")
 
     @label.setter

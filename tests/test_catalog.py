@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -207,7 +208,7 @@ def _setup_pyspiel_mock(
     mock_export_fn = MagicMock()
     mock_game = MagicMock()
 
-    # Wire the dynamics attribute so the == comparison in load_openspiel resolves correctly.
+    # Wire the dynamics attribute so the == comparison in generate_openspiel resolves correctly.
     # MagicMock attribute access is idempotent: mock_ps.GameType.Dynamics.SEQUENTIAL always
     # returns the same object, so the equality check passes.
     if dynamics == "sequential":
@@ -243,35 +244,35 @@ def _setup_pyspiel_mock(
     return mock_ps, mock_export_fn
 
 
-def test_openspiel_load_efg_success(monkeypatch):
+def test_generate_openspiel_efg_success(monkeypatch):
     """Sequential (extensive-form) game: EFG export is used and returns a valid Game."""
     _setup_pyspiel_mock(monkeypatch, dynamics="sequential", efg_str=_MOCK_EFG)
-    game = gbt.catalog.load_openspiel("tiny_hanabi")
+    game = gbt.catalog.generate_openspiel("tiny_hanabi")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_nfg_success(monkeypatch):
+def test_generate_openspiel_nfg_success(monkeypatch):
     """Simultaneous (normal-form) game: NFG export is used and returns a valid Game."""
     _setup_pyspiel_mock(monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG)
-    game = gbt.catalog.load_openspiel("matrix_rps")
+    game = gbt.catalog.generate_openspiel("matrix_rps")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_import_error(monkeypatch):
+def test_generate_openspiel_import_error(monkeypatch):
     """Missing open_spiel raises ImportError with a helpful message."""
     monkeypatch.setitem(sys.modules, "pyspiel", None)
     with pytest.raises(ImportError, match="open_spiel"):
-        gbt.catalog.load_openspiel("matrix_rps")
+        gbt.catalog.generate_openspiel("matrix_rps")
 
 
-def test_openspiel_load_game_not_found(monkeypatch):
+def test_generate_openspiel_game_not_found(monkeypatch):
     """pyspiel.load_game errors propagate directly without wrapping."""
     _setup_pyspiel_mock(monkeypatch, load_raises=RuntimeError("Unknown game 'bogus_game'"))
     with pytest.raises(RuntimeError, match="Unknown game"):
-        gbt.catalog.load_openspiel("bogus_game")
+        gbt.catalog.generate_openspiel("bogus_game")
 
 
-def test_openspiel_load_efg_export_failure(monkeypatch):
+def test_generate_openspiel_efg_export_failure(monkeypatch):
     """EFG export failure on a sequential game raises ValueError with format context."""
     _setup_pyspiel_mock(
         monkeypatch,
@@ -279,10 +280,10 @@ def test_openspiel_load_efg_export_failure(monkeypatch):
         efg_raises=RuntimeError("export error"),
     )
     with pytest.raises(ValueError, match="EFG format"):
-        gbt.catalog.load_openspiel("tiny_hanabi")
+        gbt.catalog.generate_openspiel("tiny_hanabi")
 
 
-def test_openspiel_load_nfg_export_failure(monkeypatch):
+def test_generate_openspiel_nfg_export_failure(monkeypatch):
     """NFG export failure on a simultaneous game raises ValueError with format context."""
     _setup_pyspiel_mock(
         monkeypatch,
@@ -290,20 +291,140 @@ def test_openspiel_load_nfg_export_failure(monkeypatch):
         nfg_raises=RuntimeError("export error"),
     )
     with pytest.raises(ValueError, match="NFG format"):
-        gbt.catalog.load_openspiel("matrix_rps")
+        gbt.catalog.generate_openspiel("matrix_rps")
 
 
-def test_openspiel_load_unsupported_dynamics(monkeypatch):
+def test_generate_openspiel_unsupported_dynamics(monkeypatch):
     """A game with unsupported dynamics (e.g. MEAN_FIELD) raises ValueError."""
     _setup_pyspiel_mock(monkeypatch, dynamics="other")
     with pytest.raises(ValueError, match="unsupported dynamics"):
-        gbt.catalog.load_openspiel("some_mfg_game")
+        gbt.catalog.generate_openspiel("some_mfg_game")
 
 
-def test_openspiel_load_with_params(monkeypatch):
+def test_generate_openspiel_with_params(monkeypatch):
     """params dict is forwarded verbatim to pyspiel.load_game."""
     mock_ps, _ = _setup_pyspiel_mock(
         monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG
     )
-    gbt.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
+    gbt.catalog.generate_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
     mock_ps.load_game.assert_called_once_with("blotto", {"players": 2, "coins": 3, "fields": 2})
+
+
+# ---------------------------------------------------------------------------
+# GAMUT game generation tests (all mocked; Java and gamut.jar not required)
+# ---------------------------------------------------------------------------
+
+
+def _fake_gamut_run(nfg_content, returncode=0, stderr=""):
+    """Return a fake subprocess.run callable that writes nfg_content to the -f path."""
+    def _run(cmd, **kwargs):
+        if returncode == 0:
+            f_idx = cmd.index("-f")
+            Path(cmd[f_idx + 1]).write_text(nfg_content)
+        result = MagicMock()
+        result.returncode = returncode
+        result.stderr = stderr
+        result.stdout = ""
+        return result
+    return _run
+
+
+def test_generate_gamut_success(monkeypatch, tmp_path):
+    """Happy path: GAMUT writes an NFG file and generate_gamut returns a Game."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr("pygambit.catalog.subprocess.run", _fake_gamut_run(_MOCK_NFG))
+    game = gbt.catalog.generate_gamut("RandomGame", gamut_jar=fake_jar)
+    assert isinstance(game, gbt.Game)
+
+
+def test_generate_gamut_with_params(monkeypatch, tmp_path):
+    """params dict is translated correctly to GAMUT command-line flags."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    captured = {}
+
+    def _run(cmd, **kwargs):
+        captured["cmd"] = cmd
+        Path(cmd[cmd.index("-f") + 1]).write_text(_MOCK_NFG)
+        result = MagicMock()
+        result.returncode = 0
+        return result
+
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr("pygambit.catalog.subprocess.run", _run)
+    gbt.catalog.generate_gamut(
+        "RandomGame",
+        params={"players": 2, "actions": [3, 3], "normalize": True, "min_payoff": 0},
+        gamut_jar=fake_jar,
+    )
+    cmd = captured["cmd"]
+    assert "-players" in cmd and cmd[cmd.index("-players") + 1] == "2"
+    assert "-actions" in cmd
+    actions_idx = cmd.index("-actions")
+    assert cmd[actions_idx + 1] == "3" and cmd[actions_idx + 2] == "3"
+    assert "-normalize" in cmd
+    normalize_idx = cmd.index("-normalize")
+    assert cmd[normalize_idx + 1] == "-min_payoff"  # no value token after -normalize
+    assert "-min_payoff" in cmd and cmd[cmd.index("-min_payoff") + 1] == "0"
+
+
+def test_generate_gamut_no_java(monkeypatch, tmp_path):
+    """Missing java on PATH raises RuntimeError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: None)
+    with pytest.raises(RuntimeError, match="Java is required"):
+        gbt.catalog.generate_gamut("RandomGame", gamut_jar=tmp_path / "gamut.jar")
+
+
+def test_generate_gamut_jar_not_found(monkeypatch, tmp_path):
+    """Non-existent gamut_jar path raises FileNotFoundError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    with pytest.raises(FileNotFoundError, match="gamut.jar not found at"):
+        gbt.catalog.generate_gamut("RandomGame", gamut_jar=tmp_path / "missing.jar")
+
+
+def test_generate_gamut_no_jar_env(monkeypatch):
+    """With gamut_jar=None and GAMUT_JAR unset, raises FileNotFoundError."""
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.delenv("GAMUT_JAR", raising=False)
+    with pytest.raises(FileNotFoundError, match="GAMUT_JAR"):
+        gbt.catalog.generate_gamut("RandomGame")
+
+
+def test_generate_gamut_gamut_fails(monkeypatch, tmp_path):
+    """Non-zero returncode from GAMUT raises ValueError naming the game class."""
+    fake_jar = tmp_path / "gamut.jar"
+    fake_jar.touch()
+    monkeypatch.setattr("pygambit.catalog.shutil.which", lambda _: "/usr/bin/java")
+    monkeypatch.setattr(
+        "pygambit.catalog.subprocess.run",
+        _fake_gamut_run("", returncode=1, stderr="Unknown game class 'Bogus'"),
+    )
+    with pytest.raises(ValueError, match="Bogus"):
+        gbt.catalog.generate_gamut("Bogus", gamut_jar=fake_jar)
+
+
+def test_gamut_games_returns_dataframe():
+    assert isinstance(gbt.catalog.gamut_games(), pd.DataFrame)
+
+
+def test_gamut_games_columns():
+    assert list(gbt.catalog.gamut_games().columns) == ["Class", "Description", "Players"]
+
+
+def test_gamut_games_count():
+    assert len(gbt.catalog.gamut_games()) == 35
+
+
+def test_gamut_games_known_classes():
+    classes = set(gbt.catalog.gamut_games()["Class"])
+    for name in [
+        "RandomGame", "BattleOfTheSexes", "CovariantGame",
+        "MajorityVoting", "PrisonersDilemma",
+    ]:
+        assert name in classes
+
+
+def test_gamut_games_players_values():
+    assert set(gbt.catalog.gamut_games()["Players"]) == {"2", "n"}

@@ -2222,9 +2222,9 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
+        label_bytes = (str(label) if label is not None else "").encode("ascii")
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player,
-                                          (str(label) if label is not None else "").encode())
+            self.game.deref().NewStrategy(resolved_player.player, label_bytes)
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

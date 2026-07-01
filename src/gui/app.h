@@ -83,7 +83,6 @@ public:
   {
     m_documents.erase(std::find(m_documents.begin(), m_documents.end(), p_doc));
   }
-  bool AreDocumentsModified() const;
   //@}
 };
 

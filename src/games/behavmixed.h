@@ -46,6 +46,7 @@ protected:
 
     Level m_level{Level::None};
     std::map<GameNode, T> m_realizProbs, m_beliefs;
+    std::map<GameInfoset, T> m_infosetProbs;
     std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
     std::map<GameInfoset, T> m_infosetValues;
     std::map<GameAction, T> m_actionValues;
@@ -60,6 +61,7 @@ protected:
     {
       m_level = Level::None;
       m_realizProbs.clear();
+      m_infosetProbs.clear();
       m_beliefs.clear();
       m_nodeValues.clear();
       m_infosetValues.clear();
@@ -72,10 +74,11 @@ protected:
 
   /// @name Auxiliary functions for cached computation of interesting values
   //@{
-  /// Compute the realisation probabilities of all nodes
+  /// Compute the realization probabilities of all nodes, and of information sets
+  /// (the probability a given information set is reached at least once)
   void ComputeRealizationProbs() const;
-  /// Compute the realisation probabilities of information sets, and beliefs at
-  /// information sets reached with positive probability
+  /// Compute beliefs (conditional reach probabilities) at information sets reached
+  /// with positive probability, normalized over each set's upper frontier
   void ComputeBeliefs() const;
   /// Compute the expected payoffs conditional on reaching each node
   void ComputeNodeValues() const;
@@ -241,6 +244,10 @@ public:
 
   const T &GetRealizProb(const GameNode &node) const;
   T GetInfosetProb(const GameInfoset &p_infoset) const;
+  /// Returns the belief at a given non-terminal node:
+  /// the probability of reaching it conditional on reaching its infoset,
+  /// normalised over the infoset's upper frontier (Halpern and Pass, 2021).
+  /// Returns std::nullopt for a terminal node, or if the infoset is not reached.
   std::optional<T> GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
   const T &GetPayoff(const GamePlayer &p_player, const GameNode &p_node) const;

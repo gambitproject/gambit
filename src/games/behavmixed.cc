@@ -284,8 +284,7 @@ template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &
 {
   CheckVersion();
   EnsureRealizations();
-  return sum_function(p_infoset->GetMembers(),
-                      [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+  return m_cache.m_infosetProbs[p_infoset];
 }
 
 template <class T>
@@ -475,6 +474,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
 template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
 {
   m_cache.m_realizProbs.clear();
+  m_cache.m_infosetProbs.clear();
 
   const auto &game = m_support.GetGame();
   m_cache.m_realizProbs[game->GetRoot()] = static_cast<T>(1);
@@ -484,15 +484,29 @@ template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
       m_cache.m_realizProbs[child] = incomingProb * GetActionProb(action);
     }
   }
+
+  for (const auto &player : game->GetPlayersWithChance()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      m_cache.m_infosetProbs[infoset] =
+          sum_function(infoset->GetMembers(),
+                       [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+    }
+  }
+  for (const auto &[infoset, node] : game->GetAbsentMindedReentries()) {
+    m_cache.m_infosetProbs[infoset] -= m_cache.m_realizProbs[node];
+  }
 }
 
 template <class T> void MixedBehaviorProfile<T>::ComputeBeliefs() const
 {
   m_cache.m_beliefs.clear();
-
+  // Normalise each member's realization probability by the infoset's upper-frontier probability
+  // (m_infosetProbs, computed in ComputeRealizationProbs), following Halpern and Pass (2021).
+  // For an absent-minded infoset the frontier excludes the reentry members, so the member beliefs
+  // may sum to above 1; for a non-absent-minded infoset the frontier is all members and this is
+  // the standard Selten (1975) normalization.
   for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
-    const T infosetProb = sum_function(
-        infoset->GetMembers(), [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+    const T infosetProb = m_cache.m_infosetProbs[infoset];
     if (infosetProb == static_cast<T>(0)) {
       continue;
     }

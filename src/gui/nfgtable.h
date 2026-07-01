@@ -47,13 +47,13 @@ class StrategicTableLayout {
 public:
   explicit StrategicTableLayout(GameDocument *doc) : m_doc(doc)
   {
-    if (m_doc->NumPlayers() >= 1) {
+    if (m_doc->GetGame()->NumPlayers() >= 1) {
       m_rowPlayers.push_back(1);
     }
-    if (m_doc->NumPlayers() >= 2) {
+    if (m_doc->GetGame()->NumPlayers() >= 2) {
       m_colPlayers.push_back(2);
     }
-    for (int pl = 3; pl <= m_doc->NumPlayers(); ++pl) {
+    for (int pl = 3; pl <= m_doc->GetGame()->NumPlayers(); ++pl) {
       m_rowPlayers.push_back(pl);
     }
   }
@@ -74,7 +74,7 @@ public:
 
   void ReconcilePlayers()
   {
-    const int maxPlayer = static_cast<int>(m_doc->NumPlayers());
+    const int maxPlayer = static_cast<int>(m_doc->GetGame()->NumPlayers());
 
     m_rowPlayers.erase(std::remove_if(m_rowPlayers.begin(), m_rowPlayers.end(),
                                       [maxPlayer](int pl) { return pl > maxPlayer; }),
@@ -175,7 +175,7 @@ public:
 
   int ColToStrategy(int player, int col) const
   {
-    const int strat = col / m_doc->NumPlayers() / NumColsSpanned(player);
+    const int strat = col / m_doc->GetGame()->NumPlayers() / NumColsSpanned(player);
     return (strat % NumStrategies(m_doc->GetNfgSupport(), GetColPlayer(player)) + 1);
   }
 
@@ -183,10 +183,13 @@ public:
   int GetRowHeaderColCount() const { return NumRowPlayers(); }
 
   int GetColHeaderRowCount() const { return NumColPlayers(); }
-  int GetColHeaderColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+  int GetColHeaderColCount() const
+  {
+    return NumColContingencies() * m_doc->GetGame()->NumPlayers();
+  }
 
   int GetPayoffRowCount() const { return NumRowContingencies(); }
-  int GetPayoffColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+  int GetPayoffColCount() const { return NumColContingencies() * m_doc->GetGame()->NumPlayers(); }
 
   int GetRowHeaderPlayer(int headerCol) const { return GetRowPlayer(headerCol + 1); }
 
@@ -206,12 +209,12 @@ public:
 
   int GetColHeaderColSpan(int headerRow) const
   {
-    return NumColsSpanned(headerRow + 1) * m_doc->NumPlayers();
+    return NumColsSpanned(headerRow + 1) * m_doc->GetGame()->NumPlayers();
   }
 
   int GetPayoffPlayerForColumn(int payoffCol) const
   {
-    const int index = payoffCol % m_doc->NumPlayers() + 1;
+    const int index = payoffCol % m_doc->GetGame()->NumPlayers() + 1;
     if (index <= NumRowPlayers()) {
       return GetRowPlayer(index);
     }

@@ -10,13 +10,29 @@ def test_player_count():
     assert len(game.players) == 2
 
 
-def test_player_label():
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_player_label(label):
     game = gbt.Game.new_table([2, 2])
-    pl1, pl2 = game.players
-    pl1.label = "Alphonse"
-    pl2.label = "Gaston"
-    assert pl1.label == "Alphonse"
-    assert pl2.label == "Gaston"
+    player = next(iter(game.players))
+    player.label = label
+    assert player.label == label
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_player_label_invalid_raises_valueerror(label):
+    game = gbt.Game.new_table([2, 2])
+    player = next(iter(game.players))
+    with pytest.raises(ValueError):
+        player.label = label
+
+
+@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
+def test_player_label_non_ascii_rejected(label):
+    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+    game = gbt.Game.new_table([2, 2])
+    player = next(iter(game.players))
+    with pytest.raises(UnicodeEncodeError):
+        player.label = label
 
 
 def test_player_index_by_string():
@@ -113,6 +129,20 @@ def test_player_strategy_by_label():
     pl1 = next(iter(game.players))
     next(iter(pl1.strategies)).label = "Cooperate"
     assert pl1.strategies["Cooperate"].label == "Cooperate"
+
+
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_add_strategy_label_valid(label):
+    game = gbt.Game.new_table([2, 2])
+    strategy = game.add_strategy(next(iter(game.players)), label)
+    assert strategy.label == label
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_add_strategy_label_invalid_raises_valueerror(label):
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(ValueError):
+        game.add_strategy(next(iter(game.players)), label)
 
 
 def test_player_strategy_bad_label():
