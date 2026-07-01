@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <algorithm>
 
 #include "gambit.h"
@@ -804,9 +805,11 @@ template <class C> void NormalizeLabels(C &&p_container)
 {
   // NOLINTBEGIN(misc-const-correctness)
   std::map<std::string, std::size_t> counts;
+  std::set<std::string> used;
   // NOLINTEND(misc-const-correctness)
   for (const auto &element : p_container) {
     counts[element->GetLabel()] += 1;
+    used.insert(element->GetLabel());
   }
   // NOLINTBEGIN(misc-const-correctness)
   std::map<std::string, std::size_t> visited;
@@ -818,8 +821,15 @@ template <class C> void NormalizeLabels(C &&p_container)
     if (counts[label] == 1 && label != "") {
       continue;
     }
-    const auto index = ++visited[label];
-    element->SetLabel(label + "_" + std::to_string(index));
+    // Generate the next "label_n" that is not already used in this scope, so
+    // that e.g. {"x", "x", "x_1"} does not renumber to a duplicate "x_1".
+    std::string candidate;
+    do {
+      const auto index = ++visited[label];
+      candidate = label + "_" + std::to_string(index);
+    } while (used.count(candidate) > 0);
+    used.insert(candidate);
+    element->SetLabel(candidate);
   }
 }
 
