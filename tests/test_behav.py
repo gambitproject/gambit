@@ -896,6 +896,55 @@ def test_infoset_prob_by_label_reference(
 
 
 @pytest.mark.parametrize(
+    "game,infoset_label,prob,rational_flag",
+    [
+        # P1 infoset 1 is absent-minded (root + one reentry)
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Absent-minded", 1.0, False),
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Second", 0.5, False),
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Third", 0.125, False),
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Absent-minded", "1", True),
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Second", "1/2", True),
+        (games.read_from_file("noPR-AM-driver-one-player.efg"), "Third", "1/8", True),
+        # P1 infoset 1 has 3 members (root + both children are reentries)
+        (games.read_from_file("noPR-action-AM.efg"), "Absent-minded", 1.0, False),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 1", 0.25, False),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 2", 0.25, False),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 3", 0.25, False),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 4", 0.25, False),
+        (games.read_from_file("noPR-action-AM.efg"), "Absent-minded", "1", True),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 1", "1/4", True),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 2", "1/4", True),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 3", "1/4", True),
+        (games.read_from_file("noPR-action-AM.efg"), "Response 4", "1/4", True),
+        # # P1 infoset 1 has 3 members (3-node chain with the last member being
+        # # behavioral-strategy-reachable, but not pure-strategy-reachable)
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Absent-minded", 1.0, False),
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Second", 0.5, False),
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Player 2", 0.0625, False),
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Absent-minded", "1", True),
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Second", "1/2", True),
+        (games.read_from_file("noPR-action-AM-three-chain.efg"), "Player 2", "1/16", True),
+    ],
+)
+def test_absent_minded_infoset_prob(
+    game: gbt.Game, infoset_label: str, prob: str | float, rational_flag: bool
+):
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    ip = profile.infoset_prob(game.infosets[infoset_label])
+    assert ip == (gbt.Rational(prob) if rational_flag else prob)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
+    """The chance root infoset is reached with probability one."""
+    game = gbt.catalog.load("journals/geb/gilboa1997/fig2")
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    one = gbt.Rational(1) if rational_flag else 1.0
+    assert profile.realiz_prob(game.root) == one
+    assert profile.infoset_prob(game.root.infoset) == one
+
+
+@pytest.mark.parametrize(
     "game,player_label,infoset_label,payoff,rational_flag",
     [
         (games.read_from_file("mixed_behavior_game.efg"), "Player 1", "Infoset 1:1", 3.0, False),
@@ -1784,6 +1833,40 @@ def test_agent_max_regret_versus_non_agent(
             ["Queen", "Bet"],
             "2/7",
             True,
+        ),
+        # Information set I1 = {root, reentry_node}; reentry_node is reached by ["1", "1"].
+        # The upper frontier of I1 is {root}, so the conditioning event has probability
+        # realiz(root) = 1 for every profile, and beliefs are normalised by it:
+        # belief(root) = 1, belief(reentry_node) = realiz(reentry_node).
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            ZERO, ["1/2", "1/2", "1/2", "1/2", "1/2", "1/2"], [], "1", True,
+        ),
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            ZERO, ["1/2", "1/2", "1/2", "1/2", "1/2", "1/2"], ["1", "1"], "1/4", True,
+        ),
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            TOL, [0.5, 0.5, 0.5, 0.5, 0.5, 0.5], [], 1.0, False,
+        ),
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            TOL, [0.5, 0.5, 0.5, 0.5, 0.5, 0.5], ["1", "1"], 0.25, False,
+        ),
+        # asymmetric: p(I1,1)=2/3, p(I2,1)=3/4; realiz(reentry_node)=1/2
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            ZERO, ["2/3", "1/3", "3/4", "1/4", "1/2", "1/2"], [], "1", True,
+        ),
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            ZERO, ["2/3", "1/3", "3/4", "1/4", "1/2", "1/2"], ["1", "1"], "1/2", True,
+        ),
+        # reentry reached with prob 1
+        (
+            games.read_from_file("noPR-AM-driver-one-player.efg"),
+            ZERO, ["1", "0", "1", "0", "1", "0"], ["1", "1"], "1", True,
         ),
     ],
 )

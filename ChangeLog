@@ -41,6 +41,8 @@
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
+- In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates
+  that are evaluated on-demand, to align with the behaviour of collections.  (#946)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)

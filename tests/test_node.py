@@ -13,33 +13,91 @@ from . import games
 def test_get_infoset():
     """Test to ensure that we can retrieve an infoset for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.infoset is not None
-    assert game.root.children["U1"].infoset is not None
-    assert game.root.children["U1"].children["D2"].children["U3"].infoset is None
+    assert game.root.infoset
+    assert game.root.children["U1"].infoset
+    assert not game.root.children["U1"].children["D2"].children["U3"].infoset
+
+
+def test_infoset_equality_is_symmetric():
+    """A node-anchored infoset proxy and the resolved Infoset compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    proxy = game.root.infoset
+    infoset = next(iter(game.infosets))
+    assert proxy == infoset
+    assert infoset == proxy
+
+
+def test_node_infoset_truthiness():
+    """A node-anchored infoset view is truthy iff the node currently has an
+    infoset, and tracks mutation across the terminal boundary."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = terminal.infoset
+    assert not proxy
+    game.append_move(terminal, game.players["Player 1"], ["a", "b"])
+    assert proxy
 
 
 def test_get_outcome():
     """Test to ensure that we can retrieve an outcome for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
     assert (
-            game.root.children["U1"].children["D2"].children["U3"].outcome
-            == game.outcomes["Outcome 1"]
-        )
-    assert game.root.outcome is None
+        game.root.children["U1"].children["D2"].children["U3"].outcome
+        == game.outcomes["Outcome 1"]
+    )
+    assert not game.root.outcome
 
 
 def test_set_outcome_null():
-    """Test to set an outcome to the null outcome."""
+    """Setting an outcome to null leaves the node's outcome view falsy."""
     game = games.read_from_file("basic_extensive_game.efg")
-    game.set_outcome(game.root.children["U1"].children["U2"].children["U3"], None)
-    assert game.root.children["U1"].children["U2"].children["U3"].outcome is None
+    node = game.root.children["U1"].children["U2"].children["U3"]
+    game.set_outcome(node, None)
+    assert not node.outcome
+
+
+def test_node_outcome_subscript_tracks_mutation():
+    """Indexing the outcome view reads/writes the outcome's payoffs, reflecting mutation."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = node.outcome
+    player = game.players["Player 1"]
+    proxy[player] = 7
+    assert node.outcome[player] == 7
+
+
+def test_outcome_equality_is_symmetric():
+    """A node-anchored outcome view and the resolved Outcome compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"].children["D2"].children["U3"]
+    proxy = node.outcome
+    outcome = game.outcomes["Outcome 1"]
+    assert proxy == outcome
+    assert outcome == proxy
 
 
 def test_get_player():
     """Test to ensure that we can retrieve a player for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
     assert game.root.player == game.players["Player 1"]
-    assert game.root.children["U1"].children["D2"].children["U3"].player is None
+    assert not game.root.children["U1"].children["D2"].children["U3"].player
+
+
+def test_player_equality_is_symmetric():
+    """A node-anchored player view and the resolved Player compare equal from either side."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    proxy = game.root.player
+    player = game.players["Player 1"]
+    assert proxy == player
+    assert player == proxy
+
+
+def test_node_player_resolves_chance():
+    """At a chance node the player view resolves to the chance player."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    chance_node = game.root
+    assert chance_node.player.is_chance
+    assert chance_node.player == game.players.chance
 
 
 def test_get_game():
@@ -534,12 +592,23 @@ def test_insert_move_error_player_mismatch():
 
 
 def test_node_leave_infoset():
-    """Test to ensure it's possible to remove a node from an infoset"""
+    """A node-anchored infoset proxy is lazy: it re-resolves after the node leaves its infoset."""
     game = games.read_from_file("basic_extensive_game.efg")
-    p2_infoset = game.root.children["U1"].infoset
-    assert len(p2_infoset.members) == 2
-    game.leave_infoset(game.root.children["U1"])
-    assert len(p2_infoset.members) == 1
+    node = game.root.children["U1"]
+    proxy = node.infoset
+    assert len(proxy.members) == 2
+    game.leave_infoset(node)
+    assert list(proxy.members) == [node]
+
+
+def test_node_infoset_becomes_null_when_truncated():
+    """A captured infoset proxy re-resolves to null after the node is truncated to a leaf."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    proxy = node.infoset
+    assert proxy
+    game.delete_tree(node)
+    assert not proxy
 
 
 def test_node_delete_parent():
