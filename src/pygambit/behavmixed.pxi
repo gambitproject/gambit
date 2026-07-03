@@ -591,8 +591,17 @@ class MixedBehaviorProfile:
         """Returns the conditional probability that a node is reached, given that
         its information set is reached.
 
-        If the information set is not reachable, the belief is not well-defined.
-        In this case, the function returns `None`.
+        The conditioning event is that the information set is reached at least once,
+        so beliefs are normalized by the upper-frontier probability returned by
+        `infoset_prob` (following :cite:p:`HalPas21`), rather than by the sum of the
+        members' realization probabilities.  For a non-absent-minded information set
+        the two approaches agree.  For an absent-minded information set they need not:
+        the beliefs over its members may sum to more than one.
+
+        If the information set is reached with zero probability under the profile, the
+        belief is not well-defined and the function returns `None`.  This is the same
+        reach probability returned by `infoset_prob`, so a `None` belief corresponds
+        exactly to `infoset_prob` being zero there.
 
         Parameters
         ----------
@@ -751,13 +760,21 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._realiz_prob(self.game._resolve_node(node, "realiz_prob"))
 
-    def infoset_prob(self, infoset: NodeReference) -> ProfileDType:
+    def infoset_prob(self, infoset: InfosetReference) -> ProfileDType:
         """Returns the probability with which an information set is reached.
+
+        This is the probability that the information set is reached *at least once*
+        under the profile: the realization probability of its upper frontier, i.e. the
+        members not preceded by another member of the same information set.
+        For a non-absent-minded information set, its upper frontier coincides with it.
+        For an absent-minded information set, with a play passing through it more than once,
+        the members below its frontier are excluded, so this is generally less than
+        the sum of the members' realization probabilities; see :cite:p:`HalPas21`.
 
         Parameters
         ----------
         infoset : Infoset or str
-            The information set to get the payoff for.  If a string is passed, the
+            The information set to get the probability for.  If a string is passed, the
             information set is determined by finding the information set with that label, if any.
 
         Raises
@@ -766,6 +783,10 @@ class MixedBehaviorProfile:
             If `infoset` is an ``Infoset`` from a different game.
         KeyError
             If `infoset` is a string and no information set in the game has that label.
+
+        See Also
+        --------
+        MixedBehaviorProfile.belief
         """
         self._check_validity()
         return self._infoset_prob(self.game._resolve_infoset(infoset, "infoset_prob"))

@@ -59,7 +59,7 @@ MixedBehaviorProfileList::~MixedBehaviorProfileList() = default;
 void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+    m_doc->DoSelectProfile(p_event.GetRow() + 1);
   }
   else {
     // Clicking on an action column sets the selected node to the first
@@ -73,7 +73,7 @@ void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 
 void MixedBehaviorProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(p_event.GetRow() + 1);
   ClearSelection();
 }
 
@@ -125,7 +125,7 @@ void MixedBehaviorProfileList::UpdateLabels()
 
 void MixedBehaviorProfileList::UpdateCells()
 {
-  const int currentProfile = m_doc->GetCurrentProfile();
+  const int currentProfile = m_doc->GetWorkspace().GetCurrentProfile();
 
   const wxFont normalFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
   const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -134,7 +134,8 @@ void MixedBehaviorProfileList::UpdateCells()
     for (int col = 0; col < GetNumberCols(); ++col) {
       SetCellValue(
           row, col,
-          wxString(m_doc->GetProfiles().GetActionProb(col + 1, row + 1).c_str(), *wxConvCurrent));
+          wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, row + 1).c_str(),
+                   *wxConvCurrent));
 
       wxGridCellAttr *attr = new wxGridCellAttr;
       attr->SetFont(row + 1 == currentProfile ? boldFont : normalFont);
@@ -164,7 +165,7 @@ void MixedBehaviorProfileList::UpdateCells()
 
 void MixedBehaviorProfileList::OnUpdate()
 {
-  if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
+  if (!m_doc->GetGame() || m_doc->GetWorkspace().NumProfileLists() == 0) {
     if (GetNumberRows() > 0) {
       DeleteRows(0, GetNumberRows());
     }
@@ -174,7 +175,7 @@ void MixedBehaviorProfileList::OnUpdate()
     return;
   }
 
-  const AnalysisOutput &profiles = m_doc->GetProfiles();
+  const AnalysisOutput &profiles = m_doc->GetWorkspace().GetProfiles();
   const int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();

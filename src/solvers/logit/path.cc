@@ -125,11 +125,12 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
-void PathTracer::TracePath(
-    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
-    double &p_omega, TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
-    CriterionFunctionType p_criterion, CriterionBracketFunctionType p_criterionBracket) const
+TracePathResult
+PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+                      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+                      Vector<double> &x, double &p_omega, TerminationFunctionType p_terminate,
+                      CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
+                      CriterionBracketFunctionType p_criterionBracket) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
   const double c_maxDist = 0.4;  // maximal distance to curve
@@ -163,7 +164,7 @@ void PathTracer::TracePath(
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      return;
+      return {x, false, "Stepsize fell below minimum threshold."};
     }
 
     // Predictor step
@@ -211,7 +212,7 @@ void PathTracer::TracePath(
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        return;
+        return {x, false, "Maximum iterations exceeded."};
       }
     }
 
@@ -239,7 +240,7 @@ void PathTracer::TracePath(
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        return;
+        return {x, false, "Stepsize fell below minimum threshold."};
       }
       continue;
     }
@@ -281,6 +282,7 @@ void PathTracer::TracePath(
       }
     }
   }
+  return {x, true, "Path tracing terminated successfully."};
 }
 
 } // end namespace Gambit

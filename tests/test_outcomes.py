@@ -2,6 +2,8 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
+
 
 @pytest.mark.parametrize(
     "game", [gbt.Game.new_table([2, 2]), gbt.Game.new_tree()]
@@ -21,14 +23,29 @@ def test_outcome_delete(game: gbt.Game):
     assert len(game.outcomes) == outcome_count - 1
 
 
-@pytest.mark.parametrize(
-    "game,label",
-    [(gbt.Game.new_table([2, 2]), "outcome label")]
-)
-def test_outcome_label(game: gbt.Game, label: str):
+@pytest.mark.parametrize("label", games.VALID_LABELS)
+def test_outcome_label(label: str):
+    game = gbt.Game.new_table([2, 2])
     outcome = next(iter(game.outcomes))
     outcome.label = label
     assert outcome.label == label
+
+
+@pytest.mark.parametrize("label", games.INVALID_LABELS)
+def test_outcome_label_invalid_raises_valueerror(label: str):
+    game = gbt.Game.new_table([2, 2])
+    outcome = next(iter(game.outcomes))
+    with pytest.raises(ValueError):
+        outcome.label = label
+
+
+@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
+def test_outcome_label_non_ascii_rejected(label: str):
+    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+    game = gbt.Game.new_table([2, 2])
+    outcome = next(iter(game.outcomes))
+    with pytest.raises(UnicodeEncodeError):
+        outcome.label = label
 
 
 @pytest.mark.parametrize(

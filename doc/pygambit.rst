@@ -56,6 +56,7 @@ These tutorials assume you have read the new user tutorials and are familiar wit
    :maxdepth: 2
 
    tutorials/interoperability_tutorials/openspiel
+   tutorials/interoperability_tutorials/gamut
 
 API documentation
 ----------------

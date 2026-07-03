@@ -48,16 +48,16 @@ class NodeChildren:
     def __getitem__(self, action: str | Action) -> Node:
         """Returns the successor node which is reached after `action` is played.
 
-        `action` may be an ``Action`` at this node's information set, or its label.
+        `action` may be an ``Action`` at this node's infoset, or its label.
 
         Raises
         ------
         KeyError
             If `action` is a string and no action with that label exists at the node's
-            information set, or if the node is terminal.
+            infoset, or if the node is terminal.
         ValueError
             If `action` is an empty or all-whitespace string, or is an ``Action``
-            from a different information set.
+            from a different infoset.
         TypeError
             If `action` is not a ``str`` or an ``Action``.
 
@@ -85,7 +85,7 @@ class NodeChildren:
             try:
                 return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
             except IndexError:
-                raise ValueError("Action is from a different information set than node") from None
+                raise ValueError("Action is from a different infoset than node") from None
         if isinstance(action, int):
             raise TypeError(
                 "node children cannot be indexed by position; index by the action taken "
@@ -93,6 +93,241 @@ class NodeChildren:
                 "(Integer indexing was removed in 16.7.0.)"
             )
         raise TypeError(f"Index must be a str label or an Action, not {action.__class__.__name__}")
+
+
+@cython.cclass
+class NodeInfoset:
+    """The infoset to which a node currently belongs.
+
+    A lazy, node-anchored view: holds the node and resolves its infoset on each access,
+    so the value reflects the current state of the game even after the game is mutated.
+
+    .. versionadded:: 16.7.0
+    """
+    node = cython.declare(c_GameNode)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a NodeInfoset outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> NodeInfoset:
+        obj: NodeInfoset = NodeInfoset.__new__(NodeInfoset)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _resolve(self) -> Infoset:
+        if self.node.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
+            return None
+        return Infoset.wrap(self.node.deref().GetInfoset())
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(f"'NodeInfoset' object has no attribute '{name}'")
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                f"node's infoset is currently None (terminal node); "
+                f"cannot access '{name}'"
+            )
+        return getattr(resolved, name)
+
+    @property
+    def label(self):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                "node's infoset is currently None (terminal node); "
+                "cannot access 'label'"
+            )
+        return resolved.label
+
+    @label.setter
+    def label(self, value):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                "node's infoset is currently None (terminal node); "
+                "cannot set 'label'"
+            )
+        resolved.label = value
+
+    def __repr__(self) -> str:
+        resolved = self._resolve()
+        return repr(resolved) if resolved is not None else "None"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        mine = self._resolve()
+        if isinstance(other, NodeInfoset):
+            other = cython.cast(NodeInfoset, other)._resolve()
+        if mine is None or other is None:
+            return mine is None and other is None
+        return mine == other
+
+    def __bool__(self) -> bool:
+        return self._resolve() is not None
+
+    def __hash__(self) -> int:
+        # Hash by the resolved infoset (transitional).
+        resolved = self._resolve()
+        return hash(resolved) if resolved is not None else 0
+
+
+@cython.cclass
+class NodeOutcome:
+    """The outcome attached to a node.
+
+    A lazy, node-anchored view: holds the node and resolves its outcome on each access,
+    so the value reflects the current state of the game even after the game is mutated.
+
+    .. versionadded:: 16.7.0
+    """
+    node = cython.declare(c_GameNode)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a NodeOutcome outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> NodeOutcome:
+        obj: NodeOutcome = NodeOutcome.__new__(NodeOutcome)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _resolve(self) -> Outcome:
+        if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
+            return None
+        return Outcome.wrap(self.node.deref().GetOutcome())
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(f"'NodeOutcome' object has no attribute '{name}'")
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                f"node has no outcome attached; cannot access '{name}'"
+            )
+        return getattr(resolved, name)
+
+    def __getitem__(self, player):
+        resolved = self._resolve()
+        if resolved is None:
+            raise KeyError("node has no outcome attached")
+        return resolved[player]
+
+    def __setitem__(self, player, value):
+        resolved = self._resolve()
+        if resolved is None:
+            raise KeyError("node has no outcome attached")
+        resolved[player] = value
+
+    @property
+    def label(self):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError("node has no outcome attached; cannot access 'label'")
+        return resolved.label
+
+    @label.setter
+    def label(self, value):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError("node has no outcome attached; cannot set 'label'")
+        resolved.label = value
+
+    def __repr__(self) -> str:
+        resolved = self._resolve()
+        return repr(resolved) if resolved is not None else "None"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        mine = self._resolve()
+        if isinstance(other, NodeOutcome):
+            other = cython.cast(NodeOutcome, other)._resolve()
+        if mine is None or other is None:
+            return mine is None and other is None
+        return mine == other
+
+    def __bool__(self) -> bool:
+        return self._resolve() is not None
+
+    def __hash__(self) -> int:
+        # Hash by the resolved outcome (transitional).
+        resolved = self._resolve()
+        return hash(resolved) if resolved is not None else 0
+
+
+@cython.cclass
+class NodePlayer:
+    """The player who makes the decision at a node.
+
+    A lazy, node-anchored view: holds the node and resolves its player on each access,
+    so the value reflects the current state of the game even after the game is mutated.
+
+    .. versionadded:: 16.7.0
+    """
+    node = cython.declare(c_GameNode)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a NodePlayer outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> NodePlayer:
+        obj: NodePlayer = NodePlayer.__new__(NodePlayer)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _resolve(self) -> Player:
+        if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
+            return Player.wrap(self.node.deref().GetPlayer())
+        return None
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(f"'NodePlayer' object has no attribute '{name}'")
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError(
+                f"node has no player (terminal node); cannot access '{name}'"
+            )
+        return getattr(resolved, name)
+
+    @property
+    def label(self):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError("node has no player (terminal node); cannot access 'label'")
+        return resolved.label
+
+    @label.setter
+    def label(self, value):
+        resolved = self._resolve()
+        if resolved is None:
+            raise AttributeError("node has no player (terminal node); cannot set 'label'")
+        resolved.label = value
+
+    def __repr__(self) -> str:
+        resolved = self._resolve()
+        return repr(resolved) if resolved is not None else "None"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        mine = self._resolve()
+        if isinstance(other, NodePlayer):
+            other = cython.cast(NodePlayer, other)._resolve()
+        if mine is None or other is None:
+            return mine is None and other is None
+        return mine == other
+
+    def __bool__(self) -> bool:
+        return self._resolve() is not None
+
+    def __hash__(self) -> int:
+        # Hash by the resolved player (transitional).
+        resolved = self._resolve()
+        return hash(resolved) if resolved is not None else 0
 
 
 @cython.cclass
@@ -135,7 +370,12 @@ class Node:
 
     @property
     def label(self) -> str:
-        """The text label associated with the node."""
+        """The text label associated with the node.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.node.deref().GetLabel().decode("ascii")
 
     @label.setter
@@ -153,25 +393,31 @@ class Node:
         return Game.wrap(self.node.deref().GetGame())
 
     @property
-    def infoset(self) -> Infoset | None:
-        """The information set to which this node belongs.
+    def infoset(self) -> NodeInfoset:
+        """The infoset to which this node currently belongs.
 
-        If this is a terminal node, which belongs to no information set,
-        None is returned.
+        Returns a lazy, node-anchored view resolved on each access, so the value reflects
+        the current state of the game even if the game is mutated after this property is read.
+        For a terminal node, which belongs to no infoset, the view is falsy and equals ``None``.
+
+        .. versionchanged:: 16.7.0
         """
-        if self.node.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
-            return Infoset.wrap(self.node.deref().GetInfoset())
-        return None
+        return NodeInfoset.wrap(self.node)
 
     @property
-    def player(self) -> Player | None:
+    def player(self) -> NodePlayer:
         """The player who makes the decision at this node.
 
-        If this is a terminal node, None is returned.
+        Returns a lazy, node-anchored view resolved on each access, so the value reflects
+        the current state of the game even if the game is mutated after this property is read.
+        For a terminal node, which has no player, the view is falsy and equals ``None``.
+        At a chance node the view resolves to the chance player (``is_chance`` is ``True``).
+
+        .. versionchanged:: 16.7.0
+            Now returns a lazily-evaluated, node-anchored view rather than capturing the
+            player at the time of access.
         """
-        if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
-            return Player.wrap(self.node.deref().GetPlayer())
-        return None
+        return NodePlayer.wrap(self.node)
 
     @property
     def parent(self) -> Node | None:
@@ -262,14 +508,18 @@ class Node:
         return self.node.deref().IsStrategyReachable()
 
     @property
-    def outcome(self) -> Outcome | None:
-        """Returns the outcome attached to the node.
+    def outcome(self) -> NodeOutcome:
+        """The outcome currently attached to this node.
 
-        If no outcome is attached to the node, None is returned.
+        Returns a lazy, node-anchored view resolved on each access, so the value reflects
+        the current state of the game even if the game is mutated after this property is read.
+        When no outcome is attached, the view is falsy and equals ``None``.
+
+        .. versionchanged:: 16.7.0
+            Now returns a lazily-evaluated, node-anchored view rather than capturing the
+            outcome at the time of access.
         """
-        if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
-            return None
-        return Outcome.wrap(self.node.deref().GetOutcome())
+        return NodeOutcome.wrap(self.node)
 
     @property
     def plays(self) -> list[Node]:

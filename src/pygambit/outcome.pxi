@@ -47,11 +47,10 @@ class Outcome:
         else:
             return f"Outcome(game={self.game}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Outcome) and
-            self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Outcome):
+            return NotImplemented
+        return self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
@@ -63,7 +62,12 @@ class Outcome:
 
     @property
     def label(self) -> str:
-        """The text label associated with this outcome."""
+        """The text label associated with this outcome.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.outcome.deref().GetLabel().decode("ascii")
 
     @label.setter

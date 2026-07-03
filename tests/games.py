@@ -8,6 +8,14 @@ import numpy as np
 
 import pygambit as gbt
 
+# Label-validation fixtures.
+# VALID: accepted by the C++ validator.
+# INVALID: rejected by the validator -> ValueError (reach CheckLabel as ASCII bytes).
+# NON_ASCII: rejected at the pygambit ASCII encode boundary
+VALID_LABELS = ["x", "a b", "a b c"]
+INVALID_LABELS = [" x", "x ", " ", "a  b", "a\tb", "a\nb"]
+NON_ASCII_LABELS = ["é", "naïve"]
+
 
 def read_from_file(fn: str) -> gbt.Game:
     if fn.endswith(".efg"):

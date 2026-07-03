@@ -59,7 +59,7 @@ MixedStrategyProfileList::~MixedStrategyProfileList() = default;
 void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+    m_doc->DoSelectProfile(p_event.GetRow() + 1);
   }
 
   ClearSelection();
@@ -67,7 +67,7 @@ void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 
 void MixedStrategyProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(p_event.GetRow() + 1);
   ClearSelection();
 }
 
@@ -143,7 +143,7 @@ void MixedStrategyProfileList::UpdateLabels()
 
 void MixedStrategyProfileList::UpdateCells()
 {
-  const int currentProfile = m_doc->GetCurrentProfile();
+  const int currentProfile = m_doc->GetWorkspace().GetCurrentProfile();
 
   const wxFont normalFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
   const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -152,9 +152,10 @@ void MixedStrategyProfileList::UpdateCells()
     const int profile = row + 1;
 
     for (int col = 0; col < GetNumberCols(); ++col) {
-      SetCellValue(row, col,
-                   wxString(m_doc->GetProfiles().GetStrategyProb(col + 1, profile).c_str(),
-                            *wxConvCurrent));
+      SetCellValue(
+          row, col,
+          wxString(m_doc->GetWorkspace().GetProfiles().GetStrategyProb(col + 1, profile).c_str(),
+                   *wxConvCurrent));
 
       wxGridCellAttr *attr = new wxGridCellAttr;
       attr->SetFont(profile == currentProfile ? boldFont : normalFont);
@@ -169,7 +170,7 @@ void MixedStrategyProfileList::UpdateCells()
 
 void MixedStrategyProfileList::OnUpdate()
 {
-  if (m_doc->NumProfileLists() == 0) {
+  if (m_doc->GetWorkspace().NumProfileLists() == 0) {
     if (GetNumberRows() > 0) {
       DeleteRows(0, GetNumberRows());
     }
@@ -179,7 +180,7 @@ void MixedStrategyProfileList::OnUpdate()
     return;
   }
 
-  const AnalysisOutput &profiles = m_doc->GetProfiles();
+  const AnalysisOutput &profiles = m_doc->GetWorkspace().GetProfiles();
 
   BeginBatch();
 

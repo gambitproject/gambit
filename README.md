@@ -48,6 +48,7 @@ installable via PyPI.
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/StephenPasteris"><img src="https://avatars.githubusercontent.com/u/140617768?v=4?s=100" width="100px;" alt="StephenPasteris"/><br /><sub><b>StephenPasteris</b></sub></a><br /><a href="#research-StephenPasteris" title="Research">🔬</a> <a href="#code-StephenPasteris" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/d-kad"><img src="https://avatars.githubusercontent.com/u/165307096?v=4?s=100" width="100px;" alt="Daniel Kadnikov"/><br /><sub><b>Daniel Kadnikov</b></sub></a><br /><a href="#research-d-kad" title="Research">🔬</a> <a href="#code-d-kad" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/AndresFerCervell"><img src="https://avatars.githubusercontent.com/u/153729439?v=4?s=100" width="100px;" alt="Andrés Fernández Cervell"/><br /><sub><b>Andrés Fernández Cervell</b></sub></a><br /><a href="#code-AndresFerCervell" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/wyz2368"><img src="https://avatars.githubusercontent.com/u/25018133?v=4?s=100" width="100px;" alt="wyz2368"/><br /><sub><b>wyz2368</b></sub></a><br /><a href="#code-wyz2368" title="Code">💻</a> <a href="#research-wyz2368" title="Research">🔬</a></td>
     </tr>
   </tbody>
 </table>
