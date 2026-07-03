@@ -411,6 +411,80 @@ ENUMMIXED_DOUBLE_CASES = [
 ]
 
 
+ENUMPOLY_STRATEGY_CASES = [
+    # 2x2x2 strategic form game based on local max cut -- 2 pure and 1 mixed
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [d(1, 0), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(0, 1)],
+                [d("1/2", "1/2"), d("1/2", "1/2"), d("1/2", "1/2")],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_1",
+    ),
+    # coordination game with 3 pure and 4 mixed equilibria
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
+            expected=[
+                    [d(1, 0, 0), d(1, 0, 0)],
+                    [d(0, 1, 0), d(0, 1, 0)],
+                    [d(0, 0, 1), d(0, 0, 1)],
+                    [d("1/2", "1/2", 0), d("1/2", "1/2", 0)],
+                    [d("1/2", 0, "1/2"), d("1/2", 0, "1/2")],
+                    [d(0, "1/2", "1/2"), d(0, "1/2", "1/2")],
+                    [d("1/3", "1/3", "1/3"), d("1/3", "1/3", "1/3")],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_2",
+    ),
+    # A three-player game with a unique Nash equilibrium in irrational mixed strategies (nau2004 sec4 catalog game)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec4"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                    [d(0.6192325794725537, 0.3807674205274463), 
+                    d(0.4798042226776053, 0.5201957773223946), 
+                    d(0.3788253360656313, 0.6211746639343687)],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_3",
+    ),
+    # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a continuum of completely mixed Nash equilibria (nau2004 sec5 catalog game)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec5"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                    [d(1, 0), d(0, 1), d(1, 0)],
+                    [d(0, 1), d(1, 0), d(1, 0)],
+                    [d(0, 1), d(0, 1), d(0, 1)],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_4",
+    ),
+]
+
+
 LP_STRATEGY_RATIONAL_CASES = [
     pytest.param(
         EquilibriumTestCase(
@@ -945,6 +1019,7 @@ CASES = []
 CASES += ENUMPURE_CASES
 CASES += ENUMMIXED_RATIONAL_CASES
 CASES += ENUMMIXED_DOUBLE_CASES
+CASES += ENUMPOLY_STRATEGY_CASES
 CASES += LP_STRATEGY_RATIONAL_CASES
 CASES += LP_STRATEGY_DOUBLE_CASES
 CASES += LCP_STRATEGY_RATIONAL_CASES
