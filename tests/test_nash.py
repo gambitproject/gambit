@@ -1043,7 +1043,6 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         assert len(result.equilibria) == len(test_case.expected)
     for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
-            print(eq)
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_strategy_profile(rational=True, data=exp)
