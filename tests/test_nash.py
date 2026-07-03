@@ -456,7 +456,9 @@ ENUMPOLY_STRATEGY_CASES = [
             factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec4"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                    [d(0.6192325794725537, 0.3807674205274463), d(0.4798042226776053, 0.5201957773223946), d(0.3788253360656313, 0.6211746639343687)],
+                    [d(0.6192325794725537, 0.3807674205274463), 
+                    d(0.4798042226776053, 0.5201957773223946), 
+                    d(0.3788253360656313, 0.6211746639343687)],
             ],
             prob_tol=TOL,
             regret_tol=TOL,
