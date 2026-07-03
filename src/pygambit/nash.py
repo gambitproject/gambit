@@ -804,3 +804,32 @@ def logit_solve(
         equilibria=equilibria,
         parameters={"first_step": first_step, "max_accel": max_accel},
     )
+
+
+def hp_solve(
+        game: libgbt.Game,
+) -> NashComputationResult:
+    """Compute Nash equilibria of a game using :cite:p:`HerPee01`
+
+    Returns an approximation to the limiting point on the principal branch of
+    the homotopy path for the game.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute equilibria in.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+    """
+    equilibria = libgbt._hp_strategy_solve(game)
+    return NashComputationResult(
+        game=game,
+        method="hp",
+        rational=False,
+        use_strategic=True,
+        equilibria=equilibria,
+        parameters={},
+    )
