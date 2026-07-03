@@ -1476,27 +1476,21 @@ class Game:
     def _resolve_player(self,
                         player: typing.Any, funcname: str, argname: str = "player") -> Player:
         """Resolve an attempt to reference a player of the game.
-
-        Parameters
-        ----------
-        player : Any
-            An object to resolve as a reference to a player.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'player'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
+        ...
         TypeError
-            If `player` is not a `Player` or a `str`
+            If `player` is not a `Player`, `NodePlayer`, or a `str`
         ValueError
-            If `player` is an empty `str` or all spaces
+            If `player` is an empty `str` or is a `NodePlayer` that resolves to no player
+            (terminal node).
         """
+        if isinstance(player, NodePlayer):
+            resolved = cython.cast(NodePlayer, player)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no player "
+                    f"(the node is terminal)"
+                )
+            player = resolved
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1534,10 +1528,19 @@ class Game:
         KeyError
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
-            If `outcome` is not an `Outcome` or a `str`
+            If `outcome` is not an `Outcome`, `NodeOutcome`, or a `str`
         ValueError
-            If `outcome` is an empty `str` or all spaces
+            If `outcome` is an empty `str` or all spaces, or is a `NodeOutcome` that
+            resolves to no outcome (no outcome is attached to its node).
         """
+        if isinstance(outcome, NodeOutcome):
+            resolved = cython.cast(NodeOutcome, outcome)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no outcome "
+                    f"(no outcome is attached to the node)"
+                )
+            outcome = resolved
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1550,7 +1553,7 @@ class Game:
             try:
                 return self.outcomes[outcome]
             except KeyError:
-                raise KeyError(f"{funcname}(): no node with label '{outcome}'")
+                raise KeyError(f"{funcname}(): no outcome with label '{outcome}'")
         raise TypeError(
             f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
         )
@@ -1677,10 +1680,19 @@ class Game:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         TypeError
-            If `infoset` is not an `Infoset` or a `str`
+            If `infoset` is not an `Infoset`, `NodeInfoset`, or a `str`
         ValueError
-            If `infoset` is an empty `str` or all spaces
+            If `infoset` is an empty `str` or all spaces, or is a `NodeInfoset` that
+            resolves to no information set (its node is terminal).
         """
+        if isinstance(infoset, NodeInfoset):
+            resolved = cython.cast(NodeInfoset, infoset)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no information set "
+                    f"(the node is terminal)"
+                )
+            infoset = resolved
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1766,7 +1778,7 @@ class Game:
         self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
             action.label = label
-        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
+        resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 

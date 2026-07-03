@@ -47,11 +47,10 @@ class Outcome:
         else:
             return f"Outcome(game={self.game}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Outcome) and
-            self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Outcome):
+            return NotImplemented
+        return self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
