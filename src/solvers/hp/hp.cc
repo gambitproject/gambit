@@ -25,7 +25,7 @@
 #include "solvers/hp/hp.h"
 
 namespace Gambit {
-std::list<MixedStrategyProfile<double>> HPStrategySolveWrapper(const Game &p_game)
+std::list<MixedStrategyProfile<double>> HPStrategySolve(const Game &p_game)
 {
   std::list<MixedStrategyProfile<double>> result;
   const StrategySupportProfile support(p_game);

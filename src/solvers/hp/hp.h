@@ -26,7 +26,7 @@
 #include <list>
 
 namespace Gambit {
-std::list<MixedStrategyProfile<double>> HPStrategySolveWrapper(const Game &p_game);
+std::list<MixedStrategyProfile<double>> HPStrategySolve(const Game &p_game);
 } // namespace Gambit
 
 #endif // HP_H
