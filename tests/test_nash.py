@@ -450,15 +450,16 @@ ENUMPOLY_STRATEGY_CASES = [
         marks=pytest.mark.nash_enumpoly_strategy,
         id="test_enumpoly_strategy_2",
     ),
-    # A three-player game with a unique Nash equilibrium in irrational mixed strategies (nau2004 sec4 catalog game)
+    # A three-player game with a unique Nash equilibrium in irrational mixed strategies
+    # (nau2004 sec4 catalog game)
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec4"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                    [d(0.6192325794725537, 0.3807674205274463), 
-                    d(0.4798042226776053, 0.5201957773223946), 
-                    d(0.3788253360656313, 0.6211746639343687)],
+                [d(0.6192325794725537, 0.3807674205274463),
+                 d(0.4798042226776053, 0.5201957773223946),
+                 d(0.3788253360656313, 0.6211746639343687)],
             ],
             prob_tol=TOL,
             regret_tol=TOL,
@@ -466,7 +467,8 @@ ENUMPOLY_STRATEGY_CASES = [
         marks=pytest.mark.nash_enumpoly_strategy,
         id="test_enumpoly_strategy_3",
     ),
-    # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a continuum of completely mixed Nash equilibria (nau2004 sec5 catalog game)
+    # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a continuum of
+    # completely mixed Nash equilibria (nau2004 sec5 catalog game)
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec5"),
