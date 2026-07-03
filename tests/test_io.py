@@ -49,6 +49,11 @@ def test_read_agg_invalid():
         gbt.read_agg(game_path)
 
 
+def test_read_agg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_agg(io.StringIO("0 0 0\n"))
+
+
 def test_read_bagg():
     game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
     game = gbt.read_bagg(game_path)
@@ -61,6 +66,11 @@ def test_read_bagg_invalid():
     )
     with pytest.raises(ValueError):
         gbt.read_bagg(game_path)
+
+
+def test_read_bagg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_bagg(io.StringIO("0 0 0\n"))
 
 
 def test_read_gbt_invalid():
