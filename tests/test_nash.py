@@ -425,9 +425,60 @@ ENUMPOLY_STRATEGY_CASES = [
                 [d("1/2", "1/2"), d("1/2", "1/2"), d("1/2", "1/2")],
             ],
             prob_tol=TOL,
+            regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
         id="test_enumpoly_strategy_1",
+    ),
+    # coordination game with 3 pure and 4 mixed equilibria
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
+            expected=[
+                    [d(1, 0, 0), d(1, 0, 0)],
+                    [d(0, 1, 0), d(0, 1, 0)],
+                    [d(0, 0, 1), d(0, 0, 1)],
+                    [d("1/2", "1/2", 0), d("1/2", "1/2", 0)],
+                    [d("1/2", 0, "1/2"), d("1/2", 0, "1/2")],
+                    [d(0, "1/2", "1/2"), d(0, "1/2", "1/2")],
+                    [d("1/3", "1/3", "1/3"), d("1/3", "1/3", "1/3")],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_2",
+    ),
+    # A three-player game with a unique Nash equilibrium in irrational mixed strategies (nau2004 sec4 catalog game)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec4"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                    [d(0.6192325794725537, 0.3807674205274463), d(0.4798042226776053, 0.5201957773223946), d(0.3788253360656313, 0.6211746639343687)],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_3",
+    ),
+    # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a continuum of completely mixed Nash equilibria (nau2004 sec5 catalog game)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec5"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                    [d(1, 0), d(0, 1), d(1, 0)],
+                    [d(0, 1), d(1, 0), d(1, 0)],
+                    [d(0, 1), d(0, 1), d(0, 1)],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_4",
     ),
 ]
 
@@ -992,6 +1043,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         assert len(result.equilibria) == len(test_case.expected)
     for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
+            print(eq)
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_strategy_profile(rational=True, data=exp)
