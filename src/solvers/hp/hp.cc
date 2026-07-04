@@ -23,16 +23,30 @@
 #include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hp.h"
+#include "solvers/hp/hpsystem.h"
 
 namespace Gambit {
-std::list<MixedStrategyProfile<double>> HPStrategySolve(const Game &p_game)
+std::list<MixedStrategyProfile<double>>
+HPStrategySolve(const Game &p_game, const MixedStrategyProfile<double> &p_prior)
 {
-  std::list<MixedStrategyProfile<double>> result;
+  const std::list<MixedStrategyProfile<double>> result;
   const StrategySupportProfile support(p_game);
 
-  const MixedStrategyProfile<double> trivial_profile = support.NewMixedStrategyProfile<double>();
+  const MixedStrategyProfile<double> prior(p_prior);
 
-  result.push_back(trivial_profile);
-  return result;
+  const HPEquationSystem system(p_game, p_prior);
+  Vector<double> init_pt = system.ComputeInitialPoint();
+
+  std::cout << "Computed starting vector (alpha form): ";
+  for (size_t i = 1; i <= init_pt.size(); ++i) {
+    std::cout << init_pt[i] << " ";
+  }
+  std::cout << std::endl;
+
+  std::list<MixedStrategyProfile<double>> ret;
+  const MixedStrategyProfile<double> T_0 = system.ExtractEquilibrium(init_pt);
+  ret.push_back(T_0);
+
+  return ret;
 }
 } // namespace Gambit
