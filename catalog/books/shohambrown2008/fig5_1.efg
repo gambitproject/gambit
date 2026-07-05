@@ -1,0 +1,21 @@
+EFG 2 R "Fig 5.1 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 5.1 from :cite:p:`ShoLeyB08`.
+This is a sharing game. Imagine a brother and sister sharing two indivisible and identical presents
+from their parents. First the brother suggests a split, which can be one of three-he
+keeps both, she keeps both, or they each keep one. Then the sister chooses whether
+to accept or reject the split. If she accepts they each get their allocated present(s),
+and otherwise neither gets any gift.
+"
+
+p "" 1 1 "" { "2-0" "1-1" "0-2" } 0
+p "" 2 2 "" { "no" "yes" } 0
+t "" 1 "" { 0 0 }
+t "" 2 "" { 2 0 }
+p "" 2 3 "" { "no" "yes" } 0
+t "" 3 "" { 0 0 }
+t "" 4 "" { 1 1 }
+p "" 2 4 "" { "no" "yes" } 0
+t "" 5 "" { 0 0 }
+t "" 6 "" { 0 2 }

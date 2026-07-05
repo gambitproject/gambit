@@ -1,0 +1,57 @@
+% Extensive-form game transcribed from the provided figure.
+% DrawTree .ef format.
+% Layout is chosen to preserve the original geometry of the image:
+% chance at the top, two Player 1 singleton information sets,
+% crossed middle branches, and two horizontal Player 2 information sets.
+%
+% Player 0: Chance
+% Player 1: 1
+% Player 2: 2
+%
+% Chance chooses G or B with probability 1/2 each.
+% Player 1 observes the chance outcome and chooses X or Y, with labels
+% indexed by the realized chance outcome: X_G, Y_G, X_B, Y_B.
+% Player 2 observes only whether the signal is X or Y, not the chance outcome.
+
+player 0 name Chance
+player 1 name 1
+player 2 name 2
+
+% Root chance node.
+level 0 node n1 player 0
+
+% Chance branches, arranged as in the figure.
+level 2 node n2 xshift -2.8 from n1 move \frac{1}{2} player 1
+level 2 node n3 xshift 2.8 from n1 move \frac{1}{2} player 1
+
+% Player 1 branches.
+% Left Player 1 node: chance outcome G.
+level 4 node n4 xshift -2.7 from n2 move X_G
+level 4 node n5 xshift 4.1 from n2 move Y_G
+
+% Right Player 1 node: chance outcome B.
+% The X_B and Y_G branches cross, matching the original layout.
+level 4 node n6 xshift -4.1 from n3 move X_B
+level 4 node n7 xshift 2.7 from n3 move Y_B
+
+% Player 2 information sets.
+% X-signal information set: histories (G,X_G) and (B,X_B).
+iset n4 n6 player 2
+
+% Y-signal information set: histories (G,Y_G) and (B,Y_B).
+iset n5 n7 player 2
+
+% Player 2 actions and terminal payoffs, listed left-to-right as in the image.
+% At the X-signal information set.
+level 6 node n8 xshift -0.45 from n4 move l_X payoffs 4 10
+level 6 node n9 xshift 0.45 from n4 move r_X payoffs 0 6
+
+level 6 node n10 xshift -0.45 from n6 move l_X payoffs 6 0
+level 6 node n11 xshift 0.45 from n6 move r_X payoffs 0 6
+
+% At the Y-signal information set.
+level 6 node n12 xshift -0.45 from n5 move l_Y payoffs 4 10
+level 6 node n13 xshift 0.45 from n5 move r_Y payoffs 0 6
+
+level 6 node n14 xshift -0.45 from n7 move l_Y payoffs 6 0
+level 6 node n15 xshift 0.45 from n7 move r_Y payoffs 0 6
