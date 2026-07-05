@@ -1,6 +1,7 @@
 import argparse
 import shutil
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
@@ -15,6 +16,24 @@ MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 GTDRAW_SETTINGS_CONFIG = Path(__file__).parent / "gtdraw_settings.yaml"
 CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "catalog_hierarchy.yaml"
 SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
+
+
+@contextmanager
+def _using_catalog_dir(catalog_dir: Path):
+    """Temporarily make pygambit.catalog read data from the checked-out catalog."""
+    old_resource = gbt.catalog._CATALOG_RESOURCE
+    gbt.catalog._CATALOG_RESOURCE = catalog_dir
+    try:
+        yield
+    finally:
+        gbt.catalog._CATALOG_RESOURCE = old_resource
+
+
+def _catalog_games(catalog_dir: Path | None = None) -> pd.DataFrame:
+    """Return catalog games using files from *catalog_dir*, not installed package data."""
+    catalog_dir = catalog_dir or CATALOG_DIR
+    with _using_catalog_dir(catalog_dir):
+        return gbt.catalog.games(include_descriptions=True)
 
 
 def catalog_gtdraw_settings(slug: str) -> dict:
@@ -325,10 +344,11 @@ def generate_rst_table(
     catalog_dir = catalog_dir or CATALOG_DIR
     labels = load_hierarchy_labels()
     tree = _build_slug_tree(df)
-    with open(rst_path, "w", encoding="utf-8") as f:
-        _write_tree_level(
-            f, tree, "", labels, catalog_dir, indent="", regenerate_images=regenerate_images
-        )
+    with _using_catalog_dir(catalog_dir):
+        with open(rst_path, "w", encoding="utf-8") as f:
+            _write_tree_level(
+                f, tree, "", labels, catalog_dir, indent="", regenerate_images=regenerate_images
+            )
 
 
 def update_makefile(
@@ -409,7 +429,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create RST list-table used by doc/catalog.rst
-    df = gbt.catalog.games(include_descriptions=True)
+    df = _catalog_games()
     _warn_missing_descriptions(df)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
