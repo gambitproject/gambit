@@ -5,7 +5,7 @@ Figure 5.9 from :cite:p:`ShoLeyB08`.
 This is the centipede game. In this game two players alternate in making decisions, at each
 turn choosing between going down and ending the game or going across and
 continuing it.
-This example is usd to explain the criticisms of backward induction for finding subgame-perfect equilibrium.
+This example is used to explain the criticisms of backward induction for finding subgame-perfect equilibrium.
 Note that centipede is also a parametrized game, with the parameter being the number of rounds.
 "
 

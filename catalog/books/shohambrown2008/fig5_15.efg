@@ -2,7 +2,7 @@ EFG 2 R "Fig 5.15 from Shoham and Leyton-Brown (2008)" { "1" "2" }
 
 "
 Figure 5.15 from :cite:p:`ShoLeyB08`.
-A game with imperfect information.  
+A game with imperfect information.
 This example shows how a requirement that a substrategy be a best response in
 all subgames is too simplistic for defining SPE in games with imperfect information.
 "
