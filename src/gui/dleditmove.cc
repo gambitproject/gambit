@@ -46,6 +46,8 @@ public:
 
   wxString GetActionLabel(int p_act) const;
   Array<Number> GetActionProbs() const;
+
+  void FocusActionLabel(int p_act) { m_actionLabels.at(p_act - 1)->SetFocus(); }
 };
 
 ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
@@ -198,8 +200,37 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   Bind(wxEVT_BUTTON, &EditMoveDialog::OnOK, this, wxID_OK);
 }
 
+bool EditMoveDialog::ValidateLabels()
+{
+  const wxString infosetLabel = m_infosetLabel->GetNormalizedValue();
+  if (infosetLabel.empty()) {
+    wxRichMessageDialog(this, _("Information set label cannot be empty."), _("Error"),
+                        wxOK | wxCENTRE | wxICON_ERROR)
+        .ShowModal();
+    m_infosetLabel->SetFocus();
+    return false;
+  }
+
+  for (int act = 1; act <= m_actionPanel->NumActions(); ++act) {
+    const wxString actionLabel = m_actionPanel->GetActionLabel(act);
+    if (actionLabel.empty()) {
+      wxRichMessageDialog(this, _("Action labels cannot be empty."), _("Error"),
+                          wxOK | wxCENTRE | wxICON_ERROR)
+          .ShowModal();
+      m_actionPanel->FocusActionLabel(act);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void EditMoveDialog::OnOK(wxCommandEvent &p_event)
 {
+  if (!ValidateLabels()) {
+    return;
+  }
+
   if (!m_infoset->IsChanceInfoset()) {
     p_event.Skip();
     return;

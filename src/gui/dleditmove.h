@@ -34,6 +34,7 @@ class EditMoveDialog final : public wxDialog {
   LabelTextCtrl *m_infosetLabel;
   ActionPanel *m_actionPanel;
 
+  bool ValidateLabels();
   void OnOK(wxCommandEvent &);
 
 public:
