@@ -69,8 +69,8 @@ EditableLabelText::EditableLabelText(wxWindow *p_parent, int p_id, const wxStrin
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
           wxCommandEventHandler(EditableLabelText::OnAccept));
 
-  m_textCtrl->Bind(wxEVT_KILL_FOCUS, &EditableText::OnTextKillFocus, this);
-  m_textCtrl->Bind(wxEVT_CHAR_HOOK, &EditableText::OnTextCharHook, this);
+  m_textCtrl->Bind(wxEVT_KILL_FOCUS, &EditableLabelText::OnTextKillFocus, this);
+  m_textCtrl->Bind(wxEVT_CHAR_HOOK, &EditableLabelText::OnTextCharHook, this);
 
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
