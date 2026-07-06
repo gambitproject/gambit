@@ -57,7 +57,7 @@ void StaticTextButton::OnLeftClick(wxMouseEvent &p_event)
 
 EditableLabelText::EditableLabelText(wxWindow *p_parent, int p_id, const wxString &p_value,
                                      const wxPoint &p_position, const wxSize &p_size)
-  : wxPanel(p_parent, p_id, p_position, p_size)
+  : wxPanel(p_parent, p_id, p_position, p_size), m_committedValue(p_value)
 {
   m_staticText =
       new StaticTextButton(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxALIGN_LEFT);
@@ -94,6 +94,10 @@ void EditableLabelText::EndEdit(bool p_accept)
 {
   if (p_accept) {
     m_staticText->SetLabel(m_textCtrl->GetNormalizedValue());
+  }
+  else {
+    m_textCtrl->SetValue(m_committedValue);
+    m_staticText->SetLabel(m_committedValue);
   }
 
   GetSizer()->Show(m_textCtrl, false);
@@ -141,6 +145,7 @@ wxString EditableLabelText::GetValue() const
 
 void EditableLabelText::SetValue(const wxString &p_value)
 {
+  m_committedValue = p_value;
   m_textCtrl->SetValue(p_value);
   m_staticText->SetLabel(p_value);
 }

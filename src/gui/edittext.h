@@ -49,6 +49,7 @@ class EditableLabelText : public wxPanel {
   StaticTextButton *m_staticText;
   LabelTextCtrl *m_textCtrl;
 
+  wxString m_committedValue;
   bool m_endingEdit = false;
 
   /// @name Event handlers
