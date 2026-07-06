@@ -104,6 +104,12 @@ bool LabelEditorRefData::EndEdit(const wxSheetCoords &p_coords, wxSheet *p_sheet
   auto *textCtrl = wxStaticCast(GetTextCtrl(), LabelTextCtrl);
   const wxString value = textCtrl->GetNormalizedValue();
 
+  if (value.empty()) {
+    wxBell();
+    textCtrl->SetFocus();
+    return false;
+  }
+
   if (value == p_sheet->GetCellValue(p_coords)) {
     return false;
   }

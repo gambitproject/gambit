@@ -242,6 +242,13 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
+  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+
+  if (label.empty()) {
+    wxBell();
+    return;
+  }
+
   m_table->RenameRowHeaderStrategy(
       p_coords.GetCol(), p_coords.GetRow(),
       LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
@@ -541,6 +548,13 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
+  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+
+  if (label.empty()) {
+    wxBell();
+    return;
+  }
+
   m_table->RenameColHeaderStrategy(
       p_coords.GetRow(), p_coords.GetCol(),
       LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
