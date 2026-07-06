@@ -222,8 +222,19 @@ void TablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void TablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
+  const wxString label =
+      LabelTextCtrl::Normalize(m_playerLabel->GetValue(), true, LabelCharacterPolicy::AsciiOnly);
+
+  if (label.empty()) {
+    wxBell();
+    m_playerLabel->BeginEdit();
+    return;
+  }
+
+  m_playerLabel->SetValue(label);
+
   try {
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), label);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
