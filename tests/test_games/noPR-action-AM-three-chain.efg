@@ -1,0 +1,20 @@
+EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" }
+"Test fixture for information-set reach probability under absent-mindedness.
+Player 1's first information set has a member that is behavioural-strategy-reachable,
+but not pure-strategy-reachable; likewise, both members of Player 2's infoset are
+behavioural-strategy-reachable but not pure-strategy-reachable.
+Both are missed by re-entry detection that rides on pure-strategy reachability."
+
+p "" 1 1 "Absent-minded" { "1" "2" } 0
+p "" 1 2 "Second" { "1" "2" } 0
+p "" 1 1 "Absent-minded" { "1" "2" } 0
+t "" 1 "Outcome 1" { 1, -1 }
+p "" 1 1 "Absent-minded" { "1" "2" } 0
+t "" 2 "Outcome 2" { 2, -2 }
+p "" 2 1 "Player 2" { "1" "2" } 0
+p "" 2 1 "Player 2" { "1" "2" } 0
+t "" 3 "Outcome 3" { 3, -3 }
+t "" 4 "Outcome 4" { 4, -4 }
+t "" 5 "Outcome 5" { 5, -5 }
+t "" 6 "Outcome 6" { 6, -6 }
+t "" 7 "Outcome 7" { 7, -7 }

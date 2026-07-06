@@ -25,6 +25,9 @@
 - Corrected calculation of total number of actions for a player in `pygambit` (#938)
 - Corrected a regression in action graph games that left the internal data structure not fully initialised,
   leading to segmentation faults.
+- Corrected handling of malformed AGG/BAGG files: files with an invalid or degenerate header
+  (for example a wrong file type, or a header declaring zero players) are now rejected with a
+  `ValueError` instead of causing a segmentation fault while constructing the game.
 
 ### Changed
 - Added a new welcome/landing window on launching the GUI without a game.  This has the effect of
@@ -41,6 +44,8 @@
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
+- In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates
+  that are evaluated on-demand, to align with the behaviour of collections.  (#946)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)

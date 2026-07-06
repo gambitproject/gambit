@@ -49,6 +49,11 @@ def test_read_agg_invalid():
         gbt.read_agg(game_path)
 
 
+def test_read_agg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_agg(io.StringIO("0 0 0\n"))
+
+
 def test_read_bagg():
     game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
     game = gbt.read_bagg(game_path)
@@ -61,6 +66,11 @@ def test_read_bagg_invalid():
     )
     with pytest.raises(ValueError):
         gbt.read_bagg(game_path)
+
+
+def test_read_bagg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_bagg(io.StringIO("0 0 0\n"))
 
 
 def test_read_gbt_invalid():
@@ -147,17 +157,7 @@ def test_read_write_nfg():
     nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     serialized_nfg_game = nfg_game.to_nfg()
     deserialized_nfg_game = gbt.read_nfg(
-        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=False
+        io.BytesIO(serialized_nfg_game.encode())
     )
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game == double_serialized_nfg_game
-
-
-def test_read_write_nfg_normalize():
-    nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
-    serialized_nfg_game = nfg_game.to_nfg()
-    deserialized_nfg_game = gbt.read_nfg(
-        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=True
-    )
-    double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
-    assert serialized_nfg_game != double_serialized_nfg_game
