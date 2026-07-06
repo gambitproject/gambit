@@ -69,6 +69,9 @@ EditableLabelText::EditableLabelText(wxWindow *p_parent, int p_id, const wxStrin
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
           wxCommandEventHandler(EditableLabelText::OnAccept));
 
+  m_textCtrl->Bind(wxEVT_KILL_FOCUS, &EditableText::OnTextKillFocus, this);
+  m_textCtrl->Bind(wxEVT_CHAR_HOOK, &EditableText::OnTextCharHook, this);
+
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
   topSizer->Add(m_textCtrl, 1, wxEXPAND, 0);
@@ -96,6 +99,33 @@ void EditableLabelText::EndEdit(bool p_accept)
   GetSizer()->Show(m_textCtrl, false);
   GetSizer()->Show(m_staticText, true);
   GetSizer()->Layout();
+}
+
+void EditableLabelText::AcceptEdit()
+{
+  if (!IsEditing() || m_endingEdit) {
+    return;
+  }
+
+  m_endingEdit = true;
+  EndEdit(true);
+
+  wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER);
+  event.SetId(GetId());
+  wxPostEvent(GetParent(), event);
+
+  m_endingEdit = false;
+}
+
+void EditableLabelText::CancelEdit()
+{
+  if (!IsEditing() || m_endingEdit) {
+    return;
+  }
+
+  m_endingEdit = true;
+  EndEdit(false);
+  m_endingEdit = false;
 }
 
 wxString EditableLabelText::GetValue() const
@@ -143,11 +173,22 @@ void EditableLabelText::OnClick(wxCommandEvent &)
   wxPostEvent(GetParent(), event);
 }
 
-void EditableLabelText::OnAccept(wxCommandEvent &)
+void EditableLabelText::OnAccept(wxCommandEvent &) { AcceptEdit(); }
+
+void EditableLabelText::OnTextKillFocus(wxFocusEvent &p_event)
 {
-  EndEdit(true);
-  wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER);
-  event.SetId(GetId());
-  wxPostEvent(GetParent(), event);
+  AcceptEdit();
+  p_event.Skip();
 }
+
+void EditableLabelText::OnTextCharHook(wxKeyEvent &p_event)
+{
+  if (p_event.GetKeyCode() == WXK_ESCAPE && IsEditing()) {
+    CancelEdit();
+    return;
+  }
+
+  p_event.Skip();
+}
+
 } // namespace Gambit::GUI

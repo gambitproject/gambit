@@ -49,13 +49,22 @@ class EditableLabelText : public wxPanel {
   StaticTextButton *m_staticText;
   LabelTextCtrl *m_textCtrl;
 
+  bool m_endingEdit = false;
+
   /// @name Event handlers
   //@{
   /// Called when the static text is clicked
   void OnClick(wxCommandEvent &);
   /// Called when the text control is dismissed via enter
   void OnAccept(wxCommandEvent &);
+  /// Called when the text control loses focus
+  void OnTextKillFocus(wxFocusEvent &);
+  /// Called to intercept Escape while editing
+  void OnTextCharHook(wxKeyEvent &);
   //@}
+
+  void AcceptEdit();
+  void CancelEdit();
 
 public:
   EditableLabelText(wxWindow *p_parent, int p_id, const wxString &p_value,
@@ -68,12 +77,9 @@ public:
   wxString GetValue() const;
   void SetValue(const wxString &p_value);
 
-  // @name Overriding wxWindow methods
-  //@{
   bool SetForegroundColour(const wxColour &) override;
   bool SetBackgroundColour(const wxColour &) override;
   bool SetFont(const wxFont &) override;
-  //@}
 };
 } // namespace Gambit::GUI
 
