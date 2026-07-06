@@ -294,14 +294,17 @@ void gbtTreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 
 void gbtTreePlayerPanel::PostPendingChanges()
 {
-  if (m_playerLabel->IsEditing()) {
-    m_playerLabel->EndEdit(true);
-    try {
-      m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
+  if (!m_playerLabel->IsEditing()) {
+    return;
+  }
+  m_playerLabel->EndEdit(true);
+  try {
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+    m_playerLabel->SetValue(
+        wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(), *wxConvCurrent));
   }
 }
 
