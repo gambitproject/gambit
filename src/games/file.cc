@@ -439,8 +439,7 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
-    auto outcome = p_nfg->NewOutcome();
-    outcome->SetLabel(p_parser.GetLastText());
+    auto outcome = p_nfg->NewOutcome(p_parser.GetLastText());
     p_parser.GetNextToken();
 
     for (auto player : players) {
@@ -592,9 +591,8 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
 
     GameOutcome outcome;
     if (!contains(p_treeData.m_outcomeMap, outcomeId)) {
-      outcome = p_game->NewOutcome();
+      outcome = p_game->NewOutcome(label);
       p_treeData.m_outcomeMap[outcomeId] = outcome;
-      outcome->SetLabel(label);
       auto player_it = p_game->GetPlayers().begin();
       for (const auto &payoff : payoffs) {
         outcome->SetPayoff(*player_it, payoff);

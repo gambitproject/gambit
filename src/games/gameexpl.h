@@ -41,8 +41,8 @@ public:
 
   /// @name Outcomes
   //@{
-  /// Creates a new outcome in the game
-  GameOutcome NewOutcome() override;
+  /// Creates a new outcome in the game, with the given label set at construction
+  GameOutcome NewOutcome(const std::string &p_label) override;
 
   /// @name Writing data files
   //@{

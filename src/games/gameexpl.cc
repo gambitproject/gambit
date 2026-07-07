@@ -58,10 +58,15 @@ Rational GameExplicitRep::GetMaxPayoff() const
 //                      GameExplicitRep: Outcomes
 //------------------------------------------------------------------------
 
-GameOutcome GameExplicitRep::NewOutcome()
+GameOutcome GameExplicitRep::NewOutcome(const std::string &p_label)
 {
-  m_outcomes.push_back(std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1));
-  return m_outcomes.back();
+  auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1);
+  // GameExplicitRep is a friend of GameOutcomeRep, so set the raw label directly,
+  // bypassing the enforcement in SetLabel. The label may be empty or duplicate here;
+  // NormalizeGameLabels makes outcome labels unique and nonempty.
+  outcome->m_label = p_label;
+  m_outcomes.push_back(outcome);
+  return outcome;
 }
 
 //------------------------------------------------------------------------
