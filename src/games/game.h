@@ -554,11 +554,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
@@ -1347,6 +1343,22 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameNodeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Node labels may be empty, but a non-empty label must be unique within the game.
+  if (!p_label.empty()) {
+    for (const auto &node : GetGame()->GetNodes()) {
+      if (node.get() != this && node->GetLabel() == p_label) {
+        throw ValueException("Node label must be unique within the game");
+      }
+    }
+  }
+  m_label = p_label;
+}
 inline int GameNodeRep::GetNumber() const
 {
   m_game->EnsureNodeOrdering();
