@@ -515,6 +515,7 @@ class TreeData {
 public:
   std::map<int, GameOutcome> m_outcomeMap;
   std::map<int, std::map<int, GameInfoset>> m_infosetMap;
+  std::map<int, std::map<int, std::list<std::string>>> m_rawActionLabels;
 };
 
 void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
@@ -620,6 +621,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
 
 void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, const int p_infosetId,
                          const GameInfoset &p_infoset, const std::string &p_label,
+                         const std::list<std::string> &p_definedLabels,
                          const std::list<std::string> &p_labels)
 {
   if (p_infoset->GetLabel() != p_label) {
@@ -629,22 +631,18 @@ void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, con
                          ")");
   }
 
-  const auto &actions = p_infoset->GetActions();
-  if (actions.size() != p_labels.size()) {
+  if (p_definedLabels.size() != p_labels.size()) {
     p_state.OnParseError("Infoset action count mismatch "
                          "(player " +
                          std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
                          ")");
   }
-  auto label_it = p_labels.begin();
-  for (auto action : actions) {
-    if (action->GetLabel() != *label_it) {
-      p_state.OnParseError("Infoset action labels do not match previous definition "
-                           "(player " +
-                           std::to_string(p_playerId) + ", infoset " +
-                           std::to_string(p_infosetId) + ")");
-    }
-    ++label_it;
+
+  if (p_definedLabels != p_labels) {
+    p_state.OnParseError("Infoset action labels do not match previous definition "
+                         "(player " +
+                         std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
+                         ")");
   }
 }
 
@@ -697,6 +695,8 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
+      p_treeData.m_rawActionLabels[0][infosetId] = action_labels;
+      NormalizeLabelStrings(action_labels);
       infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
@@ -708,7 +708,8 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
       p_game->SetChanceProbs(infoset, probs);
     }
     else {
-      CheckInfosetActions(p_state, 0, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, 0, infosetId, infoset, label,
+                          p_treeData.m_rawActionLabels[0][infosetId], action_labels);
       CheckChanceProbs(p_state, infosetId, infoset, probs);
       p_game->AppendMove(p_node, infoset);
     }
@@ -754,6 +755,8 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
+      p_treeData.m_rawActionLabels[playerId][infosetId] = action_labels;
+      NormalizeLabelStrings(action_labels);
       infoset = p_game->AppendMove(p_node, player, action_labels.size());
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
@@ -764,7 +767,8 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
       }
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label,
+                          p_treeData.m_rawActionLabels[playerId][infosetId], action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }
