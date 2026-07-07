@@ -720,6 +720,7 @@ GameTreeRep::GameTreeRep()
   : m_root(std::make_shared<GameNodeRep>(this, nullptr)),
     m_chance(std::make_shared<GamePlayerRep>(this, 0))
 {
+  m_chance->m_label = "Chance";
 }
 
 GameTreeRep::~GameTreeRep()
