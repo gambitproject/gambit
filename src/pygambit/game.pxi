@@ -2094,21 +2094,29 @@ class Game:
 
     def add_outcome(self,
                     payoffs: list | None = None,
-                    label: str = "") -> Outcome:
+                    label: str | None = None) -> Outcome:
         """Add a new outcome to the game.
+
+        .. versionchanged:: 16.7.0
+            Outcome labels must be unique and nonempty.  If `label` is not specified,
+            a unique label of the form ``"Outcome n"`` is generated automatically.
 
         Parameters
         ----------
         payoffs : list, optional
-            The payoffs of the outcome to each player.
-        label : str, default ""
-            The label for the outcome
+            The payoffs of the outcome to each player.  If not specified, all
+            payoffs are set to zero.
+        label : str, optional
+            The label for the outcome.  If not specified, a unique label of the
+            form ``"Outcome n"`` is generated.  If specified, it must be nonempty
+            and not already in use by another outcome in the game.
 
         Raises
         ------
         ValueError
-            If `payoffs` is specified but is not the same length as the number of players
-            in the game.
+            If `payoffs` is specified but is not the same length as the number of
+            players in the game, or if `label` is specified but is empty or is
+            already the label of another outcome in the game.
 
         Returns
         -------
@@ -2121,8 +2129,13 @@ class Game:
         else:
             payoffs = [0 for _ in self.players]
         c = Outcome.wrap(self.game.deref().NewOutcome())
-        if str(label) != "":
-            c.label = str(label)
+        if label is None:
+            existing = {o.label for o in self.outcomes}
+            n = 1
+            while f"Outcome {n}" in existing:
+                n += 1
+            label = f"Outcome {n}"
+        c.label = str(label)
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c

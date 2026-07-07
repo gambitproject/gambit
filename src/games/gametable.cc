@@ -391,7 +391,10 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   else {
     m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
     std::generate(m_outcomes.begin(), m_outcomes.end(), [this, outc = 1]() mutable {
-      return std::make_shared<GameOutcomeRep>(this, outc++);
+      auto o = std::make_shared<GameOutcomeRep>(this, outc);
+      o->m_label = "Outcome " + std::to_string(outc);
+      outc++;
+      return o;
     });
     std::transform(m_outcomes.begin(), m_outcomes.end(), m_results.begin(),
                    [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
