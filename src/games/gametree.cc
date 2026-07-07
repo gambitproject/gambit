@@ -598,7 +598,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   node->m_infoset->m_members.push_back(p_node);
   for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
        old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
-    (*new_act)->SetLabel((*old_act)->GetLabel());
+    (*new_act)->m_label = (*old_act)->GetLabel();
   }
   ClearComputedValues();
   InvalidateInfosetOrdering();

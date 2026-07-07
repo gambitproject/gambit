@@ -13,16 +13,30 @@ def test_set_action_label(label: str):
     assert action.label == label
 
 
-def test_set_empty_action_futurewarning():
+def test_set_empty_action_valueerror():
     game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         next(iter(game.root.infoset.actions)).label = ""
 
 
-def test_set_duplicate_action_futurewarning():
+def test_set_duplicate_action_valueerror():
     game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         next(iter(game.root.infoset.actions)).label = "Queen"
+
+
+def test_append_move_duplicate_action_labels_raises():
+    game = games.create_stripped_down_poker_efg()
+    terminal = next(iter(game.root.children))
+    with pytest.raises(ValueError):
+        game.append_move(terminal, "Alice", ["x", "x"])
+
+
+def test_append_move_empty_action_label_raises():
+    game = games.create_stripped_down_poker_efg()
+    terminal = next(iter(game.root.children))
+    with pytest.raises(ValueError):
+        game.append_move(terminal, "Alice", ["x", ""])
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)

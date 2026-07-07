@@ -240,11 +240,7 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   bool Precedes(const GameNode &) const;
 };
@@ -1324,6 +1320,22 @@ inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
 
 inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
+inline void GameActionRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  if (p_label.empty()) {
+    throw ValueException("Action label must not be empty");
+  }
+  for (const auto &action : GetInfoset()->GetActions()) {
+    if (action.get() != this && action->GetLabel() == p_label) {
+      throw ValueException("Action label must be unique within the information set");
+    }
+  }
+  m_label = p_label;
+}
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
