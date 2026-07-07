@@ -56,18 +56,23 @@ def test_player_label_invalid():
         _ = game.players["Not a player"]
 
 
-def test_set_empty_player_futurewarning():
+def test_set_empty_player_valueerror():
     game = games.create_stripped_down_poker_efg()
     player = next(iter(game.players))
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         player.label = ""
 
 
-def test_set_duplicate_player_futurewarning():
+def test_set_duplicate_player_valueerror():
     game = games.create_stripped_down_poker_efg()
     pl1, pl2, *_ = game.players
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         pl1.label = pl2.label
+
+
+def test_chance_player_has_label():
+    game = gbt.Game.new_tree()
+    assert game.players.chance.label == "Chance"
 
 
 def test_strategic_game_add_player():

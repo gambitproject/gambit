@@ -34,6 +34,14 @@ ctypedef string (*GameWriter)(const c_Game &) except +IOError
 ctypedef c_Game (*GameParser)(const string &) except +IOError
 
 
+def _generate_unique_label(existing, stem: str) -> str:
+    """Return the first ``f"{stem} {n}"`` (n = 1, 2, …) not present in `existing`."""
+    n = 1
+    while f"{stem} {n}" in existing:
+        n += 1
+    return f"{stem} {n}"
+
+
 @cython.cfunc
 def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
               parser: GameParser):
@@ -2053,13 +2061,25 @@ class Game:
                 "Operation only defined for games with a tree representation"
             )
 
-    def add_player(self, label: str = "") -> Player:
+    def add_player(self, label: str | None = None) -> Player:
         """Add a new player to the game.
+
+        .. versionchanged:: 16.7.0
+            Player labels must be unique and nonempty.  If `label` is not
+            specified, a unique label of the form ``"Player n"`` is generated.
 
         Parameters
         ----------
-        label : str, default ""
-            The label for the player.
+        label : str, optional
+            The label for the player.  If not specified, a unique label of the
+            form ``"Player n"`` is generated.  If specified, it must be nonempty
+            and not already in use by another player.
+
+        Raises
+        ------
+        ValueError
+            If `label` is specified but is empty or is already the label of another
+            player in the game.
 
         Returns
         -------
@@ -2067,8 +2087,9 @@ class Game:
             A reference to the newly-created player.
         """
         p = Player.wrap(self.game.deref().NewPlayer())
-        if str(label) != "":
-            p.label = str(label)
+        if label is None:
+            label = _generate_unique_label({pl.label for pl in self.players}, "Player")
+        p.label = str(label)
         return p
 
     def set_player(self, infoset: Infoset | str,
@@ -2130,11 +2151,7 @@ class Game:
             payoffs = [0 for _ in self.players]
         c = Outcome.wrap(self.game.deref().NewOutcome())
         if label is None:
-            existing = {o.label for o in self.outcomes}
-            n = 1
-            while f"Outcome {n}" in existing:
-                n += 1
-            label = f"Outcome {n}"
+            label = _generate_unique_label({o.label for o in self.outcomes}, "Outcome")
         c.label = str(label)
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff

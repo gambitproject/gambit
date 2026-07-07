@@ -201,11 +201,7 @@ public:
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Gets the payoff associated with the outcome to the player
   template <class T> const T &GetPayoff(const GamePlayer &p_player) const;
@@ -471,11 +467,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -1228,8 +1220,11 @@ public:
   {
     return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
   }
-  /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome() { throw UndefinedException(); }
+  /// Creates a new outcome, with the given label (empty by default) set at construction.
+  /// The label is set directly, without the uniqueness and nonemptiness enforcement
+  /// applied by SetLabel, so the file parser can assign the raw label read from a file;
+  /// NormalizeGameLabels makes outcome labels unique and nonempty afterwards.
+  virtual GameOutcome NewOutcome(const std::string &p_label = "") { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
@@ -1283,6 +1278,22 @@ public:
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameOutcomeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label.empty()) {
+    throw ValueException("Outcome label must not be empty");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  for (const auto &outcome : GetGame()->GetOutcomes()) {
+    if (outcome.get() != this && outcome->GetLabel() == p_label) {
+      throw ValueException("Outcome label must be unique within the game");
+    }
+  }
+  m_label = p_label;
+}
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
@@ -1342,6 +1353,23 @@ inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_fr
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GamePlayerRep::SetLabel(const std::string &p_label)
+{
+  if (p_label.empty()) {
+    throw ValueException("Player label must not be empty");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  for (const auto &player : GetGame()->GetPlayers()) {
+    if (player.get() != this && player->GetLabel() == p_label) {
+      throw ValueException("Player label must be unique within the game");
+    }
+  }
+  m_label = p_label;
+}
+
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();
