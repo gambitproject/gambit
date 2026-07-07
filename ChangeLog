@@ -40,8 +40,16 @@
 - Payoff editing in extensive games in the graphical interface is now done via a context popup window
   rather than text controls drawn (not always well!) over the game tree display.  (#947)
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
-- Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
-  double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
+- Labels for game objects are now enforced in `pygambit`, completing the transition announced by the
+  `FutureWarning` introduced in 16.5.0.  Labels must be valid (printable ASCII and spaces only, with
+  no leading, trailing, or consecutive spaces); an invalid label raises `ValueError`.  In addition,
+  labels for players, outcomes, strategies, and actions must be non-empty and unique within their
+  scope (the game for players and outcomes, the player for strategies, and the information set for
+  actions).  Labels for nodes and information sets remain optional (they may be empty), but a
+  non-empty label must be valid and unique -- within the game for nodes, and within the player for
+  information sets.  The `pygambit` methods `add_player`, `add_outcome`, and `add_strategy`
+  auto-generate a unique label when none is supplied. (#861,#944)
+- The chance player is now given the label "Chance" by default. (#861)
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
 - In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates
