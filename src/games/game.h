@@ -281,11 +281,7 @@ public:
 
   bool IsChanceInfoset() const;
 
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -1346,6 +1342,23 @@ inline void GameActionRep::SetLabel(const std::string &p_label)
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Infoset labels may be empty, but a non-empty label must be unique among
+  // the infosets of the same player.
+  if (!p_label.empty()) {
+    for (const auto &infoset : GetPlayer()->GetInfosets()) {
+      if (infoset.get() != this && infoset->GetLabel() == p_label) {
+        throw ValueException("Infoset label must be unique for the player");
+      }
+    }
+  }
+  m_label = p_label;
+}
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
