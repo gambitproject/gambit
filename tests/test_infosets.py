@@ -1,5 +1,6 @@
 import dataclasses
 import functools
+import itertools
 import typing
 
 import pytest
@@ -29,6 +30,15 @@ def test_infoset_label_non_ascii_rejected(label):
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(UnicodeEncodeError):
         game.root.infoset.label = label
+
+
+def test_infoset_label_duplicate_within_player_raises_valueerror():
+    game = games.read_from_file("subgames.efg")
+    player = next(p for p in game.players if sum(1 for _ in p.infosets) >= 2)
+    first, second = itertools.islice(player.infosets, 2)
+    first.label = "shared"
+    with pytest.raises(ValueError):
+        second.label = "shared"
 
 
 def test_infoset_player_retrieval():
