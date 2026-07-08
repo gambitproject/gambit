@@ -369,11 +369,7 @@ public:
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -1311,6 +1307,22 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
+inline void GameStrategyRep::SetLabel(const std::string &p_label)
+{
+  if (p_label.empty()) {
+    throw ValueException("Strategy label must not be empty");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  for (const auto &strategy : GetPlayer()->GetStrategies()) {
+    if (strategy.get() != this && strategy->GetLabel() == p_label) {
+      throw ValueException("Strategy label must be unique for the player");
+    }
+  }
+  m_label = p_label;
+}
 
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }

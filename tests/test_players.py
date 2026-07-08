@@ -145,6 +145,27 @@ def test_add_strategy_label_invalid_raises_valueerror(label):
         game.add_strategy(next(iter(game.players)), label)
 
 
+def test_add_strategy_requires_label():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(TypeError):
+        game.add_strategy(next(iter(game.players)))
+
+
+def test_strategy_label_empty_raises_valueerror():
+    game = gbt.Game.new_table([2, 2])
+    strategy = next(iter(next(iter(game.players)).strategies))
+    with pytest.raises(ValueError):
+        strategy.label = ""
+
+
+def test_strategy_label_duplicate_within_player_raises_valueerror():
+    game = gbt.Game.new_table([2, 2])
+    pl1 = next(iter(game.players))
+    s1, s2 = pl1.strategies
+    with pytest.raises(ValueError):
+        s2.label = s1.label
+
+
 def test_player_strategy_bad_label():
     game = gbt.Game.new_table([2, 2])
     pl1 = next(iter(game.players))
@@ -232,7 +253,7 @@ def test_player_get_min_payoff_null_outcome():
     pl1, pl2 = game.players
     assert pl1.min_payoff == 1
     assert pl2.min_payoff == 2
-    game.add_strategy(pl1)
+    game.add_strategy(pl1, "new strategy")
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
     for player in game.players:
@@ -258,7 +279,7 @@ def test_player_get_max_payoff_null_outcome():
     pl1, pl2 = game.players
     assert pl1.max_payoff == -1
     assert pl2.max_payoff == -2
-    game.add_strategy(pl1)
+    game.add_strategy(pl1, "new strategy")
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
     for player in game.players:
