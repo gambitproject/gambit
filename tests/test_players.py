@@ -42,6 +42,31 @@ def test_add_player_requires_label():
         game.add_player()
 
 
+def test_add_player_duplicate_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    existing = next(iter(game.players)).label
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player(existing)
+    assert len(game.players) == count_before
+
+
+def test_add_player_empty_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player("")
+    assert len(game.players) == count_before
+
+
+def test_add_player_reserved_chance_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_tree()
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player("Chance")
+    assert len(game.players) == count_before
+
+
 def test_chance_player_has_label():
     """The chance player is labeled "Chance" by default."""
     game = gbt.Game.new_tree()

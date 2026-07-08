@@ -2058,6 +2058,8 @@ class Game:
 
         .. versionchanged:: 16.7.0
             A label is now required and must be nonempty and unique among the game's players.
+            In extensive games, the label cannot be ``"Chance"``, which is reserved for the
+            chance player.
 
         Parameters
         ----------
@@ -2073,12 +2075,16 @@ class Game:
         Raises
         ------
         ValueError
-            If `label` is empty or is already the label of another player.
+            If `label` is empty, is already the label of another player, or (in an
+            extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
         label_str = str(label)
         if not label_str:
             raise ValueError("add_player(): label must not be empty")
-        if label_str in (player.label for player in self.players):
+        existing = [player.label for player in self.players]
+        if self.is_tree:
+            existing.append(self.players.chance.label)
+        if label_str in existing:
             raise ValueError(f"add_player(): label '{label_str}' is already in use")
         return Player.wrap(self.game.deref().NewPlayer(label_str.encode("ascii")))
 
