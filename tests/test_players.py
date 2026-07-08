@@ -284,3 +284,22 @@ def test_player_get_max_payoff_null_outcome():
     # are null outcomes.  So now minimum payoff should be zero from those.
     for player in game.players:
         assert player.max_payoff == 0
+
+
+def test_add_strategy_duplicate_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    pl = next(iter(game.players))
+    existing = next(iter(pl.strategies)).label
+    count_before = len(pl.strategies)
+    with pytest.raises(ValueError):
+        game.add_strategy(pl, existing)
+    assert len(pl.strategies) == count_before
+
+
+def test_add_strategy_empty_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    pl = next(iter(game.players))
+    count_before = len(pl.strategies)
+    with pytest.raises(ValueError):
+        game.add_strategy(pl, "")
+    assert len(pl.strategies) == count_before
