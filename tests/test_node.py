@@ -1125,6 +1125,22 @@ def test_node_label_valid(label):
     assert game.root.label == label
 
 
+def test_node_label_duplicate_raises_valueerror():
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = "shared"
+    with pytest.raises(ValueError):
+        game.root.children["U1"].label = "shared"
+
+
+def test_node_label_empty_is_allowed():
+    """Node labels may be empty (unlike outcomes/players); multiple empties coexist."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = ""
+    game.root.children["U1"].label = ""
+    assert game.root.label == ""
+    assert game.root.children["U1"].label == ""
+
+
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_node_label_invalid_raises_valueerror(label):
     game = games.read_from_file("basic_extensive_game.efg")
