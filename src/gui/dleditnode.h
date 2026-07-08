@@ -32,6 +32,8 @@ class EditNodeDialog final : public wxDialog {
   wxChoice *m_outcome, *m_infoset;
   Array<GameInfoset> m_infosetList;
 
+  void OnOK(wxCommandEvent &);
+
 public:
   // Lifecycle
   EditNodeDialog(wxWindow *p_parent, const GameNode &p_node);
