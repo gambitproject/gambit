@@ -1350,6 +1350,9 @@ inline void GamePlayerRep::SetLabel(const std::string &p_label)
     return;
   }
   CheckLabel(p_label);
+  if (GetGame()->IsTree() && p_label == GetGame()->GetChance()->GetLabel()) {
+    throw ValueException("Player label must not be the reserved chance player label");
+  }
   for (const auto &player : GetGame()->GetPlayers()) {
     if (player.get() != this && player->GetLabel() == p_label) {
       throw ValueException("Player label must be unique within the game");

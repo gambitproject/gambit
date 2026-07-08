@@ -80,6 +80,14 @@ def test_chance_player_label_cannot_be_changed():
         game.players.chance.label = "Nature"
 
 
+def test_regular_player_cannot_be_relabeled_to_chance():
+    game = gbt.Game.new_tree()
+    game.add_player("Alice")
+    player = next(iter(game.players))
+    with pytest.raises(ValueError):
+        player.label = "Chance"
+
+
 def test_player_index_by_string():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
