@@ -203,14 +203,19 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
 bool EditMoveDialog::ValidateLabels()
 {
   const wxString infosetLabel = m_infosetLabel->GetNormalizedValue();
-  if (infosetLabel.empty()) {
-    wxRichMessageDialog(this, _("Information set label cannot be empty."), _("Error"),
-                        wxOK | wxCENTRE | wxICON_ERROR)
-        .ShowModal();
-    m_infosetLabel->SetFocus();
-    return false;
+  if (!infosetLabel.empty()) {
+    for (const auto &infoset : m_infoset->GetPlayer()->GetInfosets()) {
+      if (infoset != m_infoset && infoset->GetLabel() == infosetLabel) {
+        wxRichMessageDialog(this, _("Information set label must be unique for the player."),
+                            _("Error"), wxOK | wxCENTRE | wxICON_ERROR)
+            .ShowModal();
+        m_infosetLabel->SetFocus();
+        return false;
+      }
+    }
   }
 
+  std::set<wxString> actionLabels;
   for (int act = 1; act <= m_actionPanel->NumActions(); ++act) {
     const wxString actionLabel = m_actionPanel->GetActionLabel(act);
     if (actionLabel.empty()) {
@@ -220,8 +225,17 @@ bool EditMoveDialog::ValidateLabels()
       m_actionPanel->FocusActionLabel(act);
       return false;
     }
-  }
 
+    if (contains(actionLabels, actionLabel)) {
+      wxRichMessageDialog(this, _("Action labels must be unique within the information set."),
+                          _("Error"), wxOK | wxCENTRE | wxICON_ERROR)
+          .ShowModal();
+      m_actionPanel->FocusActionLabel(act);
+      return false;
+    }
+
+    actionLabels.insert(actionLabel);
+  }
   return true;
 }
 
