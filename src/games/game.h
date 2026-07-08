@@ -289,11 +289,7 @@ public:
 
   bool IsChanceInfoset() const;
 
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -554,11 +550,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
@@ -1327,6 +1319,23 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Infoset labels may be empty, but a non-empty label must be unique among
+  // the infosets of the same player.
+  if (!p_label.empty()) {
+    for (const auto &infoset : GetPlayer()->GetInfosets()) {
+      if (infoset.get() != this && infoset->GetLabel() == p_label) {
+        throw ValueException("Infoset label must be unique for the player");
+      }
+    }
+  }
+  m_label = p_label;
+}
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
@@ -1347,6 +1356,22 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameNodeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Node labels may be empty, but a non-empty label must be unique within the game.
+  if (!p_label.empty()) {
+    for (const auto &node : GetGame()->GetNodes()) {
+      if (node.get() != this && node->GetLabel() == p_label) {
+        throw ValueException("Node label must be unique within the game");
+      }
+    }
+  }
+  m_label = p_label;
+}
 inline int GameNodeRep::GetNumber() const
 {
   m_game->EnsureNodeOrdering();
