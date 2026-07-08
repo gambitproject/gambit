@@ -497,7 +497,16 @@ void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label
 
 void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
+  std::set<std::string> strategyLabels;
+  for (const auto &strategy : p_player->GetStrategies()) {
+    std::cout << strategy->GetLabel() << std::endl;
+    strategyLabels.insert(strategy->GetLabel());
+  }
+  int number = p_player->GetStrategies().size() + 1;
+  while (contains(strategyLabels, std::to_string(number))) {
+    number++;
+  }
+  m_game->NewStrategy(p_player, std::to_string(number));
   NotifyChanged(GameModificationType::GameForm);
 }
 
