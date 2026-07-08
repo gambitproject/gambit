@@ -10,7 +10,7 @@ from . import games
 )
 def test_outcome_add(game: gbt.Game):
     outcome_count = len(game.outcomes)
-    game.add_outcome()
+    game.add_outcome(label="new outcome")
     assert len(game.outcomes) == outcome_count + 1
 
 
@@ -65,6 +65,29 @@ def test_outcome_index_label(game: gbt.Game, label: str):
 def test_outcome_index_unmatched_label(game: gbt.Game):
     with pytest.raises(KeyError):
         _ = game.outcomes["not an outcome"]
+
+
+def test_add_outcome_requires_label():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(TypeError):
+        game.add_outcome([0, 0])
+
+
+def test_add_outcome_duplicate_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    existing = next(iter(game.outcomes)).label
+    count_before = len(game.outcomes)
+    with pytest.raises(ValueError):
+        game.add_outcome([0, 0], existing)
+    assert len(game.outcomes) == count_before
+
+
+def test_add_outcome_empty_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    count_before = len(game.outcomes)
+    with pytest.raises(ValueError):
+        game.add_outcome([0, 0], "")
+    assert len(game.outcomes) == count_before
 
 
 @pytest.mark.parametrize(

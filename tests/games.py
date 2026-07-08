@@ -48,7 +48,7 @@ def create_efg_corresponding_to_bimatrix_game(
     for i, j in itertools.product(range(m), range(n)):
         g.set_outcome(
             g.root.children[str(i)].children[str(j)],
-            g.add_outcome([A[i, j], B[i, j]])
+            g.add_outcome([A[i, j], B[i, j]], f"({i},{j})")
         )
     return g
 
@@ -509,12 +509,12 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
-            g.set_outcome(current_node.children["Take"], g.add_outcome(payoffs))
+            g.set_outcome(current_node.children["Take"], g.add_outcome(payoffs, f"take_{t}"))
             if t == self.N - 1:  # for last round, push payoffs
                 payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
                 if current_player == "2":
                     payoffs.reverse()
-                g.set_outcome(current_node.children["Push"], g.add_outcome(payoffs))
+                g.set_outcome(current_node.children["Push"], g.add_outcome(payoffs, f"push_{t}"))
             current_node = current_node.children["Push"]
             current_player = "2" if current_player == "1" else "1"
         return g
@@ -635,7 +635,9 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
     def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
-            g.set_outcome(node, g.add_outcome([0] * self.n_players))
+            g.set_outcome(
+                node, g.add_outcome([0] * self.n_players, f"leaf_{len(list(g.outcomes))}")
+            )
         else:
             current_player = str(whose_turn + 1)
             g.append_move(node, current_player, ["L", "R"])

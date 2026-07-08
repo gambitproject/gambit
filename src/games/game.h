@@ -184,7 +184,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
-  GameOutcomeRep(GameRep *p_game, int p_number);
+  GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label);
   ~GameOutcomeRep() = default;
   //@}
 
@@ -201,11 +201,7 @@ public:
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Gets the payoff associated with the outcome to the player
   template <class T> const T &GetPayoff(const GamePlayer &p_player) const;
@@ -1224,7 +1220,7 @@ public:
     return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
   }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome() { throw UndefinedException(); }
+  virtual GameOutcome NewOutcome(const std::string &p_label) { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
@@ -1278,6 +1274,22 @@ public:
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameOutcomeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label.empty()) {
+    throw ValueException("Outcome label must not be empty");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  for (const auto &outcome : GetGame()->GetOutcomes()) {
+    if (outcome.get() != this && outcome->GetLabel() == p_label) {
+      throw ValueException("Outcome label must be unique within the game");
+    }
+  }
+  m_label = p_label;
+}
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {

@@ -65,18 +65,14 @@ class Outcome:
         """The text label associated with this outcome.
 
         .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+            An outcome label must be nonempty and unique within the game; an empty or duplicate
+            label now raises ``ValueError``.  A label may contain only printable ASCII characters
+            and spaces, not begin/end with a space, nor have two consecutive spaces.
         """
         return self.outcome.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (outcome.label for outcome in self.game.outcomes):
-            warnings.warn("In a future version, outcomes must have unique labels",
-                          FutureWarning)
         self.outcome.deref().SetLabel(value.encode("ascii"))
 
     @property
