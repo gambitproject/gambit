@@ -2075,7 +2075,12 @@ class Game:
         ValueError
             If `label` is empty or is already the label of another player.
         """
-        return Player.wrap(self.game.deref().NewPlayer(str(label).encode("ascii")))
+        label_str = str(label)
+        if not label_str:
+            raise ValueError("add_player(): label must not be empty")
+        if label_str in (player.label for player in self.players):
+            raise ValueError(f"add_player(): label '{label_str}' is already in use")
+        return Player.wrap(self.game.deref().NewPlayer(label_str.encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:
