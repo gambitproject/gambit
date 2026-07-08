@@ -190,8 +190,8 @@ GamePlayer InsertMoveDialog::GetPlayer() const
   if (playerNumber <= static_cast<int>(m_doc->GetGame()->NumPlayers())) {
     return m_doc->GetGame()->GetPlayer(playerNumber);
   }
-  const GamePlayer player = m_doc->GetGame()->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(m_doc->GetGame()->NumPlayers()));
+  const GamePlayer player = m_doc->GetGame()->NewPlayer(
+      "Player " + lexical_cast<std::string>(m_doc->GetGame()->NumPlayers() + 1));
   return player;
 }
 

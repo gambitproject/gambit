@@ -481,8 +481,8 @@ void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment
 
 void GameDocument::DoNewPlayer()
 {
-  const GamePlayer player = m_game->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
+  const GamePlayer player =
+      m_game->NewPlayer("Player " + lexical_cast<std::string>(m_game->NumPlayers() + 1));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
   }

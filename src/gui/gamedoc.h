@@ -333,8 +333,8 @@ inline GameDocument *NewTreeDocument()
 {
   const Game efg = NewTree();
   efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
+  efg->NewPlayer("Player 1");
+  efg->NewPlayer("Player 2");
   return new GameDocument(efg);
 }
 
