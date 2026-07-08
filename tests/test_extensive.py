@@ -44,7 +44,7 @@ def test_game_add_players_label(players: list):
 
 def test_game_add_players_nolabel():
     game = gbt.Game.new_tree()
-    game.add_player()
+    game.add_player("Player")
 
 
 @pytest.mark.parametrize("game_input,expected_result", [

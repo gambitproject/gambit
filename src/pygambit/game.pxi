@@ -563,7 +563,7 @@ class Game:
         g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            Player.wrap(g.game.deref().NewPlayer()).label = str(player)
+            g.game.deref().NewPlayer(str(player).encode("ascii"))
         return g
 
     @classmethod
@@ -2053,23 +2053,29 @@ class Game:
                 "Operation only defined for games with a tree representation"
             )
 
-    def add_player(self, label: str = "") -> Player:
+    def add_player(self, label: str) -> Player:
         """Add a new player to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the game's players.
 
         Parameters
         ----------
-        label : str, default ""
-            The label for the player.
+        label : str
+            The label for the new player.  Must be nonempty and not already in use
+            by another player in the game.
 
         Returns
         -------
         Player
             A reference to the newly-created player.
+
+        Raises
+        ------
+        ValueError
+            If `label` is empty or is already the label of another player.
         """
-        p = Player.wrap(self.game.deref().NewPlayer())
-        if str(label) != "":
-            p.label = str(label)
-        return p
+        return Player.wrap(self.game.deref().NewPlayer(str(label).encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:

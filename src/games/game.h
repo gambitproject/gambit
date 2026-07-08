@@ -460,7 +460,10 @@ public:
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
   using Sequences = ElementCollection<GamePlayer, GameSequenceRep>;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label)
+    : m_game(p_game), m_number(p_id), m_label(p_label)
+  {
+  }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep();
 
@@ -471,11 +474,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -1162,7 +1161,7 @@ public:
   virtual GamePlayer GetChance() const = 0;
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer() = 0;
+  virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
   //@}
 
   /// @name Dimensions of the game
@@ -1339,6 +1338,25 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GamePlayerRep::SetLabel(const std::string &p_label)
+{
+  if (IsChance()) {
+    throw ValueException("The chance player's label cannot be changed");
+  }
+  if (p_label.empty()) {
+    throw ValueException("Player label must not be empty");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  for (const auto &player : GetGame()->GetPlayers()) {
+    if (player.get() != this && player->GetLabel() == p_label) {
+      throw ValueException("Player label must be unique within the game");
+    }
+  }
+  m_label = p_label;
+}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();

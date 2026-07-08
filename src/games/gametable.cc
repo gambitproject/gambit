@@ -494,10 +494,11 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 //                       GameTableRep: Players
 //------------------------------------------------------------------------
 
-GamePlayer GameTableRep::NewPlayer()
+GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
 {
   IncrementVersion();
   auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, 1);
+  player->SetLabel(p_label);
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
