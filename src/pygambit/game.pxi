@@ -2208,15 +2208,14 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        label_str = str(label)
-        if not label_str:
+        if not label:
             raise ValueError("add_strategy(): label must not be empty")
-        if label_str in (strategy.label for strategy in resolved_player.strategies):
+        if label in (strategy.label for strategy in resolved_player.strategies):
             raise ValueError(
-                f"add_strategy(): label '{label_str}' is already in use for this player"
+                f"add_strategy(): the player already has a strategy with label '{label}'"
             )
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label_str.encode("ascii"))
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:
