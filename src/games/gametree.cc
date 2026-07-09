@@ -1526,8 +1526,8 @@ int GameTreeRep::BehavProfileLength() const
 
 GamePlayer GameTreeRep::NewPlayer(const std::string &p_label)
 {
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, "");
-  player->SetLabel(p_label);
+  CheckPlayerLabel(p_label);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label);
   IncrementVersion();
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
