@@ -570,11 +570,8 @@ class Game:
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.
 
-        The game's objects are created with default labels:
-        players are labeled ``"1"``, ``"2"``, and so on;
-        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on;
-        and the outcomes (one for each contingency) are created without labels.
-        Any of these labels may be changed afterwards via the object's ``label`` attribute.
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -604,7 +601,9 @@ class Game:
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
-        The players, strategies, and outcomes are labeled as in :meth:`new_table`.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -681,8 +680,9 @@ class Game:
         and have the same number of dimensions as the total number of
         players.
 
-        The players are labeled with the keys of `payoffs`; strategies and
-        outcomes are labeled as described in :meth:`new_table`.
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
 
         Parameters
         ----------
