@@ -67,8 +67,8 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 //                       class GamePlayerRep
 //========================================================================
 
-GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id)
+GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats)
+  : m_game(p_game), m_number(p_id), m_label(p_label)
 {
   for (int j = 1; j <= p_strats; j++) {
     m_strategies.push_back(std::make_shared<GameStrategyRep>(this, j, ""));

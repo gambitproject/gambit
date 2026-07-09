@@ -35,6 +35,59 @@ def test_player_label_non_ascii_rejected(label):
         player.label = label
 
 
+def test_add_player_requires_label():
+    """add_player now requires a label; omitting it is a TypeError."""
+    game = gbt.Game.new_tree()
+    with pytest.raises(TypeError):
+        game.add_player()
+
+
+def test_add_player_duplicate_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    existing = next(iter(game.players)).label
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player(existing)
+    assert len(game.players) == count_before
+
+
+def test_add_player_empty_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_table([2, 2])
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player("")
+    assert len(game.players) == count_before
+
+
+def test_add_player_reserved_chance_label_raises_and_leaves_game_unchanged():
+    game = gbt.Game.new_tree()
+    count_before = len(game.players)
+    with pytest.raises(ValueError):
+        game.add_player("Chance")
+    assert len(game.players) == count_before
+
+
+def test_chance_player_has_label():
+    """The chance player is labeled "Chance" by default."""
+    game = gbt.Game.new_tree()
+    assert game.players.chance.label == "Chance"
+
+
+def test_chance_player_label_cannot_be_changed():
+    """The chance player's label is reserved ("Chance") and cannot be changed."""
+    game = gbt.Game.new_tree()
+    with pytest.raises(ValueError):
+        game.players.chance.label = "Nature"
+
+
+def test_regular_player_cannot_be_relabeled_to_chance():
+    game = gbt.Game.new_tree()
+    game.add_player("Alice")
+    player = next(iter(game.players))
+    with pytest.raises(ValueError):
+        player.label = "Chance"
+
+
 def test_player_index_by_string():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
@@ -56,30 +109,30 @@ def test_player_label_invalid():
         _ = game.players["Not a player"]
 
 
-def test_set_empty_player_futurewarning():
+def test_set_empty_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     player = next(iter(game.players))
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         player.label = ""
 
 
-def test_set_duplicate_player_futurewarning():
+def test_set_duplicate_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     pl1, pl2, *_ = game.players
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         pl1.label = pl2.label
 
 
 def test_strategic_game_add_player():
     game = gbt.Game.new_table([2, 2])
-    new_player = game.add_player()
+    new_player = game.add_player("Player 3")
     assert len(game.players) == 3
     assert len(new_player.strategies) == 1
 
 
 def test_extensive_game_add_player():
     game = gbt.Game.new_tree()
-    game.add_player()
+    game.add_player("Alice")
     pl1 = next(iter(game.players))
     assert len(game.players) == 1
     assert len(pl1.infosets) == 0

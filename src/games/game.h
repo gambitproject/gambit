@@ -460,8 +460,11 @@ public:
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
   using Sequences = ElementCollection<GamePlayer, GameSequenceRep>;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
-  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label)
+    : m_game(p_game), m_number(p_id), m_label(p_label)
+  {
+  }
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats);
   ~GamePlayerRep();
 
   bool IsValid() const { return m_valid; }
@@ -471,11 +474,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -764,6 +763,8 @@ protected:
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
   void IndexStrategies() const;
+  /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
+  void CheckPlayerLabel(const std::string &p_label) const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1162,7 +1163,7 @@ public:
   virtual GamePlayer GetChance() const = 0;
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer() = 0;
+  virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
   //@}
 
   /// @name Dimensions of the game
@@ -1336,9 +1337,35 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   }
   m_label = p_label;
 }
+inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Player label must not be empty");
+  }
+  CheckLabel(p_label);
+  if (IsTree() && p_label == GetChance()->GetLabel()) {
+    throw ValueException("Player label must not be the reserved chance player label");
+  }
+  for (const auto &player : m_players) {
+    if (player->GetLabel() == p_label) {
+      throw ValueException("Player label must be unique within the game");
+    }
+  }
+}
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GamePlayerRep::SetLabel(const std::string &p_label)
+{
+  if (IsChance()) {
+    throw ValueException("The chance player's label cannot be changed");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  GetGame()->CheckPlayerLabel(p_label);
+  m_label = p_label;
+}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();

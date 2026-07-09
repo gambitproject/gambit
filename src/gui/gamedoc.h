@@ -295,7 +295,7 @@ public:
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  void DoNewPlayer();
+  GamePlayer DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
   void DoNewStrategy(GamePlayer p_player);
   void DoDeleteStrategy(GameStrategy p_strategy);
@@ -333,8 +333,8 @@ inline GameDocument *NewTreeDocument()
 {
   const Game efg = NewTree();
   efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
+  efg->NewPlayer("Player 1");
+  efg->NewPlayer("Player 2");
   return new GameDocument(efg);
 }
 

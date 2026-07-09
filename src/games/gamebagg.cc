@@ -213,9 +213,8 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
   int k = 1;
   for (int pl = 1; pl <= baggPtr->getNumPlayers(); pl++) {
     for (int j = 0; j < baggPtr->getNumTypes(pl - 1); j++, k++) {
-      m_players.push_back(
-          std::make_shared<GamePlayerRep>(this, k, baggPtr->getNumActions(pl - 1, j)));
-      m_players.back()->m_label = std::to_string(k);
+      m_players.push_back(std::make_shared<GamePlayerRep>(this, k, std::to_string(k),
+                                                          baggPtr->getNumActions(pl - 1, j)));
       agent2baggPlayer[k] = pl;
       std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
                     [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable {

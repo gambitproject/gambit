@@ -22,6 +22,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <set>
 
 #include "gambit.h"
 #include "core/tinyxml.h" // for XML parser for LoadDocument()
@@ -479,14 +480,24 @@ void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoNewPlayer()
+GamePlayer GameDocument::DoNewPlayer()
 {
-  const GamePlayer player = m_game->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
+  std::set<std::string> playerLabels;
+
+  for (const auto &player : m_game->GetPlayers()) {
+    playerLabels.insert(player->GetLabel());
+  }
+
+  int number = m_game->NumPlayers() + 1;
+  while (contains(playerLabels, "Player " + lexical_cast<std::string>(number))) {
+    number++;
+  }
+  const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
   }
   NotifyChanged(GameModificationType::GameForm);
+  return player;
 }
 
 void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
