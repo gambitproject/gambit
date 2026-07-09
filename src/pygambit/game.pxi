@@ -2064,8 +2064,8 @@ class Game:
         Parameters
         ----------
         label : str
-            The label for the new player.  Must be nonempty and not already in use
-            by another player in the game.
+            The label for the new player.  Must be nonempty and not the same as the label
+            of an existing player in the game.
 
         Returns
         -------
