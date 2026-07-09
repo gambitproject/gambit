@@ -563,12 +563,15 @@ class Game:
         g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            Player.wrap(g.game.deref().NewPlayer()).label = str(player)
+            g.game.deref().NewPlayer(str(player).encode("ascii"))
         return g
 
     @classmethod
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -598,6 +601,9 @@ class Game:
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -673,6 +679,10 @@ class Game:
         The payoff matrices must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
 
         Parameters
         ----------
@@ -2053,23 +2063,32 @@ class Game:
                 "Operation only defined for games with a tree representation"
             )
 
-    def add_player(self, label: str = "") -> Player:
+    def add_player(self, label: str) -> Player:
         """Add a new player to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the game's players.
+            In extensive games, the label cannot be ``"Chance"``, which is reserved for the
+            chance player.
 
         Parameters
         ----------
-        label : str, default ""
-            The label for the player.
+        label : str
+            The label for the new player.  Must be nonempty and not the same as the label
+            of an existing player in the game.
 
         Returns
         -------
         Player
             A reference to the newly-created player.
+
+        Raises
+        ------
+        ValueError
+            If `label` is empty, is already the label of another player, or (in an
+            extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
-        p = Player.wrap(self.game.deref().NewPlayer())
-        if str(label) != "":
-            p.label = str(label)
-        return p
+        return Player.wrap(self.game.deref().NewPlayer(label.encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:
@@ -2173,15 +2192,20 @@ class Game:
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
         self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
-    def add_strategy(self, player: Player | str, label: str = None) -> Strategy:
+    def add_strategy(self, player: Player | str, label: str) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            player's strategies.
 
         Parameters
         ----------
         player : Player or str
             The player to create the new strategy for
-        label : str, optional
-            The label to assign to the new strategy
+        label : str
+            The label for the new strategy.  Must be nonempty and not already in use
+            by another of the player's strategies.
 
         Returns
         -------
@@ -2194,6 +2218,8 @@ class Game:
             If `player` is a `Player` from a different game.
         UndefinedOperationError
             If called on a game which has an extensive representation.
+        ValueError
+            If `label` is empty or is already the label of another of the player's strategies.
         """
         if self.is_tree:
             raise UndefinedOperationError(
@@ -2201,9 +2227,8 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        label_bytes = (str(label) if label is not None else "").encode("ascii")
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label_bytes)
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

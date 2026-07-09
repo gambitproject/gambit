@@ -179,8 +179,8 @@ template class AGGMixedStrategyProfileRep<Rational>;
 GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    m_players.push_back(std::make_shared<GamePlayerRep>(this, pl, aggPtr->getNumActions(pl - 1)));
-    m_players.back()->m_label = lexical_cast<std::string>(pl);
+    m_players.push_back(std::make_shared<GamePlayerRep>(this, pl, lexical_cast<std::string>(pl),
+                                                        aggPtr->getNumActions(pl - 1)));
     std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
                   [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable {
                     s->m_label = std::to_string(st++);
