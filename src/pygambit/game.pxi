@@ -570,6 +570,9 @@ class Game:
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.
 
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
+
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
 
@@ -598,6 +601,9 @@ class Game:
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -673,6 +679,10 @@ class Game:
         The payoff matrices must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
 
         Parameters
         ----------
