@@ -2078,15 +2078,7 @@ class Game:
             If `label` is empty, is already the label of another player, or (in an
             extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
-        label_str = str(label)
-        if not label_str:
-            raise ValueError("add_player(): label must not be empty")
-        existing = [player.label for player in self.players]
-        if self.is_tree:
-            existing.append(self.players.chance.label)
-        if label_str in existing:
-            raise ValueError(f"add_player(): label '{label_str}' is already in use")
-        return Player.wrap(self.game.deref().NewPlayer(label_str.encode("ascii")))
+        return Player.wrap(self.game.deref().NewPlayer(label.encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:

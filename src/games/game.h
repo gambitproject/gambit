@@ -464,7 +464,7 @@ public:
     : m_game(p_game), m_number(p_id), m_label(p_label)
   {
   }
-  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats);
   ~GamePlayerRep();
 
   bool IsValid() const { return m_valid; }
