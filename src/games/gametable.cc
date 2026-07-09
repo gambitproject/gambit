@@ -497,8 +497,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 
 GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
 {
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, "", 1);
-  player->SetLabel(p_label);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label, 1);
   IncrementVersion();
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
