@@ -533,13 +533,15 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
   if (p_player->GetGame().get() != this) {
     throw MismatchException();
   }
+  p_player->CheckStrategyLabel(p_label);
+  auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
+                                                    p_player->m_strategies.size() + 1, p_label);
   IncrementVersion();
   std::vector<long> old_radices;
   for (const auto &player : m_players) {
     old_radices.push_back(player->m_strategies.size());
   }
-  p_player->m_strategies.push_back(std::make_shared<GameStrategyRep>(
-      p_player.get(), p_player->m_strategies.size() + 1, p_label));
+  p_player->m_strategies.push_back(strategy);
   RebuildTable(old_radices);
   return p_player->m_strategies.back();
 }

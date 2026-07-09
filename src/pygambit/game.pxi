@@ -2192,15 +2192,20 @@ class Game:
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
         self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
-    def add_strategy(self, player: Player | str, label: str = None) -> Strategy:
+    def add_strategy(self, player: Player | str, label: str) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            player's strategies.
 
         Parameters
         ----------
         player : Player or str
             The player to create the new strategy for
-        label : str, optional
-            The label to assign to the new strategy
+        label : str
+            The label for the new strategy.  Must be nonempty and not already in use
+            by another of the player's strategies.
 
         Returns
         -------
@@ -2213,6 +2218,8 @@ class Game:
             If `player` is a `Player` from a different game.
         UndefinedOperationError
             If called on a game which has an extensive representation.
+        ValueError
+            If `label` is empty or is already the label of another of the player's strategies.
         """
         if self.is_tree:
             raise UndefinedOperationError(
@@ -2220,9 +2227,8 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        label_bytes = (str(label) if label is not None else "").encode("ascii")
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label_bytes)
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

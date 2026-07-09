@@ -369,11 +369,7 @@ public:
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -491,6 +487,8 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
+  /// Validate that p_label is a nonempty, valid, unique label for a strategy of this player.
+  void CheckStrategyLabel(const std::string &p_label) const;
   //@}
 
   /// @name Sequences
@@ -1312,6 +1310,27 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
+inline void GameStrategyRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  GetPlayer()->CheckStrategyLabel(p_label);
+  m_label = p_label;
+}
+
+inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Strategy label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &strategy : m_strategies) {
+    if (strategy->GetLabel() == p_label) {
+      throw ValueException("Strategy label must be unique for the player");
+    }
+  }
+}
 
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }

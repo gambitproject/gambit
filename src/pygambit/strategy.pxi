@@ -55,18 +55,15 @@ class Strategy:
         """Get or set the text label associated with the strategy.
 
         .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+            A strategy label must be nonempty and unique among the player's strategies;
+            an empty or duplicate label now raises ``ValueError``.  A label may contain only
+            printable ASCII characters and spaces, not begin/end with a space, nor have two
+            consecutive spaces.
         """
         return self.strategy.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (strategy.label for strategy in self.player.strategies):
-            warnings.warn("In a future version, strategies for a player must have unique labels",
-                          FutureWarning)
         self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
