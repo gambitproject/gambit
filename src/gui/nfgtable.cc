@@ -249,9 +249,12 @@ void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
     return;
   }
 
-  m_table->RenameRowHeaderStrategy(
+  const wxString result = m_table->RenameRowHeaderStrategy(
       p_coords.GetCol(), p_coords.GetRow(),
       LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+  if (!result.empty()) {
+    CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
+  }
 }
 
 wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -555,9 +558,12 @@ void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
     return;
   }
 
-  m_table->RenameColHeaderStrategy(
-      p_coords.GetRow(), p_coords.GetCol(),
+  const wxString result = m_table->RenameColHeaderStrategy(
+      p_coords.GetCol(), p_coords.GetRow(),
       LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+  if (!result.empty()) {
+    CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
+  }
 }
 
 wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -1349,7 +1355,7 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
       p_dc, wxSheetBlock(0, 0, m_payoffSheet->GetNumberRows(), m_payoffSheet->GetNumberCols()));
 }
 
-void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
+wxString TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
 {
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
@@ -1358,11 +1364,12 @@ void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wx
     m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    return wxString::FromUTF8(ex.what());
   }
+  return "";
 }
 
-void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
+wxString TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
 {
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
@@ -1371,8 +1378,9 @@ void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wx
     m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    return wxString::FromUTF8(ex.what());
   }
+  return "";
 }
 
 void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
