@@ -499,7 +499,6 @@ void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
   std::set<std::string> strategyLabels;
   for (const auto &strategy : p_player->GetStrategies()) {
-    std::cout << strategy->GetLabel() << std::endl;
     strategyLabels.insert(strategy->GetLabel());
   }
   int number = p_player->GetStrategies().size() + 1;
