@@ -294,14 +294,13 @@ void TreePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
     return;
   }
 
-  m_playerLabel->SetValue(label);
-
   try {
     m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), label);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }
+  m_playerLabel->SetValue(m_doc->GetGame()->GetPlayer(m_player)->GetLabel());
 }
 
 void TreePlayerPanel::PostPendingChanges()
