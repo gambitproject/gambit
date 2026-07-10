@@ -68,7 +68,7 @@ overrides:
     label_bg: false
     label_bg_color: white
     label_bg_opacity: 0.8
-    iset_fill: false
+    iset_fill: true
     iset_fill_opacity: 0.2
     iset_boundary: solid
     legend_position: top-left
