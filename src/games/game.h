@@ -759,6 +759,8 @@ protected:
   void IndexStrategies() const;
   /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
   void CheckPlayerLabel(const std::string &p_label) const;
+  /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
+  void CheckOutcomeLabel(const std::string &p_label) const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1276,18 +1278,10 @@ public:
 inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
 inline void GameOutcomeRep::SetLabel(const std::string &p_label)
 {
-  if (p_label.empty()) {
-    throw ValueException("Outcome label must not be empty");
-  }
   if (p_label == m_label) {
     return;
   }
-  CheckLabel(p_label);
-  for (const auto &outcome : GetGame()->GetOutcomes()) {
-    if (outcome.get() != this && outcome->GetLabel() == p_label) {
-      throw ValueException("Outcome label must be unique within the game");
-    }
-  }
+  GetGame()->CheckOutcomeLabel(p_label);
   m_label = p_label;
 }
 
@@ -1380,6 +1374,18 @@ inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
   for (const auto &player : m_players) {
     if (player->GetLabel() == p_label) {
       throw ValueException("Player label must be unique within the game");
+    }
+  }
+}
+inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Outcome label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &outcome : m_outcomes) {
+    if (outcome->GetLabel() == p_label) {
+      throw ValueException("Outcome label must be unique within the game");
     }
   }
 }

@@ -437,22 +437,39 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
   auto players = p_nfg->GetPlayers();
   p_parser.GetNextToken();
 
+  // Buffer raw labels + payoffs so labels can be normalized (unique, nonempty)
+  // before the outcome objects are created (NewOutcome now rejects empty/duplicate).
+  std::vector<std::string> labels;
+  std::vector<std::vector<Number>> payoff_lists;
+
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
-    auto outcome = p_nfg->NewOutcome(p_parser.GetLastText());
+    labels.push_back(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    for (auto player : players) {
+    std::vector<Number> payoffs;
+    for (size_t i = 0; i < players.size(); ++i) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-      outcome->SetPayoff(player, Number(p_parser.GetLastText()));
+      payoffs.emplace_back(p_parser.GetLastText());
       p_parser.AcceptNextToken(TOKEN_COMMA);
     }
+    payoff_lists.push_back(payoffs);
+
     p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_parser.GetNextToken();
   }
-
   p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_parser.GetNextToken();
+
+  NormalizeLabelStrings(labels);
+  for (size_t i = 0; i < labels.size(); ++i) {
+    auto outcome = p_nfg->NewOutcome(labels[i]);
+    auto player_it = players.begin();
+    for (const auto &payoff : payoff_lists[i]) {
+      outcome->SetPayoff(*player_it, payoff);
+      ++player_it;
+    }
+  }
 }
 
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
@@ -510,9 +527,24 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
 //                  Temporary representation classes
 //=========================================================================
 
+/// An outcome definition encountered during the parse.  Outcomes are not
+/// created until the whole tree has been read, so that their labels can be
+/// normalized in one pass before creation, as NewOutcome enforces
+/// the label requirements at creation time.
+struct OutcomeRecord {
+  std::string m_label;
+  std::vector<Number> m_payoffs;
+};
+
 class TreeData {
 public:
-  std::map<int, GameOutcome> m_outcomeMap;
+  std::map<int, OutcomeRecord> m_outcomeRecords;
+  /// Outcome ids in order of first occurrence in the file; determines the
+  /// creation order (and hence numbering) of the outcomes, matching the
+  /// order in which the previous implementation created them.
+  std::vector<int> m_outcomeOrder;
+  /// Deferred node-to-outcome attachments, replayed after outcomes are created.
+  std::vector<std::pair<GameNode, int>> m_nodeOutcomes;
   std::map<int, std::map<int, GameInfoset>> m_infosetMap;
 };
 
@@ -535,32 +567,27 @@ void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
 }
 
 void CheckOutcomeDefinition(const GameFileLexer &p_state, int p_outcomeId,
-                            const GameOutcome &p_outcome, const std::string &p_label,
-                            const GameRep::Players &p_players,
+                            const OutcomeRecord &p_record, const std::string &p_label,
                             const std::vector<Number> &p_payoffs)
 {
-  if (p_outcome->GetLabel() != p_label) {
+  if (p_record.m_label != p_label) {
     p_state.OnParseError("Outcome label does not match previous definition "
                          "(outcome " +
                          std::to_string(p_outcomeId) + ")");
   }
-
-  if (p_players.size() != p_payoffs.size()) {
+  if (p_record.m_payoffs.size() != p_payoffs.size()) {
     p_state.OnParseError("Outcome payoff count mismatch "
                          "(outcome " +
                          std::to_string(p_outcomeId) + ")");
   }
-
-  auto player_it = p_players.begin();
-  for (const auto &payoff : p_payoffs) {
-    if (p_outcome->GetPayoff<std::string>(*player_it) !=
-        static_cast<const std::string &>(payoff)) {
+  for (size_t i = 0; i < p_payoffs.size(); ++i) {
+    if (static_cast<const std::string &>(p_record.m_payoffs[i]) !=
+        static_cast<const std::string &>(p_payoffs[i])) {
       p_state.OnParseError("Outcome payoffs do not match previous definition "
                            "(outcome " +
-                           std::to_string(p_outcomeId) + ", player " +
-                           std::to_string((*player_it)->GetNumber()) + ")");
+                           std::to_string(p_outcomeId) + ", player " + std::to_string(i + 1) +
+                           ")");
     }
-    ++player_it;
   }
 }
 
@@ -588,31 +615,53 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    GameOutcome outcome;
-    if (!contains(p_treeData.m_outcomeMap, outcomeId)) {
-      outcome = p_game->NewOutcome(label);
-      p_treeData.m_outcomeMap[outcomeId] = outcome;
-      auto player_it = p_game->GetPlayers().begin();
-      for (const auto &payoff : payoffs) {
-        outcome->SetPayoff(*player_it, payoff);
-        ++player_it;
-      }
+    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+      p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
+      p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
     else {
-      outcome = p_treeData.m_outcomeMap.at(outcomeId);
-      CheckOutcomeDefinition(p_state, outcomeId, outcome, label, p_game->GetPlayers(), payoffs);
+      CheckOutcomeDefinition(p_state, outcomeId, p_treeData.m_outcomeRecords.at(outcomeId), label,
+                             payoffs);
     }
-    p_game->SetOutcome(p_node, outcome);
+    p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
   }
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    try {
-      p_game->SetOutcome(p_node, p_treeData.m_outcomeMap.at(outcomeId));
-    }
-    catch (std::out_of_range) {
+    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
+    p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
+  }
+}
+
+/// Create the game's outcomes from the definitions buffered during the parse.
+/// Labels are normalized in first-occurrence order before creation, so that
+/// the label requirements enforced by NewOutcome (nonempty, unique) are
+/// satisfied; this matches the treatment of outcome labels read from .nfg
+/// files, and produces the same labels the previous post-parse normalization
+/// pass produced.
+void CreateOutcomes(const Game &p_game, const TreeData &p_treeData)
+{
+  std::vector<std::string> labels;
+  for (const int id : p_treeData.m_outcomeOrder) {
+    labels.push_back(p_treeData.m_outcomeRecords.at(id).m_label);
+  }
+  NormalizeLabelStrings(labels);
+
+  std::map<int, GameOutcome> created;
+  auto label_it = labels.begin();
+  for (const int id : p_treeData.m_outcomeOrder) {
+    auto outcome = p_game->NewOutcome(*label_it++);
+    auto player_it = p_game->GetPlayers().begin();
+    for (const auto &payoff : p_treeData.m_outcomeRecords.at(id).m_payoffs) {
+      outcome->SetPayoff(*player_it, payoff);
+      ++player_it;
+    }
+    created.emplace(id, outcome);
+  }
+  for (const auto &[node, id] : p_treeData.m_nodeOutcomes) {
+    p_game->SetOutcome(node, created.at(id));
   }
 }
 
@@ -903,6 +952,7 @@ Game ReadEfgFile(std::istream &p_stream)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
+  CreateOutcomes(game, treeData);
   NormalizeGameLabels(game);
   return game;
 }

@@ -2141,17 +2141,12 @@ class Game:
         """
         if label is None:
             raise TypeError("add_outcome() missing required argument: 'label'")
-        s = str(label)
-        if not s:
-            raise ValueError("add_outcome(): label must not be empty")
-        if s in (o.label for o in self.outcomes):
-            raise ValueError(f"add_outcome(): label '{s}' is already in use")
         if payoffs is not None:
             if len(payoffs) != len(self.players):
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome(s.encode("ascii")))
+        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("ascii")))
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c

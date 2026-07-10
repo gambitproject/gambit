@@ -60,6 +60,7 @@ Rational GameExplicitRep::GetMaxPayoff() const
 
 GameOutcome GameExplicitRep::NewOutcome(const std::string &p_label)
 {
+  CheckOutcomeLabel(p_label);
   m_outcomes.push_back(std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label));
   return m_outcomes.back();
 }
