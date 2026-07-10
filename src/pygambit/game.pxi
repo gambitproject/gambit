@@ -2112,22 +2112,27 @@ class Game:
         self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
-                    payoffs: list | None = None,
-                    label: str = "") -> Outcome:
+                    label: str,
+                    payoffs: list | None = None) -> Outcome:
         """Add a new outcome to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            game's outcomes.
 
         Parameters
         ----------
+        label : str
+            The label for the outcome.  Must be nonempty and not already in use
+            by another outcome in the game.
         payoffs : list, optional
             The payoffs of the outcome to each player.
-        label : str, default ""
-            The label for the outcome
 
         Raises
         ------
         ValueError
             If `payoffs` is specified but is not the same length as the number of players
-            in the game.
+            in the game, or if `label` is empty or already in use by another outcome.
 
         Returns
         -------
@@ -2139,9 +2144,7 @@ class Game:
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome())
-        if str(label) != "":
-            c.label = str(label)
+        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("ascii")))
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c

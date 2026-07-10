@@ -15,6 +15,19 @@ def _parse_nfg(text: str) -> gbt.Game:
         return gbt.read_nfg(f)
 
 
+LEGACY_EFG_HEADER = 'EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+
+
+def test_read_efg_empty_outcome_labels_are_normalized():
+    g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [o.label for o in g.outcomes] == ["_1", "_2"]
+
+
+def test_read_efg_repeated_outcome_id_consistent():
+    g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 1 "" { 1, -1 }\n')
+    assert len(g.outcomes) == 1
+
+
 def test_string_empty():
     with pytest.raises(ValueError) as excinfo:
         _parse_efg("")
