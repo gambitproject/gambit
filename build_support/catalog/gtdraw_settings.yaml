@@ -45,7 +45,7 @@ overrides:
       3: '#1616BC'
       4: '#985003'
 
-  books/shohambrown2008/fig6_8:
+  books/shohamleytonbrown2008/fig6_8:
     scale_factor: 1.0
     level_scaling: 1.0
     sublevel_scaling: 1.0
