@@ -344,11 +344,10 @@ def generate_rst_table(
     catalog_dir = catalog_dir or CATALOG_DIR
     labels = load_hierarchy_labels()
     tree = _build_slug_tree(df)
-    with _using_catalog_dir(catalog_dir):
-        with open(rst_path, "w", encoding="utf-8") as f:
-            _write_tree_level(
-                f, tree, "", labels, catalog_dir, indent="", regenerate_images=regenerate_images
-            )
+    with _using_catalog_dir(catalog_dir), open(rst_path, "w", encoding="utf-8") as f:
+        _write_tree_level(
+            f, tree, "", labels, catalog_dir, indent="", regenerate_images=regenerate_images
+        )
 
 
 def update_makefile(

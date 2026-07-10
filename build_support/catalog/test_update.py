@@ -173,7 +173,7 @@ class TestCatalogResourceSelection:
         df = update._catalog_games(checkout_dir)
 
         assert calls == [(checkout_dir, {"include_descriptions": True})]
-        assert update.gbt.catalog._CATALOG_RESOURCE == stale_dir
+        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
         assert list(df["Game"]) == ["checkout/game1"]
 
     def test_generate_rst_table_uses_requested_catalog_dir_while_rendering(
@@ -195,7 +195,7 @@ class TestCatalogResourceSelection:
         update.generate_rst_table(_make_df(), tmp_path / "out.rst", catalog_dir=checkout_dir)
 
         assert observed == [checkout_dir]
-        assert update.gbt.catalog._CATALOG_RESOURCE == stale_dir
+        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
 
 
 # ---------------------------------------------------------------------------
