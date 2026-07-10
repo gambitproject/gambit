@@ -647,15 +647,40 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   }
 }
 
+namespace {
+
+std::string GenerateOutcomeLabel(const Game &p_game)
+{
+  std::set<std::string> outcomeLabels;
+  for (const auto &outcome : p_game->GetOutcomes()) {
+    outcomeLabels.insert(outcome->GetLabel());
+  }
+  int outc = p_game->GetOutcomes().size() + 1;
+  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+    outc++;
+  }
+  return "Outcome " + std::to_string(outc);
+}
+
+} // namespace
+
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->SetOutcome(p_node, m_game->NewOutcome());
+  std::set<std::string> outcomeLabels;
+  for (const auto &outcome : m_game->GetOutcomes()) {
+    outcomeLabels.insert(outcome->GetLabel());
+  }
+  int outc = m_game->GetOutcomes().size() + 1;
+  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+    outc++;
+  }
+  m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
-  p_profile->SetOutcome(m_game->NewOutcome());
+  p_profile->SetOutcome(m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
@@ -707,11 +732,9 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   }
 
   if (!outcome) {
-    outcome = GetGame()->NewOutcome();
-    GetGame()->SetOutcome(p_node, outcome);
+    outcome = m_game->NewOutcome(p_label.ToStdString());
+    m_game->SetOutcome(p_node, outcome);
   }
-
-  outcome->SetLabel(label);
 
   for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
     outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
@@ -731,7 +754,7 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
 
 void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  const GameOutcome outcome = m_game->NewOutcome();
+  const GameOutcome outcome = m_game->NewOutcome(GenerateOutcomeLabel(m_game));
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
   for (const auto &player : m_game->GetPlayers()) {
     outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));

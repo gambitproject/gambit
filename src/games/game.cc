@@ -39,8 +39,10 @@ namespace Gambit {
 //                       class GameOutcomeRep
 //========================================================================
 
-GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label)
+  : m_game(p_game), m_number(p_number), m_label(p_label)
 {
+  CheckLabel(p_label);
   for (const auto &player : m_game->m_players) {
     m_payoffs[player.get()] = Number();
   }

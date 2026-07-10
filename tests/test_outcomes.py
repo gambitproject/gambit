@@ -10,7 +10,7 @@ from . import games
 )
 def test_outcome_add(game: gbt.Game):
     outcome_count = len(game.outcomes)
-    game.add_outcome()
+    game.add_outcome(label="new outcome")
     assert len(game.outcomes) == outcome_count + 1
 
 
@@ -67,6 +67,12 @@ def test_outcome_index_unmatched_label(game: gbt.Game):
         _ = game.outcomes["not an outcome"]
 
 
+def test_add_outcome_requires_label():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(TypeError):
+        game.add_outcome([0, 0])
+
+
 @pytest.mark.parametrize(
     "game", [gbt.Game.new_table([2, 2])]
 )
@@ -89,3 +95,21 @@ def test_outcome_payoff_by_player_label():
     assert out1["dan"] == 2
     assert out2["joe"] == 3
     assert out2["dan"] == 4
+
+
+@pytest.mark.parametrize("bad_label", ["", "win"])
+def test_add_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str):
+    game = gbt.Game.new_tree(players=["A", "B"])
+    game.add_outcome("win", [1, 2])
+    with pytest.raises(ValueError):
+        game.add_outcome(bad_label, [3, 4])
+    assert [o.label for o in game.outcomes] == ["win"]
+
+
+def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
+    game = gbt.Game.new_tree(players=["A", "B"])
+    game.add_outcome("win", [1, 2])
+    outcome = game.add_outcome("lose", [0, 0])
+    with pytest.raises(ValueError):
+        outcome.label = "win"
+    assert outcome.label == "lose"
