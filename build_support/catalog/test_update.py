@@ -148,6 +148,57 @@ def _make_image_files(catalog_dir, slug, fmt="efg"):
 
 
 # ---------------------------------------------------------------------------
+# Tests for catalog resource selection
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.catalog_update
+class TestCatalogResourceSelection:
+    def test_catalog_games_uses_requested_catalog_dir_and_restores_resource(
+        self, tmp_path, monkeypatch
+    ):
+        stale_dir = tmp_path / "installed_catalog_data"
+        checkout_dir = tmp_path / "checkout_catalog"
+        stale_dir.mkdir()
+        checkout_dir.mkdir()
+        calls = []
+
+        def fake_games(**kwargs):
+            calls.append((update.gbt.catalog._CATALOG_RESOURCE, kwargs))
+            return _make_df(_efg_row("checkout/game1"))
+
+        monkeypatch.setattr(update.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
+        monkeypatch.setattr(update.gbt.catalog, "games", fake_games)
+
+        df = update._catalog_games(checkout_dir)
+
+        assert calls == [(checkout_dir, {"include_descriptions": True})]
+        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
+        assert list(df["Game"]) == ["checkout/game1"]
+
+    def test_generate_rst_table_uses_requested_catalog_dir_while_rendering(
+        self, tmp_path, monkeypatch
+    ):
+        stale_dir = tmp_path / "installed_catalog_data"
+        checkout_dir = tmp_path / "checkout_catalog"
+        stale_dir.mkdir()
+        checkout_dir.mkdir()
+        observed = []
+
+        def fake_write_tree_level(*args, **kwargs):
+            observed.append(update.gbt.catalog._CATALOG_RESOURCE)
+
+        monkeypatch.setattr(update.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
+        monkeypatch.setattr(update, "load_hierarchy_labels", lambda: {})
+        monkeypatch.setattr(update, "_write_tree_level", fake_write_tree_level)
+
+        update.generate_rst_table(_make_df(), tmp_path / "out.rst", catalog_dir=checkout_dir)
+
+        assert observed == [checkout_dir]
+        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
+
+
+# ---------------------------------------------------------------------------
 # Tests for catalog_gtdraw_settings
 # ---------------------------------------------------------------------------
 
