@@ -735,6 +735,9 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     outcome = m_game->NewOutcome(p_label.ToStdString());
     m_game->SetOutcome(p_node, outcome);
   }
+  else {
+    outcome->SetLabel(label);
+  }
 
   for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
     outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));

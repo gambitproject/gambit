@@ -995,7 +995,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
   EditNodeDialog dialog(this, m_doc->GetSelectNode());
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
+      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeLabel());
       if (dialog.GetOutcome() > 0) {
         m_doc->DoSetOutcome(m_doc->GetSelectNode(),
                             m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
@@ -1030,14 +1030,14 @@ void GameFrame::OnEditMove(wxCommandEvent &)
   EditMoveDialog dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetName());
+      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
 
       if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
       for (const auto &action : infoset->GetActions()) {
-        m_doc->DoSetActionLabel(action, dialog.GetActionName(action->GetNumber()));
+        m_doc->DoSetActionLabel(action, dialog.GetActionLabel(action->GetNumber()));
       }
       if (infoset->IsChanceInfoset()) {
         m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
