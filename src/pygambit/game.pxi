@@ -2112,8 +2112,8 @@ class Game:
         self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
-                    payoffs: list | None = None,
-                    label: str = None) -> Outcome:
+                    label: str,
+                    payoffs: list | None = None) -> Outcome:
         """Add a new outcome to the game.
 
         .. versionchanged:: 16.7.0
@@ -2122,11 +2122,11 @@ class Game:
 
         Parameters
         ----------
-        payoffs : list, optional
-            The payoffs of the outcome to each player.
         label : str
             The label for the outcome.  Must be nonempty and not already in use
             by another outcome in the game.
+        payoffs : list, optional
+            The payoffs of the outcome to each player.
 
         Raises
         ------
@@ -2139,8 +2139,6 @@ class Game:
         Outcome
             A reference to the newly-created outcome.
         """
-        if label is None:
-            raise TypeError("add_outcome() missing required argument: 'label'")
         if payoffs is not None:
             if len(payoffs) != len(self.players):
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")

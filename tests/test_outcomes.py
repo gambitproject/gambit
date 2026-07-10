@@ -100,16 +100,16 @@ def test_outcome_payoff_by_player_label():
 @pytest.mark.parametrize("bad_label", ["", "win"])
 def test_add_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str):
     game = gbt.Game.new_tree(players=["A", "B"])
-    game.add_outcome([1, 2], label="win")
+    game.add_outcome("win", [1, 2])
     with pytest.raises(ValueError):
-        game.add_outcome([3, 4], label=bad_label)
+        game.add_outcome(bad_label, [3, 4])
     assert [o.label for o in game.outcomes] == ["win"]
 
 
 def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
     game = gbt.Game.new_tree(players=["A", "B"])
-    game.add_outcome([1, 2], label="win")
-    outcome = game.add_outcome([0, 0], label="lose")
+    game.add_outcome("win", [1, 2])
+    outcome = game.add_outcome("lose", [0, 0])
     with pytest.raises(ValueError):
         outcome.label = "win"
     assert outcome.label == "lose"
