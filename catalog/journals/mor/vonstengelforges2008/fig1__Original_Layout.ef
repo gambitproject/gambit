@@ -26,13 +26,13 @@ level 2 node n3 xshift 2.8 from n1 move \frac{1}{2} player 1
 
 % Player 1 branches.
 % Left Player 1 node: chance outcome G.
-level 4 node n4 xshift -2.7 from n2 move X_G
-level 4 node n5 xshift 4.1 from n2 move Y_G
+level 4 node n4 xshift -2.5 yshift -0.9 from n2 move X_G
+level 4 node n5 xshift 3.9 yshift -0.9 from n2 move Y_G
 
 % Right Player 1 node: chance outcome B.
 % The X_B and Y_G branches cross, matching the original layout.
-level 4 node n6 xshift -4.1 from n3 move X_B
-level 4 node n7 xshift 2.7 from n3 move Y_B
+level 4 node n6 xshift -3.9 yshift -0.9 from n3 move X_B
+level 4 node n7 xshift 2.5 yshift -0.9 from n3 move Y_B
 
 % Player 2 information sets.
 % X-signal information set: histories (G,X_G) and (B,X_B).

@@ -70,5 +70,5 @@ overrides:
     label_bg_opacity: 0.8
     iset_fill: true
     iset_fill_opacity: 0.2
-    iset_boundary: solid
+    iset_boundary: none
     legend_position: top-left
