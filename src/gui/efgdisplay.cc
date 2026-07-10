@@ -50,10 +50,20 @@ protected:
   void OnDismiss() override;
 
 private:
+  struct ValidationResult {
+    bool ok{true};
+    wxString message;
+    wxTextCtrl *ctrl{nullptr};
+  };
+
   void BuildControls();
   void LoadValues();
   void PositionPopup();
   void OnKeyDown(wxKeyEvent &p_event);
+
+  ValidationResult ValidatePayoffs(std::vector<wxString> &p_payoffs);
+  void ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl);
+  void ClearValidationFailure();
   void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
 
   EfgDisplay *m_owner;
@@ -63,17 +73,20 @@ private:
 
   wxPanel *m_contentPanel;
   wxTextCtrl *m_labelCtrl;
+  wxStaticText *m_errorText;
   wxFlexGridSizer *m_gridSizer;
   std::vector<wxTextCtrl *> m_payoffCtrls;
 
   int m_initialPlayer{0};
   bool m_cancelled{false};
   bool m_dismissing{false};
+  bool m_committing{false};
+  bool m_restoringAfterFailedCommit{false};
 };
 
 OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
   : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc),
-    m_contentPanel(nullptr), m_labelCtrl(nullptr)
+    m_contentPanel(nullptr), m_labelCtrl(nullptr), m_errorText(nullptr)
 {
   SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
 
@@ -143,6 +156,13 @@ void OutcomeEditorPopup::BuildControls()
 
   outerSizer->Add(payoffSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, FromDIP(12));
 
+  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+  m_errorText->SetForegroundColour(*wxRED);
+  m_errorText->Wrap(FromDIP(260));
+  m_errorText->Hide();
+
+  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+
   m_contentPanel->SetSizer(outerSizer);
 
   popupSizer->Add(m_contentPanel, 1, wxEXPAND | wxALL, FromDIP(1));
@@ -197,8 +217,11 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
   m_initialPlayer = p_initialPlayer;
   m_cancelled = false;
   m_dismissing = false;
+  m_committing = false;
+  m_restoringAfterFailedCommit = false;
 
   LoadValues();
+  ClearValidationFailure();
   Fit();
   PositionPopup();
 
@@ -217,7 +240,7 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
 
 void OutcomeEditorPopup::OnDismiss()
 {
-  if (m_dismissing) {
+  if (m_dismissing || m_restoringAfterFailedCommit) {
     return;
   }
 
@@ -253,70 +276,146 @@ void OutcomeEditorPopup::Cancel()
     return;
   }
 
+  ClearValidationFailure();
+
   m_cancelled = true;
   Dismiss();
 }
 
-bool OutcomeEditorPopup::Commit()
+OutcomeEditorPopup::ValidationResult
+OutcomeEditorPopup::ValidatePayoffs(std::vector<wxString> &p_payoffs)
 {
-  if (!m_node) {
-    return false;
-  }
+  p_payoffs.clear();
+  p_payoffs.reserve(m_payoffCtrls.size());
 
-  std::vector<wxString> payoffs;
-  payoffs.reserve(m_payoffCtrls.size());
-
-  for (auto *ctrl : m_payoffCtrls) {
+  for (size_t player = 1; player <= m_payoffCtrls.size(); ++player) {
+    wxTextCtrl *ctrl = m_payoffCtrls[player - 1];
     wxString value = ctrl->GetValue();
 
     if (value.EndsWith(wxT("/"))) {
       value.RemoveLast();
+      ctrl->SetValue(value);
+      ctrl->SetInsertionPointEnd();
     }
 
     try {
       lexical_cast<Rational>(value.ToStdString());
     }
     catch (const std::exception &) {
-      RestoreAfterFailedCommit(ctrl);
-      return false;
+      return {false,
+              wxString::Format(_("Payoff for player %lu is not a valid number."),
+                               static_cast<unsigned long>(player)),
+              ctrl};
     }
 
-    payoffs.push_back(value);
+    p_payoffs.push_back(value);
+  }
+
+  return {};
+}
+
+bool OutcomeEditorPopup::Commit()
+{
+  if (!m_node || m_committing) {
+    return false;
+  }
+
+  m_committing = true;
+
+  std::vector<wxString> payoffs;
+  const ValidationResult validation = ValidatePayoffs(payoffs);
+
+  if (!validation.ok) {
+    ShowValidationFailure(validation.message, validation.ctrl);
+    RestoreAfterFailedCommit(validation.ctrl);
+    m_committing = false;
+    return false;
   }
 
   try {
     m_doc->DoSetOutcomeData(m_node, m_labelCtrl->GetValue(), payoffs);
   }
   catch (const std::exception &ex) {
-    ExceptionDialog(m_owner, ex.what()).ShowModal();
+    ShowValidationFailure(wxString::FromUTF8(ex.what()), m_labelCtrl);
+    RestoreAfterFailedCommit(m_labelCtrl);
+    m_committing = false;
     return false;
   }
+
+  ClearValidationFailure();
 
   m_dismissing = true;
   Dismiss();
   m_dismissing = false;
   m_node = nullptr;
 
+  m_committing = false;
   return true;
+}
+
+void OutcomeEditorPopup::ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl)
+{
+  wxBell();
+
+  if (m_errorText) {
+    m_errorText->SetLabel(p_message);
+    m_errorText->Wrap(FromDIP(260));
+    m_errorText->Show();
+  }
+
+  if (m_contentPanel) {
+    m_contentPanel->Layout();
+  }
+
+  Fit();
+  PositionPopup();
+
+  if (p_ctrl) {
+    p_ctrl->SetFocus();
+    p_ctrl->SelectAll();
+  }
+}
+
+void OutcomeEditorPopup::ClearValidationFailure()
+{
+  if (!m_errorText) {
+    return;
+  }
+
+  m_errorText->SetLabel(wxEmptyString);
+  m_errorText->Hide();
+
+  if (m_contentPanel) {
+    m_contentPanel->Layout();
+  }
 }
 
 void OutcomeEditorPopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
 {
-  wxBell();
+  if (m_restoringAfterFailedCommit) {
+    return;
+  }
+
+  m_restoringAfterFailedCommit = true;
 
   CallAfter([this, p_invalidCtrl]() {
+    m_restoringAfterFailedCommit = false;
+
     if (!m_node) {
       return;
     }
 
     PositionPopup();
-    Popup();
 
-    p_invalidCtrl->SetFocus();
-    p_invalidCtrl->SelectAll();
+    if (!IsShown()) {
+      Popup();
+    }
+
+    wxTextCtrl *ctrl = p_invalidCtrl ? p_invalidCtrl : m_labelCtrl;
+    ctrl->SetFocus();
+    ctrl->SelectAll();
   });
 }
-
 //--------------------------------------------------------------------------
 //                       Bitmap drawing functions
 //--------------------------------------------------------------------------
