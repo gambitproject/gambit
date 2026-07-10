@@ -1,5 +1,13 @@
-% Four games with uniform chance and corrected player 2 information sets
-% Nature chooses among MP, PD, Coord, BoS with probability 1/4 each.
+% Four games with uniform chance and non-overlapping information sets.
+% Nature chooses among MP, PD, Coord, and BoS with probability 1/4 each.
+%
+% The Player 2 information sets are separated vertically:
+%   - MP and Coord nodes are at level 5.
+%   - PD and BoS nodes are at level 11.
+%
+% The additional spacing prevents the U/D labels and the terminal
+% payoffs of the upper subtrees from overlapping either information set.
+
 player 0 name Nature
 player 1 name 1
 player 2 name 2
@@ -7,48 +15,78 @@ player 2 name 2
 % Nature root
 level 0 node 1 player 0
 
-% Nature moves: uniform distribution shown on each branch
+% Nature moves
+% MP and PD belong to Player 1's first information set.
 level 2 node 1 xshift -7.5 from 0,1 move MP~(1/4)
 level 2 node 2 xshift -2.5 from 0,1 move PD~(1/4)
-level 2 node 3 xshift 2.5 from 0,1 move Coord~(1/4)
-level 2 node 4 xshift 7.5 from 0,1 move BoS~(1/4)
+
+% Coord and BoS belong to Player 1's second information set.
+level 3 node 3 xshift 2.5 from 0,1 move Coord~(1/4)
+level 3 node 4 xshift 7.5 from 0,1 move BoS~(1/4)
 
 % Player 1 moves U/D
-level 4 node 1 xshift -1 from 2,1 move U
-level 4 node 2 xshift 1 from 2,1 move D
-level 4 node 3 xshift -1 from 2,2 move U
-level 4 node 4 xshift 1 from 2,2 move D
-level 4 node 5 xshift -1 from 2,3 move U
-level 4 node 6 xshift 1 from 2,3 move D
-level 4 node 7 xshift -1 from 2,4 move U
-level 4 node 8 xshift 1 from 2,4 move D
 
-% Player 2 moves L/R and payoffs, left-to-right as in the figure
-level 6 node 1 xshift -0.55 from 4,1 move L payoffs 2 0
-level 6 node 2 xshift 0.55 from 4,1 move R payoffs 0 2
-level 6 node 3 xshift -0.55 from 4,2 move L payoffs 0 2
-level 6 node 4 xshift 0.55 from 4,2 move R payoffs 2 0
+% Matching Pennies:
+% These nodes belong to Player 2 information set 1.
+level 5 node 1 xshift -1 from 2,1 move U
+level 5 node 2 xshift 1 from 2,1 move D
 
-level 6 node 5 xshift -0.55 from 4,3 move L payoffs 2 2
-level 6 node 6 xshift 0.55 from 4,3 move R payoffs 0 3
-level 6 node 7 xshift -0.55 from 4,4 move L payoffs 3 0
-level 6 node 8 xshift 0.55 from 4,4 move R payoffs 1 1
+% Prisoner's Dilemma:
+% These nodes belong to Player 2 information set 2.
+level 11 node 3 xshift -1 from 2,2 move U
+level 11 node 4 xshift 1 from 2,2 move D
 
-level 6 node 9 xshift -0.55 from 4,5 move L payoffs 2 2
-level 6 node 10 xshift 0.55 from 4,5 move R payoffs 0 0
-level 6 node 11 xshift -0.55 from 4,6 move L payoffs 0 0
-level 6 node 12 xshift 0.55 from 4,6 move R payoffs 1 1
+% Coordination:
+% These nodes belong to Player 2 information set 1.
+level 5 node 5 xshift -1 from 3,3 move U
+level 5 node 6 xshift 1 from 3,3 move D
 
-level 6 node 13 xshift -0.55 from 4,7 move L payoffs 2 1
-level 6 node 14 xshift 0.55 from 4,7 move R payoffs 0 0
-level 6 node 15 xshift -0.55 from 4,8 move L payoffs 0 0
-level 6 node 16 xshift 0.55 from 4,8 move R payoffs 1 2
+% Battle of the Sexes:
+% These nodes belong to Player 2 information set 2.
+level 11 node 7 xshift -1 from 3,4 move U
+level 11 node 8 xshift 1 from 3,4 move D
+
+% Player 2 moves L/R and terminal payoffs
+
+% Matching Pennies
+% The terminal level is sufficiently above the second information set.
+level 8 node 1 xshift -0.55 from 5,1 move L payoffs 2 0
+level 8 node 2 xshift 0.55 from 5,1 move R payoffs 0 2
+level 8 node 3 xshift -0.55 from 5,2 move L payoffs 0 2
+level 8 node 4 xshift 0.55 from 5,2 move R payoffs 2 0
+
+% Prisoner's Dilemma
+level 14 node 5 xshift -0.55 from 11,3 move L payoffs 2 2
+level 14 node 6 xshift 0.55 from 11,3 move R payoffs 0 3
+level 14 node 7 xshift -0.55 from 11,4 move L payoffs 3 0
+level 14 node 8 xshift 0.55 from 11,4 move R payoffs 1 1
+
+% Coordination
+% These payoffs are placed at level 8, leaving three levels before
+% the lower Player 2 information set at level 11.
+level 8 node 9 xshift -0.55 from 5,5 move L payoffs 2 2
+level 8 node 10 xshift 0.55 from 5,5 move R payoffs 0 0
+level 8 node 11 xshift -0.55 from 5,6 move L payoffs 0 0
+level 8 node 12 xshift 0.55 from 5,6 move R payoffs 1 1
+
+% Battle of the Sexes
+level 14 node 13 xshift -0.55 from 11,7 move L payoffs 2 1
+level 14 node 14 xshift 0.55 from 11,7 move R payoffs 0 0
+level 14 node 15 xshift -0.55 from 11,8 move L payoffs 0 0
+level 14 node 16 xshift 0.55 from 11,8 move R payoffs 1 2
 
 % Player 1 information sets
-iset 2,1 2,2 player 1
-iset 2,3 2,4 player 1
 
-% Player 2 information sets:
-% first and third are the same; second and fourth are the same.
-iset 4,1 4,2 4,5 4,6 player 2
-iset 4,3 4,4 4,7 4,8 player 2
+% Player 1 cannot distinguish MP from PD.
+iset 2,1 2,2 player 1
+
+% Player 1 cannot distinguish Coordination from Battle of the Sexes.
+iset 3,3 3,4 player 1
+
+% Player 2 information sets
+
+% Player 2 cannot distinguish MP from Coordination.
+iset 5,1 5,2 5,5 5,6 player 2
+
+% Player 2 cannot distinguish PD from Battle of the Sexes.
+iset 11,3 11,4 11,7 11,8 player 2
