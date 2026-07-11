@@ -1,4 +1,4 @@
-## [16.7.0] - unreleased
+## [16.7.0] - 2026-07-11
 
 ### Added
 - Added `Player.sequences` as the collection of sequences available to a player.
@@ -42,6 +42,9 @@
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
 - Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
+- Nonempty labels are now required for all players, outcomes, actions, and strategies.
+  Labels must be unique within the game for players and outcomes, within the player for
+  strategies, and within the information set for actions.
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
 - In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates
