@@ -25,8 +25,8 @@
 #include "solvers/hp/hpsystem.h"
 
 namespace Gambit {
-HPEquationSystem::HPEquationSystem(const Game &game, const MixedStrategyProfile<double> &prior)
-  : m_game(game), m_prior(prior)
+HPEquationSystem::HPEquationSystem(const MixedStrategyProfile<double> &prior)
+  : m_game(prior.GetGame()), m_prior(prior)
 {
 }
 
@@ -76,6 +76,11 @@ Vector<double> HPEquationSystem::ComputeInitialPoint() const
       if (std::abs(lambda) < tol && !found_br) {
         start_point[alpha_idx++] = 1.0; // Best response
         found_br = true;
+      }
+      else if (std::abs(lambda) < tol) {
+        throw std::runtime_error("Multiple best responses found for player " +
+                                 std::to_string(player_idx) +
+                                 ". Only one best response is allowed.");
       }
       else {
         // Avoid sqrt of negative numbers

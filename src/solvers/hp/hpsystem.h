@@ -29,7 +29,7 @@ namespace Gambit {
 
 class HPEquationSystem {
 public:
-  HPEquationSystem(const Game &game, const MixedStrategyProfile<double> &prior);
+  HPEquationSystem(const MixedStrategyProfile<double> &prior);
 
   // Evaluates H(t, alpha, mu) = 0
   void GetValue(const Vector<double> &point, Vector<double> &lhs) const;
@@ -43,7 +43,7 @@ public:
   MixedStrategyProfile<double> ExtractEquilibrium(const Vector<double> &final_point) const;
 
 private:
-  const Game &m_game;
+  const Game m_game;
   MixedStrategyProfile<double> m_prior;
 
   // Transforms alpha to sigma and lambda

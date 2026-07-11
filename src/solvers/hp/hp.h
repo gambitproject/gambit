@@ -27,7 +27,7 @@
 
 namespace Gambit {
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const Game &p_game, const MixedStrategyProfile<double> &p_prior);
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior);
 } // namespace Gambit
 
 #endif // HP_H

@@ -27,14 +27,11 @@
 
 namespace Gambit {
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const Game &p_game, const MixedStrategyProfile<double> &p_prior)
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
 {
   const std::list<MixedStrategyProfile<double>> result;
-  const StrategySupportProfile support(p_game);
 
-  const MixedStrategyProfile<double> prior(p_prior);
-
-  const HPEquationSystem system(p_game, p_prior);
+  const HPEquationSystem system(p_prior);
   Vector<double> init_pt = system.ComputeInitialPoint();
 
   std::cout << "Computed starting vector (alpha form): ";

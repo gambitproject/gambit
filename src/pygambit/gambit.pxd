@@ -623,7 +623,7 @@ cdef extern from "solvers/logit/logit.h":
 
 cdef extern from "solvers/hp/hp.h":
     stdlist[c_MixedStrategyProfile[double]] HPStrategySolve(
-            c_Game, c_MixedStrategyProfile[double]
+            c_MixedStrategyProfile[double]
     ) except +RuntimeError
 
 
