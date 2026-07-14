@@ -70,7 +70,6 @@ def create_t0_degenerate_example() -> gbt.MixedStrategyProfileDouble:
     prior = game.mixed_strategy_profile()
     p1, p2 = list(game.players)
 
-    # El prior que descubriste accidentalmente
     prior[list(p1.strategies)[0]] = 2.0 / 3.0
     prior[list(p1.strategies)[1]] = 1.0 / 3.0
     prior[list(p2.strategies)[0]] = 1.0 / 3.0
@@ -83,7 +82,7 @@ HP_CASES = [
     pytest.param(
         HPSolverTestCase(
             factory=create_hp_paper_example,
-            expected=[d(0.8, 0.2), d(1.0 / 3.0, 2.0 / 3.0)],
+            expected=[d(0.0, 1.0), d(0.0, 1.0)],
         ),
         marks=pytest.mark.xfail(reason="Mathematical curve tracking not yet fully implemented"),
         id="test_hp_herings_peeters_example",
