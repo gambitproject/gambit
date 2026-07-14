@@ -84,7 +84,6 @@ HP_CASES = [
             factory=create_hp_paper_example,
             expected=[d(0.0, 1.0), d(0.0, 1.0)],
         ),
-        marks=pytest.mark.xfail(reason="Mathematical curve tracking not yet fully implemented"),
         id="test_hp_herings_peeters_example",
     ),
     pytest.param(
@@ -92,7 +91,6 @@ HP_CASES = [
             factory=create_hs_example_1,
             expected=[d(0.0, 1.0), d(0.0, 1.0)],
         ),
-        marks=pytest.mark.xfail(reason="Mathematical curve tracking not yet fully implemented"),
         id="test_hp_hs_example_1",
     ),
 ]
