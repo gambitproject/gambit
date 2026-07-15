@@ -48,19 +48,32 @@ class PlayerInfosets:
         for infoset in self.player.deref().GetInfosets():
             yield Infoset.wrap(infoset)
 
-    def __getitem__(self, index: int | str) -> Infoset:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Infoset label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Player has no infoset with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Player has multiple infosets with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Infoset.wrap(self.player.deref().GetInfoset(index + 1))
-        raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Infoset:
+        """Returns the player's information set with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the infoset to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the player has no information set with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one of the player's
+            information sets has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an information set by its label,
+            or iterate over the collection.  String lookup now requires an exact match of the
+            label; previously, leading/trailing whitespace was stripped from `label` before
+            comparison.
+        """
+        return _resolve_by_label(self, label, "Player", "infoset", "infosets")
 
 
 @cython.cclass
@@ -82,29 +95,37 @@ class PlayerActions:
         return f"PlayerActions(player={self.player})"
 
     def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.player.actions)
+        return sum(len(s.actions) for s in self.player.infosets)
 
     def __iter__(self) -> typing.Iterator[Action]:
         for infoset in self.player.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: int | str) -> Action:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Action label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Player has no action with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Player has multiple actions with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, action in enumerate(self):
-                if i == index:
-                    return action
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Action:
+        """Returns the player's action with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the action to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the player has no action with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one of the player's actions
+            has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an action by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Player", "action", "actions")
 
 
 @cython.cclass
@@ -125,7 +146,7 @@ class PlayerStrategies:
     def __repr__(self) -> str:
         return f"PlayerStrategies(player={Player.wrap(self.player)})"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of strategies for the player in the game."""
         return self.player.deref().GetStrategies().size()
 
@@ -133,19 +154,58 @@ class PlayerStrategies:
         for strategy in self.player.deref().GetStrategies():
             yield Strategy.wrap(strategy)
 
-    def __getitem__(self, index: int | str) -> Strategy:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Strategy label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Player has no strategy with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Player has multiple strategies with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Strategy.wrap(self.player.deref().GetStrategy(index + 1))
-        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Strategy:
+        """Returns the player's strategy with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the strategy to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the player has no strategy with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one of the player's strategies
+            has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a strategy by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Player", "strategy", "strategies")
+
+
+@cython.cclass
+class PlayerSequences:
+    """The collection of sequences available to a player."""
+    player = cython.declare(c_GamePlayer)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create PlayerSequences outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(player: c_GamePlayer) -> PlayerSequences:
+        obj: PlayerSequences = PlayerSequences.__new__(PlayerSequences)
+        obj.player = player
+        return obj
+
+    def __repr__(self) -> str:
+        return f"PlayerSequences(player={Player.wrap(self.player)})"
+
+    def __len__(self) -> int:
+        """The number of sequences for the player in the game."""
+        return self.player.deref().GetSequences().size()
+
+    def __iter__(self) -> typing.Iterator[Sequence]:
+        for sequence in self.player.deref().GetSequences():
+            yield Sequence.wrap(sequence)
 
 
 @cython.cclass
@@ -171,11 +231,10 @@ class Player:
         else:
             return f"Player(game={self.game}, number={self.number})"
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Player) and
-            self.player.deref() == cython.cast(Player, other).player.deref()
-        )
+    def __eq__(self, other: typing.Any):
+        if not isinstance(other, Player):
+            return NotImplemented
+        return self.player.deref() == cython.cast(Player, other).player.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.player.deref())
@@ -187,16 +246,16 @@ class Player:
 
     @property
     def label(self) -> str:
-        """Gets or sets the text label of the player."""
+        """Gets or sets the text label of the player.
+
+        .. versionchanged:: 16.7.0
+            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
+            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        """
         return self.player.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (player.label for player in self.game.players):
-            warnings.warn("In a future version, players must have unique labels",
-                          FutureWarning)
         self.player.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -213,8 +272,13 @@ class Player:
 
     @property
     def strategies(self) -> PlayerStrategies:
-        """Returns the set of strategies belonging to the player."""
+        """Returns the collection of strategies belonging to the player."""
         return PlayerStrategies.wrap(self.player)
+
+    @property
+    def sequences(self) -> PlayerSequences:
+        """Returns the collection of sequences belonging to the player."""
+        return PlayerSequences.wrap(self.player)
 
     @property
     def infosets(self) -> PlayerInfosets:

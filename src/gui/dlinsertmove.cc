@@ -118,7 +118,7 @@ void InsertMoveDialog::OnPlayer(wxCommandEvent &)
   if (playerNumber == 0) {
     player = m_doc->GetGame()->GetChance();
   }
-  else if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
+  else if (playerNumber <= static_cast<int>(m_doc->GetGame()->NumPlayers())) {
     player = m_doc->GetGame()->GetPlayer(playerNumber);
   }
 
@@ -187,17 +187,15 @@ GamePlayer InsertMoveDialog::GetPlayer() const
   if (playerNumber == 0) {
     return m_doc->GetGame()->GetChance();
   }
-  if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
+  if (playerNumber <= static_cast<int>(m_doc->GetGame()->NumPlayers())) {
     return m_doc->GetGame()->GetPlayer(playerNumber);
   }
-  const GamePlayer player = m_doc->GetGame()->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(m_doc->NumPlayers()));
-  return player;
+  return m_doc->DoNewPlayer();
 }
 
 GameInfoset InsertMoveDialog::GetInfoset() const
 {
-  if (m_playerItem->GetSelection() <= static_cast<int>(m_doc->NumPlayers())) {
+  if (m_playerItem->GetSelection() <= static_cast<int>(m_doc->GetGame()->NumPlayers())) {
     const GamePlayer player = GetPlayer();
     const int infosetNumber = m_infosetItem->GetSelection();
 

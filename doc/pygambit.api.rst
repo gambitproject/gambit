@@ -20,6 +20,7 @@ Representation of games
    Infoset
    Action
    Strategy
+   Subgame
 
 
 Creating, reading, and writing games
@@ -32,6 +33,7 @@ Creating, reading, and writing games
    read_efg
    read_nfg
    read_agg
+   read_bagg
 
    Game.new_tree
    Game.new_table
@@ -109,6 +111,8 @@ Information about the game
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.subgames
+   Game.minimal_subgame
 
 .. autosummary::
    :toctree: api/
@@ -122,7 +126,7 @@ Information about the game
    Player.is_chance
    Player.min_payoff
    Player.max_payoff
-   Player.strategies
+   Player.sequences
 
 .. autosummary::
    :toctree: api/
@@ -150,6 +154,14 @@ Information about the game
    Node.is_successor_of
    Node.plays
    Node.own_prior_action
+
+.. autosummary::
+   :toctree: api/
+
+   Subgame.game
+   Subgame.root
+   Subgame.parent
+   Subgame.children
 
 .. autosummary::
 
@@ -186,6 +198,13 @@ Information about the game
    Strategy.number
    Strategy.action
 
+.. autosummary::
+
+   :toctree: api/
+
+   Sequence.player
+   Sequence.parent
+   Sequence.actions
 
 Player behavior
 ...............
@@ -338,4 +357,7 @@ Catalog of games
    :toctree: api/
 
    load
+   generate_openspiel
+   generate_gamut
+   gamut_games
    games

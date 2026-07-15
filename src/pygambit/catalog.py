@@ -1,3 +1,8 @@
+import io
+import os
+import shutil
+import subprocess
+import tempfile
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -7,12 +12,317 @@ import pandas as pd
 import pygambit as gbt
 
 # Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit")/"catalog_data"
+_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
+# This ensures that catalog files are included in editable installs too
+if not _CATALOG_RESOURCE.is_dir():
+    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
+    if _repo_catalog.is_dir():
+        _CATALOG_RESOURCE = _repo_catalog
 
 READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
+
+
+def generate_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
+    """
+    Generate a game using the OpenSpiel library.
+
+    Parameters
+    ----------
+    game_name : str
+        The short name of the OpenSpiel game (e.g. ``"matrix_rps"``,
+        ``"tiny_hanabi"``). Passed directly to ``pyspiel.load_game``.
+    params : dict, optional
+        Game parameters forwarded to ``pyspiel.load_game``
+        (e.g. ``{"players": 2, "coins": 3, "fields": 2}`` for ``"blotto"``).
+        See the `OpenSpiel game list
+        <https://openspiel.readthedocs.io/en/latest/games.html>`_ for
+        available parameters per game.
+
+    Returns
+    -------
+    gbt.Game
+        The generated game.
+
+    Raises
+    ------
+    ImportError
+        If ``open_spiel`` is not installed.
+    ValueError
+        If the game's dynamics type is not supported for export, or if the
+        format exporter raises an error for this specific game.
+    Other exceptions from ``pyspiel.load_game`` propagate directly.
+        For example, ``pyspiel.SpielError`` is raised for unknown game names
+        or invalid/missing parameters.
+    """
+    try:
+        import pyspiel
+        from open_spiel.python.algorithms.gambit import export_gambit
+    except ImportError as exc:
+        raise ImportError(
+            "open_spiel is required to load OpenSpiel games. "
+            "Install it with: pip install open_spiel"
+        ) from exc
+
+    # Let pyspiel's own exceptions propagate unchanged — they already carry
+    # informative messages ("Unknown game '...'", "Unknown parameter '...'", etc.)
+    game = pyspiel.load_game(game_name, params or {})
+
+    dynamics = game.get_type().dynamics
+
+    # OpenSpiel's SEQUENTIAL corresponds to extensive-form (tree) games in Gambit;
+    # SIMULTANEOUS corresponds to normal-form (strategic-form) games.
+    if dynamics == pyspiel.GameType.Dynamics.SEQUENTIAL:
+        try:
+            efg_str = export_gambit(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to EFG format: {exc}"
+            ) from exc
+        return gbt.read_efg(io.StringIO(efg_str))
+
+    elif dynamics == pyspiel.GameType.Dynamics.SIMULTANEOUS:
+        try:
+            nfg_str = pyspiel.game_to_nfg_string(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to NFG format: {exc}"
+            ) from exc
+        return gbt.read_nfg(io.StringIO(nfg_str))
+
+    else:
+        raise ValueError(
+            f"OpenSpiel game '{game_name}' has unsupported dynamics type "
+            f"'{dynamics}' and cannot be exported to Gambit format."
+        )
+
+
+def generate_gamut(
+    game_class: str,
+    params: dict | None = None,
+    gamut_jar: Path | str | None = None,
+) -> gbt.Game:
+    """
+    Generate a game using the GAMUT game generator.
+
+    GAMUT (http://gamut.stanford.edu) is a Java-based suite of parameterised
+    game generators. This function calls GAMUT as an external process and
+    returns the resulting game as a :class:`~pygambit.Game` object.
+
+    Parameters
+    ----------
+    game_class : str
+        The GAMUT game class name (e.g. ``"RandomGame"``, ``"CovariantGame"``).
+        See the `GAMUT documentation <http://gamut.stanford.edu/documentation.htm>`_
+        for available game classes and their parameters.
+    params : dict, optional
+        Parameters forwarded to GAMUT as command-line flags. Each key becomes
+        ``-key``.  Values are handled as follows:
+
+        - ``True`` → flag with no value token
+          (e.g. ``{"normalize": True}`` → ``-normalize``)
+        - list or tuple → space-separated tokens
+          (e.g. ``{"actions": [3, 3]}`` → ``-actions 3 3``)
+        - anything else → single token
+          (e.g. ``{"players": 2}`` → ``-players 2``)
+
+        Multi-word GAMUT flags use underscores:
+        ``{"min_payoff": 0, "max_payoff": 100}``.
+    gamut_jar : pathlib.Path or str, optional
+        Path to ``gamut.jar``. If omitted, the ``GAMUT_JAR`` environment
+        variable is used. Raises :class:`FileNotFoundError` if neither is
+        supplied.
+
+    Returns
+    -------
+    Game
+        The generated game.
+
+    Raises
+    ------
+    RuntimeError
+        If ``java`` is not found on the system PATH.
+    FileNotFoundError
+        If ``gamut.jar`` cannot be located.
+    ValueError
+        If GAMUT exits with a non-zero return code (e.g. invalid game class
+        or parameters).
+    """
+    if shutil.which("java") is None:
+        raise RuntimeError(
+            "Java is required to run GAMUT. "
+            "Install Java and ensure 'java' is on your PATH."
+        )
+    if gamut_jar is None:
+        env_jar = os.environ.get("GAMUT_JAR")
+        if env_jar is None:
+            raise FileNotFoundError(
+                "gamut.jar not found. Provide the path via the 'gamut_jar' argument "
+                "or set the GAMUT_JAR environment variable. "
+                "Download GAMUT from http://gamut.stanford.edu/."
+            )
+        gamut_jar = Path(env_jar).expanduser()
+    else:
+        gamut_jar = Path(gamut_jar).expanduser()
+    if not gamut_jar.is_file():
+        raise FileNotFoundError(f"gamut.jar not found at {gamut_jar}")
+
+    cmd = ["java", "-jar", str(gamut_jar), "-g", game_class, "-output", "GambitOutput"]
+    if params:
+        for key, value in params.items():
+            cmd.append(f"-{key}")
+            if value is True:
+                pass  # boolean flags like -normalize, -int_payoffs take no value token
+            elif isinstance(value, (list, tuple)):
+                cmd.extend(str(v) for v in value)
+            else:
+                cmd.append(str(value))
+
+    with tempfile.NamedTemporaryFile(suffix=".nfg", delete=False) as tmp:
+        out_path = Path(tmp.name)
+    try:
+        cmd.extend(["-f", str(out_path)])
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise ValueError(
+                f"GAMUT failed for game class '{game_class}': "
+                f"{result.stderr.strip() or result.stdout.strip()}"
+            )
+        return gbt.read_nfg(str(out_path))
+    finally:
+        out_path.unlink(missing_ok=True)
+
+
+_GAMUT_GAMES = [
+    {"Class": "ArmsRace",
+     "Description": "Arms race with cost and demand functions chosen by players.",
+     "Players": "n"},
+    {"Class": "BattleOfTheSexes",
+     "Description": "Coordination game where players prefer to meet but disagree on the venue.",
+     "Players": "2"},
+    {"Class": "BertrandOligopoly",
+     "Description": "Bertrand oligopoly with arbitrary cost and demand functions.",
+     "Players": "n"},
+    {"Class": "BidirectionalLEG",
+     "Description": "Bidirectional local-effect game on a specified graph.",
+     "Players": "n"},
+    {"Class": "Chicken",
+     "Description": "Classic 2x2 Chicken game.",
+     "Players": "2"},
+    {"Class": "CollaborationGame",
+     "Description": "Game where all players choosing the same action yields the highest payoffs.",
+     "Players": "n"},
+    {"Class": "CongestionGame",
+     "Description": "Congestion game where payoffs depend on how many players share facilities.",
+     "Players": "n"},
+    {"Class": "CoordinationGame",
+     "Description": "Pure coordination game rewarding matching action choices.",
+     "Players": "n"},
+    {"Class": "CournotDuopoly",
+     "Description": "Cournot duopoly with arbitrary cost and inverse demand functions.",
+     "Players": "2"},
+    {"Class": "CovariantGame",
+     "Description": "Game with payoffs whose cross-player correlation is set by a parameter r.",
+     "Players": "n"},
+    {"Class": "DispersionGame",
+     "Description": "Game where dispersed action choices are rewarded.",
+     "Players": "n"},
+    {"Class": "GrabTheDollar",
+     "Description": "Simultaneous competition to claim a prize first.",
+     "Players": "2"},
+    {"Class": "GreedyGame",
+     "Description": "Players each choose a subset from a set; payoffs depend on overlap.",
+     "Players": "2"},
+    {"Class": "GuessThirdsAve",
+     "Description": "Players guess a number trying to reach 2/3 of the average.",
+     "Players": "n"},
+    {"Class": "HawkAndDove",
+     "Description": "Classic 2x2 Hawk and Dove game.",
+     "Players": "2"},
+    {"Class": "LocationGame",
+     "Description": "Hotelling-style two-player location game on a street.",
+     "Players": "2"},
+    {"Class": "MajorityVoting",
+     "Description": "Majority voting game with arbitrary candidate utilities.",
+     "Players": "n"},
+    {"Class": "MatchingPennies",
+     "Description": "Classic 2x2 Matching Pennies game.",
+     "Players": "2"},
+    {"Class": "MinimumEffortGame",
+     "Description": "Payoffs depend on the minimum effort exerted across all players.",
+     "Players": "n"},
+    {"Class": "NPlayerChicken",
+     "Description": "N-player Chicken game with cooperation costs and collective rewards.",
+     "Players": "n"},
+    {"Class": "NPlayerPrisonersDilemma",
+     "Description": "N-player Prisoner's Dilemma with parameterised payoff functions.",
+     "Players": "n"},
+    {"Class": "PolymatrixGame",
+     "Description": "Polymatrix game formed by two-player edge games on a graph.",
+     "Players": "n"},
+    {"Class": "PrisonersDilemma",
+     "Description": "Classic 2x2 Prisoner's Dilemma.",
+     "Players": "2"},
+    {"Class": "RandomCompoundGame",
+     "Description": "Compound game whose payoffs are sums of random 2x2 sub-games.",
+     "Players": "n"},
+    {"Class": "RandomGame",
+     "Description": "Game with payoffs drawn uniformly at random.",
+     "Players": "n"},
+    {"Class": "RandomGraphicalGame",
+     "Description": "Random graphical game on a specified graph.",
+     "Players": "n"},
+    {"Class": "RandomLEG",
+     "Description": "Random local-effect game on a specified graph.",
+     "Players": "n"},
+    {"Class": "RandomZeroSum",
+     "Description": "Two-player zero-sum game with random payoffs.",
+     "Players": "2"},
+    {"Class": "RockPaperScissors",
+     "Description": "Classic Rock, Paper, Scissors game.",
+     "Players": "2"},
+    {"Class": "ShapleyGame",
+     "Description": "Shapley's original game; no stable equilibrium under replicator dynamics.",
+     "Players": "2"},
+    {"Class": "SimpleInspectionGame",
+     "Description": "Inspection game where players choose from different-sized subsets.",
+     "Players": "2"},
+    {"Class": "TravelersDilemma",
+     "Description": "Players claim a value; the lowest claim "
+                    "wins a reward, others receive a penalty.",
+     "Players": "n"},
+    {"Class": "TwoByTwoGame",
+     "Description": "2x2 game of a specified type per Rapoport's classification (type in 1-85).",
+     "Players": "2"},
+    {"Class": "UniformLEG",
+     "Description": "Local-effect game where all edges share the same local-effect function.",
+     "Players": "n"},
+    {"Class": "WarOfAttrition",
+     "Description": "Players choose concession times; payoffs "
+                    "depend on valuations and decrements.",
+     "Players": "2"},
+]
+
+
+def gamut_games() -> pd.DataFrame:
+    """
+    Return a DataFrame listing all 35 GAMUT game classes.
+
+    Each row describes one game class that can be passed to
+    :func:`generate_gamut` as the ``game_class`` argument.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns:
+
+        - ``"Class"``: the game class name to pass to :func:`generate_gamut`
+        - ``"Description"``: a short description of the game family
+        - ``"Players"``: ``"2"`` for two-player only, ``"n"`` for n-player
+    """
+    return pd.DataFrame.from_records(_GAMUT_GAMES, columns=["Class", "Description", "Players"])
 
 
 def load(slug: str) -> gbt.Game:
@@ -155,20 +465,23 @@ def games(
             record["Format"] = ext
         records.append(record)
 
-    # Add all the games stored as EFG/NFG files
-    for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
-        reader = READERS.get(resource_path.suffix)
+    # Add all the games stored as EFG/NFG files.
+    # Collect paths matching each supported extension, sort together to preserve
+    # a consistent alphabetical order, then load using the known reader.
+    for resource_path in sorted(
+        path
+        for suffix in READERS
+        for path in _CATALOG_RESOURCE.rglob(f"*{suffix}")
+        if path.is_file()
+    ):
+        reader = READERS[resource_path.suffix]
+        rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
+        slug = rel_path.with_suffix("").as_posix()
 
-        if reader is not None and resource_path.is_file():
-            # Calculate the path relative to the root resource
-            # and remove the suffix to get the "slug"
-            rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-            slug = rel_path.with_suffix("").as_posix()
-
-            with as_file(resource_path) as path:
-                game = reader(str(path))
-                if check_filters(game):
-                    append_record(slug, game)
+        with as_file(resource_path) as path:
+            game = reader(str(path))
+            if check_filters(game):
+                append_record(slug, game)
 
     if include_descriptions:
         return pd.DataFrame.from_records(

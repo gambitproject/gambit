@@ -67,8 +67,28 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (p_selection == p_entry->m_node) ? 6 : 3,
-                                             wxPENSTYLE_SOLID));
+  const bool selected = (p_selection == p_entry->m_node);
+
+  if (selected) {
+    constexpr int selectionPadding = 6;
+    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+
+    p_dc.SetPen(*wxTRANSPARENT_PEN);
+    p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
+
+    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
+                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                selectionPadding);
+    }
+    else {
+      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
+                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       selectionSize);
+    }
+  }
+
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
 
   if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
@@ -104,6 +124,25 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
                      p_entry->m_size);
+  }
+
+  if (selected) {
+    constexpr int selectionPadding = 6;
+    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+
+    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
+
+    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
+                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                selectionPadding);
+    }
+    else {
+      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
+                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       selectionSize);
+    }
   }
 
   int textWidth, textHeight;
@@ -442,12 +481,15 @@ wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, 
         return _T("");
       }
     case GBT_NODE_LABEL_REALIZPROB:
-      return {m_doc->GetProfiles().GetRealizProb(n).c_str(), *wxConvCurrent};
+      return {m_doc->GetWorkspace().GetProfiles().GetRealizProb(n).c_str(), *wxConvCurrent};
     case GBT_NODE_LABEL_BELIEFPROB:
-      return {m_doc->GetProfiles().GetBeliefProb(n).c_str(), *wxConvCurrent};
+      return {m_doc->GetWorkspace().GetProfiles().GetBeliefProb(n).c_str(), *wxConvCurrent};
     case GBT_NODE_LABEL_VALUE:
       if (n->GetInfoset() && n->GetPlayer()->GetNumber() > 0) {
-        return {m_doc->GetProfiles().GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(),
+        return {m_doc->GetWorkspace()
+                    .GetProfiles()
+                    .GetNodeValue(n, n->GetPlayer()->GetNumber())
+                    .c_str(),
                 *wxConvCurrent};
       }
       else {
@@ -482,19 +524,25 @@ wxString TreeLayout::CreateBranchLabel(const std::shared_ptr<NodeEntry> &p_entry
                     .c_str(),
                 *wxConvCurrent};
       }
-      else if (m_doc->NumProfileLists() == 0) {
+      else if (m_doc->GetWorkspace().NumProfileLists() == 0) {
         return wxT("");
       }
       else {
-        return {m_doc->GetProfiles().GetActionProb(parent, p_entry->GetChildNumber()).c_str(),
+        return {m_doc->GetWorkspace()
+                    .GetProfiles()
+                    .GetActionProb(parent, p_entry->GetChildNumber())
+                    .c_str(),
                 *wxConvCurrent};
       }
     case GBT_BRANCH_LABEL_VALUE:
-      if (m_doc->NumProfileLists() == 0) {
+      if (m_doc->GetWorkspace().NumProfileLists() == 0) {
         return wxT("");
       }
       else {
-        return {m_doc->GetProfiles().GetActionValue(parent, p_entry->GetChildNumber()).c_str(),
+        return {m_doc->GetWorkspace()
+                    .GetProfiles()
+                    .GetActionValue(parent, p_entry->GetChildNumber())
+                    .c_str(),
                 *wxConvCurrent};
       }
     default:
@@ -673,11 +721,12 @@ void TreeLayout::GenerateLabels() const
             parent->GetInfoset()->GetAction(entry->GetChildNumber()))));
       }
       else {
-        const int profile = m_doc->GetCurrentProfile();
+        const int profile = m_doc->GetWorkspace().GetCurrentProfile();
         if (profile > 0) {
           try {
-            entry->SetActionProb((double)lexical_cast<Rational>(
-                m_doc->GetProfiles().GetActionProb(parent, entry->GetChildNumber())));
+            entry->SetActionProb(
+                (double)lexical_cast<Rational>(m_doc->GetWorkspace().GetProfiles().GetActionProb(
+                    parent, entry->GetChildNumber())));
           }
           catch (ValueException &) {
             // This occurs when the probability is undefined

@@ -8,12 +8,24 @@ import numpy as np
 
 import pygambit as gbt
 
+# Label-validation fixtures.
+# VALID: accepted by the C++ validator.
+# INVALID: rejected by the validator -> ValueError (reach CheckLabel as ASCII bytes).
+# NON_ASCII: rejected at the pygambit ASCII encode boundary
+VALID_LABELS = ["x", "a b", "a b c"]
+INVALID_LABELS = [" x", "x ", " ", "a  b", "a\tb", "a\nb"]
+NON_ASCII_LABELS = ["é", "naïve"]
+
 
 def read_from_file(fn: str) -> gbt.Game:
     if fn.endswith(".efg"):
         return gbt.read_efg(pathlib.Path("tests/test_games") / fn)
     elif fn.endswith(".nfg"):
         return gbt.read_nfg(pathlib.Path("tests/test_games") / fn)
+    elif fn.endswith(".agg"):
+        return gbt.read_agg(pathlib.Path("tests/test_games") / fn)
+    elif fn.endswith(".bagg"):
+        return gbt.read_bagg(pathlib.Path("tests/test_games") / fn)
     else:
         raise ValueError(f"Unknown file extension in {fn}")
 
@@ -34,7 +46,10 @@ def create_efg_corresponding_to_bimatrix_game(
     g.append_move(g.root, "1", actions1)
     g.append_move(g.root.children, "2", actions2)
     for i, j in itertools.product(range(m), range(n)):
-        g.set_outcome(g.root.children[i].children[j], g.add_outcome([A[i, j], B[i, j]]))
+        g.set_outcome(
+            g.root.children[str(i)].children[str(j)],
+            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]])
+        )
     return g
 
 
@@ -60,10 +75,10 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     g = create_efg_corresponding_to_bimatrix_game(A, B, title)
 
     if variant == "missing term outcome":
-        g.delete_outcome(g.root.children[0].children[1].outcome)
+        g.delete_outcome(g.root.children["0"].children["1"].outcome)
     elif variant == "with neutral outcome":
-        neutral = g.add_outcome([0, 0], label="neutral")
-        g.set_outcome(g.root.children[0], neutral)
+        neutral = g.add_outcome("neutral", [0, 0])
+        g.set_outcome(g.root.children["0"], neutral)
 
     return g
 
@@ -92,14 +107,14 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     deals = ["King", "Queen"]
     g.append_move(g.root, g.players.chance, deals)
 
-    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    ante_outcome = g.add_outcome("Ante", [-1, -1])
     g.set_outcome(g.root, ante_outcome)
 
-    alice_folds_outcome = g.add_outcome([0, 2], label="Alice Folds")
-    alice_bets_outcome = g.add_outcome([-1, 0], label="Alice Bets")
-    bob_folds_outcome = g.add_outcome([3, 0], label="Bob Folds")
-    bob_calls_and_wins_outcome = g.add_outcome([0, 3], label="Bob Calls and Wins")
-    bob_calls_and_loses_outcome = g.add_outcome([4, -1], label="Bob Calls and Loses")
+    alice_folds_outcome = g.add_outcome("Alice Folds", [0, 2])
+    alice_bets_outcome = g.add_outcome("Alice Bets", [-1, 0])
+    bob_folds_outcome = g.add_outcome("Bob Folds", [3, 0])
+    bob_calls_and_wins_outcome = g.add_outcome("Bob Calls and Wins", [0, 3])
+    bob_calls_and_loses_outcome = g.add_outcome("Bob Calls and Loses", [4, -1])
 
     for node in g.root.children:
         g.append_move(node, player="Alice", actions=["Bet", "Fold"])
@@ -222,10 +237,10 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
 
     # create 4 possible outcomes just once
     payoffs_to_outcomes = {
-        (1, -1): g.add_outcome([1, -1], label="Alice wins 1"),
-        (2, -2): g.add_outcome([2, -2], label="Alice wins 2"),
-        (-1, 1): g.add_outcome([-1, 1], label="Bob wins 1"),
-        (-2, 2): g.add_outcome([-2, 2], label="Bob wins 2"),
+        (1, -1): g.add_outcome("Alice wins 1", [1, -1]),
+        (2, -2): g.add_outcome("Alice wins 2", [2, -2]),
+        (-1, 1): g.add_outcome("Bob wins 1", [-1, 1]),
+        (-2, 2): g.add_outcome("BOb wins 2", [-2, 2]),
     }
 
     for term_node in [n for n in g.nodes if n.is_terminal]:
@@ -241,7 +256,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
     """
     g = _create_kuhn_poker_efg_without_outcomes()
 
-    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    ante_outcome = g.add_outcome("Ante", [-1, -1])
     g.set_outcome(g.root, ante_outcome)
 
     outcomes_dict = dict()
@@ -249,27 +264,27 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         # non-terminal outcomes for betting
         payoffs = [-1, 0] if player == "Alice" else [0, -1]
         tmp = f"{player} bets"
-        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
 
         # terminal outcomes for showdown after both check (pot of 2)
         payoffs = [2, 0] if player == "Alice" else [0, 2]
         tmp = f"{player} wins showdown for pot of 2"
-        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
 
         # terminal outcomes after a player folds (pot of 3)
         payoffs = [0, 3] if player == "Alice" else [3, 0]
         tmp = f"{player} folds"
-        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
 
         # terminal outcomes after a player calls and wins: bet first (-1) then win pot (4)
         payoffs = [3, 0] if player == "Alice" else [0, 3]
         tmp = f"{player} calls and wins"
-        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
 
         # terminal outcomes after a player calls and loses: bet first (-1) then lose pot (4)
         payoffs = [-1, 4] if player == "Alice" else [4, -1]
         tmp = f"{player} calls and loses"
-        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
 
     def add_outcomes(term_node):
         def get_path(node):
@@ -378,17 +393,25 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
-    g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+    g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
+    g.set_outcome(
+        g.root.children["Trust"].children["Honor"],
+        g.add_outcome("Trustworthy", [1, 1])
+        )
     if unique_NE_variant:
         g.set_outcome(
-            g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+            g.root.children["Trust"].children["Abuse"],
+            g.add_outcome("Untrustworthy", ["1/2", 2])
         )
     else:
         g.set_outcome(
-            g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+            g.root.children["Trust"].children["Abuse"],
+            g.add_outcome("Untrustworthy", [-1, 2])
         )
-    g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+    g.set_outcome(
+        g.root.children["Not trust"],
+        g.add_outcome("Opt-out", [0, 0])
+        )
     return g
 
 
@@ -486,13 +509,13 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
-            g.set_outcome(current_node.children[0], g.add_outcome(payoffs))
+            g.set_outcome(current_node.children["Take"], g.add_outcome(f"take_{t}", payoffs))
             if t == self.N - 1:  # for last round, push payoffs
                 payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
                 if current_player == "2":
                     payoffs.reverse()
-                g.set_outcome(current_node.children[1], g.add_outcome(payoffs))
-            current_node = current_node.children[1]
+                g.set_outcome(current_node.children["Push"], g.add_outcome(f"push_{t}", payoffs))
+            current_node = current_node.children["Push"]
             current_player = "2" if current_player == "1" else "1"
         return g
 
@@ -612,7 +635,9 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
     def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
-            g.set_outcome(node, g.add_outcome([0] * self.n_players))
+            g.set_outcome(
+                node, g.add_outcome(f"leaf_{len(list(g.outcomes))}", [0] * self.n_players)
+            )
         else:
             current_player = str(whose_turn + 1)
             g.append_move(node, current_player, ["L", "R"])
@@ -628,8 +653,8 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         )
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
-            if not n.is_terminal and not n.children[0].is_terminal:
-                g.set_infoset(n.children[1], n.children[0].infoset)
+            if not n.is_terminal and not n.children["L"].is_terminal:
+                g.set_infoset(n.children["R"], n.children["L"].infoset)
         return g
 
     def reduced_strategic_form(self):

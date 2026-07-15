@@ -27,6 +27,8 @@
 #include "style.h"
 #include "analysis.h"
 
+class TiXmlNode;
+
 namespace Gambit::GUI {
 
 class GameView;
@@ -122,15 +124,84 @@ public:
 // GBT_DOC_MODIFIED_LABELS: Labeling of players, strategies, etc. has
 // changed.
 //
-// GBT_DOC_MODIFIED_VIEWS: Information about how the document is viewed
-// (e.g., player colors) has changed.
+// GBT_DOC_MODIFIED_WORKSPACE: Stored analysis workspace data has changed.
+// This affects workbook/workspace persistence, but does not modify the
+// underlying game model.
 //
-using GameModificationType = enum {
-  GBT_DOC_MODIFIED_NONE = 0x00,
-  GBT_DOC_MODIFIED_GAME = 0x01,
-  GBT_DOC_MODIFIED_PAYOFFS = 0x02,
-  GBT_DOC_MODIFIED_LABELS = 0x04,
-  GBT_DOC_MODIFIED_VIEWS = 0x08
+// GBT_DOC_MODIFIED_PRESENTATION: Settings on how information is rendered
+// (for example, colors) have changed.
+//
+enum class GameModificationType : unsigned int {
+  None = 0x00,
+  GameForm = 0x01,
+  GamePayoffs = 0x02,
+  GameLabels = 0x04,
+  Workspace = 0x08,
+  Presentation = 0x10
+};
+
+inline GameModificationType operator|(GameModificationType p_left, GameModificationType p_right)
+{
+  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) |
+                                           static_cast<unsigned int>(p_right));
+}
+
+inline GameModificationType operator&(GameModificationType p_left, GameModificationType p_right)
+{
+  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) &
+                                           static_cast<unsigned int>(p_right));
+}
+
+inline GameModificationType &operator|=(GameModificationType &p_left, GameModificationType p_right)
+{
+  p_left = p_left | p_right;
+  return p_left;
+}
+
+inline bool HasModification(GameModificationType p_modifications, GameModificationType p_test)
+{
+  return static_cast<unsigned int>(p_modifications & p_test) != 0;
+}
+
+class AnalysisWorkspace {
+  GameDocument *m_doc;
+
+  StrategyDominanceStack m_stratSupports;
+
+  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
+  int m_currentProfileList;
+
+public:
+  explicit AnalysisWorkspace(GameDocument *p_doc);
+
+  void Clear();
+  void ResetForGameChange();
+  void BuildNfg();
+
+  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
+  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
+  void AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void SelectEquilibriumOutput(int p_index);
+  int NumProfileLists() const { return m_profiles.size(); }
+  int GetCurrentProfileList() const { return m_currentProfileList; }
+
+  int GetCurrentProfile() const
+  {
+    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
+  }
+  void SelectProfile(int p_profile);
+
+  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
+  void SetDominanceStrictness(bool p_strict);
+  bool GetStrategyElimStrength() const;
+  bool NextDominanceLevel();
+  void PreviousDominanceLevel();
+  void TopDominanceLevel();
+  bool CanStrategyElim() const;
+  int GetStrategyElimLevel() const;
+
+  void Save(std::ostream &) const;
+  bool Load(TiXmlNode *p_game);
 };
 
 class GameDocument {
@@ -152,27 +223,25 @@ class GameDocument {
 
   TreeRenderConfig m_style;
   GameNode m_selectNode;
-  bool m_modified;
+  bool m_gameModified, m_workspaceModified;
 
-  StrategyDominanceStack m_stratSupports;
+  AnalysisWorkspace m_workspace;
 
-  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
-  int m_currentProfileList;
-
-  void UpdateViews(GameModificationType p_modifications);
+  void NotifyChanged(GameModificationType p_modifications);
+  void UpdateViews();
 
 public:
   explicit GameDocument(Game p_game);
   ~GameDocument();
 
   //!
-  //! @name Reading and writing .gbt savefiles
+  //! @name Reading and writing savefiles
   //!
   //@{
-  /// Load document from the specified file (which should be a .gbt file)
+  /// Load workspace from the specified file (which should be a .gbt file)
   /// Returns true if successful, false if error
-  bool LoadDocument(const wxString &p_filename);
-  void SaveDocument(std::ostream &) const;
+  bool LoadWorkspace(const wxString &p_filename);
+  void SaveWorkspace(std::ostream &) const;
   //@}
 
   Game GetGame() const { return m_game; }
@@ -181,54 +250,30 @@ public:
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified() const { return m_modified; }
-  void SetModified(bool p_modified) { m_modified = p_modified; }
+  bool IsModified() const { return m_gameModified || m_workspaceModified; }
+  bool IsGameModified() const { return m_gameModified; }
+  bool IsWorkspaceModified() const { return m_workspaceModified; }
+  void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
+  void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
+
+  const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
 
-  size_t NumPlayers() const { return m_game->NumPlayers(); }
-  bool IsConstSum() const { return m_game->IsConstSum(); }
-  bool IsTree() const { return m_game->IsTree(); }
   GameAction GetAction(int p_index) const;
 
-  //!
-  //! @name Handling of list of computed profiles
-  //!
-  //@{
-  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
-  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
-  void SetProfileList(int p_index);
-  int NumProfileLists() const { return m_profiles.size(); }
-  int GetCurrentProfileList() const { return m_currentProfileList; }
+  void DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void DoSelectEquilibriumOutput(int p_index);
+  void DoSelectProfile(int p_profile);
 
-  int GetCurrentProfile() const
-  {
-    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
-  }
-  void SetCurrentProfile(int p_profile);
-
-  //!
-  //! @name Handling of behavior supports
-  //!
-  //@{
   BehaviorSupportProfile GetEfgSupport() const { return BehaviorSupportProfile(m_game); }
-  //@}
+  const StrategySupportProfile &GetNfgSupport() const { return m_workspace.GetNfgSupport(); }
 
-  //!
-  //! @name Handling of strategy supports
-  //!
-  //@{
-  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
-  void SetStrategyElimStrength(bool p_strict);
-  bool GetStrategyElimStrength() const;
-  bool NextStrategyElimLevel();
-  void PreviousStrategyElimLevel();
-  void TopStrategyElimLevel();
-  bool CanStrategyElim() const;
-  int GetStrategyElimLevel() const;
-  //@}
+  void DoSetDominanceStrictness(bool p_strict);
+  bool DoNextDominanceLevel();
+  void DoPreviousDominanceLevel();
+  void DoTopDominanceLevel();
 
   GameNode GetSelectNode() const { return m_selectNode; }
   void SetSelectNode(GameNode);
@@ -237,11 +282,20 @@ public:
   void PostPendingChanges();
 
   /// Operations on game model
-  void DoSave(const wxString &p_filename);
-  void DoExportEfg(const wxString &p_filename);
-  void DoExportNfg(const wxString &p_filename);
+  enum class GameSaveFormat { Efg, Nfg, Workspace };
+  GameSaveFormat GetCurrentSaveFormat() const
+  {
+    if (m_filename.EndsWith(".efg")) {
+      return GameSaveFormat::Efg;
+    }
+    if (m_filename.EndsWith(".nfg")) {
+      return GameSaveFormat::Nfg;
+    }
+    return GameSaveFormat::Workspace;
+  }
+  void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  void DoNewPlayer();
+  GamePlayer DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
   void DoNewStrategy(GamePlayer p_player);
   void DoDeleteStrategy(GameStrategy p_strategy);
@@ -266,12 +320,34 @@ public:
   void DoNewOutcome(GameNode p_node);
   void DoNewOutcome(const PureStrategyProfile &p_profile);
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
+                        const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
 };
+
+inline GameDocument *NewTreeDocument()
+{
+  const Game efg = NewTree();
+  efg->SetTitle("Untitled Extensive Game");
+  efg->NewPlayer("Player 1");
+  efg->NewPlayer("Player 2");
+  return new GameDocument(efg);
+}
+
+inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
+{
+  const Game nfg = NewTable(p_dim);
+  nfg->SetTitle("Untitled Strategic Game");
+  int pl = 1;
+  for (auto player : nfg->GetPlayers()) {
+    player->SetLabel("Player " + std::to_string(pl++));
+  }
+  return new GameDocument(nfg);
+}
 
 class GameView {
 protected:

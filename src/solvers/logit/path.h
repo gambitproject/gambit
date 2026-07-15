@@ -58,6 +58,12 @@ using CallbackFunctionType = std::function<void(const Vector<double> &)>;
 
 inline void NullCallbackFunction(const Vector<double> &) {}
 
+struct TracePathResult {
+  Vector<double> final_point;
+  bool status; // true if path tracing terminated successfully, false if it terminated due to error
+  std::string message; // error message if status is false
+};
+
 //
 // This class implements a generic path-following algorithm for smooth curves.
 // It is based on the ideas and codes presented in Allgower and Georg's
@@ -74,7 +80,7 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
-  void
+  TracePathResult
   TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
             std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
             Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,

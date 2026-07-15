@@ -42,8 +42,8 @@ public:
 
 template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->GetMinPayoff())
 {
-  ns1 = p_game->GetPlayer(1)->NumSequences();
-  ns2 = p_game->GetPlayer(2)->NumSequences();
+  ns1 = p_game->GetPlayer(1)->GetSequences().size();
+  ns2 = p_game->GetPlayer(2)->GetSequences().size();
   for (const auto &player : p_game->GetPlayers()) {
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {

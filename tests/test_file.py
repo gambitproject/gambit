@@ -15,6 +15,19 @@ def _parse_nfg(text: str) -> gbt.Game:
         return gbt.read_nfg(f)
 
 
+LEGACY_EFG_HEADER = 'EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+
+
+def test_read_efg_empty_outcome_labels_are_normalized():
+    g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [o.label for o in g.outcomes] == ["_1", "_2"]
+
+
+def test_read_efg_repeated_outcome_id_consistent():
+    g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 1 "" { 1, -1 }\n')
+    assert len(g.outcomes) == 1
+
+
 def test_string_empty():
     with pytest.raises(ValueError) as excinfo:
         _parse_efg("")
@@ -32,8 +45,8 @@ def test_efg_no_newline_end():
 
 
 def test_string_wrong_magic():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG", "")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG", "")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert (
@@ -43,16 +56,16 @@ def test_string_wrong_magic():
 
 
 def test_efg_unsupported_version():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG 2", "EFG 1")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG 2", "EFG 1")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 1:6: Accepting only EFG version 2" in str(excinfo.value)
 
 
 def test_efg_unsupported_precision():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG 2 R", "EFG 2 X")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG 2 R", "EFG 2 X")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert (
@@ -62,35 +75,35 @@ def test_efg_unsupported_precision():
 
 
 def test_efg_invalid_node_type():
-    with open("tests/test_games/e02.efg") as f:
-        file_text = f.read().replace('p "" 1 1', 'x "" 1 1')
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_efg()
+    file_text = file_text.replace('p "" 1 1', 'x "" 1 1')
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 4:3: Invalid type of node" in str(excinfo)
 
 
 def test_efg_payoffs_too_many():
-    with open("tests/test_games/e02.efg") as f:
-        file_text = f.read().replace("1, 1", "1, 2, 3")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_efg()
+    file_text = file_text.replace("1, 1", "1, 2, 3")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 5:29: Expected '}'" in str(excinfo)
 
 
 def test_nfg_title_missing():
-    with open("tests/test_games/e02.nfg") as f:
-        file_text = f.read().replace('"Selten (IJGT, 75), Figure 2, normal form"', "")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_nfg()
+    file_text = file_text.replace('"Selten (IJGT 1975) Figure 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)
     assert "Parse error in game file: line 1:11: Game title missing" in str(excinfo)
 
 
 def test_nfg_player_missing():
-    with open("tests/test_games/e02.nfg") as f:
-        file_text = f.read().replace('"Player 2"', "")
+    file_text = gbt.catalog.load("journals/ijgt/selten1975/fig2").to_nfg()
+    file_text = file_text.replace('"Player 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)
-    assert "Parse error in game file: line 1:73: Expected '}'" in str(excinfo)
+    assert "Parse error in game file: line 4:2: Expected '}'" in str(excinfo)
 
 
 def test_nfg_payoffs_not_enough():

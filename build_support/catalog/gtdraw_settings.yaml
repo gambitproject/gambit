@@ -1,0 +1,74 @@
+# Default draw_tree settings applied to all catalog games.
+defaults:
+  color_scheme: colorblind
+  font_family: sffamily
+  font_italic: true
+  shared_terminal_depth: true
+  sublevel_scaling: 0
+  iset_fill: true
+  iset_boundary: none
+
+# Per-game overrides. Keys are slug prefixes or exact slugs.
+# For a given game, all matching keys are applied shortest-first,
+# so more specific entries (longer keys) override more general ones.
+# A key matches if slug == key or slug starts with key + "/".
+# Consult https://www.gambit-project.org/draw_tree/ for available settings.
+overrides:
+  journals/geb/bagwell1995:
+    sublevel_scaling: 1
+  books/watson2013:
+    sublevel_scaling: 1
+  journals/ijgt/selten1975:
+    shared_terminal_depth: false
+  books/myerson1991/fig2_1:
+    action_label_position: 0.4
+  misc/reiley2008/fig1:
+    action_label_position: 0.4
+  books/vonstengel2022/fig10.1:
+    sublevel_scaling: 0.75
+    shared_terminal_depth: false
+  journals/mor/vonstengelforges2008/fig1:
+    sublevel_scaling: 1
+  journals/mor/vonstengelforges2008/fig6:
+    action_label_dist: 3.0
+  journals/mor/vonstengelforges2008/fig9:
+    sublevel_scaling: 0.5
+  journals/geb/gilboa1997/fig1:
+    action_label_dist: 5.0
+  conf/itcs/jakobsen2016/fig3:
+    action_label_dist: 3.0
+    color_scheme: custom
+    custom_colors:
+      0: '#759138'
+      1: '#007FFF'
+      2: '#DD79E0'
+      3: '#1616BC'
+      4: '#985003'
+
+  books/shohamleytonbrown2008/fig6_8:
+    scale_factor: 1.0
+    level_scaling: 1.0
+    sublevel_scaling: 1.0
+    width_scaling: 1.0
+    horizontal: false
+    mirror: false
+    shared_terminal_depth: false
+    color_scheme: colorblind
+    edge_thickness: 1.0
+    action_label_position: 0.5
+    action_label_position_by: player
+    action_label_dist: 1.0
+    vary_action_label_positions: false
+    vary_action_label_positions_by: all
+    font_family: rmfamily
+    font_bold: false
+    font_italic: false
+    font_size: normalsize
+    node_size: 1.5
+    label_bg: false
+    label_bg_color: white
+    label_bg_opacity: 0.8
+    iset_fill: true
+    iset_fill_opacity: 0.2
+    iset_boundary: none
+    legend_position: top-left

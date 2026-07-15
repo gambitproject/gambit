@@ -31,34 +31,37 @@
 #include <sstream>
 #include "gambit.h"
 #include "games/gameagg.h"
+#include "games/gamebagg.h"
 #include "games/nash.h"
 
 using namespace std;
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-Game ParseGbtGame(std::string const &s, bool p_normalizeLabels)
+Game ParseGbtGame(std::string const &s)
 {
   std::istringstream f(s);
   return ReadGbtFile(f);
 }
-
-Game ParseEfgGame(std::string const &s, bool p_normalizeLabels)
+Game ParseEfgGame(std::string const &s)
 {
   std::istringstream f(s);
-  return ReadEfgFile(f, p_normalizeLabels);
+  return ReadEfgFile(f);
 }
-
-Game ParseNfgGame(std::string const &s, bool p_normalizeLabels)
+Game ParseNfgGame(std::string const &s)
 {
   std::istringstream f(s);
-  return ReadNfgFile(f, p_normalizeLabels);
+  return ReadNfgFile(f);
 }
-
-Game ParseAggGame(std::string const &s, bool p_normalizeLabels)
+Game ParseAggGame(std::string const &s)
 {
   std::istringstream f(s);
   return ReadAggFile(f);
+}
+Game ParseBaggGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadBaggFile(f);
 }
 
 std::string WriteEfgFile(const Game &p_game)

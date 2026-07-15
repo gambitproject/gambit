@@ -66,7 +66,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
           wxCommandEventHandler(NashChoiceDialog::OnCount));
   topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, 5);
 
-  if (p_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
+  if (p_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
     wxString methodChoices[] = {s_recommended, s_lp, s_simpdiv, s_logit, s_enumpoly};
     m_methodChoice =
         new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, methodChoices);
@@ -79,7 +79,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, 5);
 
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     wxString repChoices[] = {wxT("using the extensive game"), wxT("using the strategic game")};
     m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
     m_repChoice->SetSelection(0);
@@ -114,14 +114,14 @@ void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
   m_methodChoice->Append(s_recommended);
 
   if (p_event.GetSelection() == 0) {
-    if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
+    if (m_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
       m_methodChoice->Append(s_lp);
     }
     m_methodChoice->Append(s_simpdiv);
     m_methodChoice->Append(s_logit);
   }
   else if (p_event.GetSelection() == 1) {
-    if (m_doc->NumPlayers() == 2) {
+    if (m_doc->GetGame()->NumPlayers() == 2) {
       m_methodChoice->Append(s_lcp);
     }
     m_methodChoice->Append(s_enumpure);
@@ -131,7 +131,7 @@ void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
     m_methodChoice->Append(s_enumpoly);
   }
   else {
-    if (m_doc->NumPlayers() == 2) {
+    if (m_doc->GetGame()->NumPlayers() == 2) {
       m_methodChoice->Append(s_enummixed);
     }
   }
@@ -195,7 +195,7 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
 
   if (method == s_recommended) {
     if (m_countChoice->GetSelection() == 0) {
-      if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
+      if (m_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
         cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lp") + options);
         cmd->SetDescription(wxT("One equilibrium by solving a linear program ") + game);
@@ -207,7 +207,7 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
       }
     }
     else if (m_countChoice->GetSelection() == 1) {
-      if (m_doc->NumPlayers() == 2) {
+      if (m_doc->GetGame()->NumPlayers() == 2) {
         cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lcp") + options);
         cmd->SetDescription(wxT("Some equilibria by solving a linear complementarity program ") +
@@ -220,7 +220,7 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
       }
     }
     else {
-      if (m_doc->NumPlayers() == 2) {
+      if (m_doc->GetGame()->NumPlayers() == 2) {
         cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
         cmd->SetCommand(prefix + wxT("enummixed"));
         cmd->SetDescription(

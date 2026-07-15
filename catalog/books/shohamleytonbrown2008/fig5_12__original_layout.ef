@@ -1,0 +1,15 @@
+% Extensive-form game transcribed from the uploaded image
+player 1 name 1
+player 2 name 2
+
+% Player 1's two decision nodes are in the same information set.
+level 0 node 1
+level 2 node 1 xshift -3 from 0,1 move L
+level 2 node 2 xshift 3 from 0,1 move R player 2
+
+level 4 node 1 xshift -1 from 2,1 move L payoffs 1 0
+level 4 node 2 xshift 1 from 2,1 move R payoffs 100 100
+level 4 node 3 xshift -1 from 2,2 move U payoffs 5 1
+level 4 node 4 xshift 1 from 2,2 move D payoffs 2 2
+
+iset 0,1 2,1 player 1

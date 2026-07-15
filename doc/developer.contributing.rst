@@ -85,6 +85,7 @@ We recognize that generative AI tools can be a useful aid in software developmen
 - **No AI-generated comments.** Please do not post output from Large Language Models (LLMs) or similar tools as comments on GitHub issues or pull requests. Such comments are often generic and do not add to the discussion.
 - **Humans over bots.** We discourage the use of automated tools, such as bots or agents, to post AI-generated content to issues or pull requests, without the advance approval of the core development team.
 
+.. _submit-contribution:
 
 How to submit a contribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,6 +176,7 @@ Tests can be added to the test suite by creating new test files in the ``tests``
 Tests should be written using the `pytest` framework.
 Refer to existing test files for examples of how to write tests or see the `pytest documentation <https://docs.pytest.org/en/stable/>`_ for more information.
 
+.. _editing-docs:
 
 Editing this documentation
 ---------------------------
@@ -209,6 +211,32 @@ To submit a tutorial for inclusion in the Gambit documentation, please follow th
 
 4. *[Optional]* If your tutorial requires additional dependencies not already listed in the ``doc`` list under ``[project.optional-dependencies]`` inside ``pyproject.toml``, please add them to the file.
 
+.. _updating-bibliography:
+
+Updating the Bibliography
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The bibliography entries are stored in BibTeX format in the file `doc/references.bib`.
+To add a new entry:
+
+1. Open `doc/references.bib` and add the BibTeX citation.
+2. In your BibTeX entry, include a ``category`` field to specify where the reference
+   should appear on the bibliography page. The allowed categories are:
+
+   * ``articles_equilibria`` for articles on computation of equilibria.
+   * ``articles_general`` for general game theory articles and texts.
+   * ``textbooks`` for textbooks and general references.
+
+3. To cite the entry in documentation or game files, use the format ``:cite:p:`key```,
+   where ``key`` is the BibTeX key of your entry.
+
+.. note::
+
+   The bibliography is formatted using a custom Harvard referencing style.
+   This style and its formatting templates are defined within ``doc/conf.py``.
+   A custom Python implementation is used instead of a traditional ``.bst``
+   file because `.bst` styles output raw LaTeX formatting, which cannot be
+   rendered to HTML by Sphinx.
 
 Recognising contributions
 -------------------------
@@ -252,7 +280,19 @@ When making a new release of Gambit, follow these steps:
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
-3. Update the `ChangeLog` file with a summary of changes
+3. Update the ``ChangeLog`` file at the repository root with a summary of changes for this release.
+   This file is the single source of truth for release notes — it is surfaced in the documentation
+   (see :ref:`releases`) and used to populate the GitHub release automatically.
+
+   The ``ChangeLog`` must follow the `Keep a Changelog <https://keepachangelog.com>`__ format:
+   version headers of the form ``## [X.Y.Z] - YYYY-MM-DD`` and subsections from
+   ``Added``, ``Changed``, ``Deprecated``, ``Removed``, ``Fixed``, or ``Security``.
+   The test suite enforces this format — any malformed entry will cause ``pytest`` to fail.
+
+   To verify the new entry will be extracted correctly before tagging, run the
+   extraction script from the repository root::
+
+       python build_support/releases/extract_changelog.py X.Y.Z
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
 
@@ -263,8 +303,10 @@ When making a new release of Gambit, follow these steps:
     git push origin maintX_Y
     git push origin --tags
 
-6. Create a new release on the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__, using the tag created in step 4.
-   Include a summary of changes from the `ChangeLog` file in the release notes.
+6. Pushing the tag triggers the ``release.yml`` GitHub Actions workflow, which automatically
+   reads the ``ChangeLog`` entry for the new version and creates the corresponding release on the
+   `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__ with those notes.
+   No manual action is required.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.
 

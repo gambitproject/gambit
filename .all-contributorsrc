@@ -64,6 +64,25 @@
         "research",
         "code"
       ]
+    },
+    {
+      "login": "AndresFerCervell",
+      "name": "Andrés Fernández Cervell",
+      "avatar_url": "https://avatars.githubusercontent.com/u/153729439?v=4",
+      "profile": "https://github.com/AndresFerCervell",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "wyz2368",
+      "name": "wyz2368",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25018133?v=4",
+      "profile": "https://github.com/wyz2368",
+      "contributions": [
+        "code",
+        "research"
+      ]
     }
   ]
 }

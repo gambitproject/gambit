@@ -376,8 +376,9 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   : m_results(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<>()))
 {
   for (const auto &nstrat : dim) {
-    m_players.push_back(std::make_shared<GamePlayerRep>(this, m_players.size() + 1, nstrat));
-    m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
+    const auto pl = m_players.size() + 1;
+    m_players.push_back(
+        std::make_shared<GamePlayerRep>(this, pl, lexical_cast<std::string>(pl), nstrat));
     std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
                   [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable {
                     s->m_label = std::to_string(st++);
@@ -391,7 +392,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   else {
     m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
     std::generate(m_outcomes.begin(), m_outcomes.end(), [this, outc = 1]() mutable {
-      return std::make_shared<GameOutcomeRep>(this, outc++);
+      return std::make_shared<GameOutcomeRep>(this, outc++, "");
     });
     std::transform(m_outcomes.begin(), m_outcomes.end(), m_results.begin(),
                    [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
@@ -482,8 +483,10 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   }
   p_file << "}" << std::endl;
 
-  for (auto result : m_results) {
-    p_file << ((result) ? result->m_number : 0) << ' ';
+  for (auto iter : StrategyContingencies(
+           StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
+    const auto outcome = iter->GetOutcome();
+    p_file << ((outcome) ? outcome->m_number : 0) << ' ';
   }
   p_file << std::endl;
 }
@@ -492,10 +495,11 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 //                       GameTableRep: Players
 //------------------------------------------------------------------------
 
-GamePlayer GameTableRep::NewPlayer()
+GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
 {
+  CheckPlayerLabel(p_label);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label, 1);
   IncrementVersion();
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, 1);
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
@@ -529,13 +533,15 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
   if (p_player->GetGame().get() != this) {
     throw MismatchException();
   }
+  p_player->CheckStrategyLabel(p_label);
+  auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
+                                                    p_player->m_strategies.size() + 1, p_label);
   IncrementVersion();
   std::vector<long> old_radices;
   for (const auto &player : m_players) {
     old_radices.push_back(player->m_strategies.size());
   }
-  p_player->m_strategies.push_back(std::make_shared<GameStrategyRep>(
-      p_player.get(), p_player->m_strategies.size() + 1, p_label));
+  p_player->m_strategies.push_back(strategy);
   RebuildTable(old_radices);
   return p_player->m_strategies.back();
 }

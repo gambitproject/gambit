@@ -39,8 +39,10 @@ namespace Gambit {
 //                       class GameOutcomeRep
 //========================================================================
 
-GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label)
+  : m_game(p_game), m_number(p_number), m_label(p_label)
 {
+  CheckLabel(p_label);
   for (const auto &player : m_game->m_players) {
     m_payoffs[player.get()] = Number();
   }
@@ -67,8 +69,8 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 //                       class GamePlayerRep
 //========================================================================
 
-GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id)
+GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats)
+  : m_game(p_game), m_number(p_id), m_label(p_label)
 {
   for (int j = 1; j <= p_strats; j++) {
     m_strategies.push_back(std::make_shared<GameStrategyRep>(this, j, ""));
@@ -77,11 +79,14 @@ GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
 
 GamePlayerRep::~GamePlayerRep()
 {
-  for (auto infoset : m_infosets) {
+  for (const auto &infoset : m_infosets) {
     infoset->Invalidate();
   }
-  for (auto strategy : m_strategies) {
+  for (const auto &strategy : m_strategies) {
     strategy->Invalidate();
+  }
+  for (const auto &sequence : m_sequences) {
+    sequence->Invalidate();
   }
 }
 
@@ -156,16 +161,6 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
   else {
     MakeStrategy(behav);
   }
-}
-
-size_t GamePlayerRep::NumSequences() const
-{
-  if (!m_game->IsTree()) {
-    throw UndefinedException();
-  }
-  return std::transform_reduce(
-      m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
-      [](const std::shared_ptr<GameInfosetRep> &s) { return s->m_actions.size(); });
 }
 
 //========================================================================
@@ -410,29 +405,37 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_st
   ComputePayoffs();
 
   auto player = p_strategy->GetPlayer();
+  if (player->m_strategies.size() == 1) {
+    return T{0};
+  }
   T best_other_payoff = maximize_function(
       filter_if(player->GetStrategies(), [&](const auto &s) { return s != p_strategy; }),
       [this, &player](const auto &strategy) -> T {
         return m_cache.m_strategyValues.at(player).at(strategy);
       });
-  return std::max(best_other_payoff - m_cache.m_strategyValues.at(player).at(p_strategy),
-                  static_cast<T>(0));
+  return std::max(best_other_payoff - m_cache.m_strategyValues.at(player).at(p_strategy), T{0});
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
 {
   CheckVersion();
   ComputePayoffs();
-  auto br_payoff =
-      maximize_function(p_player->GetStrategies(), [this, p_player](const auto &strategy) -> T {
-        return m_cache.m_strategyValues.at(p_player).at(strategy);
-      });
+  auto strategies = p_player->GetStrategies();
+  if (strategies.size() == 0) {
+    return T{0};
+  }
+  auto br_payoff = maximize_function(strategies, [this, p_player](const auto &strategy) -> T {
+    return m_cache.m_strategyValues.at(p_player).at(strategy);
+  });
   return br_payoff - m_cache.m_payoffs.at(p_player);
 }
 
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
 {
   CheckVersion();
+  if (GetGame()->GetPlayers().size() == 0) {
+    return T{0};
+  }
   return maximize_function(GetGame()->GetPlayers(),
                            [this](const auto &player) -> T { return this->GetRegret(player); });
 }

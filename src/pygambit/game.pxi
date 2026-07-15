@@ -31,12 +31,11 @@ import scipy.stats
 import pygambit.gameiter
 
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
-ctypedef c_Game (*GameParser)(const string &, bool) except +IOError
+ctypedef c_Game (*GameParser)(const string &) except +IOError
 
 
 @cython.cfunc
 def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-              normalize_labels: bool,
               parser: GameParser):
 
     g = cython.declare(Game)
@@ -48,23 +47,19 @@ def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
         with open(filepath_or_buffer, "rb") as f:
             data = f.read()
     try:
-        g = Game.wrap(parser(data, normalize_labels))
+        g = Game.wrap(parser(data))
     except Exception as exc:
         raise ValueError(f"Parse error in game file: {exc}") from None
     return g
 
 
-def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in a GBT file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -80,22 +75,18 @@ def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_efg, read_nfg, read_agg
+    read_efg, read_nfg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseGbtGame)
+    return read_game(filepath_or_buffer, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -111,22 +102,18 @@ def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_nfg, read_agg
+    read_gbt, read_nfg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseEfgGame)
+    return read_game(filepath_or_buffer, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -142,22 +129,18 @@ def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_efg, read_agg
+    read_gbt, read_efg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseNfgGame)
+    return read_game(filepath_or_buffer, parser=ParseNfgGame)
 
 
-def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in an AGG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -173,9 +156,36 @@ def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
 
     See Also
     --------
-    read_gbt, read_efg, read_nfg
+    read_gbt, read_efg, read_nfg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseAggGame)
+    return read_game(filepath_or_buffer, parser=ParseAggGame)
+
+
+def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+    """Construct a game from its serialised representation in a BAGG file.
+
+    Parameters
+    ----------
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
+        The path to the file containing the game representation or file-like object
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+
+    See Also
+    --------
+    read_gbt, read_efg, read_nfg, read_agg
+    """
+    return read_game(filepath_or_buffer, parser=ParseBaggGame)
 
 
 @cython.cclass
@@ -212,6 +222,38 @@ class GameNodes:
 
 
 @cython.cclass
+class GameSubgames:
+    """Represents the set of subgames in a game."""
+    game = cython.declare(c_Game)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameSubgames outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameSubgames:
+        obj: GameSubgames = GameSubgames.__new__(GameSubgames)
+        obj.game = game
+        return obj
+
+    def __repr__(self) -> str:
+        return f"GameSubgames(game={Game.wrap(self.game)})"
+
+    def __len__(self) -> int:
+        """The number of subgames in the game."""
+        if not self.game.deref().IsTree():
+            return 0
+        return self.game.deref().GetSubgames().size()
+
+    def __iter__(self) -> typing.Iterator[Subgame]:
+        """Iterate over the game subgames in postorder."""
+        if not self.game.deref().IsTree():
+            return
+        for subgame in self.game.deref().GetSubgames():
+            yield Subgame.wrap(subgame)
+
+
+@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -237,19 +279,30 @@ class GameOutcomes:
         for outcome in self.game.deref().GetOutcomes():
             yield Outcome.wrap(outcome)
 
-    def __getitem__(self, index: int | str) -> Outcome:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Outcome label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no outcome with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple outcomes with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            return Outcome.wrap(self.game.deref().GetOutcome(index + 1))
-        raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Outcome:
+        """Returns the outcome with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the outcome to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no outcome in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one outcome has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an outcome by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "outcome", "outcomes")
 
 
 @cython.cclass
@@ -278,22 +331,30 @@ class GamePlayers:
         for player in self.game.deref().GetPlayers():
             yield Player.wrap(player)
 
-    def __getitem__(self, index: int | str) -> Player:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Player label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no player with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple players with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            try:
-                return Player.wrap(self.game.deref().GetPlayer(index + 1))
-            except IndexError:
-                raise IndexError("Index out of range") from None
-        raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Player:
+        """Returns the player with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the player to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one player has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a player by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "player", "players")
 
     @property
     def chance(self) -> Player:
@@ -326,23 +387,30 @@ class GameActions:
         for infoset in self.game.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: int | str) -> Action:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Action label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no action with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple actions with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, action in enumerate(self):
-                if i == index:
-                    return action
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Action:
+        """Returns the action with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the action to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no action in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one action has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an action by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "action", "actions")
 
 
 @cython.cclass
@@ -370,23 +438,32 @@ class GameInfosets:
         for player in self.game.players:
             yield from player.infosets
 
-    def __getitem__(self, index: int | str) -> Infoset:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Infoset label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no infoset with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple infosets with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, infoset in enumerate(self):
-                if i == index:
-                    return infoset
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Infoset:
+        """Returns the information set with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the infoset to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no information set in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one information set has
+            label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference an information set by its label,
+            or iterate over the collection.  String lookup now requires an exact match of the
+            label; previously, leading/trailing whitespace was stripped from `label` before
+            comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "infoset", "infosets")
 
 
 @cython.cclass
@@ -414,23 +491,30 @@ class GameStrategies:
         for player in self.game.players:
             yield from player.strategies
 
-    def __getitem__(self, index: int | str) -> Strategy:
-        if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Strategy label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no strategy with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple strategies with label '{index}'")
-            return matches[0]
-        if isinstance(index, int):
-            for i, strat in enumerate(self):
-                if i == index:
-                    return strat
-            else:
-                raise IndexError("Index out of range")
-        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
+    def __getitem__(self, label: str) -> Strategy:
+        """Returns the strategy with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the strategy to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If no strategy in the game has label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one strategy has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a strategy by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Game", "strategy", "strategies")
 
 
 @cython.cclass
@@ -479,12 +563,15 @@ class Game:
         g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            Player.wrap(g.game.deref().NewPlayer()).label = str(player)
+            g.game.deref().NewPlayer(str(player).encode("ascii"))
         return g
 
     @classmethod
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -514,6 +601,9 @@ class Game:
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -589,6 +679,10 @@ class Game:
         The payoff matrices must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
 
         Parameters
         ----------
@@ -806,6 +900,57 @@ class Game:
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
+    @property
+    def subgames(self) -> GameSubgames:
+        """The set of subgames in the game.
+
+        Iteration over this property yields the subgames in postorder
+        (children before parents).
+
+        .. versionadded:: 16.7.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return GameSubgames.wrap(self.game)
+
+    def minimal_subgame(self, infoset: typing.Union[Infoset, str]) -> Subgame:
+        """Returns the smallest subgame containing `infoset`.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set to query.
+
+        Returns
+        -------
+        Subgame
+            The smallest subgame containing `infoset`.
+
+        .. versionadded:: 16.7.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        MismatchError
+            If `infoset` is from a different game.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        resolved_infoset = self._resolve_infoset(infoset, "minimal_subgame")
+        return Subgame.wrap(
+            self.game.deref().GetMinimalSubgame(cython.cast(Infoset, resolved_infoset).infoset)
+        )
+
     def set_chance_probs(self, infoset: Infoset | str, probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.
 
@@ -858,8 +1003,8 @@ class Game:
                 self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1)
             )
 
-        if self.is_tree:
-            return TreeGameOutcome.wrap(self.game, psp)
+        if self.is_tree or self.game.deref().IsAgg():
+            return DerivedGameOutcome.wrap(self.game, psp)
         else:
             outcome = Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
             if outcome.outcome != cython.cast(c_GameOutcome, NULL):
@@ -867,28 +1012,50 @@ class Game:
             else:
                 return None
 
-    def __getitem__(self, i):
+    def __getitem__(self, contingency):
         """Returns the `Outcome` associated with a profile of pure strategies.
+
+        Each strategy in the profile may be given as a ``Strategy``, its text label,
+        or its integer index within the corresponding player's strategies.
+
+        Raises
+        ------
+        TypeError
+            If `contingency` is not a tuple-like object, or contains an element
+            that is not an ``int``, ``str``, or ``Strategy``.
+        KeyError
+            If the number of elements in `contingency` does not equal the
+            number of players.
+        IndexError
+            If an integer index is out of range for the corresponding player,
+            or a label or ``Strategy`` does not belong to that player.
+
+        .. note::
+            Unlike the game's object collections, strategies within a contingency can be referenced
+            by integer index, as a contingency is a coordinate in the players' strategy spaces;
+            labels and ``Strategy`` objects are also accepted.
         """
+        players = list(self.players)
         try:
-            if len(i) != len(self.players):
+            if len(contingency) != len(players):
                 raise KeyError("Number of strategies is not equal to the number of players")
         except TypeError:
-            raise TypeError("contingency must be a tuple-like object")
-        cont = [0 for _ in self.players]
-        for (pl, st) in enumerate(i):
+            raise TypeError("contingency must be a tuple-like object") from None
+        cont = [0 for _ in players]
+        for (pl, st) in enumerate(contingency):
+            player = players[pl]
             if isinstance(st, int):
-                if st < 0 or st >= len(self.players[pl].strategies):
+                if st < 0 or st >= len(player.strategies):
                     raise IndexError(f"Provided strategy index {st} out of range for player {pl}")
                 cont[pl] = st
             elif isinstance(st, str):
                 try:
-                    cont[pl] = [s.label for s in self.players[pl].strategies].index(st)
+                    cont[pl] = [s.label for s in player.strategies].index(st)
                 except ValueError:
                     raise IndexError(f"Provided strategy label '{st}' not defined")
             elif isinstance(st, Strategy):
                 try:
-                    cont[pl] = list(self.players[pl].strategies).index(st)
+                    cont[pl] = list(player.strategies).index(st)
                 except ValueError:
                     raise IndexError(f"Provided strategy '{st}' not available to player")
             else:
@@ -1298,27 +1465,21 @@ class Game:
     def _resolve_player(self,
                         player: typing.Any, funcname: str, argname: str = "player") -> Player:
         """Resolve an attempt to reference a player of the game.
-
-        Parameters
-        ----------
-        player : Any
-            An object to resolve as a reference to a player.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'player'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
+        ...
         TypeError
-            If `player` is not a `Player` or a `str`
+            If `player` is not a `Player`, `NodePlayer`, or a `str`
         ValueError
-            If `player` is an empty `str` or all spaces
+            If `player` is an empty `str` or is a `NodePlayer` that resolves to no player
+            (terminal node).
         """
+        if isinstance(player, NodePlayer):
+            resolved = cython.cast(NodePlayer, player)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no player "
+                    f"(the node is terminal)"
+                )
+            player = resolved
         if isinstance(player, Player):
             if player.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1356,10 +1517,19 @@ class Game:
         KeyError
             If `outcome` is a string and no outcome in the game has that label.
         TypeError
-            If `outcome` is not an `Outcome` or a `str`
+            If `outcome` is not an `Outcome`, `NodeOutcome`, or a `str`
         ValueError
-            If `outcome` is an empty `str` or all spaces
+            If `outcome` is an empty `str` or all spaces, or is a `NodeOutcome` that
+            resolves to no outcome (no outcome is attached to its node).
         """
+        if isinstance(outcome, NodeOutcome):
+            resolved = cython.cast(NodeOutcome, outcome)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no outcome "
+                    f"(no outcome is attached to the node)"
+                )
+            outcome = resolved
         if isinstance(outcome, Outcome):
             if outcome.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1372,7 +1542,7 @@ class Game:
             try:
                 return self.outcomes[outcome]
             except KeyError:
-                raise KeyError(f"{funcname}(): no node with label '{outcome}'")
+                raise KeyError(f"{funcname}(): no outcome with label '{outcome}'")
         raise TypeError(
             f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
         )
@@ -1499,10 +1669,19 @@ class Game:
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         TypeError
-            If `infoset` is not an `Infoset` or a `str`
+            If `infoset` is not an `Infoset`, `NodeInfoset`, or a `str`
         ValueError
-            If `infoset` is an empty `str` or all spaces
+            If `infoset` is an empty `str` or all spaces, or is a `NodeInfoset` that
+            resolves to no information set (its node is terminal).
         """
+        if isinstance(infoset, NodeInfoset):
+            resolved = cython.cast(NodeInfoset, infoset)._resolve()
+            if resolved is None:
+                raise ValueError(
+                    f"{funcname}(): {argname} resolves to no information set "
+                    f"(the node is terminal)"
+                )
+            infoset = resolved
         if isinstance(infoset, Infoset):
             if infoset.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
@@ -1588,7 +1767,7 @@ class Game:
         self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
             action.label = label
-        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
+        resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
@@ -1884,23 +2063,32 @@ class Game:
                 "Operation only defined for games with a tree representation"
             )
 
-    def add_player(self, label: str = "") -> Player:
+    def add_player(self, label: str) -> Player:
         """Add a new player to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the game's players.
+            In extensive games, the label cannot be ``"Chance"``, which is reserved for the
+            chance player.
 
         Parameters
         ----------
-        label : str, default ""
-            The label for the player.
+        label : str
+            The label for the new player.  Must be nonempty and not the same as the label
+            of an existing player in the game.
 
         Returns
         -------
         Player
             A reference to the newly-created player.
+
+        Raises
+        ------
+        ValueError
+            If `label` is empty, is already the label of another player, or (in an
+            extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
-        p = Player.wrap(self.game.deref().NewPlayer())
-        if str(label) != "":
-            p.label = str(label)
-        return p
+        return Player.wrap(self.game.deref().NewPlayer(label.encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:
@@ -1924,22 +2112,27 @@ class Game:
         self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
-                    payoffs: list | None = None,
-                    label: str = "") -> Outcome:
+                    label: str,
+                    payoffs: list | None = None) -> Outcome:
         """Add a new outcome to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            game's outcomes.
 
         Parameters
         ----------
+        label : str
+            The label for the outcome.  Must be nonempty and not already in use
+            by another outcome in the game.
         payoffs : list, optional
             The payoffs of the outcome to each player.
-        label : str, default ""
-            The label for the outcome
 
         Raises
         ------
         ValueError
             If `payoffs` is specified but is not the same length as the number of players
-            in the game.
+            in the game, or if `label` is empty or already in use by another outcome.
 
         Returns
         -------
@@ -1951,9 +2144,7 @@ class Game:
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome())
-        if str(label) != "":
-            c.label = str(label)
+        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("ascii")))
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c
@@ -2004,15 +2195,20 @@ class Game:
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
         self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
-    def add_strategy(self, player: Player | str, label: str = None) -> Strategy:
+    def add_strategy(self, player: Player | str, label: str) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            player's strategies.
 
         Parameters
         ----------
         player : Player or str
             The player to create the new strategy for
-        label : str, optional
-            The label to assign to the new strategy
+        label : str
+            The label for the new strategy.  Must be nonempty and not already in use
+            by another of the player's strategies.
 
         Returns
         -------
@@ -2025,6 +2221,8 @@ class Game:
             If `player` is a `Player` from a different game.
         UndefinedOperationError
             If called on a game which has an extensive representation.
+        ValueError
+            If `label` is empty or is already the label of another of the player's strategies.
         """
         if self.is_tree:
             raise UndefinedOperationError(
@@ -2033,8 +2231,7 @@ class Game:
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player,
-                                          (str(label) if label is not None else "").encode())
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

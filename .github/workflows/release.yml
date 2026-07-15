@@ -1,0 +1,28 @@
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Extract changelog for this version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          python3 build_support/releases/extract_changelog.py "${VERSION#v}"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Gambit ${{ github.ref_name }}" \
+            --notes-file release_notes.md
