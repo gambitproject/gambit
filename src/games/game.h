@@ -630,6 +630,11 @@ public:
   GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
   Infosets GetInfosets() const;
+  /// Validate that p_label is a valid label for an information set of this player,
+  /// disregarding any information sets in p_ignore.
+  void CheckInfosetLabel(const std::string &p_label,
+                         const std::set<const GameInfosetRep *> &p_ignore) const;
+  //@}
 
   /// @name Strategies
   //@{
@@ -1265,6 +1270,11 @@ public:
   virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
   virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
   virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
+  virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
+                                  const std::string &)
+  {
+    throw UndefinedException();
+  }
   virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
   {
     throw UndefinedException();
@@ -1506,6 +1516,22 @@ inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
   }
 }
 
+inline void
+GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
+                                 const std::set<const GameInfosetRep *> &p_ignore) const
+{
+  CheckLabel(p_label);
+  // Infoset labels may be empty; a nonempty label must be unique among the infosets of the player.
+  if (p_label.empty()) {
+    return;
+  }
+  for (const auto &infoset : m_infosets) {
+    if (p_ignore.count(infoset.get()) == 0 && infoset->GetLabel() == p_label) {
+      throw ValueException("Infoset label must be unique for the player");
+    }
+  }
+}
+
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
 
@@ -1518,16 +1544,7 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   if (p_label == m_label) {
     return;
   }
-  CheckLabel(p_label);
-  // Infoset labels may be empty, but a non-empty label must be unique among
-  // the infosets of the same player.
-  if (!p_label.empty()) {
-    for (const auto &infoset : GetPlayer()->GetInfosets()) {
-      if (infoset.get() != this && infoset->GetLabel() == p_label) {
-        throw ValueException("Infoset label must be unique for the player");
-      }
-    }
-  }
+  m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
 }
 inline void GameRep::CheckPlayerLabel(const std::string &p_label) const

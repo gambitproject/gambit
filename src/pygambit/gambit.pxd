@@ -364,6 +364,7 @@ cdef extern from "games/game.h":
         void DeleteTree(c_GameNode) except +
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
         void Reveal(c_GameInfoset, c_GamePlayer) except +
+        c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
         void SetInfoset(c_GameNode, c_GameInfoset) except +ValueError
         c_GameInfoset LeaveInfoset(c_GameNode) except +
         c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
