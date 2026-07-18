@@ -94,14 +94,8 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
   auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, "");
   strategy->m_behav = behav;
-  for (const auto &infoset : m_infosets) {
-    strategy->m_label += (contains(strategy->m_behav, infoset.get()))
-                             ? std::to_string(strategy->m_behav[infoset.get()])
-                             : "*";
-  }
-  if (strategy->m_label.empty()) {
-    strategy->m_label = "*";
-  }
+  // A derived-label strategy: the text label is rendered from m_behav on the first GetLabel()
+  strategy->m_label.reset();
   m_strategies.push_back(strategy);
 }
 
@@ -305,8 +299,9 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
       for (const auto &infoset : player->m_infosets) {
-        if (strategy->m_behav[infoset.get()] > 0) {
-          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset.get()])];
+        if (contains(strategy->m_behav, infoset.get()) &&
+            strategy->m_behav.at(infoset.get()) > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav.at(infoset.get()))];
         }
       }
       (*m_rep)[strategy] = prob;
