@@ -1,3 +1,16 @@
+## [Unreleased]
+
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.
+
+### Changed
+- `Game.leave_infoset`, `Game.set_infoset`, `Game.set_player`, and `Game.reveal` are now
+  implemented in terms of `Game.make_infoset`.  `set_infoset` now requires the node to have
+  the same actions as the target information set, with the same labels in the same order
+  (previously only the number of actions was checked).  `reveal` now raises at
+  absent-minded information sets.
+
 ## [16.7.0] - 2026-07-11
 
 ### Added
