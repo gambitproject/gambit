@@ -39,7 +39,10 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   const PathTracer tracer;
   double omega = 1.0;
 
-  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.0; };
+  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
+  auto criterion_function = [](const Vector<double> &point,
+                               const Vector<double> &tangent) -> double { return point[1] - 1.0; };
+
   const TracePathResult result = tracer.TracePath(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {
@@ -60,7 +63,8 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
           std::cout << prob_vector[i] << " ";
         }
         std::cout << std::endl;
-      });
+      },
+      criterion_function);
 
   equilibria.push_back(system.ExtractEquilibrium(x));
   return equilibria;
