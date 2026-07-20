@@ -1,3 +1,10 @@
+## [17.0.0] - unreleased
+
+### Changed
+- Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
+  removes dependency on tinyxml.  (#897)
+
+
 ## [16.7.0] - 2026-07-11
 
 ### Added

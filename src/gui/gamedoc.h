@@ -27,8 +27,6 @@
 #include "style.h"
 #include "analysis.h"
 
-class TiXmlNode;
-
 namespace Gambit::GUI {
 
 class GameView;
@@ -200,8 +198,8 @@ public:
   bool CanStrategyElim() const;
   int GetStrategyElimLevel() const;
 
-  void Save(std::ostream &) const;
-  bool Load(TiXmlNode *p_game);
+  std::vector<LegacyWorkspaceFile::Analysis> Save() const;
+  bool Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses);
 };
 
 class GameDocument {
