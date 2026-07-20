@@ -28,6 +28,7 @@
 #include <stack>
 #include <queue>
 #include <memory>
+#include <optional>
 
 #include "number.h"
 #include "gameobject.h"
@@ -343,7 +344,9 @@ class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   bool m_valid{true};
   GamePlayerRep *m_player;
   int m_number;
-  std::string m_label;
+  /// Stored label or std::nullopt for a strategy whose label is derived: strategies created by
+  /// GamePlayerRep::MakeStrategy() render a label from m_behav on the first call to GetLabel()
+  mutable std::optional<std::string> m_label;
   std::map<GameInfosetRep *, int> m_behav;
 
 public:
@@ -363,7 +366,7 @@ public:
   /// @name Data access
   //@{
   /// Returns the text label associated with the strategy
-  const std::string &GetLabel() const { return m_label; }
+  const std::string &GetLabel() const;
   /// Sets the text label associated with the strategy
   void SetLabel(const std::string &p_label);
 
@@ -1318,7 +1321,7 @@ inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_f
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
 inline void GameStrategyRep::SetLabel(const std::string &p_label)
 {
-  if (p_label == m_label) {
+  if (p_label == GetLabel()) {
     return;
   }
   GetPlayer()->CheckStrategyLabel(p_label);
@@ -1473,6 +1476,19 @@ inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
 }
 
 inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this(); }
+
+inline const std::string &GameStrategyRep::GetLabel() const
+{
+  if (!m_label) {
+    std::string label;
+    for (const auto &infoset : m_player->GetInfosets()) {
+      const auto action = m_behav.find(infoset.get());
+      label += (action != m_behav.end()) ? std::to_string(action->second) : "*";
+    }
+    m_label = label.empty() ? "*" : std::move(label);
+  }
+  return *m_label;
+}
 
 //=======================================================================
 
