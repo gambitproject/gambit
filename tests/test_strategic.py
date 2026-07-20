@@ -1,3 +1,5 @@
+import io
+
 import pytest
 
 import pygambit as gbt
@@ -73,3 +75,33 @@ def test_game_get_min_payoff():
 def test_game_get_max_payoff():
     game = games.read_from_file("mixed_strategy.nfg")
     assert game.max_payoff == 3
+
+
+@pytest.mark.xfail(
+    reason="Generated reduced-strategy labels are not injective",
+    raises=AssertionError, strict=True,
+)
+def test_generated_strategy_labels_are_unique():
+    """#981 established that a strategy label must be nonempty, valid, and
+    unique among a player's strategies.  Labels generated for reduced
+    strategies bypass the check: two 11-action information sets yield
+    strategies (1, 11) and (11, 1), both rendering as "111"."""
+    g = games.read_from_file("label-collision.efg")
+    labels = [s.label for s in g.players["Player 1"].strategies]
+    dups = sorted({lab for lab in labels if labels.count(lab) > 1})
+    assert len(set(labels)) == len(labels), f"duplicate generated labels: {dups}"
+
+
+@pytest.mark.xfail(
+    reason="Generated reduced-strategy labels are not injective; "
+           "duplicate labels break NFG re-read",
+    raises=ValueError, strict=True,
+)
+def test_game_with_duplicate_generated_labels_roundtrips_through_nfg():
+    """WriteNfgFile serialises the duplicate generated labels;
+    ReadNfgFile then rejects its own output.  FAILS on 16.7.0.
+
+    The game has two 11-action information sets for one player (imperfect
+    recall); reduced strategies (1, 11) and (11, 1) both render as "111"."""
+    g = games.read_from_file("label-collision.efg")
+    gbt.read_nfg(io.StringIO(g.to_nfg()))
