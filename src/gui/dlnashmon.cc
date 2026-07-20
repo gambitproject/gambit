@@ -27,6 +27,7 @@
 #include <wx/txtstrm.h>
 #include <wx/process.h>
 #include <wx/tokenzr.h>
+#include <cstring>
 #include <optional>
 #include <variant>
 #include "wx/sheet/sheet.h"
