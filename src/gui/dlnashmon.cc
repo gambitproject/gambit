@@ -26,6 +26,9 @@
 #endif // WX_PRECOMP
 #include <wx/txtstrm.h>
 #include <wx/process.h>
+#include <wx/tokenzr.h>
+#include <optional>
+#include <variant>
 #include "wx/sheet/sheet.h"
 
 #include "gamedoc.h"
@@ -33,20 +36,38 @@
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
+using namespace Gambit;
 using namespace Gambit::GUI;
 
 namespace {
 
-wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
-wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
+wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_PROFILE, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_PROFILE, wxThreadEvent);
 
 wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
 
+using ComputedProfile = std::variant<MixedStrategyProfile<double>, MixedStrategyProfile<Rational>,
+                                     MixedBehaviorProfile<double>, MixedBehaviorProfile<Rational>>;
+
+template <class T>
+void AddProfile(AnalysisOutput &p_output, const MixedStrategyProfile<T> &p_profile)
+{
+  dynamic_cast<AnalysisProfileList<T> &>(p_output).AddProfile(p_profile);
+}
+
+template <class T>
+void AddProfile(AnalysisOutput &p_output, const MixedBehaviorProfile<T> &p_profile)
+{
+  dynamic_cast<AnalysisProfileList<T> &>(p_output).AddProfile(p_profile);
+}
+
 class ExternalProcessRunner final : public wxEvtHandler {
   wxEvtHandler *m_parent;
+  Game m_game;
+  const AnalysisOutput &m_output;
   wxProcess *m_process{nullptr};
   long m_pid{0};
   wxTimer m_timer;
@@ -75,17 +96,61 @@ class ExternalProcessRunner final : public wxEvtHandler {
     m_pid = 0;
   }
 
-  void PostLine(const wxString &line) const
+  template <class T> std::optional<ComputedProfile> ParseProfile(const wxString &p_line) const
   {
-    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_LINE);
-    evt->SetString(line);
-    wxQueueEvent(m_parent, evt);
+    wxStringTokenizer tokens(p_line, wxT(","));
+    if (tokens.GetNextToken() != wxT("NE")) {
+      return std::nullopt;
+    }
+
+    if (m_output.IsBehavior()) {
+      MixedBehaviorProfile<T> profile(m_game);
+      if (tokens.CountTokens() != profile.BehaviorProfileLength()) {
+        return std::nullopt;
+      }
+      for (size_t i = 1; i <= profile.BehaviorProfileLength(); ++i) {
+        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+      }
+      return ComputedProfile(std::move(profile));
+    }
+    else {
+      auto profile = m_game->NewMixedStrategyProfile(static_cast<T>(0));
+      if (tokens.CountTokens() != profile.MixedProfileLength()) {
+        return std::nullopt;
+      }
+      for (size_t i = 1; i <= profile.MixedProfileLength(); ++i) {
+        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+      }
+      return ComputedProfile(std::move(profile));
+    }
+  }
+
+  void ProcessLine(const wxString &p_line) const
+  {
+    try {
+      std::optional<ComputedProfile> profile;
+      if (dynamic_cast<const AnalysisProfileList<double> *>(&m_output)) {
+        profile = ParseProfile<double>(p_line);
+      }
+      else if (dynamic_cast<const AnalysisProfileList<Rational> *>(&m_output)) {
+        profile = ParseProfile<Rational>(p_line);
+      }
+      if (!profile) {
+        return;
+      }
+
+      auto *event = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_PROFILE);
+      event->SetPayload(std::move(*profile));
+      wxQueueEvent(m_parent, event);
+    }
+    catch (const std::exception &) {
+    }
   }
 
   void FlushPendingLine()
   {
     if (!m_pending.empty()) {
-      PostLine(m_pending);
+      ProcessLine(m_pending);
       m_pending.clear();
     }
   }
@@ -93,7 +158,8 @@ class ExternalProcessRunner final : public wxEvtHandler {
 public:
   enum class RunnerStartResult { Ok, LaunchFailed, NoOutputPipe, StdinWriteFailed };
 
-  explicit ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this)
+  ExternalProcessRunner(wxEvtHandler *p_parent, const Game &p_game, const AnalysisOutput &p_output)
+    : m_parent(p_parent), m_game(p_game), m_output(p_output), m_timer(this)
   {
     Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this);
     Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
@@ -175,7 +241,7 @@ public:
       }
 
       if (ch == '\n') {
-        PostLine(m_pending);
+        ProcessLine(m_pending);
         m_pending.clear();
       }
       else if (ch != '\r') {
@@ -198,7 +264,7 @@ class NashMonitorDialog final : public wxDialog {
 
   void OnClose(wxCloseEvent &);
   void OnStop(wxCommandEvent &);
-  void OnRunnerLine(wxThreadEvent &);
+  void OnRunnerProfile(wxThreadEvent &);
   void OnRunnerFinished(wxThreadEvent &);
 
   void SetStatusRunning() const
@@ -281,7 +347,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   sizer->SetSizeHints(this);
   CenterOnParent();
 
-  Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
+  Bind(wxEVT_EXTERNAL_RUNNER_PROFILE, &NashMonitorDialog::OnRunnerProfile, this);
   Bind(wxEVT_EXTERNAL_RUNNER_FINISHED, &NashMonitorDialog::OnRunnerFinished, this);
   m_stopButton->Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this);
   Bind(wxEVT_CLOSE_WINDOW, &NashMonitorDialog::OnClose, this);
@@ -306,7 +372,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
     m_doc->GetGame()->Write(s, "nfg");
   }
 
-  m_runner = std::make_unique<ExternalProcessRunner>(this);
+  m_runner = std::make_unique<ExternalProcessRunner>(this, m_doc->GetGame(), *m_output);
   switch (const auto result = m_runner->Start(p_command->GetCommand(),
                                               wxString(s.str().c_str(), *wxConvCurrent))) {
   case ExternalProcessRunner::RunnerStartResult::Ok:
@@ -324,15 +390,14 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
   }
 }
 
-void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
+void NashMonitorDialog::OnRunnerProfile(wxThreadEvent &p_event)
 {
-  const wxString msg = p_event.GetString();
-  if (!msg.empty()) {
-    m_doc->DoAddOutput(*m_output, msg);
-    wxString label;
-    label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
-    m_countText->SetLabel(label);
-  }
+  const auto &profile = p_event.GetPayload<ComputedProfile>();
+  std::visit([this](const auto &p) { AddProfile(*m_output, p); }, profile);
+  m_doc->DoAnalysisOutputChanged();
+  wxString label;
+  label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+  m_countText->SetLabel(label);
 }
 
 void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)

@@ -326,7 +326,7 @@ public:
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
-  void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
+  void DoAnalysisOutputChanged();
 };
 
 inline GameDocument *NewTreeDocument()
