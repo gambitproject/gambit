@@ -25,7 +25,6 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/tokenzr.h>
-
 #include "gambit.h"
 #include "core/tinyxml.h" // for XML parser for Load()
 
@@ -37,77 +36,22 @@ namespace Gambit::GUI {
 //                     class AnalysisProfileList
 //=========================================================================
 
-// Use anonymous namespace to make these helpers private
-namespace {
-
-class NotNashException final : public std::runtime_error {
-public:
-  NotNashException() : std::runtime_error("Output line does not contain a Nash equilibrium") {}
-  ~NotNashException() noexcept override = default;
-};
-
 template <class T>
-MixedStrategyProfile<T> OutputToMixedProfile(GameDocument *p_doc, const wxString &p_text)
+void AnalysisProfileList<T>::AddProfile(const MixedStrategyProfile<T> &p_profile)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile(static_cast<T>(0.0)));
-
-  if (wxStringTokenizer tok(p_text, wxT(",")); tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == static_cast<unsigned int>(profile.MixedProfileLength())) {
-      for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-        profile[i] =
-            lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
+  m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile));
+  if (m_doc->GetGame()->IsTree()) {
+    m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
   }
-
-  throw NotNashException();
+  m_current = m_mixedProfiles.size();
 }
 
 template <class T>
-MixedBehaviorProfile<T> OutputToBehavProfile(GameDocument *p_doc, const wxString &p_text)
+void AnalysisProfileList<T>::AddProfile(const MixedBehaviorProfile<T> &p_profile)
 {
-  MixedBehaviorProfile<T> profile(p_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == static_cast<unsigned int>(profile.BehaviorProfileLength())) {
-      for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-        profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
-  }
-
-  throw NotNashException();
-}
-
-} // end anonymous namespace
-
-template <class T> void AnalysisProfileList<T>::AddOutput(const wxString &p_output)
-{
-  try {
-    if (m_isBehav) {
-      auto profile =
-          std::make_shared<MixedBehaviorProfile<T>>(OutputToBehavProfile<T>(m_doc, p_output));
-      m_behavProfiles.push_back(profile);
-      m_mixedProfiles.push_back(
-          std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
-      m_current = m_behavProfiles.size();
-    }
-    else {
-      auto profile =
-          std::make_shared<MixedStrategyProfile<T>>(OutputToMixedProfile<T>(m_doc, p_output));
-      m_mixedProfiles.push_back(profile);
-      if (m_doc->GetGame()->IsTree()) {
-        m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(*profile));
-      }
-      m_current = m_mixedProfiles.size();
-    }
-  }
-  catch (NotNashException &) {
-  }
+  m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
+  m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile.ToMixedProfile()));
+  m_current = m_behavProfiles.size();
 }
 
 template <class T> void AnalysisProfileList<T>::BuildNfg()

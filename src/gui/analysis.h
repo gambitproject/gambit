@@ -98,8 +98,6 @@ public:
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
-  virtual void AddOutput(const wxString &) = 0;
-
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
@@ -169,7 +167,8 @@ public:
   //! @name Adding profiles to the list
   //!
   //@{
-  void AddOutput(const wxString &) override;
+  void AddProfile(const MixedStrategyProfile<T> &);
+  void AddProfile(const MixedBehaviorProfile<T> &);
   /// Map all behavior profiles to corresponding mixed profiles
   void BuildNfg() override;
 

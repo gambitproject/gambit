@@ -397,11 +397,7 @@ void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_prof
   NotifyChanged(GameModificationType::Workspace);
 }
 
-void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
-{
-  p_list.AddOutput(p_output);
-  NotifyChanged(GameModificationType::Workspace);
-}
+void GameDocument::DoAnalysisOutputChanged() { NotifyChanged(GameModificationType::Workspace); }
 
 void GameDocument::DoSelectEquilibriumOutput(int p_index)
 {
