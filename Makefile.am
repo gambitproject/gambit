@@ -315,7 +315,9 @@ gtracer_SOURCES = \
 
 hp_SOURCES = \
 	src/solvers/hp/hp.h \
-	src/solvers/hp/hp.cc
+	src/solvers/hp/hp.cc \
+	src/solvers/hp/hpsystem.h \
+	src/solvers/hp/hpsystem.cc
 
 if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++

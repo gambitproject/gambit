@@ -807,7 +807,7 @@ def logit_solve(
 
 
 def hp_solve(
-        game: libgbt.Game,
+        prior: libgbt.MixedStrategyProfileDouble,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :cite:p:`HerPee01`
 
@@ -816,17 +816,17 @@ def hp_solve(
 
     Parameters
     ----------
-    game : Game
-        The game to compute equilibria in.
+    prior : MixedStrategyProfileDouble
+        The prior distribution over strategies.
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    equilibria = libgbt._hp_strategy_solve(game)
+    equilibria = libgbt._hp_strategy_solve(prior)
     return NashComputationResult(
-        game=game,
+        game=prior.game,
         method="hp",
         rational=False,
         use_strategic=True,

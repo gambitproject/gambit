@@ -370,5 +370,6 @@ def _logit_behavior_branch(game: Game,
     return ret
 
 
-def _hp_strategy_solve(game: Game) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(HPStrategySolve(game.game))
+def _hp_strategy_solve(
+                       prior: MixedStrategyProfileDouble) -> list[MixedStrategyProfileDouble]:
+    return _convert_mspd(HPStrategySolve(deref(prior.profile)))

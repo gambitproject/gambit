@@ -23,16 +23,50 @@
 #include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hp.h"
+#include "solvers/hp/hpsystem.h"
+#include "solvers/logit/path.h"
 
 namespace Gambit {
-std::list<MixedStrategyProfile<double>> HPStrategySolve(const Game &p_game)
+std::list<MixedStrategyProfile<double>>
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
 {
-  std::list<MixedStrategyProfile<double>> result;
-  const StrategySupportProfile support(p_game);
 
-  const MixedStrategyProfile<double> trivial_profile = support.NewMixedStrategyProfile<double>();
+  std::list<MixedStrategyProfile<double>> equilibria;
 
-  result.push_back(trivial_profile);
-  return result;
+  HPEquationSystem system(p_prior);
+  Vector<double> x = system.ComputeInitialPoint();
+
+  const PathTracer tracer;
+  double omega = 1.0;
+
+  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
+  auto criterion_function = [](const Vector<double> &point,
+                               const Vector<double> &tangent) -> double { return point[1] - 1.0; };
+
+  const TracePathResult result = tracer.TracePath(
+      [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
+      [&system](const Vector<double> &point, Matrix<double> &jac) {
+        system.GetJacobian(point, jac);
+      },
+      x, omega, termination_condition,
+      [&system](const Vector<double> &point) {
+        std::cout << "[Path Tracer Step] t = " << point[1];
+        std::cout << " | Alfas: ";
+        for (size_t i = 2; i <= 5; ++i) {
+          std::cout << point[i] << " ";
+        }
+        std::cout << "| Mu: " << point[6] << " " << point[7] << std::endl;
+
+        std::cout << "Full point vector in probabilities: ";
+        Vector<double> prob_vector = system.ExtractEquilibrium(point).GetProbVector();
+        for (size_t i = 1; i <= prob_vector.size(); ++i) {
+          std::cout << prob_vector[i] << " ";
+        }
+        std::cout << std::endl;
+      },
+      criterion_function);
+
+  equilibria.push_back(system.ExtractEquilibrium(x));
+  return equilibria;
 }
 } // namespace Gambit

@@ -622,7 +622,9 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "solvers/hp/hp.h":
-    stdlist[c_MixedStrategyProfile[double]] HPStrategySolve(c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[double]] HPStrategySolve(
+            c_MixedStrategyProfile[double]
+    ) except +RuntimeError
 
 
 cdef extern from "nash.h":
