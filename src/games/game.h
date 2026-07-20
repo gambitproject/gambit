@@ -1321,13 +1321,6 @@ inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_f
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
 inline void GameStrategyRep::SetLabel(const std::string &p_label)
 {
-  // Compare against GetLabel(), not m_label: a derived-label strategy stores no label,
-  // so the raw comparison is vacuously false and setting a label
-  // equal to the rendered one would fall through to CheckStrategyLabel, where
-  // the strategy would spuriously collide with itself.  (The infoset SetLabel
-  // excludes self with `!= this` inside its own loop; the strategy loop lives
-  // in CheckStrategyLabel, shared with NewStrategy where no self exists yet,
-  // so this early return is the self-exclusion.)
   if (p_label == GetLabel()) {
     return;
   }
