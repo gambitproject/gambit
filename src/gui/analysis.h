@@ -23,7 +23,7 @@
 #ifndef GAMBIT_GUI_ANALYSIS_H
 #define GAMBIT_GUI_ANALYSIS_H
 
-class TiXmlNode;
+#include "games/workspace.h"
 
 //
 // This file contains classes which manage the output of analysis tools.
@@ -101,8 +101,7 @@ public:
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
-  /// Write a profile list to XML savefile
-  virtual void Save(std::ostream &) const = 0;
+  virtual LegacyWorkspaceFile::Analysis Save() const = 0;
 };
 
 //!
@@ -180,10 +179,8 @@ public:
   //! @name Saving and loading profile lists
   //!
   //@{
-  /// Build a profile list from XML savefile
-  void Load(TiXmlNode *analysis);
-  /// Write a profile list to XML savefile
-  void Save(std::ostream &) const override;
+  void Load(const LegacyWorkspaceFile::Analysis &p_analysis);
+  LegacyWorkspaceFile::Analysis Save() const override;
   //@}
 };
 

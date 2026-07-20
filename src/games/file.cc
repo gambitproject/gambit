@@ -854,55 +854,9 @@ void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p
 
 } // end of anonymous namespace
 
-#include "core/tinyxml.h"
+#include "workspace.h"
 
 namespace Gambit {
-
-class GameXMLSavefile {
-private:
-  TiXmlDocument doc;
-
-public:
-  explicit GameXMLSavefile(const std::string &p_xml);
-  ~GameXMLSavefile() = default;
-
-  Game GetGame() const;
-};
-
-GameXMLSavefile::GameXMLSavefile(const std::string &p_xml)
-{
-  doc.Parse(p_xml.c_str());
-  if (doc.Error()) {
-    throw InvalidFileException("Not a valid XML document");
-  }
-}
-
-Game GameXMLSavefile::GetGame() const
-{
-  const TiXmlNode *docroot = doc.FirstChild("gambit:document");
-  if (!docroot) {
-    throw InvalidFileException("Not a Gambit game savefile document");
-  }
-
-  const TiXmlNode *game = docroot->FirstChild("game");
-  if (!game) {
-    throw InvalidFileException("No game representation found in document");
-  }
-
-  const TiXmlNode *efgfile = game->FirstChild("efgfile");
-  if (efgfile) {
-    std::istringstream s(efgfile->FirstChild()->Value());
-    return ReadGame(s);
-  }
-
-  const TiXmlNode *nfgfile = game->FirstChild("nfgfile");
-  if (nfgfile) {
-    std::istringstream s(nfgfile->FirstChild()->Value());
-    return ReadGame(s);
-  }
-
-  throw InvalidFileException("No game representation found in document");
-}
 
 void NormalizeGameLabels(const Game &p_game)
 {
@@ -988,11 +942,19 @@ Game ReadNfgFile(std::istream &p_stream)
 
 Game ReadGbtFile(std::istream &p_stream)
 {
-  std::stringstream buffer;
-  buffer << p_stream.rdbuf();
-  auto game = GameXMLSavefile(buffer.str()).GetGame();
-  NormalizeGameLabels(game);
-  return game;
+  try {
+    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(p_stream);
+    std::istringstream game_text(workspace.game);
+    auto game = ReadGame(game_text);
+    NormalizeGameLabels(game);
+    return game;
+  }
+  catch (const InvalidFileException &) {
+    throw;
+  }
+  catch (const std::runtime_error &) {
+    throw InvalidFileException("Not a valid .gbt document");
+  }
 }
 
 Game ReadAggFile(std::istream &p_stream)
