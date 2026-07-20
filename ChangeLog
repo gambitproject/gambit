@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Changed
+- Labels for reduced strategies are now rendered lazily on first access rather than
+  eagerly during strategy generation. Strategy labels are unchanged.
+
 ## [16.7.0] - 2026-07-11
 
 ### Added
