@@ -1,6 +1,8 @@
 ## [17.0.0] - unreleased
 
 ### Changed
+- `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
+  to match the behaviour of all other Nash equilibrium solvers.  (#996)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
 
