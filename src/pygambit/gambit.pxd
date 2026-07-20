@@ -551,9 +551,7 @@ cdef extern from "solvers/lcp/lcp.h":
     stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
-            c_Game, int p_stopAfter, int p_maxDepth
-    ) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/lp/lp.h":
     stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError

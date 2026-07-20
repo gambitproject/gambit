@@ -143,21 +143,16 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
   linalg::LemkeTableau<T> tab(A, b);
   solution.eps = tab.Epsilon();
 
-  try {
-    tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
-    tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
-    solution.AddBFS(tab);
-    Vector<T> sol(tab.MinRow(), tab.MaxRow());
-    tab.BasisVector(sol);
-    MixedBehaviorProfile<T> profile(p_game);
-    GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
-    profile.UndefinedToCentroid();
-    solution.m_equilibria.push_back(profile);
-    this->m_onEquilibrium(profile, "NE");
-  }
-  catch (std::runtime_error &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-  }
+  tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
+  tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
+  solution.AddBFS(tab);
+  Vector<T> sol(tab.MinRow(), tab.MaxRow());
+  tab.BasisVector(sol);
+  MixedBehaviorProfile<T> profile(p_game);
+  GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
+  profile.UndefinedToCentroid();
+  solution.m_equilibria.push_back(profile);
+  this->m_onEquilibrium(profile, "NE");
   return solution.m_equilibria;
 }
 
