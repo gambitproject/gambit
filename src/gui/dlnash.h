@@ -33,6 +33,9 @@ class NashChoiceDialog final : public wxDialog {
   // Event handlers
   void OnCount(wxCommandEvent &);
   void OnMethod(wxCommandEvent &);
+  void UpdateRepresentationChoice();
+
+  NashComputationSpec GetComputation() const;
 
 public:
   NashChoiceDialog(wxWindow *, GameDocument *);
