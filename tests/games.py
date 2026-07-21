@@ -415,6 +415,24 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     return g
 
 
+def create_two_pair_infosets_efg() -> gbt.Game:
+    """Four decision nodes of player "1" in two labeled pair infosets.
+
+    Chance flips L/R; "1" moves at both depth-1 nodes (infoset "X") and again
+    after action "a" at each (infoset "Y"); all four nodes have actions ["a","b"].
+    With A,B the depth-1 nodes and C,D the depth-2 nodes, make_infoset([B,C],...)
+    leaves A and D as singleton rumps retaining "X" and "Y".
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="Two pair infosets")
+    g.append_move(g.root, g.players.chance, ["L", "R"])
+    g.append_move(list(g.root.children), "1", ["a", "b"])
+    g.root.children["L"].infoset.label = "X"
+    g.append_move([g.root.children["L"].children["a"],
+                   g.root.children["R"].children["a"]], "1", ["a", "b"])
+    g.root.children["L"].children["a"].infoset.label = "Y"
+    return g
+
+
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A

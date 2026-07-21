@@ -2163,6 +2163,9 @@ class Game:
         Revelation is a one-shot operation; it is not enforced with respect to any
         revisions made to the game tree subsequently.
 
+        .. versionchanged:: 17.0.0
+            Now implemented via `make_infoset`.
+
         Parameters
         ----------
         infoset : Infoset or str
@@ -2175,11 +2178,6 @@ class Game:
         MismatchError
             If `infoset` is an `Infoset` from a different game, or
             `player` is a `Player` from a different game.
-
-        .. versionchanged:: 17.0.0
-            Now implemented via `make_infoset`.  Revealing the move at an
-            absent-minded information set is no longer permitted.
-
         UndefinedOperationError
             If `infoset` is absent-minded.
         """

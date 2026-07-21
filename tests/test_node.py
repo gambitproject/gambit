@@ -602,10 +602,10 @@ def test_node_leave_infoset():
 
 
 def test_leave_infoset_sole_member_is_noop():
-    """Leaving a sinleton infoset is a no-op: infoset identity and label retained."""
+    """Leaving a singleton infoset is a no-op: infoset identity and label retained."""
     game = games.read_from_file("basic_extensive_game.efg")
     game.root.infoset.label = "solo"            # root is its infoset's only member
-    iset = game.root.infoset
+    iset = game.infosets["solo"]                # resolved Infoset, not a node-anchored proxy
     game.leave_infoset(game.root)
     assert game.root.infoset == iset
     assert game.root.infoset.label == "solo"
