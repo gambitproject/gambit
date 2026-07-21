@@ -1,4 +1,4 @@
-## [Unreleased]
+## [17.0.0] - unreleased
 
 ### Added
 - Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
