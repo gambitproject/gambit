@@ -127,9 +127,10 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 
 } // namespace
 
-std::list<MixedBehaviorProfile<double>> LiapAgentSolve(const MixedBehaviorProfile<double> &p_start,
-                                                       double p_maxregret, int p_maxitsN,
-                                                       BehaviorCallbackType<double> p_callback)
+std::list<MixedBehaviorProfile<double>>
+LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+               BehaviorCallbackType<double> p_onEquilibrium,
+               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -139,7 +140,7 @@ std::list<MixedBehaviorProfile<double>> LiapAgentSolve(const MixedBehaviorProfil
   std::list<MixedBehaviorProfile<double>> solutions;
 
   MixedBehaviorProfile<double> p(p_start);
-  p_callback(p, "start");
+  p_onEvent(LiapStartEvent<MixedBehaviorProfile<double>>{p});
 
   const AgentLyapunovFunction F(p);
   const Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
@@ -160,12 +161,13 @@ std::list<MixedBehaviorProfile<double>> LiapAgentSolve(const MixedBehaviorProfil
   }
 
   auto p2 = EnforceNonnegativity(p);
-  if (p2.GetAgentMaxRegret() * F.GetScale() < p_maxregret) {
-    p_callback(p2, "NE");
+  const double regret = p2.GetAgentMaxRegret() * F.GetScale();
+  if (regret < p_maxregret) {
+    p_onEquilibrium(p2, "NE");
     solutions.push_back(p2);
   }
   else {
-    p_callback(p2, "end");
+    p_onEvent(LiapEndEvent<MixedBehaviorProfile<double>>{p2, regret});
   }
   return solutions;
 }
