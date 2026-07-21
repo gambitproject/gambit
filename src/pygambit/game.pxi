@@ -2069,23 +2069,37 @@ class Game:
         c_iset.deref().SetLabel((label or "").encode("ascii"))
 
     def leave_infoset(self, node: Node | str):
-        """Remove this node from its information set. If this node is the only node
-        in its information set, this operation has no effect.
+        """Remove `node` from its information set, placing it in a new singleton.
+
+        If `node` is the only member of its information set, this is a no-op and
+        the information set (with its label) is unchanged.  Otherwise `node` is
+        placed in a new, unlabeled singleton information set belonging to the
+        same player; the label, if any, stays with the members left in the rump.
 
         .. versionchanged:: 17.0.0
-            Now implemented via `make_infoset` for personal decision nodes.
+            Now implemented via `make_infoset`.
 
         Parameters
         ----------
         node : Node or str
             The node to move to a new singleton information set.
+
+        Raises
+        ------
+        MismatchError
+            If `node` is a `Node` from a different game.
+        KeyError
+            If `node` is a string and no node in the game has that label.
+        TypeError
+            If `node` is neither a `Node` nor a `str`.
+        ValueError
+            If `node` is an empty string or all whitespace.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "leave_infoset"))
         if (
-            resolved_node.is_terminal                       # C++ silently no-ops
-            or resolved_node.infoset.player.is_chance       # chance: outside make_infoset's
-                                                            # domain; semantics untested (D5)
-            or len(resolved_node.infoset.members) == 1      # documented no-op, label retained
+            resolved_node.is_terminal
+            or resolved_node.infoset.player.is_chance
+            or len(resolved_node.infoset.members) == 1
         ):
             self.game.deref().LeaveInfoset(resolved_node.node)
             return
@@ -2096,30 +2110,43 @@ class Game:
     def set_infoset(self,
                     node: Node | str,
                     infoset: Infoset | str) -> None:
-        """Place `node` in the information set `infoset`.  `node` must have the same
-        number of descendants as `infoset` has actions.
+        """Place `node` in the information set `infoset`.
+
+        `node` must be a decision node with the same action labels as `infoset` in the same order
+        If `node` already belongs to `infoset`, this is a no-op.
+
+        .. versionchanged:: 17.0.0
+            Now implemented via `make_infoset`.  Two new requirements are now enforced:
+            - `node` must have the same actions as `infoset`: the same labels in the same order
+              (previously only the number of actions was checked);
+            - `node` must be a personal decision node.
+              Setting the information set of a terminal node or a chance node now raises.
 
         Parameters
         ----------
         node : Node or str
-            The node to set the information set
+            The node to place in the information set.
         infoset : Infoset or str
-            The information set to join
+            The information set to join.
 
         Raises
         ------
         MismatchError
-            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from
-            a different game.
-        .. versionchanged:: 17.0.0
-            Now implemented via `make_infoset`.  The node must have the same
-            actions as `infoset`, with the same labels in the same order;
-            previously only the number of actions was checked.
+            If `node` or `infoset` is from a different game.
+        KeyError
+            If `node` or `infoset` is a string matching no node or information
+            set in the game.
+        TypeError
+            If `node` or `infoset` is not an accepted type.
+        UndefinedOperationError
+            If `node` is a terminal node or a chance node.
+        ValueError
+            If `node`'s actions do not match `infoset`'s, with the same labels in the same order.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "set_infoset"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_infoset"))
         if resolved_node.infoset == resolved_infoset:
-            return                                          # preserve documented no-op
+            return
         self.make_infoset(list(resolved_infoset.members) + [resolved_node],
                           resolved_infoset.player.label,
                           resolved_infoset.label or None)

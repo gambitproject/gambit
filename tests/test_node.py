@@ -601,6 +601,30 @@ def test_node_leave_infoset():
     assert list(proxy.members) == [node]
 
 
+def test_leave_infoset_sole_member_is_noop():
+    """Leaving a sinleton infoset is a no-op: infoset identity and label retained."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.infoset.label = "solo"            # root is its infoset's only member
+    iset = game.root.infoset
+    game.leave_infoset(game.root)
+    assert game.root.infoset == iset
+    assert game.root.infoset.label == "solo"
+
+
+def test_leave_infoset_from_shared_infoset_relabels():
+    """Leaving a multi-node infoset places the node in a new unlabeled singleton,
+    while the original infoset keeps its label with the members left behind."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    sibling = game.root.children["D1"]
+    node.infoset.label = "multi"
+    assert len(node.infoset.members) == 2       # precondition: a multi-node infoset
+    game.leave_infoset(node)
+    assert node.infoset.label == ""             # departing node: fresh unlabeled singleton
+    assert sibling.infoset.label == "multi"     # label stays with the rump
+    assert list(sibling.infoset.members) == [sibling]
+
+
 def test_node_infoset_becomes_null_when_truncated():
     """A captured infoset proxy re-resolves to null after the node is truncated to a leaf."""
     game = games.read_from_file("basic_extensive_game.efg")

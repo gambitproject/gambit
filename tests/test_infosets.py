@@ -314,3 +314,66 @@ def test_make_infoset_across_different_source_players():
     assert n2.infoset == n3.infoset
     assert n2.infoset.player == game.players["1"]
     assert n3.infoset.player == game.players["1"]
+
+
+def test_set_infoset_joins_node_to_infoset():
+    """A node joins the target infoset, adopting its player and label."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    game.add_player("Player 3")
+    # Two same-shape nodes under different players; put one into the other's infoset.
+    a = game.root.children["1"].children["1"]
+    game.append_move(a, "Player 3", ["x", "y"])
+    b = game.root.children["2"].children["1"]
+    game.append_move(b, "Player 3", ["x", "y"])
+    a.infoset.label = "target"
+    game.set_infoset(b, a.infoset)
+    assert b.infoset == a.infoset
+    assert b.infoset.label == "target"
+    assert b.infoset.player == game.players["Player 3"]
+
+
+@pytest.mark.parametrize("node_actions", [["c", "d"], ["b", "a"]])
+def test_set_infoset_requires_matching_action_labels(node_actions):
+    """`node`'s actions must match `infoset`'s in label and order; a matching
+    count is no longer sufficient (was the only check before 17.0)."""
+    game = gbt.Game.new_tree(players=["1"])
+    game.append_move(game.root, "1", ["a", "b"])
+    game.append_move(game.root.children["a"], "1", node_actions)
+    with pytest.raises(ValueError):
+        game.set_infoset(game.root.children["a"], game.root.infoset)
+
+
+def test_set_infoset_terminal_node_raises():
+    """Setting the infoset of a terminal node now raises (was a silent no-op before 17.0)."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["U2"].children["U3"]
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_infoset(terminal, game.root.infoset)
+
+
+def test_set_infoset_chance_node_raises():
+    """A chance node cannot be placed in a personal infoset (newly enforced in 17.0)."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    chance_node = game.root            # the deal is a chance move
+    personal = next(n for n in game.nodes if not n.is_terminal and not n.infoset.is_chance)
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_infoset(chance_node, personal.infoset)
+
+
+def test_set_infoset_already_member_is_noop():
+    """Placing a node in the infoset it already belongs to is a no-op."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    node = game.root.children["1"]
+    node.infoset.label = "keep"
+    members = list(node.infoset.members)
+    game.set_infoset(node, node.infoset)
+    assert node.infoset.label == "keep"
+    assert list(node.infoset.members) == members
+
+
+def test_set_infoset_mismatch_raises():
+    """`node` and `infoset` must belong to this game."""
+    game1 = games.read_from_file("basic_extensive_game.efg")
+    game2 = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.MismatchError):
+        game1.set_infoset(game1.root, game2.root.infoset)
