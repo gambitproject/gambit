@@ -224,8 +224,8 @@ namespace Gambit::Nash {
 
 std::list<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
-                      EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
-                      EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
+                      BehaviorCallbackType<double> p_onEquilibrium,
+                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent)
 {
   const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
   if (scale != 0.0) {
@@ -236,7 +236,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   auto possible_supports = PossibleNashBehaviorSupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
-    p_onSupport("candidate", support);
+    p_onEvent(EnumPolyCandidateSupportEvent<BehaviorSupportProfile>{support});
     bool isSingular = false;
     for (const auto &solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0),
@@ -245,7 +245,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
       ret.push_back(solution);
     }
     if (isSingular) {
-      p_onSupport("singular", support);
+      p_onEvent(EnumPolySingularSupportEvent<BehaviorSupportProfile>{support});
     }
     if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;

@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <type_traits>
 #include <getopt.h>
 #include "gambit.h"
 #include "tools/util.h"
@@ -29,6 +30,22 @@
 
 using namespace Gambit;
 using namespace Gambit::Nash;
+
+template <class Renderer, class Profile>
+void RenderLiapEvent(const Renderer &p_renderer, const LiapEvent<Profile> &p_event)
+{
+  std::visit(
+      [&](const auto &event) {
+        using EventType = std::decay_t<decltype(event)>;
+        if constexpr (std::is_same_v<EventType, LiapStartEvent<Profile>>) {
+          p_renderer->Render(event.profile, "start");
+        }
+        else if constexpr (std::is_same_v<EventType, LiapEndEvent<Profile>>) {
+          p_renderer->Render(event.profile, "end");
+        }
+      },
+      p_event);
+}
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -221,13 +238,16 @@ int main(int argc, char *argv[])
 
       for (size_t i = 1; i <= starts.size(); i++) {
         auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
-        LiapStrategySolve(starts[i], maxregret, maxitsN,
-                          [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
-                                              const std::string &p_label) {
-                            if (p_label == "NE" || verbose) {
-                              renderer->Render(p_profile, p_label);
-                            }
-                          });
+        LiapStrategySolve(
+            starts[i], maxregret, maxitsN,
+            [renderer](const MixedStrategyProfile<double> &p_profile) {
+              renderer->Render(p_profile);
+            },
+            [renderer, verbose](const LiapEvent<MixedStrategyProfile<double>> &event) {
+              if (verbose) {
+                RenderLiapEvent(renderer, event);
+              }
+            });
       }
     }
     else {
@@ -243,13 +263,16 @@ int main(int argc, char *argv[])
 
       for (size_t i = 1; i <= starts.size(); i++) {
         auto renderer = MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, false);
-        LiapAgentSolve(starts[i], maxregret, maxitsN,
-                       [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
-                                           const std::string &p_label) {
-                         if (p_label == "NE" || verbose) {
-                           renderer->Render(p_profile, p_label);
-                         }
-                       });
+        LiapAgentSolve(
+            starts[i], maxregret, maxitsN,
+            [renderer](const MixedBehaviorProfile<double> &p_profile) {
+              renderer->Render(p_profile);
+            },
+            [renderer, verbose](const LiapEvent<MixedBehaviorProfile<double>> &event) {
+              if (verbose) {
+                RenderLiapEvent(renderer, event);
+              }
+            });
       }
     }
     return 0;

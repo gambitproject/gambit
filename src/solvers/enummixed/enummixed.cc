@@ -176,7 +176,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
         }
         eqm = eqm.Normalize();
         solution->m_extremeEquilibria.push_back(eqm);
-        p_onEquilibrium(eqm, "NE");
+        p_onEquilibrium(eqm);
 
         // note: The keys give the mixed strategy associated with each node.
         //       The keys should also keep track of the basis
