@@ -25,9 +25,8 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/tokenzr.h>
-
 #include "gambit.h"
-#include "core/tinyxml.h" // for XML parser for Load()
+#include "games/workspace.h"
 
 #include "analysis.h"
 #include "gamedoc.h"
@@ -37,77 +36,22 @@ namespace Gambit::GUI {
 //                     class AnalysisProfileList
 //=========================================================================
 
-// Use anonymous namespace to make these helpers private
-namespace {
-
-class NotNashException final : public std::runtime_error {
-public:
-  NotNashException() : std::runtime_error("Output line does not contain a Nash equilibrium") {}
-  ~NotNashException() noexcept override = default;
-};
-
 template <class T>
-MixedStrategyProfile<T> OutputToMixedProfile(GameDocument *p_doc, const wxString &p_text)
+void AnalysisProfileList<T>::AddProfile(const MixedStrategyProfile<T> &p_profile)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile(static_cast<T>(0.0)));
-
-  if (wxStringTokenizer tok(p_text, wxT(",")); tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == static_cast<unsigned int>(profile.MixedProfileLength())) {
-      for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-        profile[i] =
-            lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
+  m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile));
+  if (m_doc->GetGame()->IsTree()) {
+    m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
   }
-
-  throw NotNashException();
+  m_current = m_mixedProfiles.size();
 }
 
 template <class T>
-MixedBehaviorProfile<T> OutputToBehavProfile(GameDocument *p_doc, const wxString &p_text)
+void AnalysisProfileList<T>::AddProfile(const MixedBehaviorProfile<T> &p_profile)
 {
-  MixedBehaviorProfile<T> profile(p_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == static_cast<unsigned int>(profile.BehaviorProfileLength())) {
-      for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-        profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
-      }
-      return profile;
-    }
-  }
-
-  throw NotNashException();
-}
-
-} // end anonymous namespace
-
-template <class T> void AnalysisProfileList<T>::AddOutput(const wxString &p_output)
-{
-  try {
-    if (m_isBehav) {
-      auto profile =
-          std::make_shared<MixedBehaviorProfile<T>>(OutputToBehavProfile<T>(m_doc, p_output));
-      m_behavProfiles.push_back(profile);
-      m_mixedProfiles.push_back(
-          std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
-      m_current = m_behavProfiles.size();
-    }
-    else {
-      auto profile =
-          std::make_shared<MixedStrategyProfile<T>>(OutputToMixedProfile<T>(m_doc, p_output));
-      m_mixedProfiles.push_back(profile);
-      if (m_doc->GetGame()->IsTree()) {
-        m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(*profile));
-      }
-      m_current = m_mixedProfiles.size();
-    }
-  }
-  catch (NotNashException &) {
-  }
+  m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
+  m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile.ToMixedProfile()));
+  m_current = m_behavProfiles.size();
 }
 
 template <class T> void AnalysisProfileList<T>::BuildNfg()
@@ -166,30 +110,23 @@ MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &
 
 } // end anonymous namespace
 
-//
-// Load a profile list from XML.  Pass a node pointing to an
-// <analysis> entry in the workbook file
-//
-template <class T> void AnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
+// Load a profile list from the neutral workspace representation.
+template <class T>
+void AnalysisProfileList<T>::Load(const LegacyWorkspaceFile::Analysis &p_analysis)
 {
   Clear();
-
-  if (TiXmlNode *description = p_analysis->FirstChild("description")) {
-    m_description = wxString(description->FirstChild()->Value(), *wxConvCurrent);
-  }
-
-  for (TiXmlNode *node = p_analysis->FirstChild("profile"); node;
-       node = node->NextSiblingElement()) {
-    if (const char *type = node->ToElement()->Attribute("type"); !strcmp(type, "behav")) {
-      const MixedBehaviorProfile<T> profile =
-          TextToBehavProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
+  m_description = wxString(p_analysis.description.c_str(), *wxConvCurrent);
+  for (const auto &saved_profile : p_analysis.profiles) {
+    if (saved_profile.type == "behav") {
+      const MixedBehaviorProfile<T> profile = TextToBehavProfile<T>(
+          m_doc, wxString(saved_profile.probabilities.c_str(), *wxConvCurrent));
       m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
       m_isBehav = true;
       m_current = m_behavProfiles.size();
     }
     else {
-      const MixedStrategyProfile<T> profile =
-          TextToMixedProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
+      const MixedStrategyProfile<T> profile = TextToMixedProfile<T>(
+          m_doc, wxString(saved_profile.probabilities.c_str(), *wxConvCurrent));
       m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile));
       m_isBehav = false;
       m_current = m_mixedProfiles.size();
@@ -409,47 +346,37 @@ std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index
   }
 }
 
-template <class T> void AnalysisProfileList<T>::Save(std::ostream &p_file) const
+template <class T> LegacyWorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 {
-  p_file << "<analysis type=\"list\">\n";
-
-  p_file << "<description>\n";
-  p_file << static_cast<const char *>(m_description.mb_str()) << "\n";
-  p_file << "</description>\n";
-
+  LegacyWorkspaceFile::Analysis result;
+  result.description = m_description.ToStdString();
   if (m_doc->GetGame()->IsTree()) {
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
-      p_file << "<profile type=\"behav\">\n";
+      std::ostringstream probabilities;
       for (size_t k = 1; k <= behav.BehaviorProfileLength(); k++) {
-        p_file << behav[k];
-        if (k < behav.BehaviorProfileLength()) {
-          p_file << ",";
+        if (k > 1) {
+          probabilities << ',';
         }
-        else {
-          p_file << "\n";
-        }
+        probabilities << behav[k];
       }
-      p_file << "</profile>\n";
+      result.profiles.push_back({"behav", probabilities.str()});
     }
   }
   else {
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedStrategyProfile<T> &mixed = *m_mixedProfiles[j];
-      p_file << "<profile type=\"mixed\">\n";
+      std::ostringstream probabilities;
       for (size_t k = 1; k <= mixed.MixedProfileLength(); k++) {
-        p_file << mixed[k];
-        if (k < mixed.MixedProfileLength()) {
-          p_file << ",";
+        if (k > 1) {
+          probabilities << ',';
         }
-        else {
-          p_file << "\n";
-        }
+        probabilities << mixed[k];
       }
-      p_file << "</profile>\n";
+      result.profiles.push_back({"mixed", probabilities.str()});
     }
   }
-  p_file << "</analysis>\n";
+  return result;
 }
 
 // Explicit instantiations

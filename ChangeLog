@@ -10,6 +10,13 @@
   the same actions as the target information set, with the same labels in the same order
   (previously only the number of actions was checked).  `reveal` now raises at
   absent-minded information sets.
+- `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
+  to match the behaviour of all other Nash equilibrium solvers.  (#996)
+- `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of
+  the run.  (#998)
+- Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
+  removes dependency on tinyxml.  (#897)
+
 
 ## [16.7.0] - 2026-07-11
 

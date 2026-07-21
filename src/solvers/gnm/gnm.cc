@@ -58,9 +58,8 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
   };
   GNM(*p_rep, norm_pert, answers, p_steps, FUZZ, p_localNewtonInterval, p_localNewtonMaxits,
       p_lambdaEnd, WOBBLE, THRESHOLD, callback, return_message);
-  for (auto answer : answers) {
+  for (const auto &answer : answers) {
     eqa.push_back(ToProfile(p_game, answer));
-    p_callback(eqa.back(), "NE");
   }
   return eqa;
 }

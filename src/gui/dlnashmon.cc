@@ -25,49 +25,308 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/txtstrm.h>
+#include <wx/process.h>
+#include <wx/tokenzr.h>
+#include <cstring>
+#include <optional>
+#include <variant>
+#include "wx/sheet/sheet.h"
 
-#include "dlnashmon.h"
 #include "gamedoc.h"
 
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
-namespace Gambit::GUI {
-constexpr int GBT_ID_TIMER = 1000;
-constexpr int GBT_ID_PROCESS = 1001;
+using namespace Gambit;
+using namespace Gambit::GUI;
 
-BEGIN_EVENT_TABLE(NashMonitorDialog, wxDialog)
-EVT_END_PROCESS(GBT_ID_PROCESS, NashMonitorDialog::OnEndProcess)
-EVT_IDLE(NashMonitorDialog::OnIdle)
-EVT_TIMER(GBT_ID_TIMER, NashMonitorDialog::OnTimer)
-END_EVENT_TABLE()
+namespace {
+
+wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_PROFILE, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_PROFILE, wxThreadEvent);
+
+wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
+
+using ComputedProfile = std::variant<MixedStrategyProfile<double>, MixedStrategyProfile<Rational>,
+                                     MixedBehaviorProfile<double>, MixedBehaviorProfile<Rational>>;
+
+template <class T>
+void AddProfile(AnalysisOutput &p_output, const MixedStrategyProfile<T> &p_profile)
+{
+  dynamic_cast<AnalysisProfileList<T> &>(p_output).AddProfile(p_profile);
+}
+
+template <class T>
+void AddProfile(AnalysisOutput &p_output, const MixedBehaviorProfile<T> &p_profile)
+{
+  dynamic_cast<AnalysisProfileList<T> &>(p_output).AddProfile(p_profile);
+}
+
+class ExternalProcessRunner final : public wxEvtHandler {
+  wxEvtHandler *m_parent;
+  Game m_game;
+  const AnalysisOutput &m_output;
+  wxProcess *m_process{nullptr};
+  long m_pid{0};
+  wxTimer m_timer;
+  wxString m_pending;
+
+  void OnTimer(wxTimerEvent &)
+  {
+    ReadAvailableOutput();
+    if (m_process) {
+      m_timer.StartOnce(1000);
+    }
+  }
+
+  void OnEndProcess(wxProcessEvent &p_event)
+  {
+    m_timer.Stop();
+    ReadAvailableOutput();
+    FlushPendingLine();
+
+    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
+    evt->SetInt(p_event.GetExitCode());
+    wxQueueEvent(m_parent, evt);
+
+    delete m_process;
+    m_process = nullptr;
+    m_pid = 0;
+  }
+
+  template <class T> std::optional<ComputedProfile> ParseProfile(const wxString &p_line) const
+  {
+    wxStringTokenizer tokens(p_line, wxT(","));
+    if (tokens.GetNextToken() != wxT("NE")) {
+      return std::nullopt;
+    }
+
+    if (m_output.IsBehavior()) {
+      MixedBehaviorProfile<T> profile(m_game);
+      if (tokens.CountTokens() != profile.BehaviorProfileLength()) {
+        return std::nullopt;
+      }
+      for (size_t i = 1; i <= profile.BehaviorProfileLength(); ++i) {
+        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+      }
+      return ComputedProfile(std::move(profile));
+    }
+    else {
+      auto profile = m_game->NewMixedStrategyProfile(static_cast<T>(0));
+      if (tokens.CountTokens() != profile.MixedProfileLength()) {
+        return std::nullopt;
+      }
+      for (size_t i = 1; i <= profile.MixedProfileLength(); ++i) {
+        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+      }
+      return ComputedProfile(std::move(profile));
+    }
+  }
+
+  void ProcessLine(const wxString &p_line) const
+  {
+    try {
+      std::optional<ComputedProfile> profile;
+      if (dynamic_cast<const AnalysisProfileList<double> *>(&m_output)) {
+        profile = ParseProfile<double>(p_line);
+      }
+      else if (dynamic_cast<const AnalysisProfileList<Rational> *>(&m_output)) {
+        profile = ParseProfile<Rational>(p_line);
+      }
+      if (!profile) {
+        return;
+      }
+
+      auto *event = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_PROFILE);
+      event->SetPayload(std::move(*profile));
+      wxQueueEvent(m_parent, event);
+    }
+    catch (const std::exception &) {
+    }
+  }
+
+  void FlushPendingLine()
+  {
+    if (!m_pending.empty()) {
+      ProcessLine(m_pending);
+      m_pending.clear();
+    }
+  }
+
+public:
+  enum class RunnerStartResult { Ok, LaunchFailed, NoOutputPipe, StdinWriteFailed };
+
+  ExternalProcessRunner(wxEvtHandler *p_parent, const Game &p_game, const AnalysisOutput &p_output)
+    : m_parent(p_parent), m_game(p_game), m_output(p_output), m_timer(this)
+  {
+    Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this);
+    Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
+  }
+
+  ~ExternalProcessRunner() override
+  {
+    m_timer.Stop();
+    if (m_process) {
+      delete m_process;
+    }
+  }
+
+  RunnerStartResult Start(const wxString &p_command, const wxString &p_stdin)
+  {
+    m_process = new wxProcess(this);
+    m_process->Redirect();
+    m_pid = wxExecute(p_command, wxEXEC_ASYNC, m_process);
+    if (m_pid == 0) {
+      delete m_process;
+      m_process = nullptr;
+      return RunnerStartResult::LaunchFailed;
+    }
+
+    const auto out = m_process->GetOutputStream();
+    if (!out || !out->IsOk()) {
+      Stop();
+      return RunnerStartResult::NoOutputPipe;
+    }
+
+    const wxScopedCharBuffer bytes = p_stdin.utf8_str();
+    const char *data = bytes.data();
+
+    if (const size_t len = std::strlen(data); !out->WriteAll(data, len)) {
+      Stop();
+      return RunnerStartResult::StdinWriteFailed;
+    }
+    m_process->CloseOutput();
+    m_timer.StartOnce(1000);
+    return RunnerStartResult::Ok;
+  }
+
+  bool Stop()
+  {
+    m_timer.Stop();
+    if (!m_process || m_pid == 0) {
+      return false;
+    }
+#ifdef __WXMSW__
+    constexpr wxSignal signal = wxSIGKILL;
+#else
+    constexpr wxSignal signal = wxSIGTERM;
+#endif
+
+    switch (const auto rc = wxProcess::Kill(m_pid, signal)) {
+    case wxKILL_OK:
+      return true;
+    case wxKILL_NO_PROCESS:
+      m_pid = 0;
+      return false;
+    default:
+      return false;
+    }
+  }
+
+  void ReadAvailableOutput()
+  {
+    if (!m_process || !m_process->IsInputAvailable()) {
+      return;
+    }
+
+    wxInputStream *stream = m_process->GetInputStream();
+
+    while (m_process->IsInputAvailable()) {
+      char ch;
+      stream->Read(&ch, 1);
+      if (stream->LastRead() != 1) {
+        break;
+      }
+
+      if (ch == '\n') {
+        ProcessLine(m_pending);
+        m_pending.clear();
+      }
+      else if (ch != '\r') {
+        m_pending += ch;
+      }
+    }
+  }
+};
+
+class NashMonitorDialog final : public wxDialog {
+  GameDocument *m_doc;
+  std::unique_ptr<class ExternalProcessRunner> m_runner;
+  wxWindow *m_profileList;
+  wxStaticText *m_statusText, *m_countText;
+  wxButton *m_stopButton, *m_okButton;
+  std::shared_ptr<AnalysisOutput> m_output;
+  bool m_stopRequested{false};
+
+  void Start(const std::shared_ptr<AnalysisOutput> &p_command);
+
+  void OnClose(wxCloseEvent &);
+  void OnStop(wxCommandEvent &);
+  void OnRunnerProfile(wxThreadEvent &);
+  void OnRunnerFinished(wxThreadEvent &);
+
+  void SetStatusRunning() const
+  {
+    m_statusText->SetLabel(wxT("The computation is currently in progress."));
+    m_statusText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    m_stopButton->Enable(true);
+    m_okButton->Enable(false);
+  }
+  void SetStatusStopping() const
+  {
+    m_statusText->SetLabel(wxT("Stopping computation..."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+    m_stopButton->Enable(false);
+  }
+  void SetStatusStopped() const
+  {
+    m_statusText->SetLabel(wxT("The computation has been stopped."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+  void SetStatusFinishedNormally() const
+  {
+    m_statusText->SetLabel(wxT("The computation has completed."));
+    m_statusText->SetForegroundColour(wxColour(0, 192, 0));
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+  void SetStatusFinishedAbnormally(const wxString &p_message) const
+  {
+    m_statusText->SetLabel(p_message);
+    m_statusText->SetForegroundColour(*wxRED);
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+
+public:
+  NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                    const std::shared_ptr<AnalysisOutput> &p_command);
+};
 
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER), m_output(p_command)
+    m_doc(p_doc), m_output(p_command)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusText =
-      new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
-  m_statusText->SetForegroundColour(*wxBLUE);
+  m_statusText = new wxStaticText(this, wxID_STATIC, "The computation is currently in progress.");
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
+  m_stopButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(stop_xpm));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
-
-  Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(NashMonitorDialog::OnStop));
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -77,23 +336,27 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   else {
     m_profileList = new MixedStrategyProfileList(this, m_doc);
   }
-  m_profileList->SetSizeHints(wxSize(500, 300));
+  m_profileList->SetMinSize(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
 
-  m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
-  sizer->Add(m_okButton, 0, wxALL | wxALIGN_RIGHT, 5);
+  auto *buttonSizer = CreateStdDialogButtonSizer(wxOK);
+  sizer->Add(buttonSizer, 0, wxALL | wxEXPAND, 5);
+  m_okButton = dynamic_cast<wxButton *>(FindWindow(wxID_OK));
   m_okButton->Enable(false);
 
-  SetSizer(sizer);
-  sizer->Fit(this);
+  SetSizerAndFit(sizer);
   sizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
   CenterOnParent();
+
+  Bind(wxEVT_EXTERNAL_RUNNER_PROFILE, &NashMonitorDialog::OnRunnerProfile, this);
+  Bind(wxEVT_EXTERNAL_RUNNER_FINISHED, &NashMonitorDialog::OnRunnerFinished, this);
+  m_stopButton->Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this);
+  Bind(wxEVT_CLOSE_WINDOW, &NashMonitorDialog::OnClose, this);
 
   Start(p_command);
 }
 
-void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
+void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
@@ -102,11 +365,6 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
 
   m_doc->DoAddEquilibriumOutput(p_command);
 
-  m_process = new wxProcess(this, GBT_ID_PROCESS);
-  m_process->Redirect();
-
-  m_pid = wxExecute(p_command->GetCommand(), wxEXEC_ASYNC, m_process);
-
   std::ostringstream s;
   if (p_command->IsBehavior()) {
     m_doc->GetGame()->Write(s, "efg");
@@ -114,100 +372,86 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
   else {
     m_doc->GetGame()->Write(s, "nfg");
   }
-  wxString str(wxString(s.str().c_str(), *wxConvCurrent));
 
-  // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If this doesn't
-  // complete the whole way, we take a 100-millisecond siesta and try
-  // again.  (This seems to primarily be an issue with -- you guessed it --
-  // Windows!)
-  while (str.length() > 0) {
-    wxTextOutputStream os(*m_process->GetOutputStream());
-
-    // It appears that (at least with mingw) the string itself contains
-    // only '\n' for newlines.  If we don't SetMode here, these get
-    // converted to '\r\n' sequences, and so the number of characters
-    // LastWrite() returns does not match the number of characters in
-    // our string.  Setting this explicitly solves this problem.
-    os.SetMode(wxEOL_UNIX);
-    os.WriteString(str);
-    str.Remove(0, m_process->GetOutputStream()->LastWrite());
-    wxMilliSleep(100);
+  m_runner = std::make_unique<ExternalProcessRunner>(this, m_doc->GetGame(), *m_output);
+  switch (const auto result = m_runner->Start(p_command->GetCommand(),
+                                              wxString(s.str().c_str(), *wxConvCurrent))) {
+  case ExternalProcessRunner::RunnerStartResult::Ok:
+    SetStatusRunning();
+    break;
+  case ExternalProcessRunner::RunnerStartResult::LaunchFailed:
+    SetStatusFinishedAbnormally("Failed to launch solver.");
+    break;
+  case ExternalProcessRunner::RunnerStartResult::NoOutputPipe:
+    SetStatusFinishedAbnormally("Solver launched, but I/O redirection failed.");
+    break;
+  case ExternalProcessRunner::RunnerStartResult::StdinWriteFailed:
+    SetStatusFinishedAbnormally("Failed to send input to solver.");
+    break;
   }
-  m_process->CloseOutput();
-
-  m_stopButton->Enable(true);
-
-  m_timer.Start(1000, false);
 }
 
-void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
+void NashMonitorDialog::OnRunnerProfile(wxThreadEvent &p_event)
 {
-  if (!m_process) {
+  const auto &profile = p_event.GetPayload<ComputedProfile>();
+  std::visit([this](const auto &p) { AddProfile(*m_output, p); }, profile);
+  m_doc->DoAnalysisOutputChanged();
+  wxString label;
+  label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+  m_countText->SetLabel(label);
+}
+
+void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
+{
+  m_stopButton->Enable(false);
+
+  if (m_stopRequested) {
+    SetStatusStopped();
+  }
+  else if (p_event.GetInt() == 0) {
+    SetStatusFinishedNormally();
+  }
+  else {
+    SetStatusFinishedAbnormally(
+        wxString::Format("The computation ended abnormally (code %d)", p_event.GetInt()));
+  }
+}
+
+void NashMonitorDialog::OnStop(wxCommandEvent &)
+{
+  m_stopRequested = true;
+  SetStatusStopping();
+  m_runner->Stop();
+}
+
+void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
+{
+  if (!m_runner || !m_stopButton->IsEnabled()) {
+    p_event.Skip();
     return;
   }
 
-  if (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
+  m_stopRequested = true;
+  SetStatusStopping();
+  m_runner->Stop();
 
-    wxString msg;
-    msg << tis.ReadLine();
-
-    m_doc->DoAddOutput(*m_output, msg);
-    wxString label;
-    label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
-    m_countText->SetLabel(label);
-    p_event.RequestMore();
+  if (p_event.CanVeto()) {
+    p_event.Veto();
   }
   else {
-    m_timer.Start(1000, false);
+    p_event.Skip();
   }
 }
 
-void NashMonitorDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
+} // anonymous namespace
 
-void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
+namespace Gambit::GUI {
+
+void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                           const std::shared_ptr<AnalysisOutput> &p_command)
 {
-  m_stopButton->Enable(false);
-  m_timer.Stop();
-
-  while (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    if (!msg.empty()) {
-      m_doc->DoAddOutput(*m_output, msg);
-      wxString label;
-      label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
-      m_countText->SetLabel(label);
-    }
-  }
-
-  if (p_event.GetExitCode() == 0) {
-    m_statusText->SetLabel(wxT("The computation has completed."));
-    m_statusText->SetForegroundColour(wxColour(0, 192, 0));
-  }
-  else {
-    m_statusText->SetLabel(wxT("The computation ended abnormally."));
-    m_statusText->SetForegroundColour(*wxRED);
-  }
-
-  m_okButton->Enable(true);
+  NashMonitorDialog dialog(p_parent, p_doc, p_command);
+  dialog.ShowModal();
 }
 
-void NashMonitorDialog::OnStop(wxCommandEvent &p_event)
-{
-  // Per the wxWidgets wiki, under Windows, programs that run
-  // without a console window don't respond to the more polite
-  // SIGTERM, so instead we must be rude and SIGKILL it.
-  m_stopButton->Enable(false);
-
-#ifdef __WXMSW__
-  wxProcess::Kill(m_pid, wxSIGKILL);
-#else
-  wxProcess::Kill(m_pid, wxSIGTERM);
-#endif // __WXMSW__
-}
 } // namespace Gambit::GUI

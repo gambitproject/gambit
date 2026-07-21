@@ -223,11 +223,7 @@ core_SOURCES = \
 	src/core/rational.h \
 	src/core/matrix.cc \
 	src/core/function.cc \
-	src/core/function.h \
-	src/core/tinyxml.cc \
-	src/core/tinyxmlerror.cc \
-	src/core/tinyxmlparser.cc \
-	src/core/tinyxml.h
+	src/core/function.h
 
 agg_SOURCES = \
 	src/games/gameagg.cc \
@@ -270,6 +266,8 @@ game_SOURCES = \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
 	src/games/file.cc \
+	src/games/workspace.cc \
+	src/games/workspace.h \
 	src/games/writer.cc \
 	src/games/writer.h \
 	src/games/layout.cc \
@@ -498,7 +496,6 @@ gambit_SOURCES = \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
-	src/gui/dlnashmon.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
 	src/gui/dlnfglogit.cc \

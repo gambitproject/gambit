@@ -57,20 +57,6 @@ ToMixedBehaviorProfile(const std::list<MixedStrategyProfile<T>> &p_list)
   return ret;
 }
 
-template <class T>
-using BehaviorSolverType = std::function<std::list<MixedBehaviorProfile<T>>(const Game &)>;
-
-//
-// Exception raised when maximum number of equilibria to compute
-// has been reached.  A convenience for unraveling a potentially
-// deep recursion.
-//
-class EquilibriumLimitReached : public std::runtime_error {
-public:
-  EquilibriumLimitReached() : std::runtime_error("Reached target number of equilibria") {}
-  ~EquilibriumLimitReached() noexcept override = default;
-};
-
 } // namespace Gambit::Nash
 
 #endif // LIBGAMBIT_NASH_H

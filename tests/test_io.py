@@ -81,6 +81,40 @@ def test_read_gbt_invalid():
         gbt.read_gbt(game_path)
 
 
+def test_read_gbt_workspace(tmp_path):
+    game_path = tmp_path / "game.gbt"
+    game_path.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<gambit:document xmlns:gambit="http://gambit.sourceforge.net/" version="0.1">
+  <numbers decimals="4"/>
+  <game>
+    <nfgfile>
+NFG 1 R "Prisoner's <Dilemma> & test" { "Alice" "Bob" }
+{ { "Cooperate" "Defect" } { "Cooperate" "Defect" } }
+""
+3 3 0 5 5 0 1 1
+    </nfgfile>
+  </game>
+</gambit:document>
+"""
+    )
+
+    game = gbt.read_gbt(game_path)
+
+    assert game.title == "Prisoner's <Dilemma> & test"
+    assert [player.label for player in game.players] == ["Alice", "Bob"]
+
+
+def test_read_gbt_rejects_malformed_xml(tmp_path):
+    game_path = tmp_path / "malformed.gbt"
+    game_path.write_text(
+        "<gambit:document><game><nfgfile>NFG 1 R</game></gambit:document>"
+    )
+
+    with pytest.raises(ValueError):
+        gbt.read_gbt(game_path)
+
+
 def test_write_efg():
     game = gbt.Game.new_tree()
     serialized_game = game.to_efg()
