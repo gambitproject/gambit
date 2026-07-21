@@ -56,7 +56,7 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
   for (const auto &profile : StrategyContingencies(p_game)) {
     if (IsNash(profile)) {
       solutions.push_back(profile->ToMixedStrategyProfile());
-      p_onEquilibrium(solutions.back(), "NE");
+      p_onEquilibrium(solutions.back());
     }
   }
   return solutions;
@@ -95,7 +95,7 @@ EnumPureAgentSolve(const Game &p_game,
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (IsAgentNash(citer)) {
       solutions.push_back(citer.ToMixedBehaviorProfile());
-      p_onEquilibrium(solutions.back(), "NE");
+      p_onEquilibrium(solutions.back());
     }
   }
   return solutions;

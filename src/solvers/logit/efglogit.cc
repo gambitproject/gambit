@@ -343,7 +343,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
   const auto &profiles = callback.GetProfiles();
-  p_onEquilibrium(profiles.back().GetProfile(), "NE");
+  p_onEquilibrium(profiles.back().GetProfile());
   return profiles;
 }
 

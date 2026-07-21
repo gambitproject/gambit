@@ -67,7 +67,7 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
 
   std::list<MixedStrategyProfile<double>> solutions;
   solutions.push_back(ToProfile(p_pert.GetGame(), ans));
-  p_onEquilibrium(solutions.back(), "NE");
+  p_onEquilibrium(solutions.back());
   return solutions;
 }
 

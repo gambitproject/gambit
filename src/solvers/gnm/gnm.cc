@@ -58,7 +58,7 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
                                                        const cvector &sigma) {
     const auto profile = ToProfile(p_game, sigma);
     if (label == "NE") {
-      p_onEquilibrium(profile, label);
+      p_onEquilibrium(profile);
     }
     else if (label == "start") {
       p_onEvent(Nash::GNMStartEvent{profile});

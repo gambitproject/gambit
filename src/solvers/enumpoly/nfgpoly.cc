@@ -158,7 +158,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
              support, is_singular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
       const MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
-        p_onEquilibrium(fullProfile, "NE");
+        p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }
     }

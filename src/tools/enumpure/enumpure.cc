@@ -125,12 +125,12 @@ int main(int argc, char *argv[])
     }
 
     if (game->IsTree() && solveAgent) {
-      EnumPureAgentSolve(game, [&](const MixedBehaviorProfile<Rational> &p,
-                                   const std::string &label) { renderer->Render(p, label); });
+      EnumPureAgentSolve(game,
+                         [&](const MixedBehaviorProfile<Rational> &p) { renderer->Render(p); });
     }
     else {
-      EnumPureStrategySolve(game, [&](const MixedStrategyProfile<Rational> &p,
-                                      const std::string &label) { renderer->Render(p, label); });
+      EnumPureStrategySolve(game,
+                            [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); });
     }
     return 0;
   }

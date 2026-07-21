@@ -519,7 +519,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
     }
   }
 
-  m_onEquilibrium(y, "NE");
+  m_onEquilibrium(y);
   std::list<MixedStrategyProfile<Rational>> sol;
   sol.push_back(y);
   return sol;

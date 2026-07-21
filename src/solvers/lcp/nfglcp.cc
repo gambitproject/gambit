@@ -203,7 +203,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
     }
   }
 
-  m_onEquilibrium(profile, "NE");
+  m_onEquilibrium(profile);
   p_solution.m_equilibria.push_back(profile);
 
   if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {

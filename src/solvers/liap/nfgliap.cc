@@ -168,7 +168,7 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   p = EnforceNonnegativity(p);
   const double regret = p.GetMaxRegret() * F.GetScale();
   if (regret < p_maxregret) {
-    p_onEquilibrium(p, "NE");
+    p_onEquilibrium(p);
     solutions.push_back(p);
   }
   else {

@@ -163,7 +163,7 @@ LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, 
   auto p2 = EnforceNonnegativity(p);
   const double regret = p2.GetAgentMaxRegret() * F.GetScale();
   if (regret < p_maxregret) {
-    p_onEquilibrium(p2, "NE");
+    p_onEquilibrium(p2);
     solutions.push_back(p2);
   }
   else {

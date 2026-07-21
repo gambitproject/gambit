@@ -240,8 +240,8 @@ int main(int argc, char *argv[])
         auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
         LiapStrategySolve(
             starts[i], maxregret, maxitsN,
-            [renderer](const MixedStrategyProfile<double> &p_profile, const std::string &p_label) {
-              renderer->Render(p_profile, p_label);
+            [renderer](const MixedStrategyProfile<double> &p_profile) {
+              renderer->Render(p_profile);
             },
             [renderer, verbose](const LiapEvent<MixedStrategyProfile<double>> &event) {
               if (verbose) {
@@ -265,8 +265,8 @@ int main(int argc, char *argv[])
         auto renderer = MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, false);
         LiapAgentSolve(
             starts[i], maxregret, maxitsN,
-            [renderer](const MixedBehaviorProfile<double> &p_profile, const std::string &p_label) {
-              renderer->Render(p_profile, p_label);
+            [renderer](const MixedBehaviorProfile<double> &p_profile) {
+              renderer->Render(p_profile);
             },
             [renderer, verbose](const LiapEvent<MixedBehaviorProfile<double>> &event) {
               if (verbose) {

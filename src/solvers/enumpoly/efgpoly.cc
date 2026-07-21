@@ -241,7 +241,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     for (const auto &solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0),
                       p_maxregret)) {
-      p_onEquilibrium(solution, "NE");
+      p_onEquilibrium(solution);
       ret.push_back(solution);
     }
     if (isSingular) {

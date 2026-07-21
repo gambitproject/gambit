@@ -210,8 +210,8 @@ int main(int argc, char *argv[])
     for (auto pert : perts) {
       GNMStrategySolve(
           pert, lambdaEnd, steps, localNewtonInterval, localNewtonMaxits,
-          [renderer](const MixedStrategyProfile<double> &p_profile, const std::string &p_label) {
-            renderer->Render(p_profile, p_label);
+          [renderer](const MixedStrategyProfile<double> &p_profile) {
+            renderer->Render(p_profile);
           },
           [renderer, verbose](const GNMEvent &p_event) {
             if (verbose) {

@@ -239,9 +239,7 @@ int main(int argc, char *argv[])
         auto renderer = std::make_shared<MixedStrategyCSVAsFloatRenderer>(std::cout, decimals);
         SimpdivStrategySolve(
             start, maxregret, gridResize, 0,
-            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
-              renderer->Render(p, label);
-            },
+            [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); },
             [&](const SimpdivEvent &event) {
               if (verbose) {
                 RenderSimpdivEvent(renderer, event);
@@ -252,9 +250,7 @@ int main(int argc, char *argv[])
         auto renderer = std::make_shared<MixedStrategyProfileCSVRenderer<Rational>>(std::cout);
         SimpdivStrategySolve(
             start, maxregret, gridResize, 0,
-            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
-              renderer->Render(p, label);
-            },
+            [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); },
             [&](const SimpdivEvent &event) {
               if (verbose) {
                 RenderSimpdivEvent(renderer, event);

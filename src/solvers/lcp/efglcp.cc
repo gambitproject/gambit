@@ -152,7 +152,7 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
   GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
   profile.UndefinedToCentroid();
   solution.m_equilibria.push_back(profile);
-  this->m_onEquilibrium(profile, "NE");
+  this->m_onEquilibrium(profile);
   return solution.m_equilibria;
 }
 

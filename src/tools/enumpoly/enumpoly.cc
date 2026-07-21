@@ -214,17 +214,13 @@ int main(int argc, char *argv[])
     if (!game->IsTree() || useStrategic) {
       EnumPolyStrategySolve(
           game, stopAfter, maxregret,
-          [](const MixedStrategyProfile<double> &eqm, const std::string &label) {
-            PrintProfile(std::cout, label, eqm);
-          },
+          [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const EnumPolyEvent<StrategySupportProfile> &event) { PrintEnumPolyEvent(event); });
     }
     else {
       EnumPolyBehaviorSolve(
           game, stopAfter, maxregret,
-          [](const MixedBehaviorProfile<double> &eqm, const std::string &label) {
-            PrintProfile(std::cout, label, eqm);
-          },
+          [](const MixedBehaviorProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const EnumPolyEvent<BehaviorSupportProfile> &event) { PrintEnumPolyEvent(event); });
     }
     return 0;
