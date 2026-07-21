@@ -31,9 +31,10 @@ public:
   explicit NashSimpdivStrategySolver(
       int p_gridResize = 2, int p_leashLength = 0,
       const Rational &p_maxregret = Rational(1, 1000000),
-      StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
+      StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
+      SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback)
     : m_gridResize(p_gridResize), m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
-      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium)
+      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium), m_onEvent(p_onEvent)
   {
   }
   ~NashSimpdivStrategySolver() = default;
@@ -46,6 +47,7 @@ private:
   int m_gridResize, m_leashLength;
   Rational m_maxregret;
   StrategyCallbackType<Rational> m_onEquilibrium;
+  SimpdivEventCallbackType m_onEvent;
 
   class State;
 
@@ -506,12 +508,12 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);
-  m_onEquilibrium(y, "start");
+  m_onEvent(SimpdivStartEvent{y});
 
   while (true) {
     d /= Rational(m_gridResize);
     const Rational regret = Simplex(y, d);
-    m_onEquilibrium(y, std::to_string(d));
+    m_onEvent(SimpdivRefinementEvent{y, d, regret});
     if (regret <= m_maxregret * scale) {
       break;
     }
@@ -549,9 +551,11 @@ NashSimpdivStrategySolver::Solve(const Game &p_game) const
 std::list<MixedStrategyProfile<Rational>>
 SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
                      int p_gridResize, int p_leashLength,
-                     StrategyCallbackType<Rational> p_onEquilibrium)
+                     StrategyCallbackType<Rational> p_onEquilibrium,
+                     SimpdivEventCallbackType p_onEvent)
 {
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium)
+  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium,
+                                   p_onEvent)
       .Solve(p_start);
 }
 
