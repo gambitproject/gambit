@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
+#include <type_traits>
 #include "gambit.h"
 #include "solvers/enumpoly/enumpoly.h"
 
@@ -117,6 +118,21 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
   p_stream << std::endl;
 }
 
+template <class Support> void PrintEnumPolyEvent(const EnumPolyEvent<Support> &p_event)
+{
+  std::visit(
+      [](const auto &event) {
+        using Event = std::decay_t<decltype(event)>;
+        if constexpr (std::is_same_v<Event, EnumPolyCandidateSupportEvent<Support>>) {
+          PrintSupport(std::cout, "candidate", event.support);
+        }
+        else if constexpr (std::is_same_v<Event, EnumPolySingularSupportEvent<Support>>) {
+          PrintSupport(std::cout, "singular", event.support);
+        }
+      },
+      p_event);
+}
+
 int main(int argc, char *argv[])
 {
   opterr = 0;
@@ -198,18 +214,18 @@ int main(int argc, char *argv[])
     if (!game->IsTree() || useStrategic) {
       EnumPolyStrategySolve(
           game, stopAfter, maxregret,
-          [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
-          [](const std::string &label, const StrategySupportProfile &support) {
-            PrintSupport(std::cout, label, support);
-          });
+          [](const MixedStrategyProfile<double> &eqm, const std::string &label) {
+            PrintProfile(std::cout, label, eqm);
+          },
+          [](const EnumPolyEvent<StrategySupportProfile> &event) { PrintEnumPolyEvent(event); });
     }
     else {
       EnumPolyBehaviorSolve(
           game, stopAfter, maxregret,
-          [](const MixedBehaviorProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
-          [](const std::string &label, const BehaviorSupportProfile &support) {
-            PrintSupport(std::cout, label, support);
-          });
+          [](const MixedBehaviorProfile<double> &eqm, const std::string &label) {
+            PrintProfile(std::cout, label, eqm);
+          },
+          [](const EnumPolyEvent<BehaviorSupportProfile> &event) { PrintEnumPolyEvent(event); });
     }
     return 0;
   }
