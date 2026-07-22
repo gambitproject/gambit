@@ -285,7 +285,8 @@ When making a new release of Gambit, follow these steps:
    (see :ref:`releases`) and used to populate the GitHub release automatically.
 
    The ``ChangeLog`` must follow the `Keep a Changelog <https://keepachangelog.com>`__ format:
-   version headers of the form ``## [X.Y.Z] - YYYY-MM-DD`` and subsections from
+   version headers of the form ``## [X.Y.Z] - YYYY-MM-DD`` (or
+   ``## [X.Y.Z-(alpha|beta|rc).W] - YYYY-MM-DD`` for prereleases) and subsections from
    ``Added``, ``Changed``, ``Deprecated``, ``Removed``, ``Fixed``, or ``Security``.
    The test suite enforces this format — any malformed entry will cause ``pytest`` to fail.
 
@@ -293,6 +294,9 @@ When making a new release of Gambit, follow these steps:
    extraction script from the repository root::
 
        python build_support/releases/extract_changelog.py X.Y.Z
+
+   For a prerelease, pass the complete version (for example,
+   ``X.Y.Z-rc.W``).
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
 
@@ -306,6 +310,8 @@ When making a new release of Gambit, follow these steps:
 6. Pushing the tag triggers the ``release.yml`` GitHub Actions workflow, which automatically
    reads the ``ChangeLog`` entry for the new version and creates the corresponding release on the
    `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__ with those notes.
+   Tags whose version contains ``-alpha``, ``-beta``, or ``-rc`` are marked as a GitHub prerelease
+   automatically, so they do not appear as the repository's "Latest release".
    No manual action is required.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.

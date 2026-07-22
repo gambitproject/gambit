@@ -1,4 +1,4 @@
-## [17.0.0] - unreleased
+## [17.0.0-alpha.1] - unreleased
 
 ### Changed
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
