@@ -23,7 +23,10 @@
 #ifndef GAMBIT_GUI_ANALYSIS_H
 #define GAMBIT_GUI_ANALYSIS_H
 
+#include <optional>
+
 #include "games/workspace.h"
+#include "nashspec.h"
 
 //
 // This file contains classes which manage the output of analysis tools.
@@ -41,6 +44,7 @@ class AnalysisOutput {
 protected:
   GameDocument *m_doc;
   wxString m_label, m_description, m_command;
+  std::optional<NashComputationSpec> m_computation;
 
 public:
   /// @name Lifecycle
@@ -70,6 +74,15 @@ public:
 
   /// Set the command used to generate the list
   void SetCommand(const wxString &p_command) { m_command = p_command; }
+
+  /// Get the typed specification used to generate the list, if available
+  const std::optional<NashComputationSpec> &GetComputationSpec() const { return m_computation; }
+
+  /// Set the typed specification used to generate the list
+  void SetComputationSpec(const NashComputationSpec &p_computation)
+  {
+    m_computation = p_computation;
+  }
 
   /// The number of profiles in the list
   virtual int NumProfiles() const = 0;

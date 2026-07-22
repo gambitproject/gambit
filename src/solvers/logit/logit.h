@@ -24,6 +24,9 @@
 #define SOLVERS_LOGIT_H
 
 #include <functional>
+#include <variant>
+
+#include "games/nash.h"
 
 namespace Gambit {
 
@@ -79,48 +82,56 @@ template <> inline size_t LogitQRE<MixedBehaviorProfile<double>>::size() const
 
 using LogitQREMixedStrategyProfile = LogitQRE<MixedStrategyProfile<double>>;
 
-using MixedStrategyObserverFunctionType =
-    std::function<void(const LogitQREMixedStrategyProfile &)>;
+template <class QRE> struct LogitPathEvent {
+  const QRE &qre;
+};
 
-inline void NullMixedStrategyObserver(const LogitQREMixedStrategyProfile &) {}
+template <class QRE> using LogitEvent = std::variant<LogitPathEvent<QRE>>;
+template <class QRE> using LogitEventCallbackType = std::function<void(const LogitEvent<QRE> &)>;
+
+template <class QRE> void NullLogitEventCallback(const LogitEvent<QRE> &) {}
 
 std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
     const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
     double p_firstStep, double p_maxAccel,
-    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
+    Nash::StrategyCallbackType<double> p_onEquilibrium = Nash::NullStrategyCallback<double>,
+    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
+        NullLogitEventCallback<LogitQREMixedStrategyProfile>);
 
-std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
-    const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
-    double p_omega, double p_firstStep, double p_maxAccel,
-    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
+std::list<LogitQREMixedStrategyProfile>
+LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
+                         const std::list<double> &p_targetLambda, double p_omega,
+                         double p_firstStep, double p_maxAccel,
+                         LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
+                             NullLogitEventCallback<LogitQREMixedStrategyProfile>);
 
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
-                      MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
+                      LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
+                          NullLogitEventCallback<LogitQREMixedStrategyProfile>);
 
 using LogitQREMixedBehaviorProfile = LogitQRE<MixedBehaviorProfile<double>>;
 
-using MixedBehaviorObserverFunctionType =
-    std::function<void(const LogitQREMixedBehaviorProfile &)>;
-
-inline void NullMixedBehaviorObserver(const LogitQREMixedBehaviorProfile &) {}
-
-std::list<LogitQREMixedBehaviorProfile>
-LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
-                   MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
+std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(
+    const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
+    double p_firstStep, double p_maxAccel,
+    Nash::BehaviorCallbackType<double> p_onEquilibrium = Nash::NullBehaviorCallback<double>,
+    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
+        NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
 
 std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
                          const std::list<double> &p_targetLambda, double p_omega,
                          double p_firstStep, double p_maxAccel,
-                         MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
+                         LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
+                             NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
 
 LogitQREMixedBehaviorProfile
 LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
-                      MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
+                      LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
+                          NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
 
 } // namespace Gambit
 

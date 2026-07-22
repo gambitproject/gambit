@@ -23,9 +23,25 @@
 #ifndef GAMBIT_NASH_SIMPDIV_H
 #define GAMBIT_NASH_SIMPDIV_H
 
+#include <variant>
 #include "games/nash.h"
 
 namespace Gambit::Nash {
+
+struct SimpdivStartEvent {
+  const MixedStrategyProfile<Rational> &profile;
+};
+
+struct SimpdivRefinementEvent {
+  const MixedStrategyProfile<Rational> &profile;
+  Rational gridSize;
+  Rational regret;
+};
+
+using SimpdivEvent = std::variant<SimpdivStartEvent, SimpdivRefinementEvent>;
+using SimpdivEventCallbackType = std::function<void(const SimpdivEvent &)>;
+
+inline void NullSimpdivEventCallback(const SimpdivEvent &) {}
 
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
@@ -36,7 +52,8 @@ std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
     const MixedStrategyProfile<Rational> &p_start,
     const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
     int p_leashLength = 0,
-    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>);
+    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
+    SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback);
 
 } // end namespace Gambit::Nash
 
