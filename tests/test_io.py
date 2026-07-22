@@ -131,8 +131,8 @@ def test_write_efg_as_nfg():
     result = """
 NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player 1" "Player 2" }
 
-{ { "1**111" "21*111" "221111" "222111" }
-{ "1**111" "21*111" "221111" "222111" }
+{ { "1" "2" "3" "4" }
+{ "1" "2" "3" "4" }
 }
 ""
 
