@@ -1741,7 +1741,7 @@ Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
   for (const auto &player : m_game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       try {
-        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav[infoset.get()]));
+        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav.at(infoset.get())));
       }
       catch (std::out_of_range &) {
       }

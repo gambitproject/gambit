@@ -8,6 +8,9 @@
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
 
+### Fixed
+- Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
+  no longer inserts spurious entries into a strategy's internal action map.
 
 ## [16.7.0] - 2026-07-11
 
