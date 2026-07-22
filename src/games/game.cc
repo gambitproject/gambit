@@ -92,16 +92,11 @@ GamePlayerRep::~GamePlayerRep()
 
 void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
-  auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, "");
+  // Reduced strategies are labelled by their sequence number in their generation order.
+  // This order is deterministic for a given game (see MakeReducedStrats)
+  const std::string number = std::to_string(m_strategies.size() + 1);
+  auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, number);
   strategy->m_behav = behav;
-  for (const auto &infoset : m_infosets) {
-    strategy->m_label += (contains(strategy->m_behav, infoset.get()))
-                             ? std::to_string(strategy->m_behav.at(infoset.get()))
-                             : "*";
-  }
-  if (strategy->m_label.empty()) {
-    strategy->m_label = "*";
-  }
   m_strategies.push_back(strategy);
 }
 

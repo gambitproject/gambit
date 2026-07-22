@@ -7,6 +7,8 @@
   the run.  (#998)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
+- Reduced strategies of extensive games are now labelled by sequential per-player integers ("1", "2", ...)
+  in the deterministic order in which they are generated, matching the labelling of strategies in strategic games.
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs

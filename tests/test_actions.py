@@ -180,8 +180,8 @@ def test_action_plays():
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 2", "2", ["R"], "L"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "1", ["R", "L"], "R"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "2", ["R", "L"], "L"),
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1*", [], "R"),
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "21", [], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", [], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "2", [], "L"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "1", ["L"], "R"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "2", ["L"], "L"),
         (games.read_from_file("basic_extensive_game.efg"), "Player 1", "1", [], "U1"),
@@ -212,13 +212,13 @@ def test_strategy_action_defined(
 @pytest.mark.parametrize(
     "game, player_label, strategy_label, infoset_label, infoset_path",
     [
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1*", None, ["L", "L"]),
-        (games.read_from_file("cent3.efg"), "Player 1", "1**111", "(1,3)", None),
-        (games.read_from_file("cent3.efg"), "Player 1", "1**111", "(1,5)", None),
-        (games.read_from_file("cent3.efg"), "Player 1", "21*111", "(1,5)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "1**111", "(2,4)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "1**111", "(2,4)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "21*111", "(2,5)", None),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", None, ["L", "L"]),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,3)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "2", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "2", "(2,5)", None),
     ],
 )
 def test_strategy_action_undefined_returns_none(
