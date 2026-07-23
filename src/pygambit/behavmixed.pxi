@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from pygambit.util import MultiIndexSeriesFormatter
 import cython
 from cython.operator cimport dereference as deref
 
@@ -372,7 +373,7 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str([self[player] for player in self.game.players])
+        return MultiIndexSeriesFormatter().format(self.as_dict())
 
     def _repr_latex_(self) -> str:
         return (
@@ -381,6 +382,14 @@ class MixedBehaviorProfile:
                       for player in self.game.players])
             + r"\right]$"
         )
+
+    def as_dict(self) -> dict[tuple, float]:
+        result = {}
+        for player in self.game.players:
+            for info in player.infosets:
+                for action in info.actions:
+                    result[(player.label, info.label, action.label)] = self[action]
+        return result
 
     @property
     def game(self) -> Game:
