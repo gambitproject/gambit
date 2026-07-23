@@ -145,14 +145,6 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
         (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
-        ###############################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "12", 0.15, False),
-        (games.create_stripped_down_poker_efg(), "21", 0.99, False),
-        (games.create_stripped_down_poker_efg(), "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "12", "3/4", True),
-        (games.create_stripped_down_poker_efg(), "21", "7/9", True),
     ],
 )
 def test_set_and_get_probability_by_strategy_label(
@@ -198,14 +190,14 @@ def test_set_and_get_probabilities_by_player_label(
         ##############################################################################
         # stripped-down poker efg
         # Player 1
-        (games.create_stripped_down_poker_efg(), "Alice", "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "12", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "21", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "22", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "12", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "21", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "22", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "1", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "2", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "3", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "4", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "1", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "2", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "3", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "4", "1/4", True),
         # Player 2
         (games.create_stripped_down_poker_efg(), "Bob", "1", 0.5, False),
         (games.create_stripped_down_poker_efg(), "Bob", "2", 0.5, False),
@@ -232,10 +224,10 @@ def test_profile_indexing_by_player_and_strategy_label_reference(
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), "Bob", "11", True),
         (games.create_stripped_down_poker_efg(), "Bob", "11", False),
-        (games.create_stripped_down_poker_efg(), "Alice", "1", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "1", False),
-        (games.create_stripped_down_poker_efg(), "Alice", "2", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "2", False),
+        (games.create_stripped_down_poker_efg(), "Alice", "99", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "99", False),
+        (games.create_stripped_down_poker_efg(), "Bob", "99", True),
+        (games.create_stripped_down_poker_efg(), "Bob", "99", False),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_outcome.nfg"), P1, "2-1", True),
@@ -312,22 +304,6 @@ def test_profile_indexing_by_invalid_strategy_label(
 @pytest.mark.parametrize(
     "game,strategy_label,prob,rational_flag",
     [
-        ###########################################################################
-        # stripped-down poker efg
-        # Player 1
-        (games.create_stripped_down_poker_efg(), "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "12", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "21", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "22", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "12", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "21", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "22", "1/4", True),
-        # Player 2
-        (games.create_stripped_down_poker_efg(), "1", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "2", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "1", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "2", "1/2", True),
         ############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         # Player 1
@@ -503,33 +479,34 @@ def test_payoff_by_label_reference(
 
 
 @pytest.mark.parametrize(
-    "game,rational_flag,label,value",
+    "game,rational_flag,player_label,label,value",
     [
         ##############################################################################
         # zero matrix nfg
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "cooperate", 0),
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "cooperate", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "Joe", "cooperate", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "Joe", "cooperate", 0),
         ##############################################################################
         # coordination 4x4 nfg
-        (games.read_from_file("coordination_4x4_outcome.nfg"), False, "1-1", 0.25),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), True, "1-1", "1/4"),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), False, P1, "1-1", 0.25),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), True, P1, "1-1", "1/4"),
         ##############################################################################
         # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), False, "11", 0.5),  # Bet/Bet
-        (games.create_stripped_down_poker_efg(), False, "12", 0.25),  # Bet King/Fold Queen
-        (games.create_stripped_down_poker_efg(), False, "21", -0.75),  # Fold King/Bet Queen
-        (games.create_stripped_down_poker_efg(), False, "22", -1),  # Fold/Fold
-        (games.create_stripped_down_poker_efg(), True, "11", "1/2"),
-        (games.create_stripped_down_poker_efg(), True, "12", "1/4"),
-        (games.create_stripped_down_poker_efg(), True, "21", "-3/4"),
-        (games.create_stripped_down_poker_efg(), True, "22", -1),
+        (games.create_stripped_down_poker_efg(), False, "Alice", "1", 0.5),  # Bet/Bet
+        (games.create_stripped_down_poker_efg(), False, "Alice", "2", 0.25),  # BetKing/FoldQueen
+        (games.create_stripped_down_poker_efg(), False, "Alice", "3", -0.75),  # FoldKing/BetQueen
+        (games.create_stripped_down_poker_efg(), False, "Alice", "4", -1),  # Fold/Fold
+        (games.create_stripped_down_poker_efg(), True, "Alice", "1", "1/2"),
+        (games.create_stripped_down_poker_efg(), True, "Alice", "2", "1/4"),
+        (games.create_stripped_down_poker_efg(), True, "Alice", "3", "-3/4"),
+        (games.create_stripped_down_poker_efg(), True, "Alice", "4", -1),
     ],
 )
 def test_strategy_value_by_label_reference(
-    game: gbt.Game, rational_flag: bool, label: str, value: float | str
+    game: gbt.Game, rational_flag: bool, player_label: str, label: str, value: float | str
 ):
     value = gbt.Rational(value) if rational_flag else value
-    assert game.mixed_strategy_profile(rational=rational_flag).strategy_value(label) == value
+    strategy = game.players[player_label].strategies[label]
+    assert game.mixed_strategy_profile(rational=rational_flag).strategy_value(strategy) == value
 
 
 @pytest.mark.parametrize(

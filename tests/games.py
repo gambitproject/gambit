@@ -447,6 +447,21 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     return create_efg_corresponding_to_bimatrix_game(A, B, title)
 
 
+def strategy_map(player: gbt.Player, strategy: gbt.Strategy) -> tuple:
+    """The action prescribed by ``strategy`` at each of ``player``'s information sets,
+    in the player's information set order: the 1-based position of the prescribed action, or "*"
+    where the strategy prescribes nothing because the information set is unreachable.
+    """
+    prescriptions = []
+    for infoset in player.infosets:
+        action = strategy.action(infoset)
+        if action is None:
+            prescriptions.append("*")
+        else:
+            prescriptions.append(str(list(infoset.actions).index(action) + 1))
+    return tuple(prescriptions)
+
+
 class EfgFamilyForReducedStrategicFormTests(ABC):
     """ """
 
@@ -535,7 +550,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
 
         rs = [get_rss(n) for n in n_moves]
         self.set_size_of_rsf(rs)
-        return rs
+        return [[str(i) for i in range(1, len(r) + 1)] for r in rs]
 
     def reduced_strategic_form(self):
         m, n = self.size_of_rsf
@@ -615,7 +630,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         return {p: n_isets[p - 1] for p in players}
 
     def _redu_strategies_level_1(self, player):
-        return ["1", "2"] if player == 1 else ["*"]
+        return ["1", "2"] if player == 1 else ["1"]
 
     def player_with_changes(self, level):
         return ((level - 1) % self.n_players) + 1
@@ -625,12 +640,15 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
 
     @abstractmethod
     def _redu_strats(self, player, level):
+        """Returns a list whose length is the player's reduced-strategy count.
+        The signature labels are no longer used as strategies are now labelled sequentially.
+        """
         pass
 
     def reduced_strategies(self):
         rs = [self._redu_strats(player, self.level) for player in self.players]
         self.set_size_of_rsf(rs)
-        return rs
+        return [[str(i) for i in range(1, len(r) + 1)] for r in rs]
 
     def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)

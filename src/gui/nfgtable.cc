@@ -27,6 +27,7 @@
 #include <wx/dnd.h>   // for drag-and-drop support
 #include <wx/print.h> // for printing support
 #include <wx/dcsvg.h> // for SVG output
+#include <wx/popupwin.h>
 
 #include "wx/sheet/sheet.h"
 
@@ -75,7 +76,7 @@ protected:
   void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
   /// Overriding wxSheet member to show editor on one click
-  void OnCellLeftClick(wxSheetEvent &);
+  virtual void OnCellLeftClick(wxSheetEvent &);
 
 public:
   /// @name Lifecycle
@@ -159,6 +160,7 @@ class RowPlayerWidget final : public TableWidgetBase {
   //@}
 
   void OnCellRightClick(wxSheetEvent &);
+  void OnCellLeftClick(wxSheetEvent &) override;
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                           const wxPoint &p_pos);
@@ -197,6 +199,99 @@ RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent)
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
               wxSheetEventFunction,
               static_cast<wxSheetEventFunction>(&RowPlayerWidget::OnCellRightClick))));
+}
+
+namespace {
+wxString GetStrategyTooltip(const GameStrategy &p_strategy)
+{
+  if (!p_strategy->GetGame()->IsTree()) {
+    return {};
+  }
+
+  wxString tooltip;
+  for (const auto &infoset : p_strategy->GetPlayer()->GetInfosets()) {
+    const auto action = p_strategy->GetAction(infoset);
+    if (!action) {
+      continue;
+    }
+
+    if (!tooltip.empty()) {
+      tooltip << wxT("\n");
+    }
+    tooltip << wxString::Format(_("Information set %d"), infoset->GetNumber());
+    if (!infoset->GetLabel().empty()) {
+      tooltip << wxT(" (") << wxString(infoset->GetLabel().c_str(), *wxConvCurrent) << wxT(")");
+    }
+    tooltip << wxT(": ");
+    if (action->GetLabel().empty()) {
+      tooltip << wxString::Format(_("action %d"), action->GetNumber());
+    }
+    else {
+      tooltip << wxString(action->GetLabel().c_str(), *wxConvCurrent);
+    }
+  }
+  return tooltip;
+}
+
+class StrategyDescriptionPopup final : public wxPopupTransientWindow {
+public:
+  StrategyDescriptionPopup(wxWindow *p_parent, const GameStrategy &p_strategy)
+    : wxPopupTransientWindow(p_parent, wxBORDER_NONE)
+  {
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
+
+    auto *content = new wxPanel(this);
+    content->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
+    auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+    const wxString label(p_strategy->GetLabel().c_str(), *wxConvCurrent);
+    auto *heading = new wxStaticText(content, wxID_ANY, wxString::Format(_("Strategy %s"), label));
+    wxFont headingFont = heading->GetFont();
+    headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+    headingFont.SetPointSize(headingFont.GetPointSize() + 1);
+    heading->SetFont(headingFont);
+    contentSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+
+    auto *description = new wxStaticText(content, wxID_ANY, GetStrategyTooltip(p_strategy));
+    description->Wrap(FromDIP(420));
+    contentSizer->Add(description, 0, wxALL, FromDIP(12));
+    content->SetSizer(contentSizer);
+
+    auto *popupSizer = new wxBoxSizer(wxVERTICAL);
+    popupSizer->Add(content, 1, wxEXPAND | wxALL, FromDIP(1));
+    SetSizerAndFit(popupSizer);
+  }
+
+protected:
+  void OnDismiss() override { Destroy(); }
+};
+
+void ShowStrategyPopup(wxSheet *p_sheet, const wxSheetCoords &p_coords,
+                       const GameStrategy &p_strategy)
+{
+  auto *popup = new StrategyDescriptionPopup(p_sheet, p_strategy);
+  const wxRect cellRect = p_sheet->CellToRect(p_coords, true);
+  const wxPoint anchor = p_sheet->GetGridWindow()->ClientToScreen(cellRect.GetBottomLeft());
+  popup->Position(anchor, wxSize(popup->FromDIP(8), popup->FromDIP(8)));
+  popup->Popup();
+}
+
+} // namespace
+
+void RowPlayerWidget::OnCellLeftClick(wxSheetEvent &p_event)
+{
+  if (!m_table->IsReadOnly() || m_table->GetRowHeaderColCount() == 0) {
+    TableWidgetBase::OnCellLeftClick(p_event);
+    return;
+  }
+
+  const auto coords = p_event.GetCoords();
+  const int player = m_table->GetRowHeaderPlayer(coords.GetCol());
+  const int strategy = m_table->GetRowHeaderStrategy(coords.GetCol(), coords.GetRow());
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  if (!GetStrategyTooltip(gameStrategy).empty()) {
+    ShowStrategyPopup(this, coords, gameStrategy);
+  }
 }
 
 void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
@@ -428,6 +523,7 @@ class ColPlayerWidget final : public TableWidgetBase {
   //@}
 
   void OnCellRightClick(wxSheetEvent &);
+  void OnCellLeftClick(wxSheetEvent &) override;
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                           const wxPoint &p_pos);
@@ -466,6 +562,22 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent)
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
               wxSheetEventFunction, wxSheetEventFunction(&ColPlayerWidget::OnCellRightClick))));
+}
+
+void ColPlayerWidget::OnCellLeftClick(wxSheetEvent &p_event)
+{
+  if (!m_table->IsReadOnly() || m_table->GetColHeaderRowCount() == 0) {
+    TableWidgetBase::OnCellLeftClick(p_event);
+    return;
+  }
+
+  const auto coords = p_event.GetCoords();
+  const int player = m_table->GetColHeaderPlayer(coords.GetRow());
+  const int strategy = m_table->GetColHeaderStrategy(coords.GetRow(), coords.GetCol());
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  if (!GetStrategyTooltip(gameStrategy).empty()) {
+    ShowStrategyPopup(this, coords, gameStrategy);
+  }
 }
 
 void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)

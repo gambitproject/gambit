@@ -119,13 +119,13 @@ def test_outcome_index_exception_label():
         # 1 player; reduction; generic payoffs
         (
             games.read_from_file("reduction_one_player_generic_payoffs.efg"),
-            [["11", "12", "2*", "3*", "4*"]],
+            [["1", "2", "3", "4", "5"]],
             [np.array(range(1, 6))],
         ),
         # 2 players; reduction possible for player 1; payoff ties
         (
             gbt.catalog.load("journals/ijgt/selten1975/fig2"),
-            [["1*", "21", "22"], ["1", "2"]],
+            [["1", "2", "3"], ["1", "2"]],
             [
                 np.array([[1, 1], [0, 0], [0, 2]]),
                 np.array([[1, 1], [2, 3], [2, 0]]),
@@ -134,7 +134,7 @@ def test_outcome_index_exception_label():
         # 2 players; 1 move each so no reduction possible
         (
             games.read_from_file("sample_extensive_game.efg"),
-            [["1", "2"], ["11", "12", "21", "22"]],
+            [["1", "2"], ["1", "2", "3", "4"]],
             [
                 np.array([[2, 2, 2, 2], [4, 6, 4, 6]]),
                 np.array([[3, 3, 3, 3], [5, 7, 5, 7]]),
@@ -165,8 +165,8 @@ def test_outcome_index_exception_label():
         (
             games.read_from_file("reduction_generic_payoffs.efg"),
             [
-                ["1*1", "1*2", "211", "212", "221", "222"],
-                ["11*", "12*", "2**", "3*1", "3*2", "4**"],
+                ["1", "2", "3", "4", "5", "6"],
+                ["1", "2", "3", "4", "5", "6"],
             ],
             [
                 np.array(
@@ -195,7 +195,7 @@ def test_outcome_index_exception_label():
         (
             games.read_from_file("binary_3_levels_generic_payoffs.efg"),
             [
-                ["11*", "12*", "2*1", "2*2"],
+                ["1", "2", "3", "4"],
                 ["1", "2"],
             ],
             [
@@ -207,21 +207,8 @@ def test_outcome_index_exception_label():
         (
             games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
             [
-                ["1*", "2*", "31", "32", "4*"],
-                [
-                    "1*11",
-                    "1*12",
-                    "1*21",
-                    "1*22",
-                    "2111",
-                    "2112",
-                    "2121",
-                    "2122",
-                    "2211",
-                    "2212",
-                    "2221",
-                    "2222",
-                ],
+                ["1", "2", "3", "4", "5"],
+                ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
             ],
             [
                 np.array(
@@ -251,8 +238,8 @@ def test_outcome_index_exception_label():
         (
             games.read_from_file("cent3.efg"),
             [
-                ["1**111", "21*111", "221111", "222111"],
-                ["1**111", "21*111", "221111", "222111"],
+                ["1", "2", "3", "4"],
+                ["1", "2", "3", "4"],
             ],
             [
                 np.array(
@@ -276,7 +263,7 @@ def test_outcome_index_exception_label():
         # Stripped-down poker; 2 player zero-sum game with chance at the root
         (
             games.create_stripped_down_poker_efg(),
-            [["11", "12", "21", "22"], ["1", "2"]],
+            [["1", "2", "3", "4"], ["1", "2"]],
             [
                 np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
                 np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
@@ -284,7 +271,7 @@ def test_outcome_index_exception_label():
         ),
         (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-            [["11", "12", "21", "22"], ["1", "2"]],
+            [["1", "2", "3", "4"], ["1", "2"]],
             [
                 np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
                 np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
@@ -293,7 +280,7 @@ def test_outcome_index_exception_label():
         # Nature playing at the root, 2 players, no reduction, non-generic payoffs
         (
             games.read_from_file("nature_rooted_nongeneric.efg"),
-            [["1", "2"], ["11", "12", "21", "22"]],
+            [["1", "2"], ["1", "2", "3", "4"]],
             [
                 np.array([[-1, -1, 2, 2], [0, 0, 0, 0]]),
                 np.array([[-1, -1, 2, 2], [3, 4, 3, 4]]),
@@ -302,7 +289,7 @@ def test_outcome_index_exception_label():
         # Nature playing at the root, 2 players, no reduction, generic payoffs
         (
             games.read_from_file("nature_rooted_generic.efg"),
-            [["1", "2"], ["11", "12", "21", "22"]],
+            [["1", "2"], ["1", "2", "3", "4"]],
             [
                 np.array([[3, 3, 4, 4], [5, 6, 5, 6]]),
                 np.array([[-3, -3, -4, -4], [-5, -6, -5, -6]]),
@@ -311,7 +298,7 @@ def test_outcome_index_exception_label():
         # Nature playing last determining the payoffs, 2 players, no reduction, non-generic payoffs
         (
             games.read_from_file("nature_leaves_nongeneric.efg"),
-            [["1", "2"], ["11", "12", "21", "22"]],
+            [["1", "2"], ["1", "2", "3", "4"]],
             [
                 np.array([[-1, -1, 2, 2], [0, 0, 0, 0]]),
                 np.array([[-1, -1, 2, 2], [3, 4, 3, 4]]),
@@ -320,7 +307,7 @@ def test_outcome_index_exception_label():
         # Nature playing last determining the payoffs, 2 players, no reduction, generic payoffs
         (
             games.read_from_file("nature_leaves_generic.efg"),
-            [["1", "2"], ["11", "12", "21", "22"]],
+            [["1", "2"], ["1", "2", "3", "4"]],
             [
                 np.array(
                     [["3/2", "3/2", "7/2", "7/2"], ["11/2", "15/2", "11/2", "15/2"]]
@@ -366,7 +353,7 @@ def test_outcome_index_exception_label():
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
         # (
         #    gbt.catalog.load("journals/geb/wichardt2008"),
-        #    [["11", "12", "21", "22"], ["1", "2"]],
+        #    [["1", "2", "3", "4"], ["1", "2"]],
         #    [
         #        np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
         #        np.array([[-1, 1], [5, 5], [5, 5], [1, -1]]),
@@ -380,7 +367,7 @@ def test_reduced_strategic_form(
     """
     We test two things:
         - that the strategy labels are as expected
-          (these use positive integers and '*'s, rather than labels of moves even if they exist)
+          (labelled by sequential per-player integers, not by the numbers of prescribed actions)
         - that the payoff tables are correct, which is done via game.to_arrays()
     """
     arrays = game.to_arrays()
@@ -390,6 +377,93 @@ def test_reduced_strategic_form(
     ):
         assert labels == [s.label for s in player.strategies]
         assert (arr == games.vectorized_make_rational(exp_raw)).all()
+
+
+@pytest.mark.parametrize(
+    "game,strategy_maps",
+    [
+        ###############################################################################
+        # 1 player; reduction after the first move
+        (
+            games.read_from_file("reduction_one_player_generic_payoffs.efg"),
+            [[("1", "1"), ("1", "2"), ("2", "*"), ("3", "*"), ("4", "*")]],
+        ),
+        # 2 players; reduction for player 1
+        (
+            gbt.catalog.load("journals/ijgt/selten1975/fig2"),
+            [[("1", "*"), ("2", "1"), ("2", "2")], [("1",), ("2",)]],
+        ),
+        # 2 players; reduction for both players
+        (
+            games.read_from_file("reduction_generic_payoffs.efg"),
+            [
+                [
+                    ("1", "*", "1"), ("1", "*", "2"), ("2", "1", "1"),
+                    ("2", "1", "2"), ("2", "2", "1"), ("2", "2", "2"),
+                ],
+                [
+                    ("1", "1", "*"), ("1", "2", "*"), ("2", "*", "*"),
+                    ("3", "*", "1"), ("3", "*", "2"), ("4", "*", "*"),
+                ],
+            ],
+        ),
+        # binary tree; reduction for player 1
+        (
+            games.read_from_file("binary_3_levels_generic_payoffs.efg"),
+            [
+                [("1", "1", "*"), ("1", "2", "*"), ("2", "*", "1"), ("2", "*", "2")],
+                [("1",), ("2",)],
+            ],
+        ),
+        # game from GTE survey; reduction for both players
+        (
+            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
+            [
+                [("1", "*"), ("2", "*"), ("3", "1"), ("3", "2"), ("4", "*")],
+                [
+                    ("1", "*", "1", "1"), ("1", "*", "1", "2"),
+                    ("1", "*", "2", "1"), ("1", "*", "2", "2"),
+                    ("2", "1", "1", "1"), ("2", "1", "1", "2"),
+                    ("2", "1", "2", "1"), ("2", "1", "2", "2"),
+                    ("2", "2", "1", "1"), ("2", "2", "1", "2"),
+                    ("2", "2", "2", "1"), ("2", "2", "2", "2"),
+                ],
+            ],
+        ),
+        ###########################################################################
+        # Games with chance nodes
+        ###########################################################################
+        # chance-rooted long centipede game
+        (
+            games.read_from_file("cent3.efg"),
+            [
+                [
+                    ("1", "*", "*", "1", "1", "1"), ("2", "1", "*", "1", "1", "1"),
+                    ("2", "2", "1", "1", "1", "1"), ("2", "2", "2", "1", "1", "1"),
+                ],
+            ] * 2,
+        ),
+        # stripped-down poker; chance-rooted, no reduction for either player
+        (
+            games.create_stripped_down_poker_efg(),
+            [
+                [("1", "1"), ("1", "2"), ("2", "1"), ("2", "2")],
+                [("1",), ("2",)],
+            ],
+        ),
+    ],
+)
+def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
+    """
+    Verify the action assignments of reduced strategies.
+
+    Strategy labels are sequential integers and so no longer describe which action
+    a strategy prescribes at each information set; the mapping is reconstructed via
+    `Strategy.action`.  A "*" marks an information set at which the strategy
+    prescribes no action, being unreachable given the strategy's own earlier actions.
+    """
+    for player, expected_maps in zip(game.players, strategy_maps, strict=True):
+        assert [games.strategy_map(player, s) for s in player.strategies] == expected_maps
 
 
 @pytest.mark.parametrize(
