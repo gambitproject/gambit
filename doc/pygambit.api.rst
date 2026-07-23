@@ -68,6 +68,7 @@ Transforming game information structure
 .. autosummary::
    :toctree: api/
 
+   Game.make_infoset
    Game.set_player
    Game.set_infoset
    Game.leave_infoset

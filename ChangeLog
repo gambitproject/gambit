@@ -1,6 +1,15 @@
 ## [17.0.0] - unreleased
 
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.
+
 ### Changed
+- `Game.leave_infoset`, `Game.set_infoset`, `Game.set_player`, and `Game.reveal` are now
+  implemented in terms of `Game.make_infoset`.  `set_infoset` now requires the node to have
+  the same actions as the target information set, with the same labels in the same order
+  (previously only the number of actions was checked).  `reveal` now raises at
+  absent-minded information sets.
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
   to match the behaviour of all other Nash equilibrium solvers.  (#996)
 - `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of
