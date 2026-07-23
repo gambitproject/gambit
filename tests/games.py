@@ -447,6 +447,21 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     return create_efg_corresponding_to_bimatrix_game(A, B, title)
 
 
+def strategy_map(player: gbt.Player, strategy: gbt.Strategy) -> tuple:
+    """The action prescribed by ``strategy`` at each of ``player``'s information sets,
+    in the player's information set order: the 1-based position of the prescribed action, or "*"
+    where the strategy prescribes nothing because the information set is unreachable.
+    """
+    prescriptions = []
+    for infoset in player.infosets:
+        action = strategy.action(infoset)
+        if action is None:
+            prescriptions.append("*")
+        else:
+            prescriptions.append(str(list(infoset.actions).index(action) + 1))
+    return tuple(prescriptions)
+
+
 class EfgFamilyForReducedStrategicFormTests(ABC):
     """ """
 

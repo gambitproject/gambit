@@ -380,6 +380,93 @@ def test_reduced_strategic_form(
 
 
 @pytest.mark.parametrize(
+    "game,strategy_maps",
+    [
+        ###############################################################################
+        # 1 player; reduction after the first move
+        (
+            games.read_from_file("reduction_one_player_generic_payoffs.efg"),
+            [[("1", "1"), ("1", "2"), ("2", "*"), ("3", "*"), ("4", "*")]],
+        ),
+        # 2 players; reduction for player 1
+        (
+            gbt.catalog.load("journals/ijgt/selten1975/fig2"),
+            [[("1", "*"), ("2", "1"), ("2", "2")], [("1",), ("2",)]],
+        ),
+        # 2 players; reduction for both players
+        (
+            games.read_from_file("reduction_generic_payoffs.efg"),
+            [
+                [
+                    ("1", "*", "1"), ("1", "*", "2"), ("2", "1", "1"),
+                    ("2", "1", "2"), ("2", "2", "1"), ("2", "2", "2"),
+                ],
+                [
+                    ("1", "1", "*"), ("1", "2", "*"), ("2", "*", "*"),
+                    ("3", "*", "1"), ("3", "*", "2"), ("4", "*", "*"),
+                ],
+            ],
+        ),
+        # binary tree; reduction for player 1
+        (
+            games.read_from_file("binary_3_levels_generic_payoffs.efg"),
+            [
+                [("1", "1", "*"), ("1", "2", "*"), ("2", "*", "1"), ("2", "*", "2")],
+                [("1",), ("2",)],
+            ],
+        ),
+        # game from GTE survey; reduction for both players
+        (
+            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
+            [
+                [("1", "*"), ("2", "*"), ("3", "1"), ("3", "2"), ("4", "*")],
+                [
+                    ("1", "*", "1", "1"), ("1", "*", "1", "2"),
+                    ("1", "*", "2", "1"), ("1", "*", "2", "2"),
+                    ("2", "1", "1", "1"), ("2", "1", "1", "2"),
+                    ("2", "1", "2", "1"), ("2", "1", "2", "2"),
+                    ("2", "2", "1", "1"), ("2", "2", "1", "2"),
+                    ("2", "2", "2", "1"), ("2", "2", "2", "2"),
+                ],
+            ],
+        ),
+        ###########################################################################
+        # Games with chance nodes
+        ###########################################################################
+        # chance-rooted long centipede game
+        (
+            games.read_from_file("cent3.efg"),
+            [
+                [
+                    ("1", "*", "*", "1", "1", "1"), ("2", "1", "*", "1", "1", "1"),
+                    ("2", "2", "1", "1", "1", "1"), ("2", "2", "2", "1", "1", "1"),
+                ],
+            ] * 2,
+        ),
+        # stripped-down poker; chance-rooted, no reduction for either player
+        (
+            games.create_stripped_down_poker_efg(),
+            [
+                [("1", "1"), ("1", "2"), ("2", "1"), ("2", "2")],
+                [("1",), ("2",)],
+            ],
+        ),
+    ],
+)
+def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
+    """
+    Verify the action assignments of reduced strategies.
+
+    Strategy labels are sequential integers and so no longer describe which action
+    a strategy prescribes at each information set; the mapping is reconstructed via
+    `Strategy.action`.  A "*" marks an information set at which the strategy
+    prescribes no action, being unreachable given the strategy's own earlier actions.
+    """
+    for player, expected_maps in zip(game.players, strategy_maps, strict=True):
+        assert [games.strategy_map(player, s) for s in player.strategies] == expected_maps
+
+
+@pytest.mark.parametrize(
     "standard,modified",
     [
         (
