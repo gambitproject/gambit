@@ -28,7 +28,7 @@ class HPSolverTestCase:
 
 
 def create_prior_from_catalog(game_path: str) -> gbt.MixedStrategyProfile:
-    """Carga un juego del catálogo y devuelve su prior uniforme por defecto."""
+    """Loads a game from the catalog and returns a prior that is uniform over all strategies."""
     game = gbt.catalog.load(game_path)
     return game.mixed_strategy_profile()
 
