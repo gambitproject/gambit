@@ -143,6 +143,11 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       StrategyCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent)
 {
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
   if (scale != 0.0) {
     p_maxregret *= scale;
