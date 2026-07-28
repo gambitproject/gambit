@@ -1,6 +1,7 @@
 """Test of calls to the Herings & Peeters (2001) homotopy solver."""
 
 import dataclasses
+import functools
 import typing
 
 import numpy as np
@@ -24,6 +25,12 @@ class HPSolverTestCase:
     factory: typing.Callable[[], gbt.MixedStrategyProfileDouble]
     expected: list
     prob_tol: float = TOL
+
+
+def create_prior_from_catalog(game_path: str) -> gbt.MixedStrategyProfile:
+    """Carga un juego del catálogo y devuelve su prior uniforme por defecto."""
+    game = gbt.catalog.load(game_path)
+    return game.mixed_strategy_profile()
 
 
 def create_hs_base_game() -> gbt.Game:
@@ -93,6 +100,38 @@ HP_CASES = [
         ),
         id="test_hp_hs_example_1",
     ),
+    pytest.param(
+        HPSolverTestCase(
+            factory=functools.partial(create_prior_from_catalog, "books/myerson1991/fig2_1"),
+            expected=[d(1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0), d(2.0 / 3.0, 1.0 / 3.0)],
+        ),
+        id="test_hp_myerson1991_fig2_1",
+    ),
+    pytest.param(
+        HPSolverTestCase(
+            factory=functools.partial(create_prior_from_catalog, "books/vonstengel2022/fig10.1"),
+            expected=[d(0.0, 0.5, 0, 0.5), d(1.0 / 4.0, 3.0 / 4.0)],
+        ),
+        id="test_hp_vonstengel2022_fig10.1",
+    ),
+    pytest.param(
+        HPSolverTestCase(
+            factory=functools.partial(create_prior_from_catalog, "journals/ijgt/nau2004/sec4"),
+            expected=[
+                d(0.6192325794725538, 0.38076742052744617),
+                d(0.4798042226776052, 0.5201957773223949),
+                d(0.37882533606563146, 0.6211746639343685)
+            ],
+        ),
+        id="test_hp_nau2004_sec4",
+    ),
+    pytest.param(
+        HPSolverTestCase(
+            factory=functools.partial(create_prior_from_catalog, "journals/other/reiley2008/fig1"),
+            expected=[d(1.0 / 3.0, 2.0 / 3.0, 0.0, 0.0), d(2.0 / 3.0, 1.0 / 3.0)],
+        ),
+        id="test_hp_reiley2008_fig1",
+    ),
 ]
 
 
@@ -127,6 +166,15 @@ def test_hp_strategy_solver(test_case: HPSolverTestCase, subtests) -> None:
 def test_hp_degenerate_t0_prior_raises_error() -> None:
     """Test that the HP solver correctly identifies when given a degenerate prior."""
     prior = create_t0_degenerate_example()
+    with pytest.raises(RuntimeError, match="Multiple best responses found for player 1. "
+                       "Only one best response is allowed."):
+        gbt.nash.hp_solve(prior=prior)
+
+
+@pytest.mark.nash
+def test_hp_degenerate_t0_prior_selten1975_fig2() -> None:
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
+    prior = game.mixed_strategy_profile()
     with pytest.raises(RuntimeError, match="Multiple best responses found for player 1. "
                        "Only one best response is allowed."):
         gbt.nash.hp_solve(prior=prior)
