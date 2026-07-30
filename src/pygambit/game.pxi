@@ -951,6 +951,62 @@ class Game:
             self.game.deref().GetMinimalSubgame(cython.cast(Infoset, resolved_infoset).infoset)
         )
 
+    def get_behavior(self,
+                     player: Player | str,
+                     strategy: Strategy | str) -> StrategyBehavior:
+        """Return the mapping from information sets to actions prescribed by a strategy.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : Player or str
+            The player whose strategy to view.
+        strategy : Strategy or str
+            The strategy to view.
+
+        Returns
+        -------
+        StrategyBehavior
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        MismatchError
+            If `player` is from a different game, or `strategy` belongs to a different player.
+        KeyError
+            If `strategy` is a string and `player` has no strategy with that label.
+
+        See Also
+        --------
+        Strategy.action : The action prescribed at a single information set.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "get_behavior(): only defined for games with a tree representation"
+            )
+        resolved_player = cython.cast(Player, self._resolve_player(player, "get_behavior"))
+        if isinstance(strategy, Strategy):
+            if strategy.player != resolved_player:
+                raise MismatchError(
+                    f"get_behavior(): strategy must belong to player "
+                    f"'{resolved_player.label}'"
+                )
+            resolved_strategy = strategy
+        elif isinstance(strategy, str):
+            if not strategy.strip():
+                raise ValueError(
+                    "get_behavior(): strategy cannot be an empty string or all spaces"
+                )
+            resolved_strategy = resolved_player.strategies[strategy]
+        else:
+            raise TypeError(
+                f"get_behavior(): strategy must be Strategy or str, "
+                f"not {strategy.__class__.__name__}"
+            )
+        return StrategyBehavior.wrap(resolved_player, resolved_strategy)
+
     def set_chance_probs(self, infoset: Infoset | str, probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.
 
