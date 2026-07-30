@@ -73,18 +73,22 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   in >> S;
   stripComment(in);
   in >> P;
+  if (!in || N <= 0 || S < 0 || P < 0) {
+    throw std::runtime_error("Error in game file: expected BAGG header with number of "
+                             "players, action nodes, and function nodes");
+  }
 
   stripComment(in);
   vector<int> numTypes(N);
 
   // input number of types for each player
   for (int i = 0; i < N; ++i) {
-    if (in.eof() || in.bad()) {
+    in >> numTypes[i];
+    if (!in) {
       throw std::runtime_error(
           "Error in game file: integer expected for the number of types for player " +
           std::to_string(i));
     }
-    in >> numTypes[i];
   }
 
   // input the type distributions
@@ -93,10 +97,10 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   for (int i = 0; i < N; ++i) {
     TDist.emplace_back(numTypes[i]);
     for (int j = 0; j < numTypes[i]; ++j) {
-      if (in.eof() || in.bad()) {
+      in >> TDist[i][j];
+      if (!in) {
         throw std::runtime_error("Error in game file: number expected for type distribution");
       }
-      in >> TDist[i][j];
     }
   }
 
@@ -105,12 +109,12 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   vector<vector<vector<int>>> typeActionSets(N);
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < numTypes[i]; ++j) {
-      if (in.eof() || in.bad()) {
+      int temp;
+      in >> temp;
+      if (!in || temp < 0) {
         throw std::runtime_error(
             "Error in game file: integer expected for size of type action set");
       }
-      int temp;
-      in >> temp;
       typeActionSets[i].emplace_back(temp);
     }
   }
@@ -120,10 +124,10 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < numTypes[i]; ++j) {
       for (int &el : typeActionSets[i][j]) {
-        if (in.eof() || in.bad()) {
+        in >> el;
+        if (!in) {
           throw std::runtime_error("Error in game file: integer expected for type action set");
         }
-        in >> el;
       }
     }
   }

@@ -31,12 +31,11 @@ import scipy.stats
 import pygambit.gameiter
 
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
-ctypedef c_Game (*GameParser)(const string &, bool) except +IOError
+ctypedef c_Game (*GameParser)(const string &) except +IOError
 
 
 @cython.cfunc
 def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-              normalize_labels: bool,
               parser: GameParser):
 
     g = cython.declare(Game)
@@ -48,23 +47,19 @@ def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
         with open(filepath_or_buffer, "rb") as f:
             data = f.read()
     try:
-        g = Game.wrap(parser(data, normalize_labels))
+        g = Game.wrap(parser(data))
     except Exception as exc:
         raise ValueError(f"Parse error in game file: {exc}") from None
     return g
 
 
-def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in a GBT file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -82,20 +77,16 @@ def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
     --------
     read_efg, read_nfg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseGbtGame)
+    return read_game(filepath_or_buffer, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -113,20 +104,16 @@ def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
     --------
     read_gbt, read_nfg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseEfgGame)
+    return read_game(filepath_or_buffer, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -144,20 +131,16 @@ def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
     --------
     read_gbt, read_efg, read_agg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseNfgGame)
+    return read_game(filepath_or_buffer, parser=ParseNfgGame)
 
 
-def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-             normalize_labels: bool = False) -> Game:
+def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in an AGG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -175,20 +158,16 @@ def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
     --------
     read_gbt, read_efg, read_nfg, read_bagg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseAggGame)
+    return read_game(filepath_or_buffer, parser=ParseAggGame)
 
 
-def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-              normalize_labels: bool = False) -> Game:
+def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     """Construct a game from its serialised representation in a BAGG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
-    normalize_labels : bool (default False)
-        Ensure all labels are nonempty and unique within their scopes.
-        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -206,7 +185,7 @@ def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
     --------
     read_gbt, read_efg, read_nfg, read_agg
     """
-    return read_game(filepath_or_buffer, normalize_labels, parser=ParseBaggGame)
+    return read_game(filepath_or_buffer, parser=ParseBaggGame)
 
 
 @cython.cclass
@@ -584,12 +563,15 @@ class Game:
         g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            Player.wrap(g.game.deref().NewPlayer()).label = str(player)
+            g.game.deref().NewPlayer(str(player).encode("ascii"))
         return g
 
     @classmethod
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -619,6 +601,9 @@ class Game:
         corresponding player.  The arrays must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
 
         .. versionchanged:: 16.1.0
             Added the `title` parameter.
@@ -694,6 +679,10 @@ class Game:
         The payoff matrices must all have the same shape,
         and have the same number of dimensions as the total number of
         players.
+
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
 
         Parameters
         ----------
@@ -2074,23 +2063,32 @@ class Game:
                 "Operation only defined for games with a tree representation"
             )
 
-    def add_player(self, label: str = "") -> Player:
+    def add_player(self, label: str) -> Player:
         """Add a new player to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the game's players.
+            In extensive games, the label cannot be ``"Chance"``, which is reserved for the
+            chance player.
 
         Parameters
         ----------
-        label : str, default ""
-            The label for the player.
+        label : str
+            The label for the new player.  Must be nonempty and not the same as the label
+            of an existing player in the game.
 
         Returns
         -------
         Player
             A reference to the newly-created player.
+
+        Raises
+        ------
+        ValueError
+            If `label` is empty, is already the label of another player, or (in an
+            extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
-        p = Player.wrap(self.game.deref().NewPlayer())
-        if str(label) != "":
-            p.label = str(label)
-        return p
+        return Player.wrap(self.game.deref().NewPlayer(label.encode("ascii")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:
@@ -2114,22 +2112,27 @@ class Game:
         self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
-                    payoffs: list | None = None,
-                    label: str = "") -> Outcome:
+                    label: str,
+                    payoffs: list | None = None) -> Outcome:
         """Add a new outcome to the game.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            game's outcomes.
 
         Parameters
         ----------
+        label : str
+            The label for the outcome.  Must be nonempty and not already in use
+            by another outcome in the game.
         payoffs : list, optional
             The payoffs of the outcome to each player.
-        label : str, default ""
-            The label for the outcome
 
         Raises
         ------
         ValueError
             If `payoffs` is specified but is not the same length as the number of players
-            in the game.
+            in the game, or if `label` is empty or already in use by another outcome.
 
         Returns
         -------
@@ -2141,9 +2144,7 @@ class Game:
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome())
-        if str(label) != "":
-            c.label = str(label)
+        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("ascii")))
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c
@@ -2194,15 +2195,20 @@ class Game:
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
         self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
-    def add_strategy(self, player: Player | str, label: str = None) -> Strategy:
+    def add_strategy(self, player: Player | str, label: str) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.
+
+        .. versionchanged:: 16.7.0
+            A label is now required and must be nonempty and unique among the
+            player's strategies.
 
         Parameters
         ----------
         player : Player or str
             The player to create the new strategy for
-        label : str, optional
-            The label to assign to the new strategy
+        label : str
+            The label for the new strategy.  Must be nonempty and not already in use
+            by another of the player's strategies.
 
         Returns
         -------
@@ -2215,6 +2221,8 @@ class Game:
             If `player` is a `Player` from a different game.
         UndefinedOperationError
             If called on a game which has an extensive representation.
+        ValueError
+            If `label` is empty or is already the label of another of the player's strategies.
         """
         if self.is_tree:
             raise UndefinedOperationError(
@@ -2222,9 +2230,8 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        label_bytes = (str(label) if label is not None else "").encode("ascii")
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label_bytes)
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

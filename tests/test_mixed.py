@@ -309,13 +309,6 @@ def test_profile_indexing_by_invalid_strategy_label(
         game.mixed_strategy_profile(rational=rational_flag)[strategy_label]
 
 
-def test_profile_indexing_by_player_and_duplicate_strategy_label():
-    game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
-    profile = game.mixed_strategy_profile()
-    with pytest.raises(ValueError):
-        profile["Dan"]["defect"]
-
-
 @pytest.mark.parametrize(
     "game,strategy_label,prob,rational_flag",
     [

@@ -132,11 +132,8 @@ int main(int argc, char *argv[])
     }
 
     for (auto pert : perts) {
-      IPAStrategySolve(pert, [renderer](const MixedStrategyProfile<double> &p_profile,
-                                        const std::string &p_label) {
-        if (p_label == "NE") {
-          renderer->Render(p_profile, p_label);
-        }
+      IPAStrategySolve(pert, [renderer](const MixedStrategyProfile<double> &p_profile) {
+        renderer->Render(p_profile);
       });
     }
     return 0;

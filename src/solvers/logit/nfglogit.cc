@@ -283,8 +283,9 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
 
 class TracingCallbackFunction {
 public:
-  TracingCallbackFunction(const Game &p_game, const MixedStrategyObserverFunctionType &p_observer)
-    : m_game(p_game), m_observer(p_observer)
+  TracingCallbackFunction(const Game &p_game,
+                          LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
+    : m_game(p_game), m_onEvent(p_onEvent)
   {
   }
   ~TracingCallbackFunction() = default;
@@ -294,7 +295,7 @@ public:
 
 private:
   Game m_game;
-  MixedStrategyObserverFunctionType m_observer;
+  LogitEventCallbackType<LogitQREMixedStrategyProfile> m_onEvent;
   std::list<LogitQREMixedStrategyProfile> m_profiles;
 };
 
@@ -303,13 +304,13 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
   MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0));
   PointToProfile(profile, p_point);
   m_profiles.emplace_back(profile, p_point.back(), 1.0);
-  m_observer(m_profiles.back());
+  m_onEvent(LogitPathEvent<LogitQREMixedStrategyProfile>{m_profiles.back()});
 }
 
 class EstimatorCallbackFunction {
 public:
   EstimatorCallbackFunction(const Game &p_game, const Vector<double> &p_frequencies,
-                            const MixedStrategyObserverFunctionType &p_observer);
+                            LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent);
   ~EstimatorCallbackFunction() = default;
 
   void EvaluatePoint(const Vector<double> &p_point);
@@ -319,14 +320,14 @@ public:
 private:
   Game m_game;
   const Vector<double> &m_frequencies;
-  MixedStrategyObserverFunctionType m_observer;
+  LogitEventCallbackType<LogitQREMixedStrategyProfile> m_onEvent;
   LogitQREMixedStrategyProfile m_bestProfile;
 };
 
 EstimatorCallbackFunction::EstimatorCallbackFunction(
     const Game &p_game, const Vector<double> &p_frequencies,
-    const MixedStrategyObserverFunctionType &p_observer)
-  : m_game(p_game), m_frequencies(p_frequencies), m_observer(p_observer),
+    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
+  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(p_onEvent),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0), 0.0,
                   LogLike(p_frequencies, p_game->NewMixedStrategyProfile(0.0).GetProbVector()))
 {
@@ -338,7 +339,7 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
   PointToProfile(profile, p_point);
   auto qre = LogitQREMixedStrategyProfile(profile, p_point.back(),
                                           LogLike(m_frequencies, profile.GetProbVector()));
-  m_observer(qre);
+  m_onEvent(LogitPathEvent<LogitQREMixedStrategyProfile>{qre});
   if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
     m_bestProfile = qre;
   }
@@ -349,7 +350,8 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
                    double p_firstStep, double p_maxAccel,
-                   const MixedStrategyObserverFunctionType &p_observer)
+                   Nash::StrategyCallbackType<double> p_onEquilibrium,
+                   LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -365,7 +367,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_observer);
+  TracingCallbackFunction callback(game, p_onEvent);
   EquationSystem system(game);
   tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
@@ -379,14 +381,16 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
         return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
-  return callback.GetProfiles();
+  const auto &profiles = callback.GetProfiles();
+  p_onEquilibrium(profiles.back().GetProfile());
+  return profiles;
 }
 
 std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
                          const std::list<double> &p_targetLambda, double p_omega,
                          double p_firstStep, double p_maxAccel,
-                         const MixedStrategyObserverFunctionType &p_observer)
+                         LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -397,7 +401,7 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
 
   const Game game = p_start.GetGame();
   Vector x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_observer);
+  TracingCallbackFunction callback(game, p_onEvent);
   std::list<LogitQREMixedStrategyProfile> ret;
   EquationSystem system(game);
   for (auto lam : p_targetLambda) {
@@ -421,7 +425,7 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
-                      MixedStrategyObserverFunctionType p_observer)
+                      LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
 {
   const LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
   if (start.size() == 0) {
@@ -434,7 +438,7 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
   const Game game = start.GetGame();
   Vector<double> x(ProfileToPoint(start)), restart(x);
   const Vector freq_vector(p_frequencies.GetProbVector());
-  EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), p_observer);
+  EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), p_onEvent);
   EquationSystem system(game);
   while (true) {
     tracer.TracePath(

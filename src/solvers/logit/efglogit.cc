@@ -244,8 +244,9 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
 
 class TracingCallbackFunction {
 public:
-  TracingCallbackFunction(const Game &p_game, MixedBehaviorObserverFunctionType p_observer)
-    : m_game(p_game), m_observer(p_observer)
+  TracingCallbackFunction(const Game &p_game,
+                          LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
+    : m_game(p_game), m_onEvent(p_onEvent)
   {
   }
   ~TracingCallbackFunction() = default;
@@ -255,7 +256,7 @@ public:
 
 private:
   Game m_game;
-  MixedBehaviorObserverFunctionType m_observer;
+  LogitEventCallbackType<LogitQREMixedBehaviorProfile> m_onEvent;
   std::list<LogitQREMixedBehaviorProfile> m_profiles;
 };
 
@@ -263,13 +264,13 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
   const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
   m_profiles.emplace_back(profile, p_point.back(), 1.0);
-  m_observer(m_profiles.back());
+  m_onEvent(LogitPathEvent<LogitQREMixedBehaviorProfile>{m_profiles.back()});
 }
 
 class EstimatorCallbackFunction {
 public:
   EstimatorCallbackFunction(const Game &p_game, const Vector<double> &p_frequencies,
-                            MixedBehaviorObserverFunctionType p_observer);
+                            LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent);
   ~EstimatorCallbackFunction() = default;
 
   void EvaluatePoint(const Vector<double> &p_point);
@@ -278,14 +279,14 @@ public:
 private:
   Game m_game;
   const Vector<double> &m_frequencies;
-  MixedBehaviorObserverFunctionType m_observer;
+  LogitEventCallbackType<LogitQREMixedBehaviorProfile> m_onEvent;
   LogitQREMixedBehaviorProfile m_bestProfile;
 };
 
-EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
-                                                     const Vector<double> &p_frequencies,
-                                                     MixedBehaviorObserverFunctionType p_observer)
-  : m_game(p_game), m_frequencies(p_frequencies), m_observer(p_observer),
+EstimatorCallbackFunction::EstimatorCallbackFunction(
+    const Game &p_game, const Vector<double> &p_frequencies,
+    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
+  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(p_onEvent),
     m_bestProfile(MixedBehaviorProfile<double>(p_game), 0.0,
                   LogLike(p_frequencies, static_cast<const Vector<double> &>(
                                              MixedBehaviorProfile<double>(p_game))))
@@ -298,7 +299,7 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
   auto qre = LogitQREMixedBehaviorProfile(
       profile, p_point.back(),
       LogLike(m_frequencies, static_cast<const Vector<double> &>(profile)));
-  m_observer(qre);
+  m_onEvent(LogitPathEvent<LogitQREMixedBehaviorProfile>{qre});
   if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
     m_bestProfile = qre;
   }
@@ -311,7 +312,8 @@ namespace Gambit {
 std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
                    double p_firstStep, double p_maxAccel,
-                   MixedBehaviorObserverFunctionType p_observer)
+                   Nash::BehaviorCallbackType<double> p_onEquilibrium,
+                   LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -326,7 +328,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   }
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_observer);
+  TracingCallbackFunction callback(game, p_onEvent);
   EquationSystem system(game);
   tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
@@ -340,14 +342,16 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         return RegretTerminationFunction(game, p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
-  return callback.GetProfiles();
+  const auto &profiles = callback.GetProfiles();
+  p_onEquilibrium(profiles.back().GetProfile());
+  return profiles;
 }
 
 std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
                          const std::list<double> &p_targetLambda, double p_omega,
                          double p_firstStep, double p_maxAccel,
-                         MixedBehaviorObserverFunctionType p_observer)
+                         LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -358,7 +362,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_observer);
+  TracingCallbackFunction callback(game, p_onEvent);
   EquationSystem system(game);
   std::list<LogitQREMixedBehaviorProfile> ret;
   for (auto lam : p_targetLambda) {
@@ -382,7 +386,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
 LogitQREMixedBehaviorProfile
 LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
-                      MixedBehaviorObserverFunctionType p_observer)
+                      LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
   const LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
   if (start.size() == 0) {
@@ -395,7 +399,7 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
   Vector<double> x(ProfileToPoint(start)), restart(x);
   const Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
   EstimatorCallbackFunction callback(
-      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_observer);
+      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_onEvent);
   EquationSystem system(start.GetGame());
   while (true) {
     tracer.TracePath(

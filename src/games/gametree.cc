@@ -718,7 +718,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
 
 GameTreeRep::GameTreeRep()
   : m_root(std::make_shared<GameNodeRep>(this, nullptr)),
-    m_chance(std::make_shared<GamePlayerRep>(this, 0))
+    m_chance(std::make_shared<GamePlayerRep>(this, 0, "Chance"))
 {
 }
 
@@ -1524,10 +1524,11 @@ int GameTreeRep::BehavProfileLength() const
 //                        GameTreeRep: Players
 //------------------------------------------------------------------------
 
-GamePlayer GameTreeRep::NewPlayer()
+GamePlayer GameTreeRep::NewPlayer(const std::string &p_label)
 {
+  CheckPlayerLabel(p_label);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label);
   IncrementVersion();
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1);
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
@@ -1740,7 +1741,7 @@ Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
   for (const auto &player : m_game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       try {
-        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav[infoset.get()]));
+        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav.at(infoset.get())));
       }
       catch (std::out_of_range &) {
       }

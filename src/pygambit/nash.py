@@ -666,7 +666,7 @@ def enumpoly_solve(
 ) -> NashComputationResult:
     """:ref:`Compute Nash equilibria by enumerating all support profiles
     of strategies or actions, and for each support finding all totally-mixed equilibria of
-    the game over that support.<enumpoly_solve>`
+    the game over that support. <enumpoly>`
 
     Parameters
     ----------

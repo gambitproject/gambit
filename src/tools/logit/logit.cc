@@ -200,9 +200,11 @@ int main(int argc, char *argv[])
       std::ifstream mleData(mleFile.c_str());
       ReadProfile(mleData, frequencies);
 
-      auto printer = [fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {
+      auto printer = [fullGraph,
+                      decimals](const LogitEvent<LogitQREMixedStrategyProfile> &p_event) {
         if (fullGraph) {
-          PrintProfile(std::cout, decimals, p);
+          PrintProfile(std::cout, decimals,
+                       std::get<LogitPathEvent<LogitQREMixedStrategyProfile>>(p_event).qre);
         }
       };
       auto result =
@@ -212,9 +214,11 @@ int main(int argc, char *argv[])
     }
 
     if (!game->IsTree() || useStrategic) {
-      auto printer = [fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {
+      auto printer = [fullGraph,
+                      decimals](const LogitEvent<LogitQREMixedStrategyProfile> &p_event) {
         if (fullGraph) {
-          PrintProfile(std::cout, decimals, p);
+          PrintProfile(std::cout, decimals,
+                       std::get<LogitPathEvent<LogitQREMixedStrategyProfile>>(p_event).qre);
         }
       };
       const LogitQREMixedStrategyProfile start(game);
@@ -226,14 +230,17 @@ int main(int argc, char *argv[])
         }
       }
       else {
-        auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel,
+                                         Nash::NullStrategyCallback<double>, printer);
         PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
     else {
-      auto printer = [fullGraph, decimals](const LogitQREMixedBehaviorProfile &p) {
+      auto printer = [fullGraph,
+                      decimals](const LogitEvent<LogitQREMixedBehaviorProfile> &p_event) {
         if (fullGraph) {
-          PrintProfile(std::cout, decimals, p);
+          PrintProfile(std::cout, decimals,
+                       std::get<LogitPathEvent<LogitQREMixedBehaviorProfile>>(p_event).qre);
         }
       };
       const LogitQREMixedBehaviorProfile start(game);
@@ -245,7 +252,8 @@ int main(int argc, char *argv[])
         }
       }
       else {
-        auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel,
+                                         Nash::NullBehaviorCallback<double>, printer);
         PrintProfile(std::cout, decimals, result.back(), true);
       }
     }

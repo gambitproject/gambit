@@ -34,6 +34,7 @@
 #include <wx/dcps.h>
 #endif // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include <wx/splitter.h>
+#include <wx/artprov.h>
 
 #include "gambit.h"
 
@@ -51,7 +52,6 @@
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
-#include "dlnashmon.h"
 #include "dlefglogit.h"
 #include "dlabout.h"
 
@@ -994,7 +994,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
   EditNodeDialog dialog(this, m_doc->GetSelectNode());
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
+      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeLabel());
       if (dialog.GetOutcome() > 0) {
         m_doc->DoSetOutcome(m_doc->GetSelectNode(),
                             m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
@@ -1029,14 +1029,14 @@ void GameFrame::OnEditMove(wxCommandEvent &)
   EditMoveDialog dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetName());
+      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
 
       if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
       for (const auto &action : infoset->GetActions()) {
-        m_doc->DoSetActionLabel(action, dialog.GetActionName(action->GetNumber()));
+        m_doc->DoSetActionLabel(action, dialog.GetActionLabel(action->GetNumber()));
       }
       if (infoset->IsChanceInfoset()) {
         m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
@@ -1227,6 +1227,9 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
   }
 }
 
+extern void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                                  const std::shared_ptr<AnalysisOutput> &p_command);
+
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
@@ -1255,10 +1258,7 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
-    auto command = dialog.GetCommand();
-
-    NashMonitorDialog monitordialog(this, m_doc, command);
-    monitordialog.ShowModal();
+    ShowNashMonitorDialog(this, m_doc, dialog.GetCommand());
 
     if (!m_splitter->IsSplit()) {
       if (m_efgPanel && m_efgPanel->IsShown()) {
@@ -1311,23 +1311,94 @@ void GameFrame::OnUnsplit(wxSplitterEvent &)
 
 namespace {
 
-wxString CloseWarningMessage(GameDocument *p_doc)
+struct CloseWarningText {
+  wxString primary;
+  wxString secondary;
+};
+
+CloseWarningText CloseWarningMessage(GameDocument *p_doc)
 {
-  if (p_doc->IsGameModified() && !p_doc->IsWorkspaceModified()) {
-    return _("This game has unsaved changes.\n\n"
-             "Close without saving?");
+  const bool gameModified = p_doc->IsGameModified();
+  const bool workspaceModified = p_doc->IsWorkspaceModified();
+
+  if (gameModified && !workspaceModified) {
+    return {_("This game has unsaved changes."),
+            _("If you close this window now, changes to the game will be lost.")};
   }
-  if (!p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
-    return _("There are unsaved computational results.\n\n"
-             "These can be saved in a Gambit workspace file.\n"
-             "Close without saving?");
+
+  if (!gameModified && workspaceModified) {
+    return {_("There are unsaved computational results."),
+            _("These results can be saved in a Gambit workspace file. "
+              "If you close this window now, the unsaved results will be lost.")};
   }
-  if (p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
-    return _("This game has unsaved changes, and there are unsaved computational results.\n\n"
-             "Close without saving?");
+
+  if (gameModified && workspaceModified) {
+    return {_("This game and its computational results have unsaved changes."),
+            _("If you close this window now, changes to the game and unsaved "
+              "computational results will be lost.")};
   }
-  return wxEmptyString;
+
+  return {wxEmptyString, wxEmptyString};
 }
+
+class CloseWarningDialog final : public wxDialog {
+public:
+  CloseWarningDialog(wxWindow *parent, const CloseWarningText &text)
+    : wxDialog(parent, wxID_ANY, _("Unsaved Changes"), wxDefaultPosition, wxDefaultSize,
+               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+  {
+    auto *topSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto *contentSizer = new wxBoxSizer(wxHORIZONTAL);
+    contentSizer->Add(new wxStaticBitmap(this, wxID_ANY,
+                                         wxArtProvider::GetBitmap(wxART_WARNING, wxART_MESSAGE_BOX,
+                                                                  wxSize(32, 32))),
+                      0, wxALIGN_TOP | wxRIGHT, FromDIP(16));
+
+    auto *textSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto *primary = new wxStaticText(this, wxID_ANY, text.primary);
+    auto font = primary->GetFont();
+    font.SetWeight(wxFONTWEIGHT_BOLD);
+    primary->SetFont(font);
+
+    auto *secondary = new wxStaticText(this, wxID_ANY, text.secondary);
+    secondary->Wrap(FromDIP(460));
+
+    auto *question = new wxStaticText(this, wxID_ANY, _("Close without saving?"));
+    question->Wrap(FromDIP(460));
+
+    textSizer->Add(primary, 0, wxBOTTOM, FromDIP(8));
+    textSizer->Add(secondary, 0, wxBOTTOM, FromDIP(12));
+    textSizer->Add(question, 0);
+
+    contentSizer->Add(textSizer, 1, wxEXPAND);
+
+    topSizer->Add(contentSizer, 1, wxEXPAND | wxALL, FromDIP(20));
+
+    auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    auto *cancelButton = new wxButton(this, wxID_CANCEL, _("Cancel"));
+    auto *closeButton = new wxButton(this, wxID_YES, _("Close Without Saving"));
+
+    buttonSizer->AddStretchSpacer();
+    buttonSizer->Add(cancelButton, 0, wxRIGHT, FromDIP(8));
+    buttonSizer->Add(closeButton, 0);
+
+    topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(20));
+
+    SetSizerAndFit(topSizer);
+    SetMinSize(wxSize(FromDIP(540), -1));
+
+    SetEscapeId(wxID_CANCEL);
+    SetAffirmativeId(wxID_YES);
+
+    cancelButton->SetDefault();
+    cancelButton->SetFocus();
+
+    CentreOnParent();
+  }
+};
 
 } // namespace
 
@@ -1339,10 +1410,10 @@ void GameFrame::OnCloseWindow(wxCloseEvent &p_event)
   }
 
   if (m_doc->IsModified()) {
-    const int response = wxMessageBox(CloseWarningMessage(m_doc), _("Unsaved Changes"),
-                                      wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
+    const auto warning = CloseWarningMessage(m_doc);
 
-    if (response != wxYES) {
+    CloseWarningDialog dialog(this, warning);
+    if (dialog.ShowModal() != wxID_YES) {
       p_event.Veto();
       return;
     }

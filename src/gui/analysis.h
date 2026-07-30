@@ -23,7 +23,10 @@
 #ifndef GAMBIT_GUI_ANALYSIS_H
 #define GAMBIT_GUI_ANALYSIS_H
 
-class TiXmlNode;
+#include <optional>
+
+#include "games/workspace.h"
+#include "nashspec.h"
 
 //
 // This file contains classes which manage the output of analysis tools.
@@ -41,6 +44,7 @@ class AnalysisOutput {
 protected:
   GameDocument *m_doc;
   wxString m_label, m_description, m_command;
+  std::optional<NashComputationSpec> m_computation;
 
 public:
   /// @name Lifecycle
@@ -71,6 +75,15 @@ public:
   /// Set the command used to generate the list
   void SetCommand(const wxString &p_command) { m_command = p_command; }
 
+  /// Get the typed specification used to generate the list, if available
+  const std::optional<NashComputationSpec> &GetComputationSpec() const { return m_computation; }
+
+  /// Set the typed specification used to generate the list
+  void SetComputationSpec(const NashComputationSpec &p_computation)
+  {
+    m_computation = p_computation;
+  }
+
   /// The number of profiles in the list
   virtual int NumProfiles() const = 0;
 
@@ -98,13 +111,10 @@ public:
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
-  virtual void AddOutput(const wxString &) = 0;
-
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
-  /// Write a profile list to XML savefile
-  virtual void Save(std::ostream &) const = 0;
+  virtual LegacyWorkspaceFile::Analysis Save() const = 0;
 };
 
 //!
@@ -169,7 +179,8 @@ public:
   //! @name Adding profiles to the list
   //!
   //@{
-  void AddOutput(const wxString &) override;
+  void AddProfile(const MixedStrategyProfile<T> &);
+  void AddProfile(const MixedBehaviorProfile<T> &);
   /// Map all behavior profiles to corresponding mixed profiles
   void BuildNfg() override;
 
@@ -181,10 +192,8 @@ public:
   //! @name Saving and loading profile lists
   //!
   //@{
-  /// Build a profile list from XML savefile
-  void Load(TiXmlNode *analysis);
-  /// Write a profile list to XML savefile
-  void Save(std::ostream &) const override;
+  void Load(const LegacyWorkspaceFile::Analysis &p_analysis);
+  LegacyWorkspaceFile::Analysis Save() const override;
   //@}
 };
 

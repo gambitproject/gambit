@@ -24,7 +24,7 @@
 #define STYLE_H
 
 #include "gambit.h"
-#include "core/tinyxml.h"
+#include "games/workspace.h"
 
 class wxFont;
 
@@ -179,28 +179,9 @@ public:
   // Reset to the "factory" defaults
   void SetDefaults();
 
-  /// @name Reading and writing XML
-  //@{
-  /// Get the color settings as an XML entry
-  std::string GetColorXML() const;
-  /// Set the color settings from an XML entry
-  void SetColorXML(TiXmlNode *p_node);
-
-  /// Get the font settings as an XML entry
-  std::string GetFontXML() const;
-  /// Set the font settings from an XML entry
-  void SetFontXML(TiXmlNode *p_node);
-
-  /// Get the layout settings as an XML entry
-  std::string GetLayoutXML() const;
-  /// Set the layout settings from an XML entry
-  void SetLayoutXML(TiXmlNode *p_node);
-
-  /// Get the label settings as an XML entry
-  std::string GetLabelXML() const;
-  /// Set the label settings from an XML entry
-  void SetLabelXML(TiXmlNode *p_node);
-  //@}
+  /// Copy GUI presentation values to and from the neutral workspace representation.
+  void Save(LegacyWorkspaceFile &p_workspace) const;
+  void Load(const LegacyWorkspaceFile &p_workspace);
 };
 
 } // namespace Gambit::GUI

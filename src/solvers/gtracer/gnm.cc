@@ -326,7 +326,7 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
           if (ee < fuzz) { // only save high quality equilibria;
             // this restriction could be removed.
             Eq.push_back(sigma);
-            // PrintProfile(std::cout, "NE", sigma);
+            p_onStep("NE", Eq.back());
           }
           Index = -Index;
           s_hat_old = -1;

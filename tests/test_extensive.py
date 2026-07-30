@@ -42,11 +42,6 @@ def test_game_add_players_label(players: list):
         assert player.label == label
 
 
-def test_game_add_players_nolabel():
-    game = gbt.Game.new_tree()
-    game.add_player()
-
-
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
     (gbt.catalog.load("journals/ijgt/selten1975/fig2"), True),

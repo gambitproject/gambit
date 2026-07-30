@@ -23,12 +23,29 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include <type_traits>
 #include "gambit.h"
 #include "tools/util.h"
 #include "solvers/simpdiv/simpdiv.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
+
+template <class Renderer>
+void RenderSimpdivEvent(const Renderer &p_renderer, const SimpdivEvent &p_event)
+{
+  std::visit(
+      [&](const auto &event) {
+        using EventType = std::decay_t<decltype(event)>;
+        if constexpr (std::is_same_v<EventType, SimpdivStartEvent>) {
+          p_renderer->Render(event.profile, "start");
+        }
+        else if constexpr (std::is_same_v<EventType, SimpdivRefinementEvent>) {
+          p_renderer->Render(event.profile, std::to_string(event.gridSize));
+        }
+      },
+      p_event);
+}
 
 Array<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
 {
@@ -222,9 +239,10 @@ int main(int argc, char *argv[])
         auto renderer = std::make_shared<MixedStrategyCSVAsFloatRenderer>(std::cout, decimals);
         SimpdivStrategySolve(
             start, maxregret, gridResize, 0,
-            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
-              if (label == "NE" || verbose) {
-                renderer->Render(p, label);
+            [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); },
+            [&](const SimpdivEvent &event) {
+              if (verbose) {
+                RenderSimpdivEvent(renderer, event);
               }
             });
       }
@@ -232,9 +250,10 @@ int main(int argc, char *argv[])
         auto renderer = std::make_shared<MixedStrategyProfileCSVRenderer<Rational>>(std::cout);
         SimpdivStrategySolve(
             start, maxregret, gridResize, 0,
-            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
-              if (label == "NE" || verbose) {
-                renderer->Render(p, label);
+            [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); },
+            [&](const SimpdivEvent &event) {
+              if (verbose) {
+                RenderSimpdivEvent(renderer, event);
               }
             });
       }

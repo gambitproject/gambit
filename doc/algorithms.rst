@@ -15,7 +15,7 @@ Algorithm         Description                                                   
 :ref:`lp`         Compute equilibria in a two-player constant-sum game via linear programming   :py:func:`pygambit.nash.lp_solve`         :ref:`gambit-lp <gambit-lp>`
 :ref:`lcp`        Compute equilibria in a two-player game via linear complementarity            :py:func:`pygambit.nash.lcp_solve`        :ref:`gambit-lcp <gambit-lcp>`
 :ref:`liap`       Compute equilibria using function minimization                                :py:func:`pygambit.nash.liap_solve`       :ref:`gambit-liap <gambit-liap>`
-:ref:`logit`      Compute quantal response equilibria                                           :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
+:ref:`logit`      Trace logit QRE and approximate a Nash equilibrium at high precision           :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
 :ref:`simpdiv`    Compute equilibria via simplicial subdivision                                 :py:func:`pygambit.nash.simpdiv_solve`    :ref:`gambit-simpdiv <gambit-simpdiv>`
 :ref:`ipa`        Compute equilibria using iterated polymatrix approximation                    :py:func:`pygambit.nash.ipa_solve`        :ref:`gambit-ipa <gambit-ipa>`
 :ref:`gnm`        Compute equilibria using a global Newton method                               :py:func:`pygambit.nash.gnm_solve`        :ref:`gambit-gnm <gambit-gnm>`
@@ -141,6 +141,10 @@ logit
 
 Computes the
 principal branch of the (logit) quantal response correspondence.
+Following this branch toward large values of the precision parameter
+provides an approximation to a Nash equilibrium.  The graphical
+interface uses this limiting calculation when it selects ``logit`` as
+the recommended method for computing one Nash equilibrium.
 
 The method is based on the procedure described in Turocy :cite:p:`Tur05` for
 strategic games and Turocy :cite:p:`Tur10` for extensive games.

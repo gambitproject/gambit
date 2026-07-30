@@ -29,22 +29,16 @@
 namespace Gambit::Nash {
 
 template <class T>
-using StrategyCallbackType =
-    std::function<void(const MixedStrategyProfile<T> &, const std::string &)>;
+using StrategyCallbackType = std::function<void(const MixedStrategyProfile<T> &)>;
 
 /// @brief A fallback callback function for mixed strategy profiles that does nothing
-template <class T> void NullStrategyCallback(const MixedStrategyProfile<T> &, const std::string &)
-{
-}
+template <class T> void NullStrategyCallback(const MixedStrategyProfile<T> &) {}
 
 template <class T>
-using BehaviorCallbackType =
-    std::function<void(const MixedBehaviorProfile<T> &, const std::string &)>;
+using BehaviorCallbackType = std::function<void(const MixedBehaviorProfile<T> &)>;
 
 /// @brief A fallback callback function for mixed behavior profiles that does nothing
-template <class T> void NullBehaviorCallback(const MixedBehaviorProfile<T> &, const std::string &)
-{
-}
+template <class T> void NullBehaviorCallback(const MixedBehaviorProfile<T> &) {}
 
 template <class T>
 std::list<MixedBehaviorProfile<T>>
@@ -56,20 +50,6 @@ ToMixedBehaviorProfile(const std::list<MixedStrategyProfile<T>> &p_list)
   }
   return ret;
 }
-
-template <class T>
-using BehaviorSolverType = std::function<std::list<MixedBehaviorProfile<T>>(const Game &)>;
-
-//
-// Exception raised when maximum number of equilibria to compute
-// has been reached.  A convenience for unraveling a potentially
-// deep recursion.
-//
-class EquilibriumLimitReached : public std::runtime_error {
-public:
-  EquilibriumLimitReached() : std::runtime_error("Reached target number of equilibria") {}
-  ~EquilibriumLimitReached() noexcept override = default;
-};
 
 } // namespace Gambit::Nash
 

@@ -152,6 +152,10 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   if (!in.good()) {
     throw std::runtime_error("Error reading the number of function nodes");
   }
+  if (n <= 0 || S < 0 || P < 0) {
+    throw std::runtime_error("Error in game file: invalid AGG header (number of players, "
+                             "action nodes, or function nodes out of range)");
+  }
   stripComment(in);
 
   // enter sizes of action sets:

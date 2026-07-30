@@ -135,7 +135,8 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  StrategyCallbackType<double> p_callback)
+                  StrategyCallbackType<double> p_onEquilibrium,
+                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -145,7 +146,7 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   std::list<MixedStrategyProfile<double>> solutions;
 
   MixedStrategyProfile<double> p(p_start);
-  p_callback(p, "start");
+  p_onEvent(LiapStartEvent<MixedStrategyProfile<double>>{p});
 
   const StrategicLyapunovFunction F(p);
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
@@ -165,12 +166,13 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   }
 
   p = EnforceNonnegativity(p);
-  if (p.GetMaxRegret() * F.GetScale() < p_maxregret) {
-    p_callback(p, "NE");
+  const double regret = p.GetMaxRegret() * F.GetScale();
+  if (regret < p_maxregret) {
+    p_onEquilibrium(p);
     solutions.push_back(p);
   }
   else {
-    p_callback(p, "end");
+    p_onEvent(LiapEndEvent<MixedStrategyProfile<double>>{p, regret});
   }
 
   return solutions;

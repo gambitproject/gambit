@@ -31,6 +31,8 @@
 #include "wx/sheet/sheet.h"
 
 #include "renratio.h" // special renderer for rational numbers
+#include "editlabel.h"
+#include "labelcell.h"
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
@@ -240,7 +242,19 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->RenameRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow(), p_value);
+  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+
+  if (label.empty()) {
+    wxBell();
+    return;
+  }
+
+  const wxString result = m_table->RenameRowHeaderStrategy(
+      p_coords.GetCol(), p_coords.GetRow(),
+      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+  if (!result.empty()) {
+    CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
+  }
 }
 
 wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -252,6 +266,7 @@ wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetRowHeaderColCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetRowHeaderPlayer(p_coords.GetCol())));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
@@ -536,7 +551,19 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->RenameColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol(), p_value);
+  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+
+  if (label.empty()) {
+    wxBell();
+    return;
+  }
+
+  const wxString result = m_table->RenameColHeaderStrategy(
+      p_coords.GetCol(), p_coords.GetRow(),
+      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+  if (!result.empty()) {
+    CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
+  }
 }
 
 wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -548,6 +575,7 @@ wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetColHeaderRowCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetColHeaderPlayer(p_coords.GetRow())));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
@@ -1327,7 +1355,7 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
       p_dc, wxSheetBlock(0, 0, m_payoffSheet->GetNumberRows(), m_payoffSheet->GetNumberCols()));
 }
 
-void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
+wxString TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
 {
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
@@ -1336,11 +1364,12 @@ void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wx
     m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    return wxString::FromUTF8(ex.what());
   }
+  return "";
 }
 
-void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
+wxString TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
 {
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
@@ -1349,8 +1378,9 @@ void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wx
     m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    return wxString::FromUTF8(ex.what());
   }
+  return "";
 }
 
 void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
