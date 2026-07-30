@@ -1,5 +1,9 @@
 ## [17.0.0] - unreleased
 
+### Added
+- `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
+  information sets; the unreachable information sets are absent.  (#1002)
+
 ### Changed
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
   to match the behaviour of all other Nash equilibrium solvers.  (#996)

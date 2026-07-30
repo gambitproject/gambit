@@ -447,21 +447,6 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     return create_efg_corresponding_to_bimatrix_game(A, B, title)
 
 
-def strategy_map(player: gbt.Player, strategy: gbt.Strategy) -> tuple:
-    """The action prescribed by ``strategy`` at each of ``player``'s information sets,
-    in the player's information set order: the 1-based position of the prescribed action, or "*"
-    where the strategy prescribes nothing because the information set is unreachable.
-    """
-    prescriptions = []
-    for infoset in player.infosets:
-        action = strategy.action(infoset)
-        if action is None:
-            prescriptions.append("*")
-        else:
-            prescriptions.append(str(list(infoset.actions).index(action) + 1))
-    return tuple(prescriptions)
-
-
 class EfgFamilyForReducedStrategicFormTests(ABC):
     """ """
 
@@ -498,9 +483,28 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
 
         return (
             game.gbt_game(),
-            game.reduced_strategies(),
+            [[str(i) for i in range(1, len(r) + 1)] for r in game.reduced_strategies()],
             game.reduced_strategic_form(),
         )
+
+    @classmethod
+    def get_map_test_data(cls, **params):
+        """
+        given the provided parameters, return a tuple with:
+            - the game as a gbt.Game object
+            - the expected infoset-to-action map of each reduced strategy, per player:
+              the pre-17.0 signature split per information set ("*" = no action
+              prescribed), or the empty tuple for the single trivial strategy of a
+              player who has no information sets
+        the tuple is used directly in test_reduced_strategy_maps in test_extensive.py
+        """
+        game = cls(params)
+        gbt_game = game.gbt_game()
+        maps = [
+            [tuple(sig) if len(player.infosets) > 0 else () for sig in sigs]
+            for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
+        ]
+        return (gbt_game, maps)
 
 
 class Centipede(EfgFamilyForReducedStrategicFormTests):
@@ -550,7 +554,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
 
         rs = [get_rss(n) for n in n_moves]
         self.set_size_of_rsf(rs)
-        return [[str(i) for i in range(1, len(r) + 1)] for r in rs]
+        return rs
 
     def reduced_strategic_form(self):
         m, n = self.size_of_rsf
@@ -630,7 +634,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         return {p: n_isets[p - 1] for p in players}
 
     def _redu_strategies_level_1(self, player):
-        return ["1", "2"] if player == 1 else ["1"]
+        return ["1", "2"] if player == 1 else ["*"]
 
     def player_with_changes(self, level):
         return ((level - 1) % self.n_players) + 1
@@ -640,15 +644,12 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
 
     @abstractmethod
     def _redu_strats(self, player, level):
-        """Returns a list whose length is the player's reduced-strategy count.
-        The signature labels are no longer used as strategies are now labelled sequentially.
-        """
         pass
 
     def reduced_strategies(self):
         rs = [self._redu_strats(player, self.level) for player in self.players]
         self.set_size_of_rsf(rs)
-        return [[str(i) for i in range(1, len(r) + 1)] for r in rs]
+        return rs
 
     def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)

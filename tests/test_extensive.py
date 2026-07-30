@@ -451,6 +451,31 @@ def test_reduced_strategic_form(
                 [("1",), ("2",)],
             ],
         ),
+        # Centipede
+        (games.Centipede.get_map_test_data(N=3, m0=2, m1=7)),
+        (games.Centipede.get_map_test_data(N=4, m0=2, m1=7)),
+        (games.Centipede.get_map_test_data(N=5, m0=2, m1=7)),
+        (games.Centipede.get_map_test_data(N=9, m0=3, m1=11)),
+        # Two player binary tree
+        (games.BinEfgTwoPlayer.get_map_test_data(level=1)),
+        (games.BinEfgTwoPlayer.get_map_test_data(level=2)),
+        (games.BinEfgTwoPlayer.get_map_test_data(level=3)),
+        (games.BinEfgTwoPlayer.get_map_test_data(level=4)),
+        (games.BinEfgTwoPlayer.get_map_test_data(level=5)),
+        (games.BinEfgTwoPlayer.get_map_test_data(level=6)),
+        # Three player binary tree
+        (games.BinEfgThreePlayer.get_map_test_data(level=1)),
+        (games.BinEfgThreePlayer.get_map_test_data(level=2)),
+        (games.BinEfgThreePlayer.get_map_test_data(level=3)),
+        (games.BinEfgThreePlayer.get_map_test_data(level=4)),
+        (games.BinEfgThreePlayer.get_map_test_data(level=5)),
+        # One player IR binary tree
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=1)),
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=2)),
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=3)),
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=4)),
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=5)),
+        (games.BinEfgOnePlayerIR.get_map_test_data(level=6)),
     ],
 )
 def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
@@ -459,11 +484,16 @@ def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
 
     Strategy labels are sequential integers and so no longer describe which action
     a strategy prescribes at each information set; the mapping is reconstructed via
-    `Strategy.action`.  A "*" marks an information set at which the strategy
+    `Game.get_behavior`.  A "*" marks an information set at which the strategy
     prescribes no action, being unreachable given the strategy's own earlier actions.
     """
     for player, expected_maps in zip(game.players, strategy_maps, strict=True):
-        assert [games.strategy_map(player, s) for s in player.strategies] == expected_maps
+        for strategy, expected in zip(player.strategies, expected_maps, strict=True):
+            behavior = game.get_behavior(player, strategy)
+            assert tuple(
+                "*" if (action := behavior.get(infoset)) is None else str(action.number + 1)
+                for infoset in player.infosets
+            ) == expected
 
 
 @pytest.mark.parametrize(
