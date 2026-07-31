@@ -242,8 +242,6 @@ agg_SOURCES = \
 
 game_SOURCES = \
 	src/gambit.h \
-	src/games/gameseq.cc \
-	src/games/gameseq.h \
 	src/games/ndarray.h \
 	src/games/number.h \
 	src/games/gameobject.h \
@@ -261,6 +259,8 @@ game_SOURCES = \
 	src/games/behavpure.h \
 	src/games/behavmixed.cc \
 	src/games/behavmixed.h \
+	src/games/seqpure.cc \
+	src/games/seqpure.h \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
 	src/games/stratpure.h \

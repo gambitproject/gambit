@@ -24,6 +24,7 @@
 #define GAMETREE_H
 
 #include "gameexpl.h"
+#include "seqpure.h"
 #include <unordered_map>
 
 namespace Gambit {
@@ -98,8 +99,7 @@ protected:
   void ClearComputedValues() const;
 
   void EnsureSequences() const override;
-  void BuildSequences(const GameNode &n,
-                      std::map<GamePlayer, GameSequence> &p_currentSequences) const;
+  void BuildSequences(const GameNode &n, PureSequenceProfile &p_currentSequences) const;
 
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameInfosetRep *, GameNodeRep *);

@@ -26,14 +26,9 @@
 #include <list>
 #include <map>
 #include "game.h"
+#include "seqpure.h"
 
 namespace Gambit {
-
-class GameSequenceForm;
-class SequencesWrapper;
-class PlayerSequencesWrapper;
-class InfosetsWrapper;
-class ContingenciesWrapper;
 
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
@@ -43,9 +38,15 @@ class ContingenciesWrapper;
 /// computational approaches that enumerate possible equilibrium
 /// supports.
 class BehaviorSupportProfile {
+public:
+  /// The sequences of each player that are consistent with this support,
+  /// i.e. those whose action is in the support (or the empty sequence).
+  using SequenceMap = std::map<GamePlayer, std::vector<GameSequence>>;
+
+private:
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
-  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
+  mutable std::shared_ptr<SequenceMap> m_sequences;
   mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
 
   std::map<GameInfoset, bool> m_infosetReachable;
@@ -54,6 +55,7 @@ class BehaviorSupportProfile {
   bool HasReachableMembers(const GameInfoset &) const;
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
+  std::shared_ptr<SequenceMap> GetSequenceMap() const;
 
 public:
   class Support {
@@ -156,12 +158,12 @@ public:
 
   public:
     class iterator {
-      const std::shared_ptr<GameSequenceForm> m_sfg;
-      std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
+      const std::shared_ptr<SequenceMap> m_sequences;
+      SequenceMap::const_iterator m_currentPlayer;
       std::vector<GameSequence>::const_iterator m_currentSequence;
 
     public:
-      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end);
+      iterator(const std::shared_ptr<SequenceMap> p_sequences, bool p_end);
 
       GameSequence operator*() const { return *m_currentSequence; }
       GameSequence operator->() const { return *m_currentSequence; }
@@ -203,38 +205,36 @@ public:
 
     class iterator {
     private:
-      const std::shared_ptr<GameSequenceForm> m_sfg;
+      Game m_efg;
+      const std::shared_ptr<SequenceMap> m_sequences;
       bool m_end{false};
       std::map<GamePlayer, size_t> m_indices;
 
     public:
       using iterator_category = std::input_iterator_tag;
 
-      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end = false);
+      iterator(const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences,
+               bool p_end = false);
 
-      std::map<GamePlayer, GameSequence> operator*() const;
+      PureSequenceProfile operator*() const;
 
-      std::map<GamePlayer, GameSequence> operator->() const;
+      PureSequenceProfile operator->() const;
 
       iterator &operator++();
 
       bool operator==(const iterator &it) const
       {
-        return (m_end == it.m_end && m_sfg == it.m_sfg && m_indices == it.m_indices);
+        return (m_end == it.m_end && m_sequences == it.m_sequences && m_indices == it.m_indices);
       }
       bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
-    iterator begin() { return {m_support->GetSequenceForm()}; }
-    iterator end() { return {m_support->GetSequenceForm(), true}; }
+    iterator begin() { return {m_support->GetGame(), m_support->GetSequenceMap()}; }
+    iterator end() { return {m_support->GetGame(), m_support->GetSequenceMap(), true}; }
   };
 
-  std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
-  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
-  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
-                            const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;

@@ -997,8 +997,7 @@ void GameTreeRep::BuildComputedValues() const
   m_computedValues = true;
 }
 
-void GameTreeRep::BuildSequences(const GameNode &n,
-                                 std::map<GamePlayer, GameSequence> &p_currentSequences) const
+void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_currentSequences) const
 {
   if (!n->GetInfoset()) {
     return;
@@ -1010,7 +1009,7 @@ void GameTreeRep::BuildSequences(const GameNode &n,
   }
   else {
     auto *player = n->m_infoset->m_player;
-    const auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
+    const auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
     for (const auto &action : n->m_infoset->m_actions) {
       auto seq_it =
           std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
@@ -1025,10 +1024,10 @@ void GameTreeRep::BuildSequences(const GameNode &n,
       else {
         sequence = *seq_it;
       }
-      p_currentSequences[n->GetPlayer()] = sequence;
+      p_currentSequences.SetSequence(sequence);
       BuildSequences(n->GetChild(action), p_currentSequences);
     }
-    p_currentSequences[n->GetPlayer()] = tmp_sequence;
+    p_currentSequences.SetSequence(tmp_sequence);
   }
 }
 
@@ -1037,11 +1036,11 @@ void GameTreeRep::EnsureSequences() const
   if (m_hasSequences) {
     return;
   }
-  std::map<GamePlayer, GameSequence> currentSequences;
+  PureSequenceProfile currentSequences(m_root->GetGame());
   for (const auto &player : m_players) {
     player->m_sequences = {std::make_shared<GameSequenceRep>(player.get(), nullptr, 1,
                                                              std::weak_ptr<GameSequenceRep>())};
-    currentSequences[player] = player->m_sequences.front();
+    currentSequences.SetSequence(player->m_sequences.front());
   }
   BuildSequences(m_root, currentSequences);
   m_hasSequences = true;
