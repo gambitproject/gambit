@@ -22,7 +22,6 @@
 
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
-#include "games/gameseq.h"
 #include "polysystem.h"
 #include "polysolver.h"
 #include "indexproduct.h"

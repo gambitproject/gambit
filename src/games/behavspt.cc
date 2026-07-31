@@ -21,7 +21,6 @@
 //
 
 #include "gambit.h"
-#include "gameseq.h"
 
 namespace Gambit {
 
@@ -66,6 +65,7 @@ size_t BehaviorSupportProfile::BehaviorProfileLength() const
 void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
   m_reachableInfosets = nullptr;
+  m_sequences = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
@@ -84,6 +84,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
   m_reachableInfosets = nullptr;
+  m_sequences = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
@@ -147,12 +148,19 @@ void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
 //                 BehaviorSupportProfile: Sequence form
 //========================================================================
 
-std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() const
+std::shared_ptr<BehaviorSupportProfile::SequenceMap> BehaviorSupportProfile::GetSequenceMap() const
 {
-  if (!m_sequenceForm) {
-    m_sequenceForm = std::make_shared<GameSequenceForm>(*this);
+  if (!m_sequences) {
+    m_sequences = std::make_shared<SequenceMap>();
+    for (const auto &player : GetGame()->GetPlayers()) {
+      for (const auto &sequence : player->GetSequences()) {
+        if (!sequence->GetAction() || Contains(sequence->GetAction())) {
+          (*m_sequences)[player].emplace_back(sequence);
+        }
+      }
+    }
   }
-  return m_sequenceForm;
+  return m_sequences;
 }
 
 BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const { return {this}; }
@@ -190,8 +198,8 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, doub
 
 size_t BehaviorSupportProfile::Sequences::size() const
 {
-  return std::accumulate(m_support->GetSequenceForm()->m_sequences.cbegin(),
-                         m_support->GetSequenceForm()->m_sequences.cend(), 0,
+  const auto sequences = m_support->GetSequenceMap();
+  return std::accumulate(sequences->cbegin(), sequences->cend(), 0,
                          [](int acc, const std::pair<GamePlayer, std::vector<GameSequence>> &seq) {
                            return acc + seq.second.size();
                          });
@@ -199,22 +207,22 @@ size_t BehaviorSupportProfile::Sequences::size() const
 
 BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::begin() const
 {
-  return {m_support->GetSequenceForm(), false};
+  return {m_support->GetSequenceMap(), false};
 }
 BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::end() const
 {
-  return {m_support->GetSequenceForm(), true};
+  return {m_support->GetSequenceMap(), true};
 }
 
 BehaviorSupportProfile::Sequences::iterator::iterator(
-    const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end)
-  : m_sfg(p_sfg)
+    const std::shared_ptr<SequenceMap> p_sequences, bool p_end)
+  : m_sequences(p_sequences)
 {
   if (p_end) {
-    m_currentPlayer = m_sfg->m_sequences.cend();
+    m_currentPlayer = m_sequences->cend();
   }
   else {
-    m_currentPlayer = m_sfg->m_sequences.cbegin();
+    m_currentPlayer = m_sequences->cbegin();
     m_currentSequence = m_currentPlayer->second.cbegin();
   }
 }
@@ -222,7 +230,7 @@ BehaviorSupportProfile::Sequences::iterator::iterator(
 BehaviorSupportProfile::Sequences::iterator &
 BehaviorSupportProfile::Sequences::iterator::operator++()
 {
-  if (m_currentPlayer == m_sfg->m_sequences.cend()) {
+  if (m_currentPlayer == m_sequences->cend()) {
     return *this;
   }
   m_currentSequence++;
@@ -230,7 +238,7 @@ BehaviorSupportProfile::Sequences::iterator::operator++()
     return *this;
   }
   m_currentPlayer++;
-  if (m_currentPlayer != m_sfg->m_sequences.cend()) {
+  if (m_currentPlayer != m_sequences->cend()) {
     m_currentSequence = m_currentPlayer->second.cbegin();
   }
   return *this;
@@ -238,10 +246,10 @@ BehaviorSupportProfile::Sequences::iterator::operator++()
 
 bool BehaviorSupportProfile::Sequences::iterator::operator==(const iterator &it) const
 {
-  if (m_sfg != it.m_sfg || m_currentPlayer != it.m_currentPlayer) {
+  if (m_sequences != it.m_sequences || m_currentPlayer != it.m_currentPlayer) {
     return false;
   }
-  if (m_currentPlayer == m_sfg->m_sequences.end()) {
+  if (m_currentPlayer == m_sequences->end()) {
     return true;
   }
   return (m_currentSequence == it.m_currentSequence);
@@ -249,42 +257,42 @@ bool BehaviorSupportProfile::Sequences::iterator::operator==(const iterator &it)
 
 std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequences::begin() const
 {
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).begin();
+  return m_support->GetSequenceMap()->at(m_player).begin();
 }
 
 std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequences::end() const
 {
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).end();
+  return m_support->GetSequenceMap()->at(m_player).end();
 }
 
 size_t BehaviorSupportProfile::PlayerSequences::size() const
 {
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).size();
+  return m_support->GetSequenceMap()->at(m_player).size();
 }
 
 BehaviorSupportProfile::SequenceContingencies::iterator::iterator(
-    const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end)
-  : m_sfg(p_sfg), m_end(p_end)
+    const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences, bool p_end)
+  : m_efg(p_efg), m_sequences(p_sequences), m_end(p_end)
 {
-  for (auto [player, sequences] : m_sfg->m_sequences) {
+  for (auto [player, sequences] : *m_sequences) {
     m_indices[player] = 0;
   }
 }
 
 PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator*() const
 {
-  PureSequenceProfile ret(m_sfg->GetSupport().GetGame());
+  PureSequenceProfile ret(m_efg);
   for (auto [player, index] : m_indices) {
-    ret.SetSequence(m_sfg->m_sequences.at(player)[index]);
+    ret.SetSequence(m_sequences->at(player)[index]);
   }
   return ret;
 }
 
 PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator->() const
 {
-  PureSequenceProfile ret(m_sfg->GetSupport().GetGame());
+  PureSequenceProfile ret(m_efg);
   for (auto [player, index] : m_indices) {
-    ret.SetSequence(m_sfg->m_sequences.at(player)[index]);
+    ret.SetSequence(m_sequences->at(player)[index]);
   }
   return ret;
 }
@@ -293,7 +301,7 @@ BehaviorSupportProfile::SequenceContingencies::iterator &
 BehaviorSupportProfile::SequenceContingencies::iterator::operator++()
 {
   for (auto [player, index] : m_indices) {
-    if (index < m_sfg->m_sequences.at(player).size() - 1) {
+    if (index < m_sequences->at(player).size() - 1) {
       m_indices[player]++;
       return *this;
     }
