@@ -1,5 +1,9 @@
 ## [17.0.0] - unreleased
 
+### Added
+- Added `Game.make_chance_event`, which forms a collection of nodes into a single chance event with a
+  specified probability distribution over its actions. (#1009)
+
 ### Changed
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
   to match the behaviour of all other Nash equilibrium solvers.  (#996)
@@ -11,6 +15,10 @@
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
   no longer inserts spurious entries into a strategy's internal action map.
+
+### Removed
+- `Game.set_chance_probs` has been removed; use `Game.make_chance_event`, which expresses a change of
+  probabilities as forming the nodes of the event with the required distribution.  (#1009)
 
 ## [16.7.0] - 2026-07-11
 
