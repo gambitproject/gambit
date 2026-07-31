@@ -370,6 +370,8 @@ cdef extern from "games/game.h":
         void DeleteAction(c_GameAction) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
+        c_GameInfoset MakeChanceEvent(stdvector[c_GameNode], stdvector[c_Number],
+                                      string) except +ValueError
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
