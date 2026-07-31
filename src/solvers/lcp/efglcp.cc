@@ -37,13 +37,12 @@ struct Solution {
   BehaviorSupportProfile support;
   GamePlayer player1, player2;
   GameSequence root1, root2;
-  int ns1, ns2, ni1, ni2;
   // The row/column of the tableau assigned to each sequence: player1's
-  // occupy 1..ns1, and player2's occupy ns1+1..ns1+ns2.
+  // occupy 1..rootIndex1, and player2's occupy rootIndex1+1..rootIndex2-1.
   std::map<GameSequence, int> index;
   // The row/column of the tableau assigned to the sum-to-one constraint at
   // each information set.  Each player's block of these reserves one
-  // extra ("root") index -- see RootIndex1()/RootIndex2() -- for the
+  // extra ("root") index -- rootIndex1 and rootIndex2 below -- for the
   // constraint anchoring the probability of the empty sequence at 1.
   std::map<GameInfoset, int> infosetIndex;
   // The sequences of the actions available at an information set, i.e.
@@ -51,15 +50,22 @@ struct Solution {
   // it.  This is what expresses the sum-to-one relation among the actions
   // at an information set.
   std::map<GameInfoset, std::vector<GameSequence>> siblings;
+  // The total number of rows/columns of the tableau, and the row/column
+  // of each player's root anchor within it (see infosetIndex above).
+  int total, rootIndex1, rootIndex2;
 
   explicit Solution(const Game &p_game)
     : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
-      root1(player1->GetSequences().front()), root2(player2->GetSequences().front()),
-      ns1(static_cast<int>(support.GetSequences(player1).size())),
-      ns2(static_cast<int>(support.GetSequences(player2).size())),
-      ni1(static_cast<int>(player1->GetInfosets().size()) + 1),
-      ni2(static_cast<int>(player2->GetInfosets().size()) + 1)
+      root1(player1->GetSequences().front()), root2(player2->GetSequences().front())
   {
+    const int ns1 = static_cast<int>(support.GetSequences(player1).size());
+    const int ns2 = static_cast<int>(support.GetSequences(player2).size());
+    const int ni1 = static_cast<int>(player1->GetInfosets().size()) + 1;
+    const int ni2 = static_cast<int>(player2->GetInfosets().size()) + 1;
+    total = ns1 + ns2 + ni1 + ni2;
+    rootIndex1 = ns1 + ns2 + 1;
+    rootIndex2 = ns1 + ns2 + ni1 + 1;
+
     int idx = 1;
     for (auto sequence : support.GetSequences(player1)) {
       index[sequence] = idx++;
@@ -86,15 +92,11 @@ struct Solution {
       }
     }
   }
-
-  int Total() const { return ns1 + ns2 + ni1 + ni2; }
-  int RootIndex1() const { return ns1 + ns2 + 1; }
-  int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
 };
 
 template <class T> Matrix<T> ConstructMatrix(const Solution &p_solution)
 {
-  Matrix<T> A(1, p_solution.Total(), 0, p_solution.Total());
+  Matrix<T> A(1, p_solution.total, 0, p_solution.total);
   A = T{0};
 
   // A constant large enough that shifting every payoff down by it makes
@@ -140,20 +142,20 @@ template <class T> Matrix<T> ConstructMatrix(const Solution &p_solution)
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = T{-1};
   }
-  A(p_solution.index.at(p_solution.root1), p_solution.RootIndex1()) = T{1};
-  A(p_solution.RootIndex1(), p_solution.index.at(p_solution.root1)) = T{-1};
-  A(p_solution.index.at(p_solution.root2), p_solution.RootIndex2()) = T{1};
-  A(p_solution.RootIndex2(), p_solution.index.at(p_solution.root2)) = T{-1};
+  A(p_solution.index.at(p_solution.root1), p_solution.rootIndex1) = T{1};
+  A(p_solution.rootIndex1, p_solution.index.at(p_solution.root1)) = T{-1};
+  A(p_solution.index.at(p_solution.root2), p_solution.rootIndex2) = T{1};
+  A(p_solution.rootIndex2, p_solution.index.at(p_solution.root2)) = T{-1};
 
   return A;
 }
 
 template <class T> Vector<T> ConstructVector(const Solution &p_solution)
 {
-  Vector<T> b(1, p_solution.Total());
+  Vector<T> b(1, p_solution.total);
   b = T{0};
-  b[p_solution.RootIndex1()] = T{-1};
-  b[p_solution.RootIndex2()] = T{-1};
+  b[p_solution.rootIndex1] = T{-1};
+  b[p_solution.rootIndex2] = T{-1};
   return b;
 }
 
@@ -197,8 +199,8 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   Solution solution(p_game);
   linalg::LemkeTableau<T> tab(ConstructMatrix<T>(solution), ConstructVector<T>(solution));
 
-  tab.Pivot(solution.RootIndex1(), 0);
-  tab.SF_LCPPath(solution.RootIndex1());
+  tab.Pivot(solution.rootIndex1, 0);
+  tab.SF_LCPPath(solution.rootIndex1);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.BasisVector(sol);
 
