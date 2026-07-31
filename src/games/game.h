@@ -676,7 +676,7 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
-inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+template <class C> void ValidateDistribution(const C &p_probs, const bool p_normalized = true)
 {
   if (std::any_of(p_probs.begin(), p_probs.end(),
                   [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
@@ -1270,6 +1270,14 @@ public:
   //@{
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
+  /// Form the collection of nodes into a single chance event carrying the given
+  /// probability distribution over its actions.  The nodes need not currently be
+  /// chance nodes; personal decision nodes are converted.
+  virtual GameInfoset MakeChanceEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                      const std::string &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// Ensure the reduced-form strategies have been derived and indexed
