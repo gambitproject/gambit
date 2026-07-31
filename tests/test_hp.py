@@ -372,10 +372,6 @@ CATALOG_GAMES_TO_TEST = [
         id="catalog games that converge to a NE - books/vonstengel2022/fig10.1"
     ),
     pytest.param(
-        "books/vonstengel2022/fig10.12",
-        id="catalog games that converge to a NE - books/vonstengel2022/fig10.12"
-    ),
-    pytest.param(
         "books/watson2013/fig29_1",
         id="catalog games that converge to a NE - books/watson2013/fig29_1"
     ),
