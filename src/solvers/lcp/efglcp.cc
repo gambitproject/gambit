@@ -33,7 +33,7 @@ namespace {
 // a two-player game and the rows/columns of the sequence-form LCP
 // tableau, along with the quantities (payoffs, tree-of-sequences
 // relationships) needed to populate it.
-struct Solution {
+struct ColumnIndexMap {
   BehaviorSupportProfile support;
   GamePlayer player1, player2;
   GameSequence root1, root2;
@@ -54,7 +54,7 @@ struct Solution {
   // of each player's root anchor within it (see infosetIndex above).
   int total, rootIndex1, rootIndex2;
 
-  explicit Solution(const Game &p_game)
+  explicit ColumnIndexMap(const Game &p_game)
     : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
       root1(player1->GetSequences().front()), root2(player2->GetSequences().front())
   {
@@ -66,22 +66,23 @@ struct Solution {
     rootIndex1 = ns1 + ns2 + 1;
     rootIndex2 = ns1 + ns2 + ni1 + 1;
 
-    int idx = 1;
-    for (auto sequence : support.GetSequences(player1)) {
-      index[sequence] = idx++;
+    auto sequences1 = support.GetSequences(player1);
+    for (auto [i, sequence] : enumerate(sequences1)) {
+      index[sequence] = static_cast<int>(i) + 1;
     }
-    idx = 1;
-    for (auto sequence : support.GetSequences(player2)) {
-      index[sequence] = ns1 + idx++;
+    auto sequences2 = support.GetSequences(player2);
+    for (auto [i, sequence] : enumerate(sequences2)) {
+      index[sequence] = ns1 + static_cast<int>(i) + 1;
     }
 
-    idx = 2; // index 1 in each player's block is reserved for the root anchor
-    for (const auto &infoset : player1->GetInfosets()) {
-      infosetIndex[infoset] = ns1 + ns2 + idx++;
+    // index 1 in each player's block is reserved for the root anchor
+    auto infosets1 = player1->GetInfosets();
+    for (auto [i, infoset] : enumerate(infosets1)) {
+      infosetIndex[infoset] = ns1 + ns2 + static_cast<int>(i) + 2;
     }
-    idx = 2;
-    for (const auto &infoset : player2->GetInfosets()) {
-      infosetIndex[infoset] = ns1 + ns2 + ni1 + idx++;
+    auto infosets2 = player2->GetInfosets();
+    for (auto [i, infoset] : enumerate(infosets2)) {
+      infosetIndex[infoset] = ns1 + ns2 + ni1 + static_cast<int>(i) + 2;
     }
 
     for (auto player : {player1, player2}) {
@@ -94,42 +95,42 @@ struct Solution {
   }
 };
 
-template <class T> Matrix<T> ConstructMatrix(const Solution &p_solution)
+template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
 {
-  Matrix<T> A(1, p_solution.total, 0, p_solution.total);
+  Matrix<T> A(1, p_indexMap.total, 0, p_indexMap.total);
   A = T{0};
 
   // A constant large enough that shifting every payoff down by it makes
   // all payoff entries of the matrix negative, as Lemke's algorithm requires.
-  const Rational payoffShift = p_solution.support.GetGame()->GetMaxPayoff() + Rational(1);
+  const Rational payoffShift = p_indexMap.support.GetGame()->GetMaxPayoff() + Rational(1);
 
   // Payoff block: for every pair of sequences (one per player), the
   // payoff each player receives when that pair is exactly realised,
   // shifted by payoffShift and weighted by chance's probability of that
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
-  for (auto profile : p_solution.support.GetSequenceContingencies()) {
-    const GameSequence &seq1 = profile.GetSequence(p_solution.player1);
-    const GameSequence &seq2 = profile.GetSequence(p_solution.player2);
+  for (auto profile : p_indexMap.support.GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(p_indexMap.player1);
+    const GameSequence &seq2 = profile.GetSequence(p_indexMap.player2);
     const Rational prob = profile.GetRealizationProbability();
-    const Rational pay1 = profile.GetPayoff(p_solution.player1) - payoffShift * prob;
-    const Rational pay2 = profile.GetPayoff(p_solution.player2) - payoffShift * prob;
-    A(p_solution.index.at(seq1), p_solution.index.at(seq2)) = static_cast<T>(pay1);
-    A(p_solution.index.at(seq2), p_solution.index.at(seq1)) = static_cast<T>(pay2);
+    const Rational pay1 = profile.GetPayoff(p_indexMap.player1) - payoffShift * prob;
+    const Rational pay2 = profile.GetPayoff(p_indexMap.player2) - payoffShift * prob;
+    A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
+    A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
   }
 
   // Constraint block: for each information set, the sum-to-one relation
   // between the probability of the sequence leading to it and the sum of
   // the probabilities of its own actions' sequences.
-  for (auto player : {p_solution.player1, p_solution.player2}) {
+  for (auto player : {p_indexMap.player1, p_indexMap.player2}) {
     for (const auto &infoset : player->GetInfosets()) {
-      const int infosetIdx = p_solution.infosetIndex.at(infoset);
-      const auto &children = p_solution.siblings.at(infoset);
-      const int arrivalIdx = p_solution.index.at(children.front()->GetParent());
+      const int infosetIdx = p_indexMap.infosetIndex.at(infoset);
+      const auto &children = p_indexMap.siblings.at(infoset);
+      const int arrivalIdx = p_indexMap.index.at(children.front()->GetParent());
       A(arrivalIdx, infosetIdx) = T{-1};
       A(infosetIdx, arrivalIdx) = T{1};
       for (const auto &child : children) {
-        const int childIdx = p_solution.index.at(child);
+        const int childIdx = p_indexMap.index.at(child);
         A(childIdx, infosetIdx) = T{1};
         A(infosetIdx, childIdx) = T{-1};
       }
@@ -142,30 +143,30 @@ template <class T> Matrix<T> ConstructMatrix(const Solution &p_solution)
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = T{-1};
   }
-  A(p_solution.index.at(p_solution.root1), p_solution.rootIndex1) = T{1};
-  A(p_solution.rootIndex1, p_solution.index.at(p_solution.root1)) = T{-1};
-  A(p_solution.index.at(p_solution.root2), p_solution.rootIndex2) = T{1};
-  A(p_solution.rootIndex2, p_solution.index.at(p_solution.root2)) = T{-1};
+  A(p_indexMap.index.at(p_indexMap.root1), p_indexMap.rootIndex1) = T{1};
+  A(p_indexMap.rootIndex1, p_indexMap.index.at(p_indexMap.root1)) = T{-1};
+  A(p_indexMap.index.at(p_indexMap.root2), p_indexMap.rootIndex2) = T{1};
+  A(p_indexMap.rootIndex2, p_indexMap.index.at(p_indexMap.root2)) = T{-1};
 
   return A;
 }
 
-template <class T> Vector<T> ConstructVector(const Solution &p_solution)
+template <class T> Vector<T> ConstructVector(const ColumnIndexMap &p_indexMap)
 {
-  Vector<T> b(1, p_solution.total);
+  Vector<T> b(1, p_indexMap.total);
   b = T{0};
-  b[p_solution.rootIndex1] = T{-1};
-  b[p_solution.rootIndex2] = T{-1};
+  b[p_indexMap.rootIndex1] = T{-1};
+  b[p_indexMap.rootIndex2] = T{-1};
   return b;
 }
 
 template <class T>
 MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
-                                   const Solution &p_solution)
+                                   const ColumnIndexMap &p_indexMap)
 {
   const T eps = tab.Epsilon();
   std::map<GameSequence, T> x;
-  for (const auto &[sequence, idx] : p_solution.index) {
+  for (const auto &[sequence, idx] : p_indexMap.index) {
     T value{0};
     if (tab.Member(idx)) {
       const T candidate = sol[tab.Find(idx)];
@@ -175,7 +176,7 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
     }
     x[sequence] = value;
   }
-  return p_solution.support.ToMixedBehaviorProfile(x);
+  return p_indexMap.support.ToMixedBehaviorProfile(x);
 }
 
 } // end anonymous namespace
@@ -196,7 +197,7 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  Solution solution(p_game);
+  const ColumnIndexMap solution(p_game);
   linalg::LemkeTableau<T> tab(ConstructMatrix<T>(solution), ConstructVector<T>(solution));
 
   tab.Pivot(solution.rootIndex1, 0);
