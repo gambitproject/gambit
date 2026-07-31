@@ -53,7 +53,6 @@ template <class T> struct Solution {
   std::map<GameInfoset, std::vector<GameSequence>> siblings;
   Rational maxpay;
   T eps;
-  Array<linalg::BFS<T>> basisList;
 
   explicit Solution(const Game &p_game)
     : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
@@ -95,27 +94,6 @@ template <class T> struct Solution {
   int RootIndex1() const { return ns1 + ns2 + 1; }
   int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
 };
-
-template <class T> bool AddBFS(Solution<T> &p_solution, const linalg::LemkeTableau<T> &tableau)
-{
-  linalg::BFS<T> cbfs;
-  Vector<T> v(tableau.MinRow(), tableau.MaxRow());
-  tableau.BasisVector(v);
-
-  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++) {
-    if (tableau.Member(i)) {
-      cbfs.insert(i, v[tableau.Find(i)]);
-    }
-  }
-
-  if (!contains(p_solution.basisList, cbfs)) {
-    p_solution.basisList.push_back(cbfs);
-    return true;
-  }
-  else {
-    return false;
-  }
-}
 
 template <class T> Matrix<T> ConstructMatrix(const Solution<T> &p_solution)
 {
@@ -220,7 +198,6 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
 
   tab.Pivot(solution.RootIndex1(), 0);
   tab.SF_LCPPath(solution.RootIndex1());
-  AddBFS(solution, tab);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.BasisVector(sol);
 
