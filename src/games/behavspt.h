@@ -236,8 +236,8 @@ public:
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
-  MixedBehaviorProfile<double>
-  ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
+  template <class T>
+  MixedBehaviorProfile<T> ToMixedBehaviorProfile(const std::map<GameSequence, T> &) const;
   Infosets GetInfosets() const { return {this}; };
   SequenceContingencies GetSequenceContingencies() const;
 

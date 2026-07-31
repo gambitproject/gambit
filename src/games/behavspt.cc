@@ -177,24 +177,30 @@ BehaviorSupportProfile::GetSequenceContingencies() const
   return {this};
 }
 
-MixedBehaviorProfile<double>
-BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, double> &x) const
+template <class T>
+MixedBehaviorProfile<T>
+BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, T> &x) const
 {
-  MixedBehaviorProfile<double> b(*this);
+  MixedBehaviorProfile<T> b(*this);
   for (auto sequence : GetSequences()) {
     if (sequence->m_action == nullptr) {
       continue;
     }
-    const double parent_prob = x.at(sequence->m_parent.lock());
+    const T parent_prob = x.at(sequence->m_parent.lock());
     if (parent_prob > 0) {
       b[sequence->m_action->shared_from_this()] = x.at(sequence) / parent_prob;
     }
     else {
-      b[sequence->m_action->shared_from_this()] = 0;
+      b[sequence->m_action->shared_from_this()] = T(0);
     }
   }
   return b;
 }
+
+template MixedBehaviorProfile<double>
+BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
+template MixedBehaviorProfile<Rational>
+BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, Rational> &) const;
 
 size_t BehaviorSupportProfile::Sequences::size() const
 {

@@ -42,23 +42,43 @@ private:
 
   class Solution;
 
-  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, T, T, Solution &) const;
-  void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
-                Solution &) const;
-  void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
-                  const GameNode &n, int, int, Solution &) const;
+  void FillTableau(Matrix<T> &, Solution &) const;
+  MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &, const Vector<T> &,
+                                     const Solution &) const;
 };
 
+// Holds the correspondence between the sequences (and information sets) of
+// a two-player game and the rows/columns of the sequence-form LCP
+// tableau, along with the quantities (payoffs, tree-of-sequences
+// relationships) needed to populate it.
 template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
+  BehaviorSupportProfile support;
+  GamePlayer player1, player2;
+  GameSequence root1, root2;
   int ns1, ns2, ni1, ni2;
+  // The row/column of the tableau assigned to each sequence: player1's
+  // occupy 1..ns1, and player2's occupy ns1+1..ns1+ns2.
+  std::map<GameSequence, int> index;
+  // The row/column of the tableau assigned to the sum-to-one constraint at
+  // each information set.  Each player's block of these reserves one
+  // extra ("root") index -- see RootIndex1()/RootIndex2() -- for the
+  // constraint anchoring the probability of the empty sequence at 1.
+  std::map<GameInfoset, int> infosetIndex;
+  // The sequences of the actions available at an information set, i.e.
+  // the children, in the tree of sequences, of the sequence that leads to
+  // it.  This is what expresses the sum-to-one relation among the actions
+  // at an information set.
+  std::map<GameInfoset, std::vector<GameSequence>> siblings;
   Rational maxpay;
-  std::map<GameInfoset, int> infosetOffset;
   T eps;
   Array<linalg::BFS<T>> m_list;
   std::list<MixedBehaviorProfile<T>> m_equilibria;
 
   explicit Solution(const Game &);
+
+  int RootIndex1() const { return ns1 + ns2 + 1; }
+  int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
 
   bool AddBFS(const linalg::LemkeTableau<T> &);
 
@@ -67,17 +87,37 @@ public:
 
 template <class T>
 NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
-  : ns1(p_game->GetPlayer(1)->GetSequences().size()),
-    ns2(p_game->GetPlayer(2)->GetSequences().size()),
-    ni1(p_game->GetPlayer(1)->GetInfosets().size() + 1),
-    ni2(p_game->GetPlayer(2)->GetInfosets().size() + 1),
+  : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
+    root1(player1->GetSequences().front()), root2(player2->GetSequences().front()),
+    ns1(static_cast<int>(support.GetSequences(player1).size())),
+    ns2(static_cast<int>(support.GetSequences(player2).size())),
+    ni1(static_cast<int>(player1->GetInfosets().size()) + 1),
+    ni2(static_cast<int>(player2->GetInfosets().size()) + 1),
     maxpay(p_game->GetMaxPayoff() + Rational(1))
 {
-  for (const auto &player : p_game->GetPlayers()) {
-    int offset = 1;
-    for (const auto &infoset : player->GetInfosets()) {
-      infosetOffset[infoset] = offset;
-      offset += infoset->GetActions().size();
+  int idx = 1;
+  for (auto sequence : support.GetSequences(player1)) {
+    index[sequence] = idx++;
+  }
+  idx = 1;
+  for (auto sequence : support.GetSequences(player2)) {
+    index[sequence] = ns1 + idx++;
+  }
+
+  idx = 2; // index 1 in each player's block is reserved for the root anchor
+  for (const auto &infoset : player1->GetInfosets()) {
+    infosetIndex[infoset] = ns1 + ns2 + idx++;
+  }
+  idx = 2;
+  for (const auto &infoset : player2->GetInfosets()) {
+    infosetIndex[infoset] = ns1 + ns2 + ni1 + idx++;
+  }
+
+  for (auto player : {player1, player2}) {
+    for (auto sequence : support.GetSequences(player)) {
+      if (sequence->GetAction()) {
+        siblings[sequence->GetInfoset()].push_back(sequence);
+      }
     }
   }
 }
@@ -119,37 +159,35 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  const linalg::BFS<T> cbfs;
   Solution solution(p_game);
 
   const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
   Matrix<T> A(1, ntot, 0, ntot);
   A = static_cast<T>(0);
-  FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, static_cast<T>(0), static_cast<T>(0),
-              solution);
+  FillTableau(A, solution);
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = static_cast<T>(-1);
   }
-  A(1, solution.ns1 + solution.ns2 + 1) = static_cast<T>(1);
-  A(solution.ns1 + solution.ns2 + 1, 1) = static_cast<T>(-1);
-  A(solution.ns1 + 1, solution.ns1 + solution.ns2 + solution.ni1 + 1) = static_cast<T>(1);
-  A(solution.ns1 + solution.ns2 + solution.ni1 + 1, solution.ns1 + 1) = static_cast<T>(-1);
+  A(solution.index.at(solution.root1), solution.RootIndex1()) = static_cast<T>(1);
+  A(solution.RootIndex1(), solution.index.at(solution.root1)) = static_cast<T>(-1);
+  A(solution.index.at(solution.root2), solution.RootIndex2()) = static_cast<T>(1);
+  A(solution.RootIndex2(), solution.index.at(solution.root2)) = static_cast<T>(-1);
 
   Vector<T> b(1, ntot);
   b = static_cast<T>(0);
-  b[solution.ns1 + solution.ns2 + 1] = static_cast<T>(-1);
-  b[solution.ns1 + solution.ns2 + solution.ni1 + 1] = static_cast<T>(-1);
+  b[solution.RootIndex1()] = static_cast<T>(-1);
+  b[solution.RootIndex2()] = static_cast<T>(-1);
 
   linalg::LemkeTableau<T> tab(A, b);
   solution.eps = tab.Epsilon();
 
-  tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
-  tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
+  tab.Pivot(solution.RootIndex1(), 0);
+  tab.SF_LCPPath(solution.RootIndex1());
   solution.AddBFS(tab);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.BasisVector(sol);
-  MixedBehaviorProfile<T> profile(p_game);
-  GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
+
+  MixedBehaviorProfile<T> profile = GetProfile(tab, sol, solution);
   profile.UndefinedToCentroid();
   solution.m_equilibria.push_back(profile);
   this->m_onEquilibrium(profile);
@@ -157,107 +195,59 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
 }
 
 template <class T>
-void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T prob, int s1, int s2,
-                                           T payoff1, T payoff2, Solution &p_solution) const
+void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, Solution &p_solution) const
 {
-  const int ns1 = p_solution.ns1;
-  const int ns2 = p_solution.ns2;
-  const int ni1 = p_solution.ni1;
+  // Payoff block: for every pair of sequences (one per player), the
+  // payoff each player receives when that pair is exactly realised,
+  // shifted by a constant large enough to make all entries negative and
+  // weighted by chance's probability of that pair actually being realised
+  // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
+  for (auto profile : p_solution.support.GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(p_solution.player1);
+    const GameSequence &seq2 = profile.GetSequence(p_solution.player2);
+    const Rational prob = profile.GetRealizationProbability();
+    const Rational pay1 = profile.GetPayoff(p_solution.player1) - p_solution.maxpay * prob;
+    const Rational pay2 = profile.GetPayoff(p_solution.player2) - p_solution.maxpay * prob;
+    A(p_solution.index.at(seq1), p_solution.index.at(seq2)) = static_cast<T>(pay1);
+    A(p_solution.index.at(seq2), p_solution.index.at(seq1)) = static_cast<T>(pay2);
+  }
 
-  const GameOutcome outcome = n->GetOutcome();
-  if (outcome) {
-    payoff1 += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1));
-    payoff2 += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2));
-  }
-  if (n->IsTerminal()) {
-    A(s1, ns1 + s2) += Rational(prob) * (payoff1 - p_solution.maxpay);
-    A(ns1 + s2, s1) += Rational(prob) * (payoff2 - p_solution.maxpay);
-    return;
-  }
-  const GameInfoset infoset = n->GetInfoset();
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &action : infoset->GetActions()) {
-      FillTableau(A, n->GetChild(action),
-                  Rational(prob) * static_cast<Rational>(infoset->GetActionProb(action)), s1, s2,
-                  payoff1, payoff2, p_solution);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    const int infoset_idx = ns1 + ns2 + infoset->GetNumber() + 1;
-    A(s1, infoset_idx) = static_cast<T>(-1);
-    A(infoset_idx, s1) = static_cast<T>(1);
-    int snew = p_solution.infosetOffset.at(infoset);
-    for (const auto &child : n->GetChildren()) {
-      snew++;
-      A(snew, infoset_idx) = static_cast<T>(1);
-      A(infoset_idx, snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2, payoff1, payoff2, p_solution);
-    }
-  }
-  else {
-    const int infoset_idx = ns1 + ns2 + ni1 + n->GetInfoset()->GetNumber() + 1;
-    A(ns1 + s2, infoset_idx) = static_cast<T>(-1);
-    A(infoset_idx, ns1 + s2) = static_cast<T>(1);
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &child : n->GetChildren()) {
-      snew++;
-      A(ns1 + snew, infoset_idx) = static_cast<T>(1);
-      A(infoset_idx, ns1 + snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, s1, snew, payoff1, payoff2, p_solution);
+  // Constraint block: for each information set, the sum-to-one relation
+  // between the probability of the sequence leading to it and the sum of
+  // the probabilities of its own actions' sequences.
+  for (auto player : {p_solution.player1, p_solution.player2}) {
+    for (const auto &infoset : player->GetInfosets()) {
+      const int infosetIdx = p_solution.infosetIndex.at(infoset);
+      const auto &children = p_solution.siblings.at(infoset);
+      const int arrivalIdx = p_solution.index.at(children.front()->GetParent());
+      A(arrivalIdx, infosetIdx) = static_cast<T>(-1);
+      A(infosetIdx, arrivalIdx) = static_cast<T>(1);
+      for (const auto &child : children) {
+        const int childIdx = p_solution.index.at(child);
+        A(childIdx, infosetIdx) = static_cast<T>(1);
+        A(infosetIdx, childIdx) = static_cast<T>(-1);
+      }
     }
   }
 }
 
 template <class T>
-void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
-                                          MixedBehaviorProfile<T> &v, const Vector<T> &sol,
-                                          const GameNode &n, int s1, int s2,
-                                          Solution &p_solution) const
+MixedBehaviorProfile<T> NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
+                                                             const Vector<T> &sol,
+                                                             const Solution &p_solution) const
 {
-  const int ns1 = p_solution.ns1;
-
-  if (n->IsTerminal()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &child : n->GetChildren()) {
-      GetProfile(tab, v, sol, child, s1, s2, p_solution);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(s1)) {
-        const int ind = tab.Find(s1);
-        if (sol[ind] > p_solution.eps && tab.Member(snew)) {
-          const int ind2 = tab.Find(snew);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
+  std::map<GameSequence, T> x;
+  for (const auto &[sequence, idx] : p_solution.index) {
+    T value(0);
+    if (tab.Member(idx)) {
+      const T candidate = sol[tab.Find(idx)];
+      if (candidate > p_solution.eps) {
+        value = candidate;
       }
-      GetProfile(tab, v, sol, n->GetChild(action), snew, s2, p_solution);
     }
+    x[sequence] = value;
   }
-  else {
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(ns1 + s2)) {
-        const int ind = tab.Find(ns1 + s2);
-        if (sol[ind] > p_solution.eps && tab.Member(ns1 + snew)) {
-          const int ind2 = tab.Find(ns1 + snew);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
-      }
-      GetProfile(tab, v, sol, n->GetChild(action), s1, snew, p_solution);
-    }
-  }
+  return p_solution.support.ToMixedBehaviorProfile(x);
 }
 
 template <class T>
