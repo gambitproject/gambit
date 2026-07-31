@@ -163,12 +163,6 @@ BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
   return {this, p_player};
 }
 
-Rational BehaviorSupportProfile::GetPayoff(const PureSequenceProfile &p_profile,
-                                           const GamePlayer &p_player) const
-{
-  return GetSequenceForm()->GetPayoff(p_profile, p_player);
-}
-
 BehaviorSupportProfile::SequenceContingencies
 BehaviorSupportProfile::GetSequenceContingencies() const
 {

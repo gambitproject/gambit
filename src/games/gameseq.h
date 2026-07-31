@@ -47,13 +47,6 @@ public:
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
 
   GameRep::Players GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
-
-  /// Returns the payoff to a player that arises when each player realises
-  /// the sequence assigned to them in the profile.  This is computed on
-  /// demand by an (iterative, non-recursive) traversal of the game tree,
-  /// pruning as soon as a player's move is inconsistent with their
-  /// designated sequence.
-  Rational GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const;
 };
 
 } // end namespace Gambit

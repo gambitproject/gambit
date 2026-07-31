@@ -65,6 +65,13 @@ public:
     m_profile[p_sequence->GetPlayer()] = p_sequence;
   }
   //@}
+
+  /// Returns the payoff to a player that arises when each player realises
+  /// the sequence assigned to them in this profile.  This is computed by
+  /// an (iterative, non-recursive) traversal of the game tree, pruning as
+  /// soon as a player's move is inconsistent with their designated
+  /// sequence.
+  Rational GetPayoff(const GamePlayer &p_player) const;
 };
 
 } // end namespace Gambit

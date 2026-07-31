@@ -20,10 +20,91 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <stack>
+
 #include "gambit.h"
 
 namespace Gambit {
 
 PureSequenceProfile::PureSequenceProfile(const Game &p_efg) : m_efg(p_efg) {}
+
+namespace {
+
+/// One frame of the explicit-stack traversal used by
+/// PureSequenceProfile::GetPayoff.  Tracks the node under consideration,
+/// the probability of reaching it (given chance's actual probabilities and
+/// each player's moves as prescribed by the profile being evaluated), and
+/// how far each player has progressed along the chain of sequences from
+/// the empty sequence to the one designated for them.
+struct SequenceWalkFrame {
+  GameNode node;
+  Rational prob;
+  std::map<GamePlayer, size_t> progress;
+};
+
+} // end anonymous namespace
+
+Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
+{
+  std::map<GamePlayer, std::vector<GameSequence>> chains;
+  std::map<GamePlayer, size_t> initialProgress;
+  for (auto player : m_efg->GetPlayers()) {
+    std::vector<GameSequence> chain;
+    for (GameSequence seq = GetSequence(player); seq; seq = seq->GetParent()) {
+      chain.push_back(seq);
+    }
+    std::reverse(chain.begin(), chain.end()); // chain.front() is the empty sequence
+    chains[player] = chain;
+    initialProgress[player] = 0;
+  }
+
+  Rational payoff(0);
+  std::stack<SequenceWalkFrame> frames;
+  frames.push({m_efg->GetRoot(), Rational(1), initialProgress});
+
+  while (!frames.empty()) {
+    const SequenceWalkFrame frame = std::move(frames.top());
+    frames.pop();
+    const GameNode &n = frame.node;
+
+    if (n->GetOutcome()) {
+      const bool matches = std::all_of(chains.begin(), chains.end(), [&](const auto &entry) {
+        return frame.progress.at(entry.first) + 1 == entry.second.size();
+      });
+      if (matches) {
+        payoff += frame.prob * n->GetOutcome()->GetPayoff<Rational>(p_player);
+      }
+    }
+    if (!n->GetInfoset()) {
+      continue;
+    }
+    if (n->GetPlayer()->IsChance()) {
+      for (auto action : n->GetInfoset()->GetActions()) {
+        frames.push({n->GetChild(action),
+                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+                     frame.progress});
+      }
+      continue;
+    }
+
+    const auto &chain = chains.at(n->GetPlayer());
+    const size_t index = frame.progress.at(n->GetPlayer());
+    if (index + 1 >= chain.size()) {
+      // This player has already realised their designated sequence; any
+      // further move of theirs here is inconsistent with this profile.
+      continue;
+    }
+    const GameSequence &next = chain[index + 1];
+    if (next->GetInfoset() != n->GetInfoset()) {
+      // This is not the information set at which this player's next
+      // designated move occurs; this branch cannot realise the profile.
+      continue;
+    }
+    auto progress = frame.progress;
+    progress[n->GetPlayer()] = index + 1;
+    frames.push({n->GetChild(next->GetAction()), frame.prob, std::move(progress)});
+  }
+  return payoff;
+}
 
 } // end namespace Gambit
