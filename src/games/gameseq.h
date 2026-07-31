@@ -25,6 +25,7 @@
 
 #include "gambit.h"
 #include "ndarray.h"
+#include "seqpure.h"
 
 namespace Gambit {
 
@@ -40,21 +41,20 @@ class GameSequenceForm {
 
   void BuildSequences();
   void FillTableau();
-  void FillTableau(const GameNode &, const Rational &, std::map<GamePlayer, GameSequence> &);
+  void FillTableau(const GameNode &, const Rational &, PureSequenceProfile &);
 
-  Array<int> ProfileToIndex(const std::map<GamePlayer, GameSequence> &p_profile) const
+  Array<int> ProfileToIndex(const PureSequenceProfile &p_profile) const
   {
-    Array<int> index(p_profile.size());
+    Array<int> index(GetPlayers().size());
     for (auto player : GetPlayers()) {
       const auto &seqs = m_sequences.at(player);
-      auto loc = std::find(seqs.begin(), seqs.end(), p_profile.at(player));
+      auto loc = std::find(seqs.begin(), seqs.end(), p_profile.GetSequence(player));
       index[player->GetNumber()] = loc - seqs.begin() + 1;
     }
     return index;
   }
 
-  Rational &GetPayoffEntry(const std::map<GamePlayer, GameSequence> &p_profile,
-                           const GamePlayer &p_player)
+  Rational &GetPayoffEntry(const PureSequenceProfile &p_profile, const GamePlayer &p_player)
   {
     return m_payoffs.at(ProfileToIndex(p_profile), p_player->GetNumber());
   }
@@ -81,8 +81,7 @@ public:
 
   GameRep::Players GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
 
-  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
-                            const GamePlayer &p_player) const
+  const Rational &GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const
   {
     return m_payoffs.at(ProfileToIndex(p_profile), p_player->GetNumber());
   }

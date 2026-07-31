@@ -42,7 +42,7 @@ void GameSequenceForm::BuildSequences()
 }
 
 void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
-                                   std::map<GamePlayer, GameSequence> &p_currentSequences)
+                                   PureSequenceProfile &p_currentSequences)
 {
   if (n->GetOutcome()) {
     for (auto player : m_support.GetGame()->GetPlayers()) {
@@ -61,14 +61,14 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
     }
   }
   else {
-    auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
-    m_constraints[{n->GetInfoset(), p_currentSequences.at(n->GetPlayer())->GetAction()}] = 1;
+    auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
+    m_constraints[{n->GetInfoset(), tmp_sequence->GetAction()}] = 1;
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       m_constraints[{n->GetInfoset(), action}] = -1;
-      p_currentSequences[n->GetPlayer()] = m_correspondence.at(action);
+      p_currentSequences.SetSequence(m_correspondence.at(action));
       FillTableau(n->GetChild(action), prob, p_currentSequences);
     }
-    p_currentSequences[n->GetPlayer()] = tmp_sequence;
+    p_currentSequences.SetSequence(tmp_sequence);
   }
 }
 
@@ -80,9 +80,9 @@ void GameSequenceForm::FillTableau()
   }
   m_payoffs = NDArray<Rational>(dim, dim.size());
 
-  std::map<GamePlayer, GameSequence> currentSequence;
+  PureSequenceProfile currentSequence(m_support.GetGame());
   for (auto player : GetPlayers()) {
-    currentSequence[player] = m_sequences[player].front();
+    currentSequence.SetSequence(m_sequences[player].front());
   }
   FillTableau(m_support.GetGame()->GetRoot(), Rational(1), currentSequence);
 }

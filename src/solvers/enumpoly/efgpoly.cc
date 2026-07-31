@@ -105,7 +105,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
     if (pay != Rational(0)) {
       Polynomial<double> term(p_data.space, double(pay));
       for (auto player : p_data.m_support.GetPlayers()) {
-        term *= p_data.variables.at(profile[player]);
+        term *= p_data.variables.at(profile.GetSequence(player));
       }
       equation += term;
     }

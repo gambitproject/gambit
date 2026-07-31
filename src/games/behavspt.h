@@ -26,6 +26,7 @@
 #include <list>
 #include <map>
 #include "game.h"
+#include "seqpure.h"
 
 namespace Gambit {
 
@@ -212,9 +213,9 @@ public:
 
       iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end = false);
 
-      std::map<GamePlayer, GameSequence> operator*() const;
+      PureSequenceProfile operator*() const;
 
-      std::map<GamePlayer, GameSequence> operator->() const;
+      PureSequenceProfile operator->() const;
 
       iterator &operator++();
 
@@ -233,7 +234,7 @@ public:
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
-  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+  const Rational &GetPayoff(const PureSequenceProfile &p_profile,
                             const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>

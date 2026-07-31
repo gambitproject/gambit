@@ -169,9 +169,8 @@ int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
   return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
 }
 
-const Rational &
-BehaviorSupportProfile::GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
-                                  const GamePlayer &p_player) const
+const Rational &BehaviorSupportProfile::GetPayoff(const PureSequenceProfile &p_profile,
+                                                  const GamePlayer &p_player) const
 {
   return GetSequenceForm()->GetPayoff(p_profile, p_player);
 }
@@ -284,22 +283,20 @@ BehaviorSupportProfile::SequenceContingencies::iterator::iterator(
   }
 }
 
-std::map<GamePlayer, GameSequence>
-BehaviorSupportProfile::SequenceContingencies::iterator::operator*() const
+PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator*() const
 {
-  std::map<GamePlayer, GameSequence> ret;
+  PureSequenceProfile ret(m_sfg->GetSupport().GetGame());
   for (auto [player, index] : m_indices) {
-    ret[player] = m_sfg->m_sequences.at(player)[index];
+    ret.SetSequence(m_sfg->m_sequences.at(player)[index]);
   }
   return ret;
 }
 
-std::map<GamePlayer, GameSequence>
-BehaviorSupportProfile::SequenceContingencies::iterator::operator->() const
+PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator->() const
 {
-  std::map<GamePlayer, GameSequence> ret;
+  PureSequenceProfile ret(m_sfg->GetSupport().GetGame());
   for (auto [player, index] : m_indices) {
-    ret[player] = m_sfg->m_sequences.at(player)[index];
+    ret.SetSequence(m_sfg->m_sequences.at(player)[index]);
   }
   return ret;
 }

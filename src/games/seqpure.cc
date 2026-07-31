@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gambit.h
-// Top-level include file for Gambit library
+// FILE: src/games/seqpure.cc
+// Implementation of pure sequence profile
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,21 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_H
-#define GAMBIT_H
+#include "gambit.h"
 
-#include "core/core.h"
+namespace Gambit {
 
-#include "games/game.h"
-#include "games/writer.h"
+PureSequenceProfile::PureSequenceProfile(const Game &p_efg) : m_efg(p_efg) {}
 
-#include "games/behavspt.h"
-#include "games/behavmixed.h"
-#include "games/behavpure.h"
-#include "games/seqpure.h"
-
-#include "games/stratspt.h"
-#include "games/stratpure.h"
-#include "games/stratmixed.h"
-
-#endif // GAMBIT_H
+} // end namespace Gambit
