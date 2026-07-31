@@ -91,6 +91,7 @@ template <class T> struct Solution {
     }
   }
 
+  int Total() const { return ns1 + ns2 + ni1 + ni2; }
   int RootIndex1() const { return ns1 + ns2 + 1; }
   int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
 };
@@ -116,8 +117,11 @@ template <class T> bool AddBFS(Solution<T> &p_solution, const linalg::LemkeTable
   }
 }
 
-template <class T> void FillTableau(Matrix<T> &A, Solution<T> &p_solution)
+template <class T> Matrix<T> ConstructMatrix(const Solution<T> &p_solution)
 {
+  Matrix<T> A(1, p_solution.Total(), 0, p_solution.Total());
+  A = T{0};
+
   // Payoff block: for every pair of sequences (one per player), the
   // payoff each player receives when that pair is exactly realised,
   // shifted by a constant large enough to make all entries negative and
@@ -141,15 +145,37 @@ template <class T> void FillTableau(Matrix<T> &A, Solution<T> &p_solution)
       const int infosetIdx = p_solution.infosetIndex.at(infoset);
       const auto &children = p_solution.siblings.at(infoset);
       const int arrivalIdx = p_solution.index.at(children.front()->GetParent());
-      A(arrivalIdx, infosetIdx) = static_cast<T>(-1);
-      A(infosetIdx, arrivalIdx) = static_cast<T>(1);
+      A(arrivalIdx, infosetIdx) = T{-1};
+      A(infosetIdx, arrivalIdx) = T{1};
       for (const auto &child : children) {
         const int childIdx = p_solution.index.at(child);
-        A(childIdx, infosetIdx) = static_cast<T>(1);
-        A(infosetIdx, childIdx) = static_cast<T>(-1);
+        A(childIdx, infosetIdx) = T{1};
+        A(infosetIdx, childIdx) = T{-1};
       }
     }
   }
+
+  // Column 0 and the two "root anchor" entries are the standard
+  // sequence-form LCP fixtures that anchor the probability of each
+  // player's empty sequence at 1.
+  for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
+    A(i, 0) = T{-1};
+  }
+  A(p_solution.index.at(p_solution.root1), p_solution.RootIndex1()) = T{1};
+  A(p_solution.RootIndex1(), p_solution.index.at(p_solution.root1)) = T{-1};
+  A(p_solution.index.at(p_solution.root2), p_solution.RootIndex2()) = T{1};
+  A(p_solution.RootIndex2(), p_solution.index.at(p_solution.root2)) = T{-1};
+
+  return A;
+}
+
+template <class T> Vector<T> ConstructVector(const Solution<T> &p_solution)
+{
+  Vector<T> b(1, p_solution.Total());
+  b = T{0};
+  b[p_solution.RootIndex1()] = T{-1};
+  b[p_solution.RootIndex2()] = T{-1};
+  return b;
 }
 
 template <class T>
@@ -158,7 +184,7 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
 {
   std::map<GameSequence, T> x;
   for (const auto &[sequence, idx] : p_solution.index) {
-    T value(0);
+    T value{0};
     if (tab.Member(idx)) {
       const T candidate = sol[tab.Find(idx)];
       if (candidate > p_solution.eps) {
@@ -189,25 +215,7 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   }
 
   Solution<T> solution(p_game);
-
-  const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
-  Matrix<T> A(1, ntot, 0, ntot);
-  A = static_cast<T>(0);
-  FillTableau(A, solution);
-  for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
-    A(i, 0) = static_cast<T>(-1);
-  }
-  A(solution.index.at(solution.root1), solution.RootIndex1()) = static_cast<T>(1);
-  A(solution.RootIndex1(), solution.index.at(solution.root1)) = static_cast<T>(-1);
-  A(solution.index.at(solution.root2), solution.RootIndex2()) = static_cast<T>(1);
-  A(solution.RootIndex2(), solution.index.at(solution.root2)) = static_cast<T>(-1);
-
-  Vector<T> b(1, ntot);
-  b = static_cast<T>(0);
-  b[solution.RootIndex1()] = static_cast<T>(-1);
-  b[solution.RootIndex2()] = static_cast<T>(-1);
-
-  linalg::LemkeTableau<T> tab(A, b);
+  linalg::LemkeTableau<T> tab(ConstructMatrix(solution), ConstructVector(solution));
   solution.eps = tab.Epsilon();
 
   tab.Pivot(solution.RootIndex1(), 0);
