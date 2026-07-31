@@ -24,7 +24,6 @@
 #define GAMESEQ_H
 
 #include "gambit.h"
-#include "ndarray.h"
 #include "seqpure.h"
 
 namespace Gambit {
@@ -34,45 +33,17 @@ class GameSequenceForm {
 
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
-  NDArray<Rational> m_payoffs;
   std::map<std::pair<GameInfoset, GameAction>, int> m_constraints; // (sparse) constraint matrices
-  std::set<GameInfoset> m_infosets; // infosets actually reachable given support
   std::map<GameAction, GameSequence> m_correspondence;
 
   void BuildSequences();
-  void FillTableau();
-  void FillTableau(const GameNode &, const Rational &, PureSequenceProfile &);
-
-  Array<int> ProfileToIndex(const PureSequenceProfile &p_profile) const
-  {
-    Array<int> index(GetPlayers().size());
-    for (auto player : GetPlayers()) {
-      const auto &seqs = m_sequences.at(player);
-      auto loc = std::find(seqs.begin(), seqs.end(), p_profile.GetSequence(player));
-      index[player->GetNumber()] = loc - seqs.begin() + 1;
-    }
-    return index;
-  }
-
-  Rational &GetPayoffEntry(const PureSequenceProfile &p_profile, const GamePlayer &p_player)
-  {
-    return m_payoffs.at(ProfileToIndex(p_profile), p_player->GetNumber());
-  }
+  void BuildConstraints();
 
 public:
-  class Infosets {
-    const GameSequenceForm *m_sfg;
-
-  public:
-    Infosets(const GameSequenceForm *p_sfg) : m_sfg(p_sfg) {}
-
-    size_t size() const { return m_sfg->m_infosets.size(); }
-  };
-
   explicit GameSequenceForm(const BehaviorSupportProfile &p_support) : m_support(p_support)
   {
     BuildSequences();
-    FillTableau();
+    BuildConstraints();
   }
 
   ~GameSequenceForm() = default;
@@ -81,10 +52,12 @@ public:
 
   GameRep::Players GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
 
-  const Rational &GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const
-  {
-    return m_payoffs.at(ProfileToIndex(p_profile), p_player->GetNumber());
-  }
+  /// Returns the payoff to a player that arises when each player realises
+  /// the sequence assigned to them in the profile.  This is computed on
+  /// demand by an (iterative, non-recursive) traversal of the game tree,
+  /// pruning as soon as a player's move is inconsistent with their
+  /// designated sequence.
+  Rational GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const;
 
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const
   {

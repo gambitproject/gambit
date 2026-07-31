@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <stack>
+
 #include "gambit.h"
 #include "gameseq.h"
 
@@ -41,50 +43,106 @@ void GameSequenceForm::BuildSequences()
   }
 }
 
-void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
-                                   PureSequenceProfile &p_currentSequences)
+// Because information sets respect a player's own history, every action at
+// a given (reachable) information set is reached via the same sequence of
+// that player's prior moves.  This means the constraint matrix -- which
+// relates the probability of a sequence to the probabilities of the
+// sequences that extend it -- can be read off directly from the sequences'
+// parent relationships, without walking the tree.
+void GameSequenceForm::BuildConstraints()
 {
-  if (n->GetOutcome()) {
-    for (auto player : m_support.GetGame()->GetPlayers()) {
-      GetPayoffEntry(p_currentSequences, player) +=
-          prob * n->GetOutcome()->GetPayoff<Rational>(player);
+  for (const auto &player : GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      if (!m_support.IsReachable(infoset)) {
+        continue;
+      }
+      const auto &actions = m_support.GetActions(infoset);
+      const GameAction arrival = m_correspondence.at(actions.front())->GetParent()->GetAction();
+      m_constraints[{infoset, arrival}] = 1;
+      for (const auto &action : actions) {
+        m_constraints[{infoset, action}] = -1;
+      }
     }
-  }
-  if (!n->GetInfoset()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (auto action : n->GetInfoset()->GetActions()) {
-      FillTableau(n->GetChild(action),
-                  prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                  p_currentSequences);
-    }
-  }
-  else {
-    auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
-    m_constraints[{n->GetInfoset(), tmp_sequence->GetAction()}] = 1;
-    for (auto action : m_support.GetActions(n->GetInfoset())) {
-      m_constraints[{n->GetInfoset(), action}] = -1;
-      p_currentSequences.SetSequence(m_correspondence.at(action));
-      FillTableau(n->GetChild(action), prob, p_currentSequences);
-    }
-    p_currentSequences.SetSequence(tmp_sequence);
   }
 }
 
-void GameSequenceForm::FillTableau()
-{
-  Array<int> dim(m_sequences.size());
-  for (auto player : GetPlayers()) {
-    dim[player->GetNumber()] = m_sequences.at(player).size();
-  }
-  m_payoffs = NDArray<Rational>(dim, dim.size());
+namespace {
 
-  PureSequenceProfile currentSequence(m_support.GetGame());
+/// One frame of the explicit-stack traversal used by GameSequenceForm::GetPayoff.
+/// Tracks the node under consideration, the probability of reaching it (given
+/// chance's actual probabilities and each player's moves as prescribed by the
+/// profile being evaluated), and how far each player has progressed along the
+/// chain of sequences from the empty sequence to the one designated for them.
+struct SequenceWalkFrame {
+  GameNode node;
+  Rational prob;
+  std::map<GamePlayer, size_t> progress;
+};
+
+} // end anonymous namespace
+
+Rational GameSequenceForm::GetPayoff(const PureSequenceProfile &p_profile,
+                                     const GamePlayer &p_player) const
+{
+  std::map<GamePlayer, std::vector<GameSequence>> chains;
+  std::map<GamePlayer, size_t> initialProgress;
   for (auto player : GetPlayers()) {
-    currentSequence.SetSequence(m_sequences[player].front());
+    std::vector<GameSequence> chain;
+    for (GameSequence seq = p_profile.GetSequence(player); seq; seq = seq->GetParent()) {
+      chain.push_back(seq);
+    }
+    std::reverse(chain.begin(), chain.end()); // chain.front() is the empty sequence
+    chains[player] = chain;
+    initialProgress[player] = 0;
   }
-  FillTableau(m_support.GetGame()->GetRoot(), Rational(1), currentSequence);
+
+  Rational payoff(0);
+  std::stack<SequenceWalkFrame> frames;
+  frames.push({m_support.GetGame()->GetRoot(), Rational(1), initialProgress});
+
+  while (!frames.empty()) {
+    const SequenceWalkFrame frame = std::move(frames.top());
+    frames.pop();
+    const GameNode &n = frame.node;
+
+    if (n->GetOutcome()) {
+      const bool matches = std::all_of(chains.begin(), chains.end(), [&](const auto &entry) {
+        return frame.progress.at(entry.first) + 1 == entry.second.size();
+      });
+      if (matches) {
+        payoff += frame.prob * n->GetOutcome()->GetPayoff<Rational>(p_player);
+      }
+    }
+    if (!n->GetInfoset()) {
+      continue;
+    }
+    if (n->GetPlayer()->IsChance()) {
+      for (auto action : n->GetInfoset()->GetActions()) {
+        frames.push({n->GetChild(action),
+                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+                     frame.progress});
+      }
+      continue;
+    }
+
+    const auto &chain = chains.at(n->GetPlayer());
+    const size_t index = frame.progress.at(n->GetPlayer());
+    if (index + 1 >= chain.size()) {
+      // This player has already realised their designated sequence; any
+      // further move of theirs here is inconsistent with this profile.
+      continue;
+    }
+    const GameSequence &next = chain[index + 1];
+    if (next->GetInfoset() != n->GetInfoset()) {
+      // This is not the information set at which this player's next
+      // designated move occurs; this branch cannot realise the profile.
+      continue;
+    }
+    auto progress = frame.progress;
+    progress[n->GetPlayer()] = index + 1;
+    frames.push({n->GetChild(next->GetAction()), frame.prob, std::move(progress)});
+  }
+  return payoff;
 }
 
 } // end namespace Gambit

@@ -169,8 +169,8 @@ int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
   return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
 }
 
-const Rational &BehaviorSupportProfile::GetPayoff(const PureSequenceProfile &p_profile,
-                                                  const GamePlayer &p_player) const
+Rational BehaviorSupportProfile::GetPayoff(const PureSequenceProfile &p_profile,
+                                           const GamePlayer &p_player) const
 {
   return GetSequenceForm()->GetPayoff(p_profile, p_player);
 }
