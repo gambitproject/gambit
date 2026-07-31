@@ -52,6 +52,14 @@ public:
   std::shared_ptr<VariableSpace> space;
   std::map<GameSequence, int> var;
   std::map<GameSequence, Polynomial<double>> variables;
+  // The sequences of the actions available at an information set, i.e. the
+  // children, in the tree of sequences, of the sequence that leads to it.
+  // (Grouping by information set rather than directly by parent sequence
+  // matters: the same parent sequence can lead to different information
+  // sets, e.g. depending on an intervening chance move or another player's
+  // action.)  This is what expresses the sum-to-one relation among the
+  // actions at an information set.
+  std::map<GameInfoset, std::vector<GameSequence>> siblings;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
 };
@@ -66,14 +74,14 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
     return Polynomial<double>(p_data.space, var.at(p_sequence), 1);
   }
 
-  Polynomial<double> equation(p_data.space);
-  for (auto seq : p_data.m_support.GetSequences(p_sequence->GetPlayer())) {
-    if (seq == p_sequence) {
-      continue;
-    }
-    if (const int constraint_coef =
-            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->GetAction())) {
-      equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
+  // The last action at an information set is eliminated using the
+  // sum-to-one relation among the sequences at that information set: its
+  // probability is that of its parent sequence, less the probabilities of
+  // its sibling sequences (the other actions at the same information set).
+  Polynomial<double> equation = BuildSequenceVariable(p_data, p_sequence->GetParent(), var);
+  for (const auto &sibling : p_data.siblings.at(p_sequence->GetInfoset())) {
+    if (sibling != p_sequence) {
+      equation -= BuildSequenceVariable(p_data, sibling, var);
     }
   }
   return equation;
@@ -85,9 +93,11 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
                                                                 m_support.GetPlayers().size()))
 {
   for (auto sequence : m_support.GetSequences()) {
-    if (sequence->GetAction() &&
-        (sequence->GetAction() != p_support.GetActions(sequence->GetInfoset()).back())) {
-      var[sequence] = var.size() + 1;
+    if (sequence->GetAction()) {
+      siblings[sequence->GetInfoset()].push_back(sequence);
+      if (sequence->GetAction() != p_support.GetActions(sequence->GetInfoset()).back()) {
+        var[sequence] = var.size() + 1;
+      }
     }
   }
 

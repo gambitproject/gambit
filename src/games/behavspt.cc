@@ -163,12 +163,6 @@ BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
   return {this, p_player};
 }
 
-int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
-                                               const GameAction &p_action) const
-{
-  return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
-}
-
 Rational BehaviorSupportProfile::GetPayoff(const PureSequenceProfile &p_profile,
                                            const GamePlayer &p_player) const
 {

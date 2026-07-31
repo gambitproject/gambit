@@ -233,7 +233,6 @@ public:
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
-  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
   Rational GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>

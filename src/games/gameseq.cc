@@ -35,32 +35,6 @@ void GameSequenceForm::BuildSequences()
     for (const auto &sequence : player->GetSequences()) {
       if (!sequence->GetAction() || m_support.Contains(sequence->GetAction())) {
         m_sequences[player].emplace_back(sequence);
-        if (sequence->GetAction()) {
-          m_correspondence[sequence->GetAction()] = sequence;
-        }
-      }
-    }
-  }
-}
-
-// Because information sets respect a player's own history, every action at
-// a given (reachable) information set is reached via the same sequence of
-// that player's prior moves.  This means the constraint matrix -- which
-// relates the probability of a sequence to the probabilities of the
-// sequences that extend it -- can be read off directly from the sequences'
-// parent relationships, without walking the tree.
-void GameSequenceForm::BuildConstraints()
-{
-  for (const auto &player : GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      if (!m_support.IsReachable(infoset)) {
-        continue;
-      }
-      const auto &actions = m_support.GetActions(infoset);
-      const GameAction arrival = m_correspondence.at(actions.front())->GetParent()->GetAction();
-      m_constraints[{infoset, arrival}] = 1;
-      for (const auto &action : actions) {
-        m_constraints[{infoset, action}] = -1;
       }
     }
   }

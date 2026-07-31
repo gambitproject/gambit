@@ -33,17 +33,13 @@ class GameSequenceForm {
 
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
-  std::map<std::pair<GameInfoset, GameAction>, int> m_constraints; // (sparse) constraint matrices
-  std::map<GameAction, GameSequence> m_correspondence;
 
   void BuildSequences();
-  void BuildConstraints();
 
 public:
   explicit GameSequenceForm(const BehaviorSupportProfile &p_support) : m_support(p_support)
   {
     BuildSequences();
-    BuildConstraints();
   }
 
   ~GameSequenceForm() = default;
@@ -58,16 +54,6 @@ public:
   /// pruning as soon as a player's move is inconsistent with their
   /// designated sequence.
   Rational GetPayoff(const PureSequenceProfile &p_profile, const GamePlayer &p_player) const;
-
-  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const
-  {
-    try {
-      return m_constraints.at({p_infoset, p_action});
-    }
-    catch (std::out_of_range &) {
-      return 0;
-    }
-  }
 };
 
 } // end namespace Gambit
