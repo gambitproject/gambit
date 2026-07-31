@@ -34,37 +34,53 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   std::list<MixedStrategyProfile<double>> equilibria;
 
   HPEquationSystem system(p_prior);
-  Vector<double> x = system.ComputeInitialPoint();
 
   const PathTracer tracer;
+  Vector<double> x;
   double omega = 1.0;
+  bool wrong_orientation = false;
 
-  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
   auto criterion_function = [](const Vector<double> &point,
                                const Vector<double> &tangent) -> double { return point[1] - 1.0; };
 
-  const TracePathResult result = tracer.TracePath(
-      [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
-      [&system](const Vector<double> &point, Matrix<double> &jac) {
-        system.GetJacobian(point, jac);
-      },
-      x, omega, termination_condition,
-      [&system](const Vector<double> &point) {
-        std::cout << "[Path Tracer Step] t = " << point[1];
-        std::cout << " | Alfas: ";
-        for (size_t i = 2; i <= 5; ++i) {
-          std::cout << point[i] << " ";
-        }
-        std::cout << "| Mu: " << point[6] << " " << point[7] << std::endl;
+  for (int attemp = 0; attemp < 2; ++attemp) {
+    x = system.ComputeInitialPoint();
+    wrong_orientation = false;
 
-        std::cout << "Full point vector in probabilities: ";
-        Vector<double> prob_vector = system.ExtractEquilibrium(point).GetProbVector();
-        for (size_t i = 1; i <= prob_vector.size(); ++i) {
-          std::cout << prob_vector[i] << " ";
-        }
-        std::cout << std::endl;
-      },
-      criterion_function);
+    auto termination_condition = [&wrong_orientation](const Vector<double> &point) {
+      const double wrong_orientation_tol = -1.0e-4;
+      if (point[1] < wrong_orientation_tol) {
+        wrong_orientation = true;
+        return true;
+      }
+      return point[1] >= 1.5;
+    };
+
+    const TracePathResult result =
+        tracer.TracePath([&system](const Vector<double> &point,
+                                   Vector<double> &lhs) { system.GetValue(point, lhs); },
+                         [&system](const Vector<double> &point, Matrix<double> &jac) {
+                           system.GetJacobian(point, jac);
+                         },
+                         x, omega, termination_condition,
+                         [&system](const Vector<double> &point) {
+                           std::cout << "[Path Tracer Step] t = " << point[1] << std::endl;
+                           std::cout << "Full point vector in probabilities: ";
+                           Vector<double> prob_vector =
+                               system.ExtractEquilibrium(point).GetProbVector();
+                           for (size_t i = 1; i <= prob_vector.size(); ++i) {
+                             std::cout << prob_vector[i] << " ";
+                           }
+                           std::cout << std::endl;
+                         },
+                         criterion_function);
+    if (!wrong_orientation) {
+      break;
+    }
+
+    // Direction was wrong, flip the orientation and try again
+    omega = -1.0;
+  }
 
   equilibria.push_back(system.ExtractEquilibrium(x));
   return equilibria;
