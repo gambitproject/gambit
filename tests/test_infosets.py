@@ -104,6 +104,76 @@ def test_infoset_plays():
     assert set(test_infoset.plays) == expected_set_of_plays
 
 
+@pytest.mark.parametrize(
+    "inprobs,outprobs",
+    [
+        (["1/4", "3/4"], [gbt.Rational("1/4"), gbt.Rational("3/4")]),
+        ([0.75, 0.25], [0.75, 0.25]),
+        ({"King": 1}, [1, 0]),
+    ],
+)
+def test_make_chance_event_sets_probabilities(inprobs, outprobs):
+    game = games.read_from_file("stripped_down_poker.efg")
+    game.make_chance_event([game.root], inprobs, "Deal")
+    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
+        assert action.prob == prob
+
+
+def test_make_chance_event_pools_nodes_from_different_infosets():
+    """Nodes in distinct information sets are formed into a single chance event."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    nodes = [game.root.children["King"], game.root.children["Queen"]]
+    game.make_chance_event(nodes, ["1/4", "3/4"], "Coin")
+    assert nodes[0].infoset == nodes[1].infoset
+    assert nodes[0].infoset.is_chance
+    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
+                                                          gbt.Rational("3/4")]
+    assert not list(game.players["Alice"].infosets)
+
+
+def test_make_chance_event_requires_matching_action_labels():
+    """Nodes must have the same actions, with the same labels in the same order."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    alice_node = game.root.children["King"]        # actions Bet, Fold
+    bob_node = alice_node.children["Bet"]          # actions Call, Fold
+    with pytest.raises(ValueError):
+        game.make_chance_event([alice_node, bob_node], ["1/2", "1/2"])
+
+
+def test_make_chance_event_accepts_sparse_mapping():
+    """Actions omitted from a mapping are assigned probability zero."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    game.make_chance_event([game.root], {"King": 1}, "Deal")
+    assert [a.prob for a in game.root.infoset.actions] == [1, 0]
+
+
+def test_make_chance_event_converts_personal_node():
+    """A personal decision node becomes a chance node carrying the probabilities given."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
+    game.make_chance_event([node], ["1/4", "3/4"])
+    assert node.infoset.is_chance
+    assert [a.prob for a in node.infoset.actions] == [gbt.Rational("1/4"),
+                                                      gbt.Rational("3/4")]
+
+
+@pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40]])
+def test_make_chance_event_invalid_distribution_raises(probs):
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.make_chance_event([game.root], probs)
+
+
+@pytest.mark.parametrize(
+    "probs,error",
+    [(["1/2"], IndexError), (["1/3", "1/3", "1/3"], IndexError), ({"Jack": 1}, KeyError)],
+)
+def test_make_chance_event_malformed_probs_raises(probs, error):
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(error):
+        game.make_chance_event([game.root], probs)
+
+
 @dataclasses.dataclass
 class PriorActionsTestCase:
     """TestCase for testing own_prior_actions."""

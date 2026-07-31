@@ -72,25 +72,6 @@ def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
         game.set_chance_probs(game.root.infoset, inprobs)
 
 
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.25, 0.75, 0.25]),
-        (games.create_stripped_down_poker_efg(), [1.00]),
-    ],
-)
-def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
-    with pytest.raises(IndexError):
-        game.set_chance_probs(game.root.infoset, inprobs)
-
-
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_set_chance_personal(game: gbt.Game):
-    with pytest.raises(gbt.UndefinedOperationError):
-        personal_infoset = next(iter(game.players["Alice"].infosets))
-        game.set_chance_probs(personal_infoset, [0.75, 0.25])
-
-
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
 def test_action_precedes(game: gbt.Game):
     child = game.root.children["King"]
