@@ -951,46 +951,6 @@ class Game:
             self.game.deref().GetMinimalSubgame(cython.cast(Infoset, resolved_infoset).infoset)
         )
 
-    def set_chance_probs(self, infoset: Infoset | str,
-                         probs: typing.Sequence | typing.Mapping):
-        """Set the action probabilities at chance information set `infoset`.
-
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The chance information set at which to set the action probabilities.
-            If a string is passed, the information set is determined by finding the chance
-            information set with that label, if any.
-        probs : array-like
-            The action probabilities to set
-
-        .. versionchanged:: 17.0.0
-            Implemented in terms of `Game.make_chance_event`, and now also accepts a mapping
-            from action labels to probabilities.  The chance event is reconstituted, so the
-            ``Infoset`` passed as `infoset`, and its ``Action`` objects, are invalidated by a
-            successful call; refer to the event as ``node.infoset``.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is not an information set in this game
-        UndefinedOperationError
-            If `infoset` is not an information set of the chance player
-        IndexError
-            If the length of `probs` is not the same as the number of actions at the
-            information set
-        ValueError
-            If any of the elements of `probs` are not interpretable as numbers, or the values of
-            `probs` are not non-negative numbers that sum to exactly one.
-        """
-        resolved_infoset = self._resolve_infoset(infoset, "set_chance_probs")
-        if not resolved_infoset.is_chance:
-            raise UndefinedOperationError(
-                "set_chance_probs() first argument must be a chance infoset"
-            )
-        self.make_chance_event(list(resolved_infoset.members), probs,
-                               resolved_infoset.label or None)
-
     def _get_contingency(self, *args):
         psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
             self.game.deref().NewPureStrategyProfile()

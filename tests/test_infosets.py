@@ -113,6 +113,9 @@ def test_infoset_plays():
     ],
 )
 def test_make_chance_event_sets_probabilities(inprobs, outprobs):
+    """Probabilities may be given positionally, or as a mapping in which omitted
+    actions are assigned zero.
+    """
     game = games.read_from_file("stripped_down_poker.efg")
     game.make_chance_event([game.root], inprobs, "Deal")
     for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
@@ -140,13 +143,6 @@ def test_make_chance_event_requires_matching_action_labels():
         game.make_chance_event([alice_node, bob_node], ["1/2", "1/2"])
 
 
-def test_make_chance_event_accepts_sparse_mapping():
-    """Actions omitted from a mapping are assigned probability zero."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    game.make_chance_event([game.root], {"King": 1}, "Deal")
-    assert [a.prob for a in game.root.infoset.actions] == [1, 0]
-
-
 def test_make_chance_event_converts_personal_node():
     """A personal decision node becomes a chance node carrying the probabilities given."""
     game = games.read_from_file("stripped_down_poker.efg")
@@ -157,8 +153,9 @@ def test_make_chance_event_converts_personal_node():
                                                       gbt.Rational("3/4")]
 
 
-@pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40]])
-def test_make_chance_event_invalid_distribution_raises(probs):
+@pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40], ["foo", "bar"]])
+def test_make_chance_event_invalid_probs_raises(probs):
+    """Values must be numbers, non-negative, and sum to exactly one."""
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
         game.make_chance_event([game.root], probs)
