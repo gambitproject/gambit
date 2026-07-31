@@ -51,7 +51,6 @@ template <class T> struct Solution {
   // it.  This is what expresses the sum-to-one relation among the actions
   // at an information set.
   std::map<GameInfoset, std::vector<GameSequence>> siblings;
-  Rational maxpay;
   T eps;
 
   explicit Solution(const Game &p_game)
@@ -60,8 +59,7 @@ template <class T> struct Solution {
       ns1(static_cast<int>(support.GetSequences(player1).size())),
       ns2(static_cast<int>(support.GetSequences(player2).size())),
       ni1(static_cast<int>(player1->GetInfosets().size()) + 1),
-      ni2(static_cast<int>(player2->GetInfosets().size()) + 1),
-      maxpay(p_game->GetMaxPayoff() + Rational(1))
+      ni2(static_cast<int>(player2->GetInfosets().size()) + 1)
   {
     int idx = 1;
     for (auto sequence : support.GetSequences(player1)) {
@@ -100,17 +98,21 @@ template <class T> Matrix<T> ConstructMatrix(const Solution<T> &p_solution)
   Matrix<T> A(1, p_solution.Total(), 0, p_solution.Total());
   A = T{0};
 
+  // A constant large enough that shifting every payoff down by it makes
+  // all payoff entries of the matrix negative, as Lemke's algorithm requires.
+  const Rational payoffShift = p_solution.support.GetGame()->GetMaxPayoff() + Rational(1);
+
   // Payoff block: for every pair of sequences (one per player), the
   // payoff each player receives when that pair is exactly realised,
-  // shifted by a constant large enough to make all entries negative and
-  // weighted by chance's probability of that pair actually being realised
-  // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
+  // shifted by payoffShift and weighted by chance's probability of that
+  // pair actually being realised (which need not be 1 -- see
+  // PureSequenceProfile::GetRealizationProbability).
   for (auto profile : p_solution.support.GetSequenceContingencies()) {
     const GameSequence &seq1 = profile.GetSequence(p_solution.player1);
     const GameSequence &seq2 = profile.GetSequence(p_solution.player2);
     const Rational prob = profile.GetRealizationProbability();
-    const Rational pay1 = profile.GetPayoff(p_solution.player1) - p_solution.maxpay * prob;
-    const Rational pay2 = profile.GetPayoff(p_solution.player2) - p_solution.maxpay * prob;
+    const Rational pay1 = profile.GetPayoff(p_solution.player1) - payoffShift * prob;
+    const Rational pay2 = profile.GetPayoff(p_solution.player2) - payoffShift * prob;
     A(p_solution.index.at(seq1), p_solution.index.at(seq2)) = static_cast<T>(pay1);
     A(p_solution.index.at(seq2), p_solution.index.at(seq1)) = static_cast<T>(pay2);
   }
