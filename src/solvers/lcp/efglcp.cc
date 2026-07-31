@@ -33,7 +33,7 @@ namespace {
 // a two-player game and the rows/columns of the sequence-form LCP
 // tableau, along with the quantities (payoffs, tree-of-sequences
 // relationships) needed to populate it.
-template <class T> struct Solution {
+struct Solution {
   BehaviorSupportProfile support;
   GamePlayer player1, player2;
   GameSequence root1, root2;
@@ -51,7 +51,6 @@ template <class T> struct Solution {
   // it.  This is what expresses the sum-to-one relation among the actions
   // at an information set.
   std::map<GameInfoset, std::vector<GameSequence>> siblings;
-  T eps;
 
   explicit Solution(const Game &p_game)
     : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
@@ -93,7 +92,7 @@ template <class T> struct Solution {
   int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
 };
 
-template <class T> Matrix<T> ConstructMatrix(const Solution<T> &p_solution)
+template <class T> Matrix<T> ConstructMatrix(const Solution &p_solution)
 {
   Matrix<T> A(1, p_solution.Total(), 0, p_solution.Total());
   A = T{0};
@@ -149,7 +148,7 @@ template <class T> Matrix<T> ConstructMatrix(const Solution<T> &p_solution)
   return A;
 }
 
-template <class T> Vector<T> ConstructVector(const Solution<T> &p_solution)
+template <class T> Vector<T> ConstructVector(const Solution &p_solution)
 {
   Vector<T> b(1, p_solution.Total());
   b = T{0};
@@ -160,14 +159,15 @@ template <class T> Vector<T> ConstructVector(const Solution<T> &p_solution)
 
 template <class T>
 MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
-                                   const Solution<T> &p_solution)
+                                   const Solution &p_solution)
 {
+  const T eps = tab.Epsilon();
   std::map<GameSequence, T> x;
   for (const auto &[sequence, idx] : p_solution.index) {
     T value{0};
     if (tab.Member(idx)) {
       const T candidate = sol[tab.Find(idx)];
-      if (candidate > p_solution.eps) {
+      if (candidate > eps) {
         value = candidate;
       }
     }
@@ -194,9 +194,8 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  Solution<T> solution(p_game);
-  linalg::LemkeTableau<T> tab(ConstructMatrix(solution), ConstructVector(solution));
-  solution.eps = tab.Epsilon();
+  Solution solution(p_game);
+  linalg::LemkeTableau<T> tab(ConstructMatrix<T>(solution), ConstructVector<T>(solution));
 
   tab.Pivot(solution.RootIndex1(), 0);
   tab.SF_LCPPath(solution.RootIndex1());
