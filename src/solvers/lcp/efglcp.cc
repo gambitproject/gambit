@@ -35,8 +35,6 @@ namespace {
 // relationships) needed to populate it.
 struct ColumnIndexMap {
   BehaviorSupportProfile support;
-  GamePlayer player1, player2;
-  GameSequence root1, root2;
   // The row/column of the tableau assigned to each sequence: player1's
   // occupy 1..rootIndex1, and player2's occupy rootIndex1+1..rootIndex2-1.
   std::map<GameSequence, int> index;
@@ -54,10 +52,11 @@ struct ColumnIndexMap {
   // of each player's root anchor within it (see infosetIndex above).
   int total, rootIndex1, rootIndex2;
 
-  explicit ColumnIndexMap(const Game &p_game)
-    : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
-      root1(player1->GetSequences().front()), root2(player2->GetSequences().front())
+  explicit ColumnIndexMap(const Game &p_game) : support(p_game)
   {
+    const GamePlayer player1 = p_game->GetPlayer(1);
+    const GamePlayer player2 = p_game->GetPlayer(2);
+
     const int ns1 = static_cast<int>(support.GetSequences(player1).size());
     const int ns2 = static_cast<int>(support.GetSequences(player2).size());
     const int ni1 = static_cast<int>(player1->GetInfosets().size()) + 1;
@@ -85,7 +84,7 @@ struct ColumnIndexMap {
       infosetIndex[infoset] = ns1 + ns2 + ni1 + static_cast<int>(i) + 2;
     }
 
-    for (auto player : {player1, player2}) {
+    for (auto player : p_game->GetPlayers()) {
       for (auto sequence : support.GetSequences(player)) {
         if (sequence->GetAction()) {
           siblings[sequence->GetInfoset()].push_back(sequence);
@@ -100,9 +99,13 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   Matrix<T> A(1, p_indexMap.total, 0, p_indexMap.total);
   A = T{0};
 
+  const Game &game = p_indexMap.support.GetGame();
+  const GamePlayer player1 = game->GetPlayer(1);
+  const GamePlayer player2 = game->GetPlayer(2);
+
   // A constant large enough that shifting every payoff down by it makes
   // all payoff entries of the matrix negative, as Lemke's algorithm requires.
-  const Rational payoffShift = p_indexMap.support.GetGame()->GetMaxPayoff() + Rational(1);
+  const Rational payoffShift = game->GetMaxPayoff() + Rational(1);
 
   // Payoff block: for every pair of sequences (one per player), the
   // payoff each player receives when that pair is exactly realised,
@@ -110,11 +113,11 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
   for (auto profile : p_indexMap.support.GetSequenceContingencies()) {
-    const GameSequence &seq1 = profile.GetSequence(p_indexMap.player1);
-    const GameSequence &seq2 = profile.GetSequence(p_indexMap.player2);
+    const GameSequence &seq1 = profile.GetSequence(player1);
+    const GameSequence &seq2 = profile.GetSequence(player2);
     const Rational prob = profile.GetRealizationProbability();
-    const Rational pay1 = profile.GetPayoff(p_indexMap.player1) - payoffShift * prob;
-    const Rational pay2 = profile.GetPayoff(p_indexMap.player2) - payoffShift * prob;
+    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+    const Rational pay2 = profile.GetPayoff(player2) - payoffShift * prob;
     A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
     A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
   }
@@ -122,7 +125,7 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // Constraint block: for each information set, the sum-to-one relation
   // between the probability of the sequence leading to it and the sum of
   // the probabilities of its own actions' sequences.
-  for (auto player : {p_indexMap.player1, p_indexMap.player2}) {
+  for (auto player : game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       const int infosetIdx = p_indexMap.infosetIndex.at(infoset);
       const auto &children = p_indexMap.siblings.at(infoset);
@@ -143,10 +146,12 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = T{-1};
   }
-  A(p_indexMap.index.at(p_indexMap.root1), p_indexMap.rootIndex1) = T{1};
-  A(p_indexMap.rootIndex1, p_indexMap.index.at(p_indexMap.root1)) = T{-1};
-  A(p_indexMap.index.at(p_indexMap.root2), p_indexMap.rootIndex2) = T{1};
-  A(p_indexMap.rootIndex2, p_indexMap.index.at(p_indexMap.root2)) = T{-1};
+  const GameSequence root1 = player1->GetSequences().front();
+  const GameSequence root2 = player2->GetSequences().front();
+  A(p_indexMap.index.at(root1), p_indexMap.rootIndex1) = T{1};
+  A(p_indexMap.rootIndex1, p_indexMap.index.at(root1)) = T{-1};
+  A(p_indexMap.index.at(root2), p_indexMap.rootIndex2) = T{1};
+  A(p_indexMap.rootIndex2, p_indexMap.index.at(root2)) = T{-1};
 
   return A;
 }
