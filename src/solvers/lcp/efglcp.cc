@@ -27,32 +27,13 @@
 
 namespace Gambit::Nash {
 
-template <class T> class NashLcpBehaviorSolver {
-public:
-  NashLcpBehaviorSolver(BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
-    : m_onEquilibrium(p_onEquilibrium)
-  {
-  }
-  ~NashLcpBehaviorSolver() = default;
-
-  std::list<MixedBehaviorProfile<T>> Solve(const Game &) const;
-
-private:
-  BehaviorCallbackType<T> m_onEquilibrium;
-
-  class Solution;
-
-  void FillTableau(Matrix<T> &, Solution &) const;
-  MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &, const Vector<T> &,
-                                     const Solution &) const;
-};
+namespace {
 
 // Holds the correspondence between the sequences (and information sets) of
 // a two-player game and the rows/columns of the sequence-form LCP
 // tableau, along with the quantities (payoffs, tree-of-sequences
 // relationships) needed to populate it.
-template <class T> class NashLcpBehaviorSolver<T>::Solution {
-public:
+template <class T> struct Solution {
   BehaviorSupportProfile support;
   GamePlayer player1, player2;
   GameSequence root1, root2;
@@ -72,58 +53,49 @@ public:
   std::map<GameInfoset, std::vector<GameSequence>> siblings;
   Rational maxpay;
   T eps;
-  Array<linalg::BFS<T>> m_list;
-  std::list<MixedBehaviorProfile<T>> m_equilibria;
+  Array<linalg::BFS<T>> basisList;
 
-  explicit Solution(const Game &);
+  explicit Solution(const Game &p_game)
+    : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
+      root1(player1->GetSequences().front()), root2(player2->GetSequences().front()),
+      ns1(static_cast<int>(support.GetSequences(player1).size())),
+      ns2(static_cast<int>(support.GetSequences(player2).size())),
+      ni1(static_cast<int>(player1->GetInfosets().size()) + 1),
+      ni2(static_cast<int>(player2->GetInfosets().size()) + 1),
+      maxpay(p_game->GetMaxPayoff() + Rational(1))
+  {
+    int idx = 1;
+    for (auto sequence : support.GetSequences(player1)) {
+      index[sequence] = idx++;
+    }
+    idx = 1;
+    for (auto sequence : support.GetSequences(player2)) {
+      index[sequence] = ns1 + idx++;
+    }
 
-  int RootIndex1() const { return ns1 + ns2 + 1; }
-  int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
+    idx = 2; // index 1 in each player's block is reserved for the root anchor
+    for (const auto &infoset : player1->GetInfosets()) {
+      infosetIndex[infoset] = ns1 + ns2 + idx++;
+    }
+    idx = 2;
+    for (const auto &infoset : player2->GetInfosets()) {
+      infosetIndex[infoset] = ns1 + ns2 + ni1 + idx++;
+    }
 
-  bool AddBFS(const linalg::LemkeTableau<T> &);
-
-  int EquilibriumCount() const { return m_equilibria.size(); }
-};
-
-template <class T>
-NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
-  : support(p_game), player1(p_game->GetPlayer(1)), player2(p_game->GetPlayer(2)),
-    root1(player1->GetSequences().front()), root2(player2->GetSequences().front()),
-    ns1(static_cast<int>(support.GetSequences(player1).size())),
-    ns2(static_cast<int>(support.GetSequences(player2).size())),
-    ni1(static_cast<int>(player1->GetInfosets().size()) + 1),
-    ni2(static_cast<int>(player2->GetInfosets().size()) + 1),
-    maxpay(p_game->GetMaxPayoff() + Rational(1))
-{
-  int idx = 1;
-  for (auto sequence : support.GetSequences(player1)) {
-    index[sequence] = idx++;
-  }
-  idx = 1;
-  for (auto sequence : support.GetSequences(player2)) {
-    index[sequence] = ns1 + idx++;
-  }
-
-  idx = 2; // index 1 in each player's block is reserved for the root anchor
-  for (const auto &infoset : player1->GetInfosets()) {
-    infosetIndex[infoset] = ns1 + ns2 + idx++;
-  }
-  idx = 2;
-  for (const auto &infoset : player2->GetInfosets()) {
-    infosetIndex[infoset] = ns1 + ns2 + ni1 + idx++;
-  }
-
-  for (auto player : {player1, player2}) {
-    for (auto sequence : support.GetSequences(player)) {
-      if (sequence->GetAction()) {
-        siblings[sequence->GetInfoset()].push_back(sequence);
+    for (auto player : {player1, player2}) {
+      for (auto sequence : support.GetSequences(player)) {
+        if (sequence->GetAction()) {
+          siblings[sequence->GetInfoset()].push_back(sequence);
+        }
       }
     }
   }
-}
 
-template <class T>
-bool NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tableau)
+  int RootIndex1() const { return ns1 + ns2 + 1; }
+  int RootIndex2() const { return ns1 + ns2 + ni1 + 1; }
+};
+
+template <class T> bool AddBFS(Solution<T> &p_solution, const linalg::LemkeTableau<T> &tableau)
 {
   linalg::BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
@@ -135,8 +107,8 @@ bool NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &t
     }
   }
 
-  if (!contains(m_list, cbfs)) {
-    m_list.push_back(cbfs);
+  if (!contains(p_solution.basisList, cbfs)) {
+    p_solution.basisList.push_back(cbfs);
     return true;
   }
   else {
@@ -144,58 +116,7 @@ bool NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &t
   }
 }
 
-//
-// Lemke implements Lemke's algorithm for linear complementarity problems,
-// as refined by Eaves for degenerate problems, starting from the primary ray.
-//
-template <class T>
-std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
-{
-  if (p_game->NumPlayers() != 2) {
-    throw UndefinedException("Method only valid for two-player games.");
-  }
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
-
-  Solution solution(p_game);
-
-  const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
-  Matrix<T> A(1, ntot, 0, ntot);
-  A = static_cast<T>(0);
-  FillTableau(A, solution);
-  for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
-    A(i, 0) = static_cast<T>(-1);
-  }
-  A(solution.index.at(solution.root1), solution.RootIndex1()) = static_cast<T>(1);
-  A(solution.RootIndex1(), solution.index.at(solution.root1)) = static_cast<T>(-1);
-  A(solution.index.at(solution.root2), solution.RootIndex2()) = static_cast<T>(1);
-  A(solution.RootIndex2(), solution.index.at(solution.root2)) = static_cast<T>(-1);
-
-  Vector<T> b(1, ntot);
-  b = static_cast<T>(0);
-  b[solution.RootIndex1()] = static_cast<T>(-1);
-  b[solution.RootIndex2()] = static_cast<T>(-1);
-
-  linalg::LemkeTableau<T> tab(A, b);
-  solution.eps = tab.Epsilon();
-
-  tab.Pivot(solution.RootIndex1(), 0);
-  tab.SF_LCPPath(solution.RootIndex1());
-  solution.AddBFS(tab);
-  Vector<T> sol(tab.MinRow(), tab.MaxRow());
-  tab.BasisVector(sol);
-
-  MixedBehaviorProfile<T> profile = GetProfile(tab, sol, solution);
-  profile.UndefinedToCentroid();
-  solution.m_equilibria.push_back(profile);
-  this->m_onEquilibrium(profile);
-  return solution.m_equilibria;
-}
-
-template <class T>
-void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, Solution &p_solution) const
+template <class T> void FillTableau(Matrix<T> &A, Solution<T> &p_solution)
 {
   // Payoff block: for every pair of sequences (one per player), the
   // payoff each player receives when that pair is exactly realised,
@@ -232,9 +153,8 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, Solution &p_solution) c
 }
 
 template <class T>
-MixedBehaviorProfile<T> NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
-                                                             const Vector<T> &sol,
-                                                             const Solution &p_solution) const
+MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
+                                   const Solution<T> &p_solution)
 {
   std::map<GameSequence, T> x;
   for (const auto &[sequence, idx] : p_solution.index) {
@@ -250,11 +170,59 @@ MixedBehaviorProfile<T> NashLcpBehaviorSolver<T>::GetProfile(const linalg::Lemke
   return p_solution.support.ToMixedBehaviorProfile(x);
 }
 
+} // end anonymous namespace
+
+//
+// Lemke implements Lemke's algorithm for linear complementarity problems,
+// as refined by Eaves for degenerate problems, starting from the primary ray.
+//
 template <class T>
 std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
                                                     BehaviorCallbackType<T> p_onEquilibrium)
 {
-  return NashLcpBehaviorSolver<T>(p_onEquilibrium).Solve(p_game);
+  if (p_game->NumPlayers() != 2) {
+    throw UndefinedException("Method only valid for two-player games.");
+  }
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
+  }
+
+  Solution<T> solution(p_game);
+
+  const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
+  Matrix<T> A(1, ntot, 0, ntot);
+  A = static_cast<T>(0);
+  FillTableau(A, solution);
+  for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
+    A(i, 0) = static_cast<T>(-1);
+  }
+  A(solution.index.at(solution.root1), solution.RootIndex1()) = static_cast<T>(1);
+  A(solution.RootIndex1(), solution.index.at(solution.root1)) = static_cast<T>(-1);
+  A(solution.index.at(solution.root2), solution.RootIndex2()) = static_cast<T>(1);
+  A(solution.RootIndex2(), solution.index.at(solution.root2)) = static_cast<T>(-1);
+
+  Vector<T> b(1, ntot);
+  b = static_cast<T>(0);
+  b[solution.RootIndex1()] = static_cast<T>(-1);
+  b[solution.RootIndex2()] = static_cast<T>(-1);
+
+  linalg::LemkeTableau<T> tab(A, b);
+  solution.eps = tab.Epsilon();
+
+  tab.Pivot(solution.RootIndex1(), 0);
+  tab.SF_LCPPath(solution.RootIndex1());
+  AddBFS(solution, tab);
+  Vector<T> sol(tab.MinRow(), tab.MaxRow());
+  tab.BasisVector(sol);
+
+  MixedBehaviorProfile<T> profile = GetProfile(tab, sol, solution);
+  profile.UndefinedToCentroid();
+  p_onEquilibrium(profile);
+
+  std::list<MixedBehaviorProfile<T>> equilibria;
+  equilibria.push_back(profile);
+  return equilibria;
 }
 
 template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &,
