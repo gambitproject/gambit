@@ -31,10 +31,9 @@ namespace {
 
 // Holds the correspondence between the sequences (and information sets) of
 // a two-player game and the rows/columns of the sequence-form LCP
-// tableau, along with the quantities (payoffs, tree-of-sequences
-// relationships) needed to populate it.
+// tableau.
 struct ColumnIndexMap {
-  BehaviorSupportProfile support;
+  Game game;
   // The row/column of the tableau assigned to each sequence: player1's
   // occupy 1..rootIndex1, and player2's occupy rootIndex1+1..rootIndex2-1.
   std::map<GameSequence, int> index;
@@ -52,24 +51,24 @@ struct ColumnIndexMap {
   // of each player's root anchor within it (see infosetIndex above).
   int total, rootIndex1, rootIndex2;
 
-  explicit ColumnIndexMap(const Game &p_game) : support(p_game)
+  explicit ColumnIndexMap(const Game &p_game) : game(p_game)
   {
-    const GamePlayer player1 = p_game->GetPlayer(1);
-    const GamePlayer player2 = p_game->GetPlayer(2);
+    const GamePlayer player1 = game->GetPlayer(1);
+    const GamePlayer player2 = game->GetPlayer(2);
 
-    const int ns1 = static_cast<int>(support.GetSequences(player1).size());
-    const int ns2 = static_cast<int>(support.GetSequences(player2).size());
+    const int ns1 = static_cast<int>(player1->GetSequences().size());
+    const int ns2 = static_cast<int>(player2->GetSequences().size());
     const int ni1 = static_cast<int>(player1->GetInfosets().size()) + 1;
     const int ni2 = static_cast<int>(player2->GetInfosets().size()) + 1;
     total = ns1 + ns2 + ni1 + ni2;
     rootIndex1 = ns1 + ns2 + 1;
     rootIndex2 = ns1 + ns2 + ni1 + 1;
 
-    auto sequences1 = support.GetSequences(player1);
+    auto sequences1 = player1->GetSequences();
     for (auto [i, sequence] : enumerate(sequences1)) {
       index[sequence] = static_cast<int>(i) + 1;
     }
-    auto sequences2 = support.GetSequences(player2);
+    auto sequences2 = player2->GetSequences();
     for (auto [i, sequence] : enumerate(sequences2)) {
       index[sequence] = ns1 + static_cast<int>(i) + 1;
     }
@@ -84,8 +83,8 @@ struct ColumnIndexMap {
       infosetIndex[infoset] = ns1 + ns2 + ni1 + static_cast<int>(i) + 2;
     }
 
-    for (auto player : p_game->GetPlayers()) {
-      for (auto sequence : support.GetSequences(player)) {
+    for (auto player : game->GetPlayers()) {
+      for (auto sequence : player->GetSequences()) {
         if (sequence->GetAction()) {
           siblings[sequence->GetInfoset()].push_back(sequence);
         }
@@ -99,7 +98,7 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   Matrix<T> A(1, p_indexMap.total, 0, p_indexMap.total);
   A = T{0};
 
-  const Game &game = p_indexMap.support.GetGame();
+  const Game &game = p_indexMap.game;
   const GamePlayer player1 = game->GetPlayer(1);
   const GamePlayer player2 = game->GetPlayer(2);
 
@@ -112,14 +111,17 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // shifted by payoffShift and weighted by chance's probability of that
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
-  for (auto profile : p_indexMap.support.GetSequenceContingencies()) {
-    const GameSequence &seq1 = profile.GetSequence(player1);
-    const GameSequence &seq2 = profile.GetSequence(player2);
-    const Rational prob = profile.GetRealizationProbability();
-    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
-    const Rational pay2 = profile.GetPayoff(player2) - payoffShift * prob;
-    A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
-    A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
+  for (auto seq1 : player1->GetSequences()) {
+    for (auto seq2 : player2->GetSequences()) {
+      PureSequenceProfile profile(game);
+      profile.SetSequence(seq1);
+      profile.SetSequence(seq2);
+      const Rational prob = profile.GetRealizationProbability();
+      const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+      const Rational pay2 = profile.GetPayoff(player2) - payoffShift * prob;
+      A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
+      A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
+    }
   }
 
   // Constraint block: for each information set, the sum-to-one relation
@@ -181,7 +183,7 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
     }
     x[sequence] = value;
   }
-  return p_indexMap.support.ToMixedBehaviorProfile(x);
+  return BehaviorSupportProfile(p_indexMap.game).ToMixedBehaviorProfile(x);
 }
 
 } // end anonymous namespace
