@@ -2443,18 +2443,31 @@ ENUMPOLY_BEHAVIOR_CASES = [
         marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_13",
     ),
+    # 3-player game equivalent to a simultaneous-move 2x2x2 game (nine equilibria total,
+    # including two totally-mixed ones); this previously required an unordered check due
+    # to run-to-run variation in the order equilibria were found (see #589)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d("1/2", "1/2")], [d("2/5", "3/5")], [d("1/4", "3/4")]],
+                [[d("2/5", "3/5")], [d("1/2", "1/2")], [d("1/3", "2/3")]],
+                [[d("1/2", "1/2")], [d("1/2", "1/2")], [d(1, 0)]],
+                [[d("1/3", "2/3")], [d(1, 0)], [d("1/4", "3/4")]],
+                [[d(1, 0)], [d(1, 0)], [d(1, 0)]],
+                [[d(1, 0)], [d(0, 1)], [d(0, 1)]],
+                [[d(0, 1)], [d("1/4", "3/4")], [d("1/3", "2/3")]],
+                [[d(0, 1)], [d(1, 0)], [d(0, 1)]],
+                [[d(0, 1)], [d(0, 1)], [d(1, 0)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_14",
+    ),
 ]
-# ##############################################################################
-# 3-player game
-# (
-# games.read_from_file("mixed_behavior_game.efg"),
-# [
-# [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-# [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-# ],
-# 2,  # 9 in total found by enumpoly (see unordered test)
-# ),
-# ##############################################################################
 
 
 LOGIT_BEHAVIOR_CASES = [
@@ -2523,75 +2536,6 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for action in player.actions:
                     assert abs(eq[action] - expected[action]) <= test_case.prob_tol
-
-
-##################################################################################################
-# BEHVAIOR SOLVER -- UNORDERED
-##################################################################################################
-
-ENUMPOLY_BEHAVIOR_UNORDERED_CASES = [
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=9),
-            expected=[
-                [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-                [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-                [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
-                [[["1/3", "2/3"]], [[1, 0]], [["1/4", "3/4"]]],
-                [[[1, 0]], [[1, 0]], [[1, 0]]],
-                [[[1, 0]], [[0, 1]], [[0, 1]]],
-                [[[0, 1]], [["1/4", "3/4"]], [["1/3", "2/3"]]],
-                [[[0, 1]], [[1, 0]], [[0, 1]]],
-                [[[0, 1]], [[0, 1]], [[1, 0]]],
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_unordered_1",
-    ),
-]
-
-
-@pytest.mark.nash
-@pytest.mark.parametrize("test_case", ENUMPOLY_BEHAVIOR_UNORDERED_CASES, ids=lambda c: c.label)
-def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests) -> None:
-    """Test calls of Nash solvers in EFGs in mixed behaviors -- UNORDERED
-
-    Subtests:
-    - Agent max regret no more than `test_case.regret_tol`
-    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
-    - Equilibria that are output are distinct and all appear in the expected set
-      Equilibria are deemed to match if the maximum difference in probabilities is no more
-      than `test_case.prob_tol`
-    """
-
-    def are_the_same(game, found, candidate):
-        for p in game.players:
-            for a in p.actions:
-                if not abs(found[a] - candidate[a]) <= TOL:
-                    return False
-        return True
-
-    game = test_case.factory()
-    result = test_case.solver(game)
-    with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, eq in enumerate(result.equilibria):
-        with subtests.test(eq=i, check="agent_max_regret"):
-            assert eq.max_regret() <= test_case.regret_tol
-        with subtests.test(eq=i, check="max_regret"):
-            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
-        with subtests.test(eq=i, check="strategy_profile"):
-            found = False
-            for exp in test_case.expected[:]:
-                expected = game.mixed_behavior_profile(rational=True, data=exp)
-                if are_the_same(game, eq, expected):
-                    test_case.expected.remove(exp)
-                    found = True
-                    break
-            assert found
 
 
 ##################################################################################################

@@ -158,12 +158,20 @@ public:
 
   public:
     class iterator {
+      // Sequences are visited grouped by player, in the game's canonical player order
+      // (GameRep::Players), rather than in SequenceMap's own key order.  SequenceMap is
+      // keyed by GamePlayer, whose ordering is based on object addresses; iterating the
+      // map directly would therefore make the visitation order (and hence, downstream,
+      // any polynomial variable numbering derived from it) depend on heap layout, which
+      // can differ from run to run.
       const std::shared_ptr<SequenceMap> m_sequences;
-      SequenceMap::const_iterator m_currentPlayer;
+      GameRep::Players m_players;
+      GameRep::Players::iterator m_currentPlayer;
       std::vector<GameSequence>::const_iterator m_currentSequence;
 
     public:
-      iterator(const std::shared_ptr<SequenceMap> p_sequences, bool p_end);
+      iterator(const std::shared_ptr<SequenceMap> p_sequences, const GameRep::Players &p_players,
+               bool p_end);
 
       GameSequence operator*() const { return *m_currentSequence; }
       GameSequence operator->() const { return *m_currentSequence; }
