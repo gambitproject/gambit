@@ -35,7 +35,8 @@ namespace {
 struct ColumnIndexMap {
   Game game;
   // The row/column of the tableau assigned to each sequence: player1's
-  // occupy 1..rootIndex1, and player2's occupy rootIndex1+1..rootIndex2-1.
+  // occupy a contiguous block starting at 1, immediately followed by a
+  // contiguous block for player2's.
   std::map<GameSequence, int> index;
   // The row/column of the tableau assigned to the sum-to-one constraint at
   // each information set.  Each player's block of these reserves one
@@ -112,9 +113,9 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
   for (auto seq1 : player1->GetSequences()) {
+    PureSequenceProfile profile(game);
+    profile.SetSequence(seq1);
     for (auto seq2 : player2->GetSequences()) {
-      PureSequenceProfile profile(game);
-      profile.SetSequence(seq1);
       profile.SetSequence(seq2);
       const Rational prob = profile.GetRealizationProbability();
       const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
@@ -204,15 +205,15 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  const ColumnIndexMap solution(p_game);
-  linalg::LemkeTableau<T> tab(ConstructMatrix<T>(solution), ConstructVector<T>(solution));
+  const ColumnIndexMap columns(p_game);
+  linalg::LemkeTableau<T> tab(ConstructMatrix<T>(columns), ConstructVector<T>(columns));
 
-  tab.Pivot(solution.rootIndex1, 0);
-  tab.SF_LCPPath(solution.rootIndex1);
+  tab.Pivot(columns.rootIndex1, 0);
+  tab.SF_LCPPath(columns.rootIndex1);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.BasisVector(sol);
 
-  MixedBehaviorProfile<T> profile = GetProfile(tab, sol, solution);
+  MixedBehaviorProfile<T> profile = GetProfile(tab, sol, columns);
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile);
 
