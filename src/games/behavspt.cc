@@ -182,10 +182,9 @@ std::vector<GameSequence> BehaviorSupportProfile::GetSequences(const GameInfoset
   return result;
 }
 
-BehaviorSupportProfile::SequenceContingencies
-BehaviorSupportProfile::GetSequenceContingencies() const
+SequenceContingencies BehaviorSupportProfile::GetSequenceContingencies() const
 {
-  return {this};
+  return {GetGame(), GetSequenceMap()};
 }
 
 template <class T>
@@ -285,47 +284,6 @@ std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequence
 size_t BehaviorSupportProfile::PlayerSequences::size() const
 {
   return m_support->GetSequenceMap()->at(m_player).size();
-}
-
-BehaviorSupportProfile::SequenceContingencies::iterator::iterator(
-    const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences, bool p_end)
-  : m_efg(p_efg), m_sequences(p_sequences), m_end(p_end)
-{
-  for (auto [player, sequences] : *m_sequences) {
-    m_indices[player] = 0;
-  }
-}
-
-PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator*() const
-{
-  PureSequenceProfile ret(m_efg);
-  for (auto [player, index] : m_indices) {
-    ret.SetSequence(m_sequences->at(player)[index]);
-  }
-  return ret;
-}
-
-PureSequenceProfile BehaviorSupportProfile::SequenceContingencies::iterator::operator->() const
-{
-  PureSequenceProfile ret(m_efg);
-  for (auto [player, index] : m_indices) {
-    ret.SetSequence(m_sequences->at(player)[index]);
-  }
-  return ret;
-}
-
-BehaviorSupportProfile::SequenceContingencies::iterator &
-BehaviorSupportProfile::SequenceContingencies::iterator::operator++()
-{
-  for (auto [player, index] : m_indices) {
-    if (index < m_sequences->at(player).size() - 1) {
-      m_indices[player]++;
-      return *this;
-    }
-    m_indices[player] = 0;
-  }
-  m_end = true;
-  return *this;
 }
 
 //========================================================================

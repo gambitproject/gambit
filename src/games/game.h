@@ -73,6 +73,8 @@ class StrategySupportProfile;
 
 template <class T> class MixedBehaviorProfile;
 
+class SequenceContingencies;
+
 //=======================================================================
 //         Exceptions thrown from game representation classes
 //=======================================================================
@@ -1269,6 +1271,12 @@ public:
   virtual void BuildComputedValues() const {}
   /// Ensure sequences have been computed
   virtual void EnsureSequences() const { throw UndefinedException(); }
+
+  /// @name Sequences
+  //@{
+  /// Returns an iterator over every combination of one sequence per player
+  SequenceContingencies GetSequenceContingencies() const;
+  //@}
 };
 
 //=======================================================================

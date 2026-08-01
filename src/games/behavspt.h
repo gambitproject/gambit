@@ -41,7 +41,7 @@ class BehaviorSupportProfile {
 public:
   /// The sequences of each player that are consistent with this support,
   /// i.e. those whose action is in the support (or the empty sequence).
-  using SequenceMap = std::map<GamePlayer, std::vector<GameSequence>>;
+  using SequenceMap = Gambit::SequenceMap;
 
 private:
   Game m_efg;
@@ -195,42 +195,6 @@ public:
     size_t size() const;
     std::vector<GameSequence>::const_iterator begin() const;
     std::vector<GameSequence>::const_iterator end() const;
-  };
-
-  class SequenceContingencies {
-    const BehaviorSupportProfile *m_support;
-
-  public:
-    SequenceContingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
-
-    class iterator {
-    private:
-      Game m_efg;
-      const std::shared_ptr<SequenceMap> m_sequences;
-      bool m_end{false};
-      std::map<GamePlayer, size_t> m_indices;
-
-    public:
-      using iterator_category = std::input_iterator_tag;
-
-      iterator(const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences,
-               bool p_end = false);
-
-      PureSequenceProfile operator*() const;
-
-      PureSequenceProfile operator->() const;
-
-      iterator &operator++();
-
-      bool operator==(const iterator &it) const
-      {
-        return (m_end == it.m_end && m_sequences == it.m_sequences && m_indices == it.m_indices);
-      }
-      bool operator!=(const iterator &it) const { return !(*this == it); }
-    };
-
-    iterator begin() { return {m_support->GetGame(), m_support->GetSequenceMap()}; }
-    iterator end() { return {m_support->GetGame(), m_support->GetSequenceMap(), true}; }
   };
 
   Sequences GetSequences() const;

@@ -104,15 +104,12 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
   // Player 2's payoff is not separately represented, since the game is
   // constant-sum.
-  for (auto seq1 : player1->GetSequences()) {
-    PureSequenceProfile profile(game);
-    profile.SetSequence(seq1);
-    for (auto seq2 : player2->GetSequences()) {
-      profile.SetSequence(seq2);
-      const Rational prob = profile.GetRealizationProbability();
-      const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
-      A(p_indexMap.rowIndex.at(seq1), p_indexMap.colIndex.at(seq2)) = static_cast<T>(pay1);
-    }
+  for (auto profile : game->GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(player1);
+    const GameSequence &seq2 = profile.GetSequence(player2);
+    const Rational prob = profile.GetRealizationProbability();
+    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+    A(p_indexMap.rowIndex.at(seq1), p_indexMap.colIndex.at(seq2)) = static_cast<T>(pay1);
   }
 
   // Constraint block for player 1: the sum-to-one relation between the

@@ -99,17 +99,14 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // shifted by payoffShift and weighted by chance's probability of that
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
-  for (auto seq1 : player1->GetSequences()) {
-    PureSequenceProfile profile(game);
-    profile.SetSequence(seq1);
-    for (auto seq2 : player2->GetSequences()) {
-      profile.SetSequence(seq2);
-      const Rational prob = profile.GetRealizationProbability();
-      const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
-      const Rational pay2 = profile.GetPayoff(player2) - payoffShift * prob;
-      A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
-      A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
-    }
+  for (auto profile : game->GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(player1);
+    const GameSequence &seq2 = profile.GetSequence(player2);
+    const Rational prob = profile.GetRealizationProbability();
+    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+    const Rational pay2 = profile.GetPayoff(player2) - payoffShift * prob;
+    A(p_indexMap.index.at(seq1), p_indexMap.index.at(seq2)) = static_cast<T>(pay1);
+    A(p_indexMap.index.at(seq2), p_indexMap.index.at(seq1)) = static_cast<T>(pay2);
   }
 
   // Constraint block: for each information set, the sum-to-one relation
