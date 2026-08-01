@@ -26,6 +26,7 @@
 #include <random>
 
 #include "game.h"
+#include "seqmixed.h"
 
 namespace Gambit {
 
@@ -159,7 +160,7 @@ public:
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &) = default;
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
-  MixedBehaviorProfile(const Game &, const std::map<GameSequence, T> &);
+  MixedBehaviorProfile(const MixedSequenceProfile<T> &);
   ~MixedBehaviorProfile() = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
