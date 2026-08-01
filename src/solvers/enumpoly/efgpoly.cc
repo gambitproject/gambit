@@ -100,7 +100,7 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   }
 }
 
-Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
+Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &p_player)
 {
   Polynomial<double> equation(p_data.space);
 
@@ -120,7 +120,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto player : p_data.m_support.GetPlayers()) {
-    const Polynomial<double> payoff = GetPayoff(p_data, player);
+    const Polynomial<double> payoff = BuildPayoffPolynomial(p_data, player);
     for (auto sequence : p_data.m_support.GetSequences(player)) {
       if (auto it = p_data.var.find(sequence); it != p_data.var.end()) {
         p_equations.push_back(payoff.PartialDerivative(it->second));
