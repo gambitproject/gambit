@@ -382,7 +382,6 @@ void GameTreeRep::SetOutcome(const GameNode &p_node, const GameOutcome &p_outcom
   if (const auto newOutcome = p_outcome.get_shared().get(); newOutcome != p_node->m_outcome) {
     p_node->m_outcome = newOutcome;
     IncrementVersion();
-    ClearComputedValues();
   }
 }
 
@@ -402,20 +401,15 @@ bool GameNodeRep::IsSubgameRoot() const
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  tree_game->BuildSubgameRoots();
-  return tree_game->m_subgameData.m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
+  return tree_game->GetSubgameData().m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
 }
 
 bool GameNodeRep::IsStrategyReachable() const
 {
   auto tree_game = static_cast<GameTreeRep *>(m_game);
 
-  if (!tree_game->m_unreachableNodes) {
-    tree_game->BuildUnreachableNodes();
-  }
-
   // A node is reachable if it is NOT in the set of unreachable nodes.
-  return !contains(*tree_game->m_unreachableNodes, const_cast<GameNodeRep *>(this));
+  return !contains(tree_game->GetUnreachableNodes(), const_cast<GameNodeRep *>(this));
 }
 
 void GameTreeRep::DeleteParent(GameNode p_node)
@@ -851,9 +845,7 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
 
 bool GameTreeRep::IsPerfectRecall() const
 {
-  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
-    BuildOwnPriorActions();
-  }
+  EnsureOwnPriorActions();
 
   if (GetRoot()->IsTerminal()) {
     return true;
@@ -869,9 +861,7 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   if (p_infoset->GetGame().get() != this) {
     throw MismatchException();
   }
-  if (!m_ownPriorActionInfo) {
-    BuildOwnPriorActions();
-  }
+  EnsureOwnPriorActions();
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
@@ -880,21 +870,19 @@ GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
   if (p_infoset->GetGame().get() != this) {
     throw MismatchException();
   }
-  BuildSubgameRoots();
+  const auto &subgameData = GetSubgameData();
   auto *n = p_infoset->m_members.front().get();
-  auto it = m_subgameData.m_subgameByRoot.find(n);
-  while (it == m_subgameData.m_subgameByRoot.end()) {
+  auto it = subgameData.m_subgameByRoot.find(n);
+  while (it == subgameData.m_subgameByRoot.end()) {
     n = n->m_parent;
-    it = m_subgameData.m_subgameByRoot.find(n);
+    it = subgameData.m_subgameByRoot.find(n);
   }
   return it->second;
 }
 
 std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentries() const
 {
-  if (!m_ownPriorActionInfo) {
-    BuildOwnPriorActions();
-  }
+  EnsureOwnPriorActions();
   if (m_absentMindedReentries.empty()) {
     return {};
   }
@@ -938,26 +926,22 @@ void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 
 void GameTreeRep::EnsureNodeOrdering() const
 {
-  if (m_nodesOrdered) {
-    return;
-  }
-  int nodeindex = 1;
-  for (const auto &node : GetNodes()) {
-    node->m_number = nodeindex++;
-  }
-  m_nodesOrdered = true;
+  m_nodeOrdering.Ensure([&] {
+    int nodeindex = 1;
+    for (const auto &node : GetNodes()) {
+      node->m_number = nodeindex++;
+    }
+  });
 }
 
 void GameTreeRep::EnsureInfosetOrdering() const
 {
-  if (m_infosetsOrdered) {
-    return;
-  }
-  EnsureNodeOrdering();
-  for (auto player : GetPlayersWithChance()) {
-    SortInfosets(player.get());
-  }
-  m_infosetsOrdered = true;
+  m_infosetOrdering.Ensure([&] {
+    EnsureNodeOrdering();
+    for (auto player : GetPlayersWithChance()) {
+      SortInfosets(player.get());
+    }
+  });
 }
 
 void GameTreeRep::ClearComputedValues() const
@@ -972,29 +956,32 @@ void GameTreeRep::ClearComputedValues() const
     }
     player->m_sequences.clear();
   }
-  m_hasSequences = false;
+  m_sequences.Invalidate();
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
-  m_ownPriorActionInfo = nullptr;
-  const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
+  m_ownPriorActions.Invalidate();
+  m_unreachableNodes.Invalidate();
   m_absentMindedInfosets.clear();
+  m_subgameData.IfBuilt([](const SubgameData &sd) {
+    for (const auto &[node, subgame] : sd.m_subgameByRoot) {
+      subgame->Invalidate();
+    }
+  });
   m_subgameData.Invalidate();
   m_absentMindedReentries.clear();
-  m_computedValues = false;
+  m_strategies.Invalidate();
 }
 
-void GameTreeRep::BuildComputedValues() const
+void GameTreeRep::EnsureStrategies() const
 {
-  if (m_computedValues) {
-    return;
-  }
-  EnsureInfosetOrdering();
-  for (const auto &player : m_players) {
-    std::map<GameInfosetRep *, int> behav;
-    std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
-    player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
-  }
-  IndexStrategies();
-  m_computedValues = true;
+  m_strategies.Ensure([&] {
+    EnsureInfosetOrdering();
+    for (const auto &player : m_players) {
+      std::map<GameInfosetRep *, int> behav;
+      std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
+      player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
+    }
+    IndexStrategies();
+  });
 }
 
 void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_currentSequences) const
@@ -1033,17 +1020,15 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
 
 void GameTreeRep::EnsureSequences() const
 {
-  if (m_hasSequences) {
-    return;
-  }
-  PureSequenceProfile currentSequences(m_root->GetGame());
-  for (const auto &player : m_players) {
-    player->m_sequences = {std::make_shared<GameSequenceRep>(player.get(), nullptr, 1,
-                                                             std::weak_ptr<GameSequenceRep>())};
-    currentSequences.SetSequence(player->m_sequences.front());
-  }
-  BuildSequences(m_root, currentSequences);
-  m_hasSequences = true;
+  m_sequences.Ensure([&] {
+    PureSequenceProfile currentSequences(m_root->GetGame());
+    for (const auto &player : m_players) {
+      player->m_sequences = {std::make_shared<GameSequenceRep>(player.get(), nullptr, 1,
+                                                               std::weak_ptr<GameSequenceRep>())};
+      currentSequences.SetSequence(player->m_sequences.front());
+    }
+    BuildSequences(m_root, currentSequences);
+  });
 }
 
 void GameTreeRep::BuildConsistentPlays()
@@ -1069,87 +1054,87 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   return consistent_plays;
 }
 
-void GameTreeRep::BuildOwnPriorActions() const
+void GameTreeRep::EnsureOwnPriorActions() const
 {
-  if (m_root->IsTerminal()) {
-    m_ownPriorActionInfo = std::make_shared<OwnPriorActionInfo>();
-    m_absentMindedInfosets.clear();
-    m_absentMindedReentries.clear();
-    return;
-  }
-
-  struct OwnPriorActionsVisitor {
-    std::shared_ptr<OwnPriorActionInfo> m_info;
-    std::map<GamePlayer, std::stack<GameAction>> m_priorActions;
-
-    // A node is a re-entry of its information set iff an ancestor on the current
-    // root-to-node path shares that information set.  m_pathMemberCount counts, per information
-    // set, how many nodes on the current path belong to it.
-    std::map<GameInfosetRep *, int> m_pathMemberCount;
-    std::set<GameInfosetRep *> m_absentMindedInfosets;
-    std::vector<std::pair<GameInfosetRep *, GameNodeRep *>> m_absentMindedReentries;
-
-    explicit OwnPriorActionsVisitor(const GameTreeRep *p_game)
-      : m_info(std::make_shared<OwnPriorActionInfo>())
-    {
-      for (const auto &player : p_game->GetPlayersWithChance()) {
-        m_priorActions[player].emplace(nullptr);
-      }
+  m_ownPriorActions.Ensure([&] {
+    if (m_root->IsTerminal()) {
+      m_ownPriorActionInfo = std::make_shared<OwnPriorActionInfo>();
+      m_absentMindedInfosets.clear();
+      m_absentMindedReentries.clear();
+      return;
     }
 
-    DFSCallbackResult OnEnter(GameNode p_node, int)
-    {
-      if (auto *infoset = p_node->m_infoset) {
-        auto &stack = m_priorActions.at(infoset->m_player->shared_from_this());
-        GameActionRep *raw_prior = stack.top() ? stack.top().get() : nullptr;
+    struct OwnPriorActionsVisitor {
+      std::shared_ptr<OwnPriorActionInfo> m_info;
+      std::map<GamePlayer, std::stack<GameAction>> m_priorActions;
 
-        m_info->node_map[p_node.get()] = raw_prior;
-        m_info->infoset_map[infoset].insert(raw_prior);
+      // A node is a re-entry of its information set iff an ancestor on the current
+      // root-to-node path shares that information set.  m_pathMemberCount counts, per information
+      // set, how many nodes on the current path belong to it.
+      std::map<GameInfosetRep *, int> m_pathMemberCount;
+      std::set<GameInfosetRep *> m_absentMindedInfosets;
+      std::vector<std::pair<GameInfosetRep *, GameNodeRep *>> m_absentMindedReentries;
 
-        stack.emplace(nullptr);
-
-        if (m_pathMemberCount[infoset]++ > 0) {
-          m_absentMindedInfosets.insert(infoset);
-          m_absentMindedReentries.emplace_back(infoset, p_node.get());
+      explicit OwnPriorActionsVisitor(const GameTreeRep *p_game)
+        : m_info(std::make_shared<OwnPriorActionInfo>())
+      {
+        for (const auto &player : p_game->GetPlayersWithChance()) {
+          m_priorActions[player].emplace(nullptr);
         }
       }
-      return DFSCallbackResult::Continue;
-    }
 
-    DFSCallbackResult OnAction(GameNode p_parent, GameNode p_child, int)
-    {
-      m_priorActions.at(p_parent->m_infoset->m_player->shared_from_this()).top() =
-          p_child->GetPriorAction();
-      return DFSCallbackResult::Continue;
-    }
+      DFSCallbackResult OnEnter(GameNode p_node, int)
+      {
+        if (auto *infoset = p_node->m_infoset) {
+          auto &stack = m_priorActions.at(infoset->m_player->shared_from_this());
+          GameActionRep *raw_prior = stack.top() ? stack.top().get() : nullptr;
 
-    DFSCallbackResult OnExit(const GameNode &p_node, int)
-    {
-      if (auto *infoset = p_node->m_infoset) {
-        m_priorActions.at(infoset->m_player->shared_from_this()).pop();
-        m_pathMemberCount[infoset]--;
+          m_info->node_map[p_node.get()] = raw_prior;
+          m_info->infoset_map[infoset].insert(raw_prior);
+
+          stack.emplace(nullptr);
+
+          if (m_pathMemberCount[infoset]++ > 0) {
+            m_absentMindedInfosets.insert(infoset);
+            m_absentMindedReentries.emplace_back(infoset, p_node.get());
+          }
+        }
+        return DFSCallbackResult::Continue;
       }
-      return DFSCallbackResult::Continue;
-    }
 
-    void OnVisit(GameNode, int) {}
-  };
+      DFSCallbackResult OnAction(GameNode p_parent, GameNode p_child, int)
+      {
+        m_priorActions.at(p_parent->m_infoset->m_player->shared_from_this()).top() =
+            p_child->GetPriorAction();
+        return DFSCallbackResult::Continue;
+      }
 
-  OwnPriorActionsVisitor visitor(this);
+      DFSCallbackResult OnExit(const GameNode &p_node, int)
+      {
+        if (auto *infoset = p_node->m_infoset) {
+          m_priorActions.at(infoset->m_player->shared_from_this()).pop();
+          m_pathMemberCount[infoset]--;
+        }
+        return DFSCallbackResult::Continue;
+      }
 
-  WalkDFS(const_cast<GameTreeRep *>(this)->shared_from_this(), m_root, TraversalOrder::Preorder,
-          visitor);
+      void OnVisit(GameNode, int) {}
+    };
 
-  m_ownPriorActionInfo = visitor.m_info;
-  m_absentMindedInfosets = std::move(visitor.m_absentMindedInfosets);
-  m_absentMindedReentries = std::move(visitor.m_absentMindedReentries);
+    OwnPriorActionsVisitor visitor(this);
+
+    WalkDFS(const_cast<GameTreeRep *>(this)->shared_from_this(), m_root, TraversalOrder::Preorder,
+            visitor);
+
+    m_ownPriorActionInfo = visitor.m_info;
+    m_absentMindedInfosets = std::move(visitor.m_absentMindedInfosets);
+    m_absentMindedReentries = std::move(visitor.m_absentMindedReentries);
+  });
 }
 
 GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 {
-  if (!m_ownPriorActionInfo) {
-    BuildOwnPriorActions();
-  }
+  EnsureOwnPriorActions();
 
   auto it = m_ownPriorActionInfo->node_map.find(p_node.get());
   if (it != m_ownPriorActionInfo->node_map.end() && it->second) {
@@ -1160,9 +1145,7 @@ GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 
 std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infoset) const
 {
-  if (!m_ownPriorActionInfo) {
-    BuildOwnPriorActions();
-  }
+  EnsureOwnPriorActions();
 
   std::set<GameAction> result;
   auto it = m_ownPriorActionInfo->infoset_map.find(p_infoset.get());
@@ -1175,264 +1158,267 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   return result;
 }
 
-void GameTreeRep::BuildUnreachableNodes() const
+const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
 {
-  m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
+  return m_unreachableNodes.Get([&] {
+    std::set<GameNodeRep *> result;
 
-  if (m_root->IsTerminal()) {
-    return;
-  }
+    if (m_root->IsTerminal()) {
+      return result;
+    }
 
-  using AbsentMindedEdge = std::pair<GameAction, GameNode>;
-  using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
+    using AbsentMindedEdge = std::pair<GameAction, GameNode>;
+    using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
 
-  std::stack<ActiveEdge> position;
-  std::map<GameInfoset, GameAction> path_choices;
-  position.emplace(m_root->GetActions().begin());
+    std::stack<ActiveEdge> position;
+    std::map<GameInfoset, GameAction> path_choices;
+    position.emplace(m_root->GetActions().begin());
 
-  while (!position.empty()) {
-    ActiveEdge &current_edge = position.top();
-    GameNode child, node;
-    GameAction action;
+    while (!position.empty()) {
+      ActiveEdge &current_edge = position.top();
+      GameNode child, node;
+      GameAction action;
 
-    if (std::holds_alternative<GameNodeRep::Actions::iterator>(current_edge)) {
-      auto &current_it = std::get<GameNodeRep::Actions::iterator>(current_edge);
-      node = current_it.GetOwner();
+      if (std::holds_alternative<GameNodeRep::Actions::iterator>(current_edge)) {
+        auto &current_it = std::get<GameNodeRep::Actions::iterator>(current_edge);
+        node = current_it.GetOwner();
 
-      if (current_it == node->GetActions().end()) {
-        position.pop();
-        path_choices.erase(node->m_infoset->shared_from_this());
-        continue;
+        if (current_it == node->GetActions().end()) {
+          position.pop();
+          path_choices.erase(node->m_infoset->shared_from_this());
+          continue;
+        }
+        else {
+          std::tie(action, child) = *current_it;
+          ++current_it;
+          path_choices[node->m_infoset->shared_from_this()] = action;
+        }
       }
       else {
-        std::tie(action, child) = *current_it;
-        ++current_it;
-        path_choices[node->m_infoset->shared_from_this()] = action;
+        std::tie(action, node) = std::get<AbsentMindedEdge>(current_edge);
+        position.pop();
+        child = node->GetChild(action);
       }
-    }
-    else {
-      std::tie(action, node) = std::get<AbsentMindedEdge>(current_edge);
-      position.pop();
-      child = node->GetChild(action);
-    }
 
-    if (!child->IsTerminal()) {
-      // On a re-entry, a pure strategy replays the action chosen at the earlier visit,
-      // so only that branch is reachable; prune the rest.
-      if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
-        const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
-        position.emplace(AbsentMindedEdge{replay_action, child});
+      if (!child->IsTerminal()) {
+        // On a re-entry, a pure strategy replays the action chosen at the earlier visit,
+        // so only that branch is reachable; prune the rest.
+        if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+          const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
+          position.emplace(AbsentMindedEdge{replay_action, child});
 
-        // Mark siblings and the nodes in their subtrees as unreachable
-        for (const auto &[current_action, subtree_root] : child->GetActions()) {
-          if (current_action != replay_action) {
-            std::stack<GameNodeRep *> nodes_to_visit;
-            nodes_to_visit.push(subtree_root.get());
-            while (!nodes_to_visit.empty()) {
-              // NOLINTBEGIN(misc-const-correctness)
-              GameNodeRep *current_unreachable_node = nodes_to_visit.top();
-              // NOLINTEND(misc-const-correctness)
-              nodes_to_visit.pop();
-              m_unreachableNodes->insert(current_unreachable_node);
-              for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
-                nodes_to_visit.push(unreachable_child.get());
+          // Mark siblings and the nodes in their subtrees as unreachable
+          for (const auto &[current_action, subtree_root] : child->GetActions()) {
+            if (current_action != replay_action) {
+              std::stack<GameNodeRep *> nodes_to_visit;
+              nodes_to_visit.push(subtree_root.get());
+              while (!nodes_to_visit.empty()) {
+                // NOLINTBEGIN(misc-const-correctness)
+                GameNodeRep *current_unreachable_node = nodes_to_visit.top();
+                // NOLINTEND(misc-const-correctness)
+                nodes_to_visit.pop();
+                result.insert(current_unreachable_node);
+                for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
+                  nodes_to_visit.push(unreachable_child.get());
+                }
               }
             }
           }
         }
-      }
-      else {
-        position.emplace(child->GetActions().begin());
+        else {
+          position.emplace(child->GetActions().begin());
+        }
       }
     }
-  }
+
+    return result;
+  });
 }
 
-void GameTreeRep::BuildSubgameRoots() const
+const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
 {
-  if (m_subgameData.m_valid) {
-    return;
-  }
-  if (m_root->IsTerminal()) {
-    m_subgameData.m_valid = true;
-    return;
-  }
-
-  struct Range {
-    int m_min = std::numeric_limits<int>::max();
-    int m_max = 0;
-
-    void Merge(const Range &p_source)
-    {
-      m_min = std::min(m_min, p_source.m_min);
-      m_max = std::max(m_max, p_source.m_max);
+  return m_subgameData.Get([&] {
+    SubgameData sd;
+    if (m_root->IsTerminal()) {
+      return sd;
     }
 
-    bool operator==(const Range &p_other) const
-    {
-      return m_min == p_other.m_min && m_max == p_other.m_max;
-    }
-  };
+    struct Range {
+      int m_min = std::numeric_limits<int>::max();
+      int m_max = 0;
 
-  std::unordered_map<GameNodeRep *, Range> disc;
-  std::unordered_map<GameInfosetRep *, Range> hull;
-
-  // Phase 1: Compute subtree spans and infoset hulls
-  struct SpanVisitor {
-    std::unordered_map<GameNodeRep *, Range> &m_disc;
-    std::unordered_map<GameInfosetRep *, Range> &m_hull;
-    int m_counter = 0;
-
-    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
-    static DFSCallbackResult OnAction(GameNode, GameNode, int)
-    {
-      return DFSCallbackResult::Continue;
-    }
-    static void OnVisit(GameNode, int) {}
-
-    DFSCallbackResult OnExit(const GameNode &p_node, int)
-    {
-      GameNodeRep *node = p_node.get();
-      if (p_node->IsTerminal()) {
-        m_counter++;
-        m_disc[node] = {m_counter, m_counter};
+      void Merge(const Range &p_source)
+      {
+        m_min = std::min(m_min, p_source.m_min);
+        m_max = std::max(m_max, p_source.m_max);
       }
-      else {
-        Range &node_disc = m_disc[node];
-        const auto &children = p_node->GetChildren();
-        node_disc.m_min = m_disc.at(children.front().get()).m_min;
-        node_disc.m_max = m_disc.at(children.back().get()).m_max;
-        m_hull[node->m_infoset].Merge(node_disc);
+
+      bool operator==(const Range &p_other) const
+      {
+        return m_min == p_other.m_min && m_max == p_other.m_max;
       }
-      return DFSCallbackResult::Continue;
-    }
-  };
+    };
 
-  // Phase 2: Reachability and detection
-  struct BridgeVisitor {
-    std::unordered_map<GameNodeRep *, Range> &m_disc;
-    const std::unordered_map<GameInfosetRep *, Range> &m_hull;
-    std::vector<GameNodeRep *> &m_subgames;
-    std::unordered_map<GameNodeRep *, Range> m_low;
+    std::unordered_map<GameNodeRep *, Range> disc;
+    std::unordered_map<GameInfosetRep *, Range> hull;
 
-    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
-    static DFSCallbackResult OnAction(GameNode, GameNode, int)
-    {
-      return DFSCallbackResult::Continue;
-    }
-    static void OnVisit(GameNode, int) {}
+    // Phase 1: Compute subtree spans and infoset hulls
+    struct SpanVisitor {
+      std::unordered_map<GameNodeRep *, Range> &m_disc;
+      std::unordered_map<GameInfosetRep *, Range> &m_hull;
+      int m_counter = 0;
 
-    DFSCallbackResult OnExit(const GameNode &p_node, int)
-    {
-      GameNodeRep *node = p_node.get();
-      if (p_node->IsTerminal()) {
-        m_low[node] = m_disc.at(node);
+      static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+      static DFSCallbackResult OnAction(GameNode, GameNode, int)
+      {
+        return DFSCallbackResult::Continue;
+      }
+      static void OnVisit(GameNode, int) {}
+
+      DFSCallbackResult OnExit(const GameNode &p_node, int)
+      {
+        GameNodeRep *node = p_node.get();
+        if (p_node->IsTerminal()) {
+          m_counter++;
+          m_disc[node] = {m_counter, m_counter};
+        }
+        else {
+          Range &node_disc = m_disc[node];
+          const auto &children = p_node->GetChildren();
+          node_disc.m_min = m_disc.at(children.front().get()).m_min;
+          node_disc.m_max = m_disc.at(children.back().get()).m_max;
+          m_hull[node->m_infoset].Merge(node_disc);
+        }
+        return DFSCallbackResult::Continue;
+      }
+    };
+
+    // Phase 2: Reachability and detection
+    struct BridgeVisitor {
+      std::unordered_map<GameNodeRep *, Range> &m_disc;
+      const std::unordered_map<GameInfosetRep *, Range> &m_hull;
+      std::vector<GameNodeRep *> &m_subgames;
+      std::unordered_map<GameNodeRep *, Range> m_low;
+
+      static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+      static DFSCallbackResult OnAction(GameNode, GameNode, int)
+      {
+        return DFSCallbackResult::Continue;
+      }
+      static void OnVisit(GameNode, int) {}
+
+      DFSCallbackResult OnExit(const GameNode &p_node, int)
+      {
+        GameNodeRep *node = p_node.get();
+        if (p_node->IsTerminal()) {
+          m_low[node] = m_disc.at(node);
+          return DFSCallbackResult::Continue;
+        }
+
+        Range &low = m_low[node];
+        low = m_hull.at(node->m_infoset);
+
+        for (const auto &child : p_node->GetChildren()) {
+          low.Merge(m_low.at(child.get()));
+          m_low.erase(child.get());
+        }
+
+        if (low == m_disc.at(node)) {
+          // The `low == disc` test is exact only with distinct terminal spans. A single-action
+          // chain above a candidate node collapses the spans and can create false positives.
+          // Reject a node if some single-action ancestor's infoset (possibly the node's own)
+          // has a member in the node's subtree (possibly the node itself).
+          // Note that such an infoset is necessarily absent-minded.
+          bool spurious = false;
+          for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1 && !spurious;
+               anc = anc->m_parent) {
+            const auto &members = anc->m_infoset->m_members;
+            spurious = members.size() >= 2 &&
+                       std::any_of(members.begin(), members.end(), [&](const auto &member) {
+                         return member.get() != anc && member->IsSuccessorOf(p_node);
+                       });
+          }
+          if (!spurious) {
+            m_subgames.push_back(node);
+          }
+        }
+
+        return DFSCallbackResult::Continue;
+      }
+    };
+
+    auto game = std::const_pointer_cast<GameRep>(shared_from_this());
+
+    SpanVisitor span_visitor{disc, hull};
+    WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
+
+    BridgeVisitor bridge_visitor{disc, hull, sd.m_subgamePostorder};
+    WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
+
+    // Phase 3: Build subgame tree with subgame differences
+    struct SubgameVisitor {
+      const std::unordered_set<GameNodeRep *> &m_roots;
+      std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> &m_cache;
+      GameTreeRep *m_game;
+      // Subgame roots on the current DFS path, innermost at back
+      std::vector<GameNodeRep *> m_stack;
+      std::unordered_set<GameInfosetRep *> m_infosetVisited;
+
+      DFSCallbackResult OnEnter(const GameNode &p_node, int)
+      {
+        if (p_node->IsTerminal()) {
+          return DFSCallbackResult::Continue;
+        }
+        GameNodeRep *node = p_node.get();
+        if (contains(m_roots, node)) {
+          auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
+          if (!m_stack.empty()) {
+            auto &parent_subgame = m_cache.at(m_stack.back());
+            subgame->m_parent = parent_subgame;
+            parent_subgame->m_children.push_back(subgame);
+          }
+          m_cache.emplace(node, std::move(subgame));
+          m_stack.push_back(node);
+        }
+        if (m_infosetVisited.insert(node->m_infoset).second) {
+          m_cache.at(m_stack.back())
+              ->m_subgameDifference.emplace_back(node->m_infoset->shared_from_this());
+        }
         return DFSCallbackResult::Continue;
       }
 
-      Range &low = m_low[node];
-      low = m_hull.at(node->m_infoset);
-
-      for (const auto &child : p_node->GetChildren()) {
-        low.Merge(m_low.at(child.get()));
-        m_low.erase(child.get());
-      }
-
-      if (low == m_disc.at(node)) {
-        // The `low == disc` test is exact only with distinct terminal spans. A single-action
-        // chain above a candidate node collapses the spans and can create false positives.
-        // Reject a node if some single-action ancestor's infoset (possibly the node's own)
-        // has a member in the node's subtree (possibly the node itself).
-        // Note that such an infoset is necessarily absent-minded.
-        bool spurious = false;
-        for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1 && !spurious;
-             anc = anc->m_parent) {
-          const auto &members = anc->m_infoset->m_members;
-          spurious = members.size() >= 2 &&
-                     std::any_of(members.begin(), members.end(), [&](const auto &member) {
-                       return member.get() != anc && member->IsSuccessorOf(p_node);
-                     });
+      DFSCallbackResult OnExit(const GameNode &p_node, int)
+      {
+        if (!m_stack.empty() && m_stack.back() == p_node.get()) {
+          m_stack.pop_back();
         }
-        if (!spurious) {
-          m_subgames.push_back(node);
-        }
-      }
-
-      return DFSCallbackResult::Continue;
-    }
-  };
-
-  auto game = std::const_pointer_cast<GameRep>(shared_from_this());
-
-  SpanVisitor span_visitor{disc, hull};
-  WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
-
-  BridgeVisitor bridge_visitor{disc, hull, m_subgameData.m_subgamePostorder};
-  WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
-
-  // Phase 3: Build subgame tree with subgame differences
-  struct SubgameVisitor {
-    const std::unordered_set<GameNodeRep *> &m_roots;
-    std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> &m_cache;
-    GameTreeRep *m_game;
-    // Subgame roots on the current DFS path, innermost at back
-    std::vector<GameNodeRep *> m_stack;
-    std::unordered_set<GameInfosetRep *> m_infosetVisited;
-
-    DFSCallbackResult OnEnter(const GameNode &p_node, int)
-    {
-      if (p_node->IsTerminal()) {
         return DFSCallbackResult::Continue;
       }
-      GameNodeRep *node = p_node.get();
-      if (contains(m_roots, node)) {
-        auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
-        if (!m_stack.empty()) {
-          auto &parent_subgame = m_cache.at(m_stack.back());
-          subgame->m_parent = parent_subgame;
-          parent_subgame->m_children.push_back(subgame);
-        }
-        m_cache.emplace(node, std::move(subgame));
-        m_stack.push_back(node);
+
+      static DFSCallbackResult OnAction(GameNode, GameNode, int)
+      {
+        return DFSCallbackResult::Continue;
       }
-      if (m_infosetVisited.insert(node->m_infoset).second) {
-        m_cache.at(m_stack.back())
-            ->m_subgameDifference.emplace_back(node->m_infoset->shared_from_this());
-      }
-      return DFSCallbackResult::Continue;
-    }
+      static void OnVisit(GameNode, int) {}
+    };
 
-    DFSCallbackResult OnExit(const GameNode &p_node, int)
-    {
-      if (!m_stack.empty() && m_stack.back() == p_node.get()) {
-        m_stack.pop_back();
-      }
-      return DFSCallbackResult::Continue;
-    }
+    const std::unordered_set<GameNodeRep *> subgame_root_set(sd.m_subgamePostorder.begin(),
+                                                             sd.m_subgamePostorder.end());
 
-    static DFSCallbackResult OnAction(GameNode, GameNode, int)
-    {
-      return DFSCallbackResult::Continue;
-    }
-    static void OnVisit(GameNode, int) {}
-  };
-
-  const std::unordered_set<GameNodeRep *> subgame_root_set(
-      m_subgameData.m_subgamePostorder.begin(), m_subgameData.m_subgamePostorder.end());
-
-  SubgameVisitor subgame_visitor{subgame_root_set, m_subgameData.m_subgameByRoot,
-                                 const_cast<GameTreeRep *>(this)};
-  WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
-  m_subgameData.m_valid = true;
+    SubgameVisitor subgame_visitor{subgame_root_set, sd.m_subgameByRoot,
+                                   const_cast<GameTreeRep *>(this)};
+    WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
+    return sd;
+  });
 }
 
 std::vector<GameSubgame> GameTreeRep::GetSubgames() const
 {
-  BuildSubgameRoots();
+  const auto &subgameData = GetSubgameData();
   std::vector<GameSubgame> result;
-  result.reserve(m_subgameData.m_subgamePostorder.size());
-  for (auto *rep : m_subgameData.m_subgamePostorder) {
-    result.emplace_back(m_subgameData.m_subgameByRoot.at(rep));
+  result.reserve(subgameData.m_subgamePostorder.size());
+  for (auto *rep : subgameData.m_subgamePostorder) {
+    result.emplace_back(subgameData.m_subgameByRoot.at(rep));
   }
   return result;
 }
@@ -1500,7 +1486,7 @@ void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_subtree /
 
 void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
 {
-  BuildComputedValues();
+  EnsureStrategies();
   GameRep::WriteNfgFile(p_file);
 }
 
@@ -1604,7 +1590,6 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
   std::for_each(
       m_outcomes.begin(), m_outcomes.end(),
       [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
-  ClearComputedValues();
 }
 
 //------------------------------------------------------------------------
@@ -1626,7 +1611,6 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   ValidateDistribution(p_probs);
   IncrementVersion();
   std::copy(p_probs.begin(), p_probs.end(), p_infoset->m_probs.begin());
-  ClearComputedValues();
   return shared_from_this();
 }
 
@@ -1664,7 +1648,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  BuildComputedValues();
+  EnsureStrategies();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<double>();
 }
@@ -1674,7 +1658,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  BuildComputedValues();
+  EnsureStrategies();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
@@ -1685,7 +1669,7 @@ GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) 
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  BuildComputedValues();
+  EnsureStrategies();
   return MixedStrategyProfile<double>(std::make_unique<TreeMixedStrategyProfileRep<double>>(spt));
 }
 
@@ -1695,7 +1679,7 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  BuildComputedValues();
+  EnsureStrategies();
   return MixedStrategyProfile<Rational>(
       std::make_unique<TreeMixedStrategyProfileRep<Rational>>(spt));
 }
@@ -1725,7 +1709,7 @@ public:
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
-  BuildComputedValues();
+  EnsureStrategies();
   return PureStrategyProfile(std::make_shared<TreePureStrategyProfileRep>(
       std::const_pointer_cast<GameRep>(shared_from_this())));
 }

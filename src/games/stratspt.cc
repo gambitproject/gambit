@@ -34,7 +34,7 @@ namespace Gambit {
 
 StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_game)
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   for (const auto &player : m_game->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       m_support[player].push_back(strategy);

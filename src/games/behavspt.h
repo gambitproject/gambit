@@ -25,6 +25,7 @@
 
 #include <list>
 #include <map>
+#include "core/lazy.h"
 #include "game.h"
 #include "seqpure.h"
 
@@ -46,8 +47,8 @@ public:
 private:
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
-  mutable std::shared_ptr<SequenceMap> m_sequences;
-  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
+  mutable Lazy<std::shared_ptr<SequenceMap>> m_sequences;
+  mutable Lazy<std::shared_ptr<std::map<GameInfoset, bool>>> m_reachableInfosets;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -56,6 +57,7 @@ private:
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
   std::shared_ptr<SequenceMap> GetSequenceMap() const;
+  void FindReachableInfosets(GameNode p_node, std::map<GameInfoset, bool> &p_reachable) const;
 
 public:
   class Support {
@@ -208,7 +210,6 @@ public:
   Infosets GetInfosets() const { return {this}; };
   SequenceContingencies GetSequenceContingencies() const;
 
-  void FindReachableInfosets(GameNode p_node) const;
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
 

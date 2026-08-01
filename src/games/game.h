@@ -1174,7 +1174,7 @@ public:
   /// Returns the set of strategies in the game
   Strategies GetStrategies() const
   {
-    BuildComputedValues();
+    EnsureStrategies();
     return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
   /// Gets the i'th strategy in the game, numbered globally starting from 1
@@ -1267,8 +1267,8 @@ public:
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   //@}
 
-  /// Build any computed values anew
-  virtual void BuildComputedValues() const {}
+  /// Ensure the reduced-form strategies have been derived and indexed
+  virtual void EnsureStrategies() const {}
   /// Ensure sequences have been computed
   virtual void EnsureSequences() const { throw UndefinedException(); }
 
@@ -1416,12 +1416,12 @@ inline void GamePlayerRep::SetLabel(const std::string &p_label)
 }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   return m_strategies.at(st - 1);
 }
 inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
 }
 inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
