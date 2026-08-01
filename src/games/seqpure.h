@@ -72,6 +72,14 @@ public:
   /// soon as a player's move is inconsistent with their designated
   /// sequence.
   Rational GetPayoff(const GamePlayer &p_player) const;
+
+  /// Returns the probability, taken over chance's moves alone, that the
+  /// game terminates with every player having realised exactly the
+  /// sequence assigned to them in this profile.  (This need not be 1: it
+  /// is less than 1 whenever some player's designated sequence is not the
+  /// last move they make along a possible continuation, and 0 when the
+  /// profile can never be jointly realised at all.)
+  Rational GetRealizationProbability() const;
 };
 
 } // end namespace Gambit

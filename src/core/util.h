@@ -87,7 +87,11 @@ public:
     }
 
     bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
-    auto operator*() const { return std::tie(m_index, *m_current); }
+    // A copy, not std::tie(): some ranges' iterators (e.g. ElementCollection)
+    // dereference to a prvalue rather than a reference, which std::tie cannot
+    // bind to (and forwarding a reference to it would dangle once this
+    // full-expression ends).
+    auto operator*() const { return std::make_tuple(m_index, *m_current); }
 
   private:
     std::size_t m_index;
