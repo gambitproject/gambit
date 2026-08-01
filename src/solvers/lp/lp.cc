@@ -44,11 +44,6 @@ struct TableauIndexMap {
   // Each block reserves its first (colAnchor/rowAnchor) index for the
   // constraint anchoring the probability of the empty sequence at 1.
   std::map<GameInfoset, int> colInfosetIndex, rowInfosetIndex;
-  // The sequences of the actions available at an information set, i.e.
-  // the children, in the tree of sequences, of the sequence that leads to
-  // it.  This is what expresses the sum-to-one relation among the actions
-  // at an information set.
-  std::map<GameInfoset, std::vector<GameSequence>> siblings;
   // The number of rows/columns of the tableau, the row/column of each
   // player's information-set block anchor, and the number of rows (all in
   // player 2's block) that hold with equality rather than inequality.
@@ -86,14 +81,6 @@ struct TableauIndexMap {
     auto infosets2 = player2->GetInfosets();
     for (auto [i, infoset] : enumerate(infosets2)) {
       rowInfosetIndex[infoset] = ns1 + static_cast<int>(i) + 2;
-    }
-
-    for (auto player : game->GetPlayers()) {
-      for (auto sequence : player->GetSequences()) {
-        if (sequence->GetAction()) {
-          siblings[sequence->GetInfoset()].push_back(sequence);
-        }
-      }
     }
   }
 };
@@ -134,7 +121,7 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // the column reserved for that information set.
   for (const auto &infoset : player1->GetInfosets()) {
     const int col = p_indexMap.colInfosetIndex.at(infoset);
-    const auto &children = p_indexMap.siblings.at(infoset);
+    const auto children = infoset->GetSequences();
     const int arrivalRow = p_indexMap.rowIndex.at(children.front()->GetParent());
     A(arrivalRow, col) = T{1};
     for (const auto &child : children) {
@@ -146,7 +133,7 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // their information sets.
   for (const auto &infoset : player2->GetInfosets()) {
     const int row = p_indexMap.rowInfosetIndex.at(infoset);
-    const auto &children = p_indexMap.siblings.at(infoset);
+    const auto children = infoset->GetSequences();
     const int arrivalCol = p_indexMap.colIndex.at(children.front()->GetParent());
     A(row, arrivalCol) = T{-1};
     for (const auto &child : children) {

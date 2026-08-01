@@ -43,11 +43,6 @@ struct ColumnIndexMap {
   // extra ("root") index -- rootIndex1 and rootIndex2 below -- for the
   // constraint anchoring the probability of the empty sequence at 1.
   std::map<GameInfoset, int> infosetIndex;
-  // The sequences of the actions available at an information set, i.e.
-  // the children, in the tree of sequences, of the sequence that leads to
-  // it.  This is what expresses the sum-to-one relation among the actions
-  // at an information set.
-  std::map<GameInfoset, std::vector<GameSequence>> siblings;
   // The total number of rows/columns of the tableau, and the row/column
   // of each player's root anchor within it (see infosetIndex above).
   int total, rootIndex1, rootIndex2;
@@ -82,14 +77,6 @@ struct ColumnIndexMap {
     auto infosets2 = player2->GetInfosets();
     for (auto [i, infoset] : enumerate(infosets2)) {
       infosetIndex[infoset] = ns1 + ns2 + ni1 + static_cast<int>(i) + 2;
-    }
-
-    for (auto player : game->GetPlayers()) {
-      for (auto sequence : player->GetSequences()) {
-        if (sequence->GetAction()) {
-          siblings[sequence->GetInfoset()].push_back(sequence);
-        }
-      }
     }
   }
 };
@@ -131,7 +118,7 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   for (auto player : game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       const int infosetIdx = p_indexMap.infosetIndex.at(infoset);
-      const auto &children = p_indexMap.siblings.at(infoset);
+      const auto children = infoset->GetSequences();
       const int arrivalIdx = p_indexMap.index.at(children.front()->GetParent());
       A(arrivalIdx, infosetIdx) = T{-1};
       A(infosetIdx, arrivalIdx) = T{1};

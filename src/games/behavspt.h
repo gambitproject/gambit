@@ -235,6 +235,9 @@ public:
 
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
+  /// Returns the sequences of the actions at the information set that are
+  /// in the support.
+  std::vector<GameSequence> GetSequences(const GameInfoset &p_infoset) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   template <class T>
   MixedBehaviorProfile<T> ToMixedBehaviorProfile(const std::map<GameSequence, T> &) const;

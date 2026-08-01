@@ -171,6 +171,17 @@ BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
   return {this, p_player};
 }
 
+std::vector<GameSequence> BehaviorSupportProfile::GetSequences(const GameInfoset &p_infoset) const
+{
+  std::vector<GameSequence> result;
+  for (const auto &sequence : p_infoset->GetSequences()) {
+    if (Contains(sequence->GetAction())) {
+      result.push_back(sequence);
+    }
+  }
+  return result;
+}
+
 BehaviorSupportProfile::SequenceContingencies
 BehaviorSupportProfile::GetSequenceContingencies() const
 {
