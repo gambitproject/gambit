@@ -44,11 +44,6 @@ struct TableauIndexMap {
   // Each block reserves its first (colAnchor/rowAnchor) index for the
   // constraint anchoring the probability of the empty sequence at 1.
   std::map<GameInfoset, int> colInfosetIndex, rowInfosetIndex;
-  // The sequences of the actions available at an information set, i.e.
-  // the children, in the tree of sequences, of the sequence that leads to
-  // it.  This is what expresses the sum-to-one relation among the actions
-  // at an information set.
-  std::map<GameInfoset, std::vector<GameSequence>> siblings;
   // The number of rows/columns of the tableau, the row/column of each
   // player's information-set block anchor, and the number of rows (all in
   // player 2's block) that hold with equality rather than inequality.
@@ -87,14 +82,6 @@ struct TableauIndexMap {
     for (auto [i, infoset] : enumerate(infosets2)) {
       rowInfosetIndex[infoset] = ns1 + static_cast<int>(i) + 2;
     }
-
-    for (auto player : game->GetPlayers()) {
-      for (auto sequence : player->GetSequences()) {
-        if (sequence->GetAction()) {
-          siblings[sequence->GetInfoset()].push_back(sequence);
-        }
-      }
-    }
   }
 };
 
@@ -117,15 +104,12 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
   // Player 2's payoff is not separately represented, since the game is
   // constant-sum.
-  for (auto seq1 : player1->GetSequences()) {
-    PureSequenceProfile profile(game);
-    profile.SetSequence(seq1);
-    for (auto seq2 : player2->GetSequences()) {
-      profile.SetSequence(seq2);
-      const Rational prob = profile.GetRealizationProbability();
-      const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
-      A(p_indexMap.rowIndex.at(seq1), p_indexMap.colIndex.at(seq2)) = static_cast<T>(pay1);
-    }
+  for (auto profile : game->GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(player1);
+    const GameSequence &seq2 = profile.GetSequence(player2);
+    const Rational prob = profile.GetRealizationProbability();
+    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+    A(p_indexMap.rowIndex.at(seq1), p_indexMap.colIndex.at(seq2)) = static_cast<T>(pay1);
   }
 
   // Constraint block for player 1: the sum-to-one relation between the
@@ -134,7 +118,7 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // the column reserved for that information set.
   for (const auto &infoset : player1->GetInfosets()) {
     const int col = p_indexMap.colInfosetIndex.at(infoset);
-    const auto &children = p_indexMap.siblings.at(infoset);
+    const auto children = infoset->GetSequences();
     const int arrivalRow = p_indexMap.rowIndex.at(children.front()->GetParent());
     A(arrivalRow, col) = T{1};
     for (const auto &child : children) {
@@ -146,7 +130,7 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // their information sets.
   for (const auto &infoset : player2->GetInfosets()) {
     const int row = p_indexMap.rowInfosetIndex.at(infoset);
-    const auto &children = p_indexMap.siblings.at(infoset);
+    const auto children = infoset->GetSequences();
     const int arrivalCol = p_indexMap.colIndex.at(children.front()->GetParent());
     A(row, arrivalCol) = T{-1};
     for (const auto &child : children) {
@@ -193,7 +177,7 @@ MixedBehaviorProfile<T> GetBehavior(const Array<T> &p_primal, const Array<T> &p_
   for (const auto &[sequence, col] : p_indexMap.colIndex) {
     x[sequence] = p_primal[col];
   }
-  return BehaviorSupportProfile(p_indexMap.game).ToMixedBehaviorProfile(x);
+  return MixedBehaviorProfile<T>(MixedSequenceProfile<T>(p_indexMap.game, x));
 }
 
 } // end anonymous namespace

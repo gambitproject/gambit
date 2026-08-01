@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gambit.h
-// Top-level include file for Gambit library
+// FILE: src/games/seqmixed.h
+// Declaration of mixed sequence profile
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,22 +20,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_H
-#define GAMBIT_H
+#ifndef GAMBIT_GAMES_SEQMIXED_H
+#define GAMBIT_GAMES_SEQMIXED_H
 
-#include "core/core.h"
+#include <map>
+#include "game.h"
 
-#include "games/game.h"
-#include "games/writer.h"
+namespace Gambit {
 
-#include "games/behavspt.h"
-#include "games/behavmixed.h"
-#include "games/behavpure.h"
-#include "games/seqpure.h"
-#include "games/seqmixed.h"
+/// This class represents an assignment of a realization value to every
+/// sequence of every player of an extensive game.
+template <class T> class MixedSequenceProfile {
+  Game m_efg;
+  std::map<GameSequence, T> m_probs;
 
-#include "games/stratspt.h"
-#include "games/stratpure.h"
-#include "games/stratmixed.h"
+public:
+  MixedSequenceProfile(const Game &p_efg, const std::map<GameSequence, T> &p_probs)
+    : m_efg(p_efg), m_probs(p_probs)
+  {
+  }
 
-#endif // GAMBIT_H
+  Game GetGame() const { return m_efg; }
+
+  /// Returns the realization probability of the sequence in this profile.
+  const T &operator[](const GameSequence &p_sequence) const { return m_probs.at(p_sequence); }
+};
+
+} // end namespace Gambit
+
+#endif // GAMBIT_GAMES_SEQMIXED_H

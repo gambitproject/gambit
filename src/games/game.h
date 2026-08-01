@@ -73,6 +73,8 @@ class StrategySupportProfile;
 
 template <class T> class MixedBehaviorProfile;
 
+class SequenceContingencies;
+
 //=======================================================================
 //         Exceptions thrown from game representation classes
 //=======================================================================
@@ -297,6 +299,9 @@ public:
   {
     return Actions(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_actions);
   }
+  /// Returns the sequences corresponding to the actions available at the
+  /// information set, in the same order as GetActions().
+  std::vector<GameSequence> GetSequences() const;
   //@}
 
   GameNode GetMember(int p_index) const;
@@ -1266,6 +1271,12 @@ public:
   virtual void BuildComputedValues() const {}
   /// Ensure sequences have been computed
   virtual void EnsureSequences() const { throw UndefinedException(); }
+
+  /// @name Sequences
+  //@{
+  /// Returns an iterator over every combination of one sequence per player
+  SequenceContingencies GetSequenceContingencies() const;
+  //@}
 };
 
 //=======================================================================
@@ -1417,6 +1428,17 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 {
   m_game->EnsureSequences();
   return Sequences(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_sequences);
+}
+
+inline std::vector<GameSequence> GameInfosetRep::GetSequences() const
+{
+  std::vector<GameSequence> result;
+  for (auto sequence : GetPlayer()->GetSequences()) {
+    if (sequence->GetAction() && sequence->GetInfoset().get() == this) {
+      result.push_back(sequence);
+    }
+  }
+  return result;
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }

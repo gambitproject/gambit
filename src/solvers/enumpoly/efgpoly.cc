@@ -45,20 +45,11 @@ namespace {
 //    sequence probabilities (after the substitutions mentioned above)
 //    and setting those to zero.
 
-class ProblemData {
-public:
+struct ProblemData {
   BehaviorSupportProfile m_support;
   std::shared_ptr<VariableSpace> space;
   std::map<GameSequence, int> var;
   std::map<GameSequence, Polynomial<double>> variables;
-  // The sequences of the actions available at an information set, i.e. the
-  // children, in the tree of sequences, of the sequence that leads to it.
-  // (Grouping by information set rather than directly by parent sequence
-  // matters: the same parent sequence can lead to different information
-  // sets, e.g. depending on an intervening chance move or another player's
-  // action.)  This is what expresses the sum-to-one relation among the
-  // actions at an information set.
-  std::map<GameInfoset, std::vector<GameSequence>> siblings;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
 };
@@ -85,7 +76,7 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
   // probability is that of its parent sequence, less the probabilities of
   // its sibling sequences (the other actions at the same information set).
   Polynomial<double> equation = BuildSequenceVariable(p_data, p_sequence->GetParent());
-  for (const auto &sibling : p_data.siblings.at(p_sequence->GetInfoset())) {
+  for (const auto &sibling : p_data.m_support.GetSequences(p_sequence->GetInfoset())) {
     if (sibling != p_sequence) {
       equation -= BuildSequenceVariable(p_data, sibling);
     }
@@ -99,11 +90,8 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
                                                                 m_support.GetPlayers().size()))
 {
   for (auto sequence : m_support.GetSequences()) {
-    if (sequence->GetAction()) {
-      siblings[sequence->GetInfoset()].push_back(sequence);
-      if (!IsEliminated(m_support, sequence)) {
-        var[sequence] = var.size() + 1;
-      }
+    if (sequence->GetAction() && !IsEliminated(m_support, sequence)) {
+      var[sequence] = var.size() + 1;
     }
   }
 
@@ -112,7 +100,7 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   }
 }
 
-Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
+Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &p_player)
 {
   Polynomial<double> equation(p_data.space);
 
@@ -132,7 +120,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto player : p_data.m_support.GetPlayers()) {
-    const Polynomial<double> payoff = GetPayoff(p_data, player);
+    const Polynomial<double> payoff = BuildPayoffPolynomial(p_data, player);
     for (auto sequence : p_data.m_support.GetSequences(player)) {
       if (auto it = p_data.var.find(sequence); it != p_data.var.end()) {
         p_equations.push_back(payoff.PartialDerivative(it->second));

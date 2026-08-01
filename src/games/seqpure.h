@@ -24,6 +24,8 @@
 #define GAMBIT_GAMES_SEQPURE_H
 
 #include <map>
+#include <memory>
+#include <vector>
 #include "game.h"
 
 namespace Gambit {
@@ -80,6 +82,53 @@ public:
   /// last move they make along a possible continuation, and 0 when the
   /// profile can never be jointly realised at all.)
   Rational GetRealizationProbability() const;
+};
+
+/// The sequences of each player under consideration: e.g. those consistent
+/// with a support (BehaviorSupportProfile::GetSequenceMap()), or all of a
+/// player's sequences (GameRep::GetSequenceContingencies()).
+using SequenceMap = std::map<GamePlayer, std::vector<GameSequence>>;
+
+/// Iterates over every combination of one sequence per player, drawn from
+/// the sequences of each player in a SequenceMap.
+class SequenceContingencies {
+  Game m_efg;
+  std::shared_ptr<SequenceMap> m_sequences;
+
+public:
+  SequenceContingencies(const Game &p_efg, std::shared_ptr<SequenceMap> p_sequences)
+    : m_efg(p_efg), m_sequences(std::move(p_sequences))
+  {
+  }
+
+  class iterator {
+  private:
+    Game m_efg;
+    const std::shared_ptr<SequenceMap> m_sequences;
+    bool m_end{false};
+    std::map<GamePlayer, size_t> m_indices;
+
+  public:
+    using iterator_category = std::input_iterator_tag;
+
+    iterator(const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences,
+             bool p_end = false);
+
+    PureSequenceProfile operator*() const;
+
+    PureSequenceProfile operator->() const;
+
+    iterator &operator++();
+
+    bool operator==(const iterator &it) const
+    {
+      return (m_end == it.m_end && m_sequences == it.m_sequences && m_indices == it.m_indices);
+    }
+    bool operator!=(const iterator &it) const { return !(*this == it); }
+  };
+
+  iterator begin() const { return {m_efg, m_sequences}; }
+  iterator end() const { return {m_efg, m_sequences, true}; }
 };
 
 } // end namespace Gambit

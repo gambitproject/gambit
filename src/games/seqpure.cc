@@ -207,4 +207,56 @@ Rational PureSequenceProfile::GetRealizationProbability() const
   return total;
 }
 
+SequenceContingencies::iterator::iterator(const Game &p_efg,
+                                          const std::shared_ptr<SequenceMap> p_sequences,
+                                          bool p_end)
+  : m_efg(p_efg), m_sequences(p_sequences), m_end(p_end)
+{
+  for (auto [player, sequences] : *m_sequences) {
+    m_indices[player] = 0;
+  }
+}
+
+PureSequenceProfile SequenceContingencies::iterator::operator*() const
+{
+  PureSequenceProfile ret(m_efg);
+  for (auto [player, index] : m_indices) {
+    ret.SetSequence(m_sequences->at(player)[index]);
+  }
+  return ret;
+}
+
+PureSequenceProfile SequenceContingencies::iterator::operator->() const
+{
+  PureSequenceProfile ret(m_efg);
+  for (auto [player, index] : m_indices) {
+    ret.SetSequence(m_sequences->at(player)[index]);
+  }
+  return ret;
+}
+
+SequenceContingencies::iterator &SequenceContingencies::iterator::operator++()
+{
+  for (auto [player, index] : m_indices) {
+    if (index < m_sequences->at(player).size() - 1) {
+      m_indices[player]++;
+      return *this;
+    }
+    m_indices[player] = 0;
+  }
+  m_end = true;
+  return *this;
+}
+
+SequenceContingencies GameRep::GetSequenceContingencies() const
+{
+  auto sequences = std::make_shared<SequenceMap>();
+  for (auto player : GetPlayers()) {
+    for (auto sequence : player->GetSequences()) {
+      (*sequences)[player].push_back(sequence);
+    }
+  }
+  return {std::const_pointer_cast<GameRep>(shared_from_this()), sequences};
+}
+
 } // end namespace Gambit
