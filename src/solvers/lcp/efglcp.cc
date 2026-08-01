@@ -184,7 +184,7 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
     }
     x[sequence] = value;
   }
-  return BehaviorSupportProfile(p_indexMap.game).ToMixedBehaviorProfile(x);
+  return MixedBehaviorProfile<T>(p_indexMap.game, x);
 }
 
 } // end anonymous namespace

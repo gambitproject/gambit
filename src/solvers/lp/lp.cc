@@ -193,7 +193,7 @@ MixedBehaviorProfile<T> GetBehavior(const Array<T> &p_primal, const Array<T> &p_
   for (const auto &[sequence, col] : p_indexMap.colIndex) {
     x[sequence] = p_primal[col];
   }
-  return BehaviorSupportProfile(p_indexMap.game).ToMixedBehaviorProfile(x);
+  return MixedBehaviorProfile<T>(p_indexMap.game, x);
 }
 
 } // end anonymous namespace

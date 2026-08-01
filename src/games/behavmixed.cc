@@ -157,6 +157,31 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
 }
 
 template <class T>
+MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game,
+                                              const std::map<GameSequence, T> &p_probs)
+  : m_probs(p_game->BehavProfileLength()), m_support(BehaviorSupportProfile(p_game)),
+    m_gameversion(p_game->GetVersion())
+{
+  p_game->EnsureInfosetOrdering();
+  int index = 1;
+  for (const auto &infoset : p_game->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      m_profileIndex[action] = index++;
+    }
+  }
+  for (auto player : p_game->GetPlayers()) {
+    for (auto sequence : player->GetSequences()) {
+      if (!sequence->GetAction()) {
+        continue;
+      }
+      const T parentProb = p_probs.at(sequence->GetParent());
+      (*this)[sequence->GetAction()] =
+          (parentProb > T{0}) ? p_probs.at(sequence) / parentProb : T{0};
+    }
+  }
+}
+
+template <class T>
 MixedBehaviorProfile<T> &
 MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
 {

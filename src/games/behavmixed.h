@@ -159,6 +159,7 @@ public:
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &) = default;
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
+  MixedBehaviorProfile(const Game &, const std::map<GameSequence, T> &);
   ~MixedBehaviorProfile() = default;
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
