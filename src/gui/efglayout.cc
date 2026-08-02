@@ -574,29 +574,9 @@ GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
 std::shared_ptr<NodeEntry>
 TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
-  const auto infoset = p_entry->m_node->GetInfoset();
-  if (!infoset) {
-    // For terminal nodes, the next in information set is always the next terminal node,
-    // irrespective of draw settings
-    auto entry = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), p_entry));
-    while (entry != m_nodeList.end()) {
-      if ((*entry)->m_node->IsTerminal()) {
-        return *entry;
-      }
-      ++entry;
-    }
-    return nullptr;
-  }
-  auto member = std::next(
-      std::find(infoset->GetMembers().begin(), infoset->GetMembers().end(), p_entry->m_node));
-  while (member != infoset->GetMembers().end()) {
-    auto member_entry = GetNodeEntry(*member);
-    if (member_entry != nullptr) {
-      return member_entry;
-    }
-    ++member;
-  }
-  return nullptr;
+  const auto &members = p_entry->m_node->GetInfoset()->GetMembers();
+  const auto member = std::next(std::find(members.begin(), members.end(), p_entry->m_node));
+  return (member != members.end()) ? GetNodeEntry(*member) : nullptr;
 }
 
 void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
@@ -714,19 +694,6 @@ void TreeLayout::GenerateLabels() const
   }
 }
 
-//
-// RenderSubtree: Render branches and labels
-//
-// The following speed optimizations have been added:
-// The algorithm now traverses the tree as a linear linked list, eliminating
-// expensive searches.
-//
-// There was some clipping code in here, but it didn't correctly
-// deal with drawing information sets while scrolling.  So, the code
-// has temporarily been removed.  It remains to be seen whether
-// performance will require a more sophisticated solution to the
-// problem.  (TLT 5/2001)
-//
 void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
   const TreeRenderConfig &settings = m_doc->GetStyle();
@@ -738,17 +705,9 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
       DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
 
       if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
-        const int nextX = nextMember->GetX();
         const int nextY = nextMember->GetY();
-
-#ifdef __WXGTK__
-        // A problem with using styled pens and user scaling on wxGTK
-        p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
-                          wxPENSTYLE_SOLID));
-#else
         p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
                           wxPENSTYLE_DOT));
-#endif // __WXGTK__
         p_dc.DrawLine(parentEntry->GetX(), parentEntry->GetY(), parentEntry->GetX(), nextY);
         if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
           p_dc.DrawLine(parentEntry->GetX() + settings.GetNodeSize(), parentEntry->GetY(),
