@@ -113,6 +113,22 @@ public:
   const wxRect &GetPayoffExtent(int pl) const { return m_geometry.payoffs[pl]; }
 };
 
+/// What was hit by a point query against the rendered tree, and which node it
+/// belongs to. BranchAbove/BranchBelow report the CHILD node whose incoming
+/// branch was hit (not its parent) -- callers wanting the parent (e.g. to
+/// select the node whose move is being edited) call node->GetParent().
+/// Payoff reports which player's cell (1-indexed) within the outcome region
+/// was hit; Outcome covers the rest of the outcome region (including the
+/// "no outcome" hint).
+enum class HitRegion { None, Node, Outcome, Payoff, BranchAbove, BranchBelow };
+
+struct HitResult {
+  HitRegion region{HitRegion::None};
+  GameNode node;
+  int payoffPlayer{0}; // valid only when region == HitRegion::Payoff
+  explicit operator bool() const { return region != HitRegion::None; }
+};
+
 class TreeLayout final : public GameView {
   std::list<std::shared_ptr<NodeEntry>> m_nodeList;
   std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
@@ -180,9 +196,7 @@ public:
   int MaxY() const { return m_maxY; }
 
   GameNode NodeHitTest(int, int) const;
-  GameNode OutcomeHitTest(int, int) const;
-  GameNode BranchAboveHitTest(int, int) const;
-  GameNode BranchBelowHitTest(int, int) const;
+  HitResult HitTest(int, int) const;
 
   void Render(wxDC &, bool p_noHints) const;
 };

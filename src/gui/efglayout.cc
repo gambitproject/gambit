@@ -459,34 +459,52 @@ GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-GameNode TreeLayout::OutcomeHitTest(int p_x, int p_y) const
+//
+// Answers "what, if anything, is at (p_x, p_y)" as a single discriminated
+// result, replacing what used to be four independent hit-test entry points
+// (NodeHitTest/OutcomeHitTest/BranchAboveHitTest/BranchBelowHitTest) that
+// callers had to try in sequence -- and a fifth, manual per-player Contains()
+// loop at the one call site that needed to know which payoff was hit.
+//
+// Region priority (Node, then Outcome/Payoff, then BranchAbove, then
+// BranchBelow) matches the order those separate calls used to be tried in at
+// the one call site that used all of them (EfgDisplay::OnLeftDoubleClick), so
+// behavior is unchanged even though this is now one query: each region is
+// still checked tree-wide before falling through to the next, rather than
+// checking all regions for one node before moving to the next node (the
+// latter would let one node's outcome-label rect -- which can extend
+// arbitrarily far right -- pre-empt a Node hit on a different, further-right
+// node, which the old code never did).
+//
+HitResult TreeLayout::HitTest(int p_x, int p_y) const
 {
-  const auto hit =
-      std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                     return p_entry->OutcomeHitTest(p_x, p_y);
-                   });
-  return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
-}
-
-GameNode TreeLayout::BranchAboveHitTest(int p_x, int p_y) const
-{
-  const auto hit =
-      std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                     return p_entry->BranchAboveHitTest(p_x, p_y);
-                   });
-  return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
-}
-
-GameNode TreeLayout::BranchBelowHitTest(int p_x, int p_y) const
-{
-  const auto hit =
-      std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                     return p_entry->BranchBelowHitTest(p_x, p_y);
-                   });
-  return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
+  for (const auto &entry : m_nodeList) {
+    if (NodeHitTest(entry, p_x, p_y)) {
+      return {HitRegion::Node, entry->GetNode()};
+    }
+  }
+  for (const auto &entry : m_nodeList) {
+    if (entry->OutcomeHitTest(p_x, p_y)) {
+      const auto &payoffs = entry->m_geometry.payoffs;
+      for (int pl = payoffs.front_index(); pl <= payoffs.back_index(); ++pl) {
+        if (payoffs[pl].Contains(p_x, p_y)) {
+          return {HitRegion::Payoff, entry->GetNode(), pl};
+        }
+      }
+      return {HitRegion::Outcome, entry->GetNode()};
+    }
+  }
+  for (const auto &entry : m_nodeList) {
+    if (entry->BranchAboveHitTest(p_x, p_y)) {
+      return {HitRegion::BranchAbove, entry->GetNode()};
+    }
+  }
+  for (const auto &entry : m_nodeList) {
+    if (entry->BranchBelowHitTest(p_x, p_y)) {
+      return {HitRegion::BranchBelow, entry->GetNode()};
+    }
+  }
+  return {};
 }
 
 wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, int p_which) const

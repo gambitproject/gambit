@@ -1212,51 +1212,31 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   x = DeviceToLayout(x);
   y = DeviceToLayout(y);
 
-  GameNode node = m_layout.NodeHitTest(x, y);
-  if (node) {
-    m_doc->SetSelectNode(node);
+  const auto hit = m_layout.HitTest(x, y);
+
+  if (hit.region == HitRegion::Node) {
+    m_doc->SetSelectNode(hit.node);
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
     wxPostEvent(this, event);
     return;
   }
 
-  node = m_layout.OutcomeHitTest(x, y);
-  if (node) {
-    int initialPlayer = 0;
-
-    if (node->GetOutcome()) {
-      auto entry = m_layout.GetNodeEntry(node);
-
-      for (size_t player = 1; player <= m_doc->GetGame()->NumPlayers(); ++player) {
-        if (entry->GetPayoffExtent(player).Contains(x, y)) {
-          initialPlayer = static_cast<int>(player);
-          break;
-        }
-      }
-    }
-
-    m_outcomeEditor->BeginEdit(node, initialPlayer);
+  if (hit.region == HitRegion::Outcome || hit.region == HitRegion::Payoff) {
+    const int initialPlayer = (hit.region == HitRegion::Payoff) ? hit.payoffPlayer : 0;
+    m_outcomeEditor->BeginEdit(hit.node, initialPlayer);
     return;
   }
 
-  if (m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL) {
-    node = m_layout.BranchAboveHitTest(x, y);
-    if (node) {
-      m_doc->SetSelectNode(node);
-      const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
-      wxPostEvent(this, event);
-      return;
-    }
-  }
-
-  if (m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL) {
-    node = m_layout.BranchBelowHitTest(x, y);
-    if (node) {
-      m_doc->SetSelectNode(node);
-      const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
-      wxPostEvent(this, event);
-      return;
-    }
+  const bool aboveClickable = hit.region == HitRegion::BranchAbove &&
+                              m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL;
+  const bool belowClickable = hit.region == HitRegion::BranchBelow &&
+                              m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL;
+  if (aboveClickable || belowClickable) {
+    // hit.node is the child whose incoming branch was hit; the old behavior
+    // was to select the parent (the node whose move is being edited).
+    m_doc->SetSelectNode(hit.node->GetParent());
+    const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
+    wxPostEvent(this, event);
   }
 }
 
@@ -1275,11 +1255,11 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     x = DeviceToLayout(x);
     y = DeviceToLayout(y);
 
-    GameNode node = m_layout.NodeHitTest(x, y);
+    const auto hit = m_layout.HitTest(x, y);
 
-    if (node && !node->IsTerminal()) {
+    if (hit.region == HitRegion::Node && !hit.node->IsTerminal()) {
       wxString label;
-      label << "N" << node->GetNumber();
+      label << "N" << hit.node->GetNumber();
       wxTextDataObject textData(label);
 
       wxDropSource source(textData, this);
@@ -1287,11 +1267,10 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       return;
     }
 
-    node = m_layout.OutcomeHitTest(x, y);
-
-    if (node && node->GetOutcome()) {
+    if ((hit.region == HitRegion::Outcome || hit.region == HitRegion::Payoff) &&
+        hit.node->GetOutcome()) {
       wxString label;
-      label << "O" << node->GetNumber();
+      label << "O" << hit.node->GetNumber();
       wxTextDataObject textData(label);
 
       wxDropSource source(textData, this);
