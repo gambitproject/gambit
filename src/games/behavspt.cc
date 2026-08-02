@@ -64,8 +64,8 @@ size_t BehaviorSupportProfile::BehaviorProfileLength() const
 
 void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
-  m_reachableInfosets = nullptr;
-  m_sequences = nullptr;
+  m_reachableInfosets.Invalidate();
+  m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
@@ -83,8 +83,8 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 
 bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
-  m_reachableInfosets = nullptr;
-  m_sequences = nullptr;
+  m_reachableInfosets.Invalidate();
+  m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
@@ -150,17 +150,17 @@ void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
 
 std::shared_ptr<BehaviorSupportProfile::SequenceMap> BehaviorSupportProfile::GetSequenceMap() const
 {
-  if (!m_sequences) {
-    m_sequences = std::make_shared<SequenceMap>();
+  return m_sequences.Get([&] {
+    auto sequences = std::make_shared<SequenceMap>();
     for (const auto &player : GetGame()->GetPlayers()) {
       for (const auto &sequence : player->GetSequences()) {
         if (!sequence->GetAction() || Contains(sequence->GetAction())) {
-          (*m_sequences)[player].emplace_back(sequence);
+          (*sequences)[player].emplace_back(sequence);
         }
       }
     }
-  }
-  return m_sequences;
+    return sequences;
+  });
 }
 
 BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const { return {this}; }
@@ -290,19 +290,20 @@ size_t BehaviorSupportProfile::PlayerSequences::size() const
 //                 BehaviorSupportProfile: Reachable Information Sets
 //========================================================================
 
-void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
+void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node,
+                                                   std::map<GameInfoset, bool> &p_reachable) const
 {
   if (!p_node->IsTerminal()) {
     auto infoset = p_node->GetInfoset();
-    (*m_reachableInfosets)[infoset] = true;
+    p_reachable[infoset] = true;
     if (p_node->GetPlayer()->IsChance()) {
       for (auto action : infoset->GetActions()) {
-        FindReachableInfosets(p_node->GetChild(action));
+        FindReachableInfosets(p_node->GetChild(action), p_reachable);
       }
     }
     else {
       for (auto action : GetActions(infoset)) {
-        FindReachableInfosets(p_node->GetChild(action));
+        FindReachableInfosets(p_node->GetChild(action), p_reachable);
       }
     }
   }
@@ -310,17 +311,17 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
 
 std::shared_ptr<std::map<GameInfoset, bool>> BehaviorSupportProfile::GetReachableInfosets() const
 {
-  if (!m_reachableInfosets) {
-    m_reachableInfosets = std::make_shared<std::map<GameInfoset, bool>>();
+  return m_reachableInfosets.Get([&] {
+    auto reachable = std::make_shared<std::map<GameInfoset, bool>>();
     for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
       const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
       for (const auto &infoset : player->GetInfosets()) {
-        (*m_reachableInfosets)[infoset] = false;
+        (*reachable)[infoset] = false;
       }
     }
-    FindReachableInfosets(GetGame()->GetRoot());
-  }
-  return m_reachableInfosets;
+    FindReachableInfosets(GetGame()->GetRoot(), *reachable);
+    return reachable;
+  });
 }
 
 } // end namespace Gambit

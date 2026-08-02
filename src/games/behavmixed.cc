@@ -278,7 +278,7 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 
 template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
 {
-  m_support.GetGame()->BuildComputedValues();
+  m_support.GetGame()->EnsureStrategies();
   return MixedStrategyProfile<T>(*this).GetLiapValue();
 }
 
@@ -402,7 +402,7 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 {
-  m_support.GetGame()->BuildComputedValues();
+  m_support.GetGame()->EnsureStrategies();
   return MixedStrategyProfile<T>(*this).GetMaxRegret();
 }
 
@@ -619,7 +619,7 @@ template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infos
 template <class T> MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
   CheckVersion();
-  m_support.GetGame()->BuildComputedValues();
+  m_support.GetGame()->EnsureStrategies();
   return MixedStrategyProfile<T>(*this);
 }
 

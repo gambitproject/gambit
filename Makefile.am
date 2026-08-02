@@ -213,6 +213,7 @@ core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
+	src/core/lazy.h \
 	src/core/vector.h \
 	src/core/segment.h \
 	src/core/recarray.h \
