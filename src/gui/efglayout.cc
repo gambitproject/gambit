@@ -78,6 +78,14 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
                           const GameNode &p_selection, bool p_noHints) const
 {
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
+  const NodeTokenStyle tokenStyle = GetTokenForNode(m_doc->GetStyle(), p_entry->m_node);
+  const bool isLine = (tokenStyle == GBT_NODE_TOKEN_LINE);
+  // For every style but "line", this is exactly the shape drawn below --
+  // computed once by ComputeTokenGeometry, not recomputed here, so drawing
+  // and hit-testing (NodeEntry::NodeHitTest) can never silently disagree.
+  // "Line" has no real width of its own, so its selection ring keeps its own
+  // (differently-sized) padding rather than reusing the hit-test region.
+  const wxRect &token = p_entry->m_geometry.token;
 
   if (p_entry->m_node->GetParent()) {
     DrawIncomingBranch(p_dc, p_entry);
@@ -85,88 +93,80 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
   const bool selected = (p_selection == p_entry->m_node);
+  constexpr int selectionPadding = 6;
 
   if (selected) {
-    constexpr int selectionPadding = 6;
-    const int selectionSize = nodeSize + 2 * selectionPadding;
-
     p_dc.SetPen(*wxTRANSPARENT_PEN);
     p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
 
-    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
-      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
-                                nodeSize + 2 * selectionPadding, 2 * selectionPadding,
-                                selectionPadding);
+    if (isLine) {
+      p_dc.DrawRoundedRectangle(
+          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
+          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
     }
     else {
-      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
-                       p_entry->m_y - nodeSize / 2 - selectionPadding, selectionSize,
-                       selectionSize);
+      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
     }
   }
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
 
-  if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
-    p_dc.DrawLine(p_entry->m_x, p_entry->m_y, p_entry->m_x + nodeSize, p_entry->m_y);
+  if (isLine) {
+    p_dc.DrawLine(p_entry->GetX(), p_entry->GetY(), p_entry->GetX() + nodeSize, p_entry->GetY());
     if (m_doc->GetStyle().GetBranchStyle() == GBT_BRANCH_STYLE_FORKTINE) {
       // "classic" Gambit style: draw a small 'token' to separate
       // the fork from the node
-      p_dc.DrawEllipse(p_entry->m_x - 1, p_entry->m_y - 1, 3, 3);
+      p_dc.DrawEllipse(p_entry->GetX() - 1, p_entry->GetY() - 1, 3, 3);
     }
   }
-  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_BOX) {
+  else if (tokenStyle == GBT_NODE_TOKEN_BOX) {
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawRectangle(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
+    p_dc.DrawRectangle(token);
   }
-  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DIAMOND) {
-    wxPoint points[4] = {wxPoint(p_entry->m_x + nodeSize / 2, p_entry->m_y - nodeSize / 2),
-                         wxPoint(p_entry->m_x, p_entry->m_y),
-                         wxPoint(p_entry->m_x + nodeSize / 2, p_entry->m_y + nodeSize / 2),
-                         wxPoint(p_entry->m_x + nodeSize, p_entry->m_y)};
+  else if (tokenStyle == GBT_NODE_TOKEN_DIAMOND) {
+    wxPoint points[4] = {
+        wxPoint(token.GetX() + token.GetWidth() / 2, token.GetY()),
+        wxPoint(token.GetX(), token.GetY() + token.GetHeight() / 2),
+        wxPoint(token.GetX() + token.GetWidth() / 2, token.GetY() + token.GetHeight()),
+        wxPoint(token.GetX() + token.GetWidth(), token.GetY() + token.GetHeight() / 2)};
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawPolygon(4, points);
   }
-  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DOT) {
+  else if (tokenStyle == GBT_NODE_TOKEN_DOT) {
     p_dc.SetBrush(wxBrush(m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer()),
                           wxBRUSHSTYLE_SOLID));
-    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
+    p_dc.DrawEllipse(token);
   }
   else {
     // Default: draw circles
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
+    p_dc.DrawEllipse(token);
   }
 
   if (selected) {
-    constexpr int selectionPadding = 6;
-    const int selectionSize = nodeSize + 2 * selectionPadding;
-
     p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
     p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
-    if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
-      p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
-                                nodeSize + 2 * selectionPadding, 2 * selectionPadding,
-                                selectionPadding);
+    if (isLine) {
+      p_dc.DrawRoundedRectangle(
+          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
+          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
     }
     else {
-      p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
-                       p_entry->m_y - nodeSize / 2 - selectionPadding, selectionSize,
-                       selectionSize);
+      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
     }
   }
 
   int textWidth, textHeight;
   p_dc.SetFont(m_doc->GetStyle().GetFont());
   p_dc.GetTextExtent(p_entry->m_nodeAboveLabel, &textWidth, &textHeight);
-  p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->m_x + (nodeSize - textWidth) / 2,
-                p_entry->m_y - textHeight - 9);
+  p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->GetX() + (nodeSize - textWidth) / 2,
+                p_entry->GetY() - textHeight - 9);
   p_dc.SetFont(m_doc->GetStyle().GetFont());
   p_dc.GetTextExtent(p_entry->m_nodeBelowLabel, &textWidth, &textHeight);
-  p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->m_x + (nodeSize - textWidth) / 2,
-                p_entry->m_y + 9);
+  p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->GetX() + (nodeSize - textWidth) / 2,
+                p_entry->GetY() + 9);
 
   p_dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   DrawOutcome(p_dc, p_entry, p_noHints);
@@ -174,10 +174,10 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
 
 void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
 {
-  const int xStart = p_entry->m_parent->m_x + m_doc->GetStyle().GetNodeSize();
-  const int xEnd = p_entry->m_x;
-  const int yStart = p_entry->m_parent->m_y;
-  const int yEnd = p_entry->m_y;
+  const int xStart = p_entry->m_parent->GetX() + m_doc->GetStyle().GetNodeSize();
+  const int xEnd = p_entry->GetX();
+  const int yStart = p_entry->m_parent->GetY();
+  const int yEnd = p_entry->GetY();
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetParent()->GetPlayer());
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 4, wxPENSTYLE_SOLID));
@@ -264,10 +264,10 @@ void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEnt
     return;
   }
 
-  const int xStart = p_entry->m_parent->m_x + m_doc->GetStyle().GetNodeSize();
-  const int xEnd = p_entry->m_x;
-  const int yStart = p_entry->m_parent->m_y;
-  const int yEnd = p_entry->m_y;
+  const int xStart = p_entry->m_parent->GetX() + m_doc->GetStyle().GetNodeSize();
+  const int xEnd = p_entry->GetX();
+  const int yStart = p_entry->m_parent->GetY();
+  const int yEnd = p_entry->GetY();
 
   if (m_doc->GetStyle().GetBranchStyle() != GBT_BRANCH_STYLE_LINE) {
     // Old style fork-tine
@@ -380,7 +380,7 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
 
     if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
-      DrawFraction(p_dc, wxPoint(cell.GetX() + 5, p_entry->m_y),
+      DrawFraction(p_dc, wxPoint(cell.GetX() + 5, p_entry->GetY()),
                    outcome->GetPayoff<Rational>(player));
     }
     else {
@@ -406,7 +406,7 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
                                         const std::shared_ptr<NodeEntry> &p_entry) const
 {
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
-  wxPoint point(p_entry->m_x + nodeSize + 20, p_entry->m_y);
+  wxPoint point(p_entry->GetX() + nodeSize + 20, p_entry->GetY());
 
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
   if (!outcome) {
@@ -445,8 +445,9 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
     height = 25;
   }
 
-  p_entry->m_geometry.outcome = wxRect(p_entry->m_x + nodeSize + 20, p_entry->m_y - height / 2,
-                                       point.x - (p_entry->m_x + nodeSize + 20), height);
+  p_entry->m_geometry.outcome =
+      wxRect(p_entry->GetX() + nodeSize + 20, p_entry->GetY() - height / 2,
+             point.x - (p_entry->GetX() + nodeSize + 20), height);
   m_maxX = std::max(m_maxX, p_entry->m_geometry.outcome.GetRight());
 }
 
@@ -461,11 +462,12 @@ void TreeLayout::ComputeTokenGeometry(const std::shared_ptr<NodeEntry> &p_entry)
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
   if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
     constexpr int DELTA = 8; // a fudge factor for "almost" hitting the node
-    p_entry->m_geometry.token = wxRect(p_entry->m_x, p_entry->m_y - DELTA, nodeSize, 2 * DELTA);
+    p_entry->m_geometry.token =
+        wxRect(p_entry->GetX(), p_entry->GetY() - DELTA, nodeSize, 2 * DELTA);
     return;
   }
   p_entry->m_geometry.token =
-      wxRect(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
+      wxRect(p_entry->GetX(), p_entry->GetY() - nodeSize / 2, nodeSize, nodeSize);
 }
 
 //-----------------------------------------------------------------------
@@ -759,7 +761,7 @@ void TreeLayout::Layout(const Game &p_game)
   for (auto [node, entry] : layout.GetNodeMap()) {
     m_nodeMap[node]->m_level = entry->m_level;
     m_nodeMap[node]->m_sublevel = entry->m_sublevel;
-    m_nodeMap[node]->m_y = entry->m_offset * spacing + c_topMargin;
+    m_nodeMap[node]->SetY(entry->m_offset * spacing + c_topMargin);
   }
   m_maxY =
       c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset());
@@ -826,8 +828,8 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
       DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
 
       if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
-        const int nextX = nextMember->m_x;
-        const int nextY = nextMember->m_y;
+        const int nextX = nextMember->GetX();
+        const int nextY = nextMember->GetY();
 
 #ifdef __WXGTK__
         // A problem with using styled pens and user scaling on wxGTK
@@ -837,29 +839,30 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
         p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
                           wxPENSTYLE_DOT));
 #endif // __WXGTK__
-        p_dc.DrawLine(parentEntry->m_x, parentEntry->m_y, parentEntry->m_x, nextY);
+        p_dc.DrawLine(parentEntry->GetX(), parentEntry->GetY(), parentEntry->GetX(), nextY);
         if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
-          p_dc.DrawLine(parentEntry->m_x + settings.GetNodeSize(), parentEntry->m_y,
-                        parentEntry->m_x + settings.GetNodeSize(), nextY);
+          p_dc.DrawLine(parentEntry->GetX() + settings.GetNodeSize(), parentEntry->GetY(),
+                        parentEntry->GetX() + settings.GetNodeSize(), nextY);
         }
 
-        if (nextMember->m_x != parentEntry->m_x) {
+        if (nextMember->GetX() != parentEntry->GetX()) {
           // Draw a little arrow in the direction of the iset.
           int startX, endX;
           if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) {
-            startX = parentEntry->m_x;
-            endX = (startX + m_infosetSpacing * ((nextMember->m_x > parentEntry->m_x) ? 1 : -1));
+            startX = parentEntry->GetX();
+            endX = (startX +
+                    m_infosetSpacing * ((nextMember->GetX() > parentEntry->GetX()) ? 1 : -1));
           }
           else {
-            if (nextMember->m_x < parentEntry->m_x) {
+            if (nextMember->GetX() < parentEntry->GetX()) {
               // information set is continued to the left
-              startX = parentEntry->m_x + settings.GetNodeSize();
-              endX = parentEntry->m_x - m_infosetSpacing;
+              startX = parentEntry->GetX() + settings.GetNodeSize();
+              endX = parentEntry->GetX() - m_infosetSpacing;
             }
             else {
               // information set is continued to the right
-              startX = parentEntry->m_x;
-              endX = (parentEntry->m_x + settings.GetNodeSize() + m_infosetSpacing);
+              startX = parentEntry->GetX();
+              endX = (parentEntry->GetX() + settings.GetNodeSize() + m_infosetSpacing);
             }
           }
           p_dc.DrawLine(startX, nextY, endX, nextY);

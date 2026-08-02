@@ -30,14 +30,17 @@
 
 namespace Gambit::GUI {
 
-/// The screen regions associated with a rendered node: its own token (the
-/// shape drawn at the node's position -- a circle, box, diamond, dot, or a
-/// horizontal line, per style), the outcome label (or "no outcome" hint), one
-/// payoff cell per player (1-indexed, matching player numbers), and the two
-/// incoming-branch labels. Computed once, up front, by
-/// TreeLayout::ComputeGeometry() -- not as a side effect of painting -- so
-/// that hit-testing is always valid without requiring a prior paint event.
+/// All of a rendered node's screen coordinates in one place: its position
+/// (set by the layout pass -- TreeLayout::ComputeNodeDepths/Layout() -- not
+/// by ComputeGeometry() below), its own token (the shape drawn there -- a
+/// circle, box, diamond, dot, or horizontal line, per style), the outcome
+/// label (or "no outcome" hint), one payoff cell per player (1-indexed,
+/// matching player numbers), and the two incoming-branch labels. Everything
+/// but position is computed once, up front, by TreeLayout::ComputeGeometry()
+/// -- not as a side effect of painting -- so that hit-testing is always
+/// valid without requiring a prior paint event.
 struct NodeGeometry {
+  wxPoint position;
   wxRect token;
   wxRect outcome;
   Array<wxRect> payoffs;
@@ -48,7 +51,6 @@ class NodeEntry {
   friend class TreeLayout;
   GameNode m_node;                     // the corresponding node in the game
   std::shared_ptr<NodeEntry> m_parent; // parent node
-  int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
   NodeGeometry m_geometry;
 
   int m_level{0};         // depth of the node in tree
@@ -65,9 +67,10 @@ public:
   std::shared_ptr<NodeEntry> GetParent() const { return m_parent; }
   void SetParent(const std::shared_ptr<NodeEntry> &p_parent) { m_parent = p_parent; }
 
-  int GetX() const { return m_x; }
-  void SetX(int p_x) { m_x = p_x; }
-  int GetY() const { return m_y; }
+  int GetX() const { return m_geometry.position.x; }
+  void SetX(int p_x) { m_geometry.position.x = p_x; }
+  int GetY() const { return m_geometry.position.y; }
+  void SetY(int p_y) { m_geometry.position.y = p_y; }
 
   int GetChildNumber() const
   {
