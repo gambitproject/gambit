@@ -61,10 +61,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   if (p_entry->m_node->GetParent() && p_entry->m_inSupport) {
     DrawIncomingBranch(p_dc, p_entry);
   }
-  else {
-    p_entry->m_branchAboveRect = wxRect();
-    p_entry->m_branchBelowRect = wxRect();
-  }
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
   const bool selected = (p_selection == p_entry->m_node);
@@ -180,69 +176,38 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
                     yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
-    int textWidth, textHeight;
     p_dc.SetFont(m_doc->GetStyle().GetFont());
-    p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
-
-    // The angle of the branch
-    const double theta =
-        -std::atan(static_cast<double>(yEnd - yStart) / static_cast<double>(xEnd - xStart));
-    // The "centerpoint" of the branch
-    const int xbar = (xStart + xEnd) / 2;
-    const int ybar = (yStart + yEnd) / 2;
 
     if (m_doc->GetStyle().GetBranchLabels() == GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
-      if (yStart >= yEnd) {
-        p_dc.DrawText(p_entry->m_branchAboveLabel, xbar - textWidth / 2,
-                      ybar - textHeight + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        p_entry->m_branchAboveRect =
-            wxRect(xbar - textWidth / 2,
-                   ybar - textHeight + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
-                   textWidth, textHeight);
-      }
-      else {
-        p_dc.DrawText(p_entry->m_branchAboveLabel, xbar - textWidth / 2,
-                      ybar - textHeight - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        p_entry->m_branchAboveRect =
-            wxRect(xbar - textWidth / 2,
-                   ybar - textHeight - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
-                   textWidth, textHeight);
-      }
+      // Position/size were already computed by ComputeBranchGeometry.
+      p_dc.DrawText(p_entry->m_branchAboveLabel, p_entry->m_geometry.branchAbove.GetX(),
+                    p_entry->m_geometry.branchAbove.GetY());
+      p_dc.DrawText(p_entry->m_branchBelowLabel, p_entry->m_geometry.branchBelow.GetX(),
+                    p_entry->m_geometry.branchBelow.GetY());
     }
     else {
-      // Draw the text rotated appropriately
+      // Rotated labels are not independently hit-testable (ComputeBranchGeometry
+      // leaves their rects empty), so their position is only ever needed here,
+      // at paint time.
+      int textWidth, textHeight;
+      p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
+
+      // The angle of the branch
+      const double theta =
+          -std::atan(static_cast<double>(yEnd - yStart) / static_cast<double>(xEnd - xStart));
+      // The "centerpoint" of the branch
+      const int xbar = (xStart + xEnd) / 2;
+      const int ybar = (yStart + yEnd) / 2;
+
       p_dc.DrawRotatedText(
           p_entry->m_branchAboveLabel,
           (xbar - textHeight * std::sin(theta) - textWidth * std::cos(theta) / 2.0),
           (ybar - textHeight * std::cos(theta) + textWidth * std::sin(theta) / 2.0),
           theta * 180.0 / 3.14159);
-      p_entry->m_branchAboveRect = wxRect();
-    }
 
-    p_dc.SetFont(m_doc->GetStyle().GetFont());
-    p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
-
-    if (m_doc->GetStyle().GetBranchLabels() == GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
-      if (yStart >= yEnd) {
-        p_dc.DrawText(p_entry->m_branchBelowLabel, xbar - textWidth / 2,
-                      ybar - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        p_entry->m_branchBelowRect =
-            wxRect(xbar - textWidth / 2, ybar - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
-                   textWidth, textHeight);
-      }
-      else {
-        p_dc.DrawText(p_entry->m_branchBelowLabel, xbar - textWidth / 2,
-                      ybar + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        p_entry->m_branchBelowRect =
-            wxRect(xbar - textWidth / 2, ybar + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
-                   textWidth, textHeight);
-      }
-    }
-    else {
-      // Draw the text rotated appropriately
+      p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
       p_dc.DrawRotatedText(p_entry->m_branchBelowLabel, (xbar - textWidth * std::cos(theta) / 2.0),
                            (ybar + textWidth * std::sin(theta) / 2.0), theta * 180.0 / 3.14159);
-      p_entry->m_branchBelowRect = wxRect();
     }
   }
   else {
@@ -257,23 +222,95 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
                     yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
-    int textWidth, textHeight;
     p_dc.SetFont(m_doc->GetStyle().GetFont());
-    p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
-    p_dc.DrawText(p_entry->m_branchAboveLabel, xStart + p_entry->m_branchLength + 3,
-                  yEnd - textHeight - 3);
-    p_entry->m_branchAboveRect =
-        wxRect(xStart + p_entry->m_branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
-
-    p_dc.SetFont(m_doc->GetStyle().GetFont());
-    p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
-    p_dc.DrawText(p_entry->m_branchBelowLabel, xStart + p_entry->m_branchLength + 3, yEnd + 3);
-    p_entry->m_branchBelowRect =
-        wxRect(xStart + p_entry->m_branchLength + 3, yEnd + +3, textWidth, textHeight);
+    p_dc.DrawText(p_entry->m_branchAboveLabel, p_entry->m_geometry.branchAbove.GetX(),
+                  p_entry->m_geometry.branchAbove.GetY());
+    p_dc.DrawText(p_entry->m_branchBelowLabel, p_entry->m_geometry.branchBelow.GetX(),
+                  p_entry->m_geometry.branchBelow.GetY());
   }
 }
 
-static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value)
+//
+// Computes (without painting) the regions occupied by the incoming branch's
+// above/below labels -- the same geometry DrawIncomingBranch used to compute
+// as a side effect of painting. Rotated-orientation labels are intentionally
+// left as empty rects: they aren't independently hit-testable, and their
+// paint-time position is derived by a formula that doesn't reduce to a rect
+// (see DrawIncomingBranch).
+//
+void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
+{
+  if (!p_entry->m_node->GetParent() || !p_entry->m_inSupport) {
+    p_entry->m_geometry.branchAbove = wxRect();
+    p_entry->m_geometry.branchBelow = wxRect();
+    return;
+  }
+
+  const int xStart = p_entry->m_parent->m_x + p_entry->m_parent->m_size;
+  const int xEnd = p_entry->m_x;
+  const int yStart = p_entry->m_parent->m_y;
+  const int yEnd = p_entry->m_y;
+
+  if (m_doc->GetStyle().GetBranchStyle() != GBT_BRANCH_STYLE_LINE) {
+    // Old style fork-tine
+    int textWidth, textHeight;
+    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
+    p_entry->m_geometry.branchAbove =
+        wxRect(xStart + p_entry->m_branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
+
+    p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
+    p_entry->m_geometry.branchBelow =
+        wxRect(xStart + p_entry->m_branchLength + 3, yEnd + 3, textWidth, textHeight);
+    return;
+  }
+
+  if (m_doc->GetStyle().GetBranchLabels() != GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
+    p_entry->m_geometry.branchAbove = wxRect();
+    p_entry->m_geometry.branchBelow = wxRect();
+    return;
+  }
+
+  int textWidth, textHeight;
+  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
+
+  const int xbar = (xStart + xEnd) / 2;
+  const int ybar = (yStart + yEnd) / 2;
+
+  if (yStart >= yEnd) {
+    p_entry->m_geometry.branchAbove =
+        wxRect(xbar - textWidth / 2,
+               ybar - textHeight + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart), textWidth,
+               textHeight);
+  }
+  else {
+    p_entry->m_geometry.branchAbove =
+        wxRect(xbar - textWidth / 2,
+               ybar - textHeight - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart), textWidth,
+               textHeight);
+  }
+
+  p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
+
+  if (yStart >= yEnd) {
+    p_entry->m_geometry.branchBelow =
+        wxRect(xbar - textWidth / 2, ybar - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
+               textWidth, textHeight);
+  }
+  else {
+    p_entry->m_geometry.branchBelow =
+        wxRect(xbar - textWidth / 2, ybar + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
+               textWidth, textHeight);
+  }
+}
+
+// Computes a fraction's layout at p_point, painting it unless p_paint is false.
+// Always returns the point advanced past the fraction's width, so that both
+// painting (DrawOutcome) and geometry computation (ComputeOutcomeGeometry) can
+// share this single measurement, rather than keeping two copies in sync.
+static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value,
+                            bool p_paint = true)
 {
   p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
 
@@ -289,9 +326,11 @@ static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value
 
   const int width = ((numWidth > denWidth) ? numWidth : denWidth);
 
-  p_dc.DrawLine(p_point.x, p_point.y, p_point.x + width + 4, p_point.y);
-  p_dc.DrawText(num, p_point.x + 2 + (width - numWidth) / 2, p_point.y - 2 - numHeight);
-  p_dc.DrawText(den, p_point.x + 2 + (width - denWidth) / 2, p_point.y + 2);
+  if (p_paint) {
+    p_dc.DrawLine(p_point.x, p_point.y, p_point.x + width + 4, p_point.y);
+    p_dc.DrawText(num, p_point.x + 2 + (width - numWidth) / 2, p_point.y - 2 - numHeight);
+    p_dc.DrawText(den, p_point.x + 2 + (width - denWidth) / 2, p_point.y + 2);
+  }
 
   p_point.x += width + 14;
   return p_point;
@@ -300,44 +339,82 @@ static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value
 void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
                              bool p_noHints) const
 {
-  wxPoint point(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y);
-
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
   if (!outcome) {
     if (p_noHints) {
       return;
     }
-
-    int width, height;
+    // Position/size were already computed by ComputeOutcomeGeometry.
     p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
     p_dc.SetTextForeground(*wxLIGHT_GREY);
-    p_dc.GetTextExtent(wxT("(u)"), &width, &height);
-    p_dc.DrawText(wxT("(u)"), point.x, point.y - height / 2);
-    p_entry->m_outcomeRect = wxRect(point.x, point.y - height / 2, width, height);
-    p_entry->m_payoffRect = Array<wxRect>();
+    p_dc.DrawText(wxT("(u)"), p_entry->m_geometry.outcome.GetX(),
+                  p_entry->m_geometry.outcome.GetY());
     return;
   }
 
-  int width, height = 25;
-  p_entry->m_payoffRect = Array<wxRect>();
+  int playerIndex = 1;
   for (const auto &player : p_entry->m_node->GetGame()->GetPlayers()) {
     p_dc.SetTextForeground(m_doc->GetStyle().GetPlayerColor(player));
 
     const auto &payoff = outcome->GetPayoff<std::string>(player);
+    const wxRect &cell = p_entry->m_geometry.payoffs[playerIndex];
 
     if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
+      DrawFraction(p_dc, wxPoint(cell.GetX() + 5, p_entry->m_y),
+                   outcome->GetPayoff<Rational>(player));
+    }
+    else {
+      const wxString label = wxString(payoff.c_str(), *wxConvCurrent);
+      p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+      p_dc.DrawText(label, cell.GetX() + 5, cell.GetY());
+    }
+    ++playerIndex;
+  }
+}
+
+//
+// Computes (without painting) the outcome/payoff regions for a node -- the
+// same geometry DrawOutcome used to compute as a side effect of painting --
+// and grows m_maxX to account for the outcome label's width.  Unlike
+// DrawOutcome, this always measures as if hints were shown (i.e. as if
+// p_noHints were false): the "no outcome" hint's width is a safe upper bound
+// on what any render mode could need, so using it uniformly for sizing/
+// hit-testing purposes avoids under-sizing bitmap/SVG export (which renders
+// with hints suppressed) relative to on-screen display (which shows them).
+//
+void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
+                                        const std::shared_ptr<NodeEntry> &p_entry) const
+{
+  wxPoint point(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y);
+
+  const GameOutcome outcome = p_entry->m_node->GetOutcome();
+  if (!outcome) {
+    int width, height;
+    p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
+    p_dc.GetTextExtent(wxT("(u)"), &width, &height);
+    p_entry->m_geometry.outcome = wxRect(point.x, point.y - height / 2, width, height);
+    p_entry->m_geometry.payoffs = Array<wxRect>();
+    m_maxX = std::max(m_maxX, p_entry->m_geometry.outcome.GetRight());
+    return;
+  }
+
+  int width, height = 25;
+  p_entry->m_geometry.payoffs = Array<wxRect>();
+  for (const auto &player : p_entry->m_node->GetGame()->GetPlayers()) {
+    const auto &payoff = outcome->GetPayoff<std::string>(player);
+
+    if (payoff.find('/') != std::string::npos) {
       const int oldX = point.x;
-      point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player));
-      p_entry->m_payoffRect.push_back(
+      point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player), false);
+      p_entry->m_geometry.payoffs.push_back(
           wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
     }
     else {
       const wxString label = wxString(payoff.c_str(), *wxConvCurrent);
       p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
       p_dc.GetTextExtent(label, &width, &height);
-      p_dc.DrawText(label, point.x, point.y - height / 2);
-      p_entry->m_payoffRect.push_back(
+      p_entry->m_geometry.payoffs.push_back(
           wxRect(point.x - 5, point.y - height / 2, width + 10, height));
       point.x += width + 10;
     }
@@ -348,8 +425,10 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
     height = 25;
   }
 
-  p_entry->m_outcomeRect = wxRect(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y - height / 2,
-                                  point.x - (p_entry->m_x + p_entry->m_size + 20), height);
+  p_entry->m_geometry.outcome =
+      wxRect(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y - height / 2,
+             point.x - (p_entry->m_x + p_entry->m_size + 20), height);
+  m_maxX = std::max(m_maxX, p_entry->m_geometry.outcome.GetRight());
 }
 
 bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
@@ -629,6 +708,22 @@ void TreeLayout::ComputeRenderedParents() const
   }
 }
 
+void TreeLayout::ComputeGeometry() const
+{
+  // A throwaway off-screen DC, used only to measure text -- wxMemoryDC needs no
+  // on-screen window, unlike wxClientDC, so this needs no window/DC to be
+  // threaded in from the caller. Matches this codebase's existing idiom for
+  // off-screen DC work (e.g. EfgDisplay::MakeOutcomeBitmap, EfgPanel::GetBitmap).
+  wxMemoryDC measureDC;
+  wxBitmap measureBitmap(1, 1);
+  measureDC.SelectObject(measureBitmap);
+
+  for (const auto &entry : m_nodeList) {
+    ComputeBranchGeometry(measureDC, entry);
+    ComputeOutcomeGeometry(measureDC, entry);
+  }
+}
+
 void TreeLayout::BuildNodeList(const GameNode &p_node)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
@@ -673,6 +768,7 @@ void TreeLayout::Layout(const Game &p_game)
 
   ComputeRenderedParents();
   GenerateLabels();
+  ComputeGeometry();
 }
 
 void TreeLayout::GenerateLabels() const
@@ -783,12 +879,6 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 
     if (entry->GetNode()->IsTerminal()) {
       DrawNode(p_dc, entry, m_doc->GetSelectNode(), p_noHints);
-    }
-
-    // As we draw, we determine the outcome label extents.  Adjust the
-    // overall size of the plot accordingly.
-    if (entry->GetOutcomeExtent().GetRight() > m_maxX) {
-      m_maxX = entry->GetOutcomeExtent().GetRight();
     }
   }
 }

@@ -29,6 +29,18 @@
 #include "games/layout.h"
 
 namespace Gambit::GUI {
+
+/// The screen regions associated with a rendered node: the outcome label (or
+/// "no outcome" hint), one payoff cell per player (1-indexed, matching player
+/// numbers), and the two incoming-branch labels. Computed once, up front, by
+/// TreeLayout::ComputeGeometry() -- not as a side effect of painting -- so
+/// that hit-testing is always valid without requiring a prior paint event.
+struct NodeGeometry {
+  wxRect outcome;
+  Array<wxRect> payoffs;
+  wxRect branchAbove, branchBelow;
+};
+
 class NodeEntry {
   friend class TreeLayout;
   GameNode m_node;                     // the corresponding node in the game
@@ -36,9 +48,7 @@ class NodeEntry {
   int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
   bool m_inSupport{true};              // true if node reachable in current support
   int m_size{20};                      // horizontal size of the node
-  mutable wxRect m_outcomeRect;
-  mutable Array<wxRect> m_payoffRect;
-  mutable wxRect m_branchAboveRect, m_branchBelowRect;
+  NodeGeometry m_geometry;
 
   int m_branchLength{0}; // length of branch (exclusive of tine, if present)
 
@@ -88,19 +98,19 @@ public:
 
   bool OutcomeHitTest(const int p_x, const int p_y) const
   {
-    return (m_outcomeRect.Contains(p_x, p_y));
+    return (m_geometry.outcome.Contains(p_x, p_y));
   }
   bool BranchAboveHitTest(const int p_x, const int p_y) const
   {
-    return (m_branchAboveRect.Contains(p_x, p_y));
+    return (m_geometry.branchAbove.Contains(p_x, p_y));
   }
   bool BranchBelowHitTest(const int p_x, const int p_y) const
   {
-    return (m_branchBelowRect.Contains(p_x, p_y));
+    return (m_geometry.branchBelow.Contains(p_x, p_y));
   }
 
-  const wxRect &GetOutcomeExtent() const { return m_outcomeRect; }
-  const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
+  const wxRect &GetOutcomeExtent() const { return m_geometry.outcome; }
+  const wxRect &GetPayoffExtent(int pl) const { return m_geometry.payoffs[pl]; }
 };
 
 class TreeLayout final : public GameView {
@@ -120,6 +130,14 @@ class TreeLayout final : public GameView {
   /// (X coordinate) of all nodes
   void ComputeNodeDepths(const Layout &) const;
   void ComputeRenderedParents() const;
+
+  /// Computes NodeGeometry (outcome/payoff/branch-label regions) for every
+  /// node, and grows m_maxX to account for outcome-label width, all without
+  /// painting anything.  Must run after GenerateLabels() (it measures label
+  /// text) and ComputeRenderedParents() (branch geometry needs m_parent).
+  void ComputeGeometry() const;
+  void ComputeBranchGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
+  void ComputeOutcomeGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
 
   wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;
   wxString CreateBranchLabel(const std::shared_ptr<NodeEntry> &, int) const;

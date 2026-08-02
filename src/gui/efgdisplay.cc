@@ -1077,14 +1077,7 @@ void EfgDisplay::OnDraw(wxDC &p_dc)
 {
   p_dc.SetUserScale(GetScale(), GetScale());
   p_dc.Clear();
-  const int maxX = m_layout.MaxX();
   m_layout.Render(p_dc, false);
-  // When we draw, we might change the location of the right margin
-  // (because of the outcome labels).  Make sure scrollbars are adjusted
-  // to reflect this.
-  if (maxX != m_layout.MaxX()) {
-    AdjustScrollbarSteps();
-  }
 }
 
 void EfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
@@ -1095,18 +1088,9 @@ void EfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
 
   p_dc.SetUserScale(GetScale(), GetScale());
   p_dc.Clear();
-  const int maxX = m_layout.MaxX();
-  // A second hack: this is usually only called by functions for hardcopy
-  // output (printouts or graphics images).  We want to suppress the
-  // use of the "hints" for these.
-  // FIXME: Of course, this hack implies some useful refactor is called for!
+  // This is usually only called by functions for hardcopy output (printouts
+  // or graphics images).  We want to suppress the use of the "hints" for these.
   m_layout.Render(p_dc, true);
-  // When we draw, we might change the location of the right margin
-  // (because of the outcome labels).  Make sure scrollbars are adjusted
-  // to reflect this.
-  if (maxX != m_layout.MaxX()) {
-    AdjustScrollbarSteps();
-  }
 
   m_zoom = saveZoom;
 }
