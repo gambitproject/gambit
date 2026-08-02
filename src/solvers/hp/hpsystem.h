@@ -27,9 +27,12 @@
 
 namespace Gambit {
 
+class HPEquation;
+
 class HPEquationSystem {
 public:
-  HPEquationSystem(const MixedStrategyProfile<double> &prior);
+  explicit HPEquationSystem(const MixedStrategyProfile<double> &prior);
+  ~HPEquationSystem() = default;
 
   // Evaluates H(t, alpha, mu) = 0
   void GetValue(const Vector<double> &point, Vector<double> &lhs) const;
@@ -48,22 +51,7 @@ private:
   std::vector<double> m_payoffs_against_prior;
   int m_star;
   mutable MixedStrategyProfile<double> m_current_sigma;
-
-  // Transforms alpha to sigma and lambda
-  inline double AlphaToSigma(double alpha) const { return (alpha > 0.0) ? (alpha * alpha) : 0.0; }
-  inline double AlphaToLambda(double alpha) const { return (alpha < 0.0) ? (alpha * alpha) : 0.0; }
-
-  // d(sigma)/d(alpha)
-  inline double AlphaToSigmaDeriv(double alpha) const { return (alpha > 0.0) ? 2.0 * alpha : 0.0; }
-  // d(lambda)/d(alpha)
-  inline double AlphaToLambdaDeriv(double alpha) const
-  {
-    return (alpha < 0.0) ? 2.0 * alpha : 0.0;
-  }
-
-  // v^i(t, s)
-  double CalculateDynamicPayoff(int action_index, const GameStrategy &strategy,
-                                const MixedStrategyProfile<double> &current_sigma, double t) const;
+  std::vector<std::shared_ptr<HPEquation>> m_equations;
 };
 
 } // namespace Gambit
