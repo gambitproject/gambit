@@ -1255,6 +1255,16 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     return;
   }
 
+  if (m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL) {
+    node = m_layout.BranchAboveHitTest(x, y);
+    if (node) {
+      m_doc->SetSelectNode(node);
+      const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
+      wxPostEvent(this, event);
+      return;
+    }
+  }
+
   if (m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL) {
     node = m_layout.BranchBelowHitTest(x, y);
     if (node) {
