@@ -864,13 +864,13 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
   case WXK_LEFT:
     if (selectNode->GetParent()) {
-      m_doc->SetSelectNode(m_layout.GetRenderedAncestor(selectNode)->GetNode());
+      m_doc->SetSelectNode(selectNode->GetParent());
       EnsureNodeVisible(m_doc->GetSelectNode());
     }
     return;
   case WXK_RIGHT:
-    if (m_layout.GetRenderedDescendant(selectNode)) {
-      m_doc->SetSelectNode(m_layout.GetRenderedDescendant(selectNode)->GetNode());
+    if (selectNode->GetChildren().size() > 0) {
+      m_doc->SetSelectNode(selectNode->GetChildren().front());
       EnsureNodeVisible(m_doc->GetSelectNode());
     }
     return;

@@ -47,7 +47,7 @@ NodeTokenStyle GetTokenForNode(const TreeRenderConfig &p_style, const GameNode &
 
 int ComputeLevelProportionalX(const std::list<std::shared_ptr<NodeEntry>> &p_nodeList,
                               const Gambit::Layout &p_layout, int p_leftMargin, int p_levelLength,
-                              int p_infosetSpacing)
+                              int p_infosetSpacing, int p_nodeSize)
 {
   std::vector<int> aggregateSublevels;
   std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
@@ -59,7 +59,7 @@ int ComputeLevelProportionalX(const std::list<std::shared_ptr<NodeEntry>> &p_nod
       x += (aggregateSublevels[entry->GetLevel() - 1] + entry->GetSublevel()) * p_infosetSpacing;
     }
     entry->SetX(x);
-    maxX = std::max(maxX, x + entry->GetSize());
+    maxX = std::max(maxX, x + p_nodeSize);
   }
   return maxX;
 }
@@ -77,7 +77,9 @@ int ComputeLevelProportionalX(const std::list<std::shared_ptr<NodeEntry>> &p_nod
 void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
                           const GameNode &p_selection, bool p_noHints) const
 {
-  if (p_entry->m_node->GetParent() && p_entry->m_inSupport) {
+  const int nodeSize = m_doc->GetStyle().GetNodeSize();
+
+  if (p_entry->m_node->GetParent()) {
     DrawIncomingBranch(p_dc, p_entry);
   }
 
@@ -86,19 +88,19 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
 
   if (selected) {
     constexpr int selectionPadding = 6;
-    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+    const int selectionSize = nodeSize + 2 * selectionPadding;
 
     p_dc.SetPen(*wxTRANSPARENT_PEN);
     p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
 
     if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
       p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
-                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                nodeSize + 2 * selectionPadding, 2 * selectionPadding,
                                 selectionPadding);
     }
     else {
       p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
-                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       p_entry->m_y - nodeSize / 2 - selectionPadding, selectionSize,
                        selectionSize);
     }
   }
@@ -107,7 +109,7 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   p_dc.SetTextForeground(color);
 
   if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
-    p_dc.DrawLine(p_entry->m_x, p_entry->m_y, p_entry->m_x + p_entry->m_size, p_entry->m_y);
+    p_dc.DrawLine(p_entry->m_x, p_entry->m_y, p_entry->m_x + nodeSize, p_entry->m_y);
     if (m_doc->GetStyle().GetBranchStyle() == GBT_BRANCH_STYLE_FORKTINE) {
       // "classic" Gambit style: draw a small 'token' to separate
       // the fork from the node
@@ -116,46 +118,42 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
   else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_BOX) {
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawRectangle(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
-                       p_entry->m_size);
+    p_dc.DrawRectangle(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
   }
   else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DIAMOND) {
-    wxPoint points[4] = {
-        wxPoint(p_entry->m_x + p_entry->m_size / 2, p_entry->m_y - p_entry->m_size / 2),
-        wxPoint(p_entry->m_x, p_entry->m_y),
-        wxPoint(p_entry->m_x + p_entry->m_size / 2, p_entry->m_y + p_entry->m_size / 2),
-        wxPoint(p_entry->m_x + p_entry->m_size, p_entry->m_y)};
+    wxPoint points[4] = {wxPoint(p_entry->m_x + nodeSize / 2, p_entry->m_y - nodeSize / 2),
+                         wxPoint(p_entry->m_x, p_entry->m_y),
+                         wxPoint(p_entry->m_x + nodeSize / 2, p_entry->m_y + nodeSize / 2),
+                         wxPoint(p_entry->m_x + nodeSize, p_entry->m_y)};
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawPolygon(4, points);
   }
   else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DOT) {
     p_dc.SetBrush(wxBrush(m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer()),
                           wxBRUSHSTYLE_SOLID));
-    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
-                     p_entry->m_size);
+    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
   }
   else {
     // Default: draw circles
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
-                     p_entry->m_size);
+    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
   }
 
   if (selected) {
     constexpr int selectionPadding = 6;
-    const int selectionSize = p_entry->m_size + 2 * selectionPadding;
+    const int selectionSize = nodeSize + 2 * selectionPadding;
 
     p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
     p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
     if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
       p_dc.DrawRoundedRectangle(p_entry->m_x - selectionPadding, p_entry->m_y - selectionPadding,
-                                p_entry->m_size + 2 * selectionPadding, 2 * selectionPadding,
+                                nodeSize + 2 * selectionPadding, 2 * selectionPadding,
                                 selectionPadding);
     }
     else {
       p_dc.DrawEllipse(p_entry->m_x - selectionPadding,
-                       p_entry->m_y - p_entry->m_size / 2 - selectionPadding, selectionSize,
+                       p_entry->m_y - nodeSize / 2 - selectionPadding, selectionSize,
                        selectionSize);
     }
   }
@@ -163,11 +161,11 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   int textWidth, textHeight;
   p_dc.SetFont(m_doc->GetStyle().GetFont());
   p_dc.GetTextExtent(p_entry->m_nodeAboveLabel, &textWidth, &textHeight);
-  p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->m_x + (p_entry->m_size - textWidth) / 2,
+  p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->m_x + (nodeSize - textWidth) / 2,
                 p_entry->m_y - textHeight - 9);
   p_dc.SetFont(m_doc->GetStyle().GetFont());
   p_dc.GetTextExtent(p_entry->m_nodeBelowLabel, &textWidth, &textHeight);
-  p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->m_x + (p_entry->m_size - textWidth) / 2,
+  p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->m_x + (nodeSize - textWidth) / 2,
                 p_entry->m_y + 9);
 
   p_dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
@@ -176,7 +174,7 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
 
 void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
 {
-  const int xStart = p_entry->m_parent->m_x + p_entry->m_parent->m_size;
+  const int xStart = p_entry->m_parent->m_x + m_doc->GetStyle().GetNodeSize();
   const int xEnd = p_entry->m_x;
   const int yStart = p_entry->m_parent->m_y;
   const int yEnd = p_entry->m_y;
@@ -231,13 +229,14 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
   }
   else {
     // Old style fork-tine
-    p_dc.DrawLine(xStart, yStart, xStart + p_entry->m_branchLength, yEnd);
-    p_dc.DrawLine(xStart + p_entry->m_branchLength, yEnd, xEnd, yEnd);
+    const int branchLength = m_doc->GetStyle().GetBranchLength();
+    p_dc.DrawLine(xStart, yStart, xStart + branchLength, yEnd);
+    p_dc.DrawLine(xStart + branchLength, yEnd, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
     if (p_entry->m_actionProb >= 0.0) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxPENSTYLE_SOLID));
-      p_dc.DrawLine(xStart, yStart, xStart + p_entry->m_branchLength * p_entry->m_actionProb,
+      p_dc.DrawLine(xStart, yStart, xStart + branchLength * p_entry->m_actionProb,
                     yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
@@ -259,28 +258,29 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
 //
 void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
 {
-  if (!p_entry->m_node->GetParent() || !p_entry->m_inSupport) {
+  if (!p_entry->m_node->GetParent()) {
     p_entry->m_geometry.branchAbove = wxRect();
     p_entry->m_geometry.branchBelow = wxRect();
     return;
   }
 
-  const int xStart = p_entry->m_parent->m_x + p_entry->m_parent->m_size;
+  const int xStart = p_entry->m_parent->m_x + m_doc->GetStyle().GetNodeSize();
   const int xEnd = p_entry->m_x;
   const int yStart = p_entry->m_parent->m_y;
   const int yEnd = p_entry->m_y;
 
   if (m_doc->GetStyle().GetBranchStyle() != GBT_BRANCH_STYLE_LINE) {
     // Old style fork-tine
+    const int branchLength = m_doc->GetStyle().GetBranchLength();
     int textWidth, textHeight;
     p_dc.SetFont(m_doc->GetStyle().GetFont());
     p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
     p_entry->m_geometry.branchAbove =
-        wxRect(xStart + p_entry->m_branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
+        wxRect(xStart + branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
 
     p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
     p_entry->m_geometry.branchBelow =
-        wxRect(xStart + p_entry->m_branchLength + 3, yEnd + 3, textWidth, textHeight);
+        wxRect(xStart + branchLength + 3, yEnd + 3, textWidth, textHeight);
     return;
   }
 
@@ -405,7 +405,8 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
 void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
                                         const std::shared_ptr<NodeEntry> &p_entry) const
 {
-  wxPoint point(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y);
+  const int nodeSize = m_doc->GetStyle().GetNodeSize();
+  wxPoint point(p_entry->m_x + nodeSize + 20, p_entry->m_y);
 
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
   if (!outcome) {
@@ -444,16 +445,16 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
     height = 25;
   }
 
-  p_entry->m_geometry.outcome =
-      wxRect(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y - height / 2,
-             point.x - (p_entry->m_x + p_entry->m_size + 20), height);
+  p_entry->m_geometry.outcome = wxRect(p_entry->m_x + nodeSize + 20, p_entry->m_y - height / 2,
+                                       point.x - (p_entry->m_x + nodeSize + 20), height);
   m_maxX = std::max(m_maxX, p_entry->m_geometry.outcome.GetRight());
 }
 
 bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
                              const int p_y) const
 {
-  if (p_x < p_entry->m_x || p_x >= p_entry->m_x + p_entry->m_size) {
+  const int nodeSize = m_doc->GetStyle().GetNodeSize();
+  if (p_x < p_entry->m_x || p_x >= p_entry->m_x + nodeSize) {
     return false;
   }
 
@@ -461,7 +462,7 @@ bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const in
     constexpr int DELTA = 8; // a fudge factor for "almost" hitting the node
     return (p_y >= p_entry->m_y - DELTA && p_y <= p_entry->m_y + DELTA);
   }
-  return (p_y >= p_entry->m_y - p_entry->m_size / 2 && p_y <= p_entry->m_y + p_entry->m_size / 2);
+  return (p_y >= p_entry->m_y - nodeSize / 2 && p_y <= p_entry->m_y + nodeSize / 2);
 }
 
 //-----------------------------------------------------------------------
@@ -640,32 +641,6 @@ wxString TreeLayout::CreateBranchLabel(const std::shared_ptr<NodeEntry> &p_entry
   }
 }
 
-std::shared_ptr<NodeEntry> TreeLayout::GetRenderedAncestor(const GameNode &p_node) const
-{
-  auto n = p_node;
-  auto entry = GetNodeEntry(n->GetParent());
-  while (!entry) {
-    n = n->GetParent();
-    entry = GetNodeEntry(n->GetParent());
-  }
-  return entry;
-}
-
-std::shared_ptr<NodeEntry> TreeLayout::GetRenderedDescendant(const GameNode &p_node) const
-{
-  for (const auto &child : p_node->GetChildren()) {
-    auto n = GetNodeEntry(child);
-    if (n) {
-      return n;
-    }
-    n = GetRenderedDescendant(child);
-    if (n) {
-      return n;
-    }
-  }
-  return nullptr;
-}
-
 GameNode TreeLayout::PriorSameLevel(const GameNode &p_node) const
 {
   if (auto entry = GetNodeEntry(p_node)) {
@@ -725,14 +700,8 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) cons
 void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
 {
   m_maxX = ComputeLevelProportionalX(m_nodeList, p_layout, c_leftMargin,
-                                     m_doc->GetStyle().GetNodeLevelLength(), m_infosetSpacing);
-}
-
-void TreeLayout::ComputeRenderedParents() const
-{
-  for (const auto &e : m_nodeList) {
-    e->m_parent = (e->m_node == m_doc->GetGame()->GetRoot()) ? e : GetRenderedAncestor(e->m_node);
-  }
+                                     m_doc->GetStyle().GetNodeLevelLength(), m_infosetSpacing,
+                                     m_doc->GetStyle().GetNodeSize());
 }
 
 void TreeLayout::ComputeGeometry() const
@@ -751,15 +720,15 @@ void TreeLayout::ComputeGeometry() const
   }
 }
 
-void TreeLayout::BuildNodeList(const GameNode &p_node)
+void TreeLayout::BuildNodeList(const GameNode &p_node,
+                               const std::shared_ptr<NodeEntry> &p_parentEntry)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
-  entry->m_size = m_doc->GetStyle().GetNodeSize();
-  entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
+  entry->m_parent = p_parentEntry;
   for (const auto &child : p_node->GetChildren()) {
-    BuildNodeList(child);
+    BuildNodeList(child, entry);
   }
 }
 
@@ -767,7 +736,7 @@ void TreeLayout::BuildNodeList(const Game &p_game)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
-  BuildNodeList(p_game->GetRoot());
+  BuildNodeList(p_game->GetRoot(), nullptr);
 }
 
 void TreeLayout::Layout(const Game &p_game)
@@ -793,7 +762,6 @@ void TreeLayout::Layout(const Game &p_game)
       c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset());
   ComputeNodeDepths(layout);
 
-  ComputeRenderedParents();
   GenerateLabels();
   ComputeGeometry();
 }
@@ -868,8 +836,8 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 #endif // __WXGTK__
         p_dc.DrawLine(parentEntry->m_x, parentEntry->m_y, parentEntry->m_x, nextY);
         if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
-          p_dc.DrawLine(parentEntry->m_x + parentEntry->GetSize(), parentEntry->m_y,
-                        parentEntry->m_x + parentEntry->GetSize(), nextY);
+          p_dc.DrawLine(parentEntry->m_x + settings.GetNodeSize(), parentEntry->m_y,
+                        parentEntry->m_x + settings.GetNodeSize(), nextY);
         }
 
         if (nextMember->m_x != parentEntry->m_x) {
@@ -882,13 +850,13 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
           else {
             if (nextMember->m_x < parentEntry->m_x) {
               // information set is continued to the left
-              startX = parentEntry->m_x + parentEntry->GetSize();
+              startX = parentEntry->m_x + settings.GetNodeSize();
               endX = parentEntry->m_x - m_infosetSpacing;
             }
             else {
               // information set is continued to the right
               startX = parentEntry->m_x;
-              endX = (parentEntry->m_x + parentEntry->GetSize() + m_infosetSpacing);
+              endX = (parentEntry->m_x + settings.GetNodeSize() + m_infosetSpacing);
             }
           }
           p_dc.DrawLine(startX, nextY, endX, nextY);

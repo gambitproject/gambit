@@ -46,11 +46,7 @@ class NodeEntry {
   GameNode m_node;                     // the corresponding node in the game
   std::shared_ptr<NodeEntry> m_parent; // parent node
   int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
-  bool m_inSupport{true};              // true if node reachable in current support
-  int m_size{20};                      // horizontal size of the node
   NodeGeometry m_geometry;
-
-  int m_branchLength{0}; // length of branch (exclusive of tine, if present)
 
   int m_level{0};         // depth of the node in tree
   int m_sublevel{0};      // # of the infoset line on this level
@@ -74,10 +70,6 @@ public:
   {
     return (m_node->GetParent()) ? m_node->GetPriorAction()->GetNumber() : 0;
   }
-
-  int GetSize() const { return m_size; }
-
-  int GetBranchLength() const { return m_branchLength; }
 
   int GetLevel() const { return m_level; }
   int GetSublevel() const { return m_sublevel; }
@@ -141,19 +133,20 @@ class TreeLayout final : public GameView {
 
   std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &) const;
 
-  void BuildNodeList(const GameNode &);
+  /// Creates the NodeEntry for p_node (and recursively, its descendants),
+  /// linking each to p_parentEntry (nullptr for the root).
+  void BuildNodeList(const GameNode &p_node, const std::shared_ptr<NodeEntry> &p_parentEntry);
 
   /// Based on node levels and information set sublevels, compute the depth
   /// (X coordinate) of all nodes. The actual placement strategy is the free
   /// function ComputeLevelProportionalX in efglayout.cc; this just supplies
   /// it with this instance's style/spacing parameters.
   void ComputeNodeDepths(const Layout &) const;
-  void ComputeRenderedParents() const;
 
   /// Computes NodeGeometry (outcome/payoff/branch-label regions) for every
   /// node, and grows m_maxX to account for outcome-label width, all without
   /// painting anything.  Must run after GenerateLabels() (it measures label
-  /// text) and ComputeRenderedParents() (branch geometry needs m_parent).
+  /// text); relies on each entry's m_parent, set once by BuildNodeList.
   void ComputeGeometry() const;
   void ComputeBranchGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void ComputeOutcomeGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
@@ -188,12 +181,6 @@ public:
   {
     return m_nodeMap.at(p_node);
   }
-  /// Return the layout entry for the most immediate predecessor of p_node
-  /// which is rendered in the layout
-  std::shared_ptr<NodeEntry> GetRenderedAncestor(const GameNode &p_node) const;
-  /// Return the layout entry for the first descendant node of p_node
-  /// which is rendered in the layout, as determined by the depth-first traversal.
-  std::shared_ptr<NodeEntry> GetRenderedDescendant(const GameNode &p_node) const;
 
   int MaxX() const { return m_maxX; }
   int MaxY() const { return m_maxY; }
