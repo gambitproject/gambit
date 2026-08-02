@@ -23,12 +23,27 @@
 #ifndef STYLE_H
 #define STYLE_H
 
+#include <functional>
+
 #include "gambit.h"
 #include "games/workspace.h"
 
 class wxFont;
 
 namespace Gambit::GUI {
+
+// Forward-declared rather than included: gamedoc.h includes this header, so
+// including gamedoc.h here would be circular. Only a reference is needed at
+// this point; the label-generator methods that use it are implemented in
+// style.cc, which can include gamedoc.h freely.
+class AnalysisWorkspace;
+
+/// A function that computes a node's (or a branch's) label text. Callers
+/// (TreeLayout) don't need to know how many label styles exist or what each
+/// one means -- see TreeRenderConfig::GetNodeLabelGenerator/
+/// GetBranchLabelGenerator, which translate a style enum into one of these.
+using LabelGenerator = std::function<wxString(const GameNode &)>;
+
 enum NodeTokenStyle {
   GBT_NODE_TOKEN_LINE,
   GBT_NODE_TOKEN_BOX,
@@ -156,6 +171,11 @@ public:
 
   BranchLabelStyle GetBranchBelowLabel() const { return m_branchBelowLabel; }
   void SetBranchBelowLabel(BranchLabelStyle p_label) { m_branchBelowLabel = p_label; }
+
+  LabelGenerator GetNodeLabelGenerator(NodeLabelStyle p_which,
+                                       const AnalysisWorkspace &p_workspace) const;
+  LabelGenerator GetBranchLabelGenerator(BranchLabelStyle p_which,
+                                         const AnalysisWorkspace &p_workspace) const;
 
   // Fonts
   const wxFont &GetFont() const { return m_font; }

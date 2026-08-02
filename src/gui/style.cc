@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <map>
 #include <sstream>
 
 #ifndef WX_PRECOMP
@@ -27,6 +28,7 @@
 #endif // WX_PRECOMP
 
 #include "style.h"
+#include "gamedoc.h" // for AnalysisWorkspace's complete type -- only needed here, not in style.h
 
 namespace Gambit::GUI {
 //===========================================================================
@@ -95,6 +97,136 @@ void TreeRenderConfig::SetDefaults()
   for (size_t pl = 1; pl <= m_playerColors.size(); pl++) {
     m_playerColors[pl] = s_defaultColors[(pl - 1) % 8];
   }
+}
+
+namespace {
+
+wxString EmptyLabel(const GameNode &, const AnalysisWorkspace &) { return {}; }
+
+wxString NodeLabelText(const GameNode &n, const AnalysisWorkspace &)
+{
+  return {n->GetLabel().c_str(), *wxConvCurrent};
+}
+
+wxString PlayerLabel(const GameNode &n, const AnalysisWorkspace &)
+{
+  if (!n->GetPlayer()) {
+    return {};
+  }
+  return {n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent};
+}
+
+wxString InfosetLabel(const GameNode &n, const AnalysisWorkspace &)
+{
+  if (!n->GetInfoset()) {
+    return {};
+  }
+  return {n->GetInfoset()->GetLabel().c_str(), *wxConvCurrent};
+}
+
+wxString InfosetIdLabel(const GameNode &n, const AnalysisWorkspace &)
+{
+  if (!n->GetInfoset()) {
+    return {};
+  }
+  wxString label;
+  if (n->GetInfoset()->IsChanceInfoset()) {
+    label << "C:" << n->GetInfoset()->GetNumber();
+  }
+  else {
+    label << n->GetPlayer()->GetNumber() << ":" << n->GetInfoset()->GetNumber();
+  }
+  return label;
+}
+
+wxString RealizProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
+{
+  return {p_workspace.GetProfiles().GetRealizProb(n).c_str(), *wxConvCurrent};
+}
+
+wxString BeliefProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
+{
+  return {p_workspace.GetProfiles().GetBeliefProb(n).c_str(), *wxConvCurrent};
+}
+
+wxString NodeValueLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
+{
+  if (!n->GetInfoset() || n->GetPlayer()->GetNumber() <= 0) {
+    return {};
+  }
+  return {p_workspace.GetProfiles().GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(),
+          *wxConvCurrent};
+}
+
+using NodeLabelFunction = wxString (*)(const GameNode &, const AnalysisWorkspace &);
+
+const std::map<NodeLabelStyle, NodeLabelFunction> s_nodeLabelFunctions = {
+    {GBT_NODE_LABEL_NOTHING, &EmptyLabel},         {GBT_NODE_LABEL_LABEL, &NodeLabelText},
+    {GBT_NODE_LABEL_PLAYER, &PlayerLabel},         {GBT_NODE_LABEL_ISETLABEL, &InfosetLabel},
+    {GBT_NODE_LABEL_ISETID, &InfosetIdLabel},      {GBT_NODE_LABEL_REALIZPROB, &RealizProbLabel},
+    {GBT_NODE_LABEL_BELIEFPROB, &BeliefProbLabel}, {GBT_NODE_LABEL_VALUE, &NodeValueLabel},
+};
+
+wxString BranchLabelText(const GameNode &n, const AnalysisWorkspace &)
+{
+  const GameNode parent = n->GetParent();
+  const int childNumber = n->GetPriorAction()->GetNumber();
+  return {parent->GetInfoset()->GetAction(childNumber)->GetLabel().c_str(), *wxConvCurrent};
+}
+
+wxString BranchProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
+{
+  const GameNode parent = n->GetParent();
+  const int childNumber = n->GetPriorAction()->GetNumber();
+  if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
+    return {static_cast<std::string>(
+                parent->GetInfoset()->GetActionProb(parent->GetInfoset()->GetAction(childNumber)))
+                .c_str(),
+            *wxConvCurrent};
+  }
+  if (p_workspace.NumProfileLists() == 0) {
+    return {};
+  }
+  return {p_workspace.GetProfiles().GetActionProb(parent, childNumber).c_str(), *wxConvCurrent};
+}
+
+wxString BranchValueLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
+{
+  if (p_workspace.NumProfileLists() == 0) {
+    return {};
+  }
+  const GameNode parent = n->GetParent();
+  const int childNumber = n->GetPriorAction()->GetNumber();
+  return {p_workspace.GetProfiles().GetActionValue(parent, childNumber).c_str(), *wxConvCurrent};
+}
+
+using BranchLabelFunction = wxString (*)(const GameNode &, const AnalysisWorkspace &);
+
+const std::map<BranchLabelStyle, BranchLabelFunction> s_branchLabelFunctions = {
+    {GBT_BRANCH_LABEL_NOTHING, &EmptyLabel},
+    {GBT_BRANCH_LABEL_LABEL, &BranchLabelText},
+    {GBT_BRANCH_LABEL_PROBS, &BranchProbLabel},
+    {GBT_BRANCH_LABEL_VALUE, &BranchValueLabel},
+};
+
+} // namespace
+
+LabelGenerator TreeRenderConfig::GetNodeLabelGenerator(NodeLabelStyle p_which,
+                                                       const AnalysisWorkspace &p_workspace) const
+{
+  const auto iter = s_nodeLabelFunctions.find(p_which);
+  const NodeLabelFunction fn = (iter != s_nodeLabelFunctions.end()) ? iter->second : &EmptyLabel;
+  return [fn, &p_workspace](const GameNode &n) { return fn(n, p_workspace); };
+}
+
+LabelGenerator
+TreeRenderConfig::GetBranchLabelGenerator(BranchLabelStyle p_which,
+                                          const AnalysisWorkspace &p_workspace) const
+{
+  const auto iter = s_branchLabelFunctions.find(p_which);
+  const BranchLabelFunction fn =
+      (iter != s_branchLabelFunctions.end()) ? iter->second : &EmptyLabel;
+  return [fn, &p_workspace](const GameNode &n) { return fn(n, p_workspace); };
 }
 
 void TreeRenderConfig::Save(LegacyWorkspaceFile &p_workspace) const

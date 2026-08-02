@@ -64,6 +64,18 @@ int ComputeLevelProportionalX(const std::list<std::shared_ptr<NodeEntry>> &p_nod
   return maxX;
 }
 
+// Label generators can throw (e.g. querying a profile value that isn't
+// computed yet); a missing label should just render as blank, not crash.
+wxString SafeGenerate(const LabelGenerator &p_generator, const GameNode &p_node)
+{
+  try {
+    return p_generator(p_node);
+  }
+  catch (...) {
+    return wxT("");
+  }
+}
+
 } // namespace
 
 //-----------------------------------------------------------------------
@@ -531,120 +543,6 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
   return {};
 }
 
-wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, int p_which) const
-{
-  const GameNode n = p_entry->GetNode();
-
-  try {
-    switch (p_which) {
-    case GBT_NODE_LABEL_NOTHING:
-      return wxT("");
-    case GBT_NODE_LABEL_LABEL:
-      return {n->GetLabel().c_str(), *wxConvCurrent};
-    case GBT_NODE_LABEL_PLAYER:
-      if (n->GetPlayer()) {
-        return {n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent};
-      }
-      else {
-        return wxT("");
-      }
-    case GBT_NODE_LABEL_ISETLABEL:
-      if (n->GetInfoset()) {
-        return {n->GetInfoset()->GetLabel().c_str(), *wxConvCurrent};
-      }
-      else {
-        return wxT("");
-      }
-    case GBT_NODE_LABEL_ISETID:
-      if (n->GetInfoset()) {
-        if (n->GetInfoset()->IsChanceInfoset()) {
-          wxString label;
-          label << "C:" << n->GetInfoset()->GetNumber();
-          return label;
-        }
-        else {
-          wxString label;
-          label << n->GetPlayer()->GetNumber() << ":" << n->GetInfoset()->GetNumber();
-          return label;
-        }
-      }
-      else {
-        return _T("");
-      }
-    case GBT_NODE_LABEL_REALIZPROB:
-      return {m_doc->GetWorkspace().GetProfiles().GetRealizProb(n).c_str(), *wxConvCurrent};
-    case GBT_NODE_LABEL_BELIEFPROB:
-      return {m_doc->GetWorkspace().GetProfiles().GetBeliefProb(n).c_str(), *wxConvCurrent};
-    case GBT_NODE_LABEL_VALUE:
-      if (n->GetInfoset() && n->GetPlayer()->GetNumber() > 0) {
-        return {m_doc->GetWorkspace()
-                    .GetProfiles()
-                    .GetNodeValue(n, n->GetPlayer()->GetNumber())
-                    .c_str(),
-                *wxConvCurrent};
-      }
-      else {
-        return wxT("");
-      }
-    default:
-      return wxT("");
-    }
-  }
-  catch (...) {
-    return wxT("");
-  }
-}
-
-wxString TreeLayout::CreateBranchLabel(const std::shared_ptr<NodeEntry> &p_entry,
-                                       int p_which) const
-{
-  const GameNode parent = p_entry->GetParent()->GetNode();
-
-  try {
-    switch (p_which) {
-    case GBT_BRANCH_LABEL_NOTHING:
-      return wxT("");
-    case GBT_BRANCH_LABEL_LABEL:
-      return {parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(),
-              *wxConvCurrent};
-    case GBT_BRANCH_LABEL_PROBS:
-      if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
-        return {static_cast<std::string>(
-                    parent->GetInfoset()->GetActionProb(
-                        parent->GetInfoset()->GetAction(p_entry->GetChildNumber())))
-                    .c_str(),
-                *wxConvCurrent};
-      }
-      else if (m_doc->GetWorkspace().NumProfileLists() == 0) {
-        return wxT("");
-      }
-      else {
-        return {m_doc->GetWorkspace()
-                    .GetProfiles()
-                    .GetActionProb(parent, p_entry->GetChildNumber())
-                    .c_str(),
-                *wxConvCurrent};
-      }
-    case GBT_BRANCH_LABEL_VALUE:
-      if (m_doc->GetWorkspace().NumProfileLists() == 0) {
-        return wxT("");
-      }
-      else {
-        return {m_doc->GetWorkspace()
-                    .GetProfiles()
-                    .GetActionValue(parent, p_entry->GetChildNumber())
-                    .c_str(),
-                *wxConvCurrent};
-      }
-    default:
-      return wxT("");
-    }
-  }
-  catch (...) {
-    return wxT("");
-  }
-}
-
 GameNode TreeLayout::PriorSameLevel(const GameNode &p_node) const
 {
   if (auto entry = GetNodeEntry(p_node)) {
@@ -774,12 +672,24 @@ void TreeLayout::Layout(const Game &p_game)
 void TreeLayout::GenerateLabels() const
 {
   const TreeRenderConfig &settings = m_doc->GetStyle();
+  const auto &workspace = m_doc->GetWorkspace();
+  // The style resolves each label choice into a function once here, rather
+  // than TreeLayout re-interpreting the style enum for every node.
+  const LabelGenerator nodeAbove =
+      settings.GetNodeLabelGenerator(settings.GetNodeAboveLabel(), workspace);
+  const LabelGenerator nodeBelow =
+      settings.GetNodeLabelGenerator(settings.GetNodeBelowLabel(), workspace);
+  const LabelGenerator branchAbove =
+      settings.GetBranchLabelGenerator(settings.GetBranchAboveLabel(), workspace);
+  const LabelGenerator branchBelow =
+      settings.GetBranchLabelGenerator(settings.GetBranchBelowLabel(), workspace);
+
   for (const auto &entry : m_nodeList) {
-    entry->SetNodeAboveLabel(CreateNodeLabel(entry, settings.GetNodeAboveLabel()));
-    entry->SetNodeBelowLabel(CreateNodeLabel(entry, settings.GetNodeBelowLabel()));
+    entry->SetNodeAboveLabel(SafeGenerate(nodeAbove, entry->GetNode()));
+    entry->SetNodeBelowLabel(SafeGenerate(nodeBelow, entry->GetNode()));
     if (entry->GetChildNumber() > 0) {
-      entry->SetBranchAboveLabel(CreateBranchLabel(entry, settings.GetBranchAboveLabel()));
-      entry->SetBranchBelowLabel(CreateBranchLabel(entry, settings.GetBranchBelowLabel()));
+      entry->SetBranchAboveLabel(SafeGenerate(branchAbove, entry->GetNode()));
+      entry->SetBranchBelowLabel(SafeGenerate(branchBelow, entry->GetNode()));
 
       const GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {

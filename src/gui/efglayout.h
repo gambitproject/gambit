@@ -165,9 +165,6 @@ class TreeLayout final : public GameView {
   void ComputeBranchGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void ComputeOutcomeGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
 
-  wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;
-  wxString CreateBranchLabel(const std::shared_ptr<NodeEntry> &, int) const;
-
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
   // Overriding GameView members
