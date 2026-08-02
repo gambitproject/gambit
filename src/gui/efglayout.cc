@@ -45,6 +45,25 @@ NodeTokenStyle GetTokenForNode(const TreeRenderConfig &p_style, const GameNode &
   return p_style.GetPlayerToken();
 }
 
+int ComputeLevelProportionalX(const std::list<std::shared_ptr<NodeEntry>> &p_nodeList,
+                              const Gambit::Layout &p_layout, int p_leftMargin, int p_levelLength,
+                              int p_infosetSpacing)
+{
+  std::vector<int> aggregateSublevels;
+  std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
+                   std::back_inserter(aggregateSublevels));
+  int maxX = 0;
+  for (const auto &entry : p_nodeList) {
+    int x = p_leftMargin + entry->GetLevel() * p_levelLength;
+    if (entry->GetLevel() != 0) {
+      x += (aggregateSublevels[entry->GetLevel() - 1] + entry->GetSublevel()) * p_infosetSpacing;
+    }
+    entry->SetX(x);
+    maxX = std::max(maxX, x + entry->GetSize());
+  }
+  return maxX;
+}
+
 } // namespace
 
 //-----------------------------------------------------------------------
@@ -705,18 +724,8 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) cons
 
 void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
 {
-  std::vector<int> aggregateSublevels;
-  std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
-                   std::back_inserter(aggregateSublevels));
-  m_maxX = 0;
-  for (const auto &entry : m_nodeList) {
-    entry->m_x = c_leftMargin + entry->m_level * m_doc->GetStyle().GetNodeLevelLength();
-    if (entry->m_level != 0) {
-      entry->m_x +=
-          (aggregateSublevels[entry->m_level - 1] + entry->m_sublevel) * m_infosetSpacing;
-    }
-    m_maxX = std::max(m_maxX, entry->m_x + entry->m_size);
-  }
+  m_maxX = ComputeLevelProportionalX(m_nodeList, p_layout, c_leftMargin,
+                                     m_doc->GetStyle().GetNodeLevelLength(), m_infosetSpacing);
 }
 
 void TreeLayout::ComputeRenderedParents() const

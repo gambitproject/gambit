@@ -67,6 +67,7 @@ public:
   void SetParent(const std::shared_ptr<NodeEntry> &p_parent) { m_parent = p_parent; }
 
   int GetX() const { return m_x; }
+  void SetX(int p_x) { m_x = p_x; }
   int GetY() const { return m_y; }
 
   int GetChildNumber() const
@@ -143,7 +144,9 @@ class TreeLayout final : public GameView {
   void BuildNodeList(const GameNode &);
 
   /// Based on node levels and information set sublevels, compute the depth
-  /// (X coordinate) of all nodes
+  /// (X coordinate) of all nodes. The actual placement strategy is the free
+  /// function ComputeLevelProportionalX in efglayout.cc; this just supplies
+  /// it with this instance's style/spacing parameters.
   void ComputeNodeDepths(const Layout &) const;
   void ComputeRenderedParents() const;
 
