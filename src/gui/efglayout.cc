@@ -410,36 +410,6 @@ GameNode TreeLayout::BranchBelowHitTest(int p_x, int p_y) const
   return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
 }
 
-bool TreeLayout::InfosetHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
-                                const int p_y) const
-{
-  auto nextMember = ComputeNextInInfoset(p_entry);
-  if (nextMember && p_entry->GetNode()->GetInfoset()) {
-    if (p_x > p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing - 2 &&
-        p_x < p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing + 2) {
-      if (p_y > p_entry->m_y && p_y < nextMember->m_y) {
-        // next infoset is below this one
-        return true;
-      }
-      if (p_y > nextMember->m_y && p_y < p_entry->m_y) {
-        // next infoset is above this one
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-GameNode TreeLayout::InfosetHitTest(int p_x, int p_y) const
-{
-  const auto hit =
-      std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                     return InfosetHitTest(p_entry, p_x, p_y);
-                   });
-  return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
-}
-
 wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, int p_which) const
 {
   const GameNode n = p_entry->GetNode();

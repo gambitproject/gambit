@@ -165,8 +165,6 @@ public:
   GameNode OutcomeHitTest(int, int) const;
   GameNode BranchAboveHitTest(int, int) const;
   GameNode BranchBelowHitTest(int, int) const;
-  bool InfosetHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
-  GameNode InfosetHitTest(int, int) const;
 
   void Render(wxDC &, bool p_noHints) const;
 };
