@@ -29,18 +29,29 @@
 #include "games/layout.h"
 
 namespace Gambit::GUI {
+
+/// All of a rendered node's screen coordinates in one place: its position
+/// (set by the layout pass -- TreeLayout::ComputeNodeDepths/Layout() -- not
+/// by ComputeGeometry() below), its own token (the shape drawn there -- a
+/// circle, box, diamond, dot, or horizontal line, per style), the outcome
+/// label (or "no outcome" hint), one payoff cell per player (1-indexed,
+/// matching player numbers), and the two incoming-branch labels. Everything
+/// but position is computed once, up front, by TreeLayout::ComputeGeometry()
+/// -- not as a side effect of painting -- so that hit-testing is always
+/// valid without requiring a prior paint event.
+struct NodeGeometry {
+  wxPoint position;
+  wxRect token;
+  wxRect outcome;
+  Array<wxRect> payoffs;
+  wxRect branchAbove, branchBelow;
+};
+
 class NodeEntry {
   friend class TreeLayout;
   GameNode m_node;                     // the corresponding node in the game
   std::shared_ptr<NodeEntry> m_parent; // parent node
-  int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
-  bool m_inSupport{true};              // true if node reachable in current support
-  int m_size{20};                      // horizontal size of the node
-  mutable wxRect m_outcomeRect;
-  mutable Array<wxRect> m_payoffRect;
-  mutable wxRect m_branchAboveRect, m_branchBelowRect;
-
-  int m_branchLength{0}; // length of branch (exclusive of tine, if present)
+  NodeGeometry m_geometry;
 
   int m_level{0};         // depth of the node in tree
   int m_sublevel{0};      // # of the infoset line on this level
@@ -56,17 +67,15 @@ public:
   std::shared_ptr<NodeEntry> GetParent() const { return m_parent; }
   void SetParent(const std::shared_ptr<NodeEntry> &p_parent) { m_parent = p_parent; }
 
-  int GetX() const { return m_x; }
-  int GetY() const { return m_y; }
+  int GetX() const { return m_geometry.position.x; }
+  void SetX(int p_x) { m_geometry.position.x = p_x; }
+  int GetY() const { return m_geometry.position.y; }
+  void SetY(int p_y) { m_geometry.position.y = p_y; }
 
   int GetChildNumber() const
   {
     return (m_node->GetParent()) ? m_node->GetPriorAction()->GetNumber() : 0;
   }
-
-  int GetSize() const { return m_size; }
-
-  int GetBranchLength() const { return m_branchLength; }
 
   int GetLevel() const { return m_level; }
   int GetSublevel() const { return m_sublevel; }
@@ -86,21 +95,41 @@ public:
   const double &GetActionProb() const { return m_actionProb; }
   void SetActionProb(const double &p_prob) { m_actionProb = p_prob; }
 
+  bool NodeHitTest(const int p_x, const int p_y) const
+  {
+    return (m_geometry.token.Contains(p_x, p_y));
+  }
   bool OutcomeHitTest(const int p_x, const int p_y) const
   {
-    return (m_outcomeRect.Contains(p_x, p_y));
+    return (m_geometry.outcome.Contains(p_x, p_y));
   }
   bool BranchAboveHitTest(const int p_x, const int p_y) const
   {
-    return (m_branchAboveRect.Contains(p_x, p_y));
+    return (m_geometry.branchAbove.Contains(p_x, p_y));
   }
   bool BranchBelowHitTest(const int p_x, const int p_y) const
   {
-    return (m_branchBelowRect.Contains(p_x, p_y));
+    return (m_geometry.branchBelow.Contains(p_x, p_y));
   }
 
-  const wxRect &GetOutcomeExtent() const { return m_outcomeRect; }
-  const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
+  const wxRect &GetOutcomeExtent() const { return m_geometry.outcome; }
+  const wxRect &GetPayoffExtent(int pl) const { return m_geometry.payoffs[pl]; }
+};
+
+/// What was hit by a point query against the rendered tree, and which node it
+/// belongs to. BranchAbove/BranchBelow report the CHILD node whose incoming
+/// branch was hit (not its parent) -- callers wanting the parent (e.g. to
+/// select the node whose move is being edited) call node->GetParent().
+/// Payoff reports which player's cell (1-indexed) within the outcome region
+/// was hit; Outcome covers the rest of the outcome region (including the
+/// "no outcome" hint).
+enum class HitRegion { None, Node, Outcome, Payoff, BranchAbove, BranchBelow };
+
+struct HitResult {
+  HitRegion region{HitRegion::None};
+  GameNode node;
+  int payoffPlayer{0}; // valid only when region == HitRegion::Payoff
+  explicit operator bool() const { return region != HitRegion::None; }
 };
 
 class TreeLayout final : public GameView {
@@ -114,15 +143,27 @@ class TreeLayout final : public GameView {
 
   std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &) const;
 
-  void BuildNodeList(const GameNode &);
+  /// Creates the NodeEntry for p_node (and recursively, its descendants),
+  /// linking each to p_parentEntry (nullptr for the root).
+  void BuildNodeList(const GameNode &p_node, const std::shared_ptr<NodeEntry> &p_parentEntry);
 
   /// Based on node levels and information set sublevels, compute the depth
-  /// (X coordinate) of all nodes
+  /// (X coordinate) of all nodes. The actual placement strategy is the free
+  /// function ComputeLevelProportionalX in efglayout.cc; this just supplies
+  /// it with this instance's style/spacing parameters.
   void ComputeNodeDepths(const Layout &) const;
-  void ComputeRenderedParents() const;
 
-  wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;
-  wxString CreateBranchLabel(const std::shared_ptr<NodeEntry> &, int) const;
+  /// Computes NodeGeometry (token/outcome/payoff/branch-label regions) for
+  /// every node, and grows m_maxX to account for outcome-label width, all
+  /// without painting anything.  Must run after GenerateLabels() (it measures
+  /// label text); relies on each entry's m_parent, set once by BuildNodeList.
+  void ComputeGeometry() const;
+  /// Computes the region occupied by the node's own token (its shape, per
+  /// style -- see GetTokenForNode in efglayout.cc), independent of any text
+  /// measurement, so unlike its siblings below this needs no wxDC.
+  void ComputeTokenGeometry(const std::shared_ptr<NodeEntry> &) const;
+  void ComputeBranchGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
+  void ComputeOutcomeGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
 
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
@@ -134,7 +175,6 @@ class TreeLayout final : public GameView {
   void DrawIncomingBranch(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
-  bool NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
   void BuildNodeList(const Game &);
 
 public:
@@ -151,20 +191,12 @@ public:
   {
     return m_nodeMap.at(p_node);
   }
-  /// Return the layout entry for the most immediate predecessor of p_node
-  /// which is rendered in the layout
-  std::shared_ptr<NodeEntry> GetRenderedAncestor(const GameNode &p_node) const;
-  /// Return the layout entry for the first descendant node of p_node
-  /// which is rendered in the layout, as determined by the depth-first traversal.
-  std::shared_ptr<NodeEntry> GetRenderedDescendant(const GameNode &p_node) const;
 
   int MaxX() const { return m_maxX; }
   int MaxY() const { return m_maxY; }
 
   GameNode NodeHitTest(int, int) const;
-  GameNode OutcomeHitTest(int, int) const;
-  GameNode BranchAboveHitTest(int, int) const;
-  GameNode BranchBelowHitTest(int, int) const;
+  HitResult HitTest(int, int) const;
 
   void Render(wxDC &, bool p_noHints) const;
 };

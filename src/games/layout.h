@@ -34,7 +34,6 @@ struct LayoutEntry {
   friend class Layout;
   double m_offset{-1};        // Cartesian coordinates of node
   int m_level, m_sublevel{0}; // depth of the node in tree
-  bool m_inSupport{true};
 
   explicit LayoutEntry(int p_level) : m_level(p_level) {}
 };
