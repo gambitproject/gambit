@@ -40,20 +40,26 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   double omega = 1.0;
   bool wrong_orientation = false;
 
-  auto criterion_function = [](const Vector<double> &point,
-                               const Vector<double> &tangent) -> double { return point[1] - 1.0; };
+  const double t_target = 1.0;
+  const double t_tol = 0.5;
 
-  for (int attemp = 0; attemp < 2; ++attemp) {
+  auto criterion_function = [t_target](const Vector<double> &point,
+                                       const Vector<double> &tangent) -> double {
+    return point[1] - t_target;
+  };
+
+  for (int attempt = 0; attempt < 2; ++attempt) {
     x = system.ComputeInitialPoint();
     wrong_orientation = false;
 
-    auto termination_condition = [&wrong_orientation](const Vector<double> &point) {
+    auto termination_condition = [&wrong_orientation, t_target,
+                                  t_tol](const Vector<double> &point) {
       const double wrong_orientation_tol = -1.0e-4;
       if (point[1] < wrong_orientation_tol) {
         wrong_orientation = true;
         return true;
       }
-      return point[1] >= 1.5;
+      return (point[1] >= t_target + t_tol);
     };
 
     const TracePathResult result =
@@ -81,8 +87,23 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
     // Direction was wrong, flip the orientation and try again
     omega = -1.0;
   }
+  const MixedStrategyProfile<double> eq_profile = system.ExtractEquilibrium(x);
 
-  equilibria.push_back(system.ExtractEquilibrium(x));
+  equilibria.push_back(eq_profile);
+
+  // Check that the profile is an equilibrium taking into account how far we are from the target t
+  // value
+  const double delta = std::abs(t_target - x[1]);
+  const double scale = p_prior.GetGame()->GetMaxPayoff() - p_prior.GetGame()->GetMinPayoff();
+  const double max_regret = eq_profile.GetMaxRegret();
+  // error tolerance <= delta * scale
+  const double error_tolerance =
+      (delta * scale) + 1e-6; // Add a small epsilon to account for numerical errors
+
+  // If it is not an equilibrium, return an empty list
+  if (max_regret > error_tolerance) {
+    return {};
+  }
   return equilibria;
 }
 } // namespace Gambit
