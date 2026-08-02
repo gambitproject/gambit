@@ -30,12 +30,15 @@
 
 namespace Gambit::GUI {
 
-/// The screen regions associated with a rendered node: the outcome label (or
-/// "no outcome" hint), one payoff cell per player (1-indexed, matching player
-/// numbers), and the two incoming-branch labels. Computed once, up front, by
+/// The screen regions associated with a rendered node: its own token (the
+/// shape drawn at the node's position -- a circle, box, diamond, dot, or a
+/// horizontal line, per style), the outcome label (or "no outcome" hint), one
+/// payoff cell per player (1-indexed, matching player numbers), and the two
+/// incoming-branch labels. Computed once, up front, by
 /// TreeLayout::ComputeGeometry() -- not as a side effect of painting -- so
 /// that hit-testing is always valid without requiring a prior paint event.
 struct NodeGeometry {
+  wxRect token;
   wxRect outcome;
   Array<wxRect> payoffs;
   wxRect branchAbove, branchBelow;
@@ -89,6 +92,10 @@ public:
   const double &GetActionProb() const { return m_actionProb; }
   void SetActionProb(const double &p_prob) { m_actionProb = p_prob; }
 
+  bool NodeHitTest(const int p_x, const int p_y) const
+  {
+    return (m_geometry.token.Contains(p_x, p_y));
+  }
   bool OutcomeHitTest(const int p_x, const int p_y) const
   {
     return (m_geometry.outcome.Contains(p_x, p_y));
@@ -143,11 +150,15 @@ class TreeLayout final : public GameView {
   /// it with this instance's style/spacing parameters.
   void ComputeNodeDepths(const Layout &) const;
 
-  /// Computes NodeGeometry (outcome/payoff/branch-label regions) for every
-  /// node, and grows m_maxX to account for outcome-label width, all without
-  /// painting anything.  Must run after GenerateLabels() (it measures label
-  /// text); relies on each entry's m_parent, set once by BuildNodeList.
+  /// Computes NodeGeometry (token/outcome/payoff/branch-label regions) for
+  /// every node, and grows m_maxX to account for outcome-label width, all
+  /// without painting anything.  Must run after GenerateLabels() (it measures
+  /// label text); relies on each entry's m_parent, set once by BuildNodeList.
   void ComputeGeometry() const;
+  /// Computes the region occupied by the node's own token (its shape, per
+  /// style -- see GetTokenForNode in efglayout.cc), independent of any text
+  /// measurement, so unlike its siblings below this needs no wxDC.
+  void ComputeTokenGeometry(const std::shared_ptr<NodeEntry> &) const;
   void ComputeBranchGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void ComputeOutcomeGeometry(wxDC &, const std::shared_ptr<NodeEntry> &) const;
 
@@ -164,7 +175,6 @@ class TreeLayout final : public GameView {
   void DrawIncomingBranch(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
-  bool NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
   void BuildNodeList(const Game &);
 
 public:

@@ -450,19 +450,22 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
   m_maxX = std::max(m_maxX, p_entry->m_geometry.outcome.GetRight());
 }
 
-bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
-                             const int p_y) const
+//
+// Computes the region occupied by the node's own token -- a bounding box
+// sized to the node for most token styles, or a thin horizontal band (a
+// fudge factor around the drawn line) for the "line" style, which has no
+// real width of its own to hit-test against.
+//
+void TreeLayout::ComputeTokenGeometry(const std::shared_ptr<NodeEntry> &p_entry) const
 {
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
-  if (p_x < p_entry->m_x || p_x >= p_entry->m_x + nodeSize) {
-    return false;
-  }
-
   if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
     constexpr int DELTA = 8; // a fudge factor for "almost" hitting the node
-    return (p_y >= p_entry->m_y - DELTA && p_y <= p_entry->m_y + DELTA);
+    p_entry->m_geometry.token = wxRect(p_entry->m_x, p_entry->m_y - DELTA, nodeSize, 2 * DELTA);
+    return;
   }
-  return (p_y >= p_entry->m_y - nodeSize / 2 && p_y <= p_entry->m_y + nodeSize / 2);
+  p_entry->m_geometry.token =
+      wxRect(p_entry->m_x, p_entry->m_y - nodeSize / 2, nodeSize, nodeSize);
 }
 
 //-----------------------------------------------------------------------
@@ -471,11 +474,10 @@ bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const in
 
 GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
 {
-  const auto hit =
-      std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                     return NodeHitTest(p_entry, p_x, p_y);
-                   });
+  const auto hit = std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                                [p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
+                                  return p_entry->NodeHitTest(p_x, p_y);
+                                });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
@@ -499,7 +501,7 @@ GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
 HitResult TreeLayout::HitTest(int p_x, int p_y) const
 {
   for (const auto &entry : m_nodeList) {
-    if (NodeHitTest(entry, p_x, p_y)) {
+    if (entry->NodeHitTest(p_x, p_y)) {
       return {HitRegion::Node, entry->GetNode()};
     }
   }
@@ -715,6 +717,7 @@ void TreeLayout::ComputeGeometry() const
   measureDC.SelectObject(measureBitmap);
 
   for (const auto &entry : m_nodeList) {
+    ComputeTokenGeometry(entry);
     ComputeBranchGeometry(measureDC, entry);
     ComputeOutcomeGeometry(measureDC, entry);
   }
