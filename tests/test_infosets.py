@@ -134,13 +134,17 @@ def test_make_chance_event_pools_nodes_from_different_infosets():
     assert not list(game.players["Alice"].infosets)
 
 
-def test_make_chance_event_requires_matching_action_labels():
-    """Nodes must have the same actions, with the same labels in the same order."""
+@pytest.mark.parametrize("probs", [["1/2", "1/2"], {"Call": 1}])
+def test_make_chance_event_requires_matching_action_labels(probs):
+    """Nodes must have the same actions, with the same labels in the same order.
+
+    The mapping case was previously reported as an unknown action label.
+    """
     game = games.read_from_file("stripped_down_poker.efg")
     alice_node = game.root.children["King"]        # actions Bet, Fold
     bob_node = alice_node.children["Bet"]          # actions Call, Fold
     with pytest.raises(ValueError):
-        game.make_chance_event([alice_node, bob_node], ["1/2", "1/2"])
+        game.make_chance_event([alice_node, bob_node], probs)
 
 
 def test_make_chance_event_converts_personal_node():
@@ -151,6 +155,49 @@ def test_make_chance_event_converts_personal_node():
     assert node.infoset.is_chance
     assert [a.prob for a in node.infoset.actions] == [gbt.Rational("1/4"),
                                                       gbt.Rational("3/4")]
+
+
+def test_make_chance_event_terminal_node_raises():
+    game = games.read_from_file("stripped_down_poker.efg")
+    terminal = game.root.children["King"].children["Fold"]
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.make_chance_event([terminal], ["1/2", "1/2"])
+
+
+def test_make_chance_event_repeated_node_raises():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.make_chance_event([game.root, game.root], ["1/2", "1/2"])
+
+
+def test_make_chance_event_mismatch_raises():
+    game = games.read_from_file("stripped_down_poker.efg")
+    other = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(gbt.MismatchError):
+        game.make_chance_event([other.root], ["1/2", "1/2"])
+
+
+def test_make_chance_event_strategic_game_raises():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.make_chance_event([], [1])
+
+
+def test_make_chance_event_empty_nodes_raises():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.make_chance_event([], ["1/2", "1/2"])
+
+
+def test_make_chance_event_label_held_by_rump_raises():
+    """A label may be reused only if all members of the event holding it are absorbed."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    nodes = [game.root.children["King"], game.root.children["Queen"]]
+    game.make_chance_event(nodes, ["1/2", "1/2"], "Coin")
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.make_chance_event([nodes[0]], ["1/2", "1/2"], "Coin")
+    assert game.to_efg() == before
 
 
 @pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40], ["foo", "bar"]])
