@@ -426,7 +426,7 @@ GamePlayer GameDocument::DoNewPlayer()
 
 void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
 {
-  p_player->SetLabel(p_label.ToStdString());
+  p_player->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -452,19 +452,19 @@ void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 
 void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(p_label.ToStdString());
+  p_strategy->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
-  p_infoset->SetLabel(p_label.ToStdString());
+  p_infoset->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
 {
-  p_action->SetLabel(p_label.ToStdString());
+  p_action->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -504,7 +504,7 @@ void GameDocument::DoInsertAction(GameNode p_node)
 
 void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
-  p_node->SetLabel(p_label.ToStdString());
+  p_node->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -632,7 +632,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     parsedPayoffs.push_back(lexical_cast<Rational>(value.ToStdString()));
   }
 
-  const std::string label = p_label.ToStdString();
+  const std::string label = p_label.ToStdString(wxConvUTF8);
   GameOutcome outcome = p_node->GetOutcome();
 
   bool changed = !outcome;
@@ -656,7 +656,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   }
 
   if (!outcome) {
-    outcome = m_game->NewOutcome(p_label.ToStdString());
+    outcome = m_game->NewOutcome(p_label.ToStdString(wxConvUTF8));
     m_game->SetOutcome(p_node, outcome);
   }
   else {

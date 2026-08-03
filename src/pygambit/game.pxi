@@ -563,7 +563,7 @@ class Game:
         g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            g.game.deref().NewPlayer(str(player).encode("ascii"))
+            g.game.deref().NewPlayer(str(player).encode("utf-8"))
         return g
 
     @classmethod
@@ -746,29 +746,37 @@ class Game:
         """Get or set the title of the game.
 
         The title of the game is an arbitrary string, generally intended
-        to be short.
+        to be short.  Unlike object labels, a title has no printable-character or
+        spacing restriction; it need only be well-formed UTF-8 text.
+
+        .. versionchanged:: 17.0.0
+            Must be well-formed UTF-8 text; an invalid value now raises ``ValueError``.
         """
-        return self.game.deref().GetTitle().decode("ascii")
+        return self.game.deref().GetTitle().decode("utf-8")
 
     @title.setter
     def title(self, value: str) -> None:
-        self.game.deref().SetTitle(value.encode("ascii"))
+        self.game.deref().SetTitle(value.encode("utf-8"))
 
     @property
     def description(self) -> str:
         """Get or set the description of the game.
 
         A game's description is an arbitrary string, and may be more discursive
-        than a title.
+        than a title.  Unlike object labels, a description has no printable-character
+        or spacing restriction; it need only be well-formed UTF-8 text.
 
         .. versionchanged:: 16.6.0
            Renamed ``Game.comment`` to ``Game.description``.
+
+        .. versionchanged:: 17.0.0
+            Must be well-formed UTF-8 text; an invalid value now raises ``ValueError``.
         """
-        return self.game.deref().GetDescription().decode("ascii")
+        return self.game.deref().GetDescription().decode("utf-8")
 
     @description.setter
     def description(self, value: str) -> None:
-        self.game.deref().SetDescription(value.encode("ascii"))
+        self.game.deref().SetDescription(value.encode("utf-8"))
 
     @property
     def actions(self) -> GameActions:
@@ -2088,7 +2096,7 @@ class Game:
             If `label` is empty, is already the label of another player, or (in an
             extensive game) is ``"Chance"``, the reserved label of the chance player.
         """
-        return Player.wrap(self.game.deref().NewPlayer(label.encode("ascii")))
+        return Player.wrap(self.game.deref().NewPlayer(label.encode("utf-8")))
 
     def set_player(self, infoset: Infoset | str,
                    player: Player | str) -> None:
@@ -2144,7 +2152,7 @@ class Game:
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("ascii")))
+        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("utf-8")))
         for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c
@@ -2231,7 +2239,7 @@ class Game:
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
         return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label.encode("ascii"))
+            self.game.deref().NewStrategy(resolved_player.player, label.encode("utf-8"))
         )
 
     def delete_strategy(self, strategy: Strategy | str) -> None:

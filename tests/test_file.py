@@ -145,6 +145,27 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
         _parse_nfg(data)
 
 
+def test_efg_label_malformed_utf8_rejected():
+    """A genuinely ill-formed UTF-8 byte sequence in a label is rejected (#862).
+
+    A Python ``str`` cannot hold ill-formed UTF-8, so this is not reachable through the
+    normal string-based read_efg/label-setter API; it is exercised here by feeding raw
+    bytes directly through a binary buffer, bypassing the encode step in read_game().
+    """
+    file_bytes = b'EFG 2 R "t" { "A\x80" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid label"):
+        gbt.read_efg(f)
+
+
+def test_efg_title_malformed_utf8_rejected():
+    """Malformed UTF-8 in the game title is rejected too, but via CheckText (#862):
+    the message is distinct from a label's, since title has no printable/spacing rule.
+    """
+    file_bytes = b'EFG 2 R "t\x80" { "A" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid text"):
+        gbt.read_efg(f)
+
+
 def test_nfg_outcomes_too_many():
     data = """
 NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Player 2" }

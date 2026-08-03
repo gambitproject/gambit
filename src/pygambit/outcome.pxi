@@ -66,14 +66,19 @@ class Outcome:
 
         .. versionchanged:: 16.7.0
             An outcome label must be nonempty and unique within the game; an empty or duplicate
-            label now raises ``ValueError``.  A label may contain only printable ASCII characters
-            and spaces, not begin/end with a space, nor have two consecutive spaces.
+            label now raises ``ValueError``.
+
+        .. versionchanged:: 17.0.0
+            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
+            contain no control characters, and must not begin/end with whitespace or have
+            two consecutive whitespace characters.  "Whitespace" means any Unicode space
+            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
         """
-        return self.outcome.deref().GetLabel().decode("ascii")
+        return self.outcome.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.outcome.deref().SetLabel(value.encode("ascii"))
+        self.outcome.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def number(self) -> int:

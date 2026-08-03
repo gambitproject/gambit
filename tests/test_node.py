@@ -1148,11 +1148,12 @@ def test_node_label_invalid_raises_valueerror(label):
         game.root.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_node_label_non_ascii_rejected(label):
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_node_label_unicode_accepted(label):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(UnicodeEncodeError):
-        game.root.label = label
+    game.root.label = label
+    assert game.root.label == label
 
 
 @pytest.mark.parametrize(
