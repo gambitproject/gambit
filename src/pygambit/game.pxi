@@ -1956,8 +1956,8 @@ class Game:
                           label: str | None = None) -> None:
         """Form `nodes` into a single chance event with distribution `probs`.
 
-        The nodes must all be decision nodes of this game with the same actions, with the same
-        labels in the same order.  They need not be chance nodes; personal decision nodes are
+        `nodes` must all be nonterminal nodes of this game with the same actions, with the same
+        labels in the same order.  They need not be chance nodes; personal nodes are
         converted, and the move is thereafter resolved by chance.  Nodes are removed from
         whatever information sets or chance events they currently belong to; any of those which
         retain members survive, keeping their labels, and those left with no members are deleted.
@@ -1973,7 +1973,7 @@ class Game:
         Parameters
         ----------
         nodes : Node or NodeReferenceSet
-            The nonempty set of decision nodes to place in the chance event.
+            The nonempty set of nonterminal nodes to place in the chance event.
         probs : sequence or mapping
             The probability distribution over the actions of the event.  A sequence must specify
             one probability per action, in action order.  A mapping from action labels
@@ -2006,12 +2006,20 @@ class Game:
                 "make_chance_event(): operation only defined for games with a tree representation"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_chance_event")
+        if not resolved_nodes:
+            raise ValueError("make_chance_event(): `nodes` must not be empty")
         if any(n.is_terminal for n in resolved_nodes):
             raise UndefinedOperationError(
-                "make_chance_event(): all nodes must be decision nodes"
+                "make_chance_event(): all nodes must be nonterminal"
             )
         resolved_node = cython.cast(Node, resolved_nodes[0])
         action_labels = [a.label for a in resolved_node.infoset.actions]
+        if any([a.label for a in n.infoset.actions] != action_labels
+               for n in resolved_nodes[1:]):
+            raise ValueError(
+                "make_chance_event(): all nodes must have the same actions, "
+                "with the same labels in the same order"
+            )
         resolved_probs = self._resolve_probs(probs, action_labels, "make_chance_event")
         c_nodes = stdvector[c_GameNode]()
         for n in resolved_nodes:
@@ -2019,7 +2027,7 @@ class Game:
         c_probs = stdvector[c_Number]()
         for p in resolved_probs:
             c_probs.push_back(_to_number(p))
-        self.game.deref().MakeChanceEvent(c_nodes, c_probs, (label or "").encode("ascii"))
+        self.game.deref().MakeChanceEvent(c_nodes, c_probs, (label or "").encode("utf-8"))
 
     def leave_infoset(self, node: Node | str):
         """Remove this node from its information set. If this node is the only node
