@@ -201,12 +201,7 @@ HPEquationSystem::HPEquationSystem(const MixedStrategyProfile<double> &prior)
 void HPEquationSystem::GetValue(const Vector<double> &point, Vector<double> &lhs) const
 {
   // Update internal mutable state
-  int temp_alpha_idx = 2;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &strategy : player->GetStrategies()) {
-      m_current_sigma[strategy] = AlphaToSigma(point[temp_alpha_idx++]);
-    }
-  }
+  UpdateSigma(point);
 
   // Evaluate all equations
   for (size_t i = 1; i <= m_equations.size(); ++i) {
@@ -217,12 +212,7 @@ void HPEquationSystem::GetValue(const Vector<double> &point, Vector<double> &lhs
 void HPEquationSystem::GetJacobian(const Vector<double> &point, Matrix<double> &p_jac) const
 {
   // Update internal mutable state
-  int temp_alpha_idx = 2;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &strategy : player->GetStrategies()) {
-      m_current_sigma[strategy] = AlphaToSigma(point[temp_alpha_idx++]);
-    }
-  }
+  UpdateSigma(point);
 
   p_jac = 0.0;
   Vector<double> column(point.size()); // Temp vector matching Jacobian column size
@@ -299,13 +289,22 @@ HPEquationSystem::ExtractEquilibrium(const Vector<double> &final_point) const
     for (const auto &strategy : player->GetStrategies()) {
       const double alpha_val = final_point[alpha_idx++];
       const double prob = AlphaToSigma(alpha_val);
-      ;
       ret[strategy] = prob;
     }
   }
   ret = ret.Normalize();
 
   return ret;
+}
+
+void HPEquationSystem::UpdateSigma(const Vector<double> &point) const
+{
+  int temp_alpha_idx = 2;
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      m_current_sigma[strategy] = AlphaToSigma(point[temp_alpha_idx++]);
+    }
+  }
 }
 
 } // end namespace Gambit

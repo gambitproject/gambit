@@ -52,6 +52,8 @@ private:
   int m_star;
   mutable MixedStrategyProfile<double> m_current_sigma;
   std::vector<std::shared_ptr<HPEquation>> m_equations;
+
+  void UpdateSigma(const Vector<double> &point) const;
 };
 
 } // namespace Gambit
