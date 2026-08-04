@@ -24,10 +24,10 @@
 
 using namespace Gambit;
 
-Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                              std::istream &p_stream)
+std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                    std::istream &p_stream)
 {
-  Array<MixedStrategyProfile<double>> profiles;
+  std::vector<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
     for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
@@ -44,16 +44,6 @@ Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game
     std::string foo;
     std::getline(p_stream, foo);
     profiles.push_back(p);
-  }
-  return profiles;
-}
-
-Array<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game, int p_count)
-{
-  std::default_random_engine engine;
-  Array<MixedStrategyProfile<double>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    profiles.push_back(p_game->NewRandomStrategyProfile(engine));
   }
   return profiles;
 }

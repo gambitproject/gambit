@@ -39,13 +39,13 @@ def test_outcome_label_invalid_raises_valueerror(label: str):
         outcome.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_outcome_label_non_ascii_rejected(label: str):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_outcome_label_unicode_accepted(label: str):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.Game.new_table([2, 2])
     outcome = next(iter(game.outcomes))
-    with pytest.raises(UnicodeEncodeError):
-        outcome.label = label
+    outcome.label = label
+    assert outcome.label == label
 
 
 @pytest.mark.parametrize(

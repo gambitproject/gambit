@@ -30,15 +30,12 @@
 
 namespace Gambit::GUI {
 
-enum class LabelCharacterPolicy { AsciiOnly, Unicode };
-
 class LabelTextCtrl final : public wxTextCtrl {
-  LabelCharacterPolicy m_policy;
   bool m_normalizing{false};
 
-  static bool IsAsciiPrintable(wxUniChar p_char);
   static bool IsLabelWhitespace(wxUniChar p_char);
-  static bool IsAllowedNonWhitespace(wxUniChar p_char, LabelCharacterPolicy p_policy);
+  static bool IsControlCharacter(wxUniChar p_char);
+  static bool IsAllowedNonWhitespace(wxUniChar p_char);
 
   wxString NormalizeValue(const wxString &p_value, bool p_stripTrailing) const;
   void NormalizeInPlace(bool p_stripTrailing);
@@ -47,11 +44,9 @@ class LabelTextCtrl final : public wxTextCtrl {
   void OnKillFocus(wxFocusEvent &p_event);
 
 public:
-  static wxString Normalize(const wxString &p_value, bool p_stripTrailing,
-                            LabelCharacterPolicy p_policy = LabelCharacterPolicy::AsciiOnly);
+  static wxString Normalize(const wxString &p_value, bool p_stripTrailing);
 
   LabelTextCtrl(wxWindow *p_parent, wxWindowID p_id, const wxString &p_value,
-                LabelCharacterPolicy p_policy = LabelCharacterPolicy::AsciiOnly,
                 const wxPoint &p_pos = wxDefaultPosition, const wxSize &p_size = wxDefaultSize,
                 long p_style = 0);
 

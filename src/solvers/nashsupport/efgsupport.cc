@@ -22,7 +22,7 @@
 
 #include "nashsupport.h"
 
-namespace { // to keep the recursive function private
+namespace { // to keep this helper private
 
 using namespace Gambit;
 
@@ -38,54 +38,85 @@ bool AllActionsReachable(const BehaviorSupportProfile &p_support)
   return true;
 }
 
-void PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
-                                  const std::list<GameAction>::iterator &p_cursor,
-                                  const std::list<GameAction>::iterator &p_end,
-                                  std::list<BehaviorSupportProfile> &p_list)
-{
-  auto copy = std::next(p_cursor);
-  if (copy == p_end) {
-    if (AllActionsReachable(p_support)) {
-      p_list.push_back(p_support);
-    }
-
-    BehaviorSupportProfile copySupport(p_support);
-    copySupport.RemoveAction(*p_cursor);
-    if (AllActionsReachable(copySupport)) {
-      p_list.push_back(copySupport);
-    }
-  }
-  else {
-    PossibleNashBehaviorSupports(p_support, copy, p_end, p_list);
-
-    BehaviorSupportProfile copySupport(p_support);
-    copySupport.RemoveAction(*p_cursor);
-    PossibleNashBehaviorSupports(copySupport, copy, p_end, p_list);
-  }
-}
-
 } // namespace
 
-//
-// TODO: This is a naive implementation that does not take into account
-//       that removing actions from a support profile can (and often does) lead
-//       to information sets becoming unreachable.
-//
-std::shared_ptr<PossibleNashBehaviorSupportsResult>
-PossibleNashBehaviorSupports(const Game &p_game)
-{
-  const BehaviorSupportProfile support(p_game);
-  auto result = std::make_shared<PossibleNashBehaviorSupportsResult>();
-
-  std::list<GameAction> actions;
-  for (const auto &player : p_game->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        actions.push_back(action);
+// Candidates are the 2^n ways of choosing, for each action in the game (in player/infoset/
+// action order), whether to keep it or remove it from the full support.  This is walked as
+// a binary odometer over `m_removeFlags`, with the last action in the list as the
+// fastest-changing (rightmost) digit.
+class PossibleNashBehaviorSupports::Impl {
+public:
+  explicit Impl(const Game &p_game) : m_fullSupport(p_game)
+  {
+    for (const auto &player : p_game->GetPlayers()) {
+      for (const auto &infoset : player->GetInfosets()) {
+        for (const auto &action : infoset->GetActions()) {
+          m_actions.push_back(action);
+        }
       }
     }
+    m_removeFlags.assign(m_actions.size(), false);
   }
 
-  PossibleNashBehaviorSupports(support, actions.begin(), actions.end(), result->m_supports);
-  return result;
+  std::optional<BehaviorSupportProfile> Next()
+  {
+    while (Advance()) {
+      BehaviorSupportProfile candidate(m_fullSupport);
+      for (size_t i = 0; i < m_actions.size(); i++) {
+        if (m_removeFlags[i]) {
+          candidate.RemoveAction(m_actions[i]);
+        }
+      }
+      if (AllActionsReachable(candidate)) {
+        return candidate;
+      }
+    }
+    return std::nullopt;
+  }
+
+private:
+  // Moves to the next combination of remove-flags.  The first call leaves the
+  // all-kept (full-support) combination in place; later calls increment the odometer.
+  // Returns false once every combination has been produced.
+  bool Advance()
+  {
+    if (m_exhausted) {
+      return false;
+    }
+    if (m_first) {
+      m_first = false;
+      return true;
+    }
+    for (size_t i = m_removeFlags.size(); i-- > 0;) {
+      if (!m_removeFlags[i]) {
+        m_removeFlags[i] = true;
+        return true;
+      }
+      m_removeFlags[i] = false;
+    }
+    m_exhausted = true;
+    return false;
+  }
+
+  BehaviorSupportProfile m_fullSupport;
+  std::vector<GameAction> m_actions;
+  std::vector<bool> m_removeFlags;
+  bool m_first = true;
+  bool m_exhausted = false;
+};
+
+PossibleNashBehaviorSupports::PossibleNashBehaviorSupports(const Game &p_game)
+  : m_impl(std::make_unique<Impl>(p_game))
+{
+}
+
+PossibleNashBehaviorSupports::~PossibleNashBehaviorSupports() = default;
+PossibleNashBehaviorSupports::PossibleNashBehaviorSupports(
+    PossibleNashBehaviorSupports &&) noexcept = default;
+PossibleNashBehaviorSupports &
+PossibleNashBehaviorSupports::operator=(PossibleNashBehaviorSupports &&) noexcept = default;
+
+std::optional<BehaviorSupportProfile> PossibleNashBehaviorSupports::Next()
+{
+  return m_impl->Next();
 }

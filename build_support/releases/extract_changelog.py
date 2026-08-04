@@ -3,7 +3,7 @@
 The ChangeLog at the repository root follows the Keep a Changelog format
 (https://keepachangelog.com). Each release section looks like:
 
-    ## [X.Y.Z] - YYYY-MM-DD
+    ## [X.Y.Z[-alpha.W|-beta.W|-rc.W]] - YYYY-MM-DD
 
     ### Added
     - ...
@@ -20,6 +20,7 @@ Usage
 Run from the repository root::
 
     python build_support/releases/extract_changelog.py X.Y.Z
+    python build_support/releases/extract_changelog.py X.Y.Z-rc.W
 
 Optional arguments::
 
@@ -36,14 +37,16 @@ import sys
 def extract(version: str, changelog: pathlib.Path, output: pathlib.Path) -> None:
     """Extract the release notes for *version* from *changelog* and write to *output*.
 
-    Searches for a section header of the form ``## [X.Y.Z] - ...`` and captures
-    everything up to the next version header (or end of file).  Exits with a
-    non-zero status and an error message if the version is not found.
+    Searches for a section header of the form ``## [X.Y.Z] - ...`` or
+    ``## [X.Y.Z-rc.W] - ...`` and captures everything up to the next version
+    header (or end of file). Exits with a non-zero status and an error message
+    if the version is not found.
 
     Parameters
     ----------
     version:
-        Version string without a leading ``v``, e.g. ``"16.6.0"``.
+        Version string without a leading ``v``, e.g. ``"16.6.0"`` or
+        ``"17.0.0-rc.1"``.
     changelog:
         Path to the ChangeLog file to read from.
     output:
@@ -64,7 +67,7 @@ def extract(version: str, changelog: pathlib.Path, output: pathlib.Path) -> None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("version", help="Version string, e.g. 16.6.0")
+    parser.add_argument("version", help="Version string, e.g. 16.6.0 or 17.0.0-rc.1")
     parser.add_argument(
         "--changelog",
         type=pathlib.Path,

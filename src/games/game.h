@@ -119,38 +119,169 @@ public:
 //                       Validation of labels
 //=======================================================================
 
+/// @brief Decodes p_text as UTF-8, appending each decoded code point to p_codepoints.
+///
+/// Validates well-formedness per the Unicode Standard's table of well-formed UTF-8
+/// byte sequences: rejects truncated sequences, overlong encodings, encoded
+/// surrogate code points (U+D800-DFFF), and code points beyond U+10FFFF.
+///
+/// @return true if p_text is well-formed UTF-8. On failure, p_codepoints holds
+///         only the code points decoded before the invalid byte was reached,
+///         and should not be used.
+inline bool DecodeUtf8(const std::string &p_text, std::vector<char32_t> &p_codepoints)
+{
+  p_codepoints.clear();
+  auto byte_at = [&p_text](size_t i) { return static_cast<unsigned char>(p_text[i]); };
+  size_t i = 0;
+  const size_t n = p_text.size();
+  while (i < n) {
+    const unsigned char b0 = byte_at(i);
+    char32_t codepoint;
+    size_t length;
+    unsigned char lo1 = 0x80, hi1 = 0xbf; // valid range for the first continuation byte
+    if (b0 <= 0x7f) {
+      p_codepoints.push_back(b0);
+      ++i;
+      continue;
+    }
+    else if (b0 >= 0xc2 && b0 <= 0xdf) {
+      length = 2;
+      codepoint = b0 & 0x1f;
+    }
+    else if (b0 == 0xe0) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+      lo1 = 0xa0; // excludes overlong 3-byte encodings
+    }
+    else if ((b0 >= 0xe1 && b0 <= 0xec) || (b0 >= 0xee && b0 <= 0xef)) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+    }
+    else if (b0 == 0xed) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+      hi1 = 0x9f; // excludes encoded surrogate code points U+D800-DFFF
+    }
+    else if (b0 == 0xf0) {
+      length = 4;
+      codepoint = b0 & 0x07;
+      lo1 = 0x90; // excludes overlong 4-byte encodings
+    }
+    else if (b0 >= 0xf1 && b0 <= 0xf3) {
+      length = 4;
+      codepoint = b0 & 0x07;
+    }
+    else if (b0 == 0xf4) {
+      length = 4;
+      codepoint = b0 & 0x07;
+      hi1 = 0x8f; // excludes code points beyond U+10FFFF
+    }
+    else {
+      return false; // stray continuation byte, 0xc0/0xc1, or 0xf5-0xff
+    }
+    if (i + length > n) {
+      return false; // truncated sequence
+    }
+    for (size_t k = 1; k < length; k++) {
+      const unsigned char b = byte_at(i + k);
+      const unsigned char lo = (k == 1) ? lo1 : 0x80;
+      const unsigned char hi = (k == 1) ? hi1 : 0xbf;
+      if (b < lo || b > hi) {
+        return false;
+      }
+      codepoint = (codepoint << 6) | (b & 0x3f);
+    }
+    p_codepoints.push_back(codepoint);
+    i += length;
+  }
+  return true;
+}
+
+/// @brief Returns whether p_text is well-formed UTF-8.
+/// @sa DecodeUtf8
+inline bool IsWellFormedUtf8(const std::string &p_text)
+{
+  std::vector<char32_t> codepoints;
+  return DecodeUtf8(p_text, codepoints);
+}
+
+/// @brief Returns whether c is a Unicode space separator (category Zs).
+///
+/// This is the complete, fixed set of "blank" characters that a label treats as
+/// whitespace for the no-leading/trailing, single-whitespace-between-printables
+/// rule -- the same treatment historically given only to the literal ASCII space.
+/// The set has been stable across Unicode versions for a long time, so it is
+/// hardcoded here rather than obtained from a full Unicode character database.
+inline bool IsUnicodeSpaceSeparator(char32_t c)
+{
+  switch (c) {
+  case 0x0020: // SPACE
+  case 0x00a0: // NO-BREAK SPACE
+  case 0x1680: // OGHAM SPACE MARK
+  case 0x2000: // EN QUAD
+  case 0x2001: // EM QUAD
+  case 0x2002: // EN SPACE
+  case 0x2003: // EM SPACE
+  case 0x2004: // THREE-PER-EM SPACE
+  case 0x2005: // FOUR-PER-EM SPACE
+  case 0x2006: // SIX-PER-EM SPACE
+  case 0x2007: // FIGURE SPACE
+  case 0x2008: // PUNCTUATION SPACE
+  case 0x2009: // THIN SPACE
+  case 0x200a: // HAIR SPACE
+  case 0x202f: // NARROW NO-BREAK SPACE
+  case 0x205f: // MEDIUM MATHEMATICAL SPACE
+  case 0x3000: // IDEOGRAPHIC SPACE
+    return true;
+  default:
+    return false;
+  }
+}
+
 /// @brief Returns whether p_label is a valid label for a game object.
 ///
 /// A valid label either is the empty string (denoting the absence of a label),
-/// or consists only of printable ASCII characters and spaces, begins and ends
-/// with a printable character, and contains no two consecutive spaces.
+/// or is well-formed UTF-8 containing no control characters (Unicode category Cc,
+/// i.e. U+0000-001F, U+007F, and U+0080-009F, plus the line/paragraph separators
+/// U+2028 and U+2029), begins and ends with a non-whitespace, non-control
+/// character, and contains no two consecutive whitespace characters.  "Whitespace"
+/// here means any Unicode space separator (category Zs; see IsUnicodeSpaceSeparator),
+/// not just the literal ASCII space -- so, for example, a label may not begin with
+/// a no-break space (U+00A0) any more than it may begin with an ordinary space.
 ///
-/// @note The set of valid labels is intended to be widened to permit Unicode in
-///       a future version; this function is the single point at which the
-///       definition is enforced.
+/// @note Categories other than Cc/Zl/Zp/Zs (for example, format or private-use
+///       characters) are deliberately not excluded: labels exist for object
+///       identity and display, not as a place to police the full space of Unicode.
 inline bool IsValidLabel(const std::string &p_label)
 {
   if (p_label.empty()) {
     return true;
   }
-  auto is_printable = [](unsigned char c) { return c >= 0x21 && c <= 0x7e; };
-  if (!is_printable(p_label.front()) || !is_printable(p_label.back())) {
+  std::vector<char32_t> codepoints;
+  if (!DecodeUtf8(p_label, codepoints)) {
     return false;
   }
-  bool previous_was_space = false;
-  for (const char ch : p_label) {
-    const auto c = static_cast<unsigned char>(ch);
-    if (c == ' ') {
-      if (previous_was_space) {
-        return false; // two consecutive spaces
+  auto is_control = [](char32_t c) {
+    return c <= 0x1f || c == 0x7f || (c >= 0x80 && c <= 0x9f) || c == 0x2028 || c == 0x2029;
+  };
+  auto is_whitespace = [](char32_t c) { return IsUnicodeSpaceSeparator(c); };
+  auto is_printable = [&](char32_t c) { return !is_control(c) && !is_whitespace(c); };
+  if (!is_printable(codepoints.front()) || !is_printable(codepoints.back())) {
+    return false;
+  }
+  bool previous_was_whitespace = false;
+  for (const char32_t c : codepoints) {
+    if (is_whitespace(c)) {
+      if (previous_was_whitespace) {
+        return false; // two consecutive whitespace characters
       }
-      previous_was_space = true;
+      previous_was_whitespace = true;
     }
     else if (is_printable(c)) {
-      previous_was_space = false;
+      previous_was_whitespace = false;
     }
     else {
-      return false; // tab, newline, other control, or non-ASCII byte
+      return false; // control character
     }
   }
   return true;
@@ -161,9 +292,27 @@ inline bool IsValidLabel(const std::string &p_label)
 inline void CheckLabel(const std::string &p_label)
 {
   if (!IsValidLabel(p_label)) {
-    throw ValueException("Invalid label: a label may contain only printable ASCII "
-                         "characters and spaces, must not begin or end with a space, "
-                         "and must not contain two consecutive spaces");
+    throw ValueException("Invalid label: a label must be well-formed UTF-8 text "
+                         "containing no control characters, must not begin or end "
+                         "with whitespace, and must not contain two consecutive "
+                         "whitespace characters");
+  }
+}
+
+/// @brief Returns whether p_text is valid free-form text (a game title or description).
+///
+/// Unlike labels, free-form text has no semantic role in the model (it does not
+/// identify an object or participate in any uniqueness constraint), so the only
+/// requirement is that it be well-formed UTF-8.
+/// @sa IsValidLabel
+inline bool IsValidText(const std::string &p_text) { return IsWellFormedUtf8(p_text); }
+
+/// @brief Throws ValueException if p_text is not valid free-form text.
+/// @sa IsValidText
+inline void CheckText(const std::string &p_text)
+{
+  if (!IsValidText(p_text)) {
+    throw ValueException("Invalid text: must be well-formed UTF-8");
   }
 }
 
@@ -1031,12 +1180,20 @@ public:
   /// Get the text label associated with the game
   virtual const std::string &GetTitle() const { return m_title; }
   /// Set the text label associated with the game
-  virtual void SetTitle(const std::string &p_title) { m_title = p_title; }
+  virtual void SetTitle(const std::string &p_title)
+  {
+    CheckText(p_title);
+    m_title = p_title;
+  }
 
   /// Get the text comment associated with the game
   virtual const std::string &GetDescription() const { return m_comment; }
   /// Set the text comment associated with the game
-  virtual void SetDescription(const std::string &p_comment) { m_comment = p_comment; }
+  virtual void SetDescription(const std::string &p_comment)
+  {
+    CheckText(p_comment);
+    m_comment = p_comment;
+  }
 
   /// Return the version number of the game.  The version is incremented after each
   /// substantive change to the game (i.e. not merely involving labels)
@@ -1129,6 +1286,11 @@ public:
   virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
   virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
   virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
+  virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
+                                  const std::string &)
+  {
+    throw UndefinedException();
+  }
   virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
   {
     throw UndefinedException();
@@ -1143,33 +1305,11 @@ public:
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
 
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles
-  template <class Generator>
-  MixedStrategyProfile<double> NewRandomStrategyProfile(Generator &generator) const;
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedStrategyProfile<Rational> NewRandomStrategyProfile(int denom, Generator &generator) const;
   virtual MixedStrategyProfile<double>
   NewMixedStrategyProfile(double, const StrategySupportProfile &) const = 0;
   virtual MixedStrategyProfile<Rational>
   NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const = 0;
 
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles
-  template <class Generator>
-  MixedBehaviorProfile<double> NewRandomBehaviorProfile(Generator &generator) const;
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(int denom, Generator &generator) const;
   /// @name Players
   //@{
   /// Returns the number of players in the game

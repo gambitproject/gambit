@@ -33,13 +33,13 @@ def test_action_label_invalid_raises_valueerror(label: str):
         action.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_action_label_non_ascii_rejected(label: str):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_action_label_unicode_accepted(label: str):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    with pytest.raises(UnicodeEncodeError):
-        action.label = label
+    action.label = label
+    assert action.label == label
 
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])

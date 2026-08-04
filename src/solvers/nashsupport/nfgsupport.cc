@@ -24,7 +24,6 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
-#include <functional>
 
 #include "nashsupport.h"
 
@@ -33,36 +32,34 @@ using namespace Gambit;
 namespace {
 
 using StrategySupport = std::vector<GameStrategy>;
-using CallbackFunction = std::function<void(const std::map<GamePlayer, StrategySupport> &)>;
 
 class CartesianRange {
-  Array<size_t> m_sizes;
+  std::vector<size_t> m_sizes;
 
 public:
-  CartesianRange(const Array<size_t> &p_sizes) : m_sizes(p_sizes) {}
+  CartesianRange(const std::vector<size_t> &p_sizes) : m_sizes(p_sizes) {}
 
   class iterator {
-  private:
-    Array<size_t> m_sizes;
-    Array<size_t> m_indices;
+    std::vector<size_t> m_sizes;
+    std::vector<size_t> m_indices;
     bool m_end;
 
   public:
     using iterator_category = std::forward_iterator_tag;
 
-    iterator(const Array<size_t> &p_sizes, bool p_end = false)
+    iterator(const std::vector<size_t> &p_sizes, bool p_end = false)
       : m_sizes(p_sizes), m_indices(m_sizes.size()), m_end(p_end)
     {
       std::fill(m_indices.begin(), m_indices.end(), 1);
     }
 
-    const Array<size_t> &operator*() const { return m_indices; }
+    const std::vector<size_t> &operator*() const { return m_indices; }
 
-    const Array<size_t> &operator->() const { return m_indices; }
+    const std::vector<size_t> &operator->() const { return m_indices; }
 
     iterator &operator++()
     {
-      for (size_t i = 1; i <= m_sizes.size(); i++) {
+      for (size_t i = 0; i < m_sizes.size(); i++) {
         if (++m_indices[i] <= m_sizes[i]) {
           return *this;
         }
@@ -115,19 +112,16 @@ bool AnyDominatedStrategies(const Game &game, std::map<GamePlayer, StrategySuppo
 }
 
 class StrategySubsets {
-private:
   GamePlayer m_player;
   size_t m_size;
 
 public:
   class iterator {
-  private:
     GamePlayerRep::Strategies m_strategies;
     StrategySupport m_current;
     std::vector<bool> m_include;
     bool m_end;
 
-  private:
     void UpdateCurrent()
     {
       m_current.clear();
@@ -179,47 +173,15 @@ public:
   iterator end() { return {m_player->GetStrategies(), m_size, true}; }
 };
 
-void GenerateSupportProfiles(const Game &game,
-                             std::map<GamePlayer, StrategySupport> currentSupports,
-                             std::list<StrategySubsets> domains, CallbackFunction callback)
+std::vector<size_t> ComputeOuterDim(const std::vector<size_t> &numActions, bool preferBalance,
+                                    int numPlayers)
 {
-  auto domain = domains.front();
-  domains.pop_front();
-  for (auto support : domain) {
-    currentSupports[domain.GetPlayer()] = support;
-    if (AnyDominatedStrategies(game, currentSupports)) {
-      continue;
-    }
-    if (domains.empty()) {
-      callback(currentSupports);
-    }
-    else {
-      GenerateSupportProfiles(game, currentSupports, domains, callback);
-    }
-  }
-}
-
-/// Solve over supports with a total number of strategies `size` and a maximum difference
-/// in player support size of `diff`.
-void GenerateSizeDiff(const Game &game, int size, size_t diff, CallbackFunction callback)
-{
-  auto players = game->GetPlayers();
-  CartesianRange range(game->GetStrategies().shape_array());
-  for (auto size_profile : range) {
-    if (*std::max_element(size_profile.cbegin(), size_profile.cend()) -
-                *std::min_element(size_profile.cbegin(), size_profile.cend()) !=
-            diff ||
-        std::accumulate(size_profile.cbegin(), size_profile.cend(), 0) != size) {
-      continue;
-    }
-    std::list<StrategySubsets> domains;
-    std::transform(players.begin(), players.end(), size_profile.begin(),
-                   std::back_inserter(domains),
-                   [](const GamePlayer &player, size_t sz) -> StrategySubsets {
-                     return {player, sz};
-                   });
-    GenerateSupportProfiles(game, std::map<GamePlayer, StrategySupport>(), domains, callback);
-  }
+  const int maxsize = std::accumulate(numActions.begin(), numActions.end(), 0) - numPlayers + 1;
+  const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
+  std::vector<size_t> dim(2);
+  dim[0] = preferBalance ? maxsize : maxdiff;
+  dim[1] = preferBalance ? maxdiff : maxsize;
+  return dim;
 }
 
 StrategySupportProfile
@@ -238,29 +200,157 @@ StrategiesToSupport(const Game &p_game, const std::map<GamePlayer, StrategySuppo
 
 } // end anonymous namespace
 
-std::shared_ptr<PossibleNashStrategySupportsResult>
-PossibleNashStrategySupports(const Game &p_game)
-{
-  auto result = std::make_shared<PossibleNashStrategySupportsResult>();
-  auto numActions = p_game->GetStrategies().shape_array();
-
-  const int maxsize =
-      std::accumulate(numActions.begin(), numActions.end(), 0) - p_game->NumPlayers() + 1;
-  const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
-
-  const bool preferBalance = p_game->NumPlayers() == 2;
-  Array<size_t> dim(2);
-  dim[1] = (preferBalance) ? maxsize : maxdiff;
-  dim[2] = (preferBalance) ? maxdiff : maxsize;
-
-  CartesianRange range(dim);
-  const std::list<MixedStrategyProfile<double>> solutions;
-  for (auto x : range) {
-    GenerateSizeDiff(p_game, ((preferBalance) ? x[1] : x[2]) + p_game->NumPlayers() - 1,
-                     ((preferBalance) ? x[2] : x[1]) - 1,
-                     [p_game, result](const std::map<GamePlayer, StrategySupport> &p_profile) {
-                       result->m_supports.push_back(StrategiesToSupport(p_game, p_profile));
-                     });
+class PossibleNashStrategySupports::Impl {
+public:
+  explicit Impl(const Game &p_game)
+    : m_game(p_game), m_numActions(p_game->GetStrategies().shape()),
+      m_preferBalance(p_game->NumPlayers() == 2),
+      m_xRange(ComputeOuterDim(m_numActions, m_preferBalance, p_game->NumPlayers())),
+      m_xIt(m_xRange.begin()), m_xEnd(m_xRange.end()), m_sizeProfileRange(m_numActions),
+      m_spIt(m_sizeProfileRange.end()), m_spEnd(m_sizeProfileRange.end()), m_current(p_game)
+  {
   }
-  return result;
+
+  std::optional<StrategySupportProfile> Next()
+  {
+    if (!Advance()) {
+      return std::nullopt;
+    }
+    return m_current;
+  }
+
+private:
+  struct Frame {
+    GamePlayer player;
+    StrategySubsets::iterator cur;
+    StrategySubsets::iterator end;
+  };
+
+  bool Advance()
+  {
+    while (true) {
+      if (!m_stack.empty() && AdvanceDFS()) {
+        return true;
+      }
+      while (!NextSizeProfile()) {
+        if (!NextX()) {
+          return false;
+        }
+      }
+    }
+  }
+
+  bool AdvanceDFS()
+  {
+    while (!m_stack.empty()) {
+      Frame &frame = m_stack.back();
+      if (frame.cur == frame.end) {
+        m_currentSupports.erase(frame.player);
+        m_stack.pop_back();
+        if (!m_stack.empty()) {
+          ++m_stack.back().cur;
+        }
+        continue;
+      }
+      m_currentSupports[frame.player] = *frame.cur;
+      if (AnyDominatedStrategies(m_game, m_currentSupports)) {
+        ++frame.cur;
+        continue;
+      }
+      if (m_stack.size() == m_domains.size()) {
+        m_current = StrategiesToSupport(m_game, m_currentSupports);
+        ++frame.cur;
+        return true;
+      }
+      StrategySubsets &nextDomain = m_domains[m_stack.size()];
+      m_stack.push_back(Frame{nextDomain.GetPlayer(), nextDomain.begin(), nextDomain.end()});
+    }
+    return false;
+  }
+
+  // Advances to the next (size, diff) preference pair, resetting the size-profile search
+  // to its start.  Returns false once all pairs have been tried.
+  bool NextX()
+  {
+    if (m_xIt == m_xEnd) {
+      return false;
+    }
+    const std::vector<size_t> &x = *m_xIt;
+    m_size = static_cast<int>(m_preferBalance ? x[0] : x[1]) + m_game->NumPlayers() - 1;
+    m_diff = (m_preferBalance ? x[1] : x[0]) - 1;
+    ++m_xIt;
+    m_spIt = m_sizeProfileRange.begin();
+    m_spEnd = m_sizeProfileRange.end();
+    return true;
+  }
+
+  // Advances to the next size profile (for the current (size, diff) pair) whose total and
+  // spread match, setting up the per-player subset domains and DFS stack for it. Returns
+  // false once all size profiles have been tried for the current pair.
+  bool NextSizeProfile()
+  {
+    while (m_spIt != m_spEnd) {
+      const std::vector<size_t> &sizeProfile = *m_spIt;
+      ++m_spIt;
+      if (*std::max_element(sizeProfile.cbegin(), sizeProfile.cend()) -
+                  *std::min_element(sizeProfile.cbegin(), sizeProfile.cend()) !=
+              m_diff ||
+          std::accumulate(sizeProfile.cbegin(), sizeProfile.cend(), 0) != m_size) {
+        continue;
+      }
+      SetupDomains(sizeProfile);
+      return true;
+    }
+    return false;
+  }
+
+  void SetupDomains(const std::vector<size_t> &p_sizeProfile)
+  {
+    auto players = m_game->GetPlayers();
+    m_domains.clear();
+    std::transform(players.begin(), players.end(), p_sizeProfile.begin(),
+                   std::back_inserter(m_domains),
+                   [](const GamePlayer &player, size_t sz) -> StrategySubsets {
+                     return {player, sz};
+                   });
+    m_currentSupports.clear();
+    m_stack.clear();
+    m_stack.push_back(
+        Frame{m_domains.front().GetPlayer(), m_domains.front().begin(), m_domains.front().end()});
+  }
+
+  Game m_game;
+  std::vector<size_t> m_numActions;
+  bool m_preferBalance;
+
+  CartesianRange m_xRange;
+  CartesianRange::iterator m_xIt;
+  CartesianRange::iterator m_xEnd;
+  int m_size = 0;
+  size_t m_diff = 0;
+
+  CartesianRange m_sizeProfileRange;
+  CartesianRange::iterator m_spIt;
+  CartesianRange::iterator m_spEnd;
+
+  std::vector<StrategySubsets> m_domains;
+  std::vector<Frame> m_stack;
+  std::map<GamePlayer, StrategySupport> m_currentSupports;
+  StrategySupportProfile m_current;
+};
+
+PossibleNashStrategySupports::PossibleNashStrategySupports(const Game &p_game)
+  : m_impl(std::make_unique<Impl>(p_game))
+{
+}
+
+PossibleNashStrategySupports::~PossibleNashStrategySupports() = default;
+PossibleNashStrategySupports::PossibleNashStrategySupports(
+    PossibleNashStrategySupports &&) noexcept = default;
+PossibleNashStrategySupports &
+PossibleNashStrategySupports::operator=(PossibleNashStrategySupports &&) noexcept = default;
+
+std::optional<StrategySupportProfile> PossibleNashStrategySupports::Next()
+{
+  return m_impl->Next();
 }

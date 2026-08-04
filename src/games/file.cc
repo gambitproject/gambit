@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -33,6 +34,14 @@ namespace {
 // This anonymous namespace encapsulates the file-parsing code
 
 using namespace Gambit;
+
+// std::isspace/std::isdigit are undefined behavior when given a (possibly
+// negative) plain `char` other than EOF; a UTF-8 continuation or lead byte
+// has the high bit set and so is negative on a platform with signed char.
+// These wrappers convert to `unsigned char` first, restricting the check to
+// the ASCII whitespace/digit characters that terminate lexer tokens.
+bool IsAsciiSpace(char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; }
+bool IsAsciiDigit(char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; }
 
 using GameFileToken = enum {
   TOKEN_NUMBER = 0,
@@ -121,7 +130,7 @@ GameFileToken GameFileLexer::GetNextToken()
     return (m_lastToken = TOKEN_EOF);
   }
 
-  while (isspace(c)) {
+  while (IsAsciiSpace(c)) {
     ReadChar(c);
     if (m_file.eof()) {
       return (m_lastToken = TOKEN_EOF);
@@ -140,12 +149,12 @@ GameFileToken GameFileLexer::GetNextToken()
   else if (c == ',') {
     return (m_lastToken = TOKEN_COMMA);
   }
-  else if (isdigit(c) || c == '-' || c == '+') {
+  else if (IsAsciiDigit(c) || c == '-' || c == '+') {
     std::string buf;
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -158,7 +167,7 @@ GameFileToken GameFileLexer::GetNextToken()
     if (c == '.') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -166,12 +175,12 @@ GameFileToken GameFileLexer::GetNextToken()
       if (c == 'e' || c == 'E') {
         buf += c;
         ReadChar(c);
-        if (c != '+' && c != '-' && !isdigit(c)) {
+        if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
           OnParseError("Invalid Token +/-");
         }
         buf += c;
         ReadChar(c);
-        while (!m_file.eof() && isdigit(c)) {
+        while (!m_file.eof() && IsAsciiDigit(c)) {
           buf += c;
           ReadChar(c);
         }
@@ -184,7 +193,7 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == '/') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -195,12 +204,12 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == 'e' || c == 'E') {
       buf += c;
       ReadChar(c);
-      if (c != '+' && c != '-' && !isdigit(c)) {
+      if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
         OnParseError("Invalid Token +/-");
       }
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -219,7 +228,7 @@ GameFileToken GameFileLexer::GetNextToken()
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -241,7 +250,7 @@ GameFileToken GameFileLexer::GetNextToken()
       if (a == '\n') {
         IncreaseLine();
       }
-    } while (!m_file.eof() && isspace(a));
+    } while (!m_file.eof() && IsAsciiSpace(a));
 
     if (a == '\"') {
       bool lastslash = false;
@@ -276,14 +285,14 @@ GameFileToken GameFileLexer::GetNextToken()
         if (a == '\n') {
           IncreaseLine();
         }
-      } while (!isspace(a));
+      } while (!IsAsciiSpace(a));
     }
 
     return (m_lastToken = TOKEN_TEXT);
   }
 
   m_lastText = "";
-  while (!m_file.eof() && !isspace(c)) {
+  while (!m_file.eof() && !IsAsciiSpace(c)) {
     m_lastText += c;
     ReadChar(c);
   }

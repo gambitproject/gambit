@@ -78,7 +78,7 @@ class NodeChildren:
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
                 raise KeyError(f"No action with label '{action}' at node")
             for act in self.parent.deref().GetInfoset().deref().GetActions():
-                if act.deref().GetLabel().decode("ascii") == cython.cast(str, action):
+                if act.deref().GetLabel().decode("utf-8") == cython.cast(str, action):
                     return Node.wrap(self.parent.deref().GetChild(act))
             raise KeyError(f"No action with label '{action}' at node")
         if isinstance(action, Action):
@@ -372,15 +372,17 @@ class Node:
     def label(self) -> str:
         """The text label associated with the node.
 
-        .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        .. versionchanged:: 17.0.0
+            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
+            contain no control characters, and must not begin/end with whitespace or have
+            two consecutive whitespace characters.  "Whitespace" means any Unicode space
+            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
         """
-        return self.node.deref().GetLabel().decode("ascii")
+        return self.node.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.node.deref().SetLabel(value.encode("ascii"))
+        self.node.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def children(self) -> NodeChildren:
