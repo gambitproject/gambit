@@ -13,6 +13,8 @@
   the run.  (#998)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
+- Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
+  lazy generator algorithm rather than materialising all as a single list up front.
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
