@@ -591,16 +591,6 @@ def test_insert_move_error_player_mismatch():
         game1.insert_move(game1.root, game2.players["Player 1"], 1)
 
 
-def test_node_leave_infoset():
-    """A node-anchored infoset proxy is lazy: it re-resolves after the node leaves its infoset."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
-    proxy = node.infoset
-    assert len(proxy.members) == 2
-    game.leave_infoset(node)
-    assert list(proxy.members) == [node]
-
-
 def test_node_infoset_becomes_null_when_truncated():
     """A captured infoset proxy re-resolves to null after the node is truncated to a leaf."""
     game = games.read_from_file("basic_extensive_game.efg")

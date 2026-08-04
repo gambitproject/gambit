@@ -546,6 +546,81 @@ Game GameTreeRep::CopySubgame(GameNode p_root) const
   return ReadGame(is);
 }
 
+GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
+                                     const GamePlayer &p_player, const std::string &p_label)
+{
+  if (p_nodes.empty()) {
+    throw ValueException("At least one node must be specified");
+  }
+  if (p_player->m_game != this) {
+    throw MismatchException();
+  }
+  if (p_player->IsChance()) {
+    throw UndefinedException("The information set must belong to a personal player, not chance");
+  }
+  std::set<GameNodeRep *> selected;
+  for (const auto &node : p_nodes) {
+    if (node->m_game != this) {
+      throw MismatchException();
+    }
+    if (node->IsTerminal()) {
+      throw UndefinedException("All nodes must be decision nodes");
+    }
+    if (node->m_infoset->IsChanceInfoset()) {
+      throw UndefinedException("All nodes must belong to a personal player, not chance");
+    }
+    if (!selected.insert(node.get()).second) {
+      throw ValueException("Each node may be referenced only once");
+    }
+  }
+  // The first member defines the action labels and their order of the new information set.
+  const auto &reference = p_nodes.front()->m_infoset->m_actions;
+  for (const auto &node : p_nodes) {
+    const auto &actions = node->m_infoset->m_actions;
+    if (!std::equal(
+            actions.begin(), actions.end(), reference.begin(), reference.end(),
+            [](const std::shared_ptr<GameActionRep> &a, const std::shared_ptr<GameActionRep> &b) {
+              return a->GetLabel() == b->GetLabel();
+            })) {
+      throw ValueException(
+          "All nodes must have the same actions, with the same labels in the same order");
+    }
+  }
+  // Destroy an infoset all of whose members are absorbed; the label it holds can then be reused.
+  std::set<const GameInfosetRep *> absorbed;
+  if (!p_label.empty()) {
+    for (const auto &infoset : p_player->m_infosets) {
+      if (infoset->GetLabel() == p_label &&
+          std::all_of(infoset->m_members.begin(), infoset->m_members.end(),
+                      [&selected](const std::shared_ptr<GameNodeRep> &m) {
+                        return contains(selected, m.get());
+                      })) {
+        absorbed.insert(infoset.get());
+      }
+    }
+  }
+  p_player->CheckInfosetLabel(p_label, absorbed);
+
+  IncrementVersion();
+  auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
+                                                     p_player.get(), reference.size());
+  auto dest = newInfoset->m_actions.begin();
+  for (const auto &action : reference) {
+    (*dest)->SetLabel(action->GetLabel());
+    ++dest;
+  }
+  p_player->m_infosets.push_back(newInfoset);
+  for (const auto &node : p_nodes) {
+    RemoveMember(node->m_infoset, node.get());
+    newInfoset->m_members.push_back(node);
+    node->m_infoset = newInfoset.get();
+  }
+  newInfoset->SetLabel(p_label);
+  ClearComputedValues();
+  InvalidateInfosetOrdering();
+  return newInfoset;
+}
+
 void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
   if (p_node->m_game != this || p_infoset->m_game != this) {

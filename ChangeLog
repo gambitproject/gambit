@@ -15,10 +15,23 @@
   removes dependency on tinyxml.  (#897)
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
+- Introduced `Game.make_infoset`, which subsumes operations previously written as `Game.leave_infoset`,
+  `Game.set_infoset`, and `Game.set_player`.
+- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
+
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
   no longer inserts spurious entries into a strategy's internal action map.
+
+### Removed
+- `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the
+  information set and the new player.  (#999)
+- `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
+  information sets and their members is now maintained automatically.  (#999)
 
 ## [16.7.0] - 2026-07-11
 

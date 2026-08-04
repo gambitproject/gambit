@@ -237,11 +237,6 @@ class Infoset:
 
         The iteration order of information set members is the order in which they
         are encountered in the pre-order depth first traversal of the game tree.
-
-        .. versionchanged:: 16.5.0
-           It is no longer necessary to call `Game.sort_infosets` to standardise
-           iteration order.
-
         """
         return InfosetMembers.wrap(self.infoset)
 
