@@ -240,9 +240,9 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   }
 
   std::list<MixedBehaviorProfile<double>> ret;
-  auto possible_supports = PossibleNashBehaviorSupports(p_game);
+  PossibleNashBehaviorSupports possible_supports(p_game);
 
-  for (auto support : possible_supports->m_supports) {
+  for (auto support : possible_supports) {
     p_onEvent(EnumPolyCandidateSupportEvent<BehaviorSupportProfile>{support});
     bool isSingular = false;
     for (const auto &solution :

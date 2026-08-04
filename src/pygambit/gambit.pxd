@@ -583,11 +583,9 @@ cdef extern from "solvers/gnm/gnm.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/nashsupport/nashsupport.h":
-    cdef cppclass c_PossibleNashStrategySupportsResult "PossibleNashStrategySupportsResult":
-        stdlist[c_StrategySupportProfile] m_supports
-    shared_ptr[c_PossibleNashStrategySupportsResult] PossibleNashStrategySupports(
-            c_Game
-    ) except +RuntimeError
+    cdef cppclass c_PossibleNashStrategySupports "PossibleNashStrategySupports":
+        c_PossibleNashStrategySupports(c_Game) except +
+        optional[c_StrategySupportProfile] Next() except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
     stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
