@@ -31,10 +31,8 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 using namespace Gambit::gametracer;
 
-extern Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                                     std::istream &p_stream);
-extern Array<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
-                                                                       int p_count);
+extern std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                           std::istream &p_stream);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -121,14 +119,15 @@ int main(int argc, char *argv[])
     const Game game = ReadGame(*input_stream);
     auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
 
-    Array<MixedStrategyProfile<double>> perts;
+    std::vector<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {
       std::ifstream startPerts(startFile.c_str());
       perts = ReadStrategyPerturbations(game, startPerts);
     }
     else {
       // Generate the desired number of points randomly
-      perts = RandomStrategyPerturbations(game, numVectors);
+      std::default_random_engine engine;
+      perts = NewRandomStrategyProfiles(game, numVectors, engine);
     }
 
     for (auto pert : perts) {
