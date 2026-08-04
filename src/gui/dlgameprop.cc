@@ -40,8 +40,7 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
 
   auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")), 0, wxALL | wxALIGN_CENTER, 5);
-  m_title = new wxTextCtrl(this, wxID_ANY,
-                           wxString(m_doc->GetGame()->GetTitle().c_str(), *wxConvCurrent),
+  m_title = new wxTextCtrl(this, wxID_ANY, wxString::FromUTF8(m_doc->GetGame()->GetTitle()),
                            wxDefaultPosition, wxSize(400, -1));
 
   titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, 5);
@@ -50,9 +49,9 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
   auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")), 0, wxALL | wxALIGN_CENTER,
                     5);
-  m_comment = new wxTextCtrl(this, wxID_ANY,
-                             wxString(m_doc->GetGame()->GetDescription().c_str(), *wxConvCurrent),
-                             wxDefaultPosition, wxSize(400, -1), wxTE_MULTILINE);
+  m_comment =
+      new wxTextCtrl(this, wxID_ANY, wxString::FromUTF8(m_doc->GetGame()->GetDescription()),
+                     wxDefaultPosition, wxSize(400, -1), wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
 

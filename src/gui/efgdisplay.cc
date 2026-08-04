@@ -141,9 +141,9 @@ void OutcomeEditorPopup::BuildControls()
   for (size_t player = 1; player <= m_doc->GetGame()->NumPlayers(); ++player) {
     const GamePlayer gamePlayer = game->GetPlayer(player);
 
-    payoffSizer->Add(new wxStaticText(m_contentPanel, wxID_ANY,
-                                      wxString(gamePlayer->GetLabel().c_str(), *wxConvCurrent)),
-                     0, wxALIGN_CENTER_VERTICAL);
+    payoffSizer->Add(
+        new wxStaticText(m_contentPanel, wxID_ANY, wxString::FromUTF8(gamePlayer->GetLabel())), 0,
+        wxALIGN_CENTER_VERTICAL);
 
     auto *payoffCtrl = new wxTextCtrl(m_contentPanel, wxID_ANY);
 
@@ -184,7 +184,7 @@ void OutcomeEditorPopup::LoadValues()
     return;
   }
 
-  m_labelCtrl->SetValue(wxString(outcome->GetLabel().c_str(), *wxConvCurrent));
+  m_labelCtrl->SetValue(wxString::FromUTF8(outcome->GetLabel()));
 
   const Game game = m_doc->GetGame();
 

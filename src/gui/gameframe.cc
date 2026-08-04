@@ -310,11 +310,10 @@ void GameFrame::OnUpdate()
   gameTitle = m_doc->GetGame()->GetTitle();
 
   if (!m_doc->GetFilename().empty()) {
-    SetTitle(wxT("Gambit - [") + m_doc->GetFilename() + wxT("] ") +
-             wxString(gameTitle.c_str(), *wxConvCurrent));
+    SetTitle(wxT("Gambit - [") + m_doc->GetFilename() + wxT("] ") + wxString::FromUTF8(gameTitle));
   }
   else {
-    SetTitle(wxT("Gambit - ") + wxString(gameTitle.c_str(), *wxConvCurrent));
+    SetTitle(wxT("Gambit - ") + wxString::FromUTF8(gameTitle));
   }
 
   if (m_doc->IsModified()) {

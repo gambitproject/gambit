@@ -84,9 +84,7 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset)
     gridSizer->Add(new wxStaticText(this, wxID_STATIC, number), 0,
                    wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
-    auto *name =
-        new LabelTextCtrl(this, wxID_ANY, wxString(action->GetLabel().c_str(), *wxConvCurrent),
-                          LabelCharacterPolicy::AsciiOnly);
+    auto *name = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(action->GetLabel()));
     m_actionLabels.push_back(name);
     gridSizer->Add(name, 1, wxEXPAND);
 
@@ -142,9 +140,7 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_infosetLabel =
-      new LabelTextCtrl(this, wxID_ANY, wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent),
-                        LabelCharacterPolicy::AsciiOnly);
+  m_infosetLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(p_infoset->GetLabel()));
   labelSizer->Add(m_infosetLabel, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxEXPAND);
 

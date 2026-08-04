@@ -162,14 +162,13 @@ void TablePlayerPanel::OnUpdate()
   const wxColour color = m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player));
 
   m_playerLabel->SetForegroundColour(color);
-  m_playerLabel->SetValue(
-      wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(), *wxConvCurrent));
+  m_playerLabel->SetValue(wxString::FromUTF8(m_doc->GetGame()->GetPlayer(m_player)->GetLabel()));
 
   if (m_doc->GetWorkspace().GetCurrentProfile() > 0) {
     m_payoff->SetForegroundColour(color);
 
     const std::string pay = m_doc->GetWorkspace().GetProfiles().GetPayoff(m_player);
-    m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
+    m_payoff->SetLabel(wxT("Payoff: ") + wxString::FromUTF8(pay));
     GetSizer()->Show(m_payoff, true);
   }
   else {
@@ -222,8 +221,7 @@ void TablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
 
 void TablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
 {
-  const wxString label =
-      LabelTextCtrl::Normalize(m_playerLabel->GetValue(), true, LabelCharacterPolicy::AsciiOnly);
+  const wxString label = LabelTextCtrl::Normalize(m_playerLabel->GetValue(), true);
 
   if (label.empty()) {
     wxBell();
@@ -251,8 +249,7 @@ void TablePlayerPanel::PostPendingChanges()
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
-    m_playerLabel->SetValue(
-        wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(), *wxConvCurrent));
+    m_playerLabel->SetValue(wxString::FromUTF8(m_doc->GetGame()->GetPlayer(m_player)->GetLabel()));
   }
 }
 

@@ -1,6 +1,12 @@
 ## [17.0.0-alpha.1] - unreleased
 
 ### Changed
+- Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
+  still not contain control characters, begin/end with whitespace, or contain two consecutive
+  whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0
+  NO-BREAK SPACE), not just the ASCII space.  A game's title and description have no such
+  printable-character or spacing restriction, but must also be well-formed UTF-8.  In `pygambit`,
+  labels/title/description are now encoded/decoded as UTF-8 rather than ASCII.  (#862)
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
   to match the behaviour of all other Nash equilibrium solvers.  (#996)
 - `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of

@@ -42,7 +42,7 @@ labels to objects if the game is going to be viewed in the graphical
 interface. In all cases, these labels are surrounded by the quotation
 character ("). The use of an explicit " character within a text label
 can be accomplished by preceding the embedded " characters with a
-backwards slash (\).
+backwards slash (\). Label text is encoded as UTF-8.
 This is an alternate version of the first line of the example file, in
 which the title of the game contains the term Bayesian game in
 quotation marks::

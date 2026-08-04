@@ -166,15 +166,17 @@ class Infoset:
     def label(self) -> str:
         """Get or set the text label of the information set.
 
-        .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        .. versionchanged:: 17.0.0
+            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
+            contain no control characters, and must not begin/end with whitespace or have
+            two consecutive whitespace characters.  "Whitespace" means any Unicode space
+            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
         """
-        return self.infoset.deref().GetLabel().decode("ascii")
+        return self.infoset.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.infoset.deref().SetLabel(value.encode("ascii"))
+        self.infoset.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def number(self) -> int:

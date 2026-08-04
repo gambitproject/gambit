@@ -310,10 +310,10 @@ cdef extern from "games/game.h":
         bool IsAgg() except +
 
         string GetTitle() except +
-        void SetTitle(string) except +
+        void SetTitle(string) except +ValueError
 
         string GetDescription() except +
-        void SetDescription(string) except +
+        void SetDescription(string) except +ValueError
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError
