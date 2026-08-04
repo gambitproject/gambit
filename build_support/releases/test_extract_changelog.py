@@ -25,9 +25,11 @@ CHANGELOG = REPO_ROOT / "ChangeLog"
 # ChangeLog format rules (Keep a Changelog)
 # ---------------------------------------------------------------------------
 
-# Pre-release suffixes (a1, b2, rc3) follow PEP 440 conventions used in this project.
+# New pre-release identifiers follow Semantic Versioning. Historical PEP 440
+# spellings remain valid so that existing ChangeLog entries continue to pass.
 VERSION_HEADER_RE = re.compile(
-    r"^## \[\d+\.\d+\.\d+(?:a\d+|b\d+|rc\d+)?\] - (\d{4}-\d{2}-\d{2}|unreleased)$"
+    r"^## \[\d+\.\d+\.\d+(?:(?:a|b|rc)\d+|-(?:alpha|beta|rc)\.\d+)?\] - "
+    r"(\d{4}-\d{2}-\d{2}|unreleased)$"
 )
 # 'General' is a project-specific extension used for cross-cutting changes.
 SECTION_HEADER_RE = re.compile(r"^### (Added|Changed|Deprecated|Removed|Fixed|Security|General)$")
@@ -65,6 +67,25 @@ UNRELEASED_CHANGELOG = (
 """
     + SAMPLE_CHANGELOG
 )
+
+PRERELEASE_CHANGELOG = """\
+# Changelog
+
+## [17.0.0-rc.1] - 2026-08-03
+
+### Fixed
+- Release candidate fix
+
+## [17.0.0-beta.2] - 2026-07-27
+
+### Changed
+- Second beta change
+
+## [17.0.0-alpha.3] - 2026-07-20
+
+### Added
+- Third alpha feature
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +135,24 @@ def test_extract_unreleased_version(tmp_path):
     assert "Upcoming feature" in output.read_text()
 
 
+@pytest.mark.parametrize(
+    ("version", "expected"),
+    [
+        ("17.0.0-alpha.3", "Third alpha feature"),
+        ("17.0.0-beta.2", "Second beta change"),
+        ("17.0.0-rc.1", "Release candidate fix"),
+    ],
+)
+def test_extract_prerelease_version(tmp_path, version, expected):
+    changelog = tmp_path / "ChangeLog"
+    changelog.write_text(PRERELEASE_CHANGELOG)
+    output = tmp_path / "notes.md"
+
+    extract(version, changelog, output)
+
+    assert expected in output.read_text()
+
+
 def test_extract_missing_version_exits(tmp_path):
     changelog = tmp_path / "ChangeLog"
     changelog.write_text(SAMPLE_CHANGELOG)
@@ -151,10 +190,12 @@ def _changelog_lines():
     [(line_number, line) for line_number, line in _changelog_lines() if line.startswith("## ")],
 )
 def test_version_header_format(lineno, line):
-    """Every '## ' line must match '## [X.Y.Z] - YYYY-MM-DD' or '## [X.Y.Z] - unreleased'."""
+    """Every '## ' line must contain a supported release version and date."""
     assert VERSION_HEADER_RE.match(line), (
         f"ChangeLog line {lineno}: invalid version header: {line!r}\n"
-        "Expected: ## [X.Y.Z] - YYYY-MM-DD  or  ## [X.Y.Z] - unreleased"
+        "Expected: ## [X.Y.Z] - DATE or "
+        "## [X.Y.Z-(alpha|beta|rc).W] - DATE; DATE is YYYY-MM-DD or unreleased "
+        "(historical PEP 440 prerelease versions are also accepted)"
     )
 
 

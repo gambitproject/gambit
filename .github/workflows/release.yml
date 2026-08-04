@@ -19,10 +19,21 @@ jobs:
           VERSION="${{ github.ref_name }}"
           python3 build_support/releases/extract_changelog.py "${VERSION#v}"
 
+      - name: Determine prerelease status
+        id: version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if [[ "${VERSION#v}" =~ -(alpha|beta|rc) ]]; then
+            echo "prerelease_flag=--prerelease" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease_flag=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ github.ref_name }}" \
             --title "Gambit ${{ github.ref_name }}" \
-            --notes-file release_notes.md
+            --notes-file release_notes.md \
+            ${{ steps.version.outputs.prerelease_flag }}
