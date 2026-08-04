@@ -47,9 +47,10 @@ void RenderSimpdivEvent(const Renderer &p_renderer, const SimpdivEvent &p_event)
       p_event);
 }
 
-Array<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
+std::vector<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game,
+                                                         std::istream &p_stream)
 {
-  Array<MixedStrategyProfile<Rational>> profiles;
+  std::vector<MixedStrategyProfile<Rational>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
     for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
@@ -66,17 +67,6 @@ Array<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istr
     std::string foo;
     std::getline(p_stream, foo);
     profiles.push_back(p);
-  }
-  return profiles;
-}
-
-Array<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
-                                                     const Rational &denom)
-{
-  std::default_random_engine engine;
-  Array<MixedStrategyProfile<Rational>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    profiles.push_back(p_game->NewRandomStrategyProfile(denom, engine));
   }
   return profiles;
 }
@@ -219,13 +209,14 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    Array<MixedStrategyProfile<Rational>> starts;
+    std::vector<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
-      starts = RandomProfiles(game, stopAfter, Rational(randDenom));
+      std::default_random_engine engine;
+      starts = NewRandomStrategyProfiles(game, stopAfter, randDenom, engine);
     }
     else {
       starts.push_back(game->NewMixedStrategyProfile(Rational(0)));

@@ -23,6 +23,9 @@
 #ifndef LIBGAMBIT_MIXED_H
 #define LIBGAMBIT_MIXED_H
 
+#include <random>
+#include <vector>
+
 #include "core/vector.h"
 #include "games/gamebagg.h"
 
@@ -347,12 +350,14 @@ public:
   //@}
 };
 
+/// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
+///        set of mixed strategy profiles
 template <class Generator>
-MixedStrategyProfile<double> GameRep::NewRandomStrategyProfile(Generator &generator) const
+MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game, Generator &generator)
 {
-  auto profile = NewMixedStrategyProfile(0.0);
+  auto profile = p_game->NewMixedStrategyProfile(0.0);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
-  for (auto player : GetPlayers()) {
+  for (auto player : p_game->GetPlayers()) {
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = dist(generator);
     }
@@ -360,14 +365,51 @@ MixedStrategyProfile<double> GameRep::NewRandomStrategyProfile(Generator &genera
   return profile.Normalize();
 }
 
-template <class Generator>
-MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
-                                                                 Generator &generator) const
+/// @brief As NewRandomStrategyProfile(p_game, generator), using an unseeded-by-the-caller
+///        generator -- for callers who don't need the sequence of profiles drawn to be
+///        reproducible. Pass an explicit generator instead if reproducibility matters.
+inline MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game)
 {
-  auto profile = NewMixedStrategyProfile(Rational(0));
-  for (auto player : GetPlayers()) {
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomStrategyProfile(p_game, generator);
+}
+
+/// @brief Generate `count` mixed strategy profiles, each as
+///        NewRandomStrategyProfile(p_game, generator).
+template <class Generator>
+std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const Game &p_game, int count,
+                                                                    Generator &generator)
+{
+  std::vector<MixedStrategyProfile<double>> profiles;
+  profiles.reserve(count);
+  for (int i = 0; i < count; i++) {
+    profiles.push_back(NewRandomStrategyProfile(p_game, generator));
+  }
+  return profiles;
+}
+
+/// @brief As NewRandomStrategyProfiles(p_game, count, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
+inline std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const Game &p_game,
+                                                                           int count)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomStrategyProfiles(p_game, count, generator);
+}
+
+/// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
+///        set of mixed strategy profiles, restricted to rational probabilities with denominator
+///        `denom`.
+template <class Generator>
+MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game, int denom,
+                                                        Generator &generator)
+{
+  auto profile = p_game->NewMixedStrategyProfile(Rational(0));
+  for (auto player : p_game->GetPlayers()) {
     const std::list<Rational> dist =
-        UniformOnSimplex(p_denom, player->GetStrategies().size(), generator);
+        UniformOnSimplex(denom, player->GetStrategies().size(), generator);
     auto prob = dist.cbegin();
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = *prob;
@@ -375,6 +417,39 @@ MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
     }
   }
   return profile;
+}
+
+/// @brief As NewRandomStrategyProfile(p_game, denom, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
+inline MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game, int denom)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomStrategyProfile(p_game, denom, generator);
+}
+
+/// @brief Generate `count` mixed strategy profiles, each as
+///        NewRandomStrategyProfile(p_game, denom, generator).
+template <class Generator>
+std::vector<MixedStrategyProfile<Rational>>
+NewRandomStrategyProfiles(const Game &p_game, int count, int denom, Generator &generator)
+{
+  std::vector<MixedStrategyProfile<Rational>> profiles;
+  profiles.reserve(count);
+  for (int i = 0; i < count; i++) {
+    profiles.push_back(NewRandomStrategyProfile(p_game, denom, generator));
+  }
+  return profiles;
+}
+
+/// @brief As NewRandomStrategyProfiles(p_game, count, denom, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
+inline std::vector<MixedStrategyProfile<Rational>> NewRandomStrategyProfiles(const Game &p_game,
+                                                                             int count, int denom)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomStrategyProfiles(p_game, count, denom, generator);
 }
 
 } // end namespace Gambit

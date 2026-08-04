@@ -1122,33 +1122,11 @@ public:
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
 
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles
-  template <class Generator>
-  MixedStrategyProfile<double> NewRandomStrategyProfile(Generator &generator) const;
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedStrategyProfile<Rational> NewRandomStrategyProfile(int denom, Generator &generator) const;
   virtual MixedStrategyProfile<double>
   NewMixedStrategyProfile(double, const StrategySupportProfile &) const = 0;
   virtual MixedStrategyProfile<Rational>
   NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const = 0;
 
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles
-  template <class Generator>
-  MixedBehaviorProfile<double> NewRandomBehaviorProfile(Generator &generator) const;
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(int denom, Generator &generator) const;
   /// @name Players
   //@{
   /// Returns the number of players in the game
