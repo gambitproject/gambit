@@ -112,8 +112,10 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
 template <class T> class NashLcpStrategySolver {
 public:
   NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
-                        StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>)
-    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+                        StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                        const CancelToken &p_cancel = CancelToken())
+    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth),
+      m_cancel(p_cancel)
   {
   }
   ~NashLcpStrategySolver() = default;
@@ -125,6 +127,7 @@ private:
 
   StrategyCallbackType<T> m_onEquilibrium;
   int m_stopAfter, m_maxDepth;
+  CancelToken m_cancel;
 
   class Solution;
 
@@ -225,6 +228,8 @@ typename NashLcpStrategySolver<T>::SearchResult
 NashLcpStrategySolver<T>::AllLemke(const Game &p_game, int j, linalg::LHTableau<T> &B,
                                    Solution &p_solution, int depth) const
 {
+  m_cancel.Check();
+
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return SearchResult::Continue;
   }
@@ -244,7 +249,7 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game, int j, linalg::LHTableau<
   for (int i = B.MinCol(); i <= B.MaxCol(); i++) {
     if (i != j) {
       linalg::LHTableau<T> Bcopy(B);
-      Bcopy.LemkePath(i);
+      Bcopy.LemkePath(i, m_cancel);
       if (AllLemke(p_game, i, Bcopy, p_solution, depth + 1) == SearchResult::LimitReached) {
         return SearchResult::LimitReached;
       }
@@ -275,23 +280,24 @@ std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p
     AllLemke(p_game, 0, B, solution, 0);
   }
   else {
-    B.LemkePath(1);
+    B.LemkePath(1, m_cancel);
     OnBFS(p_game, B, solution);
   }
   return solution.m_equilibria;
 }
 
 template <class T>
-std::list<MixedStrategyProfile<T>> LcpStrategySolve(const Game &p_game, int p_stopAfter,
-                                                    int p_maxDepth,
-                                                    StrategyCallbackType<T> p_onEquilibrium)
+std::list<MixedStrategyProfile<T>>
+LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                 StrategyCallbackType<T> p_onEquilibrium, const CancelToken &p_cancel)
 {
-  return NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
+  return NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium, p_cancel)
+      .Solve(p_game);
 }
 
-template std::list<MixedStrategyProfile<double>> LcpStrategySolve(const Game &, int, int,
-                                                                  StrategyCallbackType<double>);
+template std::list<MixedStrategyProfile<double>>
+LcpStrategySolve(const Game &, int, int, StrategyCallbackType<double>, const CancelToken &);
 template std::list<MixedStrategyProfile<Rational>>
-LcpStrategySolve(const Game &, int, int, StrategyCallbackType<Rational>);
+LcpStrategySolve(const Game &, int, int, StrategyCallbackType<Rational>, const CancelToken &);
 
 } // end namespace Gambit::Nash
