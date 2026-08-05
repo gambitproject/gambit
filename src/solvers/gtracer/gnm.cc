@@ -351,6 +351,7 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
       // direction, we're probably not going back
       if (lambda < LambdaMin && Index == -1) {
         returnMessage = "too far out in the reverse direction";
+        return;
       }
       A.retract(sigma, z);
       A.payoffMatrix(DG, sigma, fuzz);
@@ -384,6 +385,7 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
         }
         else {
           returnMessage = "too much error; error is " + std::to_string(ee);
+          return;
         }
       }
 

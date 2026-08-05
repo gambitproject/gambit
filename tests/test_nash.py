@@ -1038,6 +1038,26 @@ GNM_STRATEGY_CASES = [
         marks=pytest.mark.nash_gnm_strategy,
         id="test_gnm_3",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
+            solver=gbt.nash.gnm_solve,
+            expected=[
+                [
+                    d(1, 0, 0, 0, 0, 0, 0),
+                    d(1, 0, 0, 0, 0, 0, 0),
+                    d(1, 0, 0, 0, 0, 0, 0),
+                    d(1, 0, 0, 0, 0, 0, 0),
+                    d(0, 1, 0, 0, 0, 0, 0),
+                    d(1, 0, 0, 0, 0, 0, 0),
+                ]
+            ],
+            prob_tol=TOL_LARGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_gnm_strategy,
+        id="test_gnm_4",
+    ),
 ]
 
 
