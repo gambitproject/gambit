@@ -33,7 +33,7 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
 
   // assert(aggPtr->isPure[Node]||tasks.size()==0);
   std::vector<double> strat(numNei);
-  agg::AGG::config a(numNei, 0);
+  agg::AGG::Config a(numNei, 0);
   // compute the full distrib
   aggPtr->computeP(player1, act1);
 

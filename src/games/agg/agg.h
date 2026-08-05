@@ -67,7 +67,7 @@ using payofftype = enum { COMPLETE, MAPPING, ADDITIVE };
 class AGG {
 
 public:
-  using config = std::vector<int>;
+  using Config = std::vector<int>;
   using ActionSet = std::vector<int>;
   using PlayerSet = std::vector<int>;
 
@@ -85,7 +85,7 @@ public:
       std::vector<std::vector<int>> &actionSets, std::vector<std::vector<int>> &neighbors,
       std::vector<projtype> &projTypes,
       std::vector<std::vector<ConfigDistribution<double>>> &projS,
-      std::vector<std::vector<std::vector<config>>> &proj,
+      std::vector<std::vector<std::vector<Config>>> &proj,
       std::vector<std::vector<projtype>> &projF, std::vector<std::vector<std::vector<int>>> &Po,
       std::vector<ConfigDistribution<double>> &P, std::vector<aggpayoff> &payoffs,
       std::vector<exactpayoff> &exactPayoffs);
@@ -159,7 +159,7 @@ public:
   {
     return Porder.at(player).at(action);
   }
-  const std::vector<std::vector<config>> &getProjection(int node) { return projection.at(node); }
+  const std::vector<std::vector<Config>> &getProjection(int node) { return projection.at(node); }
   const std::vector<int> &getActionSet(int player) { return actionSets.at(player); }
   const aggpayoff &getPayoffMap(int node) { return payoffs.at(node); }
 
@@ -224,7 +224,7 @@ private:
   // originally:
   // foreach s \in S, foreach i \in N, foreach s_i \in S_i,
   // the 'contribution' of s_i to D^(s)
-  std::vector<std::vector<std::vector<config>>> projection;
+  std::vector<std::vector<std::vector<Config>>> projection;
 
   // foreach s \in S, foreach i \in N, the projected mixed strat
   // which is a prob distribution over the set of 'contributions'
@@ -304,7 +304,7 @@ private:
   static void makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay, int);
 
   static void setProjections(std::vector<std::vector<ConfigDistribution<double>>> &projS,
-                             std::vector<std::vector<std::vector<config>>> &proj, int N, int S,
+                             std::vector<std::vector<std::vector<Config>>> &proj, int N, int S,
                              int P, std::vector<std::vector<int>> &AS,
                              std::vector<std::vector<int>> &neighb,
                              std::vector<projtype> &projTypes);

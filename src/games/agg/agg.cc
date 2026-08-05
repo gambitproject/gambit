@@ -36,7 +36,7 @@ inline int select2nd(const pair<int, int> &x) { return x.second; }
 AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
          vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
-         vector<vector<vector<config>>> &proj, vector<vector<projtype>> &projF,
+         vector<vector<vector<Config>>> &proj, vector<vector<projtype>> &projF,
          vector<vector<vector<int>>> &Po, vector<ConfigDistribution<double>> &P,
          vector<aggpayoff> &_payoffs, vector<exactpayoff> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
@@ -224,7 +224,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   }
 
   vector<vector<ConfigDistribution<double>>> projS;
-  vector<vector<vector<config>>> proj;
+  vector<vector<vector<Config>>> proj;
   setProjections(projS, proj, n, S, P, ASets, neighb, projTypes);
 
   vector<vector<projtype>> projF(S);
@@ -298,7 +298,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
 }
 
 void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
-                         vector<vector<vector<config>>> &proj, int N, int S, int P,
+                         vector<vector<vector<Config>>> &proj, int N, int S, int P,
                          vector<vector<int>> &AS, vector<vector<int>> &neighb,
                          vector<projtype> &projTypes)
 {
@@ -491,7 +491,7 @@ double AGG::getPurePayoff(int player, const std::vector<int> &s)
   assert(player >= 0 && player < numPlayers);
   const int Node = actionSets[player][s[player]];
   const int keylen = neighbors[Node].size();
-  config pureprofile(projection[Node][0][s[0]]);
+  Config pureprofile(projection[Node][0][s[0]]);
   for (int i = 1; i < numPlayers; i++) {
     for (int j = 0; j < keylen; j++) {
       pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
@@ -514,7 +514,7 @@ Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
   assert(player >= 0 && player < numPlayers);
   const int Node = actionSets[player][s[player]];
   const int keylen = neighbors[Node].size();
-  config pureprofile(projection[Node][0][s[0]]);
+  Config pureprofile(projection[Node][0][s[0]]);
   for (int i = 1; i < numPlayers; i++) {
     for (int j = 0; j < keylen; j++) {
       pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
@@ -677,7 +677,7 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
 
   while (true) {
     const vector<int> &comp = gc.get();
-    config c(numNei, 0);
+    Config c(numNei, 0);
     for (size_t j = 0; j < support.size(); ++j) {
       if (support[j] != -1) {
         c[support[j]] = comp[j];
@@ -795,7 +795,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
 
   while (true) {
     const vector<int> &comp = gc.get();
-    config c(numNei, 0);
+    Config c(numNei, 0);
     for (size_t j = 0; j < support.size(); ++j) {
       if (support[j] != -1) {
         c[support[j]] = comp[j];
