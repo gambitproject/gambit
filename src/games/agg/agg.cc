@@ -487,7 +487,7 @@ void AGG::doExactProjection(int Node, int i, Rational *s)
   }
 }
 
-double AGG::getPurePayoff(int player, const std::vector<int> &s)
+template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) const
 {
   assert(player >= 0 && player < numPlayers);
   const int Node = actionSets[player][s[player]];
@@ -498,40 +498,34 @@ double AGG::getPurePayoff(int player, const std::vector<int> &s)
       pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
     }
   }
-  auto p = payoffs[Node].find(pureprofile);
-  if (p == payoffs[Node].end()) {
-    std::stringstream str;
-    str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
-    str << "[";
-    copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
-    str << "] in payoffs of action node #" << Node;
-    throw std::runtime_error(str.str());
+  if constexpr (std::is_same_v<V, Rational>) {
+    auto p = exactPayoffs[Node].find(pureprofile);
+    if (p == exactPayoffs[Node].end()) {
+      std::stringstream str;
+      str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
+      str << "[";
+      copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
+      str << "] in payoffs of action node #" << Node;
+      throw std::runtime_error(str.str());
+    }
+    return static_cast<Rational>(p->second);
   }
-  return p->second;
+  else {
+    auto p = payoffs[Node].find(pureprofile);
+    if (p == payoffs[Node].end()) {
+      std::stringstream str;
+      str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
+      str << "[";
+      copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
+      str << "] in payoffs of action node #" << Node;
+      throw std::runtime_error(str.str());
+    }
+    return p->second;
+  }
 }
 
-Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
-{
-  assert(player >= 0 && player < numPlayers);
-  const int Node = actionSets[player][s[player]];
-  const int keylen = neighbors[Node].size();
-  Config pureprofile(projection[Node][0][s[0]]);
-  for (int i = 1; i < numPlayers; i++) {
-    for (int j = 0; j < keylen; j++) {
-      pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
-    }
-  }
-  auto p = exactPayoffs[Node].find(pureprofile);
-  if (p == exactPayoffs[Node].end()) {
-    std::stringstream str;
-    str << "AGG::getExactPurePayoff ERROR: unable to find the following configuration ";
-    str << "[";
-    copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
-    str << "] in payoffs of action node #" << Node;
-    throw std::runtime_error(str.str());
-  }
-  return p->second;
-}
+template double AGG::getPurePayoff<double>(int player, const std::vector<int> &s) const;
+template Rational AGG::getPurePayoff<Rational>(int player, const std::vector<int> &s) const;
 
 Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist) const
 {
@@ -539,7 +533,7 @@ Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist)
   for (const auto &entry : dist) {
     const auto it = exactPayoffs[node].find(entry.first);
     if (it != exactPayoffs[node].end() && entry.second != Rational(0)) {
-      result += entry.second * (Rational)it->second;
+      result += entry.second * static_cast<Rational>(it->second);
     }
   }
   return result;
@@ -968,7 +962,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
       throw std::runtime_error(str.str());
     }
     const Number num(word);
-    const double u = (double)num;
+    const double u = static_cast<double>(num);
 
     // insert
     const pair<trie_map<double>::iterator, bool> r = pay.insert(make_pair(key, u));
@@ -999,56 +993,55 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
   }
 }
 
-double AGG::getMaxPayoff() const
+template <class V> V AGG::getMaxPayoff() const
 {
   assert(numActionNodes > 0);
-  double result = payoffs[0].begin()->second;
-  for (int i = 1; i < numActionNodes; i++) {
-    for (const auto &it : payoffs[i]) {
-      result = max(result, it.second);
-    }
-  }
-  return result;
-}
-
-double AGG::getMinPayoff() const
-{
-  assert(numActionNodes > 0);
-  double result = payoffs[0].begin()->second;
-  for (int i = 1; i < numActionNodes; i++) {
-    for (const auto &it : payoffs[i]) {
-      result = min(result, it.second);
-    }
-  }
-  return result;
-}
-
-Number AGG::getExactMaxPayoff() const
-{
-  assert(numActionNodes > 0);
-  Number result = exactPayoffs[0].begin()->second;
-  for (int i = 0; i < numActionNodes; i++) {
-    for (const auto &it : exactPayoffs[i]) {
-      if ((Rational)it.second > (Rational)result) {
-        result = it.second;
+  if constexpr (std::is_same_v<V, Rational>) {
+    Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
+    for (int i = 1; i < numActionNodes; i++) {
+      for (const auto &it : exactPayoffs[i]) {
+        result = max(result, static_cast<Rational>(it.second));
       }
     }
+    return result;
   }
-  return result;
-}
-
-Number AGG::getExactMinPayoff() const
-{
-  assert(numActionNodes > 0);
-  Number result = exactPayoffs[0].begin()->second;
-  for (int i = 0; i < numActionNodes; i++) {
-    for (const auto &it : exactPayoffs[i]) {
-      if ((Rational)it.second < (Rational)result) {
-        result = it.second;
+  else {
+    double result = payoffs[0].begin()->second;
+    for (int i = 1; i < numActionNodes; i++) {
+      for (const auto &it : payoffs[i]) {
+        result = max(result, it.second);
       }
     }
+    return result;
   }
-  return result;
 }
+
+template <class V> V AGG::getMinPayoff() const
+{
+  assert(numActionNodes > 0);
+  if constexpr (std::is_same_v<V, Rational>) {
+    Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
+    for (int i = 1; i < numActionNodes; i++) {
+      for (const auto &it : exactPayoffs[i]) {
+        result = min(result, static_cast<Rational>(it.second));
+      }
+    }
+    return result;
+  }
+  else {
+    double result = payoffs[0].begin()->second;
+    for (int i = 1; i < numActionNodes; i++) {
+      for (const auto &it : payoffs[i]) {
+        result = min(result, it.second);
+      }
+    }
+    return result;
+  }
+}
+
+template double AGG::getMaxPayoff<double>() const;
+template Rational AGG::getMaxPayoff<Rational>() const;
+template double AGG::getMinPayoff<double>() const;
+template Rational AGG::getMinPayoff<Rational>() const;
 
 } // namespace Gambit::agg

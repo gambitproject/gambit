@@ -56,7 +56,7 @@ Rational AGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
     s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
-  return (Rational)aggPtr->getExactPurePayoff(p_player->GetNumber() - 1, s);
+  return aggPtr->getPurePayoff<Rational>(p_player->GetNumber() - 1, s);
 }
 
 Rational AGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
@@ -68,7 +68,7 @@ Rational AGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strat
     s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
-  return (Rational)aggPtr->getExactPurePayoff(player - 1, s);
+  return aggPtr->getPurePayoff<Rational>(player - 1, s);
 }
 
 //========================================================================

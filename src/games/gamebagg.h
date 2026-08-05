@@ -90,11 +90,11 @@ public:
   bool IsPerfectRecall() const override { return true; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
-  Rational GetMinPayoff() const override { return (Rational)baggPtr->getExactMinPayoff(); }
+  Rational GetMinPayoff() const override { return baggPtr->getMinPayoff<Rational>(); }
   /// Returns the smallest payoff to the player in any outcome of the game
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
-  Rational GetMaxPayoff() const override { return (Rational)baggPtr->getExactMaxPayoff(); }
+  Rational GetMaxPayoff() const override { return baggPtr->getMaxPayoff<Rational>(); }
   /// Returns the largest payoff to the player in any outcome of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}

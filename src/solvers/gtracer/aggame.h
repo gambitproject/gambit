@@ -73,7 +73,7 @@ public:
   }
   double getPurePayoff(int player, const std::vector<int> &s) const override
   {
-    return aggPtr->getPurePayoff(player, s);
+    return aggPtr->getPurePayoff<double>(player, s);
   }
 
   void setPurePayoff(int player, const std::vector<int> &s, double value) override

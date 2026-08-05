@@ -63,10 +63,8 @@ public:
   int firstAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t]; }
   int lastAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t + 1]; }
 
-  double getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
-  double getMinPayoff() const { return aggPtr->getMinPayoff(); }
-  Number getExactMaxPayoff() const { return aggPtr->getExactMaxPayoff(); }
-  Number getExactMinPayoff() const { return aggPtr->getExactMinPayoff(); }
+  template <class V> V getMaxPayoff() const { return aggPtr->getMaxPayoff<V>(); }
+  template <class V> V getMinPayoff() const { return aggPtr->getMinPayoff<V>(); }
 
   // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart --
   // unused outside this class; getPurePayoff and GameBAGGRep only ever go through the per-type

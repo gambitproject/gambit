@@ -106,7 +106,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
         throw std::runtime_error("Error in game file: number expected for type distribution");
       }
       const Number num(word);
-      TDist[i][j] = (double)num;
+      TDist[i][j] = static_cast<double>(num);
       exactTDist[i].push_back(num);
     }
   }
@@ -230,7 +230,7 @@ void BAGG::getAGGStrat(StrategyProfile<V> &as, const StrategyProfile<V> &s, int 
           const int aact = typeAction2ActionIndex[pl][t][act];
           if constexpr (std::is_same_v<V, Rational>) {
             as[aact + aggPtr->firstAction(pl)] +=
-                (Rational)exactIndepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+                static_cast<Rational>(exactIndepTypeDist[pl][t]) * s[act + firstAction(pl, t)];
           }
           else {
             as[aact + aggPtr->firstAction(pl)] +=
@@ -285,7 +285,7 @@ double BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
 // independent, per exactIndepTypeDist), not their actions -- so the expectation is a small,
 // exact, finite sum over the Cartesian product of the other players' types (bounded by the
 // product of their type counts, not their action counts), each term an exact AGG-level pure
-// payoff via AGG::getExactPurePayoff.
+// payoff via AGG::getPurePayoff<Rational>.
 Rational BAGG::getExactPurePayoff(int player, int tp, const std::vector<int> &ps) const
 {
   std::vector<int> others;
@@ -306,9 +306,9 @@ Rational BAGG::getExactPurePayoff(int player, int tp, const std::vector<int> &ps
       const int pl = others[k];
       const int t = typeIndex[k];
       sAGG[pl] = typeAction2ActionIndex[pl][t][ps[typeOffset[pl] + t]];
-      weight *= (Rational)exactIndepTypeDist[pl][t];
+      weight *= static_cast<Rational>(exactIndepTypeDist[pl][t]);
     }
-    total += weight * (Rational)aggPtr->getExactPurePayoff(player, sAGG);
+    total += weight * aggPtr->getPurePayoff<Rational>(player, sAGG);
 
     size_t k = 0;
     for (; k < others.size(); ++k) {

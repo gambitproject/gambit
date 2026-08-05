@@ -126,8 +126,12 @@ public:
   template <class V>
   V getJ(int player, int action, int player2, int action2, const StrategyProfile<V> &s);
 
-  double getPurePayoff(int player, const std::vector<int> &s);
-  Number getExactPurePayoff(int player, const std::vector<int> &s) const;
+  // payoff of the pure profile s: a direct lookup, no floating-point computation involved.
+  // V=double looks up PayoffTable; V=Rational looks up ExactPayoffTable and casts the stored
+  // Number to Rational (see ExactPayoffTable's comment for why the table itself stays
+  // Number-valued). V is never deducible from s (a plain vector<int> of action indices, not
+  // parametrized by V), so callers must specify it explicitly, e.g. getPurePayoff<Rational>(...).
+  template <class V> V getPurePayoff(int player, const std::vector<int> &s) const;
 
   bool isSymmetric() const
   {
@@ -168,10 +172,10 @@ public:
   const std::vector<int> &getActionSet(int player) { return actionSets.at(player); }
   const PayoffTable &getPayoffMap(int node) { return payoffs.at(node); }
 
-  double getMaxPayoff() const;
-  double getMinPayoff() const;
-  Number getExactMaxPayoff() const;
-  Number getExactMinPayoff() const;
+  // largest/smallest payoff in any pure profile. Same V dispatch as getPurePayoff above; likewise
+  // never deducible (no arguments at all), so callers write getMaxPayoff<Rational>(), etc.
+  template <class V> V getMaxPayoff() const;
+  template <class V> V getMinPayoff() const;
 
   void printPayoffs(std::ostream &s, int node) const
   {
@@ -293,7 +297,7 @@ private:
       std::string word;
       in >> word;
       const Number num(word);
-      p->second = (double)num;
+      p->second = static_cast<double>(num);
       exact.insert(std::make_pair(p->first, num));
     }
     std::istream &in;
