@@ -30,8 +30,8 @@ namespace Gambit::gametracer {
 
 std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 {
-  if (p_game->IsAgg()) {
-    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
+  if (auto *aggGame = dynamic_cast<GameAGGRep *>(p_game.get())) {
+    return std::shared_ptr<gnmgame>(new aggame(*aggGame));
   }
   const Rational maxPay = p_game->GetMaxPayoff();
   const Rational minPay = p_game->GetMinPayoff();
