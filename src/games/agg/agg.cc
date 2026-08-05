@@ -35,17 +35,17 @@ inline int select2nd(const pair<int, int> &x) { return x.second; }
 
 AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
-         vector<projtype> &projTypes, vector<vector<aggdistrib>> &projS,
+         vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
          vector<vector<vector<config>>> &proj, vector<vector<projtype>> &projF,
-         vector<vector<vector<int>>> &Po, vector<aggdistrib> &P, vector<aggpayoff> &_payoffs,
-         vector<exactpayoff> &_exactPayoffs)
+         vector<vector<vector<int>>> &Po, vector<ConfigDistribution<double>> &P,
+         vector<aggpayoff> &_payoffs, vector<exactpayoff> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
     exactPayoffs(_exactPayoffs), projection(proj), projectedStrat(projS),
-    exactProjectedStrat(numANodes, vector<exactdistrib>(numPlayers)), exactPr(numPlayers),
-    fullProjectedStrat(projS), projFunctions(projF), Porder(Po), Pr(P), isPure(numANodes, true),
-    node2Action(numANodes, vector<int>(numPlayers)), cache(numPlayers + 1),
-    player2Class(numPlayers), kSymStrategyOffset(1, 0)
+    exactProjectedStrat(numANodes, vector<ConfigDistribution<Rational>>(numPlayers)),
+    exactPr(numPlayers), fullProjectedStrat(projS), projFunctions(projF), Porder(Po), Pr(P),
+    isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
+    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -223,7 +223,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     projTypes[i] = make_proj_func((TypeEnum)pt, in, S, P);
   }
 
-  vector<vector<aggdistrib>> projS;
+  vector<vector<ConfigDistribution<double>>> projS;
   vector<vector<vector<config>>> proj;
   setProjections(projS, proj, n, S, P, ASets, neighb, projTypes);
 
@@ -238,7 +238,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   }
 
   vector<vector<vector<int>>> Po(n);
-  vector<aggdistrib> Pr(n);
+  vector<ConfigDistribution<double>> Pr(n);
   vector<aggpayoff> pays(S);        // payoffs
   vector<exactpayoff> exactPays(S); // exact (arbitrary-precision) counterpart of pays
 
@@ -297,8 +297,9 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
                                pays, exactPays);
 }
 
-void AGG::setProjections(vector<vector<aggdistrib>> &projS, vector<vector<vector<config>>> &proj,
-                         int N, int S, int P, vector<vector<int>> &AS, vector<vector<int>> &neighb,
+void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
+                         vector<vector<vector<config>>> &proj, int N, int S, int P,
+                         vector<vector<int>> &AS, vector<vector<int>> &neighb,
                          vector<projtype> &projTypes)
 {
   int Node, i, j, k, numNei, actions;
@@ -374,7 +375,7 @@ void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtyp
   path.pop_back();
 }
 
-void AGG::initPorder(vector<int> &Po, int i, int N, vector<aggdistrib> &projS)
+void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<double>> &projS)
 {
   vector<pair<int, int>> order;
   int k;
@@ -409,7 +410,7 @@ void AGG::computeP(int player, int act, int player2, int act2)
       }
       else {
         // apply player2's pure strat
-        aggdistrib temp;
+        ConfigDistribution<double> temp;
         temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], 1.0));
         Pr[k].multiply(Pr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
       }
@@ -455,7 +456,7 @@ void AGG::computeExactP(int player, int act, int player2, int act2)
         exactPr[k] = exactPr[k - 1];
       }
       else {
-        exactdistrib temp;
+        ConfigDistribution<Rational> temp;
         temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], Rational(1)));
         exactPr[k].multiply(exactPr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
       }
@@ -531,7 +532,7 @@ Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
   return p->second;
 }
 
-double AGG::getMixedPayoff(int player, StrategyProfile &s)
+double AGG::getMixedPayoff(int player, StrategyProfile<double> &s)
 {
   double result = 0.0;
   assert(player >= 0 && player < numPlayers);
@@ -543,7 +544,7 @@ double AGG::getMixedPayoff(int player, StrategyProfile &s)
   return result;
 }
 
-void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile &s)
+void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile<double> &s)
 {
   assert(player >= 0 && player < numPlayers);
   for (int act = 0; act < actions[player]; ++act) {
@@ -551,7 +552,7 @@ void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyP
   }
 }
 
-double AGG::getV(int player, int act, const StrategyProfile &s)
+double AGG::getV(int player, int act, const StrategyProfile<double> &s)
 {
   // project s to the projectedStrat
   doProjection(actionSets.at(player).at(act), s);
@@ -559,14 +560,14 @@ double AGG::getV(int player, int act, const StrategyProfile &s)
   return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player][act]]);
 }
 
-double AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfile &s)
+double AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfile<double> &s)
 {
   doProjection(actionSets[player1][act1], s);
   computeP(player1, act1, player2, act2);
   return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player1][act1]]);
 }
 
-Rational AGG::exactInnerProd(int node, const exactdistrib &dist) const
+Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist) const
 {
   Rational result(0);
   for (const auto &entry : dist) {
@@ -578,7 +579,7 @@ Rational AGG::exactInnerProd(int node, const exactdistrib &dist) const
   return result;
 }
 
-Rational AGG::getExactV(int player, int act, const ExactStrategyProfile &s)
+Rational AGG::getExactV(int player, int act, const StrategyProfile<Rational> &s)
 {
   doExactProjection(actionSets.at(player).at(act), s);
   computeExactP(player, act);
@@ -586,14 +587,14 @@ Rational AGG::getExactV(int player, int act, const ExactStrategyProfile &s)
 }
 
 Rational AGG::getExactJ(int player1, int act1, int player2, int act2,
-                        const ExactStrategyProfile &s)
+                        const StrategyProfile<Rational> &s)
 {
   doExactProjection(actionSets[player1][act1], s);
   computeExactP(player1, act1, player2, act2);
   return exactInnerProd(actionSets[player1][act1], exactPr[numPlayers - 1]);
 }
 
-Rational AGG::getExactMixedPayoff(int player, const ExactStrategyProfile &s)
+Rational AGG::getExactMixedPayoff(int player, const StrategyProfile<Rational> &s)
 {
   Rational result(0);
   assert(player >= 0 && player < numPlayers);
@@ -610,7 +611,7 @@ Rational AGG::getExactMixedPayoff(int player, const ExactStrategyProfile &s)
 //  parameter: s is the mixed strategy of one player. It is a vector of
 //  probabilities, indexed by the action node.
 
-double AGG::getSymMixedPayoff(StrategyProfile &s)
+double AGG::getSymMixedPayoff(StrategyProfile<double> &s)
 {
   double result = 0;
   if (!isSymmetric()) {
@@ -625,7 +626,7 @@ double AGG::getSymMixedPayoff(StrategyProfile &s)
   return result;
 }
 
-void AGG::getSymPayoffVector(std::vector<double> &dest, StrategyProfile &s)
+void AGG::getSymPayoffVector(std::vector<double> &dest, StrategyProfile<double> &s)
 {
   if (!isSymmetric()) {
     throw std::runtime_error("AGG::getSymMixedPayoff: the game is not symmetric");
@@ -635,16 +636,16 @@ void AGG::getSymPayoffVector(std::vector<double> &dest, StrategyProfile &s)
   }
 }
 
-double AGG::getSymMixedPayoff(int node, StrategyProfile &s)
+double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
 {
   const int numNei = neighbors[node].size();
 
   if (!isPure[node]) { // then compute EU using trie_map::power()
     doProjection(node, 0, s);
     assert(numPlayers > 1);
-    // aggdistrib *dest;
+    // ConfigDistribution<double> *dest;
     // projectedStrat[node][0].power(numPlayers-1, dest, Pr, numNei,projFunctions[node]);
-    aggdistrib &dest = Pr[numPlayers - 1];
+    ConfigDistribution<double> &dest = Pr[numPlayers - 1];
     projectedStrat[node][0].power(numPlayers - 1, dest, Pr[numPlayers - 2], numNei,
                                   projFunctions[node]);
     return dest.inner_prod(projection[node][0][node], numNei, projFunctions[node], payoffs[node]);
@@ -708,8 +709,8 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile &s)
 // plClass: the index for the player class
 // s: mixed strat for that player class
 
-void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act,
-                           aggdistrib &dest, int plClass2, int act2)
+void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlClass, int act,
+                           ConfigDistribution<double> &dest, int plClass2, int act2)
 {
   const int node = uniqueActionSets.at(ownPlClass).at(act);
   int numPl = playerClasses.at(plClass).size();
@@ -736,7 +737,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       projectedStrat[node][player].power(numPl, dest, Pr[0], numNei, projFunctions[node]);
     }
     if (plClass == ownPlClass) {
-      aggdistrib temp;
+      ConfigDistribution<double> temp;
       temp.insert(make_pair(projection[node][player].at(act), 1.0));
       if (dest.size() > 0) {
         dest.multiply(temp, numNei, projFunctions[node]);
@@ -747,7 +748,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       }
     }
     if (plClass == plClass2) {
-      aggdistrib temp;
+      ConfigDistribution<double> temp;
       temp.insert(make_pair(projection[node][player].at(act2), 1.0));
       if (dest.size() > 0) {
         dest.multiply(temp, numNei, projFunctions[node]);
@@ -828,7 +829,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
   } // end while
 }
 
-double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile> &s)
+double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile<double>> &s)
 {
   double result = 0.0;
 
@@ -841,7 +842,7 @@ double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile> &s)
   return result;
 }
 
-double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile &s)
+double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile<double> &s)
 {
   double result = 0.0;
 
@@ -854,21 +855,22 @@ double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile &s)
   return result;
 }
 
-void AGG::getKSymPayoffVector(std::vector<double> &dest, int playerClass, StrategyProfile &s)
+void AGG::getKSymPayoffVector(std::vector<double> &dest, int playerClass,
+                              StrategyProfile<double> &s)
 {
   for (size_t act = 0; act < uniqueActionSets[playerClass].size(); ++act) {
     dest[act] = getKSymMixedPayoff(s, playerClass, act);
   }
 }
 
-double AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s)
+double AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile<double>> &s)
 {
 
   const int numPC = playerClasses.size();
 
   const int numNei = neighbors[uniqueActionSets[playerClass][act]].size();
 
-  static aggdistrib d, temp;
+  static ConfigDistribution<double> d, temp;
   d.reset();
   temp.reset();
   getSymConfigProb(0, s[0], playerClass, act, d);
@@ -879,18 +881,18 @@ double AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile>
   return d.inner_prod(payoffs[uniqueActionSets[playerClass][act]]);
 }
 
-double AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2,
-                               int act2)
+double AGG::getKSymMixedPayoff(const StrategyProfile<double> &s, int pClass1, int act1,
+                               int pClass2, int act2)
 {
   const int numPC = playerClasses.size();
   const int numNei = neighbors[uniqueActionSets[pClass1][act1]].size();
-  static aggdistrib d, temp;
+  static ConfigDistribution<double> d, temp;
   if (pClass2 >= 0 && pClass1 == pClass2 && playerClasses.at(pClass1).size() <= 1) {
     return 0;
   }
   d.reset();
   temp.reset();
-  StrategyProfile s0(getNumKSymActions(0), 0.0);
+  StrategyProfile<double> s0(getNumKSymActions(0), 0.0);
   // if (0==pClass2) s0[act2]=1;
   // else
   for (int a = firstKSymAction(0); a < lastKSymAction(0); ++a) {
@@ -898,7 +900,7 @@ double AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, 
   }
   getSymConfigProb(0, s0, pClass1, act1, d, pClass2, act2);
   for (int pc = 1; pc < numPC; pc++) {
-    StrategyProfile ss(getNumKSymActions(pc), 0.0);
+    StrategyProfile<double> ss(getNumKSymActions(pc), 0.0);
     // if (pc==pClass2)ss[act2]=1;
     // else
     for (int a = 0; a < getNumKSymActions(pc); ++a) {

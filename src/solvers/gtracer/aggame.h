@@ -93,7 +93,8 @@ private:
   // helper functions for computing jacobian
   void computePartialP_PureNode(int player, int act, std::vector<int> &tasks) const;
   void computePartialP_bisect(int player, int act, std::vector<int>::iterator f,
-                              std::vector<int>::iterator l, Gambit::agg::aggdistrib &temp) const;
+                              std::vector<int>::iterator l,
+                              Gambit::agg::ConfigDistribution<double> &temp) const;
   void computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
                      Gambit::agg::trie_map<double> &cache) const;
   void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2, double result,

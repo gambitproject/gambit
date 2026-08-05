@@ -41,7 +41,7 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
   aggPtr->Pr[player1].swap(aggPtr->Pr[numPlayers - 1]);
   for (i = 0; i < (int)tasks.size(); i++) {
     // assert(tasks[i]!=player1);
-    agg::aggdistrib &P = aggPtr->Pr[tasks[i]];
+    agg::ConfigDistribution<double> &P = aggPtr->Pr[tasks[i]];
     // P.clear();  // to get ready for division, we need clear()
     P = aggPtr->Pr[player1];
 
@@ -79,7 +79,8 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
 }
 
 void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::iterator start,
-                                    std::vector<int>::iterator endp, agg::aggdistrib &temp) const
+                                    std::vector<int>::iterator endp,
+                                    agg::ConfigDistribution<double> &temp) const
 {
 #ifdef AGGDEBUG
   cout << "calling computePartialP_bisect with player1=" << player1 << ", act1=" << act1
