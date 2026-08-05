@@ -1,0 +1,19 @@
+#BAGG
+# Trivial single-type-per-player wrapping of 2x2.agg, used to test that BAGG games
+# work correctly through generic Game operations (e.g. gnm_solve) without the
+# numerical difficulty of larger multi-type BAGGs such as Bayesian-Coffee-3-2-2-3.bagg.
+2
+2
+0
+1 1
+1
+1
+2
+2
+0 1
+0 1
+2 0 1
+2 1 0
+
+0	35 -4
+0	-10 95
