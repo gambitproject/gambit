@@ -38,14 +38,13 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
          vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
          vector<vector<vector<Config>>> &proj, vector<vector<projtype>> &projF,
-         vector<vector<vector<int>>> &Po, vector<ConfigDistribution<double>> &P,
-         vector<PayoffTable> &_payoffs, vector<ExactPayoffTable> &_exactPayoffs)
+         vector<vector<vector<int>>> &Po, vector<PayoffTable> &_payoffs,
+         vector<ExactPayoffTable> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
-    exactPayoffs(_exactPayoffs), projection(proj), projectedStrat(projS),
-    exactProjectedStrat(numANodes, vector<ConfigDistribution<Rational>>(numPlayers)),
-    exactPr(numPlayers), fullProjectedStrat(projS), projFunctions(projF), Porder(Po), Pr(P),
-    isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
+    exactPayoffs(_exactPayoffs), projection(proj), m_state(numANodes, numPlayers),
+    m_exactState(numANodes, numPlayers), fullProjectedStrat(projS), projFunctions(projF),
+    Porder(Po), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
     cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
 
 {
@@ -294,7 +293,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       throw std::runtime_error("Unknown payoff type " + std::to_string(t));
     }
   }
-  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, projS, proj, projF, Po, Pr,
+  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, projS, proj, projF, Po,
                                pays, exactPays);
 }
 
@@ -393,99 +392,58 @@ void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<do
   transform(order.begin(), order.end(), p, select2nd);
 }
 
-// compute the induced distribution
-void AGG::computeP(int player, int act, int player2, int act2)
+// compute the induced distribution. The action graph structure (projection, Porder,
+// projFunctions, actionSets, neighbors) is purely combinatorial -- built once from integer data,
+// independent of payoff/probability values -- so it's shared by both V; only the numeric working
+// state, reached via state<V>(), differs by V.
+template <class V> void AGG::computeP(int player, int act, int player2, int act2)
 {
+  auto &s = state<V>();
   // apply player's strat
-  Pr[0].reset();
-  Pr[0].insert(make_pair(projection[actionSets[player][act]][player][act], 1.0));
+  s.Pr[0].reset();
+  s.Pr[0].insert(make_pair(projection[actionSets[player][act]][player][act], V(1)));
 
   const int numNei = neighbors[actionSets[player][act]].size();
   // apply others' strat
   for (int k = 1; k < numPlayers; k++) {
-    Pr[k].reset();
+    s.Pr[k].reset();
     if (Porder[player][act][k] == player2) {
       if (act2 == -1) {
-        // Pr[k].swap(Pr[k-1]);
-        Pr[k] = Pr[k - 1];
+        s.Pr[k] = s.Pr[k - 1];
       }
       else {
         // apply player2's pure strat
-        ConfigDistribution<double> temp;
-        temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], 1.0));
-        Pr[k].multiply(Pr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
+        ConfigDistribution<V> temp;
+        temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], V(1)));
+        s.Pr[k].multiply(s.Pr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
       }
     }
     else {
-      Pr[k].multiply(Pr[k - 1], projectedStrat[actionSets[player][act]][Porder[player][act][k]],
-                     numNei, projFunctions[actionSets[player][act]]);
+      s.Pr[k].multiply(s.Pr[k - 1],
+                       s.projectedStrat[actionSets[player][act]][Porder[player][act][k]], numNei,
+                       projFunctions[actionSets[player][act]]);
     }
   }
 }
 
-void AGG::doProjection(int Node, double *s)
+template <class V> void AGG::doProjection(int Node, V *s)
 {
   for (int i = 0; i < numPlayers; i++) {
     doProjection(Node, i, &(s[firstAction(i)]));
   }
 }
 
-void AGG::doProjection(int Node, int i, double *s)
+template <class V> void AGG::doProjection(int Node, int i, V *s)
 {
-  projectedStrat[Node][i].reset();
-  for (int j = 0; j < actions[i]; j++) {
-    if (s[j] > (double)0.0) {
-      projectedStrat[Node][i] += make_pair(projection[Node][i][j], s[j]);
-    }
-  }
+  state<V>().project(Node, i, projection[Node][i], actions[i], s);
 }
 
-// Exact (Rational) counterparts of computeP/doProjection above.  The action graph structure
-// (projection, Porder, projFunctions, actionSets, neighbors) is purely combinatorial -- built
-// once from integer data, independent of payoff/probability values -- so it's shared as-is;
-// only the numeric working state (Pr/projectedStrat) needs a separate Rational-valued copy.
-void AGG::computeExactP(int player, int act, int player2, int act2)
-{
-  exactPr[0].reset();
-  exactPr[0].insert(make_pair(projection[actionSets[player][act]][player][act], Rational(1)));
-
-  const int numNei = neighbors[actionSets[player][act]].size();
-  for (int k = 1; k < numPlayers; k++) {
-    exactPr[k].reset();
-    if (Porder[player][act][k] == player2) {
-      if (act2 == -1) {
-        exactPr[k] = exactPr[k - 1];
-      }
-      else {
-        ConfigDistribution<Rational> temp;
-        temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], Rational(1)));
-        exactPr[k].multiply(exactPr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
-      }
-    }
-    else {
-      exactPr[k].multiply(exactPr[k - 1],
-                          exactProjectedStrat[actionSets[player][act]][Porder[player][act][k]],
-                          numNei, projFunctions[actionSets[player][act]]);
-    }
-  }
-}
-
-void AGG::doExactProjection(int Node, Rational *s)
-{
-  for (int i = 0; i < numPlayers; i++) {
-    doExactProjection(Node, i, &(s[firstAction(i)]));
-  }
-}
-
-void AGG::doExactProjection(int Node, int i, Rational *s)
-{
-  exactProjectedStrat[Node][i].reset();
-  for (int j = 0; j < actions[i]; j++) {
-    if (s[j] > Rational(0)) {
-      exactProjectedStrat[Node][i] += make_pair(projection[Node][i][j], s[j]);
-    }
-  }
-}
+template void AGG::computeP<double>(int player, int act, int player2, int act2);
+template void AGG::computeP<Rational>(int player, int act, int player2, int act2);
+template void AGG::doProjection<double>(int Node, double *s);
+template void AGG::doProjection<Rational>(int Node, Rational *s);
+template void AGG::doProjection<double>(int Node, int i, double *s);
+template void AGG::doProjection<Rational>(int Node, int i, Rational *s);
 
 template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) const
 {
@@ -498,27 +456,25 @@ template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) c
       pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
     }
   }
+  const auto throwNotFound = [&]() -> void {
+    std::stringstream str;
+    str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
+    str << "[";
+    copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
+    str << "] in payoffs of action node #" << Node;
+    throw std::runtime_error(str.str());
+  };
   if constexpr (std::is_same_v<V, Rational>) {
     auto p = exactPayoffs[Node].find(pureprofile);
     if (p == exactPayoffs[Node].end()) {
-      std::stringstream str;
-      str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
-      str << "[";
-      copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
-      str << "] in payoffs of action node #" << Node;
-      throw std::runtime_error(str.str());
+      throwNotFound();
     }
     return static_cast<Rational>(p->second);
   }
   else {
     auto p = payoffs[Node].find(pureprofile);
     if (p == payoffs[Node].end()) {
-      std::stringstream str;
-      str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
-      str << "[";
-      copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
-      str << "] in payoffs of action node #" << Node;
-      throw std::runtime_error(str.str());
+      throwNotFound();
     }
     return p->second;
   }
@@ -539,35 +495,34 @@ Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist)
   return result;
 }
 
-template <class V> V AGG::getV(int player, int act, const StrategyProfile<V> &s)
+template <class V> V AGG::payoffInnerProd(int node, const ConfigDistribution<V> &dist)
 {
   if constexpr (std::is_same_v<V, Rational>) {
-    doExactProjection(actionSets.at(player).at(act), s);
-    computeExactP(player, act);
-    return exactInnerProd(actionSets[player][act], exactPr[numPlayers - 1]);
+    return exactInnerProd(node, dist);
   }
   else {
-    // project s to the projectedStrat
-    doProjection(actionSets.at(player).at(act), s);
-    computeP(player, act);
-    return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player][act]]);
+    return dist.inner_prod(payoffs[node]);
   }
+}
+
+template <class V> V AGG::getV(int player, int act, const StrategyProfile<V> &s)
+{
+  doProjection(actionSets.at(player).at(act), s);
+  computeP<V>(player, act);
+  return payoffInnerProd<V>(actionSets[player][act], state<V>().Pr[numPlayers - 1]);
 }
 
 template <class V>
 V AGG::getJ(int player1, int act1, int player2, int act2, const StrategyProfile<V> &s)
 {
-  if constexpr (std::is_same_v<V, Rational>) {
-    doExactProjection(actionSets[player1][act1], s);
-    computeExactP(player1, act1, player2, act2);
-    return exactInnerProd(actionSets[player1][act1], exactPr[numPlayers - 1]);
-  }
-  else {
-    doProjection(actionSets[player1][act1], s);
-    computeP(player1, act1, player2, act2);
-    return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player1][act1]]);
-  }
+  doProjection(actionSets[player1][act1], s);
+  computeP<V>(player1, act1, player2, act2);
+  return payoffInnerProd<V>(actionSets[player1][act1], state<V>().Pr[numPlayers - 1]);
 }
+
+template double AGG::payoffInnerProd<double>(int node, const ConfigDistribution<double> &dist);
+template Rational AGG::payoffInnerProd<Rational>(int node,
+                                                 const ConfigDistribution<Rational> &dist);
 
 template <class V> V AGG::getMixedPayoff(int player, const StrategyProfile<V> &s)
 {
@@ -636,10 +591,11 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
     doProjection(node, 0, s);
     assert(numPlayers > 1);
     // ConfigDistribution<double> *dest;
-    // projectedStrat[node][0].power(numPlayers-1, dest, Pr, numNei,projFunctions[node]);
-    ConfigDistribution<double> &dest = Pr[numPlayers - 1];
-    projectedStrat[node][0].power(numPlayers - 1, dest, Pr[numPlayers - 2], numNei,
-                                  projFunctions[node]);
+    // m_state.projectedStrat[node][0].power(numPlayers-1, dest, m_state.Pr,
+    // numNei,projFunctions[node]);
+    ConfigDistribution<double> &dest = m_state.Pr[numPlayers - 1];
+    m_state.projectedStrat[node][0].power(numPlayers - 1, dest, m_state.Pr[numPlayers - 2], numNei,
+                                          projFunctions[node]);
     return dest.inner_prod(projection[node][0][node], numNei, projFunctions[node], payoffs[node]);
   }
 
@@ -719,14 +675,15 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
 
   if (!isPure[node]) {
     const int player = playerClasses[plClass].at(0);
-    projectedStrat[node][player].reset();
+    m_state.projectedStrat[node][player].reset();
     if (numPl > 0) {
       for (int j = 0; j < actions[player]; j++) {
         if (s[j] > (double)0.0) {
-          projectedStrat[node][player] += make_pair(projection[node][player][j], s[j]);
+          m_state.projectedStrat[node][player] += make_pair(projection[node][player][j], s[j]);
         }
       }
-      projectedStrat[node][player].power(numPl, dest, Pr[0], numNei, projFunctions[node]);
+      m_state.projectedStrat[node][player].power(numPl, dest, m_state.Pr[0], numNei,
+                                                 projFunctions[node]);
     }
     if (plClass == ownPlClass) {
       ConfigDistribution<double> temp;

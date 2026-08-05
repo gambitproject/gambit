@@ -28,6 +28,7 @@
 #include <map>
 #include <vector>
 #include <iterator>
+#include <type_traits>
 #include "proj_func.h"
 #include "trie_map.h"
 #include "games/number.h"
@@ -69,6 +70,41 @@ using ExactPayoffTable = std::map<std::vector<int>, Number>;
 // provides -- letting both instantiations reuse trie_map directly.
 template <class V> using ConfigDistribution = trie_map<V>;
 
+// AGG's mutable working state for the convolution algorithm, at numeric type V. AGG holds one
+// instance per V (see AGG::state()) rather than a single instance of one or the other, since both
+// may be in use simultaneously -- e.g. from different MixedStrategyProfile instantiations over
+// the same AGG -- and each is rebuilt fresh per call regardless of its previous contents.
+template <class V> struct ConvolutionState {
+  // foreach s \in S, foreach i \in N, the projected mixed strat: a prob distribution over the
+  // set of 'contributions' (see AGG::projection).
+  std::vector<std::vector<ConfigDistribution<V>>> projectedStrat;
+
+  // when computing the induced distribution via AGG::computeP(): foreach k <= n-1, the prob.
+  // distribution P_k induced by the partial strat profile of agents o_1..o_k. Also reused, when
+  // computing the partial distributions for the payoff jacobian, as the partial distribution
+  // induced by all agents except j.
+  std::vector<ConfigDistribution<V>> Pr;
+
+  ConvolutionState(int numActionNodes, int numPlayers)
+    : projectedStrat(numActionNodes, std::vector<ConfigDistribution<V>>(numPlayers)),
+      Pr(numPlayers)
+  {
+  }
+
+  // reset projectedStrat[Node][player] to the weighted sum, over actions j with s[j] > 0, of
+  // contributions[j] weighted by s[j].
+  void project(int Node, int player, const std::vector<std::vector<int>> &contributions,
+               int numActions, const V *s)
+  {
+    projectedStrat[Node][player].reset();
+    for (int j = 0; j < numActions; j++) {
+      if (s[j] > V(0)) {
+        projectedStrat[Node][player] += std::make_pair(contributions[j], s[j]);
+      }
+    }
+  }
+};
+
 // types of input formats for payoff func
 using PayoffType = enum { COMPLETE, MAPPING, ADDITIVE };
 
@@ -88,15 +124,16 @@ public:
   // read an AGG from input stream
   static std::shared_ptr<AGG> makeAGG(std::istream &in);
 
-  // constructor
+  // constructor. Note projS is used only for fullProjectedStrat below -- the convolution
+  // engine's own working state (ConvolutionState) is sized from numANodes/numPlayers directly,
+  // not seeded from a caller-supplied array the way it used to be.
   AGG(int numPlayers, std::vector<int> &actions, int numANodes, int numPNodes,
       std::vector<std::vector<int>> &actionSets, std::vector<std::vector<int>> &neighbors,
       std::vector<projtype> &projTypes,
       std::vector<std::vector<ConfigDistribution<double>>> &projS,
       std::vector<std::vector<std::vector<Config>>> &proj,
       std::vector<std::vector<projtype>> &projF, std::vector<std::vector<std::vector<int>>> &Po,
-      std::vector<ConfigDistribution<double>> &P, std::vector<PayoffTable> &payoffs,
-      std::vector<ExactPayoffTable> &exactPayoffs);
+      std::vector<PayoffTable> &payoffs, std::vector<ExactPayoffTable> &exactPayoffs);
 
   ~AGG() = default;
 
@@ -116,10 +153,9 @@ public:
   int firstKSymAction(int i) const { return kSymStrategyOffset[i]; }
   int lastKSymAction(int i) const { return kSymStrategyOffset[i + 1]; }
 
-  // exp. payoff under mixed strat profile, via the convolution algorithm. V=double runs the
-  // floating-point engine; V=Rational runs the exact-arithmetic counterpart throughout
-  // (doProjection/computeP/inner_prod vs doExactProjection/computeExactP/exactInnerProd) --
-  // dispatched at compile time in the .cc, not overloaded, since it's the same algorithm.
+  // exp. payoff under mixed strat profile, via the convolution algorithm (doProjection/computeP,
+  // templated on V; inner_prod is trie_map's own method for V=double, exactInnerProd for
+  // V=Rational -- see exactInnerProd's comment for why that one isn't merged too).
   template <class V> V getMixedPayoff(int player, const StrategyProfile<V> &s);
   void getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile<double> &s);
   template <class V> V getV(int player, int action, const StrategyProfile<V> &s);
@@ -235,18 +271,15 @@ private:
   // the 'contribution' of s_i to D^(s)
   std::vector<std::vector<std::vector<Config>>> projection;
 
-  // foreach s \in S, foreach i \in N, the projected mixed strat
-  // which is a prob distribution over the set of 'contributions'
-  std::vector<std::vector<ConfigDistribution<double>>> projectedStrat;
+  // working state for the convolution algorithm (see ConvolutionState above), one instance per
+  // numeric type V, since both may be in use simultaneously.
+  ConvolutionState<double> m_state;
+  ConvolutionState<Rational> m_exactState;
 
-  // exact (Rational) counterpart of projectedStrat/Pr below, used only by the Rational
-  // instantiations of getMixedPayoff/getV/getJ. Independent working state from the double
-  // versions, since both may be in use (e.g. from different MixedStrategyProfile instantiations
-  // over the same AGG) and each is rebuilt fresh per call regardless.
-  std::vector<std::vector<ConfigDistribution<Rational>>> exactProjectedStrat;
-  std::vector<ConfigDistribution<Rational>> exactPr;
-
-  // foreach s in S, i in N, the full set of projected actions.
+  // foreach s in S, i in N, the full set of projected actions. Unlike m_state/m_exactState
+  // above, this is filled once (from the constructor's projS argument) and never rebuilt --
+  // read directly by gametracer::aggame (a friend) for its own jacobian bookkeeping, not used by
+  // AGG's own convolution algorithm.
   std::vector<std::vector<ConfigDistribution<double>>> fullProjectedStrat;
 
   // foreach s in S, foreach neighbor of s, its projection function
@@ -255,15 +288,6 @@ private:
   // foreach i \in N, foreach s_i in S_i, the order of agents o_1.. o_{n-1}
   //  in which we apply the DP algorithm
   std::vector<std::vector<std::vector<int>>> Porder;
-
-  // when computing the induced distribution via ComputeP():
-  // foreach k<= n-1,
-  // prob. distrib P_k induced by the partial strat profile of agents o_1..o_k
-
-  // when computing the partial distributions for the payoff jacobian:
-  //   foreach  j \in N,
-  //  the partial distribution induced by all agents except j.
-  std::vector<ConfigDistribution<double>> Pr;
 
   // foreach s in S, whether s's neighbors are all action nodes
   std::vector<bool> isPure;
@@ -325,35 +349,41 @@ private:
   static void initPorder(std::vector<int> &Po, int i, int N,
                          std::vector<ConfigDistribution<double>> &projS);
 
-  // private methods:
-  void computeP(int player, int act, int player2 = -1, int act2 = -1);
-  void doProjection(int Node, const StrategyProfile<double> &s)
+  // private methods. computeP/doProjection are the same algorithm for both V; they're made
+  // non-branching by going through state<V>() for the V-specific working arrays (m_state vs
+  // m_exactState), rather than an if constexpr per call.
+  template <class V> ConvolutionState<V> &state()
   {
-    doProjection(Node, &(const_cast<StrategyProfile<double> &>(s)[0]));
+    if constexpr (std::is_same_v<V, Rational>) {
+      return m_exactState;
+    }
+    else {
+      return m_state;
+    }
   }
-  void doProjection(int Node, int player, const StrategyProfile<double> &s)
+  template <class V> void computeP(int player, int act, int player2 = -1, int act2 = -1);
+  template <class V> void doProjection(int Node, const StrategyProfile<V> &s)
   {
-    doProjection(Node, player, &(const_cast<StrategyProfile<double> &>(s)[firstAction(player)]));
+    doProjection(Node, &(const_cast<StrategyProfile<V> &>(s)[0]));
   }
-  void doProjection(int Node, double *s);
-  void doProjection(int Node, int player, double *s);
+  template <class V> void doProjection(int Node, int player, const StrategyProfile<V> &s)
+  {
+    doProjection(Node, player, &(const_cast<StrategyProfile<V> &>(s)[firstAction(player)]));
+  }
+  template <class V> void doProjection(int Node, V *s);
+  template <class V> void doProjection(int Node, int player, V *s);
 
-  // exact (Rational) counterparts, mirroring the above precisely.  exactPayoffs is a
-  // std::map<..., Number>, not a trie_map<Rational>, so trie_map's own inner_prod can't be
-  // used directly against it -- this does the equivalent sum manually.
+  // exactPayoffs is a std::map<..., Number>, not a trie_map<Rational>, so trie_map's own
+  // inner_prod can't be used directly against it (unlike the double path, which calls
+  // dist.inner_prod(payoffs[node]) directly) -- this does the equivalent sum manually.
   Rational exactInnerProd(int node, const ConfigDistribution<Rational> &dist) const;
-  void computeExactP(int player, int act, int player2 = -1, int act2 = -1);
-  void doExactProjection(int Node, const StrategyProfile<Rational> &s)
-  {
-    doExactProjection(Node, &(const_cast<StrategyProfile<Rational> &>(s)[0]));
-  }
-  void doExactProjection(int Node, int player, const StrategyProfile<Rational> &s)
-  {
-    doExactProjection(Node, player,
-                      &(const_cast<StrategyProfile<Rational> &>(s)[firstAction(player)]));
-  }
-  void doExactProjection(int Node, Rational *s);
-  void doExactProjection(int Node, int player, Rational *s);
+
+  // dispatch point used by getV/getJ: V=double calls trie_map's own inner_prod against
+  // PayoffTable, V=Rational calls exactInnerProd against ExactPayoffTable. Not merged further
+  // than this one function -- same reason PayoffTable/ExactPayoffTable themselves aren't a
+  // template pair (see their comments): the two sides genuinely differ in container and value
+  // type, not just in V.
+  template <class V> V payoffInnerProd(int node, const ConfigDistribution<V> &dist);
 
   void getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlClass, int act,
                         ConfigDistribution<double> &dest, int plClass2 = -1, int act2 = -1);

@@ -38,8 +38,8 @@ using ProbDist = std::vector<double>;
 
 class BAGG {
 public:
-  friend class Gambit::BAGGPureStrategyProfileRep;
-  template <class T> friend class Gambit::BAGGMixedStrategyProfileRep;
+  friend class BAGGPureStrategyProfileRep;
+  template <class T> friend class BAGGMixedStrategyProfileRep;
 
   friend std::ostream &operator<<(std::ostream &s, const BAGG &g);
 
