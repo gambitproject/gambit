@@ -34,12 +34,12 @@ template <class T> class BAGGMixedStrategyProfileRep;
 
 namespace agg {
 
-using ProbDist = std::vector<AggNumber>;
+using ProbDist = std::vector<double>;
 
 class BAGG {
 public:
-  friend class BAGGPureStrategyProfileRep;
-  template <class T> friend class BAGGMixedStrategyProfileRep;
+  friend class Gambit::BAGGPureStrategyProfileRep;
+  template <class T> friend class Gambit::BAGGMixedStrategyProfileRep;
 
   friend std::ostream &operator<<(std::ostream &s, const BAGG &g);
 
@@ -63,27 +63,27 @@ public:
   int firstAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t]; }
   int lastAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t + 1]; }
 
-  AggNumber getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
-  AggNumber getMinPayoff() const { return aggPtr->getMinPayoff(); }
+  double getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
+  double getMinPayoff() const { return aggPtr->getMinPayoff(); }
   Number getExactMaxPayoff() const { return aggPtr->getExactMaxPayoff(); }
   Number getExactMinPayoff() const { return aggPtr->getExactMinPayoff(); }
 
   // exp. payoff under mixed strat profile
-  AggNumber getMixedPayoff(int player, StrategyProfile &s);
+  double getMixedPayoff(int player, StrategyProfile &s);
   // exp payoff for player, conditioned on her receiving type tp.
-  AggNumber getMixedPayoff(int player, int tp, StrategyProfile &s);
+  double getMixedPayoff(int player, int tp, StrategyProfile &s);
 
-  void getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s);
-  AggNumber getV(int player, int tp, int action, const StrategyProfile &s);
+  void getPayoffVector(std::vector<double> &dest, int player, int tp, const StrategyProfile &s);
+  double getV(int player, int tp, int action, const StrategyProfile &s);
 
   // exact counterparts, computing via Rational arithmetic throughout (see agg.h)
   Rational getExactMixedPayoff(int player, int tp, const ExactStrategyProfile &s) const;
   Rational getExactV(int player, int tp, int action, const ExactStrategyProfile &s) const;
 
-  AggNumber getPurePayoff(int player, int tp, std::vector<int> &s);
-  AggNumber getPurePayoff(int player, std::vector<int> &s)
+  double getPurePayoff(int player, int tp, std::vector<int> &s);
+  double getPurePayoff(int player, std::vector<int> &s)
   {
-    AggNumber r = 0;
+    double r = 0;
     for (int i = 0; i < numTypes[player]; ++i) {
       r += indepTypeDist[player][i] * getPurePayoff(player, i, s);
     }
@@ -91,11 +91,11 @@ public:
   }
   Rational getExactPurePayoff(int player, int tp, const std::vector<int> &ps) const;
 
-  AggNumber getSymMixedPayoff(StrategyProfile &s);
+  double getSymMixedPayoff(StrategyProfile &s);
 
-  AggNumber getSymMixedPayoff(int tp, StrategyProfile &s);
+  double getSymMixedPayoff(int tp, StrategyProfile &s);
 
-  AggNumber getSymMixedPayoff(int tp, int act, StrategyProfile &s);
+  double getSymMixedPayoff(int tp, int act, StrategyProfile &s);
 
   bool isSymmetric() const { return symmetric; }
 

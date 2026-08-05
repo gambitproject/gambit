@@ -185,27 +185,27 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
                                 typeAction2ActionIndex, aggPtr);
 }
 
-AggNumber BAGG::getMixedPayoff(int player, StrategyProfile &s)
+double BAGG::getMixedPayoff(int player, StrategyProfile &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (int tp = 0; tp < numTypes[player]; ++tp) {
     res += indepTypeDist[player][tp] * getMixedPayoff(player, tp, s);
   }
   return res;
 }
 
-AggNumber BAGG::getMixedPayoff(int player, int tp, StrategyProfile &s)
+double BAGG::getMixedPayoff(int player, int tp, StrategyProfile &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
-    if (s[act + firstAction(player, tp)] > AggNumber(0.0)) {
+    if (s[act + firstAction(player, tp)] > double(0.0)) {
       res += s[act + firstAction(player, tp)] * getV(player, tp, act, s);
     }
   }
   return res;
 }
 
-void BAGG::getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s)
+void BAGG::getPayoffVector(std::vector<double> &dest, int player, int tp, const StrategyProfile &s)
 {
   assert(player >= 0 && player < getNumPlayers() && tp >= 0 && tp < getNumTypes(player));
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
@@ -217,7 +217,7 @@ void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player
                        int action)
 {
   for (int i = 0; i < aggPtr->getNumActions(); ++i) {
-    as[i] = AggNumber(0.0);
+    as[i] = double(0.0);
   }
 
   for (int pl = 0; pl < numPlayers; ++pl) {
@@ -235,7 +235,7 @@ void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player
     }
   }
 }
-AggNumber BAGG::getV(int player, int tp, int action, const StrategyProfile &s)
+double BAGG::getV(int player, int tp, int action, const StrategyProfile &s)
 {
   StrategyProfile as(aggPtr->getNumActions());
   getAGGStrat(as, s, player, tp, action);
@@ -285,14 +285,14 @@ Rational BAGG::getExactMixedPayoff(int player, int tp, const ExactStrategyProfil
   return res;
 }
 
-AggNumber BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
+double BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
 {
   StrategyProfile st(strategyOffset[typeOffset[numPlayers]]);
   for (int i = 0; i < strategyOffset[typeOffset[numPlayers]]; i++) {
-    st[i] = (AggNumber)0.0;
+    st[i] = (double)0.0;
   }
   for (int i = 0; i < typeOffset[numPlayers]; i++) {
-    st[strategyOffset[i] + ps[i]] = (AggNumber)1.0;
+    st[strategyOffset[i] + ps[i]] = (double)1.0;
   }
   return getMixedPayoff(player, tp, st);
 }
@@ -344,7 +344,7 @@ Rational BAGG::getExactPurePayoff(int player, int tp, const std::vector<int> &ps
 void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
 {
   for (int i = 0; i < aggPtr->getNumActionNodes(); ++i) {
-    as[i] = AggNumber(0.0);
+    as[i] = double(0.0);
   }
   for (int t = 0; t < numTypes[0]; ++t) {
     for (size_t act = 0; act < typeActionSets[0][t].size(); ++act) {
@@ -354,27 +354,27 @@ void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
   }
 }
 
-AggNumber BAGG::getSymMixedPayoff(StrategyProfile &s)
+double BAGG::getSymMixedPayoff(StrategyProfile &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (int tp = 0; tp < numTypes[0]; ++tp) {
     res += indepTypeDist[0][tp] * getSymMixedPayoff(tp, s);
   }
   return res;
 }
 
-AggNumber BAGG::getSymMixedPayoff(int tp, StrategyProfile &s)
+double BAGG::getSymMixedPayoff(int tp, StrategyProfile &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (size_t act = 0; act < typeActionSets[0][tp].size(); ++act) {
-    if (s[act + firstAction(0, tp)] > AggNumber(0.0)) {
+    if (s[act + firstAction(0, tp)] > double(0.0)) {
       res += s[act + firstAction(0, tp)] * getSymMixedPayoff(tp, act, s);
     }
   }
   return res;
 }
 
-AggNumber BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
+double BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
 {
   StrategyProfile as(aggPtr->getNumActionNodes());
   getSymAGGStrat(as, s);

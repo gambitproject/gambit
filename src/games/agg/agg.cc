@@ -421,18 +421,18 @@ void AGG::computeP(int player, int act, int player2, int act2)
   }
 }
 
-void AGG::doProjection(int Node, AggNumber *s)
+void AGG::doProjection(int Node, double *s)
 {
   for (int i = 0; i < numPlayers; i++) {
     doProjection(Node, i, &(s[firstAction(i)]));
   }
 }
 
-void AGG::doProjection(int Node, int i, AggNumber *s)
+void AGG::doProjection(int Node, int i, double *s)
 {
   projectedStrat[Node][i].reset();
   for (int j = 0; j < actions[i]; j++) {
-    if (s[j] > (AggNumber)0.0) {
+    if (s[j] > (double)0.0) {
       projectedStrat[Node][i] += make_pair(projection[Node][i][j], s[j]);
     }
   }
@@ -485,7 +485,7 @@ void AGG::doExactProjection(int Node, int i, Rational *s)
   }
 }
 
-AggNumber AGG::getPurePayoff(int player, const std::vector<int> &s)
+double AGG::getPurePayoff(int player, const std::vector<int> &s)
 {
   assert(player >= 0 && player < numPlayers);
   const int Node = actionSets[player][s[player]];
@@ -531,19 +531,19 @@ Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
   return p->second;
 }
 
-AggNumber AGG::getMixedPayoff(int player, StrategyProfile &s)
+double AGG::getMixedPayoff(int player, StrategyProfile &s)
 {
-  AggNumber result = 0.0;
+  double result = 0.0;
   assert(player >= 0 && player < numPlayers);
   for (int act = 0; act < actions[player]; ++act) {
-    if (s[act + firstAction(player)] > (AggNumber)0.0) {
+    if (s[act + firstAction(player)] > (double)0.0) {
       result += s[act + firstAction(player)] * getV(player, act, s);
     }
   }
   return result;
 }
 
-void AGG::getPayoffVector(AggNumberVector &dest, int player, const StrategyProfile &s)
+void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile &s)
 {
   assert(player >= 0 && player < numPlayers);
   for (int act = 0; act < actions[player]; ++act) {
@@ -551,7 +551,7 @@ void AGG::getPayoffVector(AggNumberVector &dest, int player, const StrategyProfi
   }
 }
 
-AggNumber AGG::getV(int player, int act, const StrategyProfile &s)
+double AGG::getV(int player, int act, const StrategyProfile &s)
 {
   // project s to the projectedStrat
   doProjection(actionSets.at(player).at(act), s);
@@ -559,7 +559,7 @@ AggNumber AGG::getV(int player, int act, const StrategyProfile &s)
   return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player][act]]);
 }
 
-AggNumber AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfile &s)
+double AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfile &s)
 {
   doProjection(actionSets[player1][act1], s);
   computeP(player1, act1, player2, act2);
@@ -610,22 +610,22 @@ Rational AGG::getExactMixedPayoff(int player, const ExactStrategyProfile &s)
 //  parameter: s is the mixed strategy of one player. It is a vector of
 //  probabilities, indexed by the action node.
 
-AggNumber AGG::getSymMixedPayoff(StrategyProfile &s)
+double AGG::getSymMixedPayoff(StrategyProfile &s)
 {
-  AggNumber result = 0;
+  double result = 0;
   if (!isSymmetric()) {
     throw std::runtime_error("AGG::getSymMixedPayoff: the game is not symmetric");
   }
 
   for (int node = 0; node < numActionNodes; ++node) {
-    if (s[node] > (AggNumber)0.0) {
+    if (s[node] > (double)0.0) {
       result += s[node] * getSymMixedPayoff(node, s);
     }
   }
   return result;
 }
 
-void AGG::getSymPayoffVector(AggNumberVector &dest, StrategyProfile &s)
+void AGG::getSymPayoffVector(std::vector<double> &dest, StrategyProfile &s)
 {
   if (!isSymmetric()) {
     throw std::runtime_error("AGG::getSymMixedPayoff: the game is not symmetric");
@@ -635,7 +635,7 @@ void AGG::getSymPayoffVector(AggNumberVector &dest, StrategyProfile &s)
   }
 }
 
-AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
+double AGG::getSymMixedPayoff(int node, StrategyProfile &s)
 {
   const int numNei = neighbors[node].size();
 
@@ -650,28 +650,28 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
     return dest.inner_prod(projection[node][0][node], numNei, projFunctions[node], payoffs[node]);
   }
 
-  AggNumber V = 0.0;
+  double V = 0.0;
   vector<int> support;
-  AggNumber null_prob = 1;
+  double null_prob = 1;
   // do projection  & get support
   int self = -1;
   for (int i = 0; i < numNei; ++i) {
     if (neighbors[node][i] == node) {
       self = i;
     }
-    if (s[neighbors[node][i]] > (AggNumber)0) {
+    if (s[neighbors[node][i]] > (double)0) {
       support.push_back(i);
       null_prob -= s[neighbors[node][i]];
     }
   }
-  if (numNei < numActionNodes && null_prob > (AggNumber)0) {
+  if (numNei < numActionNodes && null_prob > (double)0) {
     support.push_back(-1);
   }
 
   // gray code
   GrayComposition gc(numPlayers - 1, support.size());
 
-  AggNumber prob =
+  double prob =
       std::pow((support.at(0) >= 0) ? s[neighbors[node][support[0]]] : null_prob, numPlayers - 1);
 
   while (true) {
@@ -694,13 +694,10 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
       break;
     }
     // update prob
-    const AggNumber i_prob =
-        (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
-    const AggNumber d_prob =
-        (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
-    assert(i_prob > (AggNumber)0 && d_prob > (AggNumber)0);
-    prob *=
-        ((AggNumber)(gc.get().at(gc.d) + 1)) * i_prob / (AggNumber)(gc.get().at(gc.i)) / d_prob;
+    const double i_prob = (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
+    const double d_prob = (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
+    assert(i_prob > (double)0 && d_prob > (double)0);
+    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
 
   } // end while
 
@@ -732,7 +729,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
     projectedStrat[node][player].reset();
     if (numPl > 0) {
       for (int j = 0; j < actions[player]; j++) {
-        if (s[j] > (AggNumber)0.0) {
+        if (s[j] > (double)0.0) {
           projectedStrat[node][player] += make_pair(projection[node][player][j], s[j]);
         }
       }
@@ -763,9 +760,9 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
     return;
   }
 
-  // AggNumber V = 0.0;
+  // double V = 0.0;
   vector<int> support;
-  AggNumber null_prob = 1;
+  double null_prob = 1;
   // do projection  & get support
   int self = -1; // index of self in the neighbor list
   int ind2 = -1; // index of act2 in the neighbor list
@@ -779,21 +776,21 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
     }
 
     const int a = node2Action.at(neighbors[node][i]).at(p);
-    if (a >= 0 && s[a] > (AggNumber)0) {
+    if (a >= 0 && s[a] > (double)0) {
       support.push_back(i);
       null_prob -= s[a];
     }
   }
-  if (null_prob > (AggNumber)0) {
+  if (null_prob > (double)0) {
     support.push_back(-1);
   }
 
   // gray code
   GrayComposition gc(numPl, support.size());
 
-  const AggNumber prob0 =
+  const double prob0 =
       (support.at(0) >= 0) ? s[node2Action[neighbors[node].at(support[0])][p]] : null_prob;
-  AggNumber prob = std::pow(prob0, numPl);
+  double prob = std::pow(prob0, numPl);
 
   while (true) {
     const vector<int> &comp = gc.get();
@@ -821,23 +818,22 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       break;
     }
     // update prob
-    const AggNumber i_prob =
+    const double i_prob =
         (support.at(gc.i) != -1) ? s[node2Action[neighbors[node][support[gc.i]]][p]] : null_prob;
-    const AggNumber d_prob =
+    const double d_prob =
         (support.at(gc.d) != -1) ? s[node2Action[neighbors[node][support[gc.d]]][p]] : null_prob;
-    assert(i_prob > (AggNumber)0 && d_prob > (AggNumber)0);
-    prob *=
-        ((AggNumber)(gc.get().at(gc.d) + 1)) * i_prob / (AggNumber)(gc.get().at(gc.i)) / d_prob;
+    assert(i_prob > (double)0 && d_prob > (double)0);
+    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
 
   } // end while
 }
 
-AggNumber AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile> &s)
+double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile> &s)
 {
-  AggNumber result = 0.0;
+  double result = 0.0;
 
   for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[playerClass][act] > (AggNumber)0.0) {
+    if (s[playerClass][act] > (double)0.0) {
 
       result += s[playerClass][act] * getKSymMixedPayoff(playerClass, act, s);
     }
@@ -845,12 +841,12 @@ AggNumber AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile> &s)
   return result;
 }
 
-AggNumber AGG::getKSymMixedPayoff(int playerClass, StrategyProfile &s)
+double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile &s)
 {
-  AggNumber result = 0.0;
+  double result = 0.0;
 
   for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[firstKSymAction(playerClass) + act] > (AggNumber)0.0) {
+    if (s[firstKSymAction(playerClass) + act] > (double)0.0) {
 
       result += s[firstKSymAction(playerClass) + act] * getKSymMixedPayoff(s, playerClass, act);
     }
@@ -858,14 +854,14 @@ AggNumber AGG::getKSymMixedPayoff(int playerClass, StrategyProfile &s)
   return result;
 }
 
-void AGG::getKSymPayoffVector(AggNumberVector &dest, int playerClass, StrategyProfile &s)
+void AGG::getKSymPayoffVector(std::vector<double> &dest, int playerClass, StrategyProfile &s)
 {
   for (size_t act = 0; act < uniqueActionSets[playerClass].size(); ++act) {
     dest[act] = getKSymMixedPayoff(s, playerClass, act);
   }
 }
 
-AggNumber AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s)
+double AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s)
 {
 
   const int numPC = playerClasses.size();
@@ -883,8 +879,8 @@ AggNumber AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfi
   return d.inner_prod(payoffs[uniqueActionSets[playerClass][act]]);
 }
 
-AggNumber AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2,
-                                  int act2)
+double AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2,
+                               int act2)
 {
   const int numPC = playerClasses.size();
   const int numNei = neighbors[uniqueActionSets[pClass1][act1]].size();
@@ -971,10 +967,10 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exact
       throw std::runtime_error(str.str());
     }
     const Number num(word);
-    const AggNumber u = (double)num;
+    const double u = (double)num;
 
     // insert
-    const pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key, u));
+    const pair<trie_map<double>::iterator, bool> r = pay.insert(make_pair(key, u));
     if (!r.second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";
@@ -1002,10 +998,10 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exact
   }
 }
 
-AggNumber AGG::getMaxPayoff() const
+double AGG::getMaxPayoff() const
 {
   assert(numActionNodes > 0);
-  AggNumber result = payoffs[0].begin()->second;
+  double result = payoffs[0].begin()->second;
   for (int i = 1; i < numActionNodes; i++) {
     for (const auto &it : payoffs[i]) {
       result = max(result, it.second);
@@ -1014,10 +1010,10 @@ AggNumber AGG::getMaxPayoff() const
   return result;
 }
 
-AggNumber AGG::getMinPayoff() const
+double AGG::getMinPayoff() const
 {
   assert(numActionNodes > 0);
-  AggNumber result = payoffs[0].begin()->second;
+  double result = payoffs[0].begin()->second;
   for (int i = 1; i < numActionNodes; i++) {
     for (const auto &it : payoffs[i]) {
       result = min(result, it.second);

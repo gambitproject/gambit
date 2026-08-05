@@ -95,13 +95,11 @@ private:
   void computePartialP_bisect(int player, int act, std::vector<int>::iterator f,
                               std::vector<int>::iterator l, Gambit::agg::aggdistrib &temp) const;
   void computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                     Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache) const;
-  void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                  Gambit::agg::AggNumber result,
-                  Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache,
-                  bool partial = false) const;
-  void computeUndisturbedPayoff(Gambit::agg::AggNumber &undisturbedPayoff, bool &has, int player1,
-                                int act1, int player2) const;
+                     Gambit::agg::trie_map<double> &cache) const;
+  void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2, double result,
+                  Gambit::agg::trie_map<double> &cache, bool partial = false) const;
+  void computeUndisturbedPayoff(double &undisturbedPayoff, bool &has, int player1, int act1,
+                                int player2) const;
 };
 
 } // end namespace Gambit::gametracer

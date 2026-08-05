@@ -41,12 +41,10 @@ class aggame;
 namespace agg {
 
 // data structure for mixed strategy profile
-using AggNumber = double;
-using StrategyProfile = std::vector<AggNumber>;
-using AggNumberVector = std::vector<AggNumber>;
+using StrategyProfile = std::vector<double>;
 
 // data structure for payoff function:
-using aggpayoff = trie_map<AggNumber>;
+using aggpayoff = trie_map<double>;
 
 // exact (arbitrary-precision) counterpart of a payoff function, populated alongside aggpayoff
 // at parse time. Only used for storage/lookup (find/insert/iterate), never for the
@@ -56,7 +54,7 @@ using aggpayoff = trie_map<AggNumber>;
 using exactpayoff = std::map<std::vector<int>, Number>;
 
 // data struct for prob distribution over configurations:
-using aggdistrib = trie_map<AggNumber>;
+using aggdistrib = trie_map<double>;
 
 // exact (arbitrary-precision) counterparts of the above, used by the exact mixed-strategy
 // payoff computation (getExactMixedPayoff/getExactV/getExactJ). Unlike exactpayoff, these
@@ -112,10 +110,10 @@ public:
   int lastKSymAction(int i) const { return kSymStrategyOffset[i + 1]; }
 
   // exp. payoff under mixed strat profile
-  AggNumber getMixedPayoff(int player, StrategyProfile &s);
-  void getPayoffVector(AggNumberVector &dest, int player, const StrategyProfile &s);
-  AggNumber getV(int player, int action, const StrategyProfile &s);
-  AggNumber getJ(int player, int action, int player2, int action2, StrategyProfile &s);
+  double getMixedPayoff(int player, StrategyProfile &s);
+  void getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile &s);
+  double getV(int player, int action, const StrategyProfile &s);
+  double getJ(int player, int action, int player2, int action2, StrategyProfile &s);
 
   // exact counterparts of the above three, computing via the same convolution algorithm but
   // in Rational arithmetic throughout, rather than double.
@@ -124,7 +122,7 @@ public:
   Rational getExactJ(int player, int action, int player2, int action2,
                      const ExactStrategyProfile &s);
 
-  AggNumber getPurePayoff(int player, const std::vector<int> &s);
+  double getPurePayoff(int player, const std::vector<int> &s);
   Number getExactPurePayoff(int player, const std::vector<int> &s) const;
 
   bool isSymmetric() const
@@ -136,19 +134,19 @@ public:
     }
     return true;
   }
-  AggNumber getSymMixedPayoff(StrategyProfile &s);
-  AggNumber getSymMixedPayoff(int actnode, StrategyProfile &s);
-  void getSymPayoffVector(AggNumberVector &dest, StrategyProfile &s);
-  AggNumber getKSymMixedPayoff(int playerClass, std::vector<StrategyProfile> &s);
-  AggNumber getKSymMixedPayoff(int playerClass, StrategyProfile &s);
-  AggNumber getKSymMixedPayoff(int playerClass, int act, std::vector<StrategyProfile> &s);
-  AggNumber getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2 = -1,
-                               int act2 = -1);
-  void getKSymPayoffVector(AggNumberVector &dest, int playerClass, StrategyProfile &s);
+  double getSymMixedPayoff(StrategyProfile &s);
+  double getSymMixedPayoff(int actnode, StrategyProfile &s);
+  void getSymPayoffVector(std::vector<double> &dest, StrategyProfile &s);
+  double getKSymMixedPayoff(int playerClass, std::vector<StrategyProfile> &s);
+  double getKSymMixedPayoff(int playerClass, StrategyProfile &s);
+  double getKSymMixedPayoff(int playerClass, int act, std::vector<StrategyProfile> &s);
+  double getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2 = -1,
+                            int act2 = -1);
+  void getKSymPayoffVector(std::vector<double> &dest, int playerClass, StrategyProfile &s);
 
-  AggNumberVector getExpectedConfig(StrategyProfile &s)
+  std::vector<double> getExpectedConfig(StrategyProfile &s)
   {
-    AggNumberVector res(numActionNodes, 0);
+    std::vector<double> res(numActionNodes, 0);
     for (int i = 0; i < numPlayers; ++i) {
       for (int j = 0; j < actions[i]; ++j) {
         res[actionSets[i][j]] += s[firstAction(i) + j];
@@ -166,8 +164,8 @@ public:
   const std::vector<int> &getActionSet(int player) { return actionSets.at(player); }
   const aggpayoff &getPayoffMap(int node) { return payoffs.at(node); }
 
-  AggNumber getMaxPayoff() const;
-  AggNumber getMinPayoff() const;
+  double getMaxPayoff() const;
+  double getMinPayoff() const;
   Number getExactMaxPayoff() const;
   Number getExactMinPayoff() const;
 
@@ -266,7 +264,7 @@ private:
   std::vector<std::vector<int>> node2Action;
 
   // cache of jacobian entries.
-  trie_map<AggNumber> cache;
+  trie_map<double> cache;
 
   // the unique action sets
   std::vector<ActionSet> uniqueActionSets;
@@ -327,8 +325,8 @@ private:
   {
     doProjection(Node, player, &(const_cast<StrategyProfile &>(s)[firstAction(player)]));
   }
-  void doProjection(int Node, AggNumber *s);
-  void doProjection(int Node, int player, AggNumber *s);
+  void doProjection(int Node, double *s);
+  void doProjection(int Node, int player, double *s);
 
   // exact (Rational) counterparts, mirroring the above precisely.  exactPayoffs is a
   // std::map<..., Number>, not a trie_map<Rational>, so trie_map's own inner_prod can't be
