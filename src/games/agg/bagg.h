@@ -68,18 +68,19 @@ public:
   Number getExactMaxPayoff() const { return aggPtr->getExactMaxPayoff(); }
   Number getExactMinPayoff() const { return aggPtr->getExactMinPayoff(); }
 
-  // exp. payoff under mixed strat profile
+  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart --
+  // unused outside this class; getPurePayoff and GameBAGGRep only ever go through the per-type
+  // overload below.
   double getMixedPayoff(int player, StrategyProfile<double> &s);
-  // exp payoff for player, conditioned on her receiving type tp.
-  double getMixedPayoff(int player, int tp, StrategyProfile<double> &s);
+
+  // exp payoff for player, conditioned on her receiving type tp, via the convolution algorithm.
+  // V=double runs the floating-point engine; V=Rational runs the exact-arithmetic counterpart
+  // throughout -- see agg.h::getMixedPayoff for how the dispatch works.
+  template <class V> V getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const;
 
   void getPayoffVector(std::vector<double> &dest, int player, int tp,
                        const StrategyProfile<double> &s);
-  double getV(int player, int tp, int action, const StrategyProfile<double> &s);
-
-  // exact counterparts, computing via Rational arithmetic throughout (see agg.h)
-  Rational getExactMixedPayoff(int player, int tp, const StrategyProfile<Rational> &s) const;
-  Rational getExactV(int player, int tp, int action, const StrategyProfile<Rational> &s) const;
+  template <class V> V getV(int player, int tp, int action, const StrategyProfile<V> &s) const;
 
   double getPurePayoff(int player, int tp, std::vector<int> &s);
   double getPurePayoff(int player, std::vector<int> &s)
@@ -120,11 +121,10 @@ private:
 
   bool symmetric;
 
-  void getAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s, int player = -1,
-                   int tp = -1, int action = -1);
+  template <class V>
+  void getAGGStrat(StrategyProfile<V> &as, const StrategyProfile<V> &s, int player = -1,
+                   int tp = -1, int action = -1) const;
   void getSymAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s);
-  void getExactAGGStrat(StrategyProfile<Rational> &as, const StrategyProfile<Rational> &s,
-                        int player, int tp, int action) const;
 };
 
 std::ostream &operator<<(std::ostream &s, const BAGG &g);

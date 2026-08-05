@@ -96,19 +96,6 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
-// A single dispatch point: T=double goes through BAGG's original floating-point convolution
-// engine (getMixedPayoff), T=Rational goes through its exact Rational-arithmetic counterpart
-// (getExactMixedPayoff) -- same algorithm, different numeric type throughout, per agg.h/bagg.h.
-template <class T> T CallMixedPayoff(agg::BAGG &g, int bplayer, int btype, std::vector<T> &s)
-{
-  if constexpr (std::is_same_v<T, Rational>) {
-    return g.getExactMixedPayoff(bplayer, btype, s);
-  }
-  else {
-    return g.getMixedPayoff(bplayer, btype, s);
-  }
-}
-
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
@@ -130,7 +117,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
       }
     }
   }
-  return CallMixedPayoff(*g.baggPtr, bplayer, btype, s);
+  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
 }
 
 template <class T>
@@ -163,7 +150,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps)
       }
     }
   }
-  return CallMixedPayoff(*g.baggPtr, bplayer, btype, s);
+  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
 }
 
 template <class T>
@@ -210,7 +197,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
       }
     }
   }
-  return CallMixedPayoff(*g.baggPtr, bplayer, btype, s);
+  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
 }
 
 template class BAGGMixedStrategyProfileRep<double>;

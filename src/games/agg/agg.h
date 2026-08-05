@@ -116,18 +116,15 @@ public:
   int firstKSymAction(int i) const { return kSymStrategyOffset[i]; }
   int lastKSymAction(int i) const { return kSymStrategyOffset[i + 1]; }
 
-  // exp. payoff under mixed strat profile
-  double getMixedPayoff(int player, StrategyProfile<double> &s);
+  // exp. payoff under mixed strat profile, via the convolution algorithm. V=double runs the
+  // floating-point engine; V=Rational runs the exact-arithmetic counterpart throughout
+  // (doProjection/computeP/inner_prod vs doExactProjection/computeExactP/exactInnerProd) --
+  // dispatched at compile time in the .cc, not overloaded, since it's the same algorithm.
+  template <class V> V getMixedPayoff(int player, const StrategyProfile<V> &s);
   void getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile<double> &s);
-  double getV(int player, int action, const StrategyProfile<double> &s);
-  double getJ(int player, int action, int player2, int action2, StrategyProfile<double> &s);
-
-  // exact counterparts of the above three, computing via the same convolution algorithm but
-  // in Rational arithmetic throughout, rather than double.
-  Rational getExactMixedPayoff(int player, const StrategyProfile<Rational> &s);
-  Rational getExactV(int player, int action, const StrategyProfile<Rational> &s);
-  Rational getExactJ(int player, int action, int player2, int action2,
-                     const StrategyProfile<Rational> &s);
+  template <class V> V getV(int player, int action, const StrategyProfile<V> &s);
+  template <class V>
+  V getJ(int player, int action, int player2, int action2, const StrategyProfile<V> &s);
 
   double getPurePayoff(int player, const std::vector<int> &s);
   Number getExactPurePayoff(int player, const std::vector<int> &s) const;
@@ -238,8 +235,8 @@ private:
   // which is a prob distribution over the set of 'contributions'
   std::vector<std::vector<ConfigDistribution<double>>> projectedStrat;
 
-  // exact (Rational) counterpart of projectedStrat/Pr below, used only by
-  // getExactMixedPayoff/getExactV/getExactJ. Independent working state from the double
+  // exact (Rational) counterpart of projectedStrat/Pr below, used only by the Rational
+  // instantiations of getMixedPayoff/getV/getJ. Independent working state from the double
   // versions, since both may be in use (e.g. from different MixedStrategyProfile instantiations
   // over the same AGG) and each is rebuilt fresh per call regardless.
   std::vector<std::vector<ConfigDistribution<Rational>>> exactProjectedStrat;

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <type_traits>
 #include "games/agg/bagg.h"
 
 using namespace std;
@@ -194,11 +195,11 @@ double BAGG::getMixedPayoff(int player, StrategyProfile<double> &s)
   return res;
 }
 
-double BAGG::getMixedPayoff(int player, int tp, StrategyProfile<double> &s)
+template <class V> V BAGG::getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const
 {
-  double res(0);
+  V res(0);
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
-    if (s[act + firstAction(player, tp)] > double(0.0)) {
+    if (s[act + firstAction(player, tp)] > V(0)) {
       res += s[act + firstAction(player, tp)] * getV(player, tp, act, s);
     }
   }
@@ -214,11 +215,12 @@ void BAGG::getPayoffVector(std::vector<double> &dest, int player, int tp,
   }
 }
 
-void BAGG::getAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s, int player,
-                       int tp, int action)
+template <class V>
+void BAGG::getAGGStrat(StrategyProfile<V> &as, const StrategyProfile<V> &s, int player, int tp,
+                       int action) const
 {
   for (int i = 0; i < aggPtr->getNumActions(); ++i) {
-    as[i] = double(0.0);
+    as[i] = V(0);
   }
 
   for (int pl = 0; pl < numPlayers; ++pl) {
@@ -226,65 +228,45 @@ void BAGG::getAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double
       for (int t = 0; t < numTypes[pl]; ++t) {
         for (size_t act = 0; act < typeActionSets[pl][t].size(); ++act) {
           const int aact = typeAction2ActionIndex[pl][t][act];
-          as[aact + aggPtr->firstAction(pl)] += indepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+          if constexpr (std::is_same_v<V, Rational>) {
+            as[aact + aggPtr->firstAction(pl)] +=
+                (Rational)exactIndepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+          }
+          else {
+            as[aact + aggPtr->firstAction(pl)] +=
+                indepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+          }
         }
       }
     }
     else {
       const int aact = typeAction2ActionIndex[player][tp][action];
-      as[aact + aggPtr->firstAction(player)] = 1;
+      as[aact + aggPtr->firstAction(player)] = V(1);
     }
   }
 }
-double BAGG::getV(int player, int tp, int action, const StrategyProfile<double> &s)
+
+template <class V> V BAGG::getV(int player, int tp, int action, const StrategyProfile<V> &s) const
 {
-  StrategyProfile<double> as(aggPtr->getNumActions());
+  StrategyProfile<V> as(aggPtr->getNumActions());
   getAGGStrat(as, s, player, tp, action);
   return aggPtr->getV(player, typeAction2ActionIndex[player][tp][action], as);
 }
 
-// Exact (Rational) counterparts of getAGGStrat/getV/getMixedPayoff above.
-void BAGG::getExactAGGStrat(StrategyProfile<Rational> &as, const StrategyProfile<Rational> &s,
-                            int player, int tp, int action) const
-{
-  for (int i = 0; i < aggPtr->getNumActions(); ++i) {
-    as[i] = Rational(0);
-  }
-
-  for (int pl = 0; pl < numPlayers; ++pl) {
-    if (pl != player) {
-      for (int t = 0; t < numTypes[pl]; ++t) {
-        for (size_t act = 0; act < typeActionSets[pl][t].size(); ++act) {
-          const int aact = typeAction2ActionIndex[pl][t][act];
-          as[aact + aggPtr->firstAction(pl)] +=
-              (Rational)exactIndepTypeDist[pl][t] * s[act + firstAction(pl, t)];
-        }
-      }
-    }
-    else {
-      const int aact = typeAction2ActionIndex[player][tp][action];
-      as[aact + aggPtr->firstAction(player)] = Rational(1);
-    }
-  }
-}
-
-Rational BAGG::getExactV(int player, int tp, int action, const StrategyProfile<Rational> &s) const
-{
-  StrategyProfile<Rational> as(aggPtr->getNumActions());
-  getExactAGGStrat(as, s, player, tp, action);
-  return aggPtr->getExactV(player, typeAction2ActionIndex[player][tp][action], as);
-}
-
-Rational BAGG::getExactMixedPayoff(int player, int tp, const StrategyProfile<Rational> &s) const
-{
-  Rational res(0);
-  for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
-    if (s[act + firstAction(player, tp)] > Rational(0)) {
-      res += s[act + firstAction(player, tp)] * getExactV(player, tp, act, s);
-    }
-  }
-  return res;
-}
+template void BAGG::getAGGStrat<double>(StrategyProfile<double> &as,
+                                        const StrategyProfile<double> &s, int player, int tp,
+                                        int action) const;
+template void BAGG::getAGGStrat<Rational>(StrategyProfile<Rational> &as,
+                                          const StrategyProfile<Rational> &s, int player, int tp,
+                                          int action) const;
+template double BAGG::getV<double>(int player, int tp, int action,
+                                   const StrategyProfile<double> &s) const;
+template Rational BAGG::getV<Rational>(int player, int tp, int action,
+                                       const StrategyProfile<Rational> &s) const;
+template double BAGG::getMixedPayoff<double>(int player, int tp,
+                                             const StrategyProfile<double> &s) const;
+template Rational BAGG::getMixedPayoff<Rational>(int player, int tp,
+                                                 const StrategyProfile<Rational> &s) const;
 
 double BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
 {

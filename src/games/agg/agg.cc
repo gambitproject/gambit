@@ -24,6 +24,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <type_traits>
 #include "games/agg/gray.h"
 #include "games/agg/agg.h"
 
@@ -532,12 +533,54 @@ Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
   return p->second;
 }
 
-double AGG::getMixedPayoff(int player, StrategyProfile<double> &s)
+Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist) const
 {
-  double result = 0.0;
+  Rational result(0);
+  for (const auto &entry : dist) {
+    const auto it = exactPayoffs[node].find(entry.first);
+    if (it != exactPayoffs[node].end() && entry.second != Rational(0)) {
+      result += entry.second * (Rational)it->second;
+    }
+  }
+  return result;
+}
+
+template <class V> V AGG::getV(int player, int act, const StrategyProfile<V> &s)
+{
+  if constexpr (std::is_same_v<V, Rational>) {
+    doExactProjection(actionSets.at(player).at(act), s);
+    computeExactP(player, act);
+    return exactInnerProd(actionSets[player][act], exactPr[numPlayers - 1]);
+  }
+  else {
+    // project s to the projectedStrat
+    doProjection(actionSets.at(player).at(act), s);
+    computeP(player, act);
+    return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player][act]]);
+  }
+}
+
+template <class V>
+V AGG::getJ(int player1, int act1, int player2, int act2, const StrategyProfile<V> &s)
+{
+  if constexpr (std::is_same_v<V, Rational>) {
+    doExactProjection(actionSets[player1][act1], s);
+    computeExactP(player1, act1, player2, act2);
+    return exactInnerProd(actionSets[player1][act1], exactPr[numPlayers - 1]);
+  }
+  else {
+    doProjection(actionSets[player1][act1], s);
+    computeP(player1, act1, player2, act2);
+    return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player1][act1]]);
+  }
+}
+
+template <class V> V AGG::getMixedPayoff(int player, const StrategyProfile<V> &s)
+{
+  V result(0);
   assert(player >= 0 && player < numPlayers);
   for (int act = 0; act < actions[player]; ++act) {
-    if (s[act + firstAction(player)] > (double)0.0) {
+    if (s[act + firstAction(player)] > V(0)) {
       result += s[act + firstAction(player)] * getV(player, act, s);
     }
   }
@@ -552,59 +595,14 @@ void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyP
   }
 }
 
-double AGG::getV(int player, int act, const StrategyProfile<double> &s)
-{
-  // project s to the projectedStrat
-  doProjection(actionSets.at(player).at(act), s);
-  computeP(player, act);
-  return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player][act]]);
-}
-
-double AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfile<double> &s)
-{
-  doProjection(actionSets[player1][act1], s);
-  computeP(player1, act1, player2, act2);
-  return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player1][act1]]);
-}
-
-Rational AGG::exactInnerProd(int node, const ConfigDistribution<Rational> &dist) const
-{
-  Rational result(0);
-  for (const auto &entry : dist) {
-    const auto it = exactPayoffs[node].find(entry.first);
-    if (it != exactPayoffs[node].end() && entry.second != Rational(0)) {
-      result += entry.second * (Rational)it->second;
-    }
-  }
-  return result;
-}
-
-Rational AGG::getExactV(int player, int act, const StrategyProfile<Rational> &s)
-{
-  doExactProjection(actionSets.at(player).at(act), s);
-  computeExactP(player, act);
-  return exactInnerProd(actionSets[player][act], exactPr[numPlayers - 1]);
-}
-
-Rational AGG::getExactJ(int player1, int act1, int player2, int act2,
-                        const StrategyProfile<Rational> &s)
-{
-  doExactProjection(actionSets[player1][act1], s);
-  computeExactP(player1, act1, player2, act2);
-  return exactInnerProd(actionSets[player1][act1], exactPr[numPlayers - 1]);
-}
-
-Rational AGG::getExactMixedPayoff(int player, const StrategyProfile<Rational> &s)
-{
-  Rational result(0);
-  assert(player >= 0 && player < numPlayers);
-  for (int act = 0; act < actions[player]; ++act) {
-    if (s[act + firstAction(player)] > Rational(0)) {
-      result += s[act + firstAction(player)] * getExactV(player, act, s);
-    }
-  }
-  return result;
-}
+template double AGG::getV<double>(int player, int act, const StrategyProfile<double> &s);
+template Rational AGG::getV<Rational>(int player, int act, const StrategyProfile<Rational> &s);
+template double AGG::getJ<double>(int player1, int act1, int player2, int act2,
+                                  const StrategyProfile<double> &s);
+template Rational AGG::getJ<Rational>(int player1, int act1, int player2, int act2,
+                                      const StrategyProfile<Rational> &s);
+template double AGG::getMixedPayoff<double>(int player, const StrategyProfile<double> &s);
+template Rational AGG::getMixedPayoff<Rational>(int player, const StrategyProfile<Rational> &s);
 
 // getSymMixedPayoff: compute expected payoff under a symmetric mixed strat,
 //   for a symmetric game.
