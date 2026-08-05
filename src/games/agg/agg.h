@@ -44,25 +44,33 @@ namespace agg {
 // (double for the floating-point engine, Rational for the exact-arithmetic counterpart).
 template <class V> using StrategyProfile = std::vector<V>;
 
-// data structure for payoff function:
-using aggpayoff = trie_map<double>;
+// the local payoff function for one action node: maps a neighbor configuration to the payoff of
+// playing that node under it. Populated at parse time; consumed by the floating-point
+// convolution engine (getMixedPayoff/getV/getJ) via trie_map's own inner_prod, so it has to stay
+// a trie_map<double> -- unlike StrategyProfile/ConfigDistribution above, this is deliberately not
+// a template (see ExactPayoffTable below for why a Rational instantiation would be unsound).
+using PayoffTable = trie_map<double>;
 
-// exact (arbitrary-precision) counterpart of a payoff function, populated alongside aggpayoff
-// at parse time. Only used for storage/lookup (find/insert/iterate), never for the
-// floating-point convolution machinery, so a plain std::map suffices -- no need to fight
-// trie_map's explicit whole-class instantiation, which requires V to support arithmetic
-// operators that Number intentionally does not provide.
-using exactpayoff = std::map<std::vector<int>, Number>;
+// exact (arbitrary-precision) counterpart of PayoffTable, populated alongside it at parse time
+// from the same source text. Deliberately not a trie_map<Rational>, for two independent reasons:
+// (1) trie_map's own inner_prod has an epsilon-tolerance discard/throw policy
+// (trie_map<V>::THRESH = 1e-12) that is meaningful for double but unsound for exact arithmetic --
+// there is no notion of "too small to matter" once payoffs are exact; and (2) this stores Number,
+// not Rational, to preserve the original entered text for exact serialization (printPayoffs),
+// which a bare Rational cannot do. As a result this is only ever used for storage/lookup
+// (find/insert/iterate) and a hand-written inner product (AGG::exactInnerProd), never trie_map's
+// own arithmetic.
+using ExactPayoffTable = std::map<std::vector<int>, Number>;
 
 // data struct for a probability distribution over configurations, using numeric type V (double
 // for the floating-point engine, Rational for the exact-arithmetic counterpart). Unlike
-// aggpayoff/exactpayoff above, this participates in the convolution algorithm
+// PayoffTable/ExactPayoffTable above, this participates in the convolution algorithm
 // (multiply/inner_prod), so V must support arithmetic -- which Rational, unlike Number,
 // provides -- letting both instantiations reuse trie_map directly.
 template <class V> using ConfigDistribution = trie_map<V>;
 
 // types of input formats for payoff func
-using payofftype = enum { COMPLETE, MAPPING, ADDITIVE };
+using PayoffType = enum { COMPLETE, MAPPING, ADDITIVE };
 
 class AGG {
 
@@ -87,8 +95,8 @@ public:
       std::vector<std::vector<ConfigDistribution<double>>> &projS,
       std::vector<std::vector<std::vector<Config>>> &proj,
       std::vector<std::vector<projtype>> &projF, std::vector<std::vector<std::vector<int>>> &Po,
-      std::vector<ConfigDistribution<double>> &P, std::vector<aggpayoff> &payoffs,
-      std::vector<exactpayoff> &exactPayoffs);
+      std::vector<ConfigDistribution<double>> &P, std::vector<PayoffTable> &payoffs,
+      std::vector<ExactPayoffTable> &exactPayoffs);
 
   ~AGG() = default;
 
@@ -161,7 +169,7 @@ public:
   }
   const std::vector<std::vector<Config>> &getProjection(int node) { return projection.at(node); }
   const std::vector<int> &getActionSet(int player) { return actionSets.at(player); }
-  const aggpayoff &getPayoffMap(int node) { return payoffs.at(node); }
+  const PayoffTable &getPayoffMap(int node) { return payoffs.at(node); }
 
   double getMaxPayoff() const;
   double getMinPayoff() const;
@@ -214,10 +222,10 @@ private:
   std::vector<projtype> projectionTypes;
 
   // payoff function for each action node \in S
-  std::vector<aggpayoff> payoffs;
+  std::vector<PayoffTable> payoffs;
 
   // exact (arbitrary-precision) counterpart of payoffs, for each action node \in S
-  std::vector<exactpayoff> exactPayoffs;
+  std::vector<ExactPayoffTable> exactPayoffs;
 
   // auxiliary data structures
 
@@ -282,8 +290,8 @@ private:
 
   // input functor
   struct input {
-    input(std::istream &i, exactpayoff &e) : in(i), exact(e) {}
-    void operator()(aggpayoff::iterator p)
+    input(std::istream &i, ExactPayoffTable &e) : in(i), exact(e) {}
+    void operator()(PayoffTable::iterator p)
     {
       std::string word;
       in >> word;
@@ -292,16 +300,17 @@ private:
       exact.insert(std::make_pair(p->first, num));
     }
     std::istream &in;
-    exactpayoff &exact;
+    ExactPayoffTable &exact;
   };
 
   // private static methods:
 
-  static void makeCOMPLETEpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay)
+  static void makeCOMPLETEpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable &exactPay)
   {
     pay.in_order(input(in, exactPay));
   }
-  static void makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay, int);
+  static void makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable &exactPay,
+                                int);
 
   static void setProjections(std::vector<std::vector<ConfigDistribution<double>>> &projS,
                              std::vector<std::vector<std::vector<Config>>> &proj, int N, int S,

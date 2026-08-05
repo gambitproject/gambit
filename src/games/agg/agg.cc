@@ -38,7 +38,7 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
          vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
          vector<vector<vector<Config>>> &proj, vector<vector<projtype>> &projF,
          vector<vector<vector<int>>> &Po, vector<ConfigDistribution<double>> &P,
-         vector<aggpayoff> &_payoffs, vector<exactpayoff> &_exactPayoffs)
+         vector<PayoffTable> &_payoffs, vector<ExactPayoffTable> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
     exactPayoffs(_exactPayoffs), projection(proj), projectedStrat(projS),
@@ -239,8 +239,8 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
 
   vector<vector<vector<int>>> Po(n);
   vector<ConfigDistribution<double>> Pr(n);
-  vector<aggpayoff> pays(S);        // payoffs
-  vector<exactpayoff> exactPays(S); // exact (arbitrary-precision) counterpart of pays
+  vector<PayoffTable> pays(S);           // payoffs
+  vector<ExactPayoffTable> exactPays(S); // exact (arbitrary-precision) counterpart of pays
 
   set<vector<int>> doneASets;
   for (i = 0; i < n; i++) {
@@ -912,11 +912,12 @@ double AGG::getKSymMixedPayoff(const StrategyProfile<double> &s, int pClass1, in
   return d.inner_prod(payoffs[uniqueActionSets[pClass1][act1]]);
 }
 
-void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay, int numNei)
+void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable &exactPay,
+                            int numNei)
 {
   int num;
   char c;
-  aggpayoff temp;
+  PayoffTable temp;
   // temp.swap(pay);
   temp = pay;
   pay.clear();
