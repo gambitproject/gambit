@@ -25,10 +25,12 @@
 #define GAMBIT_AGG_AGG_H
 
 #include <iostream>
+#include <map>
 #include <vector>
 #include <iterator>
 #include "proj_func.h"
 #include "trie_map.h"
+#include "games/number.h"
 
 namespace Gambit {
 
@@ -46,8 +48,22 @@ using AggNumberVector = std::vector<AggNumber>;
 // data structure for payoff function:
 using aggpayoff = trie_map<AggNumber>;
 
+// exact (arbitrary-precision) counterpart of a payoff function, populated alongside aggpayoff
+// at parse time. Only used for storage/lookup (find/insert/iterate), never for the
+// floating-point convolution machinery, so a plain std::map suffices -- no need to fight
+// trie_map's explicit whole-class instantiation, which requires V to support arithmetic
+// operators that Number intentionally does not provide.
+using exactpayoff = std::map<std::vector<int>, Number>;
+
 // data struct for prob distribution over configurations:
 using aggdistrib = trie_map<AggNumber>;
+
+// exact (arbitrary-precision) counterparts of the above, used by the exact mixed-strategy
+// payoff computation (getExactMixedPayoff/getExactV/getExactJ). Unlike exactpayoff, these
+// participate in the convolution algorithm (multiply/inner_prod), so they need Rational's
+// arithmetic -- which, unlike Number, it provides -- and so can reuse trie_map directly.
+using ExactStrategyProfile = std::vector<Rational>;
+using exactdistrib = trie_map<Rational>;
 
 // types of input formats for payoff func
 using payofftype = enum { COMPLETE, MAPPING, ADDITIVE };
@@ -74,7 +90,8 @@ public:
       std::vector<projtype> &projTypes, std::vector<std::vector<aggdistrib>> &projS,
       std::vector<std::vector<std::vector<config>>> &proj,
       std::vector<std::vector<projtype>> &projF, std::vector<std::vector<std::vector<int>>> &Po,
-      std::vector<aggdistrib> &P, std::vector<aggpayoff> &payoffs);
+      std::vector<aggdistrib> &P, std::vector<aggpayoff> &payoffs,
+      std::vector<exactpayoff> &exactPayoffs);
 
   ~AGG() = default;
 
@@ -100,7 +117,15 @@ public:
   AggNumber getV(int player, int action, const StrategyProfile &s);
   AggNumber getJ(int player, int action, int player2, int action2, StrategyProfile &s);
 
+  // exact counterparts of the above three, computing via the same convolution algorithm but
+  // in Rational arithmetic throughout, rather than double.
+  Rational getExactMixedPayoff(int player, const ExactStrategyProfile &s);
+  Rational getExactV(int player, int action, const ExactStrategyProfile &s);
+  Rational getExactJ(int player, int action, int player2, int action2,
+                     const ExactStrategyProfile &s);
+
   AggNumber getPurePayoff(int player, const std::vector<int> &s);
+  Number getExactPurePayoff(int player, const std::vector<int> &s) const;
 
   bool isSymmetric() const
   {
@@ -143,11 +168,17 @@ public:
 
   AggNumber getMaxPayoff() const;
   AggNumber getMinPayoff() const;
+  Number getExactMaxPayoff() const;
+  Number getExactMinPayoff() const;
 
   void printPayoffs(std::ostream &s, int node) const
   {
-    s << payoffs.at(node).size() << std::endl;
-    s << payoffs[node];
+    s << exactPayoffs.at(node).size() << std::endl;
+    for (const auto &entry : exactPayoffs.at(node)) {
+      s << "[ ";
+      std::copy(entry.first.begin(), entry.first.end(), std::ostream_iterator<int>(s, " "));
+      s << "] " << entry.second << std::endl;
+    }
   }
 
   void printActionGraph(std::ostream &s) const
@@ -188,6 +219,9 @@ private:
   // payoff function for each action node \in S
   std::vector<aggpayoff> payoffs;
 
+  // exact (arbitrary-precision) counterpart of payoffs, for each action node \in S
+  std::vector<exactpayoff> exactPayoffs;
+
   // auxiliary data structures
 
   // originally:
@@ -198,6 +232,13 @@ private:
   // foreach s \in S, foreach i \in N, the projected mixed strat
   // which is a prob distribution over the set of 'contributions'
   std::vector<std::vector<aggdistrib>> projectedStrat;
+
+  // exact (Rational) counterpart of projectedStrat/Pr below, used only by
+  // getExactMixedPayoff/getExactV/getExactJ. Independent working state from the double
+  // versions, since both may be in use (e.g. from different MixedStrategyProfile instantiations
+  // over the same AGG) and each is rebuilt fresh per call regardless.
+  std::vector<std::vector<exactdistrib>> exactProjectedStrat;
+  std::vector<exactdistrib> exactPr;
 
   // foreach s in S, i in N, the full set of projected actions.
   std::vector<std::vector<aggdistrib>> fullProjectedStrat;
@@ -244,15 +285,26 @@ private:
 
   // input functor
   struct input {
-    explicit input(std::istream &i) : in(i) {}
-    void operator()(aggpayoff::iterator p) { in >> (*p).second; }
+    input(std::istream &i, exactpayoff &e) : in(i), exact(e) {}
+    void operator()(aggpayoff::iterator p)
+    {
+      std::string word;
+      in >> word;
+      const Number num(word);
+      p->second = (double)num;
+      exact.insert(std::make_pair(p->first, num));
+    }
     std::istream &in;
+    exactpayoff &exact;
   };
 
   // private static methods:
 
-  static void makeCOMPLETEpayoff(std::istream &in, aggpayoff &pay) { pay.in_order(input(in)); }
-  static void makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int);
+  static void makeCOMPLETEpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay)
+  {
+    pay.in_order(input(in, exactPay));
+  }
+  static void makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay, int);
 
   static void setProjections(std::vector<std::vector<aggdistrib>> &projS,
                              std::vector<std::vector<std::vector<config>>> &proj, int N, int S,
@@ -277,6 +329,22 @@ private:
   }
   void doProjection(int Node, AggNumber *s);
   void doProjection(int Node, int player, AggNumber *s);
+
+  // exact (Rational) counterparts, mirroring the above precisely.  exactPayoffs is a
+  // std::map<..., Number>, not a trie_map<Rational>, so trie_map's own inner_prod can't be
+  // used directly against it -- this does the equivalent sum manually.
+  Rational exactInnerProd(int node, const exactdistrib &dist) const;
+  void computeExactP(int player, int act, int player2 = -1, int act2 = -1);
+  void doExactProjection(int Node, const ExactStrategyProfile &s)
+  {
+    doExactProjection(Node, &(const_cast<ExactStrategyProfile &>(s)[0]));
+  }
+  void doExactProjection(int Node, int player, const ExactStrategyProfile &s)
+  {
+    doExactProjection(Node, player, &(const_cast<ExactStrategyProfile &>(s)[firstAction(player)]));
+  }
+  void doExactProjection(int Node, Rational *s);
+  void doExactProjection(int Node, int player, Rational *s);
 
   void getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act, aggdistrib &dest,
                         int plClass2 = -1, int act2 = -1);

@@ -29,4 +29,7 @@ namespace Gambit::agg {
 template class trie_map<AggNumber>;
 template std::ostream &operator<<(std::ostream &s, const trie_map<AggNumber> &t);
 
+template class trie_map<Rational>;
+template std::ostream &operator<<(std::ostream &s, const trie_map<Rational> &t);
+
 } // namespace Gambit::agg

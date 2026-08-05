@@ -37,12 +37,15 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
          vector<projtype> &projTypes, vector<vector<aggdistrib>> &projS,
          vector<vector<vector<config>>> &proj, vector<vector<projtype>> &projF,
-         vector<vector<vector<int>>> &Po, vector<aggdistrib> &P, vector<aggpayoff> &_payoffs)
+         vector<vector<vector<int>>> &Po, vector<aggdistrib> &P, vector<aggpayoff> &_payoffs,
+         vector<exactpayoff> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
-    projection(proj), projectedStrat(projS), fullProjectedStrat(projS), projFunctions(projF),
-    Porder(Po), Pr(P), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
-    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
+    exactPayoffs(_exactPayoffs), projection(proj), projectedStrat(projS),
+    exactProjectedStrat(numANodes, vector<exactdistrib>(numPlayers)), exactPr(numPlayers),
+    fullProjectedStrat(projS), projFunctions(projF), Porder(Po), Pr(P), isPure(numANodes, true),
+    node2Action(numANodes, vector<int>(numPlayers)), cache(numPlayers + 1),
+    player2Class(numPlayers), kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -236,7 +239,8 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
 
   vector<vector<vector<int>>> Po(n);
   vector<aggdistrib> Pr(n);
-  vector<aggpayoff> pays(S); // payoffs
+  vector<aggpayoff> pays(S);        // payoffs
+  vector<exactpayoff> exactPays(S); // exact (arbitrary-precision) counterpart of pays
 
   set<vector<int>> doneASets;
   for (i = 0; i < n; i++) {
@@ -279,10 +283,10 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
     switch (t) {
     case COMPLETE:
-      AGG::makeCOMPLETEpayoff(in, pays[i]);
+      AGG::makeCOMPLETEpayoff(in, pays[i], exactPays[i]);
       break;
     case MAPPING:
-      AGG::makeMAPPINGpayoff(in, pays[i], neighb[i].size());
+      AGG::makeMAPPINGpayoff(in, pays[i], exactPays[i], neighb[i].size());
       break;
     case ADDITIVE:
     default:
@@ -290,7 +294,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
   }
   return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, projS, proj, projF, Po, Pr,
-                               pays);
+                               pays, exactPays);
 }
 
 void AGG::setProjections(vector<vector<aggdistrib>> &projS, vector<vector<vector<config>>> &proj,
@@ -434,6 +438,53 @@ void AGG::doProjection(int Node, int i, AggNumber *s)
   }
 }
 
+// Exact (Rational) counterparts of computeP/doProjection above.  The action graph structure
+// (projection, Porder, projFunctions, actionSets, neighbors) is purely combinatorial -- built
+// once from integer data, independent of payoff/probability values -- so it's shared as-is;
+// only the numeric working state (Pr/projectedStrat) needs a separate Rational-valued copy.
+void AGG::computeExactP(int player, int act, int player2, int act2)
+{
+  exactPr[0].reset();
+  exactPr[0].insert(make_pair(projection[actionSets[player][act]][player][act], Rational(1)));
+
+  const int numNei = neighbors[actionSets[player][act]].size();
+  for (int k = 1; k < numPlayers; k++) {
+    exactPr[k].reset();
+    if (Porder[player][act][k] == player2) {
+      if (act2 == -1) {
+        exactPr[k] = exactPr[k - 1];
+      }
+      else {
+        exactdistrib temp;
+        temp.insert(make_pair(projection[actionSets[player][act]][player2][act2], Rational(1)));
+        exactPr[k].multiply(exactPr[k - 1], temp, numNei, projFunctions[actionSets[player][act]]);
+      }
+    }
+    else {
+      exactPr[k].multiply(exactPr[k - 1],
+                          exactProjectedStrat[actionSets[player][act]][Porder[player][act][k]],
+                          numNei, projFunctions[actionSets[player][act]]);
+    }
+  }
+}
+
+void AGG::doExactProjection(int Node, Rational *s)
+{
+  for (int i = 0; i < numPlayers; i++) {
+    doExactProjection(Node, i, &(s[firstAction(i)]));
+  }
+}
+
+void AGG::doExactProjection(int Node, int i, Rational *s)
+{
+  exactProjectedStrat[Node][i].reset();
+  for (int j = 0; j < actions[i]; j++) {
+    if (s[j] > Rational(0)) {
+      exactProjectedStrat[Node][i] += make_pair(projection[Node][i][j], s[j]);
+    }
+  }
+}
+
 AggNumber AGG::getPurePayoff(int player, const std::vector<int> &s)
 {
   assert(player >= 0 && player < numPlayers);
@@ -449,6 +500,29 @@ AggNumber AGG::getPurePayoff(int player, const std::vector<int> &s)
   if (p == payoffs[Node].end()) {
     std::stringstream str;
     str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
+    str << "[";
+    copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
+    str << "] in payoffs of action node #" << Node;
+    throw std::runtime_error(str.str());
+  }
+  return p->second;
+}
+
+Number AGG::getExactPurePayoff(int player, const std::vector<int> &s) const
+{
+  assert(player >= 0 && player < numPlayers);
+  const int Node = actionSets[player][s[player]];
+  const int keylen = neighbors[Node].size();
+  config pureprofile(projection[Node][0][s[0]]);
+  for (int i = 1; i < numPlayers; i++) {
+    for (int j = 0; j < keylen; j++) {
+      pureprofile[j] = (*projFunctions[Node][j])(pureprofile[j], projection[Node][i][s[i]][j]);
+    }
+  }
+  auto p = exactPayoffs[Node].find(pureprofile);
+  if (p == exactPayoffs[Node].end()) {
+    std::stringstream str;
+    str << "AGG::getExactPurePayoff ERROR: unable to find the following configuration ";
     str << "[";
     copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
     str << "] in payoffs of action node #" << Node;
@@ -490,6 +564,45 @@ AggNumber AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfil
   doProjection(actionSets[player1][act1], s);
   computeP(player1, act1, player2, act2);
   return Pr[numPlayers - 1].inner_prod(payoffs[actionSets[player1][act1]]);
+}
+
+Rational AGG::exactInnerProd(int node, const exactdistrib &dist) const
+{
+  Rational result(0);
+  for (const auto &entry : dist) {
+    const auto it = exactPayoffs[node].find(entry.first);
+    if (it != exactPayoffs[node].end() && entry.second != Rational(0)) {
+      result += entry.second * (Rational)it->second;
+    }
+  }
+  return result;
+}
+
+Rational AGG::getExactV(int player, int act, const ExactStrategyProfile &s)
+{
+  doExactProjection(actionSets.at(player).at(act), s);
+  computeExactP(player, act);
+  return exactInnerProd(actionSets[player][act], exactPr[numPlayers - 1]);
+}
+
+Rational AGG::getExactJ(int player1, int act1, int player2, int act2,
+                        const ExactStrategyProfile &s)
+{
+  doExactProjection(actionSets[player1][act1], s);
+  computeExactP(player1, act1, player2, act2);
+  return exactInnerProd(actionSets[player1][act1], exactPr[numPlayers - 1]);
+}
+
+Rational AGG::getExactMixedPayoff(int player, const ExactStrategyProfile &s)
+{
+  Rational result(0);
+  assert(player >= 0 && player < numPlayers);
+  for (int act = 0; act < actions[player]; ++act) {
+    if (s[act + firstAction(player)] > Rational(0)) {
+      result += s[act + firstAction(player)] * getExactV(player, act, s);
+    }
+  }
+  return result;
 }
 
 // getSymMixedPayoff: compute expected payoff under a symmetric mixed strat,
@@ -559,7 +672,7 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
   GrayComposition gc(numPlayers - 1, support.size());
 
   AggNumber prob =
-      pow((support.at(0) >= 0) ? s[neighbors[node][support[0]]] : null_prob, numPlayers - 1);
+      std::pow((support.at(0) >= 0) ? s[neighbors[node][support[0]]] : null_prob, numPlayers - 1);
 
   while (true) {
     const vector<int> &comp = gc.get();
@@ -680,7 +793,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
 
   const AggNumber prob0 =
       (support.at(0) >= 0) ? s[node2Action[neighbors[node].at(support[0])][p]] : null_prob;
-  AggNumber prob = pow(prob0, numPl);
+  AggNumber prob = std::pow(prob0, numPl);
 
   while (true) {
     const vector<int> &comp = gc.get();
@@ -801,11 +914,10 @@ AggNumber AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act
   return d.inner_prod(payoffs[uniqueActionSets[pClass1][act1]]);
 }
 
-void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int numNei)
+void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, exactpayoff &exactPay, int numNei)
 {
   int num;
   char c;
-  AggNumber u;
   aggpayoff temp;
   // temp.swap(pay);
   temp = pay;
@@ -850,17 +962,27 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int numNei)
                                " expected. Instead, got " + std::to_string(c));
     }
 
-    in >> u; // get payoff
+    std::string word;
+    in >> word; // get payoff
     if (!in.good()) {
       std::stringstream str;
       str << "Error trying to read the utility value for configuration ";
       copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
       throw std::runtime_error(str.str());
     }
+    const Number num(word);
+    const AggNumber u = (double)num;
 
     // insert
     const pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key, u));
     if (!r.second) {
+      std::stringstream str;
+      str << "ERROR: overwriting utility at [";
+      copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
+      str << "]";
+      throw std::runtime_error(str.str());
+    }
+    if (!exactPay.insert(make_pair(key, num)).second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";
       copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
@@ -899,6 +1021,34 @@ AggNumber AGG::getMinPayoff() const
   for (int i = 1; i < numActionNodes; i++) {
     for (const auto &it : payoffs[i]) {
       result = min(result, it.second);
+    }
+  }
+  return result;
+}
+
+Number AGG::getExactMaxPayoff() const
+{
+  assert(numActionNodes > 0);
+  Number result = exactPayoffs[0].begin()->second;
+  for (int i = 0; i < numActionNodes; i++) {
+    for (const auto &it : exactPayoffs[i]) {
+      if ((Rational)it.second > (Rational)result) {
+        result = it.second;
+      }
+    }
+  }
+  return result;
+}
+
+Number AGG::getExactMinPayoff() const
+{
+  assert(numActionNodes > 0);
+  Number result = exactPayoffs[0].begin()->second;
+  for (int i = 0; i < numActionNodes; i++) {
+    for (const auto &it : exactPayoffs[i]) {
+      if ((Rational)it.second < (Rational)result) {
+        result = it.second;
+      }
     }
   }
   return result;

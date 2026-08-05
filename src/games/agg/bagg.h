@@ -38,14 +38,15 @@ using ProbDist = std::vector<AggNumber>;
 
 class BAGG {
 public:
-  friend class Gambit::BAGGPureStrategyProfileRep;
-  template <class T> friend class Gambit::BAGGMixedStrategyProfileRep;
+  friend class BAGGPureStrategyProfileRep;
+  template <class T> friend class BAGGMixedStrategyProfileRep;
 
   friend std::ostream &operator<<(std::ostream &s, const BAGG &g);
 
   static std::shared_ptr<BAGG> makeBAGG(std::istream &in);
 
   BAGG(int N, int S, std::vector<int> &numTypes, std::vector<ProbDist> &TDist,
+       std::vector<std::vector<Number>> &exactTDist,
        std::vector<std::vector<std::vector<int>>> &typeActionSets,
        std::vector<std::vector<std::vector<int>>> &ta2a, std::shared_ptr<AGG> aggPtr);
 
@@ -64,6 +65,8 @@ public:
 
   AggNumber getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
   AggNumber getMinPayoff() const { return aggPtr->getMinPayoff(); }
+  Number getExactMaxPayoff() const { return aggPtr->getExactMaxPayoff(); }
+  Number getExactMinPayoff() const { return aggPtr->getExactMinPayoff(); }
 
   // exp. payoff under mixed strat profile
   AggNumber getMixedPayoff(int player, StrategyProfile &s);
@@ -72,6 +75,10 @@ public:
 
   void getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s);
   AggNumber getV(int player, int tp, int action, const StrategyProfile &s);
+
+  // exact counterparts, computing via Rational arithmetic throughout (see agg.h)
+  Rational getExactMixedPayoff(int player, int tp, const ExactStrategyProfile &s) const;
+  Rational getExactV(int player, int tp, int action, const ExactStrategyProfile &s) const;
 
   AggNumber getPurePayoff(int player, int tp, std::vector<int> &s);
   AggNumber getPurePayoff(int player, std::vector<int> &s)
@@ -82,6 +89,7 @@ public:
     }
     return r;
   }
+  Rational getExactPurePayoff(int player, int tp, const std::vector<int> &ps) const;
 
   AggNumber getSymMixedPayoff(StrategyProfile &s);
 
@@ -96,6 +104,7 @@ private:
   int numActionNodes;
   std::vector<int> numTypes;
   std::vector<ProbDist> indepTypeDist;
+  std::vector<std::vector<Number>> exactIndepTypeDist;
 
   // for each player, each of her types, the set of actions
   std::vector<std::vector<std::vector<int>>> typeActionSets;
@@ -113,6 +122,8 @@ private:
   void getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player = -1, int tp = -1,
                    int action = -1);
   void getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s);
+  void getExactAGGStrat(ExactStrategyProfile &as, const ExactStrategyProfile &s, int player,
+                        int tp, int action) const;
 };
 
 std::ostream &operator<<(std::ostream &s, const BAGG &g);
