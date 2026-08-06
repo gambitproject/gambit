@@ -53,7 +53,7 @@ public:
   bool ColIndex(int x) const { return MinCol() <= x && x <= MaxCol(); }
   bool RowIndex(int x) const { return MinRow() <= x && x <= MaxRow(); }
 
-  bool Member(int i) const { return T1.Member(i) || T2.Member(i); }
+  bool Member(int i) const { return T1.IsMember(i) || T2.IsMember(i); }
   /// Return variable in i'th position of Tableau
   int Label(int i) const;
   /// Return Tableau position of variable i

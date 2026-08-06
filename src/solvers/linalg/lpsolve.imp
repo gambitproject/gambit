@@ -35,19 +35,20 @@ template <class T> Array<int> MakeArtificials(const Vector<T> &b)
   return ret;
 }
 
+template <> double LPSolve<double>::ComputeEpsilon(int i)
+{
+  return std::pow(10.0, -static_cast<double>(i));
+}
+
+template <> Rational LPSolve<Rational>::ComputeEpsilon(int /*i*/) { return Rational(0); }
+
 template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals)
-  : nvars(c.size()), neqns(b.size()), nequals(nequals), total_cost(0), tmin(0),
-    tab(A, MakeArtificials(b), b), UB(nvars + neqns), LB(nvars + neqns), ub(nvars + neqns),
-    lb(nvars + neqns), xx(nvars + neqns), cost(nvars + neqns), y(b.size()), x(b.size()),
-    d(b.size())
+  : nvars(c.size()), neqns(b.size()), nequals(nequals), total_cost(0), eps1(ComputeEpsilon(5)),
+    eps2(ComputeEpsilon(8)), eps3(ComputeEpsilon(6)), tmin(0), tab(A, MakeArtificials(b), b),
+    UB(nvars + neqns), LB(nvars + neqns), ub(nvars + neqns), lb(nvars + neqns), xx(nvars + neqns),
+    cost(nvars + neqns), y(b.size()), x(b.size()), d(b.size())
 {
-  // These are the values recommended by Murtagh (1981) for 15 digit
-  // accuracy in LP problems
-  Gambit::linalg::epsilon(eps1, 5);
-  Gambit::linalg::epsilon(eps2, 8);
-  Gambit::linalg::epsilon(eps3, 6);
-
   // Check dimensions
   if (A.NumRows() != b.size() || A.NumColumns() != c.size()) {
     well_formed = false;
@@ -105,9 +106,9 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
       xx[i] = static_cast<T>(0);
     }
   }
-  tab.BasisVector(x);
+  tab.GetBasisVector(x);
   for (size_t i = 1; i <= x.size(); i++) {
-    xlab = tab.Label(i);
+    xlab = tab.GetLabel(i);
     if (xlab < 0) {
       xlab = nvars - xlab;
     }
@@ -144,7 +145,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 
   total_cost = tab.TotalCost();
   y = tab.GetDualVector();
-  opt_bfs = tab.GetBFS();
+  opt_bfs = tab.GetColumnBFS();
   dual_bfs = tab.DualBFS();
 
   for (int i = 1; i <= neqns; i++) {
@@ -176,11 +177,11 @@ template <class T> void LPSolve<T>::Solve(int phase)
           outlab = in;
         }
         else {
-          outlab = tab.Label(out);
+          outlab = tab.GetLabel(out);
         }
         // update xx
         for (size_t i = 1; i <= x.size(); i++) {
-          xlab = tab.Label(i);
+          xlab = tab.GetLabel(i);
           if (xlab < 0) {
             xlab = nvars - xlab;
           }
@@ -196,7 +197,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
     } while (outlab == in && outlab != 0);
     if (in) {
       tab.Pivot(out, in);
-      tab.BasisVector(x);
+      tab.GetBasisVector(x);
       if (phase == 1 && tab.TotalCost() >= -eps1) {
         return;
       }
@@ -213,7 +214,7 @@ template <class T> int LPSolve<T>::Enter()
     if (i > nvars) {
       lab = nvars - i;
     }
-    if (!tab.Member(lab)) {
+    if (!tab.IsMember(lab)) {
       T rc = tab.RelativeCost(lab);
       if (rc > test + eps1) {
         if (!UB[i] || (UB[i] && xx[i] - ub[i] < -eps1)) {
@@ -242,7 +243,7 @@ template <class T> int LPSolve<T>::Exit(int in)
   out = 0;
   tmin = (T)100000000;
   for (j = 1; j <= neqns; j++) {
-    lab = tab.Label(j);
+    lab = tab.GetLabel(j);
     col = lab;
     if (lab < 0) {
       col = nvars - lab;

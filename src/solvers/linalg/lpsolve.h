@@ -55,6 +55,10 @@ private:
   int Enter();
   int Exit(int);
 
+  // Values recommended by Murtagh (1981) for 15-digit accuracy in LP problems.
+  // For Rational, this resolves to exact zero.
+  static T ComputeEpsilon(int i = 8);
+
 public:
   LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
           int nequals); // nequals = number of equalities (last nequals rows)

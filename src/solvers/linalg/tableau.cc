@@ -28,48 +28,53 @@ namespace Gambit::linalg {
 //                   Tableau<double> method definitions
 // ---------------------------------------------------------------------------
 
-// Constructors and Destructor
+//
+// Constructors and destructor
+//
 
 Tableau<double>::Tableau(const Matrix<double> &A, const Vector<double> &b)
-  : TableauInterface<double>(A, b), B(*this), tmpcol(b.front_index(), b.back_index())
+  : TableauBase<double>(A, b), m_luDecomposition(*this),
+    m_scratchColumn(b.front_index(), b.back_index())
 {
-  Solve(b, solution);
+  Solve(b, m_solution);
 }
 
 Tableau<double>::Tableau(const Matrix<double> &A, const Array<int> &art, const Vector<double> &b)
-  : TableauInterface<double>(A, art, b), B(*this), tmpcol(b.front_index(), b.back_index())
+  : TableauBase<double>(A, art, b), m_luDecomposition(*this),
+    m_scratchColumn(b.front_index(), b.back_index())
 {
-  Solve(b, solution);
+  Solve(b, m_solution);
 }
 
 Tableau<double>::Tableau(const Tableau<double> &orig)
-  : TableauInterface<double>(orig), B(orig.B, *this), tmpcol(orig.tmpcol)
+  : TableauBase<double>(orig), m_luDecomposition(orig.m_luDecomposition, *this),
+    m_scratchColumn(orig.m_scratchColumn)
 {
 }
 
 Tableau<double> &Tableau<double>::operator=(const Tableau<double> &orig)
 {
-  TableauInterface<double>::operator=(orig);
+  TableauBase<double>::operator=(orig);
   if (this != &orig) {
-    B.Copy(orig.B, *this);
-    tmpcol = orig.tmpcol;
+    m_luDecomposition.Copy(orig.m_luDecomposition, *this);
+    m_scratchColumn = orig.m_scratchColumn;
   }
   return *this;
 }
 
 //
-// pivoting operations
+// Pivoting
 //
 
 void Tableau<double>::Pivot(int outrow, int col)
 {
-  if (!RowIndex(outrow) || !ValidIndex(col)) {
+  if (!IsRowIndex(outrow) || !IsValidIndex(col)) {
     throw BadPivot();
   }
-  basis.Pivot(outrow, col);
+  m_basis.Pivot(outrow, col);
 
-  B.update(outrow, col);
-  Solve(b, solution);
+  m_luDecomposition.update(outrow, col);
+  Solve(m_b, m_solution);
 }
 
 void Tableau<double>::SolveColumn(int col, Vector<double> &out)
@@ -79,40 +84,46 @@ void Tableau<double>::SolveColumn(int col, Vector<double> &out)
   Solve(tmpcol2, out);
 }
 
-void Tableau<double>::BasisVector(Vector<double> &out) const { out = solution; }
+void Tableau<double>::GetBasisVector(Vector<double> &out) const { out = m_solution; }
 
 //
-// raw Tableau functions
+// Raw Tableau functions
 //
 
 void Tableau<double>::Refactor()
 {
-  B.refactor();
+  m_luDecomposition.refactor();
   //** is re-solve necessary here?
-  Solve(b, solution);
+  Solve(m_b, m_solution);
 }
 
 void Tableau<double>::SetConst(const Vector<double> &bnew)
 {
-  if (bnew.front_index() != b.front_index() || bnew.back_index() != b.back_index()) {
+  if (bnew.front_index() != m_b.front_index() || bnew.back_index() != m_b.back_index()) {
     throw DimensionException();
   }
-  b = bnew;
-  Solve(b, solution);
+  m_b = bnew;
+  Solve(m_b, m_solution);
 }
 
-void Tableau<double>::Solve(const Vector<double> &b, Vector<double> &x) { B.solve(b, x); }
+void Tableau<double>::Solve(const Vector<double> &b, Vector<double> &x)
+{
+  m_luDecomposition.solve(b, x);
+}
 
-void Tableau<double>::SolveT(const Vector<double> &c, Vector<double> &y) { B.solveT(c, y); }
+void Tableau<double>::SolveT(const Vector<double> &c, Vector<double> &y)
+{
+  m_luDecomposition.solveT(c, y);
+}
 
 bool Tableau<double>::IsLexMin()
 {
   for (int i = MinRow(); i <= MaxRow(); i++) {
-    if (EqZero(solution[i])) {
-      for (int j = -MaxRow(); j < Label(i); j++) {
+    if (IsEqZero(m_solution[i])) {
+      for (int j = -MaxRow(); j < GetLabel(i); j++) {
         if (j != 0) {
-          SolveColumn(j, tmpcol);
-          if (LtZero(tmpcol[i])) {
+          SolveColumn(j, m_scratchColumn);
+          if (IsLtZero(m_scratchColumn[i])) {
             return false;
           }
         }
@@ -122,8 +133,41 @@ bool Tableau<double>::IsLexMin()
   return true;
 }
 
+BFS<double> Tableau<double>::GetFullBFS() const
+{
+  Vector<double> sol(m_basis.GetFirst(), m_basis.GetLast());
+  GetBasisVector(sol);
+
+  BFS<double> cbfs;
+  for (int i = -MaxRow(); i <= -MinRow(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  for (int i = MinCol(); i <= MaxCol(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  return cbfs;
+}
+
+BFS<double> Tableau<double>::GetColumnBFS() const
+{
+  Vector<double> sol(m_basis.GetFirst(), m_basis.GetLast());
+  GetBasisVector(sol);
+
+  BFS<double> cbfs;
+  for (int i = MinCol(); i <= MaxCol(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  return cbfs;
+}
+
 // ---------------------------------------------------------------------------
-//                   Tableau<gbtRational> method definitions
+//                   Tableau<Rational> method definitions
 // ---------------------------------------------------------------------------
 
 Integer find_lcd(const Matrix<Rational> &mat)
@@ -146,114 +190,103 @@ Integer find_lcd(const Vector<Rational> &vec)
   return lcd;
 }
 
-// Constructors and Destructor
+//
+// Constructors and destructor
+//
 
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
-  : TableauInterface<Rational>(A, b), Tabdat(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
-    Coeff(b.front_index(), b.back_index()), denom(1), tmpcol(b.front_index(), b.back_index()),
-    nonbasic(A.MinCol(), A.MaxCol())
+  : TableauBase<Rational>(A, b), m_tableauData(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
+    m_scaledRHS(b.front_index(), b.back_index()), m_pivotDenominator(1),
+    m_scratchColumn(b.front_index(), b.back_index()), m_nonbasicLabels(A.MinCol(), A.MaxCol())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
-    nonbasic[j] = j;
+    m_nonbasicLabels[j] = j;
   }
 
-  totdenom = lcm(find_lcd(A), find_lcd(b));
-  if (totdenom <= 0) {
+  m_totalDenominator = lcm(find_lcd(A), find_lcd(b));
+  if (m_totalDenominator <= 0) {
     throw BadDenom();
   }
 
   for (int i = b.front_index(); i <= b.back_index(); i++) {
-    const Rational x = b[i] * (Rational)totdenom;
+    const Rational x = b[i] * static_cast<Rational>(m_totalDenominator);
     if (x.denominator() != 1) {
       throw BadDenom();
     }
-    Coeff[i] = x.numerator();
+    m_scaledRHS[i] = x.numerator();
   }
   for (int i = MinRow(); i <= MaxRow(); i++) {
     for (int j = MinCol(); j <= MaxCol(); j++) {
-      const Rational x = A(i, j) * (Rational)totdenom;
+      const Rational x = A(i, j) * static_cast<Rational>(m_totalDenominator);
       if (x.denominator() != 1) {
         throw BadDenom();
       }
-      Tabdat(i, j) = x.numerator();
+      m_tableauData(i, j) = x.numerator();
     }
   }
   for (int i = b.front_index(); i <= b.back_index(); i++) {
-    solution[i] = (Rational)Coeff[i];
+    m_solution[i] = static_cast<Rational>(m_scaledRHS[i]);
   }
 }
 
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
                            const Vector<Rational> &b)
-  : TableauInterface<Rational>(A, art, b),
-    Tabdat(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
-    Coeff(b.front_index(), b.back_index()), denom(1), tmpcol(b.front_index(), b.back_index()),
-    nonbasic(A.MinCol(), A.MaxCol() + art.size())
+  : TableauBase<Rational>(A, art, b),
+    m_tableauData(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
+    m_scaledRHS(b.front_index(), b.back_index()), m_pivotDenominator(1),
+    m_scratchColumn(b.front_index(), b.back_index()),
+    m_nonbasicLabels(A.MinCol(), A.MaxCol() + art.size())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
-    nonbasic[j] = j;
+    m_nonbasicLabels[j] = j;
   }
 
-  totdenom = lcm(find_lcd(A), find_lcd(b));
-  if (totdenom <= 0) {
+  m_totalDenominator = lcm(find_lcd(A), find_lcd(b));
+  if (m_totalDenominator <= 0) {
     throw BadDenom();
   }
 
   for (int i = b.front_index(); i <= b.back_index(); i++) {
-    const Rational x = b[i] * (Rational)totdenom;
+    const Rational x = b[i] * static_cast<Rational>(m_totalDenominator);
     if (x.denominator() != 1) {
       throw BadDenom();
     }
-    Coeff[i] = x.numerator();
+    m_scaledRHS[i] = x.numerator();
   }
   for (int i = MinRow(); i <= MaxRow(); i++) {
     for (int j = MinCol(); j <= A.MaxCol(); j++) {
-      const Rational x = A(i, j) * (Rational)totdenom;
+      const Rational x = A(i, j) * static_cast<Rational>(m_totalDenominator);
       if (x.denominator() != 1) {
         throw BadDenom();
       }
-      Tabdat(i, j) = x.numerator();
+      m_tableauData(i, j) = x.numerator();
     }
     for (int j = A.MaxCol() + 1; j <= MaxCol(); j++) {
-      Tabdat(artificial[j], j) = totdenom;
+      m_tableauData(m_artificialColumns[j], j) = m_totalDenominator;
     }
   }
   for (int i = b.front_index(); i <= b.back_index(); i++) {
-    solution[i] = (Rational)Coeff[i];
+    m_solution[i] = static_cast<Rational>(m_scaledRHS[i]);
   }
-}
-
-Tableau<Rational> &Tableau<Rational>::operator=(const Tableau<Rational> &orig)
-{
-  TableauInterface<Rational>::operator=(orig);
-  if (this != &orig) {
-    Tabdat = orig.Tabdat;
-    Coeff = orig.Coeff;
-    totdenom = orig.totdenom;
-    denom = orig.denom;
-    tmpcol = orig.tmpcol;
-    nonbasic = orig.nonbasic;
-  }
-  return *this;
 }
 
 // Aligns the column indexes
 
-int Tableau<Rational>::remap(int col_index) const
+int Tableau<Rational>::GetNonbasicPosition(int col_index) const
 {
-  int i = nonbasic.front_index();
-  while (i <= nonbasic.back_index() && nonbasic[i] != col_index) {
+  int i = m_nonbasicLabels.front_index();
+  while (i <= m_nonbasicLabels.back_index() && m_nonbasicLabels[i] != col_index) {
     i++;
   }
-  if (i > nonbasic.back_index()) {
+  if (i > m_nonbasicLabels.back_index()) {
     throw DimensionException();
   }
   return i;
 }
 
-Matrix<Rational> Tableau<Rational>::GetInverse()
+Matrix<Rational> Tableau<Rational>::ComputeInverse()
 {
-  Vector<Rational> mytmpcol(tmpcol.front_index(), tmpcol.back_index());
+  Vector<Rational> mytmpcol(m_scratchColumn.front_index(), m_scratchColumn.back_index());
   Matrix<Rational> inv(MinRow(), MaxRow(), MinRow(), MaxRow());
   for (int i = inv.MinCol(); i <= inv.MaxCol(); i++) {
     MySolveColumn(-i, mytmpcol);
@@ -262,19 +295,22 @@ Matrix<Rational> Tableau<Rational>::GetInverse()
   return inv;
 }
 
-// pivoting operations
+//
+// Pivoting
+//
+
 void Tableau<Rational>::Pivot(int outrow, int in_col)
 {
-  if (!RowIndex(outrow) || !ValidIndex(in_col)) {
+  if (!IsRowIndex(outrow) || !IsValidIndex(in_col)) {
     throw BadPivot();
   }
-  const int outlabel = Label(outrow);
+  const int outlabel = GetLabel(outrow);
 
   int col;
   const int row(outrow);
   int i, j; // loop-control variables
 
-  col = remap(in_col);
+  col = GetNonbasicPosition(in_col);
 
   // Pivot Algorithm:
   // i* denotes Pivot Row
@@ -291,113 +327,126 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
 
   // Step 3
 
-  for (i = Tabdat.MinRow(); i <= Tabdat.MaxRow(); ++i) {
+  for (i = m_tableauData.MinRow(); i <= m_tableauData.MaxRow(); ++i) {
     if (i != row) {
-      for (j = Tabdat.MinCol(); j <= Tabdat.MaxCol(); ++j) {
+      for (j = m_tableauData.MinCol(); j <= m_tableauData.MaxCol(); ++j) {
         if (j != col) {
-          Tabdat(i, j) =
-              (Tabdat(row, col) * Tabdat(i, j) - Tabdat(row, j) * Tabdat(i, col)) / denom;
+          m_tableauData(i, j) = (m_tableauData(row, col) * m_tableauData(i, j) -
+                                 m_tableauData(row, j) * m_tableauData(i, col)) /
+                                m_pivotDenominator;
         }
       }
-      Coeff[i] = (Tabdat(row, col) * Coeff[i] - Coeff[row] * Tabdat(i, col)) / denom;
+      m_scaledRHS[i] =
+          (m_tableauData(row, col) * m_scaledRHS[i] - m_scaledRHS[row] * m_tableauData(i, col)) /
+          m_pivotDenominator;
     }
   }
   // Step 2
   // Note: here we are moving the old basis column into column 'col'
-  for (i = Tabdat.MinRow(); i <= Tabdat.MaxRow(); ++i) {
+  for (i = m_tableauData.MinRow(); i <= m_tableauData.MaxRow(); ++i) {
     if (i != row) {
-      Tabdat(i, col) = -Tabdat(i, col);
+      m_tableauData(i, col) = -m_tableauData(i, col);
     }
   }
   // Step 4
-  const Integer old_denom = denom;
-  denom = Tabdat(row, col);
-  Tabdat(row, col) = old_denom;
+  const Integer old_denom = m_pivotDenominator;
+  m_pivotDenominator = m_tableauData(row, col);
+  m_tableauData(row, col) = old_denom;
 
-  basis.Pivot(outrow, in_col);
-  nonbasic[col] = outlabel;
+  m_basis.Pivot(outrow, in_col);
+  m_nonbasicLabels[col] = outlabel;
 
-  for (i = solution.front_index(); i <= solution.back_index(); i++) {
-    solution[i] = Rational(Coeff[i] * sign(denom * totdenom));
+  for (i = m_solution.front_index(); i <= m_solution.back_index(); i++) {
+    m_solution[i] =
+        static_cast<Rational>(m_scaledRHS[i] * sign(m_pivotDenominator * m_totalDenominator));
   }
 }
 
 void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
 {
-  Vector<Integer> tempcol(tmpcol.front_index(), tmpcol.back_index());
-  if (Member(in_col)) {
-    out = (Rational)0;
-    out[Find(in_col)] = Rational(abs(denom));
+  Vector<Integer> tempcol(m_scratchColumn.front_index(), m_scratchColumn.back_index());
+  if (IsMember(in_col)) {
+    out = Rational{0};
+    out[GetPosition(in_col)] = static_cast<Rational>(abs(m_pivotDenominator));
   }
   else {
-    const int col = remap(in_col);
-    Tabdat.GetColumn(col, tempcol);
+    const int col = GetNonbasicPosition(in_col);
+    m_tableauData.GetColumn(col, tempcol);
     for (int i = tempcol.front_index(); i <= tempcol.back_index(); i++) {
-      out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
+      out[i] = static_cast<Rational>(tempcol[i]) *
+               static_cast<Rational>(sign(m_pivotDenominator * m_totalDenominator));
     }
   }
-  out = out / (Rational)abs(denom);
+  out = out / static_cast<Rational>(abs(m_pivotDenominator));
   if (in_col < 0) {
-    out *= Rational(totdenom);
+    out *= static_cast<Rational>(m_totalDenominator);
   }
   for (int i = out.front_index(); i <= out.back_index(); i++) {
-    if (Label(i) < 0) {
-      out[i] = (Rational)out[i] / (Rational)totdenom;
+    if (GetLabel(i) < 0) {
+      out[i] = out[i] / static_cast<Rational>(m_totalDenominator);
     }
   }
 }
 
 void Tableau<Rational>::MySolveColumn(int in_col, Vector<Rational> &out)
 {
-  Vector<Integer> tempcol(tmpcol.front_index(), tmpcol.back_index());
-  if (Member(in_col)) {
-    out = (Rational)0;
-    out[Find(in_col)] = Rational(abs(denom));
+  Vector<Integer> tempcol(m_scratchColumn.front_index(), m_scratchColumn.back_index());
+  if (IsMember(in_col)) {
+    out = Rational{0};
+    out[GetPosition(in_col)] = static_cast<Rational>(abs(m_pivotDenominator));
   }
   else {
-    const int col = remap(in_col);
-    Tabdat.GetColumn(col, tempcol);
+    const int col = GetNonbasicPosition(in_col);
+    m_tableauData.GetColumn(col, tempcol);
     for (int i = tempcol.front_index(); i <= tempcol.back_index(); i++) {
-      out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
+      out[i] = static_cast<Rational>(tempcol[i]) *
+               static_cast<Rational>(sign(m_pivotDenominator * m_totalDenominator));
     }
   }
 }
 
 void Tableau<Rational>::GetColumn(int col, Vector<Rational> &out) const
 {
-  TableauInterface<Rational>::GetColumn(col, out);
+  TableauBase<Rational>::GetColumn(col, out);
   if (col >= 0) {
-    out *= Rational(totdenom);
+    out *= static_cast<Rational>(m_totalDenominator);
   }
 }
 
+//
+// Raw Tableau functions
+//
+
 void Tableau<Rational>::Refactor()
 {
-  Vector<Rational> mytmpcol(tmpcol);
-  totdenom = lcm(find_lcd(A), find_lcd(b));
-  if (totdenom <= 0) {
+  Vector<Rational> mytmpcol(m_scratchColumn);
+  m_totalDenominator = lcm(find_lcd(m_A), find_lcd(m_b));
+  if (m_totalDenominator <= 0) {
     throw BadDenom();
   }
   int i, j;
-  const Matrix<Rational> inv(GetInverse());
-  Matrix<Rational> Tabnew(Tabdat.MinRow(), Tabdat.MaxRow(), Tabdat.MinCol(), Tabdat.MaxCol());
-  for (i = nonbasic.front_index(); i <= nonbasic.back_index(); i++) {
-    GetColumn(nonbasic[i], mytmpcol);
-    Tabnew.SetColumn(i, inv * mytmpcol * (Rational)sign(denom * totdenom));
+  const Matrix<Rational> inv(ComputeInverse());
+  Matrix<Rational> Tabnew(m_tableauData.MinRow(), m_tableauData.MaxRow(), m_tableauData.MinCol(),
+                          m_tableauData.MaxCol());
+  for (i = m_nonbasicLabels.front_index(); i <= m_nonbasicLabels.back_index(); i++) {
+    GetColumn(m_nonbasicLabels[i], mytmpcol);
+    Tabnew.SetColumn(i, inv * mytmpcol *
+                            static_cast<Rational>(sign(m_pivotDenominator * m_totalDenominator)));
   }
 
-  Vector<Rational> Coeffnew(Coeff.front_index(), Coeff.back_index());
-  Coeffnew = inv * b * Rational(totdenom) * Rational(sign(denom * totdenom));
-  for (i = Tabdat.MinRow(); i <= Tabdat.MaxRow(); i++) {
+  Vector<Rational> Coeffnew(m_scaledRHS.front_index(), m_scaledRHS.back_index());
+  Coeffnew = inv * m_b * static_cast<Rational>(m_totalDenominator) *
+             static_cast<Rational>(sign(m_pivotDenominator * m_totalDenominator));
+  for (i = m_tableauData.MinRow(); i <= m_tableauData.MaxRow(); i++) {
     if (Coeffnew[i].denominator() != 1) {
       throw BadDenom();
     }
-    Coeff[i] = Coeffnew[i].numerator();
-    for (j = Tabdat.MinCol(); j <= Tabdat.MaxCol(); j++) {
+    m_scaledRHS[i] = Coeffnew[i].numerator();
+    for (j = m_tableauData.MinCol(); j <= m_tableauData.MaxCol(); j++) {
       if (Tabnew(i, j).denominator() != 1) {
         throw BadDenom();
       }
-      Tabdat(i, j) = Tabnew(i, j).numerator();
+      m_tableauData(i, j) = Tabnew(i, j).numerator();
     }
   }
   // BigDump(gout);
@@ -405,7 +454,7 @@ void Tableau<Rational>::Refactor()
 
 void Tableau<Rational>::SetConst(const Vector<Rational> &bnew)
 {
-  b = bnew;
+  m_b = bnew;
   Refactor();
 }
 
@@ -413,24 +462,24 @@ void Tableau<Rational>::SetConst(const Vector<Rational> &bnew)
 void Tableau<Rational>::Solve(const Vector<Rational> &b, Vector<Rational> &x)
 {
   // Here, we do x = V * b, where V = M inverse
-  x = (GetInverse() * b) / (Rational)abs(denom);
+  x = (ComputeInverse() * b) / static_cast<Rational>(abs(m_pivotDenominator));
 }
 
 // solve y M = c
 void Tableau<Rational>::SolveT(const Vector<Rational> &c, Vector<Rational> &y)
 {
   // Here we do y = c * V, where V = M inverse
-  y = (c * GetInverse()) / (Rational)abs(denom);
+  y = (c * ComputeInverse()) / static_cast<Rational>(abs(m_pivotDenominator));
 }
 
 bool Tableau<Rational>::IsLexMin()
 {
   for (int i = MinRow(); i <= MaxRow(); i++) {
-    if (EqZero(solution[i])) {
-      for (int j = -MaxRow(); j < Label(i); j++) {
+    if (IsEqZero(m_solution[i])) {
+      for (int j = -MaxRow(); j < GetLabel(i); j++) {
         if (j != 0) {
-          SolveColumn(j, tmpcol);
-          if (LtZero(tmpcol[i])) {
+          SolveColumn(j, m_scratchColumn);
+          if (IsLtZero(m_scratchColumn[i])) {
             return false;
           }
         }
@@ -440,15 +489,48 @@ bool Tableau<Rational>::IsLexMin()
   return true;
 }
 
-void Tableau<Rational>::BasisVector(Vector<Rational> &out) const
+void Tableau<Rational>::GetBasisVector(Vector<Rational> &out) const
 {
-  out = solution;
-  out = out / (Rational)abs(denom);
+  out = m_solution;
+  out = out / static_cast<Rational>(abs(m_pivotDenominator));
   for (int i = out.front_index(); i <= out.back_index(); i++) {
-    if (Label(i) < 0) {
-      out[i] = out[i] / (Rational)totdenom;
+    if (GetLabel(i) < 0) {
+      out[i] = out[i] / static_cast<Rational>(m_totalDenominator);
     }
   }
+}
+
+BFS<Rational> Tableau<Rational>::GetFullBFS() const
+{
+  Vector<Rational> sol(m_basis.GetFirst(), m_basis.GetLast());
+  GetBasisVector(sol);
+
+  BFS<Rational> cbfs;
+  for (int i = -MaxRow(); i <= -MinRow(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  for (int i = MinCol(); i <= MaxCol(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  return cbfs;
+}
+
+BFS<Rational> Tableau<Rational>::GetColumnBFS() const
+{
+  Vector<Rational> sol(m_basis.GetFirst(), m_basis.GetLast());
+  GetBasisVector(sol);
+
+  BFS<Rational> cbfs;
+  for (int i = MinCol(); i <= MaxCol(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, sol[m_basis.GetPosition(i)]);
+    }
+  }
+  return cbfs;
 }
 
 } // end namespace Gambit::linalg

@@ -31,22 +31,22 @@ namespace Gambit::linalg {
 
 template <class T> int LHTableau<T>::Label(int i) const
 {
-  if (T1.RowIndex(i)) {
-    return T1.Label(i);
+  if (T1.IsRowIndex(i)) {
+    return T1.GetLabel(i);
   }
-  if (T2.RowIndex(i)) {
-    return T2.Label(i);
+  if (T2.IsRowIndex(i)) {
+    return T2.GetLabel(i);
   }
   return 0;
 }
 
 template <class T> int LHTableau<T>::Find(int i) const
 {
-  if (T1.ValidIndex(i)) {
-    return T1.Find(i);
+  if (T1.IsValidIndex(i)) {
+    return T1.GetPosition(i);
   }
-  if (T2.ValidIndex(i)) {
-    return T2.Find(i);
+  if (T2.IsValidIndex(i)) {
+    return T2.GetPosition(i);
   }
   return 0;
 }
@@ -60,10 +60,10 @@ template <class T> void LHTableau<T>::Pivot(int outrow, int inlabel)
   if (!this->RowIndex(outrow)) {
     throw typename LemkeTableau<T>::BadPivot();
   }
-  if (T1.RowIndex(outrow)) {
+  if (T1.IsRowIndex(outrow)) {
     T1.Pivot(outrow, inlabel);
   }
-  if (T2.RowIndex(outrow)) {
+  if (T2.IsRowIndex(outrow)) {
     T2.Pivot(outrow, inlabel);
   }
 }
@@ -74,8 +74,8 @@ template <class T> void LHTableau<T>::Pivot(int outrow, int inlabel)
 
 template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 {
-  T1.BasisVector(tmp1);
-  T2.BasisVector(tmp2);
+  T1.GetBasisVector(tmp1);
+  T2.GetBasisVector(tmp2);
   for (int i = tmp1.front_index(); i <= tmp1.back_index(); i++) {
     solution[i] = tmp1[i];
   }
@@ -108,10 +108,10 @@ template <class T> int LHTableau<T>::PivotIn(int inlabel)
 // to not cycle, even if the problem is degenerate.
 template <class T> int LHTableau<T>::ExitIndex(int inlabel)
 {
-  if (T1.ValidIndex(inlabel)) {
+  if (T1.IsValidIndex(inlabel)) {
     return T1.ExitIndex(inlabel);
   }
-  if (T2.ValidIndex(inlabel)) {
+  if (T2.IsValidIndex(inlabel)) {
     return T2.ExitIndex(inlabel);
   }
   return 0;

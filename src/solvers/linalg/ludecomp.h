@@ -24,11 +24,11 @@
 #define LUDECOMP_H
 
 #include "gambit.h"
-#include "btableau.h"
 
 namespace Gambit::linalg {
 
 template <class T> class Tableau;
+class Basis;
 
 template <class T> class LUDecomposition {
 private:

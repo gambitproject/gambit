@@ -27,7 +27,7 @@
 
 namespace Gambit::linalg {
 
-template <class T> class LPTableau : public Tableau<T> {
+template <class T> class LPTableau final : public Tableau<T> {
 private:
   Vector<T> dual;
   Vector<T> unitcost;
@@ -39,7 +39,7 @@ public:
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
   LPTableau(const LPTableau<T> &) = default;
-  ~LPTableau() override = default;
+  ~LPTableau() = default;
 
   LPTableau<T> &operator=(const LPTableau<T> &) = default;
 
@@ -49,8 +49,9 @@ public:
   T RelativeCost(int) const;       // negative index convention
   const Vector<T> &GetDualVector() const { return dual; }
 
-  void Refactor() override;
-  void Pivot(int outrow, int col) override;
+  void Refactor();
+  void SetConst(const Vector<T> &bnew);
+  void Pivot(int outrow, int col);
   std::list<Array<int>> ReversePivots();
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS() const;

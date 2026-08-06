@@ -40,7 +40,7 @@ LUDecomposition<T>::LUDecomposition(Tableau<T> &t, int rfac /* = 0 */)
   : tab(t), basis(t.GetBasis()), refactor_number(rfac), iterations(0), parent(nullptr),
     copycount(0)
 {
-  auto m = basis.Last() - basis.First() + 1;
+  auto m = basis.GetLast() - basis.GetFirst() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
 }
 
@@ -83,7 +83,7 @@ template <class T> void LUDecomposition<T>::update(int col, int matcol)
   if (copycount != 0) {
     throw BadCount();
   }
-  const int m = basis.Last() - basis.First() + 1;
+  const int m = basis.GetLast() - basis.GetFirst() + 1;
 
   iterations++;
   if ((refactor_number > 0 && iterations >= refactor_number) ||
@@ -91,7 +91,7 @@ template <class T> void LUDecomposition<T>::update(int col, int matcol)
     refactor();
   }
   else {
-    Vector<T> scratch(basis.First(), basis.Last());
+    Vector<T> scratch(basis.GetFirst(), basis.GetLast());
     tab.GetColumn(matcol, scratch);
     solve(scratch, scratch);
     if (scratch[col] == static_cast<T>(0)) {
@@ -114,7 +114,7 @@ template <class T> void LUDecomposition<T>::refactor()
   }
 
   iterations = 0;
-  const int m = basis.Last() - basis.First() + 1;
+  const int m = basis.GetLast() - basis.GetFirst() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
   if (parent != nullptr) {
     parent->copycount--;
@@ -127,7 +127,7 @@ template <class T> void LUDecomposition<T>::solveT(const Vector<T> &c, Vector<T>
   if (c.front_index() != y.front_index() || c.back_index() != y.back_index()) {
     throw DimensionException();
   }
-  if (c.front_index() != basis.First() || c.back_index() != basis.Last()) {
+  if (c.front_index() != basis.GetFirst() || c.back_index() != basis.GetLast()) {
     throw DimensionException();
   }
 
@@ -149,7 +149,7 @@ template <class T> void LUDecomposition<T>::solve(const Vector<T> &a, Vector<T> 
   if (a.front_index() != d.front_index() || a.back_index() != d.back_index()) {
     throw DimensionException();
   }
-  if (a.front_index() != basis.First() || a.back_index() != basis.Last()) {
+  if (a.front_index() != basis.GetFirst() || a.back_index() != basis.GetLast()) {
     throw DimensionException();
   }
 
@@ -172,12 +172,11 @@ template <class T> void LUDecomposition<T>::solve(const Vector<T> &a, Vector<T> 
 
 template <class T> void LUDecomposition<T>::FactorBasis()
 {
-  Matrix<T> B(basis.First(), basis.Last(), basis.First(), basis.Last());
+  Matrix<T> B(basis.GetFirst(), basis.GetLast(), basis.GetFirst(), basis.GetLast());
 
-  Vector<T> scratch(basis.First(), basis.Last());
-  for (int i = basis.First(); i <= basis.Last(); i++) {
-    tab.GetColumn(basis.Label(i), scratch);
-    basis.CheckBasis();
+  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
+  for (int i = basis.GetFirst(); i <= basis.GetLast(); i++) {
+    tab.GetColumn(basis.GetLabel(i), scratch);
     B.SetColumn(i, scratch);
   }
 
@@ -290,7 +289,7 @@ void LUDecomposition<T>::EtaVectorSolve(const EtaMatrix &eta, Vector<T> &d) cons
 
 template <class T> void LUDecomposition<T>::yLP_Trans(Vector<T> &y) const
 {
-  Vector<T> scratch(basis.First(), basis.Last());
+  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
   for (int j = L.size() - 1; j >= 0; j--) {
     yLP_mult(y, j, scratch);
     y = scratch;
@@ -319,7 +318,7 @@ void LUDecomposition<T>::yLP_mult(const Vector<T> &y, int j, Vector<T> &ans) con
 
 template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 {
-  Vector<T> scratch(basis.First(), basis.Last());
+  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
   for (size_t j = 0; j < L.size(); j++) {
     LPd_mult(d, j, scratch);
     d = scratch;
@@ -343,7 +342,7 @@ template <class T> void LUDecomposition<T>::LPd_mult(Vector<T> &d, int j, Vector
 
 template <class T> bool LUDecomposition<T>::RefactorCheck()
 {
-  const int m = basis.Last() - basis.First() + 1;
+  const int m = basis.GetLast() - basis.GetFirst() + 1;
   const int i = iterations * (iterations * m + 2 * m * m);
   const int k = total_operations + iterations * m + 2 * m * m;
   return i > k;

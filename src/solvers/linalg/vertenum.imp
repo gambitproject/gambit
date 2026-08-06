@@ -52,7 +52,7 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
 {
   Deeper();
   if (tab.IsLexMin()) {
-    m_list.push_back(tab.GetBFS1());
+    m_list.push_back(tab.GetFullBFS());
     m_duallist.push_back(tab.DualBFS());
   }
   auto pivot_list = tab.ReversePivots();
@@ -79,7 +79,7 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
     for (int i = b.front_index(); i <= b.back_index(); i++) {
       if (b[i] == static_cast<T>(0)) {
         for (int j = -b.back_index(); j <= A.MaxCol(); j++) {
-          if (j && !tab.Member(j)) {
+          if (j && !tab.IsMember(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;
               tab2 = tab;

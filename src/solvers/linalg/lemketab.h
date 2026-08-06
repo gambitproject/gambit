@@ -27,7 +27,7 @@
 
 namespace Gambit::linalg {
 
-template <class T> class LemkeTableau : public Tableau<T> {
+template <class T> class LemkeTableau final : public Tableau<T> {
 public:
   class BadPivot final : public std::runtime_error {
   public:
@@ -40,7 +40,7 @@ public:
     ~BadExitIndex() noexcept override = default;
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b) : Tableau<T>(A, b) {}
-  ~LemkeTableau() override = default;
+  ~LemkeTableau() = default;
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
