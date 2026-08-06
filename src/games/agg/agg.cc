@@ -919,7 +919,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
       throw std::runtime_error(str.str());
     }
     const Number num(word);
-    const double u = static_cast<double>(num);
+    const auto u = static_cast<double>(num);
 
     // insert
     const pair<trie_map<double>::iterator, bool> r = pay.insert(make_pair(key, u));

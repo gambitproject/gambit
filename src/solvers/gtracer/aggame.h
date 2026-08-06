@@ -44,8 +44,8 @@ public:
 
   double getMixedPayoff(int player, const cvector &s) const override
   {
-    std::vector<double> sp(s.values(), s.values() + s.getm());
-    return (double)aggPtr->getMixedPayoff(player, sp);
+    const std::vector<double> sp(s.values(), s.values() + s.getm());
+    return aggPtr->getMixedPayoff(player, sp);
   }
 
   double getKSymMixedPayoff(int cls, cvector &s)
