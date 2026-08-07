@@ -72,6 +72,7 @@ Transforming game information structure
    Game.set_infoset
    Game.leave_infoset
    Game.set_chance_probs
+   Game.relabel_actions
    Game.reveal
 
 

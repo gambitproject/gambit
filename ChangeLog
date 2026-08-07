@@ -22,6 +22,8 @@
 ### Added
 - Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
   information set; the primitive operation for editing information structures.  (#999)
+- Added `Game.relabel_actions`, which simultaneously reassigns the labels of actions at an
+  information set via a mapping from current to replacement labels.  (#1026)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -32,6 +34,8 @@
   information set and the new player.  (#999)
 - `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
   information sets and their members is now maintained automatically.  (#999)
+- Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces
+  nonempty, unique labels.  (#1026)
 
 ## [16.7.0] - 2026-07-11
 
