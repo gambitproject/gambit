@@ -1774,7 +1774,7 @@ class Game:
         resolved_node = cython.cast(Node, resolved_nodes[0])
         self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
-            action.label = label
+            cython.cast(Action, action).action.deref().SetLabel(label.encode("utf-8"))
         resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
@@ -1979,6 +1979,76 @@ class Game:
                 "delete_action(): cannot delete the only action at an information set"
             )
         self.game.deref().DeleteAction(resolved_action.action)
+
+    def relabel_actions(self,
+                        infoset: Infoset | str,
+                        labels: typing.Mapping[str, str],
+                        strict: bool = True) -> None:
+        """Simultaneously reassign the labels of actions at `infoset`.
+
+        `labels` maps current action labels to their replacements.  The reassignment
+        is simultaneous, so labels can be swapped directly, e.g. ``{"a": "b", "b": "a"}``.
+        Actions are not re-ordered: each relabelled action keeps its position and,
+        at a chance information set, its probability.  After the operation, the
+        labels at the information set must be nonempty and unique.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set at which to relabel actions.  If a string is passed,
+            the information set is determined by finding the personal-player
+            information set with that label, if any.
+        labels : Mapping[str, str]
+            A mapping from current action labels to replacement labels.  Entries
+            whose key equals their value are ignored.
+        strict : bool, default True
+            If `True`, every key of `labels` must be the label of an action at
+            `infoset`, and unknown keys raise ``KeyError``.  If `False`, unknown
+            keys are ignored.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game.
+        KeyError
+            If `infoset` is a string matching no information set; or, when `strict`
+            is `True`, if a key of `labels` matches no action at `infoset`.
+        TypeError
+            If `labels` is not a mapping, or any key or value is not a string.
+        ValueError
+            If a key of `labels` matches more than one action at `infoset` (possible
+            in games read from files predating unique-label enforcement); or if any
+            replacement label is empty, is not a valid label, or would result in a
+            duplicate label at the information set.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "relabel_actions"))
+        if not hasattr(labels, "items"):
+            raise TypeError(
+                f"relabel_actions(): labels must be a mapping, "
+                f"not {labels.__class__.__name__}"
+            )
+        current = [action.label for action in resolved_infoset.actions]
+        c_labels = stdmap[string, string]()
+        for old, new in labels.items():
+            if not isinstance(old, str) or not isinstance(new, str):
+                raise TypeError("relabel_actions(): labels must map str to str")
+            matches = current.count(old)
+            if matches > 1:
+                raise ValueError(
+                    f"relabel_actions(): label '{old}' is ambiguous at this information set"
+                )
+            if matches == 0:
+                if strict:
+                    raise KeyError(f"relabel_actions(): no action with label '{old}'")
+                continue
+            if new == old:
+                continue
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
+        if c_labels.empty():
+            return
+        self.game.deref().RelabelActions(resolved_infoset.infoset, c_labels)
 
     def make_infoset(self,
                      nodes: Node | NodeReferenceSet,
