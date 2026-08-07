@@ -128,8 +128,9 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 TracePathResult
 PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
                       std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                      Vector<double> &x, double &p_omega, TerminationFunctionType p_terminate,
-                      CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
+                      Vector<double> &x, TraceDirection p_direction, size_t tracking_index,
+                      TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
+                      CriterionFunctionType p_criterion,
                       CriterionBracketFunctionType p_criterionBracket) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
@@ -157,12 +158,26 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   p_callback(x);
+  bool first_step = true;
+  double p_omega = static_cast<int>(p_direction);
 
   while (!p_terminate(x)) {
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
       return {x, false, "Stepsize fell below minimum threshold."};
+    }
+
+    if (first_step) {
+      // Ensure that the tangent is oriented in the same direction as
+      // the path-following direction.
+      if (t[tracking_index] < 0.0) {
+        p_omega *= -1.0;
+      }
+      else if (t[tracking_index] == 0.0) {
+        return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
+      }
+      first_step = false;
     }
 
     // Predictor step

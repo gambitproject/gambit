@@ -80,10 +80,13 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
+  enum class TraceDirection { Positive = 1, Negative = -1 };
+
   TracePathResult
   TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
             std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
+            Vector<double> &p_x, TraceDirection p_direction, size_t tracking_index,
+            TerminationFunctionType p_terminate,
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction) const;
