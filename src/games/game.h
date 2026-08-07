@@ -437,6 +437,10 @@ public:
   bool IsChanceInfoset() const;
 
   void SetLabel(const std::string &p_label);
+  /// Validate that p_label is a nonempty, valid label for an action of this
+  /// information set, unique among its actions disregarding any in p_ignore.
+  void CheckActionLabel(const std::string &p_label,
+                        const std::set<const GameActionRep *> &p_ignore) const;
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -1280,6 +1284,12 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
+  /// Simultaneously reassign action labels at an information set.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
   virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
@@ -1517,6 +1527,19 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::CheckActionLabel(const std::string &p_label,
+                                             const std::set<const GameActionRep *> &p_ignore) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Action label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &action : m_actions) {
+    if (p_ignore.count(action.get()) == 0 && action->GetLabel() == p_label) {
+      throw ValueException("Action label must be unique within the information set");
+    }
+  }
+}
 inline void GameInfosetRep::SetLabel(const std::string &p_label)
 {
   if (p_label == m_label) {

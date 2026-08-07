@@ -244,6 +244,46 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   return action;
 }
 
+void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
+                                 const std::map<std::string, std::string> &p_labels)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
+  }
+  // Resolve each key to exactly one action at the information set.
+  std::map<GameActionRep *, std::string> assignment;
+  std::set<const GameActionRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GameActionRep *match = nullptr;
+    for (const auto &action : p_infoset->m_actions) {
+      if (action->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Action label '" + old_label +
+                               "' is ambiguous at this information set");
+        }
+        match = action.get();
+      }
+    }
+    if (!match) {
+      throw ValueException("No action with label '" + old_label + "' at this information set");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  // Replacement labels must be legal, unique against untouched actions, and pairwise distinct
+  std::set<std::string> targets;
+  for (const auto &[action, new_label] : assignment) {
+    p_infoset->CheckActionLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Action label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[action, new_label] : assignment) {
+    action->m_label = new_label;
+  }
+}
+
 void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 {
   IncrementVersion();
