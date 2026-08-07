@@ -25,67 +25,67 @@
 
 namespace Gambit::linalg {
 
-//---------------------------------------------------------------------------
-//                     LHTableau<T>: General information
-//---------------------------------------------------------------------------
+//
+// General information
+//
 
-template <class T> int LHTableau<T>::Label(int i) const
+template <class T> int LHTableau<T>::GetLabel(int i) const
 {
-  if (T1.IsRowIndex(i)) {
-    return T1.GetLabel(i);
+  if (m_tableau1.IsRowIndex(i)) {
+    return m_tableau1.GetLabel(i);
   }
-  if (T2.IsRowIndex(i)) {
-    return T2.GetLabel(i);
+  if (m_tableau2.IsRowIndex(i)) {
+    return m_tableau2.GetLabel(i);
   }
   return 0;
 }
 
-template <class T> int LHTableau<T>::Find(int i) const
+template <class T> int LHTableau<T>::GetPosition(int i) const
 {
-  if (T1.IsValidIndex(i)) {
-    return T1.GetPosition(i);
+  if (m_tableau1.IsValidIndex(i)) {
+    return m_tableau1.GetPosition(i);
   }
-  if (T2.IsValidIndex(i)) {
-    return T2.GetPosition(i);
+  if (m_tableau2.IsValidIndex(i)) {
+    return m_tableau2.GetPosition(i);
   }
   return 0;
 }
 
-//---------------------------------------------------------------------------
-//                     LHTableau<T>: Pivoting operations
-//---------------------------------------------------------------------------
+//
+// Pivoting operations
+//
 
 template <class T> void LHTableau<T>::Pivot(int outrow, int inlabel)
 {
-  if (!this->RowIndex(outrow)) {
+  if (!this->IsRowIndex(outrow)) {
     throw typename LemkeTableau<T>::BadPivot();
   }
-  if (T1.IsRowIndex(outrow)) {
-    T1.Pivot(outrow, inlabel);
+  if (m_tableau1.IsRowIndex(outrow)) {
+    m_tableau1.Pivot(outrow, inlabel);
   }
-  if (T2.IsRowIndex(outrow)) {
-    T2.Pivot(outrow, inlabel);
+  if (m_tableau2.IsRowIndex(outrow)) {
+    m_tableau2.Pivot(outrow, inlabel);
   }
 }
 
-//---------------------------------------------------------------------------
-//                   LHTableau<T>: Miscellaneous functions
-//---------------------------------------------------------------------------
+//
+// Miscellaneous functions
+//
 
-template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
+template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetColumnBFS()
 {
-  T1.GetBasisVector(tmp1);
-  T2.GetBasisVector(tmp2);
-  for (int i = tmp1.front_index(); i <= tmp1.back_index(); i++) {
-    solution[i] = tmp1[i];
+  m_tableau1.GetBasisVector(m_scratch1);
+  m_tableau2.GetBasisVector(m_scratch2);
+  for (int i = m_scratch1.front_index(); i <= m_scratch1.back_index(); i++) {
+    m_solution[i] = m_scratch1[i];
   }
-  for (int i = tmp2.front_index(); i <= tmp2.back_index(); i++) {
-    solution[i] = tmp2[i];
+  for (int i = m_scratch2.front_index(); i <= m_scratch2.back_index(); i++) {
+    m_solution[i] = m_scratch2[i];
   }
   BFS<T> cbfs;
   for (int i = MinCol(); i <= MaxCol(); i++) {
-    if (Member(i)) {
-      cbfs.insert(i, solution[Find(i)]);
+    if (IsMember(i)) {
+      cbfs.insert(i, m_solution[GetPosition(i)]);
     }
   }
   return cbfs;
@@ -94,7 +94,7 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 template <class T> int LHTableau<T>::PivotIn(int inlabel)
 {
   const int outindex = ExitIndex(inlabel);
-  const int outlabel = Label(outindex);
+  const int outlabel = GetLabel(outindex);
   if (outlabel == 0) {
     return 0;
   }
@@ -102,17 +102,13 @@ template <class T> int LHTableau<T>::PivotIn(int inlabel)
   return outlabel;
 }
 
-// ExitIndex determines, for the current tableau and variable
-// to be added to the basis, which element should leave the basis.
-// The choice is the one specified by Eaves, which is guaranteed
-// to not cycle, even if the problem is degenerate.
 template <class T> int LHTableau<T>::ExitIndex(int inlabel)
 {
-  if (T1.IsValidIndex(inlabel)) {
-    return T1.ExitIndex(inlabel);
+  if (m_tableau1.IsValidIndex(inlabel)) {
+    return m_tableau1.ExitIndex(inlabel);
   }
-  if (T2.IsValidIndex(inlabel)) {
-    return T2.ExitIndex(inlabel);
+  if (m_tableau2.IsValidIndex(inlabel)) {
+    return m_tableau2.ExitIndex(inlabel);
   }
   return 0;
 }
@@ -121,7 +117,7 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 {
   int enter, exit;
   enter = dup;
-  if (Member(dup)) {
+  if (IsMember(dup)) {
     enter = -dup;
   }
   // Central loop - pivot until another CBFS is found

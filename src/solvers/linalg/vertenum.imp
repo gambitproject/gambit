@@ -53,9 +53,9 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
   Deeper();
   if (tab.IsLexMin()) {
     m_list.push_back(tab.GetFullBFS());
-    m_duallist.push_back(tab.DualBFS());
+    m_duallist.push_back(tab.GetDualBFS());
   }
-  auto pivot_list = tab.ReversePivots();
+  auto pivot_list = tab.ComputeReversePivots();
   if (!pivot_list.empty()) {
     branches[depth] += pivot_list.size();
     LPTableau<T> tab2(tab);

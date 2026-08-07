@@ -117,7 +117,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 
   Solve(1);
 
-  total_cost = tab.TotalCost();
+  total_cost = tab.ComputeTotalCost();
 
   // which eps should be used here?
   if (total_cost < -eps1) {
@@ -143,10 +143,10 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   tab.SetCost(cost);
   Solve(2);
 
-  total_cost = tab.TotalCost();
+  total_cost = tab.ComputeTotalCost();
   y = tab.GetDualVector();
   opt_bfs = tab.GetColumnBFS();
-  dual_bfs = tab.DualBFS();
+  dual_bfs = tab.GetDualBFS();
 
   for (int i = 1; i <= neqns; i++) {
     if (dual_bfs.count(-i)) {
@@ -198,7 +198,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
     if (in) {
       tab.Pivot(out, in);
       tab.GetBasisVector(x);
-      if (phase == 1 && tab.TotalCost() >= -eps1) {
+      if (phase == 1 && tab.ComputeTotalCost() >= -eps1) {
         return;
       }
     }
@@ -215,7 +215,7 @@ template <class T> int LPSolve<T>::Enter()
       lab = nvars - i;
     }
     if (!tab.IsMember(lab)) {
-      T rc = tab.RelativeCost(lab);
+      T rc = tab.ComputeRelativeCost(lab);
       if (rc > test + eps1) {
         if (!UB[i] || (UB[i] && xx[i] - ub[i] < -eps1)) {
           test = rc;

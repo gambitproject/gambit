@@ -31,12 +31,12 @@ template <class T> class LemkeTableau final : public Tableau<T> {
 public:
   class BadPivot final : public std::runtime_error {
   public:
-    BadPivot() : std::runtime_error("Bad pivot in LTableau") {}
+    BadPivot() : std::runtime_error("Bad pivot in LemkeTableau") {}
     ~BadPivot() noexcept override = default;
   };
   class BadExitIndex final : public std::runtime_error {
   public:
-    BadExitIndex() : std::runtime_error("Bad exit index in LTableau") {}
+    BadExitIndex() : std::runtime_error("Bad exit index in LemkeTableau") {}
     ~BadExitIndex() noexcept override = default;
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b) : Tableau<T>(A, b) {}
@@ -44,7 +44,15 @@ public:
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
-  int SF_LCPPath(int dup); // follow a path of ACBFS's from one CBFS to another
+  /// Executes one step of the Lemke-Howson algorithm, following a path of
+  /// ACBFS's (almost-complementary basic feasible solutions) from one CBFS to
+  /// another
+  int SF_LCPPath(int dup);
+
+  /// Determines, for the current tableau and variable to be added to the
+  /// basis, which element should leave the basis. The choice is the one
+  /// specified by Eaves, which is guaranteed not to cycle, even if the
+  /// problem is degenerate.
   int ExitIndex(int i);
 };
 

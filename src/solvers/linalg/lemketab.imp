@@ -24,10 +24,6 @@
 
 namespace Gambit::linalg {
 
-//---------------------------------------------------------------------------
-//                        Lemke Tableau: member functions
-//---------------------------------------------------------------------------
-
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 {
   const int outindex = SF_ExitIndex(inlabel);
@@ -99,13 +95,6 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
   return BestSet.front();
 }
 
-//
-// ExitIndex determines, for the current tableau and variable
-// to be added to the basis, which element should leave the basis.
-// The choice is the one specified by Eaves, which is guaranteed
-// to not cycle, even if the problem is degenerate.
-//
-
 template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
 {
   Array<int> BestSet;
@@ -169,10 +158,6 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
   }
   return BestSet.front();
 }
-
-//
-// Executes one step of the Lemke-Howson algorithm
-//
 
 template <class T> int LemkeTableau<T>::SF_LCPPath(int dup)
 {
