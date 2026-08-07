@@ -37,7 +37,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
 
   const PathTracer tracer;
   Vector<double> x;
-  const double p_omega = 1.0;
+  double p_omega = 1.0;
 
   const double t_target = 1.0;
   const double t_tol = 0.5;
