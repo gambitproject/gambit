@@ -31,84 +31,80 @@ template <class T> class Tableau;
 class Basis;
 
 template <class T> class LUDecomposition {
+public:
+  class BadPivot final : public std::runtime_error {
+  public:
+    BadPivot() : std::runtime_error("Bad pivot in LUDecomposition") {}
+    ~BadPivot() noexcept override = default;
+  };
+  class BadCount final : public std::runtime_error {
+  public:
+    BadCount() : std::runtime_error("Bad reference count in LUDecomposition") {}
+    ~BadCount() noexcept override = default;
+  };
+
+  /// @name Constructors and destructor
+  //@{
+  LUDecomposition(const LUDecomposition<T> &) = delete;
+
+  /// Copy constructor. Copying will fail an assertion if you try to update or
+  /// delete the original before the copy has been deleted, refactored, or set
+  /// to something else.
+  LUDecomposition(const LUDecomposition<T> &, Tableau<T> &);
+
+  /// Decompose given matrix
+  explicit LUDecomposition(Tableau<T> &, int rfac = 0);
+
+  /// Destructor
+  ~LUDecomposition();
+
+  /// Don't use the equals operator, use the Copy function instead
+  LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
+  //@}
+
+  /// @name Operations
+  //@{
+  /// Copies the LUDecomposition given (except for the basis reference)
+  void Copy(const LUDecomposition<T> &, Tableau<T> &);
+
+  /// Replace (update) the column given with the vector given
+  void Update(int, int matcol); // matcol is the column number in the matrix
+
+  /// Refactor
+  void Refactor();
+
+  /// Solve: Bk d = a
+  void Solve(const Vector<T> &, Vector<T> &) const;
+
+  /// Solve: y Bk = c
+  void SolveT(const Vector<T> &, Vector<T> &) const;
+
+  /// Set number of eta matrices added before refactoring;
+  /// if number is set to zero, refactoring is done automatically;
+  /// if number is < 0, no refactoring is done
+  void SetRefactor(int a) { m_refactorInterval = a; }
+  //@}
+
 private:
   struct EtaMatrix {
     int col;
     Vector<T> etadata;
   };
 
-  Tableau<T> &tab;
-  Basis &basis;
+  Tableau<T> &m_tableau;
+  Basis &m_basis;
 
-  std::list<EtaMatrix> U;
-  std::list<EtaMatrix> E;
-  std::vector<std::pair<int, EtaMatrix>> L;
+  std::list<EtaMatrix> m_upperEtas;
+  std::list<EtaMatrix> m_updateEtas;
+  std::vector<std::pair<int, EtaMatrix>> m_lowerFactors;
 
-  int refactor_number;
-  int iterations;
-  int total_operations;
+  int m_refactorInterval;
+  int m_iterationsSinceRefactor;
+  int m_totalOperations;
 
-  const LUDecomposition<T> *parent;
-  mutable int copycount;
+  const LUDecomposition<T> *m_parent;
+  mutable int m_copyCount;
 
-public:
-  class BadPivot final : public std::runtime_error {
-  public:
-    BadPivot() : std::runtime_error("Bad pivot in LUdecomp") {}
-    ~BadPivot() noexcept override = default;
-  };
-  class BadCount final : public std::runtime_error {
-  public:
-    BadCount() : std::runtime_error("Bad reference count in LUdecomp") {}
-    ~BadCount() noexcept override = default;
-  };
-
-  // ------------------------
-  // Constructors, Destructor
-  // ------------------------
-
-  LUDecomposition(const LUDecomposition<T> &) = delete;
-
-  // copy constructor
-  // note:  Copying will fail an assertion if you try to update or delete
-  //        the original before the copy has been deleted, refactored
-  //        Or set to something else.
-  LUDecomposition(const LUDecomposition<T> &, Tableau<T> &);
-
-  // Decompose given matrix
-  explicit LUDecomposition(Tableau<T> &, int rfac = 0);
-
-  // Destructor
-  ~LUDecomposition();
-
-  // don't use the equals operator, use the Copy function instead
-  LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
-
-  // --------------------
-  // Public Members
-  // --------------------
-
-  // copies the LUdecomp given (expect for the basis &).
-  void Copy(const LUDecomposition<T> &, Tableau<T> &);
-
-  // replace (update) the column given with the vector given.
-  void update(int, int matcol); // matcol is the column number in the matrix
-
-  // refactor
-  void refactor();
-
-  // solve: Bk d = a
-  void solve(const Vector<T> &, Vector<T> &) const;
-
-  // solve: y Bk = c
-  void solveT(const Vector<T> &, Vector<T> &) const;
-
-  // set number of etamatrices added before refactoring;
-  // if number is set to zero, refactoring is done automatically.
-  // if number is < 0, no refactoring is done
-  void SetRefactor(int a) { refactor_number = a; }
-
-private:
   void FactorBasis();
 
   void GaussElem(Matrix<T> &, int, int);
@@ -129,7 +125,7 @@ private:
 
   void LPd_mult(Vector<T> &d, int j, Vector<T> &) const;
 
-}; // end of class LUdecomp
+}; // end of class LUDecomposition
 
 } // end namespace Gambit::linalg
 

@@ -73,7 +73,7 @@ void Tableau<double>::Pivot(int outrow, int col)
   }
   m_basis.Pivot(outrow, col);
 
-  m_luDecomposition.update(outrow, col);
+  m_luDecomposition.Update(outrow, col);
   Solve(m_b, m_solution);
 }
 
@@ -92,7 +92,7 @@ void Tableau<double>::GetBasisVector(Vector<double> &out) const { out = m_soluti
 
 void Tableau<double>::Refactor()
 {
-  m_luDecomposition.refactor();
+  m_luDecomposition.Refactor();
   //** is re-solve necessary here?
   Solve(m_b, m_solution);
 }
@@ -108,12 +108,12 @@ void Tableau<double>::SetConst(const Vector<double> &bnew)
 
 void Tableau<double>::Solve(const Vector<double> &b, Vector<double> &x)
 {
-  m_luDecomposition.solve(b, x);
+  m_luDecomposition.Solve(b, x);
 }
 
 void Tableau<double>::SolveT(const Vector<double> &c, Vector<double> &y)
 {
-  m_luDecomposition.solveT(c, y);
+  m_luDecomposition.SolveT(c, y);
 }
 
 bool Tableau<double>::IsLexMin()

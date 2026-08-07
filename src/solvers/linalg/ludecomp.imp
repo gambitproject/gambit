@@ -26,116 +26,121 @@
 
 namespace Gambit::linalg {
 
+//
+// Constructors and destructor
+//
+
 template <class T>
 LUDecomposition<T>::LUDecomposition(const LUDecomposition<T> &a, Tableau<T> &t)
-  : tab(t), basis(t.GetBasis()), refactor_number(a.refactor_number), iterations(a.iterations),
-    total_operations(a.total_operations), parent(&a), copycount(0)
+  : m_tableau(t), m_basis(t.GetBasis()), m_refactorInterval(a.m_refactorInterval),
+    m_iterationsSinceRefactor(a.m_iterationsSinceRefactor), m_totalOperations(a.m_totalOperations),
+    m_parent(&a), m_copyCount(0)
 
 {
-  parent->copycount++;
+  m_parent->m_copyCount++;
 }
 
 template <class T>
 LUDecomposition<T>::LUDecomposition(Tableau<T> &t, int rfac /* = 0 */)
-  : tab(t), basis(t.GetBasis()), refactor_number(rfac), iterations(0), parent(nullptr),
-    copycount(0)
+  : m_tableau(t), m_basis(t.GetBasis()), m_refactorInterval(rfac), m_iterationsSinceRefactor(0),
+    m_parent(nullptr), m_copyCount(0)
 {
-  auto m = basis.GetLast() - basis.GetFirst() + 1;
-  total_operations = (m - 1) * m * (2 * m - 1) / 6;
+  auto m = m_basis.GetLast() - m_basis.GetFirst() + 1;
+  m_totalOperations = (m - 1) * m * (2 * m - 1) / 6;
 }
 
 template <class T> LUDecomposition<T>::~LUDecomposition()
 {
-  if (parent != nullptr) {
-    parent->copycount--;
+  if (m_parent != nullptr) {
+    m_parent->m_copyCount--;
   }
 }
 
-// -------------------------
-//  Public Members
-// -------------------------
+//
+// Operations
+//
 
 template <class T> void LUDecomposition<T>::Copy(const LUDecomposition<T> &orig, Tableau<T> &t)
 {
   if (this != &orig) {
-    if (parent != nullptr) {
-      parent->copycount--;
+    if (m_parent != nullptr) {
+      m_parent->m_copyCount--;
     }
 
-    tab = t;
-    basis = t.GetBasis();
+    m_tableau = t;
+    m_basis = t.GetBasis();
 
-    L.clear();
-    E.clear();
-    U.clear();
+    m_lowerFactors.clear();
+    m_updateEtas.clear();
+    m_upperEtas.clear();
 
-    refactor_number = orig.refactor_number;
-    iterations = orig.iterations;
-    total_operations = orig.total_operations;
-    parent = &orig;
-    copycount = 0;
-    parent->copycount++;
+    m_refactorInterval = orig.m_refactorInterval;
+    m_iterationsSinceRefactor = orig.m_iterationsSinceRefactor;
+    m_totalOperations = orig.m_totalOperations;
+    m_parent = &orig;
+    m_copyCount = 0;
+    m_parent->m_copyCount++;
   }
 }
 
-template <class T> void LUDecomposition<T>::update(int col, int matcol)
+template <class T> void LUDecomposition<T>::Update(int col, int matcol)
 {
-  if (copycount != 0) {
+  if (m_copyCount != 0) {
     throw BadCount();
   }
-  const int m = basis.GetLast() - basis.GetFirst() + 1;
+  const int m = m_basis.GetLast() - m_basis.GetFirst() + 1;
 
-  iterations++;
-  if ((refactor_number > 0 && iterations >= refactor_number) ||
-      (refactor_number == 0 && RefactorCheck())) {
-    refactor();
+  m_iterationsSinceRefactor++;
+  if ((m_refactorInterval > 0 && m_iterationsSinceRefactor >= m_refactorInterval) ||
+      (m_refactorInterval == 0 && RefactorCheck())) {
+    Refactor();
   }
   else {
-    Vector<T> scratch(basis.GetFirst(), basis.GetLast());
-    tab.GetColumn(matcol, scratch);
-    solve(scratch, scratch);
+    Vector<T> scratch(m_basis.GetFirst(), m_basis.GetLast());
+    m_tableau.GetColumn(matcol, scratch);
+    Solve(scratch, scratch);
     if (scratch[col] == static_cast<T>(0)) {
       throw BadPivot();
     }
-    E.push_back({col, scratch});
+    m_updateEtas.push_back({col, scratch});
 
-    total_operations += iterations * m + 2 * m * m;
+    m_totalOperations += m_iterationsSinceRefactor * m + 2 * m * m;
   }
 }
 
-template <class T> void LUDecomposition<T>::refactor()
+template <class T> void LUDecomposition<T>::Refactor()
 {
-  L.clear();
-  U.clear();
-  E.clear();
+  m_lowerFactors.clear();
+  m_upperEtas.clear();
+  m_updateEtas.clear();
 
-  if (!basis.IsIdent()) {
+  if (!m_basis.IsIdent()) {
     FactorBasis();
   }
 
-  iterations = 0;
-  const int m = basis.GetLast() - basis.GetFirst() + 1;
-  total_operations = (m - 1) * m * (2 * m - 1) / 6;
-  if (parent != nullptr) {
-    parent->copycount--;
-    parent = nullptr;
+  m_iterationsSinceRefactor = 0;
+  const int m = m_basis.GetLast() - m_basis.GetFirst() + 1;
+  m_totalOperations = (m - 1) * m * (2 * m - 1) / 6;
+  if (m_parent != nullptr) {
+    m_parent->m_copyCount--;
+    m_parent = nullptr;
   }
 }
 
-template <class T> void LUDecomposition<T>::solveT(const Vector<T> &c, Vector<T> &y) const
+template <class T> void LUDecomposition<T>::SolveT(const Vector<T> &c, Vector<T> &y) const
 {
   if (c.front_index() != y.front_index() || c.back_index() != y.back_index()) {
     throw DimensionException();
   }
-  if (c.front_index() != basis.GetFirst() || c.back_index() != basis.GetLast()) {
+  if (c.front_index() != m_basis.GetFirst() || c.back_index() != m_basis.GetLast()) {
     throw DimensionException();
   }
 
   y = c;
-  if (!basis.IsIdent()) {
+  if (!m_basis.IsIdent()) {
     BTransE(y);
-    if (parent != nullptr) {
-      parent->solveT(y, y);
+    if (m_parent != nullptr) {
+      m_parent->SolveT(y, y);
     }
     else {
       FTransU(y);
@@ -144,19 +149,19 @@ template <class T> void LUDecomposition<T>::solveT(const Vector<T> &c, Vector<T>
   }
 }
 
-template <class T> void LUDecomposition<T>::solve(const Vector<T> &a, Vector<T> &d) const
+template <class T> void LUDecomposition<T>::Solve(const Vector<T> &a, Vector<T> &d) const
 {
   if (a.front_index() != d.front_index() || a.back_index() != d.back_index()) {
     throw DimensionException();
   }
-  if (a.front_index() != basis.GetFirst() || a.back_index() != basis.GetLast()) {
+  if (a.front_index() != m_basis.GetFirst() || a.back_index() != m_basis.GetLast()) {
     throw DimensionException();
   }
 
   d = a;
-  if (!basis.IsIdent()) {
-    if (parent != nullptr) {
-      parent->solve(a, d);
+  if (!m_basis.IsIdent()) {
+    if (m_parent != nullptr) {
+      m_parent->Solve(a, d);
     }
     else {
       LPd_Trans(d);
@@ -166,17 +171,17 @@ template <class T> void LUDecomposition<T>::solve(const Vector<T> &a, Vector<T> 
   }
 }
 
-// -----------------
-//  Private Members
-// -----------------
+//
+// Private members
+//
 
 template <class T> void LUDecomposition<T>::FactorBasis()
 {
-  Matrix<T> B(basis.GetFirst(), basis.GetLast(), basis.GetFirst(), basis.GetLast());
+  Matrix<T> B(m_basis.GetFirst(), m_basis.GetLast(), m_basis.GetFirst(), m_basis.GetLast());
 
-  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
-  for (int i = basis.GetFirst(); i <= basis.GetLast(); i++) {
-    tab.GetColumn(basis.GetLabel(i), scratch);
+  Vector<T> scratch(m_basis.GetFirst(), m_basis.GetLast());
+  for (int i = m_basis.GetFirst(); i <= m_basis.GetLast(); i++) {
+    m_tableau.GetColumn(m_basis.GetLabel(i), scratch);
     B.SetColumn(i, scratch);
   }
 
@@ -196,12 +201,12 @@ template <class T> void LUDecomposition<T>::FactorBasis()
     for (int j = i + 1; j <= B.MaxRow(); j++) {
       scratch[j] = -B(j, i) / B(i, i);
     }
-    L.push_back({piv, {i, scratch}});
+    m_lowerFactors.push_back({piv, {i, scratch}});
     GaussElem(B, i, i);
   }
   for (int j = B.MinCol(); j <= B.MaxCol(); j++) {
     B.GetColumn(j, scratch);
-    U.push_back({j, scratch});
+    m_upperEtas.push_back({j, scratch});
   }
 }
 
@@ -230,12 +235,13 @@ template <class T> void LUDecomposition<T>::GaussElem(Matrix<T> &B, int row, int
 
 template <class T> void LUDecomposition<T>::BTransE(Vector<T> &y) const
 {
-  std::for_each(E.rbegin(), E.rend(), [&](const EtaMatrix &m) { VectorEtaSolve(m, y); });
+  std::for_each(m_updateEtas.rbegin(), m_updateEtas.rend(),
+                [&](const EtaMatrix &m) { VectorEtaSolve(m, y); });
 }
 
 template <class T> void LUDecomposition<T>::FTransU(Vector<T> &y) const
 {
-  for (const auto &eta : U) {
+  for (const auto &eta : m_upperEtas) {
     VectorEtaSolve(eta, y);
   }
 }
@@ -258,14 +264,15 @@ void LUDecomposition<T>::VectorEtaSolve(const EtaMatrix &eta, Vector<T> &y) cons
 
 template <class T> void LUDecomposition<T>::FTransE(Vector<T> &y) const
 {
-  for (const auto &eta : E) {
+  for (const auto &eta : m_updateEtas) {
     EtaVectorSolve(eta, y);
   }
 }
 
 template <class T> void LUDecomposition<T>::BTransU(Vector<T> &y) const
 {
-  std::for_each(U.rbegin(), U.rend(), [&](const EtaMatrix &m) { EtaVectorSolve(m, y); });
+  std::for_each(m_upperEtas.rbegin(), m_upperEtas.rend(),
+                [&](const EtaMatrix &m) { EtaVectorSolve(m, y); });
 }
 
 template <class T>
@@ -289,8 +296,8 @@ void LUDecomposition<T>::EtaVectorSolve(const EtaMatrix &eta, Vector<T> &d) cons
 
 template <class T> void LUDecomposition<T>::yLP_Trans(Vector<T> &y) const
 {
-  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
-  for (int j = L.size() - 1; j >= 0; j--) {
+  Vector<T> scratch(m_basis.GetFirst(), m_basis.GetLast());
+  for (int j = m_lowerFactors.size() - 1; j >= 0; j--) {
     yLP_mult(y, j, scratch);
     y = scratch;
   }
@@ -302,24 +309,24 @@ void LUDecomposition<T>::yLP_mult(const Vector<T> &y, int j, Vector<T> &ans) con
   const int ell = j + y.front_index();
 
   for (int i = y.front_index(); i <= y.back_index(); i++) {
-    if (i != L[j].second.col) {
+    if (i != m_lowerFactors[j].second.col) {
       ans[i] = y[i];
     }
     else {
       T temp = static_cast<T>(0);
       for (int k = ans.front_index(); k <= ans.back_index(); k++) {
-        temp += y[k] * L[j].second.etadata[k];
+        temp += y[k] * m_lowerFactors[j].second.etadata[k];
       }
       ans[i] = temp;
     }
   }
-  std::swap(ans[ell], ans[L[j].first]);
+  std::swap(ans[ell], ans[m_lowerFactors[j].first]);
 }
 
 template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 {
-  Vector<T> scratch(basis.GetFirst(), basis.GetLast());
-  for (size_t j = 0; j < L.size(); j++) {
+  Vector<T> scratch(m_basis.GetFirst(), m_basis.GetLast());
+  for (size_t j = 0; j < m_lowerFactors.size(); j++) {
     LPd_mult(d, j, scratch);
     d = scratch;
   }
@@ -328,23 +335,23 @@ template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 template <class T> void LUDecomposition<T>::LPd_mult(Vector<T> &d, int j, Vector<T> &ans) const
 {
   const int k = j + d.front_index();
-  std::swap(d[k], d[L[j].first]);
+  std::swap(d[k], d[m_lowerFactors[j].first]);
   for (int i = d.front_index(); i <= d.back_index(); i++) {
-    if (i == L[j].second.col) {
-      ans[i] = d[i] * L[j].second.etadata[i];
+    if (i == m_lowerFactors[j].second.col) {
+      ans[i] = d[i] * m_lowerFactors[j].second.etadata[i];
     }
     else {
-      ans[i] = d[i] + d[L[j].second.col] * L[j].second.etadata[i];
+      ans[i] = d[i] + d[m_lowerFactors[j].second.col] * m_lowerFactors[j].second.etadata[i];
     }
   }
-  std::swap(d[L[j].first], d[k]);
+  std::swap(d[m_lowerFactors[j].first], d[k]);
 }
 
 template <class T> bool LUDecomposition<T>::RefactorCheck()
 {
-  const int m = basis.GetLast() - basis.GetFirst() + 1;
-  const int i = iterations * (iterations * m + 2 * m * m);
-  const int k = total_operations + iterations * m + 2 * m * m;
+  const int m = m_basis.GetLast() - m_basis.GetFirst() + 1;
+  const int i = m_iterationsSinceRefactor * (m_iterationsSinceRefactor * m + 2 * m * m);
+  const int k = m_totalOperations + m_iterationsSinceRefactor * m + 2 * m * m;
   return i > k;
 }
 
