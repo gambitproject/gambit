@@ -38,10 +38,20 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
 
   const PathTracer tracer;
   double omega = 1.0;
+  const double t_target = 1.0;
+  const double tol = 1e-8;
 
-  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
-  auto criterion_function = [](const Vector<double> &point,
-                               const Vector<double> &tangent) -> double { return point[1] - 1.0; };
+  auto termination_condition = [t_target](const Vector<double> &point) {
+    return point[1] >= t_target;
+  };
+  auto criterion_function = [t_target](const Vector<double> &point,
+                                       const Vector<double> &tangent) -> double {
+    return point[1] - t_target;
+  };
+
+  auto polishing_termination_condition = [tol, &system](const Vector<double> &point) -> bool {
+    return system.ExtractEquilibrium(point).GetMaxRegret() <= tol;
+  };
 
   const TracePathResult result = tracer.TracePath(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
@@ -66,7 +76,30 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       },
       criterion_function);
 
+  int polish_step = 1;
+  const TracePathResult polishing_result = PolishPoint(
+      [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
+      [&system](const Vector<double> &point, Matrix<double> &jac) {
+        system.GetJacobian(point, jac);
+      },
+      x, t_target, 1, polishing_termination_condition, 100,
+      [&system, &polish_step](const Vector<double> &point) {
+        const MixedStrategyProfile<double> profile = system.ExtractEquilibrium(point);
+        const double regret = profile.GetMaxRegret();
+
+        std::cout << "[Polish Step " << polish_step++ << "] ";
+        std::cout << "Regret: " << regret << " | Probabilities: ";
+
+        Vector<double> prob_vector = profile.GetProbVector();
+        std::cout << std::fixed << std::setprecision(5);
+        for (size_t i = 1; i <= prob_vector.size(); ++i) {
+          std::cout << prob_vector[i] << " ";
+        }
+        std::cout << std::endl;
+      });
+
   equilibria.push_back(system.ExtractEquilibrium(x));
+
   return equilibria;
 }
 } // namespace Gambit

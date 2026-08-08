@@ -158,11 +158,13 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   q.GetRow(q.NumRows(), t);
   p_callback(x);
 
+  int steps = 0;
+
   while (!p_terminate(x)) {
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      return {x, false, "Stepsize fell below minimum threshold."};
+      return {x, false, "Stepsize fell below minimum threshold.", steps};
     }
 
     // Predictor step
@@ -205,7 +207,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        return {x, false, "Maximum iterations exceeded."};
+        return {x, false, "Maximum iterations exceeded.", steps};
       }
     }
 
@@ -227,7 +229,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        return {x, false, "Stepsize fell below minimum threshold."};
+        return {x, false, "Stepsize fell below minimum threshold.", steps};
       }
       continue;
     }
@@ -258,6 +260,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     x = u;
     t = newT;
     p_callback(x);
+    steps++;
 
     if (pert_countdown > 0.0) {
       // If we are currently perturbing in the neighborhood of a bifurcation, check to see
@@ -269,7 +272,74 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       }
     }
   }
-  return {x, true, "Path tracing terminated successfully."};
+  return {x, true, "Path tracing terminated successfully.", steps};
 }
 
+TracePathResult
+PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+            std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+            Vector<double> &x, double fixed_value, size_t fixed_index,
+            TerminationFunctionType p_terminate, int max_iter, CallbackFunctionType p_callback)
+{
+  x[fixed_index] = fixed_value;
+
+  const size_t N = x.size() - 1;
+  Vector<double> y(N);               // Equations results
+  Matrix<double> jac_full(N + 1, N); // Full Jacobian matrix (N+1 unknowns, N equations)
+  Matrix<double> jac_square(N, N);   // Jacobian matrix with fixed_index row removed
+  Matrix<double> Q(N, N);            // Orthogonal matrix from QR decomposition
+  Vector<double> x_reduced(N);       // Reduced x vector with fixed_index removed
+
+  int steps = 0;
+  double dist = 0.0;
+
+  while (!p_terminate(x)) {
+    if (steps >= max_iter) {
+      return {x, false, "Polishing exceeded maximum iterations.", steps};
+    }
+
+    p_function(x, y);
+    p_jacobian(x, jac_full);
+
+    // Square Matrix removing fixed_index column
+    size_t row_index = 1;
+    for (size_t i = 1; i <= N + 1; ++i) { // Newton step expects the transposed Jacobian
+      if (i != fixed_index) {
+        for (size_t j = 1; j <= N; ++j) {
+          jac_square(row_index, j) = jac_full(i, j);
+        }
+        row_index++;
+      }
+    }
+
+    // Reduced x vector removing fixed_index
+    size_t temp_idx = 1;
+    for (size_t i = 1; i <= N + 1; ++i) {
+      if (i != fixed_index) {
+        x_reduced[temp_idx++] = x[i];
+      }
+    }
+
+    QRDecomp(jac_square, Q);
+
+    // Solve jac_square * x_reduced = -y
+    NewtonStep(Q, jac_square, x_reduced, y, dist);
+
+    // Update x, keeping fixed_index constant
+    temp_idx = 1;
+    for (size_t i = 1; i <= N + 1; ++i) {
+      if (i != fixed_index) {
+        x[i] = x_reduced[temp_idx++];
+      }
+    }
+
+    steps++;
+
+    if (p_callback) {
+      p_callback(x);
+    }
+  }
+
+  return {x, true, "Polishing terminated successfully.", steps};
+}
 } // end namespace Gambit
