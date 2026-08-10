@@ -36,16 +36,15 @@ inline int select2nd(const pair<int, int> &x) { return x.second; }
 
 AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
-         vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
-         vector<vector<vector<Config>>> &proj, vector<vector<projtype>> &projF,
-         vector<vector<vector<int>>> &Po, vector<PayoffTable> &_payoffs,
-         vector<ExactPayoffTable> &_exactPayoffs)
+         vector<projtype> &projTypes, vector<vector<vector<Config>>> &proj,
+         vector<vector<projtype>> &projF, vector<vector<vector<int>>> &Po,
+         vector<PayoffTable> &_payoffs, vector<ExactPayoffTable> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
     exactPayoffs(_exactPayoffs), projection(proj), m_state(numANodes, numPlayers),
-    m_exactState(numANodes, numPlayers), fullProjectedStrat(projS), projFunctions(projF),
-    Porder(Po), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
-    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
+    m_exactState(numANodes, numPlayers), projFunctions(projF), Porder(Po), isPure(numANodes, true),
+    node2Action(numANodes, vector<int>(numPlayers)), player2Class(numPlayers),
+    kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -293,8 +292,8 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       throw std::runtime_error("Unknown payoff type " + std::to_string(t));
     }
   }
-  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, projS, proj, projF, Po,
-                               pays, exactPays);
+  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, proj, projF, Po, pays,
+                               exactPays);
 }
 
 void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,

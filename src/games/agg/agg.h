@@ -33,13 +33,7 @@
 #include "trie_map.h"
 #include "games/number.h"
 
-namespace Gambit {
-
-namespace gametracer {
-class aggame;
-}
-
-namespace agg {
+namespace Gambit::agg {
 
 // data structure for a mixed strategy profile: one probability per action, using numeric type V
 // (double for the floating-point engine, Rational for the exact-arithmetic counterpart).
@@ -119,19 +113,14 @@ public:
   static const char LBRACKET = '[';
   static const char RBRACKET = ']';
 
-  friend class gametracer::aggame; // wrapper class for gametracer
-
   // read an AGG from input stream
   static std::shared_ptr<AGG> makeAGG(std::istream &in);
 
-  // constructor. Note projS is used only for fullProjectedStrat below -- the convolution
-  // engine's own working state (ConvolutionState) is sized from numANodes/numPlayers directly,
-  // not seeded from a caller-supplied array the way it used to be.
+  // constructor. The convolution engine's own working state (ConvolutionState) is sized from
+  // numANodes/numPlayers directly, not seeded from a caller-supplied array.
   AGG(int numPlayers, std::vector<int> &actions, int numANodes, int numPNodes,
       std::vector<std::vector<int>> &actionSets, std::vector<std::vector<int>> &neighbors,
-      std::vector<projtype> &projTypes,
-      std::vector<std::vector<ConfigDistribution<double>>> &projS,
-      std::vector<std::vector<std::vector<Config>>> &proj,
+      std::vector<projtype> &projTypes, std::vector<std::vector<std::vector<Config>>> &proj,
       std::vector<std::vector<projtype>> &projF, std::vector<std::vector<std::vector<int>>> &Po,
       std::vector<PayoffTable> &payoffs, std::vector<ExactPayoffTable> &exactPayoffs);
 
@@ -140,6 +129,8 @@ public:
   int getNumPlayers() const { return numPlayers; }
   int getNumActions() const { return totalActions; }
   int getNumActions(int i) const { return actions[i]; }
+  // per-player action counts, e.g. for constructing a gnmgame from an AGG.
+  const std::vector<int> &getActionCounts() const { return actions; }
   int getMaxActions() const { return maxActions; }
   int firstAction(int i) const { return strategyOffset[i]; }
   int lastAction(int i) const { return strategyOffset[i + 1]; }
@@ -276,12 +267,6 @@ private:
   ConvolutionState<double> m_state;
   ConvolutionState<Rational> m_exactState;
 
-  // foreach s in S, i in N, the full set of projected actions. Unlike m_state/m_exactState
-  // above, this is filled once (from the constructor's projS argument) and never rebuilt --
-  // read directly by gametracer::aggame (a friend) for its own jacobian bookkeeping, not used by
-  // AGG's own convolution algorithm.
-  std::vector<std::vector<ConfigDistribution<double>>> fullProjectedStrat;
-
   // foreach s in S, foreach neighbor of s, its projection function
   std::vector<std::vector<projtype>> projFunctions;
 
@@ -294,9 +279,6 @@ private:
 
   // foreach s in S, j in N, the index of s in j's action set, or -1 if N/A
   std::vector<std::vector<int>> node2Action;
-
-  // cache of jacobian entries.
-  trie_map<double> cache;
 
   // the unique action sets
   std::vector<ActionSet> uniqueActionSets;
@@ -389,8 +371,6 @@ private:
                         ConfigDistribution<double> &dest, int plClass2 = -1, int act2 = -1);
 };
 
-} // namespace agg
-
-} // end namespace Gambit
+} // namespace Gambit::agg
 
 #endif // GAMBIT_AGG_AGG_H
