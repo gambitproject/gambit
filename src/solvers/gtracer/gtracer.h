@@ -33,9 +33,34 @@
 
 namespace Gambit::gametracer {
 
+/// @brief Why GNM's path-following terminated
+enum class GNMTerminationReason {
+  NoMoreBoundaries,  // path crosses no more support boundaries and no next equilibrium is in
+                     // sight
+  NoNextBoundary,    // path has just crossed an equilibrium, but there is no next support
+                     // boundary to aim for
+  NonfiniteStrategy, // numerical breakdown: the retracted strategy has a non-finite component
+  LambdaOutOfRange,  // path has gone far enough in the reverse direction that no further
+                     // equilibria are expected
+  ExcessiveError,    // accumulated tracking error exceeded the threshold and wobbling is disabled
+};
+
+/// @brief The outcome of a call to GNM: the equilibria found along the path, why the
+///        path-following stopped, and some performance data on the run.  Every termination
+///        site constructs and returns one of these directly, so setting the reason/message
+///        and stopping are one indivisible step.
+struct GNMResult {
+  std::list<cvector> equilibria;
+  GNMTerminationReason reason;
+  std::string message;
+  int numSteps;             // total predictor-corrector steps taken along the path
+  int numBoundaryCrossings; // number of times the support changed
+  int numLNMCalls;          // number of calls made to the local Newton method refinement
+  double finalLambda;       // position on the ray at which path-following stopped
+};
+
 /// @brief Executes the GNM algorithm on a game
 /// @param g     perturbation ray
-/// @param Eq    an array of equilibria will be stored here
 /// @param steps  number of steps to take within a support cell; higher
 ///               values of this parameter slow GNM down, but may help it
 ///               avoid getting off the path.
@@ -57,10 +82,9 @@ namespace Gambit::gametracer {
 ///                   reaches this threshold.
 /// @param p_onStep   a callback function executed on each step of the algorithm and whenever an
 ///                   equilibrium is found (with label "NE")
-void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
-         int LNMMax, double LambdaMin, bool wobble, double threshold,
-         std::function<void(const std::string &, const cvector &)> p_onStep,
-         std::string &returnMessage);
+GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
+              double LambdaMin, bool wobble, double threshold,
+              std::function<void(const std::string &, const cvector &)> p_onStep);
 
 /// @brief Execute the Govindan-Wilson Iterated Polymatrix algorithm for computing a
 ///        Nash equilibrium
