@@ -519,6 +519,119 @@ V AGG::getJ(int player1, int act1, int player2, int act2, const StrategyProfile<
   return payoffInnerProd<V>(actionSets[player1][act1], state<V>().Pr[numPlayers - 1]);
 }
 
+namespace {
+
+// Fills allBut[indices[i]] with the convolution of factors[indices[k]] for all k in [start,end)
+// except i, for every i in [start,end); temp receives the convolution of factors[indices[k]]
+// for ALL k in [start,end) (the "full product" of this range), for the caller to combine with a
+// sibling range.
+template <class V>
+void computeAllButOne(const std::vector<int> &indices, size_t start, size_t end,
+                      const std::vector<ConfigDistribution<V>> &factors, int numNei,
+                      std::vector<projtype> &projFuncs, std::vector<ConfigDistribution<V>> &allBut,
+                      ConfigDistribution<V> &temp)
+{
+  if (end - start == 1) {
+    allBut[indices[start]].reset();
+    return;
+  }
+  const size_t mid = start + (end - start) / 2;
+
+  computeAllButOne(indices, start, mid, factors, numNei, projFuncs, allBut, temp);
+  computeAllButOne(indices, mid, end, factors, numNei, projFuncs, allBut, temp);
+
+  // temp := full product of [start, mid)
+  temp = factors[indices[start]];
+  if (mid - start > 1) {
+    temp.multiply(allBut[indices[start]], numNei, projFuncs);
+  }
+
+  // extend each i in [start, mid)'s "all but i, within [start,mid)" by the full product of
+  // [mid, end), giving "all but i, within [start,end)"
+  if (mid - start == 1) {
+    allBut[indices[start]] = factors[indices[mid]];
+    if (end - mid > 1) {
+      allBut[indices[start]].multiply(allBut[indices[mid]], numNei, projFuncs);
+    }
+  }
+  else {
+    for (size_t i = start; i < mid; ++i) {
+      allBut[indices[i]].multiply(factors[indices[mid]], numNei, projFuncs);
+      if (end - mid > 1) {
+        allBut[indices[i]].multiply(allBut[indices[mid]], numNei, projFuncs);
+      }
+    }
+  }
+
+  // symmetrically, extend each i in [mid, end) by the full product of [start, mid), i.e. temp
+  if (end - mid == 1) {
+    allBut[indices[mid]] = temp;
+  }
+  else {
+    for (size_t i = mid; i < end; ++i) {
+      allBut[indices[i]].multiply(temp, numNei, projFuncs);
+    }
+  }
+}
+
+} // namespace
+
+template <class V>
+void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<V> &s,
+                               StrategyProfile<V> &dest)
+{
+  const int Node = actionSets[player1][act1];
+  const int numNei = neighbors[Node].size();
+
+  // base[player1] is pinned to the one-hot at act1 (fixed for the whole row); base[k] for
+  // every other player k is k's actual projected mixed strategy at Node, computed fresh from s.
+  std::vector<ConfigDistribution<V>> base(numPlayers);
+  base[player1].insert(std::make_pair(projection[Node][player1][act1], V(1)));
+
+  std::vector<int> others;
+  others.reserve(numPlayers - 1);
+  for (int k = 0; k < numPlayers; ++k) {
+    if (k == player1) {
+      continue;
+    }
+    others.push_back(k);
+    for (int j = 0; j < actions[k]; ++j) {
+      if (s[j + firstAction(k)] > V(0)) {
+        base[k] += std::make_pair(projection[Node][k][j], s[j + firstAction(k)]);
+      }
+    }
+  }
+  if (others.empty()) {
+    return; // only one player in the game; no off-diagonal entries to fill
+  }
+
+  std::vector<ConfigDistribution<V>> allBut(numPlayers);
+  if (others.size() == 1) {
+    // With only one other player, "everyone except player1 and that player" is nobody, so the
+    // induced distribution is just player1's own pinned action.
+    allBut[others[0]] = base[player1];
+  }
+  else {
+    ConfigDistribution<V> temp;
+    computeAllButOne(others, size_t{0}, others.size(), base, numNei, projFunctions[Node], allBut,
+                     temp);
+    for (const int j : others) {
+      allBut[j].multiply(base[player1], numNei, projFunctions[Node]);
+    }
+  }
+
+  for (const int j : others) {
+    for (int act2 = 0; act2 < actions[j]; ++act2) {
+      dest[act2 + firstAction(j)] = allBut[j].inner_prod(projection[Node][j][act2], numNei,
+                                                         projFunctions[Node], payoffs[Node]);
+    }
+  }
+}
+
+template void AGG::getPayoffJacobianRow<double>(int player1, int act1,
+                                                const StrategyProfile<double> &s,
+                                                StrategyProfile<double> &dest);
+
 template double AGG::payoffInnerProd<double>(int node, const ConfigDistribution<double> &dist);
 template Rational AGG::payoffInnerProd<Rational>(int node,
                                                  const ConfigDistribution<Rational> &dist);

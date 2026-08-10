@@ -26,7 +26,10 @@
 namespace Gambit::gametracer {
 
 // The payoff Jacobian: dest(i, j) is the payoff to the owner of action i if it deviates to i
-// while the owner of action j simultaneously deviates to j, everyone else playing s.
+// while the owner of action j simultaneously deviates to j, everyone else playing s. Computed a
+// full row at a time via AGG::getPayoffJacobianRow -- see its comment for the algorithm -- so
+// this only touches AGG's public API and avoids redoing the projection/convolution work
+// independently for every (row, column) pair.
 void aggame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   const std::vector<double> sp(s.values(), s.values() + s.getm());
@@ -43,15 +46,16 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
   }
 
   // off-diagonal entries
+  std::vector<double> row(aggPtr->getNumActions());
   for (int rown = 0; rown < aggPtr->getNumPlayers(); ++rown) {
     for (int act1 = 0; act1 < aggPtr->getNumActions(rown); act1++) {
+      aggPtr->getPayoffJacobianRow<double>(rown, act1, sp, row);
       for (int coln = 0; coln < aggPtr->getNumPlayers(); ++coln) {
         if (coln == rown) {
           continue;
         }
         for (int act2 = 0; act2 < aggPtr->getNumActions(coln); act2++) {
-          dest(act1 + firstAction(rown), act2 + firstAction(coln)) =
-              aggPtr->getJ<double>(rown, act1, coln, act2, sp);
+          dest(act1 + firstAction(rown), act2 + firstAction(coln)) = row[act2 + firstAction(coln)];
         }
       }
     }

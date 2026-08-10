@@ -153,11 +153,18 @@ public:
   template <class V>
   V getJ(int player, int action, int player2, int action2, const StrategyProfile<V> &s);
 
+  // Computes an entire row of the payoff Jacobian for player1 playing action1: for every other
+  // player j and every one of their actions, the payoff to player1 of playing action1 while j
+  // deviates to that action and everyone else plays according to s -- i.e. getJ(player1,
+  // action1, j, ., s) for every j and every one of j's actions, but computed for the whole row
+  // via a single leave-one-out convolution.
+  template <class V>
+  void getPayoffJacobianRow(int player1, int action1, const StrategyProfile<V> &s,
+                            StrategyProfile<V> &dest);
+
   // payoff of the pure profile s: a direct lookup, no floating-point computation involved.
   // V=double looks up PayoffTable; V=Rational looks up ExactPayoffTable and casts the stored
-  // Number to Rational (see ExactPayoffTable's comment for why the table itself stays
-  // Number-valued). V is never deducible from s (a plain vector<int> of action indices, not
-  // parametrized by V), so callers must specify it explicitly, e.g. getPurePayoff<Rational>(...).
+  // Number to Rational.
   template <class V> V getPurePayoff(int player, const std::vector<int> &s) const;
 
   bool isSymmetric() const
