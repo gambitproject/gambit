@@ -55,18 +55,31 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
 
   const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
   const cvector g(ToPerturbation(p_pert));
-  cvector ans(A->getNumActions());
   cvector zh(A->getNumActions(), 1.0);
-  while (true) {
-    const double ALPHA = 0.2;
-    const double EQERR = 1e-6;
-    if (IPA(*A, g, zh, ALPHA, EQERR, ans)) {
+
+  const double ALPHA = 0.2;
+  const double EQERR = 1e-6;
+  const int MAX_RESTARTS = 100;
+
+  IPAResult result{cvector(A->getNumActions()), IPATerminationReason::MaxIterationsReached, 0};
+  for (int restart = 0; restart < MAX_RESTARTS; restart++) {
+    result = IPA(*A, g, zh, ALPHA, EQERR);
+    if (result.reason == IPATerminationReason::Converged) {
       break;
     }
+    if (result.reason == IPATerminationReason::NonfiniteStrategy) {
+      throw std::runtime_error(
+          "IPA encountered a non-finite strategy profile; the perturbation vector "
+          "may not be suitable for this game");
+    }
+  }
+  if (result.reason != IPATerminationReason::Converged) {
+    throw std::runtime_error("IPA failed to converge after " + std::to_string(MAX_RESTARTS) +
+                             " restarts");
   }
 
   std::list<MixedStrategyProfile<double>> solutions;
-  solutions.push_back(ToProfile(p_pert.GetGame(), ans));
+  solutions.push_back(ToProfile(p_pert.GetGame(), result.strategy));
   p_onEquilibrium(solutions.back());
   return solutions;
 }

@@ -209,12 +209,13 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
   }
 }
 
-int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,
-        unsigned int maxiter, bool p_verbose)
+IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
+              unsigned int maxiter, bool p_verbose)
 {
   const int N = A.getNumPlayers(),
             M = A.getNumActions(); // For easy reference
   std::vector<int> Im(N);          // best actions in perturbed game
+  int numLemkeHowsonCalls = 0, numSupportChanges = 0;
 
   cmatrix DG(M, M), O(N, N, 0), // matrix of zeroes
       S(N, M, 0),               //
@@ -266,14 +267,18 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
     }
 
     // find equilibrium assuming current support
-    T2.solve(ymn1, ymn2);
-    for (int i = 0; i < M; i++) {
-      s[i] = ymn2[i];
+    const bool solved = T2.solve(ymn1, ymn2);
+    if (solved) {
+      for (int i = 0; i < M; i++) {
+        s[i] = ymn2[i];
+      }
     }
 
-    if (s.min() < 0.0) {
-      // update support and solve
+    if (!solved || s.min() < 0.0) {
+      // the restricted system for the current support is singular, or gave an
+      // infeasible (negative-probability) solution: update support and solve
       LemkeHowson(A, s, T, Im);
+      numLemkeHowsonCalls++;
     }
     else {
       // limit to current support
@@ -294,21 +299,29 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
         break;
       }
     }
+    if (!B) {
+      numSupportChanges++;
+    }
 
     // see if angle between z-sh and zh-sh is acute; if so, scale zh.
     u = zh;
     u -= sh;
 
-    ym1 = z;
-    ym1 -= sh;
-    const double ell = (ym1 * u) / u.norm2(); // dot product
-    if (ell <= 0.0 || B) {
-      zh = u;
-      zh *= ell;
-      zh += sh;
-      yh -= sho;
-      yh *= ell;
-      yh += sho;
+    // if u is exactly zero, zh already coincides with sh: there is no direction
+    // to rescale along, and the dot-product ratio below is a 0/0 that must be
+    // skipped rather than evaluated.
+    if (u.norm2() != 0.0) {
+      ym1 = z;
+      ym1 -= sh;
+      const double ell = (ym1 * u) / u.norm2(); // dot product
+      if (ell <= 0.0 || B) {
+        zh = u;
+        zh *= ell;
+        zh += sh;
+        yh -= sho;
+        yh *= ell;
+        yh += sho;
+      }
     }
 
     ym1 = z;
@@ -320,14 +333,23 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
                 << std::endl;
     }
     if (!std::isfinite(ym1.norm()) || !std::isfinite(ym2.norm())) {
-      throw std::out_of_range("encountered infinite probabilities in computed strategy profile");
+      return {s,
+              IPATerminationReason::NonfiniteStrategy,
+              static_cast<int>(iter),
+              numLemkeHowsonCalls,
+              numSupportChanges,
+              std::max(ym1.norm(), ym2.norm())};
     }
     // if z and zh or s and sh are close enough,
     // we've got an approximate equilibrium, so we can quit
     if (N <= 2 || (ym1.norm() < fuzz || ym2.norm() < fuzz)) {
-      ans = s;
       A.payoffMatrix(DG, s, 0.0);
-      return 1;
+      return {s,
+              IPATerminationReason::Converged,
+              static_cast<int>(iter),
+              numLemkeHowsonCalls,
+              numSupportChanges,
+              std::max(ym1.norm(), ym2.norm())};
     }
     ym1 = z;
     // do a first-order approximation on the first iteration,
@@ -368,7 +390,12 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
     A.normalizeStrategy(sh);
   }
   // Max iterations reached
-  return 0;
+  return {s,
+          IPATerminationReason::MaxIterationsReached,
+          static_cast<int>(maxiter),
+          numLemkeHowsonCalls,
+          numSupportChanges,
+          std::max(ym1.norm(), ym2.norm())};
 }
 
 } // end namespace Gambit::gametracer
