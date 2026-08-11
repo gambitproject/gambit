@@ -23,8 +23,12 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <algorithm>
 #include <compare>
 #include <list>
+#include <memory>
+#include <numeric>
+#include <queue>
 #include <set>
 #include <stack>
 #include <queue>
@@ -828,19 +832,33 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
-inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+inline void ValidateDistribution(std::vector<Number>::const_iterator p_begin,
+                                 std::vector<Number>::const_iterator p_end,
+                                 const bool p_normalized)
 {
-  if (std::any_of(p_probs.begin(), p_probs.end(),
+  if (std::any_of(p_begin, p_end,
                   [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
     throw ValueException("Probabilities must be non-negative numbers");
   }
   if (!p_normalized) {
     return;
   }
-  if (sum_function(p_probs, [](const Number &n) { return static_cast<Rational>(n); }) !=
-      Rational(1)) {
+  if (std::accumulate(p_begin, p_end, Rational(0), [](const Rational &s, const Number &n) {
+        return s + static_cast<Rational>(n);
+      }) != Rational(1)) {
     throw ValueException("Probabilities must sum to exactly one");
   }
+}
+
+inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
+}
+
+inline void ValidateDistribution(const std::vector<Number> &p_probs,
+                                 const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
 }
 
 class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
@@ -1412,6 +1430,14 @@ public:
   //@{
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
+  /// Form the collection of nodes into a single event carrying the given
+  /// probability distribution over its actions.  The nodes need not currently be
+  /// chance nodes; personal decision nodes are converted.
+  virtual GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                const std::string &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// Ensure the reduced-form strategies have been derived and indexed

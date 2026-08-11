@@ -260,7 +260,8 @@ class NodeOutcome:
 
 @cython.cclass
 class NodePlayer:
-    """The player who makes the decision at a node.
+    """The player associated with a node: the one who makes the decision, if the node
+    is personal, or the chance player, if the node is an event.
 
     A lazy, node-anchored view: holds the node and resolves its player on each access,
     so the value reflects the current state of the game even after the game is mutated.
@@ -408,7 +409,8 @@ class Node:
 
     @property
     def player(self) -> NodePlayer:
-        """The player who makes the decision at this node.
+        """The player associated with this node: the one who makes the decision, if this is
+        a personal node, or the chance player, if this is an event.
 
         Returns a lazy, node-anchored view resolved on each access, so the value reflects
         the current state of the game even if the game is mutated after this property is read.
