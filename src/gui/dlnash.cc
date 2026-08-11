@@ -83,11 +83,10 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return EnumMixedNashSpec{};
   }
   if (p_method == s_enumpoly) {
-    auto spec = EnumPolyNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.stopAfter = 1;
+      return EnumPolyNashSpec{.stopAfter = 1};
     }
-    return spec;
+    return EnumPolyNashSpec{};
   }
   if (p_method == s_gnm) {
     return GNMNashSpec{};
@@ -108,11 +107,10 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return LogitNashSpec{};
   }
   if (p_method == s_simpdiv) {
-    auto spec = SimpdivNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.startingPoints = 1;
+      return SimpdivNashSpec{.startingPoints = 1};
     }
-    return spec;
+    return SimpdivNashSpec{};
   }
   throw std::logic_error("Unknown Nash equilibrium method");
 }

@@ -50,7 +50,7 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
   }
   std::list<MixedStrategyProfile<double>> eqa;
   const auto perturbation = ToProfile(p_game, p_pert);
-  p_onEvent(Nash::GNMPerturbationEvent{perturbation});
+  p_onEvent(Nash::GNMPerturbationEvent{.profile = perturbation});
   cvector norm_pert = p_pert / p_pert.norm();
   auto callback = [p_game, p_onEquilibrium, p_onEvent](const std::string &label,
                                                        const cvector &sigma) {
@@ -59,15 +59,15 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
       p_onEquilibrium(profile);
     }
     else if (label == "start") {
-      p_onEvent(Nash::GNMStartEvent{profile});
+      p_onEvent(Nash::GNMStartEvent{.profile = profile});
     }
     else {
-      p_onEvent(Nash::GNMStepEvent{profile, std::stod(label)});
+      p_onEvent(Nash::GNMStepEvent{.profile = profile, .lambda = std::stod(label)});
     }
   };
   const GNMResult result = GNM(*p_rep, norm_pert, p_steps, FUZZ, p_localNewtonInterval,
                                p_localNewtonMaxits, p_lambdaEnd, WOBBLE, THRESHOLD, callback);
-  p_onEvent(Nash::GNMTerminationEvent{result.reason, result.message});
+  p_onEvent(Nash::GNMTerminationEvent{.reason = result.reason, .message = result.message});
   for (const auto &answer : result.equilibria) {
     eqa.push_back(ToProfile(p_game, answer));
   }
