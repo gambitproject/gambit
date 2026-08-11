@@ -38,22 +38,62 @@ are to be found. Some algorithms for computing equilibria are adapted
 to finding a single equilibrium, while others attempt to compute the
 whole equilibrium set. The first drop-down in the dialog specifies how
 many equilibria to compute. In this drop-down there are options for
-:guilabel:`as many equilibria as possible` and, for two-player games,
-:guilabel:`all equilibria`.  For some games, there exist algorithms which will
+:guilabel:`Compute one Nash equilibrium`, :guilabel:`Compute some Nash equilibria`,
+and, for two-player games, :guilabel:`Compute all Nash equilibria`.
+For some games, there exist algorithms which will
 compute many equilibria (relatively) efficiently, but are not
 guaranteed to find all equilibria.
 
-To simplify this process of choosing the method to compute equilibria
-in the second drop-down, Gambit provides for any game "recommended"
-methods for computing one, some, and all Nash equilibria,
-respectively. These methods are selected based on experience as to the
-efficiency and reliability of the methods, and should generally work
-well on most games. For more control over the process, the user can
-select from the second drop-down in the dialog one of the appropriate
-methods for computing equilibria. This list only shows the methods
-which are appropriate for the game, given the selection of how many
-equilibria to compute. More details on these methods are contained
-in :ref:`command-line`.
+To simplify this process of choosing the method to compute equilibria,
+the second drop-down offers :guilabel:`Gambit's recommended method`.
+The recommendation is determined by the requested number of equilibria
+and the structure of the game as follows.
+
+=======================  =============================================  ==================
+Requested output         Game                                           Method
+=======================  =============================================  ==================
+One equilibrium          Two players and constant sum                   :ref:`lp`
+One equilibrium          Any other supported game                       :ref:`logit`
+Some equilibria          Two players                                    :ref:`lcp`
+Some equilibria          Three or more players                          :ref:`simpdiv`
+All equilibria           Two players                                    :ref:`enummixed`
+=======================  =============================================  ==================
+
+The :guilabel:`all equilibria` choice is therefore offered only for
+two-player games.  The recommendation selects an algorithm; it does not
+infer properties such as uniqueness.  In particular, "some" means that
+the selected method searches for multiple equilibria where possible, not
+that a particular number of distinct equilibria is guaranteed.
+
+For more control, the user can select one of the other methods shown in
+the second drop-down.  The list is filtered using the requested output
+category and the methods' applicability.  Methods which only operate on
+strategic games automatically select and lock the strategic
+representation.  Otherwise an extensive game may be solved using either
+its behavior representation or its reduced strategic representation.
+See :ref:`algorithms` for descriptions and limitations of the methods.
+
+The current dialog uses the following solver parameters.  They are
+recorded with each computation so that the interface can expose them for
+editing in a future revision.
+
+================  ============================================================================
+Method            Parameters used by the graphical interface
+================  ============================================================================
+``enumpure``      Enumerate all pure-strategy equilibria.
+``enummixed``     Enumerate all mixed-strategy extreme equilibria.
+``enumpoly``      Stop after the first equilibrium when "one" is requested; otherwise search all
+                  supports; maximum regret ``1e-4``.
+``lp``            No method-specific parameters.
+``lcp``           Search all accessible equilibria; unlimited recursion depth.
+``liap``          10 random starting points; 1,000 iterations per point; maximum regret ``1e-4``.
+``logit``         Maximum regret ``1e-8``; initial step ``0.03``; maximum acceleration ``1.1``.
+``simpdiv``       One random starting point when "one" is requested, otherwise 20; denominator
+                  100; grid resize factor 2; maximum regret ``1/10000000``.
+``ipa``           One random perturbation.
+``gnm``           One random perturbation; ending lambda ``-10``; 100 steps per support cell;
+                  local Newton refinement every 3 steps, with at most 10 iterations.
+================  ============================================================================
 
 .. image::  screens/computing.*
             :width: 33%
@@ -61,11 +101,12 @@ in :ref:`command-line`.
             :align: right
             :target: _images/computing.png
 
-Finally, for extensive games, there is an option of whether to use the
-extensive or strategic game for computation. In general, computation
+For extensive games, there is an option of whether to use the
+extensive or strategic game for computation when the selected method
+supports both. In general, computation
 using the extensive game is preferred, since it is often a
 significantly more compact representation of the strategic
-characeteristics of the game than the reduced strategic game is.
+characteristics of the game than the reduced strategic game is.
 
 For even moderate sized games, computation of equilibrium can be a
 time-intensive process. Gambit runs all computations in the

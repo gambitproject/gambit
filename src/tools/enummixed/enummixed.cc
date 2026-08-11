@@ -132,9 +132,7 @@ int main(int argc, char *argv[])
     if (useFloat) {
       auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
       auto solution = EnumMixedStrategySolveDetailed<double>(
-          game, [&](const MixedStrategyProfile<double> &p, const std::string &label) {
-            renderer->Render(p, label);
-          });
+          game, [&](const MixedStrategyProfile<double> &p) { renderer->Render(p); });
       if (showConnect) {
         PrintCliques(solution->GetCliques(), renderer);
       }
@@ -142,9 +140,7 @@ int main(int argc, char *argv[])
     else {
       auto renderer = MakeMixedStrategyProfileRenderer<Rational>(std::cout, numDecimals, false);
       auto solution = EnumMixedStrategySolveDetailed<Rational>(
-          game, [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
-            renderer->Render(p, label);
-          });
+          game, [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); });
       if (showConnect) {
         PrintCliques(solution->GetCliques(), renderer);
       }

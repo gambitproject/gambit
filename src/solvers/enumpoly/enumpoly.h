@@ -24,46 +24,41 @@
 #ifndef GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 #define GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 
+#include <variant>
+
 #include "games/nash.h"
 #include "solvers/nashsupport/nashsupport.h"
 
 namespace Gambit::Nash {
 
-using EnumPolyMixedStrategyObserverFunctionType =
-    std::function<void(const MixedStrategyProfile<double> &)>;
+template <class Support> struct EnumPolyCandidateSupportEvent {
+  const Support &support;
+};
 
-inline void EnumPolyNullMixedStrategyObserver(const MixedStrategyProfile<double> &) {}
+template <class Support> struct EnumPolySingularSupportEvent {
+  const Support &support;
+};
 
-using EnumPolyStrategySupportObserverFunctionType =
-    std::function<void(const std::string &, const StrategySupportProfile &)>;
+template <class Support>
+using EnumPolyEvent =
+    std::variant<EnumPolyCandidateSupportEvent<Support>, EnumPolySingularSupportEvent<Support>>;
 
-inline void EnumPolyNullStrategySupportObserver(const std::string &,
-                                                const StrategySupportProfile &)
-{
-}
+template <class Support>
+using EnumPolyEventCallbackType = std::function<void(const EnumPolyEvent<Support> &)>;
 
-std::list<MixedStrategyProfile<double>> EnumPolyStrategySolve(
-    const Game &p_game, int p_stopAfter, double p_maxregret,
-    EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
-    EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
+template <class Support> void NullEnumPolyEventCallback(const EnumPolyEvent<Support> &) {}
 
-using EnumPolyMixedBehaviorObserverFunctionType =
-    std::function<void(const MixedBehaviorProfile<double> &)>;
+std::list<MixedStrategyProfile<double>>
+EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
+                      StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
+                          NullEnumPolyEventCallback<StrategySupportProfile>);
 
-inline void EnumPolyNullMixedBehaviorObserver(const MixedBehaviorProfile<double> &) {}
-
-using EnumPolyBehaviorSupportObserverFunctionType =
-    std::function<void(const std::string &, const BehaviorSupportProfile &)>;
-
-inline void EnumPolyNullBehaviorSupportObserver(const std::string &,
-                                                const BehaviorSupportProfile &)
-{
-}
-
-std::list<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(
-    const Game &, int p_stopAfter, double p_maxregret,
-    EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium = EnumPolyNullMixedBehaviorObserver,
-    EnumPolyBehaviorSupportObserverFunctionType p_onSupport = EnumPolyNullBehaviorSupportObserver);
+std::list<MixedBehaviorProfile<double>>
+EnumPolyBehaviorSolve(const Game &, int p_stopAfter, double p_maxregret,
+                      BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
+                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =
+                          NullEnumPolyEventCallback<BehaviorSupportProfile>);
 
 } // namespace Gambit::Nash
 

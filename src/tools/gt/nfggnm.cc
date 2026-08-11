@@ -24,12 +24,36 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <type_traits>
 #include "gambit.h"
 #include "tools/util.h"
 #include "solvers/gnm/gnm.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
+
+namespace {
+
+void RenderGNMEvent(const GNMEvent &p_event,
+                    const std::shared_ptr<MixedProfileRenderer<double>> &p_renderer)
+{
+  std::visit(
+      [p_renderer](const auto &event) {
+        using Event = std::decay_t<decltype(event)>;
+        if constexpr (std::is_same_v<Event, GNMPerturbationEvent>) {
+          p_renderer->Render(event.profile, "pert");
+        }
+        else if constexpr (std::is_same_v<Event, GNMStartEvent>) {
+          p_renderer->Render(event.profile, "start");
+        }
+        else if constexpr (std::is_same_v<Event, GNMStepEvent>) {
+          p_renderer->Render(event.profile, lexical_cast<std::string>(event.lambda));
+        }
+      },
+      p_event);
+}
+
+} // namespace
 
 extern Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
                                                                      std::istream &p_stream);
@@ -184,13 +208,16 @@ int main(int argc, char *argv[])
       perts = RandomStrategyPerturbations(game, numVectors);
     }
     for (auto pert : perts) {
-      GNMStrategySolve(pert, lambdaEnd, steps, localNewtonInterval, localNewtonMaxits,
-                       [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
-                                           const std::string &p_label) {
-                         if (p_label == "NE" || verbose) {
-                           renderer->Render(p_profile, p_label);
-                         }
-                       });
+      GNMStrategySolve(
+          pert, lambdaEnd, steps, localNewtonInterval, localNewtonMaxits,
+          [renderer](const MixedStrategyProfile<double> &p_profile) {
+            renderer->Render(p_profile);
+          },
+          [renderer, verbose](const GNMEvent &p_event) {
+            if (verbose) {
+              RenderGNMEvent(p_event, renderer);
+            }
+          });
     }
     return 0;
   }

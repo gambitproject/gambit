@@ -184,7 +184,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
-  GameOutcomeRep(GameRep *p_game, int p_number);
+  GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label);
   ~GameOutcomeRep() = default;
   //@}
 
@@ -201,11 +201,7 @@ public:
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Gets the payoff associated with the outcome to the player
   template <class T> const T &GetPayoff(const GamePlayer &p_player) const;
@@ -289,11 +285,7 @@ public:
 
   bool IsChanceInfoset() const;
 
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -373,11 +365,7 @@ public:
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -464,8 +452,11 @@ public:
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
   using Sequences = ElementCollection<GamePlayer, GameSequenceRep>;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
-  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label)
+    : m_game(p_game), m_number(p_id), m_label(p_label)
+  {
+  }
+  GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats);
   ~GamePlayerRep();
 
   bool IsValid() const { return m_valid; }
@@ -475,11 +466,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -496,6 +483,8 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
+  /// Validate that p_label is a nonempty, valid, unique label for a strategy of this player.
+  void CheckStrategyLabel(const std::string &p_label) const;
   //@}
 
   /// @name Sequences
@@ -554,11 +543,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
+  void SetLabel(const std::string &p_label);
 
   int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
@@ -772,6 +757,10 @@ protected:
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
   void IndexStrategies() const;
+  /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
+  void CheckPlayerLabel(const std::string &p_label) const;
+  /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
+  void CheckOutcomeLabel(const std::string &p_label) const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1170,7 +1159,7 @@ public:
   virtual GamePlayer GetChance() const = 0;
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer() = 0;
+  virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
   //@}
 
   /// @name Dimensions of the game
@@ -1233,7 +1222,7 @@ public:
     return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
   }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome() { throw UndefinedException(); }
+  virtual GameOutcome NewOutcome(const std::string &p_label) { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
@@ -1287,6 +1276,14 @@ public:
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameOutcomeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  GetGame()->CheckOutcomeLabel(p_label);
+  m_label = p_label;
+}
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
@@ -1319,6 +1316,27 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
+inline void GameStrategyRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  GetPlayer()->CheckStrategyLabel(p_label);
+  m_label = p_label;
+}
+
+inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Strategy label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &strategy : m_strategies) {
+    if (strategy->GetLabel() == p_label) {
+      throw ValueException("Strategy label must be unique for the player");
+    }
+  }
+}
 
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
@@ -1327,9 +1345,64 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Infoset labels may be empty, but a non-empty label must be unique among
+  // the infosets of the same player.
+  if (!p_label.empty()) {
+    for (const auto &infoset : GetPlayer()->GetInfosets()) {
+      if (infoset.get() != this && infoset->GetLabel() == p_label) {
+        throw ValueException("Infoset label must be unique for the player");
+      }
+    }
+  }
+  m_label = p_label;
+}
+inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Player label must not be empty");
+  }
+  CheckLabel(p_label);
+  if (IsTree() && p_label == GetChance()->GetLabel()) {
+    throw ValueException("Player label must not be the reserved chance player label");
+  }
+  for (const auto &player : m_players) {
+    if (player->GetLabel() == p_label) {
+      throw ValueException("Player label must be unique within the game");
+    }
+  }
+}
+inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Outcome label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &outcome : m_outcomes) {
+    if (outcome->GetLabel() == p_label) {
+      throw ValueException("Outcome label must be unique within the game");
+    }
+  }
+}
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GamePlayerRep::SetLabel(const std::string &p_label)
+{
+  if (IsChance()) {
+    throw ValueException("The chance player's label cannot be changed");
+  }
+  if (p_label == m_label) {
+    return;
+  }
+  GetGame()->CheckPlayerLabel(p_label);
+  m_label = p_label;
+}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();
@@ -1347,6 +1420,22 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline void GameNodeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  // Node labels may be empty, but a non-empty label must be unique within the game.
+  if (!p_label.empty()) {
+    for (const auto &node : GetGame()->GetNodes()) {
+      if (node.get() != this && node->GetLabel() == p_label) {
+        throw ValueException("Node label must be unique within the game");
+      }
+    }
+  }
+  m_label = p_label;
+}
 inline int GameNodeRep::GetNumber() const
 {
   m_game->EnsureNodeOrdering();
@@ -1395,38 +1484,32 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @brief Reads a game representation in .efg format
 ///
 /// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
-/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
-///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
+Game ReadEfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
-/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
-///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
+Game ReadNfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
-/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
-///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
+Game ReadGbtFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream, bool p_normalizeLabels = false);
+Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator

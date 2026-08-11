@@ -201,7 +201,7 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   MixedBehaviorProfile<T> profile(p_game);
   data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
   profile.UndefinedToCentroid();
-  p_onEquilibrium(profile, "NE");
+  p_onEquilibrium(profile);
   solution.push_back(profile);
   return solution;
 }
@@ -264,7 +264,7 @@ std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
   for (int j = 1; j <= k; j++) {
     eqm[p_game->GetPlayer(2)->GetStrategy(j)] = dual[j];
   }
-  p_onEquilibrium(eqm, "NE");
+  p_onEquilibrium(eqm);
   std::list<MixedStrategyProfile<T>> solution;
   solution.push_back(eqm);
   return solution;

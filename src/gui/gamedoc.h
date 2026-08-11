@@ -27,8 +27,6 @@
 #include "style.h"
 #include "analysis.h"
 
-class TiXmlNode;
-
 namespace Gambit::GUI {
 
 class GameView;
@@ -200,8 +198,8 @@ public:
   bool CanStrategyElim() const;
   int GetStrategyElimLevel() const;
 
-  void Save(std::ostream &) const;
-  bool Load(TiXmlNode *p_game);
+  std::vector<LegacyWorkspaceFile::Analysis> Save() const;
+  bool Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses);
 };
 
 class GameDocument {
@@ -295,7 +293,7 @@ public:
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  void DoNewPlayer();
+  GamePlayer DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
   void DoNewStrategy(GamePlayer p_player);
   void DoDeleteStrategy(GameStrategy p_strategy);
@@ -326,15 +324,15 @@ public:
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
-  void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
+  void DoAnalysisOutputChanged();
 };
 
 inline GameDocument *NewTreeDocument()
 {
   const Game efg = NewTree();
   efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
+  efg->NewPlayer("Player 1");
+  efg->NewPlayer("Player 2");
   return new GameDocument(efg);
 }
 

@@ -76,7 +76,7 @@ public:
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
-  GamePlayer NewPlayer() override;
+  GamePlayer NewPlayer(const std::string &p_label) override;
   //@}
 
   /// @name Nodes

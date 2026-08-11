@@ -22,9 +22,10 @@
 
 #include <sstream>
 #include <fstream>
+#include <set>
 
 #include "gambit.h"
-#include "core/tinyxml.h" // for XML parser for LoadDocument()
+#include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()
 #include "gamedoc.h"
@@ -156,45 +157,40 @@ bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanElim
 
 int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
-void AnalysisWorkspace::Save(std::ostream &p_file) const
+std::vector<LegacyWorkspaceFile::Analysis> AnalysisWorkspace::Save() const
 {
-  std::for_each(m_profiles.begin(), m_profiles.end(),
-                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+  std::vector<LegacyWorkspaceFile::Analysis> result;
+  for (const auto &analysis : m_profiles) {
+    result.push_back(analysis->Save());
+  }
+  return result;
 }
 
-bool AnalysisWorkspace::Load(TiXmlNode *p_game)
+bool AnalysisWorkspace::Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses)
 {
   m_stratSupports.Reset();
 
   m_profiles.clear();
 
-  for (TiXmlNode *analysis = p_game->FirstChild("analysis"); analysis;
-       analysis = analysis->NextSibling()) {
-    const char *type = analysis->ToElement()->Attribute("type");
-    // const char *rep = analysis->ToElement()->Attribute("rep");
-    if (type && !strcmp(type, "list")) {
-      // Read in a list of profiles
-      // We need to try to guess whether the profiles are float or rational
-      bool isFloat = false;
-      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
-           profile = profile->NextSiblingElement()) {
-        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
-            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
-          isFloat = true;
-          break;
-        }
+  for (const auto &analysis : p_analyses) {
+    // We need to try to guess whether the profiles are float or rational
+    bool isFloat = false;
+    for (const auto &profile : analysis.profiles) {
+      if (profile.probabilities.find('.') != std::string::npos ||
+          profile.probabilities.find('e') != std::string::npos) {
+        isFloat = true;
+        break;
       }
-
-      if (isFloat) {
-        auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-      else {
-        auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
+    }
+    if (isFloat) {
+      auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
+    }
+    else {
+      auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
     }
   }
 
@@ -221,116 +217,49 @@ GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
 bool GameDocument::LoadWorkspace(const wxString &p_filename)
 {
-  TiXmlDocument doc(p_filename.mb_str());
-  if (!doc.LoadFile()) {
-    // Some error occurred.  Do something smart later.
+  std::ifstream input(p_filename.mb_str());
+  if (!input) {
     return false;
   }
 
-  TiXmlNode *docroot = doc.FirstChild("gambit:document");
-
-  if (!docroot) {
-    // This is an "old-style" file that didn't have a proper root.
-    docroot = &doc;
+  LegacyWorkspaceFile workspace;
+  try {
+    workspace = Gambit::ReadLegacyWorkspace(input);
   }
-
-  TiXmlNode *game = docroot->FirstChild("game");
-  if (!game) {
-    // There ought to be at least one game child.  If not... umm...
+  catch (const std::runtime_error &) {
     return false;
   }
-
-  TiXmlNode *efgfile = game->FirstChild("efgfile");
-  if (efgfile) {
-    try {
-      std::istringstream s(efgfile->FirstChild()->Value());
-      m_game = ReadGame(s);
-    }
-    catch (...) {
-      return false;
-    }
+  try {
+    std::istringstream game_text(workspace.game);
+    m_game = ReadGame(game_text);
   }
-
-  TiXmlNode *nfgfile = game->FirstChild("nfgfile");
-  if (nfgfile) {
-    try {
-      std::istringstream s(nfgfile->FirstChild()->Value());
-      m_game = ReadGame(s);
-    }
-    catch (...) {
-      return false;
-    }
-  }
-
-  if (!efgfile && !nfgfile) {
-    // No game representation... punt!
+  catch (...) {
     return false;
   }
-
-  if (!m_workspace.Load(game)) {
+  if (!m_workspace.Load(workspace.analyses)) {
     return false;
   }
-
-  TiXmlNode *colors = docroot->FirstChild("colors");
-  if (colors) {
-    m_style.SetColorXML(colors);
-  }
-  TiXmlNode *font = docroot->FirstChild("font");
-  if (font) {
-    m_style.SetFontXML(font);
-  }
-  TiXmlNode *layout = docroot->FirstChild("autolayout");
-  if (layout) {
-    m_style.SetLayoutXML(layout);
-  }
-  TiXmlNode *labels = docroot->FirstChild("labels");
-  if (labels) {
-    m_style.SetLabelXML(labels);
-  }
-  TiXmlNode *numbers = docroot->FirstChild("numbers");
-  if (numbers) {
-    int numDecimals = 4;
-    numbers->ToElement()->QueryIntAttribute("decimals", &numDecimals);
-    m_style.SetNumDecimals(numDecimals);
-  }
-
+  m_style.Load(workspace);
   return true;
 }
 
 void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
-  p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-
-  p_file << "<gambit:document xmlns:gambit=\"http://gambit.sourceforge.net/\" version=\"0.1\">\n";
-
-  p_file << m_style.GetColorXML();
-  p_file << m_style.GetFontXML();
-
-  if (m_game->IsTree()) {
-    p_file << m_style.GetLayoutXML();
-    p_file << m_style.GetLabelXML();
+  LegacyWorkspaceFile workspace;
+  m_style.Save(workspace);
+  workspace.game_format = m_game->IsTree() ? "efg" : "nfg";
+  if (!m_game->IsTree()) {
+    workspace.layout.reset();
+    workspace.labels.reset();
   }
-
-  p_file << "<numbers decimals=\"" << m_style.NumDecimals() << "\"/>\n";
-
-  p_file << "<game>\n";
-
-  if (m_game->IsTree()) {
-    p_file << "<efgfile>\n";
-    m_game->Write(p_file, "efg");
-    p_file << "</efgfile>\n";
+  std::ostringstream game_text;
+  m_game->Write(game_text, workspace.game_format);
+  workspace.game = game_text.str();
+  if (!workspace.game.empty() && workspace.game.back() == '\n') {
+    workspace.game.pop_back();
   }
-  else {
-    p_file << "<nfgfile>\n";
-    m_game->Write(p_file, "nfg");
-    p_file << "</nfgfile>\n";
-  }
-
-  m_workspace.Save(p_file);
-
-  p_file << "</game>\n";
-
-  p_file << "</gambit:document>\n";
+  workspace.analyses = m_workspace.Save();
+  Gambit::WriteLegacyWorkspace(p_file, workspace);
 }
 
 void GameDocument::NotifyChanged(GameModificationType p_modifications)
@@ -396,11 +325,7 @@ void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_prof
   NotifyChanged(GameModificationType::Workspace);
 }
 
-void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
-{
-  p_list.AddOutput(p_output);
-  NotifyChanged(GameModificationType::Workspace);
-}
+void GameDocument::DoAnalysisOutputChanged() { NotifyChanged(GameModificationType::Workspace); }
 
 void GameDocument::DoSelectEquilibriumOutput(int p_index)
 {
@@ -479,14 +404,24 @@ void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoNewPlayer()
+GamePlayer GameDocument::DoNewPlayer()
 {
-  const GamePlayer player = m_game->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
+  std::set<std::string> playerLabels;
+
+  for (const auto &player : m_game->GetPlayers()) {
+    playerLabels.insert(player->GetLabel());
+  }
+
+  int number = m_game->NumPlayers() + 1;
+  while (contains(playerLabels, "Player " + lexical_cast<std::string>(number))) {
+    number++;
+  }
+  const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
   }
   NotifyChanged(GameModificationType::GameForm);
+  return player;
 }
 
 void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
@@ -497,7 +432,15 @@ void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label
 
 void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
+  std::set<std::string> strategyLabels;
+  for (const auto &strategy : p_player->GetStrategies()) {
+    strategyLabels.insert(strategy->GetLabel());
+  }
+  int number = p_player->GetStrategies().size() + 1;
+  while (contains(strategyLabels, std::to_string(number))) {
+    number++;
+  }
+  m_game->NewStrategy(p_player, std::to_string(number));
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -628,15 +571,40 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   }
 }
 
+namespace {
+
+std::string GenerateOutcomeLabel(const Game &p_game)
+{
+  std::set<std::string> outcomeLabels;
+  for (const auto &outcome : p_game->GetOutcomes()) {
+    outcomeLabels.insert(outcome->GetLabel());
+  }
+  int outc = p_game->GetOutcomes().size() + 1;
+  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+    outc++;
+  }
+  return "Outcome " + std::to_string(outc);
+}
+
+} // namespace
+
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->SetOutcome(p_node, m_game->NewOutcome());
+  std::set<std::string> outcomeLabels;
+  for (const auto &outcome : m_game->GetOutcomes()) {
+    outcomeLabels.insert(outcome->GetLabel());
+  }
+  int outc = m_game->GetOutcomes().size() + 1;
+  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+    outc++;
+  }
+  m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
-  p_profile->SetOutcome(m_game->NewOutcome());
+  p_profile->SetOutcome(m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
@@ -688,11 +656,12 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   }
 
   if (!outcome) {
-    outcome = GetGame()->NewOutcome();
-    GetGame()->SetOutcome(p_node, outcome);
+    outcome = m_game->NewOutcome(p_label.ToStdString());
+    m_game->SetOutcome(p_node, outcome);
   }
-
-  outcome->SetLabel(label);
+  else {
+    outcome->SetLabel(label);
+  }
 
   for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
     outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
@@ -712,7 +681,7 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
 
 void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  const GameOutcome outcome = m_game->NewOutcome();
+  const GameOutcome outcome = m_game->NewOutcome(GenerateOutcomeLabel(m_game));
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
   for (const auto &player : m_game->GetPlayers()) {
     outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));

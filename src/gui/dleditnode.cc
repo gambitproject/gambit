@@ -24,6 +24,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/richmsgdlg.h>
 #include "gambit.h"
 #include "dleditnode.h"
 
@@ -39,9 +40,9 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, 5);
-  m_nodeName =
-      new wxTextCtrl(this, wxID_ANY, wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
-  labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
+  m_nodeLabel =
+      new LabelTextCtrl(this, wxID_ANY, wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
+  labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
   auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -153,6 +154,25 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
 
   wxTopLevelWindowBase::Layout();
   CenterOnParent();
+
+  Bind(wxEVT_BUTTON, &EditNodeDialog::OnOK, this, wxID_OK);
+}
+
+void EditNodeDialog::OnOK(wxCommandEvent &p_event)
+{
+  const wxString nodeLabel = m_nodeLabel->GetNormalizedValue();
+  if (!nodeLabel.empty()) {
+    for (const auto &node : m_node->GetGame()->GetNodes()) {
+      if (node != m_node && node->GetLabel() == nodeLabel) {
+        wxRichMessageDialog(this, _("Node label must be unique in the game."), _("Error"),
+                            wxOK | wxCENTRE | wxICON_ERROR)
+            .ShowModal();
+        m_nodeLabel->SetFocus();
+        return;
+      }
+    }
+  }
+  p_event.Skip();
 }
 
 GameInfoset EditNodeDialog::GetInfoset() const
@@ -160,8 +180,6 @@ GameInfoset EditNodeDialog::GetInfoset() const
   if (m_infoset->GetSelection() == 0) {
     return nullptr;
   }
-  else {
-    return m_infosetList[m_infoset->GetSelection()];
-  }
+  return m_infosetList[m_infoset->GetSelection()];
 }
 } // namespace Gambit::GUI

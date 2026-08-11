@@ -55,18 +55,15 @@ class Strategy:
         """Get or set the text label associated with the strategy.
 
         .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+            A strategy label must be nonempty and unique among the player's strategies;
+            an empty or duplicate label now raises ``ValueError``.  A label may contain only
+            printable ASCII characters and spaces, not begin/end with a space, nor have two
+            consecutive spaces.
         """
         return self.strategy.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (strategy.label for strategy in self.player.strategies):
-            warnings.warn("In a future version, strategies for a player must have unique labels",
-                          FutureWarning)
         self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -150,11 +147,6 @@ class Sequence:
         return f"Sequence(player={self.player}, actions={self.actions})"
 
     def __eq__(self, other: typing.Any) -> bool:
-        print("__eq__")
-        print(isinstance(other, Sequence))
-        print(type(other))
-        if isinstance(other, Sequence):
-            print(self.sequence.deref() == cython.cast(Sequence, other).sequence.deref())
         return (
             isinstance(other, Sequence) and
             self.sequence.deref() == cython.cast(Sequence, other).sequence.deref()
@@ -176,7 +168,6 @@ class Sequence:
     @property
     def parent(self) -> Sequence | None:
         """The parent (predecessor) of the sequence."""
-        print(self)
         if self.sequence.deref().GetParent() == cython.cast(c_GameSequence, NULL):
             return None
         return Sequence.wrap(self.sequence.deref().GetParent())
@@ -185,10 +176,7 @@ class Sequence:
     def children(self) -> list[Sequence]:
         """The immediate children (successors) of the sequence."""
         ret: list[Sequence] = []
-        print("Looking for children of", self)
         for seq in self.player.sequences:
-            print("Sequence", seq)
-            print("Parent", seq.parent)
             if seq.parent == self:
                 ret.append(seq)
         return ret

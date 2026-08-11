@@ -319,12 +319,12 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer(int) except +IndexError
         Players GetPlayers() except +
         c_GamePlayer GetChance() except +
-        c_GamePlayer NewPlayer() except +
+        c_GamePlayer NewPlayer(string) except +ValueError
 
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
         Outcomes GetOutcomes() except +
-        c_GameOutcome NewOutcome() except +
+        c_GameOutcome NewOutcome(string) except +ValueError
         void DeleteOutcome(c_GameOutcome) except +
 
         int NumNodes() except +
@@ -488,11 +488,11 @@ cdef extern from "games/layout.h":
 
 
 cdef extern from "util.h":
-    c_Game ParseGbtGame(string, bint) except +IOError
-    c_Game ParseEfgGame(string, bint) except +IOError
-    c_Game ParseNfgGame(string, bint) except +IOError
-    c_Game ParseAggGame(string, bint) except +IOError
-    c_Game ParseBaggGame(string, bint) except +IOError
+    c_Game ParseGbtGame(string) except +IOError
+    c_Game ParseEfgGame(string) except +IOError
+    c_Game ParseNfgGame(string) except +IOError
+    c_Game ParseAggGame(string) except +IOError
+    c_Game ParseBaggGame(string) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError
@@ -551,9 +551,7 @@ cdef extern from "solvers/lcp/lcp.h":
     stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
-            c_Game, int p_stopAfter, int p_maxDepth
-    ) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/lp/lp.h":
     stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError

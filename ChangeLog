@@ -1,4 +1,18 @@
-## [16.7.0] - unreleased
+## [17.0.0] - unreleased
+
+### Changed
+- `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
+  to match the behaviour of all other Nash equilibrium solvers.  (#996)
+- `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of
+  the run.  (#998)
+- Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
+  removes dependency on tinyxml.  (#897)
+
+### Fixed
+- Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
+  no longer inserts spurious entries into a strategy's internal action map.
+
+## [16.7.0] - 2026-07-11
 
 ### Added
 - Added `Player.sequences` as the collection of sequences available to a player.
@@ -25,6 +39,9 @@
 - Corrected calculation of total number of actions for a player in `pygambit` (#938)
 - Corrected a regression in action graph games that left the internal data structure not fully initialised,
   leading to segmentation faults.
+- Corrected handling of malformed AGG/BAGG files: files with an invalid or degenerate header
+  (for example a wrong file type, or a header declaring zero players) are now rejected with a
+  `ValueError` instead of causing a segmentation fault while constructing the game.
 
 ### Changed
 - Added a new welcome/landing window on launching the GUI without a game.  This has the effect of
@@ -39,6 +56,9 @@
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
 - Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
+- Nonempty labels are now required for all players, outcomes, actions, and strategies.
+  Labels must be unique within the game for players and outcomes, within the player for
+  strategies, and within the information set for actions.
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
 - In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates

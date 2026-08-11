@@ -426,8 +426,8 @@ public:
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
-  void RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
-  void RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
+  wxString RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
+  wxString RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
 
   bool CanDeleteRowHeaderStrategy(int headerCol, int headerRow) const;
   bool CanDeleteColHeaderStrategy(int headerRow, int headerCol) const;

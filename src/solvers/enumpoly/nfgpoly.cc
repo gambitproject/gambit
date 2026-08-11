@@ -140,9 +140,14 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
-                      EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
-                      EnumPolyStrategySupportObserverFunctionType p_onSupport)
+                      StrategyCallbackType<double> p_onEquilibrium,
+                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent)
 {
+  if (!p_game->IsPerfectRecall()) {
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
+  }
+
   const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
   if (scale != 0.0) {
     p_maxregret *= scale;
@@ -152,7 +157,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   auto possible_supports = PossibleNashStrategySupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
-    p_onSupport("candidate", support);
+    p_onEvent(EnumPolyCandidateSupportEvent<StrategySupportProfile>{support});
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(
              support, is_singular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
@@ -164,7 +169,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     }
 
     if (is_singular) {
-      p_onSupport("singular", support);
+      p_onEvent(EnumPolySingularSupportEvent<StrategySupportProfile>{support});
     }
     if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;

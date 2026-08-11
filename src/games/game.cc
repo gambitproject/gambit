@@ -39,8 +39,10 @@ namespace Gambit {
 //                       class GameOutcomeRep
 //========================================================================
 
-GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label)
+  : m_game(p_game), m_number(p_number), m_label(p_label)
 {
+  CheckLabel(p_label);
   for (const auto &player : m_game->m_players) {
     m_payoffs[player.get()] = Number();
   }
@@ -67,8 +69,8 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 //                       class GamePlayerRep
 //========================================================================
 
-GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id)
+GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats)
+  : m_game(p_game), m_number(p_id), m_label(p_label)
 {
   for (int j = 1; j <= p_strats; j++) {
     m_strategies.push_back(std::make_shared<GameStrategyRep>(this, j, ""));
@@ -94,7 +96,7 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
   strategy->m_behav = behav;
   for (const auto &infoset : m_infosets) {
     strategy->m_label += (contains(strategy->m_behav, infoset.get()))
-                             ? std::to_string(strategy->m_behav[infoset.get()])
+                             ? std::to_string(strategy->m_behav.at(infoset.get()))
                              : "*";
   }
   if (strategy->m_label.empty()) {
@@ -303,8 +305,9 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
       for (const auto &infoset : player->m_infosets) {
-        if (strategy->m_behav[infoset.get()] > 0) {
-          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset.get()])];
+        if (contains(strategy->m_behav, infoset.get()) &&
+            strategy->m_behav.at(infoset.get()) > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav.at(infoset.get()))];
         }
       }
       (*m_rep)[strategy] = prob;

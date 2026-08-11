@@ -55,7 +55,8 @@ namespace Gambit::gametracer {
 /// @param threshold  the equilibrium error threshold for doing a wobble.  If
 ///                   wobbles are disabled, GNM will terminate if the error
 ///                   reaches this threshold.
-/// @param p_onStep   a callback function executed on each step of the algorithm
+/// @param p_onStep   a callback function executed on each step of the algorithm and whenever an
+///                   equilibrium is found (with label "NE")
 void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
          int LNMMax, double LambdaMin, bool wobble, double threshold,
          std::function<void(const std::string &, const cvector &)> p_onStep,

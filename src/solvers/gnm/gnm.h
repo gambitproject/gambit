@@ -23,6 +23,8 @@
 #ifndef GAMBIT_NASH_GNM_H
 #define GAMBIT_NASH_GNM_H
 
+#include <variant>
+
 #include "games/nash.h"
 #include "solvers/gtracer/gtracer.h"
 
@@ -33,17 +35,37 @@ const int GNM_LOCAL_NEWTON_INTERVAL_DEFAULT = 3;
 const int GNM_LOCAL_NEWTON_MAXITS_DEFAULT = 10;
 const int GNM_STEPS_DEFAULT = 100;
 
+struct GNMPerturbationEvent {
+  const MixedStrategyProfile<double> &profile;
+};
+
+struct GNMStartEvent {
+  const MixedStrategyProfile<double> &profile;
+};
+
+struct GNMStepEvent {
+  const MixedStrategyProfile<double> &profile;
+  double lambda;
+};
+
+using GNMEvent = std::variant<GNMPerturbationEvent, GNMStartEvent, GNMStepEvent>;
+using GNMEventCallbackType = std::function<void(const GNMEvent &)>;
+
+inline void NullGNMEventCallback(const GNMEvent &) {}
+
 std::list<MixedStrategyProfile<double>>
 GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
                  int p_localNewtonMaxits,
-                 StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
+                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 GNMEventCallbackType p_onEvent = NullGNMEventCallback);
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
 std::list<MixedStrategyProfile<double>>
 GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
                  int p_localNewtonInterval, int p_localNewtonMaxits,
-                 StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
+                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 GNMEventCallbackType p_onEvent = NullGNMEventCallback);
 
 } // end namespace Gambit::Nash
 

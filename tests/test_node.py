@@ -238,7 +238,7 @@ SUBGAME_ROOTS_CASES = [
             factory=functools.partial(
                 games.read_from_file,
                 "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
-            expected_paths=[[], ["1"], ["1", "1"], ["1", "1", "1"]]
+            expected_paths=[[], ["1_2"], ["1_2", "1_3", "1_2"], ["1_3", "1_2"]]
         ),
         id="overlapping_infosets_inside_subgames_and_Nature_move"
     ),
@@ -1123,6 +1123,22 @@ def test_node_label_valid(label):
     game = games.read_from_file("basic_extensive_game.efg")
     game.root.label = label
     assert game.root.label == label
+
+
+def test_node_label_duplicate_raises_valueerror():
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = "shared"
+    with pytest.raises(ValueError):
+        game.root.children["U1"].label = "shared"
+
+
+def test_node_label_empty_is_allowed():
+    """Node labels may be empty (unlike outcomes/players); multiple empties coexist."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = ""
+    game.root.children["U1"].label = ""
+    assert game.root.label == ""
+    assert game.root.children["U1"].label == ""
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)

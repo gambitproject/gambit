@@ -123,32 +123,28 @@ int main(int argc, char *argv[])
       if (useFloat) {
         auto renderer =
             MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, printDetail);
-        LpStrategySolve<double>(game,
-                                [&](const MixedStrategyProfile<double> &p,
-                                    const std::string &label) { renderer->Render(p, label); });
+        LpStrategySolve<double>(
+            game, [&](const MixedStrategyProfile<double> &p) { renderer->Render(p); });
       }
       else {
         auto renderer =
             MakeMixedStrategyProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
-        LpStrategySolve<Rational>(game,
-                                  [&](const MixedStrategyProfile<Rational> &p,
-                                      const std::string &label) { renderer->Render(p, label); });
+        LpStrategySolve<Rational>(
+            game, [&](const MixedStrategyProfile<Rational> &p) { renderer->Render(p); });
       }
     }
     else {
       if (useFloat) {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, printDetail);
-        LpBehaviorSolve<double>(game,
-                                [&](const MixedBehaviorProfile<double> &p,
-                                    const std::string &label) { renderer->Render(p, label); });
+        LpBehaviorSolve<double>(
+            game, [&](const MixedBehaviorProfile<double> &p) { renderer->Render(p); });
       }
       else {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
-        LpBehaviorSolve<Rational>(game,
-                                  [&](const MixedBehaviorProfile<Rational> &p,
-                                      const std::string &label) { renderer->Render(p, label); });
+        LpBehaviorSolve<Rational>(
+            game, [&](const MixedBehaviorProfile<Rational> &p) { renderer->Render(p); });
       }
     }
     return 0;
