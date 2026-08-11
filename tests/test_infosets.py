@@ -206,6 +206,21 @@ def test_make_chance_event_label_held_by_rump_raises():
     assert game.to_efg() == before
 
 
+def test_make_chance_event_label_reused_when_fully_absorbed():
+    """A label held by an existing chance event may be reused once all of that
+    event's members are absorbed into the new one; the old event is not left behind.
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+    nodes = [game.root.children["King"], game.root.children["Queen"]]
+    game.make_chance_event(nodes, ["1/2", "1/2"], "Coin")
+    game.make_chance_event(nodes, ["1/4", "3/4"], "Coin")
+    assert nodes[0].infoset == nodes[1].infoset
+    assert nodes[0].infoset.label == "Coin"
+    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
+                                                          gbt.Rational("3/4")]
+    assert [infoset.label for infoset in game.players.chance.infosets].count("Coin") == 1
+
+
 @pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40], ["foo", "bar"]])
 def test_make_chance_event_invalid_probs_raises(probs):
     """Values must be numbers, non-negative, and sum to exactly one."""
