@@ -128,7 +128,7 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 TracePathResult
 PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
                       std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                      Vector<double> &x, TraceDirection p_direction, size_t tracking_index,
+                      Vector<double> &x, TraceDirection p_direction, size_t p_tracking_index,
                       TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
                       CriterionFunctionType p_criterion,
                       CriterionBracketFunctionType p_criterionBracket) const
@@ -146,6 +146,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
+  const double orientation_tol = 1.0e-8; // tolerance for detecting change in orientation
 
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
@@ -159,7 +160,11 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   q.GetRow(q.NumRows(), t);
   p_callback(x);
   bool first_step = true;
-  double p_omega = static_cast<int>(p_direction);
+  double omega = (p_direction == TraceDirection::Positive) ? 1.0 : -1.0;
+
+  if (p_tracking_index > x.size() || p_tracking_index < 1) {
+    return {x, false, "Tracking index exceeds dimension of point vector."};
+  }
 
   while (!p_terminate(x)) {
     bool accept = true;
@@ -169,20 +174,20 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     }
 
     if (first_step) {
+      if (std::abs(t[p_tracking_index]) <= orientation_tol) {
+        return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
+      }
       // Ensure that the tangent is oriented in the same direction as
       // the path-following direction.
-      if (t[tracking_index] < 0.0) {
-        p_omega *= -1.0;
-      }
-      else if (t[tracking_index] == 0.0) {
-        return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
+      else if (t[p_tracking_index] < -orientation_tol) {
+        omega *= -1.0;
       }
       first_step = false;
     }
 
     // Predictor step
     for (size_t k = 1; k <= x.size(); k++) {
-      u[k] = x[k] + h * p_omega * t[k];
+      u[k] = x[k] + h * omega * t[k];
     }
 
     double decel = 1.0 / m_maxDecel; // initialize deceleration factor
