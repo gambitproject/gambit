@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <concepts>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -116,28 +117,30 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
   throw std::logic_error("Unknown Nash equilibrium method");
 }
 
+template <class M>
+concept StrategicMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
+    std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
+
+// Methods that report exact (rational) probabilities rather than floating-point
+// approximations.
+template <class M>
+concept RationalOutputMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, LPNashSpec> || std::same_as<M, LCPNashSpec>;
+
 bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, GNMNashSpec> ||
-               std::is_same_v<Method, IPANashSpec> || std::is_same_v<Method, LiapNashSpec> ||
-               std::is_same_v<Method, SimpdivNashSpec>;
-      },
+      [](const auto &method) { return StrategicMethod<std::decay_t<decltype(method)>>; },
       p_method);
 }
 
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, LPNashSpec> ||
-               std::is_same_v<Method, LCPNashSpec>;
-      },
+      [](const auto &method) { return RationalOutputMethod<std::decay_t<decltype(method)>>; },
       p_method);
 }
 
