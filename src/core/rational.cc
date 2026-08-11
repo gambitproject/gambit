@@ -289,7 +289,8 @@ std::istream &operator>>(std::istream &f, Rational &y)
   while (isspace(ch)) {
     f.get(ch);
     if (f.eof() || f.bad()) {
-      throw ValueException();
+      f.setstate(std::ios::failbit);
+      return f;
     }
   }
 

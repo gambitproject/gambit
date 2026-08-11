@@ -158,7 +158,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("enumpure") + strategic;
         }
         else if constexpr (std::is_same_v<Method, EnumMixedNashSpec>) {
-          return prefix + wxT("enummixed") + strategic;
+          return prefix + wxT("enummixed");
         }
         else if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           return prefix +
@@ -167,14 +167,13 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                  strategic;
         }
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
-          return prefix +
-                 wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
-                                  method.perturbations, method.lambdaEnd, method.steps,
-                                  method.localNewtonInterval, method.localNewtonMaxIterations) +
-                 strategic;
+          return prefix + wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
+                                           method.perturbations, method.lambdaEnd, method.steps,
+                                           method.localNewtonInterval,
+                                           method.localNewtonMaxIterations);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
-          return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations) + strategic;
+          return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations);
         }
         else if constexpr (std::is_same_v<Method, LPNashSpec>) {
           return prefix + wxT("lp") + strategic;
@@ -184,10 +183,9 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                  strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
-          return prefix +
-                 wxString::Format("liap -d 10 -n %d -i %d -m %.17g", method.startingPoints,
-                                  method.maxIterations, method.maxRegret) +
-                 strategic;
+          return prefix + wxString::Format("liap -d 10 -n %d -i %d -m %.17g",
+                                           method.startingPoints, method.maxIterations,
+                                           method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, LogitNashSpec>) {
           return prefix +
@@ -201,7 +199,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix +
                  wxString::Format("simpdiv -d 10 -n %d -r %d -g %d -m ", method.startingPoints,
                                   method.randomDenominator, method.gridResize) +
-                 wxString(regret.str()) + strategic;
+                 wxString(regret.str());
         }
       },
       p_spec.method);
