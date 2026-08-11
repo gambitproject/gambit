@@ -76,13 +76,8 @@ public:
   {
     const int maxPlayer = static_cast<int>(m_doc->GetGame()->NumPlayers());
 
-    m_rowPlayers.erase(std::remove_if(m_rowPlayers.begin(), m_rowPlayers.end(),
-                                      [maxPlayer](int pl) { return pl > maxPlayer; }),
-                       m_rowPlayers.end());
-
-    m_colPlayers.erase(std::remove_if(m_colPlayers.begin(), m_colPlayers.end(),
-                                      [maxPlayer](int pl) { return pl > maxPlayer; }),
-                       m_colPlayers.end());
+    std::erase_if(m_rowPlayers, [maxPlayer](int pl) { return pl > maxPlayer; });
+    std::erase_if(m_colPlayers, [maxPlayer](int pl) { return pl > maxPlayer; });
 
     for (int pl = 1; pl <= maxPlayer; ++pl) {
       if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
@@ -93,13 +88,8 @@ public:
 
   void SetRowPlayer(int index, int pl)
   {
-    if (contains(m_colPlayers, pl)) {
-      m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
-    }
-
-    if (contains(m_rowPlayers, pl)) {
-      m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
-    }
+    std::erase(m_colPlayers, pl);
+    std::erase(m_rowPlayers, pl);
 
     index = std::max(1, index);
     index = std::min(index, static_cast<int>(m_rowPlayers.size()) + 1);
@@ -111,13 +101,8 @@ public:
 
   void SetColPlayer(int index, int pl)
   {
-    if (contains(m_rowPlayers, pl)) {
-      m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
-    }
-
-    if (contains(m_colPlayers, pl)) {
-      m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
-    }
+    std::erase(m_rowPlayers, pl);
+    std::erase(m_colPlayers, pl);
 
     index = std::max(1, index);
     index = std::min(index, static_cast<int>(m_colPlayers.size()) + 1);
