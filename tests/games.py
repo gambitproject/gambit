@@ -162,7 +162,7 @@ def _create_kuhn_poker_efg_without_outcomes():
         return [d for d in deals if d[player_idx] == card]
 
     g.append_move(g.root, g.players.chance, deals)
-    g.make_chance_event([g.root], [gbt.Rational(1, 6)] * 6)
+    g.make_event([g.root], [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
         term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]

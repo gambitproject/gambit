@@ -118,21 +118,21 @@ def test_infoset_plays():
         ({"King": 1}, [1, 0]),
     ],
 )
-def test_make_chance_event_sets_probabilities(inprobs, outprobs):
+def test_make_event_sets_probabilities(inprobs, outprobs):
     """Probabilities may be given positionally, or as a mapping in which omitted
     actions are assigned zero.
     """
     game = games.read_from_file("stripped_down_poker.efg")
-    game.make_chance_event([game.root], inprobs, "Deal")
+    game.make_event([game.root], inprobs, "Deal")
     for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
         assert action.prob == prob
 
 
-def test_make_chance_event_pools_nodes_from_different_infosets():
-    """Nodes in distinct information sets are formed into a single chance event."""
+def test_make_event_pools_nodes_from_different_infosets():
+    """Nodes in distinct information sets are formed into a single event."""
     game = games.read_from_file("stripped_down_poker.efg")
     nodes = [game.root.children["King"], game.root.children["Queen"]]
-    game.make_chance_event(nodes, ["1/4", "3/4"], "Coin")
+    game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].infoset == nodes[1].infoset
     assert nodes[0].infoset.is_chance
     assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
@@ -141,7 +141,7 @@ def test_make_chance_event_pools_nodes_from_different_infosets():
 
 
 @pytest.mark.parametrize("probs", [["1/2", "1/2"], {"Call": 1}])
-def test_make_chance_event_requires_matching_action_labels(probs):
+def test_make_event_requires_matching_action_labels(probs):
     """Nodes must have the same actions, with the same labels in the same order.
 
     The mapping case was previously reported as an unknown action label.
@@ -150,70 +150,70 @@ def test_make_chance_event_requires_matching_action_labels(probs):
     alice_node = game.root.children["King"]        # actions Bet, Fold
     bob_node = alice_node.children["Bet"]          # actions Call, Fold
     with pytest.raises(ValueError):
-        game.make_chance_event([alice_node, bob_node], probs)
+        game.make_event([alice_node, bob_node], probs)
 
 
-def test_make_chance_event_converts_personal_node():
+def test_make_event_converts_personal_node():
     """A personal decision node becomes a chance node carrying the probabilities given."""
     game = games.read_from_file("stripped_down_poker.efg")
     node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
-    game.make_chance_event([node], ["1/4", "3/4"])
+    game.make_event([node], ["1/4", "3/4"])
     assert node.infoset.is_chance
     assert [a.prob for a in node.infoset.actions] == [gbt.Rational("1/4"),
                                                       gbt.Rational("3/4")]
 
 
-def test_make_chance_event_terminal_node_raises():
+def test_make_event_terminal_node_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     terminal = game.root.children["King"].children["Fold"]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_chance_event([terminal], ["1/2", "1/2"])
+        game.make_event([terminal], ["1/2", "1/2"])
 
 
-def test_make_chance_event_repeated_node_raises():
+def test_make_event_repeated_node_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        game.make_chance_event([game.root, game.root], ["1/2", "1/2"])
+        game.make_event([game.root, game.root], ["1/2", "1/2"])
 
 
-def test_make_chance_event_mismatch_raises():
+def test_make_event_mismatch_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     other = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(gbt.MismatchError):
-        game.make_chance_event([other.root], ["1/2", "1/2"])
+        game.make_event([other.root], ["1/2", "1/2"])
 
 
-def test_make_chance_event_strategic_game_raises():
+def test_make_event_strategic_game_raises():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_chance_event([], [1])
+        game.make_event([], [1])
 
 
-def test_make_chance_event_empty_nodes_raises():
+def test_make_event_empty_nodes_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        game.make_chance_event([], ["1/2", "1/2"])
+        game.make_event([], ["1/2", "1/2"])
 
 
-def test_make_chance_event_label_held_by_rump_raises():
+def test_make_event_label_held_by_rump_raises():
     """A label may be reused only if all members of the event holding it are absorbed."""
     game = games.read_from_file("stripped_down_poker.efg")
     nodes = [game.root.children["King"], game.root.children["Queen"]]
-    game.make_chance_event(nodes, ["1/2", "1/2"], "Coin")
+    game.make_event(nodes, ["1/2", "1/2"], "Coin")
     before = game.to_efg()
     with pytest.raises(ValueError):
-        game.make_chance_event([nodes[0]], ["1/2", "1/2"], "Coin")
+        game.make_event([nodes[0]], ["1/2", "1/2"], "Coin")
     assert game.to_efg() == before
 
 
-def test_make_chance_event_label_reused_when_fully_absorbed():
-    """A label held by an existing chance event may be reused once all of that
+def test_make_event_label_reused_when_fully_absorbed():
+    """A label held by an existing event may be reused once all of that
     event's members are absorbed into the new one; the old event is not left behind.
     """
     game = games.read_from_file("stripped_down_poker.efg")
     nodes = [game.root.children["King"], game.root.children["Queen"]]
-    game.make_chance_event(nodes, ["1/2", "1/2"], "Coin")
-    game.make_chance_event(nodes, ["1/4", "3/4"], "Coin")
+    game.make_event(nodes, ["1/2", "1/2"], "Coin")
+    game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].infoset == nodes[1].infoset
     assert nodes[0].infoset.label == "Coin"
     assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
@@ -222,21 +222,21 @@ def test_make_chance_event_label_reused_when_fully_absorbed():
 
 
 @pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40], ["foo", "bar"]])
-def test_make_chance_event_invalid_probs_raises(probs):
+def test_make_event_invalid_probs_raises(probs):
     """Values must be numbers, non-negative, and sum to exactly one."""
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        game.make_chance_event([game.root], probs)
+        game.make_event([game.root], probs)
 
 
 @pytest.mark.parametrize(
     "probs,error",
     [(["1/2"], IndexError), (["1/3", "1/3", "1/3"], IndexError), ({"Jack": 1}, KeyError)],
 )
-def test_make_chance_event_malformed_probs_raises(probs, error):
+def test_make_event_malformed_probs_raises(probs, error):
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(error):
-        game.make_chance_event([game.root], probs)
+        game.make_event([game.root], probs)
 
 
 @dataclasses.dataclass

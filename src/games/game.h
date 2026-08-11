@@ -1426,11 +1426,11 @@ public:
   //@{
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
-  /// Form the collection of nodes into a single chance event carrying the given
+  /// Form the collection of nodes into a single event carrying the given
   /// probability distribution over its actions.  The nodes need not currently be
   /// chance nodes; personal decision nodes are converted.
-  virtual GameInfoset MakeChanceEvent(const std::vector<GameNode> &, const std::vector<Number> &,
-                                      const std::string &)
+  virtual GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                const std::string &)
   {
     throw UndefinedException();
   }

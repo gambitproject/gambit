@@ -1689,9 +1689,8 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   return shared_from_this();
 }
 
-GameInfoset GameTreeRep::MakeChanceEvent(const std::vector<GameNode> &p_nodes,
-                                         const std::vector<Number> &p_probs,
-                                         const std::string &p_label)
+GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
+                                   const std::vector<Number> &p_probs, const std::string &p_label)
 {
   if (p_nodes.empty()) {
     throw ValueException("At least one node must be specified");
@@ -1702,13 +1701,13 @@ GameInfoset GameTreeRep::MakeChanceEvent(const std::vector<GameNode> &p_nodes,
       throw MismatchException();
     }
     if (node->IsTerminal()) {
-      throw UndefinedException("All nodes must be decision nodes");
+      throw UndefinedException("All nodes must be nonterminal");
     }
     if (!selected.insert(node.get()).second) {
       throw ValueException("Each node may be referenced only once");
     }
   }
-  // The first member defines the action labels and their order of the new chance event.
+  // The first member defines the action labels and their order of the new event.
   const auto &reference = p_nodes.front()->m_infoset->m_actions;
   for (const auto &node : p_nodes) {
     const auto &actions = node->m_infoset->m_actions;
@@ -1726,7 +1725,7 @@ GameInfoset GameTreeRep::MakeChanceEvent(const std::vector<GameNode> &p_nodes,
   }
   ValidateDistribution(p_probs);
   const GamePlayer chance = GetChance();
-  // Destroy a chance event all of whose members are absorbed; its label can then be reused.
+  // Destroy an event all of whose members are absorbed; its label can then be reused.
   std::set<const GameInfosetRep *> absorbed;
   if (!p_label.empty()) {
     for (const auto &infoset : chance->m_infosets) {
