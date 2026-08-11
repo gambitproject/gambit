@@ -55,15 +55,11 @@ inline double abs(double x) { return std::fabs(x); }
 
 inline double sqr(double x) { return x * x; }
 
+/// Tests whether `p_value` appears in `p_container`, for containers with no `contains()`
+/// member of their own (e.g. `std::vector`, `Array`).
 template <class C, class T> bool contains(const C &p_container, const T &p_value)
 {
   return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
-}
-
-template <class Key, class T> bool contains(const std::map<Key, T> &map, const Key &key)
-// TODO: remove when we move to C++20 which already includes a "contains" method
-{
-  return map.find(key) != map.end();
 }
 
 template <class C> class EnumerateView {
@@ -180,7 +176,6 @@ public:
   class iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
-    ;
     using value_type = Value;
     using difference_type = std::ptrdiff_t;
     using reference = Value;

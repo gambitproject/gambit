@@ -51,7 +51,7 @@ public:
   }
 
   // Provide map-like operations
-  int count(int key) const { return (m_map.count(key) > 0); }
+  int count(int key) const { return m_map.contains(key); }
 
   void insert(int key, const T &value)
   {
@@ -61,7 +61,7 @@ public:
 
   const T &operator[](int key) const
   {
-    if (m_map.count(key) == 1) {
+    if (m_map.contains(key)) {
       return const_cast<std::map<int, T> &>(m_map)[key];
     }
     else {

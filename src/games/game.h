@@ -1501,7 +1501,7 @@ GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
     return;
   }
   for (const auto &infoset : m_infosets) {
-    if (p_ignore.count(infoset.get()) == 0 && infoset->GetLabel() == p_label) {
+    if (!p_ignore.contains(infoset.get()) && infoset->GetLabel() == p_label) {
       throw ValueException("Infoset label must be unique for the player");
     }
   }

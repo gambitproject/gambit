@@ -361,7 +361,7 @@ void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
     do {
       const auto index = ++visited[label];
       candidate = label + "_" + std::to_string(index);
-    } while (used.count(candidate) > 0);
+    } while (used.contains(candidate));
     used.insert(candidate);
     p_set(element, candidate);
   }
@@ -624,7 +624,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
       p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
@@ -637,7 +637,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
     p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
