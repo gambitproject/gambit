@@ -23,6 +23,8 @@
 #ifndef BTABLEAU_H
 #define BTABLEAU_H
 
+#include <set>
+
 #include "gambit.h"
 
 namespace Gambit::linalg {
@@ -37,19 +39,15 @@ public:
   BFS() : m_default(0) {}
   ~BFS() = default;
 
-  // define two BFS's to be equal if their bases are equal
-  bool operator==(const BFS &M) const
+  // Returns the set of basic indices (positive for structural variables, negative for
+  // slacks).
+  std::set<int> Keys() const
   {
-    if (m_map.size() != M.m_map.size()) {
-      return false;
+    std::set<int> keys;
+    for (const auto &[key, value] : m_map) {
+      keys.insert(key);
     }
-
-    for (auto iter = m_map.begin(); iter != m_map.end(); iter++) {
-      if (M.m_map.count((*iter).first) == 0) {
-        return false;
-      }
-    }
-    return true;
+    return keys;
   }
 
   // Provide map-like operations
