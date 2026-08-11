@@ -291,6 +291,97 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
   }
 }
 
+void GameTreeRep::SetActions(const GameInfoset &p_infoset,
+                             const std::vector<std::string> &p_labels)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
+  }
+  if (p_infoset->IsChanceInfoset()) {
+    throw UndefinedException(
+        "The actions of a chance information set are set together with their probabilities");
+  }
+  if (p_labels.empty()) {
+    throw ValueException("At least one action must be specified");
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (label.empty()) {
+      throw ValueException("Action label must not be empty");
+    }
+    CheckLabel(label);
+    if (!declared.insert(label).second) {
+      throw ValueException("Action label '" + label + "' appears more than once");
+    }
+  }
+
+  std::map<std::string, int> current;
+  for (const auto &action : p_infoset->m_actions) {
+    if (!current.emplace(action->GetLabel(), action->GetNumber() - 1).second) {
+      throw ValueException("Action label '" + action->GetLabel() +
+                           "' is ambiguous at this information set");
+    }
+  }
+  std::vector<int> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+  std::vector<int> dropped;
+  for (const auto &action : p_infoset->m_actions) {
+    if (declared.count(action->GetLabel()) == 0) {
+      dropped.push_back(action->GetNumber() - 1);
+    }
+  }
+
+  IncrementVersion();
+
+  const auto members = p_infoset->m_members;
+  for (const auto &member : members) {
+    if (!member->IsValid()) {
+      continue;
+    }
+    std::vector<std::shared_ptr<GameNodeRep>> newChildren;
+    newChildren.reserve(p_labels.size());
+    for (const int src : source) {
+      if (src >= 0) {
+        newChildren.push_back(member->m_children.at(src));
+      }
+      else {
+        newChildren.push_back(std::make_shared<GameNodeRep>(this, member.get()));
+        m_numNodes++;
+      }
+    }
+    for (const int idx : dropped) {
+      const auto child = member->m_children.at(idx);
+      DeleteTree(child);
+      m_numNodes--;
+      child->Invalidate();
+    }
+    member->m_children = std::move(newChildren);
+  }
+
+  std::vector<std::shared_ptr<GameActionRep>> newActions;
+  newActions.reserve(p_labels.size());
+  for (size_t i = 0; i < p_labels.size(); i++) {
+    if (source[i] >= 0) {
+      newActions.push_back(p_infoset->m_actions[source[i]]);
+    }
+    else {
+      newActions.push_back(
+          std::make_shared<GameActionRep>(static_cast<int>(i) + 1, p_labels[i], p_infoset.get()));
+    }
+  }
+  for (const int idx : dropped) {
+    p_infoset->m_actions.at(idx)->Invalidate();
+  }
+  p_infoset->m_actions = std::move(newActions);
+  p_infoset->RenumberActions();
+  ClearComputedValues();
+  InvalidateTreeOrdering();
+}
+
 void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 {
   IncrementVersion();

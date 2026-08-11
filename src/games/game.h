@@ -1311,6 +1311,11 @@ public:
   {
     throw UndefinedException();
   }
+  /// Declare an ordered action list of a personal player's information set.
+  virtual void SetActions(const GameInfoset &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
   virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
