@@ -29,6 +29,7 @@
 #include <stack>
 #include <queue>
 #include <memory>
+#include <random>
 
 #include "number.h"
 #include "gameobject.h"
