@@ -275,11 +275,11 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   return {x, true, "Path tracing terminated successfully.", steps};
 }
 
-TracePathResult
-PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-            std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &x, double fixed_value, size_t fixed_index,
-            TerminationFunctionType p_terminate, int max_iter, CallbackFunctionType p_callback)
+PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+                         std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+                         Vector<double> &x, double fixed_value, size_t fixed_index,
+                         TerminationFunctionType p_terminate, int max_iter,
+                         CallbackFunctionType p_callback)
 {
   x[fixed_index] = fixed_value;
 
@@ -301,7 +301,6 @@ PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_func
     p_function(x, y);
     p_jacobian(x, jac_full);
 
-    // Square Matrix removing fixed_index column
     size_t row_index = 1;
     for (size_t i = 1; i <= N + 1; ++i) { // Newton step expects the transposed Jacobian
       if (i != fixed_index) {
