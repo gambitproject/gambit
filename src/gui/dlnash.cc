@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <concepts>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -82,11 +83,10 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return EnumMixedNashSpec{};
   }
   if (p_method == s_enumpoly) {
-    auto spec = EnumPolyNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.stopAfter = 1;
+      return EnumPolyNashSpec{.stopAfter = 1};
     }
-    return spec;
+    return EnumPolyNashSpec{};
   }
   if (p_method == s_gnm) {
     return GNMNashSpec{};
@@ -107,38 +107,35 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return LogitNashSpec{};
   }
   if (p_method == s_simpdiv) {
-    auto spec = SimpdivNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.startingPoints = 1;
+      return SimpdivNashSpec{.startingPoints = 1};
     }
-    return spec;
+    return SimpdivNashSpec{};
   }
   throw std::logic_error("Unknown Nash equilibrium method");
 }
 
+template <class M>
+concept StrategicMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
+    std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
+
+template <class M>
+concept RationalOutputMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, LPNashSpec> || std::same_as<M, LCPNashSpec>;
+
 bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, GNMNashSpec> ||
-               std::is_same_v<Method, IPANashSpec> || std::is_same_v<Method, LiapNashSpec> ||
-               std::is_same_v<Method, SimpdivNashSpec>;
-      },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return StrategicMethod<Method>; },
+                    p_method);
 }
 
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, LPNashSpec> ||
-               std::is_same_v<Method, LCPNashSpec>;
-      },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return RationalOutputMethod<Method>; },
+                    p_method);
 }
 
 wxString ExternalCommand(const NashComputationSpec &p_spec)
@@ -152,8 +149,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
       p_spec.representation == NashRepresentation::Strategic ? wxT(" -S") : wxString{};
 
   return std::visit(
-      [&](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      [&]<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return prefix + wxT("enumpure") + strategic;
         }
@@ -208,8 +204,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
 wxString MethodDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return wxT("in pure strategies");
         }
@@ -247,8 +242,7 @@ wxString MethodDescription(const NashMethodSpec &p_method)
 wxString ParameterDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           if (method.stopAfter == 1) {
             return wxString::Format(" (stop after one equilibrium; maximum regret %.4g)",

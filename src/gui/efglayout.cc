@@ -514,9 +514,10 @@ GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
 //
 HitResult TreeLayout::HitTest(int p_x, int p_y) const
 {
+  using enum HitRegion;
   for (const auto &entry : m_nodeList) {
     if (entry->NodeHitTest(p_x, p_y)) {
-      return {HitRegion::Node, entry->GetNode()};
+      return {Node, entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
@@ -524,20 +525,20 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
       const auto &payoffs = entry->m_geometry.payoffs;
       for (int pl = payoffs.front_index(); pl <= payoffs.back_index(); ++pl) {
         if (payoffs[pl].Contains(p_x, p_y)) {
-          return {HitRegion::Payoff, entry->GetNode(), pl};
+          return {Payoff, entry->GetNode(), pl};
         }
       }
-      return {HitRegion::Outcome, entry->GetNode()};
+      return {Outcome, entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
     if (entry->BranchAboveHitTest(p_x, p_y)) {
-      return {HitRegion::BranchAbove, entry->GetNode()};
+      return {BranchAbove, entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
     if (entry->BranchBelowHitTest(p_x, p_y)) {
-      return {HitRegion::BranchBelow, entry->GetNode()};
+      return {BranchBelow, entry->GetNode()};
     }
   }
   return {};

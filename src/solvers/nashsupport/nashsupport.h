@@ -67,7 +67,6 @@ public:
     {
       return m_current.has_value() == p_other.m_current.has_value();
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
 
   private:
     friend class PossibleNashStrategySupports;
@@ -133,7 +132,6 @@ public:
     {
       return m_current.has_value() == p_other.m_current.has_value();
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
 
   private:
     friend class PossibleNashBehaviorSupports;

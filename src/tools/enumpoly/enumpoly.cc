@@ -121,8 +121,7 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
 template <class Support> void PrintEnumPolyEvent(const EnumPolyEvent<Support> &p_event)
 {
   std::visit(
-      [](const auto &event) {
-        using Event = std::decay_t<decltype(event)>;
+      []<typename Event>(const Event &event) {
         if constexpr (std::is_same_v<Event, EnumPolyCandidateSupportEvent<Support>>) {
           PrintSupport(std::cout, "candidate", event.support);
         }

@@ -38,8 +38,7 @@ void RenderGNMEvent(const GNMEvent &p_event,
                     const std::shared_ptr<MixedProfileRenderer<double>> &p_renderer)
 {
   std::visit(
-      [p_renderer](const auto &event) {
-        using Event = std::decay_t<decltype(event)>;
+      [p_renderer]<typename Event>(const Event &event) {
         if constexpr (std::is_same_v<Event, GNMPerturbationEvent>) {
           p_renderer->Render(event.profile, "pert");
         }

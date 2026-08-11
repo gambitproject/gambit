@@ -54,8 +54,8 @@ AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
 
-dnl Require C++17 explicitly.
-AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+dnl Require C++20 explicitly.
+AX_CXX_COMPILE_STDCXX(20, [noext], [mandatory])
 
 if test x$with_gui = xtrue; then
   dnl------------------------

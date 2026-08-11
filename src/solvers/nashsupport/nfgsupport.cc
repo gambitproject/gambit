@@ -73,7 +73,6 @@ public:
     {
       return (m_end == it.m_end && m_sizes == it.m_sizes && m_indices == it.m_indices);
     }
-    bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
   iterator begin() { return {m_sizes}; }
@@ -160,7 +159,6 @@ public:
     {
       return (m_end == it.m_end && m_strategies == it.m_strategies && m_include == it.m_include);
     }
-    bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
   StrategySubsets(const GamePlayer &p_player, size_t p_size) : m_player(p_player), m_size(p_size)

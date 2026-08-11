@@ -82,7 +82,6 @@ public:
   /// @name Operator overloading
   //@{
   bool operator==(const LogBehavProfile<T> &) const;
-  bool operator!=(const LogBehavProfile<T> &x) const { return !(*this == x); }
 
   void SetProb(const GameAction &p_action, const T &p_value)
   {

@@ -23,11 +23,15 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <algorithm>
+#include <compare>
 #include <list>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
 #include <set>
 #include <stack>
-#include <queue>
-#include <memory>
 
 #include "number.h"
 #include "gameobject.h"
@@ -559,9 +563,12 @@ public:
   GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
-  bool operator<(const GameSequenceRep &other) const
+  std::strong_ordering operator<=>(const GameSequenceRep &other) const
   {
-    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
+    if (const auto cmp = m_player <=> other.m_player; cmp != 0) {
+      return cmp;
+    }
+    return m_action <=> other.m_action;
   }
   bool operator==(const GameSequenceRep &other) const
   {
@@ -790,8 +797,6 @@ public:
     return m_child_it == p_other.m_child_it;
   }
 
-  /// Compares two iterators for inequality.
-  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   //@}
 
   GameNode GetOwner() const;
@@ -825,19 +830,33 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
-inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+inline void ValidateDistribution(std::vector<Number>::const_iterator p_begin,
+                                 std::vector<Number>::const_iterator p_end,
+                                 const bool p_normalized)
 {
-  if (std::any_of(p_probs.begin(), p_probs.end(),
+  if (std::any_of(p_begin, p_end,
                   [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
     throw ValueException("Probabilities must be non-negative numbers");
   }
   if (!p_normalized) {
     return;
   }
-  if (sum_function(p_probs, [](const Number &n) { return static_cast<Rational>(n); }) !=
-      Rational(1)) {
+  if (std::accumulate(p_begin, p_end, Rational(0), [](const Rational &s, const Number &n) {
+        return s + static_cast<Rational>(n);
+      }) != Rational(1)) {
     throw ValueException("Probabilities must sum to exactly one");
   }
+}
+
+inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
+}
+
+inline void ValidateDistribution(const std::vector<Number> &p_probs,
+                                 const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
 }
 
 class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
@@ -1131,7 +1150,6 @@ public:
       {
         return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
@@ -1410,6 +1428,14 @@ public:
   //@{
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
+  /// Form the collection of nodes into a single event carrying the given
+  /// probability distribution over its actions.  The nodes need not currently be
+  /// chance nodes; personal decision nodes are converted.
+  virtual GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                const std::string &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// Ensure the reduced-form strategies have been derived and indexed
@@ -1504,7 +1530,7 @@ GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
     return;
   }
   for (const auto &infoset : m_infosets) {
-    if (p_ignore.count(infoset.get()) == 0 && infoset->GetLabel() == p_label) {
+    if (!p_ignore.contains(infoset.get()) && infoset->GetLabel() == p_label) {
       throw ValueException("Infoset label must be unique for the player");
     }
   }
@@ -1651,9 +1677,9 @@ inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this();
 //=======================================================================
 
 /// Factory function to create new game tree
-Game NewTree();
+[[nodiscard]] Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+[[nodiscard]] Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///
@@ -1662,7 +1688,7 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadEfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
@@ -1670,7 +1696,7 @@ Game ReadEfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadNfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
@@ -1678,12 +1704,12 @@ Game ReadNfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+[[nodiscard]] Game ReadGbtFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+[[nodiscard]] Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator
@@ -1691,7 +1717,7 @@ template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
   // NOLINTBEGIN(misc-const-correctness)
-  std::uniform_int_distribution dist(1, p_denom + static_cast<int>(p_dim) - 1);
+  std::uniform_int_distribution<int> dist(1, p_denom + static_cast<int>(p_dim) - 1);
   // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {

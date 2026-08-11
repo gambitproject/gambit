@@ -24,7 +24,9 @@ import cython
 
 @cython.cclass
 class PlayerInfosets:
-    """The set of information sets at which a player has the decision."""
+    """The set of information sets belonging to a player: decisions for a personal
+    player, or events for the chance player.
+    """
     player = cython.declare(c_GamePlayer)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -41,7 +43,7 @@ class PlayerInfosets:
         return f"PlayerInfosets(player={Player.wrap(self.player)})"
 
     def __len__(self) -> int:
-        """The number of information sets at which the player has the decision."""
+        """The number of information sets belonging to the player."""
         return self.player.deref().GetInfosets().size()
 
     def __iter__(self) -> typing.Iterator[Infoset]:
@@ -284,7 +286,8 @@ class Player:
 
     @property
     def infosets(self) -> PlayerInfosets:
-        """Returns the set of information sets at which the player has the decision.
+        """Returns the set of information sets belonging to the player: decisions for
+        a personal player, or events for the chance player.
 
         The iteration order of information sets is the order in which they
         are encountered in the pre-order depth first traversal of the game tree.

@@ -413,7 +413,7 @@ GamePlayer GameDocument::DoNewPlayer()
   }
 
   int number = m_game->NumPlayers() + 1;
-  while (contains(playerLabels, "Player " + lexical_cast<std::string>(number))) {
+  while (playerLabels.contains("Player " + lexical_cast<std::string>(number))) {
     number++;
   }
   const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
@@ -437,7 +437,7 @@ void GameDocument::DoNewStrategy(GamePlayer p_player)
     strategyLabels.insert(strategy->GetLabel());
   }
   int number = p_player->GetStrategies().size() + 1;
-  while (contains(strategyLabels, std::to_string(number))) {
+  while (strategyLabels.contains(std::to_string(number))) {
     number++;
   }
   m_game->NewStrategy(p_player, std::to_string(number));
@@ -580,7 +580,7 @@ std::string GenerateOutcomeLabel(const Game &p_game)
     outcomeLabels.insert(outcome->GetLabel());
   }
   int outc = p_game->GetOutcomes().size() + 1;
-  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
     outc++;
   }
   return "Outcome " + std::to_string(outc);
@@ -595,7 +595,7 @@ void GameDocument::DoNewOutcome(GameNode p_node)
     outcomeLabels.insert(outcome->GetLabel());
   }
   int outc = m_game->GetOutcomes().size() + 1;
-  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
     outc++;
   }
   m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
