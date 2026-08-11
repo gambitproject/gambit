@@ -30,9 +30,8 @@ import setuptools.command.build_py
 
 cppgambit_include_dirs = ["src"]
 cppgambit_cflags = (
-    ["-std=c++17"] if platform.system() == "Darwin"
-    else ["/std:c++17"] if platform.system() == "Windows"
-    else []
+    ["/std:c++17"] if platform.system() == "Windows"
+    else ["-std=c++17"]
 )
 
 cppgambit_core = (
