@@ -130,12 +130,8 @@ public:
   bool operator==(const std::shared_ptr<const T> &r) const { return (m_rep == r); }
   bool operator==(const std::nullptr_t &) const { return m_rep == nullptr; }
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
-  /// Explicit three-way comparison, so that containers built on `std::pair`/`std::tuple`
-  /// of game-object handles (e.g. `std::map<std::pair<int, GameInfoset>, int>`) order
-  /// consistently with `operator<` above.  Without this, C++20's synthesized `<=>` for
-  /// such containers prefers the (also well-formed) built-in `<=>` reachable through the
-  /// implicit `operator bool()` below, silently collapsing the ordering to null-vs-non-null
-  /// (see https://github.com/gambitproject/gambit/issues/1027).
+  /// Without this, C++20 synthesizes <=> via operator bool() below, ordering by
+  /// null-vs-non-null instead of by m_rep (see gambitproject/gambit issue #1027).
   std::strong_ordering operator<=>(const GameObjectPtr<T> &r) const noexcept
   {
     return m_rep <=> r.m_rep;

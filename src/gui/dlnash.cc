@@ -121,8 +121,6 @@ concept StrategicMethod =
     std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
     std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
 
-// Methods that report exact (rational) probabilities rather than floating-point
-// approximations.
 template <class M>
 concept RationalOutputMethod =
     std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||

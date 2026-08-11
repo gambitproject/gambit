@@ -55,8 +55,6 @@ inline double abs(double x) { return std::fabs(x); }
 
 inline double sqr(double x) { return x * x; }
 
-/// Tests whether `p_value` appears in `p_container`, for containers with no `contains()`
-/// member of their own (e.g. `std::vector`, `Array`).
 template <class C, class T> bool contains(const C &p_container, const T &p_value)
 {
   return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
