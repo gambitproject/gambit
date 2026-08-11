@@ -28,6 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef GAMBIT_CORE_INTEGER_H
 #define GAMBIT_CORE_INTEGER_H
 
+#include <compare>
 #include <string>
 
 namespace Gambit {
@@ -113,14 +114,8 @@ public:
   //@{
   bool operator==(const Integer &) const;
   bool operator==(long) const;
-  bool operator<(const Integer &) const;
-  bool operator<(long) const;
-  bool operator<=(const Integer &) const;
-  bool operator<=(long) const;
-  bool operator>(const Integer &) const;
-  bool operator>(long) const;
-  bool operator>=(const Integer &) const;
-  bool operator>=(long) const;
+  std::strong_ordering operator<=>(const Integer &) const;
+  std::strong_ordering operator<=>(long) const;
   //@}
 
   /// @name Assignment-based operations

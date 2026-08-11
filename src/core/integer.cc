@@ -2430,21 +2430,12 @@ bool Integer::operator==(const Integer &y) const { return compare(*this, y) == 0
 
 bool Integer::operator==(long y) const { return compare(*this, y) == 0; }
 
-bool Integer::operator<(const Integer &y) const { return compare(*this, y) < 0; }
+std::strong_ordering Integer::operator<=>(const Integer &y) const
+{
+  return compare(*this, y) <=> 0;
+}
 
-bool Integer::operator<(long y) const { return compare(*this, y) < 0; }
-
-bool Integer::operator<=(const Integer &y) const { return compare(*this, y) <= 0; }
-
-bool Integer::operator<=(long y) const { return compare(*this, y) <= 0; }
-
-bool Integer::operator>(const Integer &y) const { return compare(*this, y) > 0; }
-
-bool Integer::operator>(long y) const { return compare(*this, y) > 0; }
-
-bool Integer::operator>=(const Integer &y) const { return compare(*this, y) >= 0; }
-
-bool Integer::operator>=(long y) const { return compare(*this, y) >= 0; }
+std::strong_ordering Integer::operator<=>(long y) const { return compare(*this, y) <=> 0; }
 
 Integer &Integer::operator+=(const Integer &y)
 {

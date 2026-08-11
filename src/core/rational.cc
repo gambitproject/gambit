@@ -436,14 +436,7 @@ bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >=
 
 std::strong_ordering Rational::operator<=>(const Rational &y) const
 {
-  const int c = compare(*this, y);
-  if (c < 0) {
-    return std::strong_ordering::less;
-  }
-  if (c > 0) {
-    return std::strong_ordering::greater;
-  }
-  return std::strong_ordering::equivalent;
+  return compare(*this, y) <=> 0;
 }
 
 void Rational::negate() { num.negate(); }

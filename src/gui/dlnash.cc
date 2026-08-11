@@ -130,16 +130,14 @@ concept RationalOutputMethod =
 
 bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) { return StrategicMethod<std::decay_t<decltype(method)>>; },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return StrategicMethod<Method>; },
+                    p_method);
 }
 
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) { return RationalOutputMethod<std::decay_t<decltype(method)>>; },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return RationalOutputMethod<Method>; },
+                    p_method);
 }
 
 wxString ExternalCommand(const NashComputationSpec &p_spec)
@@ -153,8 +151,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
       p_spec.representation == NashRepresentation::Strategic ? wxT(" -S") : wxString{};
 
   return std::visit(
-      [&](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      [&]<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return prefix + wxT("enumpure") + strategic;
         }
@@ -211,8 +208,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
 wxString MethodDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return wxT("in pure strategies");
         }
@@ -250,8 +246,7 @@ wxString MethodDescription(const NashMethodSpec &p_method)
 wxString ParameterDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           if (method.stopAfter == 1) {
             return wxString::Format(" (stop after one equilibrium; maximum regret %.4g)",

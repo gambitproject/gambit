@@ -35,8 +35,7 @@ template <class Renderer>
 void RenderSimpdivEvent(const Renderer &p_renderer, const SimpdivEvent &p_event)
 {
   std::visit(
-      [&](const auto &event) {
-        using EventType = std::decay_t<decltype(event)>;
+      [&]<typename EventType>(const EventType &event) {
         if constexpr (std::is_same_v<EventType, SimpdivStartEvent>) {
           p_renderer->Render(event.profile, "start");
         }

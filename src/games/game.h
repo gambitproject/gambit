@@ -23,6 +23,7 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <compare>
 #include <list>
 #include <set>
 #include <stack>
@@ -559,9 +560,12 @@ public:
   GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
-  bool operator<(const GameSequenceRep &other) const
+  std::strong_ordering operator<=>(const GameSequenceRep &other) const
   {
-    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
+    if (const auto cmp = m_player <=> other.m_player; cmp != 0) {
+      return cmp;
+    }
+    return m_action <=> other.m_action;
   }
   bool operator==(const GameSequenceRep &other) const
   {
