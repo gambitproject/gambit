@@ -588,7 +588,7 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"

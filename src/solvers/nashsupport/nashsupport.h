@@ -23,26 +23,136 @@
 #ifndef GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H
 #define GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H
 
+#include <memory>
+#include <optional>
+
 #include "gambit.h"
 
 using namespace Gambit;
 
-class PossibleNashStrategySupportsResult {
+// Enumerates, one at a time, the strategy support profiles which can be the support of a
+// totally-mixed Nash equilibrium, using the heuristic search method of Porter, Nudelman &
+// Shoham (2004).
+//
+// This is a single-pass generator: construct one instance per game and pull candidates
+// from it, either by repeated calls to Next() or via a range-based for loop.
+class PossibleNashStrategySupports {
 public:
-  std::list<StrategySupportProfile> m_supports;
-};
-// Compute the set of strategy support profiles which can be the support of
-// a totally-mixed Nash equilibrium, using the heuristic search method of
-// Porter, Nudelman & Shoham (2004).
-std::shared_ptr<PossibleNashStrategySupportsResult> PossibleNashStrategySupports(const Game &);
+  explicit PossibleNashStrategySupports(const Game &p_game);
+  ~PossibleNashStrategySupports();
+  PossibleNashStrategySupports(PossibleNashStrategySupports &&) noexcept;
+  PossibleNashStrategySupports &operator=(PossibleNashStrategySupports &&) noexcept;
+  PossibleNashStrategySupports(const PossibleNashStrategySupports &) = delete;
+  PossibleNashStrategySupports &operator=(const PossibleNashStrategySupports &) = delete;
 
-class PossibleNashBehaviorSupportsResult {
+  // Returns the next candidate support, or std::nullopt once the search is exhausted.
+  std::optional<StrategySupportProfile> Next();
+
+  class iterator {
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = StrategySupportProfile;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const StrategySupportProfile *;
+    using reference = const StrategySupportProfile &;
+
+    reference operator*() const { return *m_current; }
+    pointer operator->() const { return &*m_current; }
+    iterator &operator++()
+    {
+      m_current = m_generator->Next();
+      return *this;
+    }
+    bool operator==(const iterator &p_other) const
+    {
+      return m_current.has_value() == p_other.m_current.has_value();
+    }
+
+  private:
+    friend class PossibleNashStrategySupports;
+    iterator(PossibleNashStrategySupports *p_generator,
+             std::optional<StrategySupportProfile> p_current)
+      : m_generator(p_generator), m_current(std::move(p_current))
+    {
+    }
+
+    PossibleNashStrategySupports *m_generator;
+    std::optional<StrategySupportProfile> m_current;
+  };
+
+  // NOTE: as this is a single-pass generator, begin() must be called only once; each call
+  // pulls the first candidate from the underlying search.
+  iterator begin() { return {this, Next()}; }
+  iterator end() { return {this, std::nullopt}; }
+
+private:
+  class Impl;
+  std::unique_ptr<Impl> m_impl;
+};
+
+// Enumerates, one at a time, the behavior support profiles which can be the support of a
+// totally-mixed Nash equilibrium.
+//
+// This is a single-pass generator: construct one instance per game and pull candidates
+// from it, either by repeated calls to Next() or via a range-based for loop.  Candidates
+// are produced lazily, so a consumer that only needs the first few supports (e.g. to find
+// up to k equilibria) never pays for the cost of enumerating the rest.
+//
+// TODO: This is a naive implementation that does not take into account that removing
+//       actions from a support profile can (and often does) lead to information sets
+//       becoming unreachable.
+class PossibleNashBehaviorSupports {
 public:
-  std::list<BehaviorSupportProfile> m_supports;
-};
+  explicit PossibleNashBehaviorSupports(const Game &p_game);
+  ~PossibleNashBehaviorSupports();
+  PossibleNashBehaviorSupports(PossibleNashBehaviorSupports &&) noexcept;
+  PossibleNashBehaviorSupports &operator=(PossibleNashBehaviorSupports &&) noexcept;
+  PossibleNashBehaviorSupports(const PossibleNashBehaviorSupports &) = delete;
+  PossibleNashBehaviorSupports &operator=(const PossibleNashBehaviorSupports &) = delete;
 
-// Compute the set of behavior support profiles which can be the support of
-// a totally-mixed Nash equilibrium.
-std::shared_ptr<PossibleNashBehaviorSupportsResult> PossibleNashBehaviorSupports(const Game &);
+  // Returns the next candidate support, or std::nullopt once the search is exhausted.
+  std::optional<BehaviorSupportProfile> Next();
+
+  class iterator {
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = BehaviorSupportProfile;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const BehaviorSupportProfile *;
+    using reference = const BehaviorSupportProfile &;
+
+    reference operator*() const { return *m_current; }
+    pointer operator->() const { return &*m_current; }
+    iterator &operator++()
+    {
+      m_current = m_generator->Next();
+      return *this;
+    }
+    bool operator==(const iterator &p_other) const
+    {
+      return m_current.has_value() == p_other.m_current.has_value();
+    }
+
+  private:
+    friend class PossibleNashBehaviorSupports;
+    iterator(PossibleNashBehaviorSupports *p_generator,
+             std::optional<BehaviorSupportProfile> p_current)
+      : m_generator(p_generator), m_current(std::move(p_current))
+    {
+    }
+
+    PossibleNashBehaviorSupports *m_generator;
+    std::optional<BehaviorSupportProfile> m_current;
+  };
+
+  // NOTE: as this is a single-pass generator, begin() must be called only once; each call
+  // pulls the first candidate from the underlying search.
+  iterator begin() { return {this, Next()}; }
+  iterator end() { return {this, std::nullopt}; }
+
+private:
+  class Impl;
+  std::unique_ptr<Impl> m_impl;
+};
 
 #endif // GAMBIT_SOLVERS_NASHSUPPORT_NASHSUPPORT_H

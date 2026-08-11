@@ -26,13 +26,13 @@ def test_player_label_invalid_raises_valueerror(label):
         player.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_player_label_non_ascii_rejected(label):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_player_label_unicode_accepted(label):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    with pytest.raises(UnicodeEncodeError):
-        player.label = label
+    player.label = label
+    assert player.label == label
 
 
 def test_add_player_requires_label():
@@ -277,6 +277,14 @@ def test_player_sequence_tree():
         # with non-terminal outcomes
         (games.create_kuhn_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
         (games.create_stripped_down_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
+        # AGGs/BAGGs
+        (games.read_from_file("2x2.agg"), [-10, -10], [95, 95]),
+        (games.read_from_file("2x2.bagg"), [-10, -10], [95, 95]),
+        (
+            games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg"),
+            [0, 0, 0, 0, 0, 0],
+            [99, 90, 99, 90, 99, 90],
+        ),
     ],
 )
 def test_player_get_min_max_payoff(game: gbt.Game, exp_min_payoffs: list, exp_max_payoffs: list):

@@ -97,10 +97,6 @@ public:
   {
     return m_actions == p_support.m_actions;
   }
-  bool operator!=(const BehaviorSupportProfile &p_support) const
-  {
-    return m_actions != p_support.m_actions;
-  }
 
   /// @name General information
   //@{
@@ -173,7 +169,6 @@ public:
       iterator &operator++();
 
       bool operator==(const iterator &it) const;
-      bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
     Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}

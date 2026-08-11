@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -33,6 +34,14 @@ namespace {
 // This anonymous namespace encapsulates the file-parsing code
 
 using namespace Gambit;
+
+// std::isspace/std::isdigit are undefined behavior when given a (possibly
+// negative) plain `char` other than EOF; a UTF-8 continuation or lead byte
+// has the high bit set and so is negative on a platform with signed char.
+// These wrappers convert to `unsigned char` first, restricting the check to
+// the ASCII whitespace/digit characters that terminate lexer tokens.
+bool IsAsciiSpace(char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; }
+bool IsAsciiDigit(char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; }
 
 using GameFileToken = enum {
   TOKEN_NUMBER = 0,
@@ -121,7 +130,7 @@ GameFileToken GameFileLexer::GetNextToken()
     return (m_lastToken = TOKEN_EOF);
   }
 
-  while (isspace(c)) {
+  while (IsAsciiSpace(c)) {
     ReadChar(c);
     if (m_file.eof()) {
       return (m_lastToken = TOKEN_EOF);
@@ -140,12 +149,12 @@ GameFileToken GameFileLexer::GetNextToken()
   else if (c == ',') {
     return (m_lastToken = TOKEN_COMMA);
   }
-  else if (isdigit(c) || c == '-' || c == '+') {
+  else if (IsAsciiDigit(c) || c == '-' || c == '+') {
     std::string buf;
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -158,7 +167,7 @@ GameFileToken GameFileLexer::GetNextToken()
     if (c == '.') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -166,12 +175,12 @@ GameFileToken GameFileLexer::GetNextToken()
       if (c == 'e' || c == 'E') {
         buf += c;
         ReadChar(c);
-        if (c != '+' && c != '-' && !isdigit(c)) {
+        if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
           OnParseError("Invalid Token +/-");
         }
         buf += c;
         ReadChar(c);
-        while (!m_file.eof() && isdigit(c)) {
+        while (!m_file.eof() && IsAsciiDigit(c)) {
           buf += c;
           ReadChar(c);
         }
@@ -184,7 +193,7 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == '/') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -195,12 +204,12 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == 'e' || c == 'E') {
       buf += c;
       ReadChar(c);
-      if (c != '+' && c != '-' && !isdigit(c)) {
+      if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
         OnParseError("Invalid Token +/-");
       }
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -219,7 +228,7 @@ GameFileToken GameFileLexer::GetNextToken()
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -241,7 +250,7 @@ GameFileToken GameFileLexer::GetNextToken()
       if (a == '\n') {
         IncreaseLine();
       }
-    } while (!m_file.eof() && isspace(a));
+    } while (!m_file.eof() && IsAsciiSpace(a));
 
     if (a == '\"') {
       bool lastslash = false;
@@ -276,14 +285,14 @@ GameFileToken GameFileLexer::GetNextToken()
         if (a == '\n') {
           IncreaseLine();
         }
-      } while (!isspace(a));
+      } while (!IsAsciiSpace(a));
     }
 
     return (m_lastToken = TOKEN_TEXT);
   }
 
   m_lastText = "";
-  while (!m_file.eof() && !isspace(c)) {
+  while (!m_file.eof() && !IsAsciiSpace(c)) {
     m_lastText += c;
     ReadChar(c);
   }
@@ -352,7 +361,7 @@ void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
     do {
       const auto index = ++visited[label];
       candidate = label + "_" + std::to_string(index);
-    } while (used.count(candidate) > 0);
+    } while (used.contains(candidate));
     used.insert(candidate);
     p_set(element, candidate);
   }
@@ -615,7 +624,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
       p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
@@ -628,7 +637,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
     p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
@@ -811,7 +820,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
       }
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }

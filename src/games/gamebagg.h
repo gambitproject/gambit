@@ -88,22 +88,21 @@ public:
   bool IsTree() const override { return false; }
   bool IsAgg() const override { return true; }
   bool IsPerfectRecall() const override { return true; }
-  bool IsConstSum() const override { throw UndefinedException(); }
+  bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(baggPtr->getMinPayoff()); }
   /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetPlayerMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
   Rational GetMaxPayoff() const override { return Rational(baggPtr->getMaxPayoff()); }
   /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetPlayerMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
-  void WriteNfgFile(std::ostream &) const override { throw UndefinedException(); }
   virtual void WriteBaggFile(std::ostream &) const;
   //@}
 
@@ -121,7 +120,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .bagg format.
-Game ReadBaggFile(std::istream &in);
+[[nodiscard]] Game ReadBaggFile(std::istream &in);
 
 } // end namespace Gambit
 

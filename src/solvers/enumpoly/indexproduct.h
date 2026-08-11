@@ -56,7 +56,6 @@ public:
       }
       return m_end || m_current == p_other.m_current;
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     iterator &operator++()
     {
       auto [cur, up] = std::mismatch(m_current.begin(), m_current.end(), m_set->m_upper.begin());

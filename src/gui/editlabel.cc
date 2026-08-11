@@ -31,34 +31,55 @@
 
 namespace Gambit::GUI {
 
-bool LabelTextCtrl::IsAsciiPrintable(wxUniChar p_char)
-{
-  const auto value = static_cast<unsigned long>(p_char);
-  return value >= 0x20 && value <= 0x7e;
-}
-
 bool LabelTextCtrl::IsLabelWhitespace(wxUniChar p_char)
 {
-  return p_char == ' ' || p_char == '\t' || p_char == '\r' || p_char == '\n' || p_char == '\v' ||
-         p_char == '\f';
-}
-
-bool LabelTextCtrl::IsAllowedNonWhitespace(wxUniChar p_char, LabelCharacterPolicy p_policy)
-{
-  switch (p_policy) {
-  case LabelCharacterPolicy::AsciiOnly:
-    return IsAsciiPrintable(p_char) && !IsLabelWhitespace(p_char);
-
-  case LabelCharacterPolicy::Unicode:
-    return !IsLabelWhitespace(p_char);
-
+  // Tab/CR/LF/VT/FF are ASCII control characters, not Unicode space separators;
+  // they are treated as whitespace here (rather than rejected outright) purely as
+  // a live-typing convenience, so that e.g. pasting text containing a tab
+  // normalizes to a single space instead of being silently dropped.
+  if (p_char == '\t' || p_char == '\r' || p_char == '\n' || p_char == '\v' || p_char == '\f') {
+    return true;
+  }
+  // Unicode space separators (category Zs) -- normalized the same way as the
+  // literal ASCII space, matching Gambit::IsValidLabel in src/games/game.h.
+  const auto value = static_cast<unsigned long>(p_char);
+  switch (value) {
+  case 0x0020: // SPACE
+  case 0x00a0: // NO-BREAK SPACE
+  case 0x1680: // OGHAM SPACE MARK
+  case 0x2000: // EN QUAD
+  case 0x2001: // EM QUAD
+  case 0x2002: // EN SPACE
+  case 0x2003: // EM SPACE
+  case 0x2004: // THREE-PER-EM SPACE
+  case 0x2005: // FOUR-PER-EM SPACE
+  case 0x2006: // SIX-PER-EM SPACE
+  case 0x2007: // FIGURE SPACE
+  case 0x2008: // PUNCTUATION SPACE
+  case 0x2009: // THIN SPACE
+  case 0x200a: // HAIR SPACE
+  case 0x202f: // NARROW NO-BREAK SPACE
+  case 0x205f: // MEDIUM MATHEMATICAL SPACE
+  case 0x3000: // IDEOGRAPHIC SPACE
+    return true;
   default:
     return false;
   }
 }
 
-wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing,
-                                  LabelCharacterPolicy p_policy)
+bool LabelTextCtrl::IsControlCharacter(wxUniChar p_char)
+{
+  const auto value = static_cast<unsigned long>(p_char);
+  return value <= 0x1f || value == 0x7f || (value >= 0x80 && value <= 0x9f) || value == 0x2028 ||
+         value == 0x2029;
+}
+
+bool LabelTextCtrl::IsAllowedNonWhitespace(wxUniChar p_char)
+{
+  return !IsLabelWhitespace(p_char) && !IsControlCharacter(p_char);
+}
+
+wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing)
 {
   wxString normalized;
   bool sawNonWhitespace = false;
@@ -78,7 +99,7 @@ wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing,
       continue;
     }
 
-    if (!IsAllowedNonWhitespace(ch, p_policy)) {
+    if (!IsAllowedNonWhitespace(ch)) {
       continue;
     }
 
@@ -127,9 +148,8 @@ void LabelTextCtrl::OnKillFocus(wxFocusEvent &p_event)
 }
 
 LabelTextCtrl::LabelTextCtrl(wxWindow *p_parent, wxWindowID p_id, const wxString &p_value,
-                             LabelCharacterPolicy p_policy, const wxPoint &p_pos,
-                             const wxSize &p_size, long p_style)
-  : wxTextCtrl(p_parent, p_id, wxEmptyString, p_pos, p_size, p_style), m_policy(p_policy)
+                             const wxPoint &p_pos, const wxSize &p_size, long p_style)
+  : wxTextCtrl(p_parent, p_id, wxEmptyString, p_pos, p_size, p_style)
 {
   ChangeValue(Normalize(p_value, true));
 

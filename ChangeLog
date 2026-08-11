@@ -1,16 +1,40 @@
 ## [17.0.0-alpha.1] - unreleased
 
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
+- Added `Game.make_event`, which forms a collection of nodes into a single event with a
+  specified probability distribution over its actions. (#1009)
+
 ### Changed
+- Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
+- Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
+  still not contain control characters, begin/end with whitespace, or contain two consecutive
+  whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0
+  NO-BREAK SPACE), not just the ASCII space.  A game's title and description have no such
+  printable-character or spacing restriction, but must also be well-formed UTF-8.  In `pygambit`,
+  labels/title/description are now encoded/decoded as UTF-8 rather than ASCII.  (#862)
 - `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
   to match the behaviour of all other Nash equilibrium solvers.  (#996)
 - `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of
   the run.  (#998)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
+- Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
+  lazy generator algorithm rather than materialising all as a single list up front.
+- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
   no longer inserts spurious entries into a strategy's internal action map.
+
+### Removed
+- `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the
+  information set and the new player.  (#999)
+- `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
+  information sets and their members is now maintained automatically.  (#999)
+- `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
+  probabilities as forming the nodes of the event with the required distribution.  (#1009)
 
 ## [16.7.0] - 2026-07-11
 

@@ -105,7 +105,7 @@ wxString EmptyLabel(const GameNode &, const AnalysisWorkspace &) { return {}; }
 
 wxString NodeLabelText(const GameNode &n, const AnalysisWorkspace &)
 {
-  return {n->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(n->GetLabel());
 }
 
 wxString PlayerLabel(const GameNode &n, const AnalysisWorkspace &)
@@ -113,7 +113,7 @@ wxString PlayerLabel(const GameNode &n, const AnalysisWorkspace &)
   if (!n->GetPlayer()) {
     return {};
   }
-  return {n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(n->GetPlayer()->GetLabel());
 }
 
 wxString InfosetLabel(const GameNode &n, const AnalysisWorkspace &)
@@ -121,7 +121,7 @@ wxString InfosetLabel(const GameNode &n, const AnalysisWorkspace &)
   if (!n->GetInfoset()) {
     return {};
   }
-  return {n->GetInfoset()->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(n->GetInfoset()->GetLabel());
 }
 
 wxString InfosetIdLabel(const GameNode &n, const AnalysisWorkspace &)
@@ -141,12 +141,12 @@ wxString InfosetIdLabel(const GameNode &n, const AnalysisWorkspace &)
 
 wxString RealizProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
 {
-  return {p_workspace.GetProfiles().GetRealizProb(n).c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(p_workspace.GetProfiles().GetRealizProb(n));
 }
 
 wxString BeliefProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
 {
-  return {p_workspace.GetProfiles().GetBeliefProb(n).c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(p_workspace.GetProfiles().GetBeliefProb(n));
 }
 
 wxString NodeValueLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
@@ -171,7 +171,7 @@ wxString BranchLabelText(const GameNode &n, const AnalysisWorkspace &)
 {
   const GameNode parent = n->GetParent();
   const int childNumber = n->GetPriorAction()->GetNumber();
-  return {parent->GetInfoset()->GetAction(childNumber)->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(parent->GetInfoset()->GetAction(childNumber)->GetLabel());
 }
 
 wxString BranchProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
@@ -187,7 +187,7 @@ wxString BranchProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace
   if (p_workspace.NumProfileLists() == 0) {
     return {};
   }
-  return {p_workspace.GetProfiles().GetActionProb(parent, childNumber).c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(p_workspace.GetProfiles().GetActionProb(parent, childNumber));
 }
 
 wxString BranchValueLabel(const GameNode &n, const AnalysisWorkspace &p_workspace)
@@ -197,7 +197,7 @@ wxString BranchValueLabel(const GameNode &n, const AnalysisWorkspace &p_workspac
   }
   const GameNode parent = n->GetParent();
   const int childNumber = n->GetPriorAction()->GetNumber();
-  return {p_workspace.GetProfiles().GetActionValue(parent, childNumber).c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(p_workspace.GetProfiles().GetActionValue(parent, childNumber));
 }
 
 using BranchLabelFunction = wxString (*)(const GameNode &, const AnalysisWorkspace &);
@@ -285,7 +285,7 @@ void TreeRenderConfig::Load(const LegacyWorkspaceFile &p_workspace)
   if (p_workspace.font) {
     const auto &font = *p_workspace.font;
     SetFont(wxFont(font.size, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false,
-                   wxString(font.face.c_str(), *wxConvCurrent)));
+                   wxString::FromUTF8(font.face)));
   }
   const auto find = [](const std::string &value, const auto &names, auto fallback) {
     const auto iter = std::find(std::begin(names), std::end(names), value);

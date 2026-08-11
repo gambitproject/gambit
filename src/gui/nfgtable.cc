@@ -237,12 +237,12 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
   const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
 
-  return {m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel());
 }
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+  const wxString label = LabelTextCtrl::Normalize(p_value, true);
 
   if (label.empty()) {
     wxBell();
@@ -250,8 +250,7 @@ void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
   }
 
   const wxString result = m_table->RenameRowHeaderStrategy(
-      p_coords.GetCol(), p_coords.GetRow(),
-      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+      p_coords.GetCol(), p_coords.GetRow(), LabelTextCtrl::Normalize(p_value, true));
   if (!result.empty()) {
     CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
   }
@@ -266,7 +265,7 @@ wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetRowHeaderColCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetRowHeaderPlayer(p_coords.GetCol())));
-    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData()));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
@@ -546,12 +545,12 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
   const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
 
-  return {m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel().c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel());
 }
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  const wxString label = LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly);
+  const wxString label = LabelTextCtrl::Normalize(p_value, true);
 
   if (label.empty()) {
     wxBell();
@@ -559,8 +558,7 @@ void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
   }
 
   const wxString result = m_table->RenameColHeaderStrategy(
-      p_coords.GetCol(), p_coords.GetRow(),
-      LabelTextCtrl::Normalize(p_value, true, LabelCharacterPolicy::AsciiOnly));
+      p_coords.GetCol(), p_coords.GetRow(), LabelTextCtrl::Normalize(p_value, true));
   if (!result.empty()) {
     CallAfter([this, result] { ExceptionDialog(this, result.ToStdString()).ShowModal(); });
   }
@@ -575,7 +573,7 @@ wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   if (m_table->GetColHeaderRowCount() > 0) {
     attr.SetForegroundColour(
         m_table->GetPlayerColor(m_table->GetColHeaderPlayer(p_coords.GetRow())));
-    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData(LabelCharacterPolicy::AsciiOnly)));
+    attr.SetEditor(wxSheetCellEditor(new LabelEditorRefData()));
     attr.SetReadOnly(m_table->IsReadOnly());
   }
   else {
@@ -798,7 +796,7 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
   const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
   auto player = m_table->GetPayoffPlayer(p_coords.GetCol());
-  return {lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
+  return wxString::FromUTF8(lexical_cast<std::string>(profile->GetPayoff(player)));
 }
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
@@ -1264,7 +1262,7 @@ public:
 
 wxPrintout *TableWidget::GetPrintout()
 {
-  return new gbtNfgPrintout(this, wxString(m_doc->GetGame()->GetTitle().c_str(), *wxConvCurrent));
+  return new gbtNfgPrintout(this, wxString::FromUTF8(m_doc->GetGame()->GetTitle()));
 }
 
 bool TableWidget::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)

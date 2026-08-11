@@ -310,10 +310,10 @@ cdef extern from "games/game.h":
         bool IsAgg() except +
 
         string GetTitle() except +
-        void SetTitle(string) except +
+        void SetTitle(string) except +ValueError
 
         string GetDescription() except +
-        void SetDescription(string) except +
+        void SetDescription(string) except +ValueError
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError
@@ -364,12 +364,15 @@ cdef extern from "games/game.h":
         void DeleteTree(c_GameNode) except +
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
         void Reveal(c_GameInfoset, c_GamePlayer) except +
+        c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
         void SetInfoset(c_GameNode, c_GameInfoset) except +ValueError
         c_GameInfoset LeaveInfoset(c_GameNode) except +
         c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
         void DeleteAction(c_GameAction) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
+        c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
+                                string) except +ValueError
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
@@ -583,11 +586,9 @@ cdef extern from "solvers/gnm/gnm.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/nashsupport/nashsupport.h":
-    cdef cppclass c_PossibleNashStrategySupportsResult "PossibleNashStrategySupportsResult":
-        stdlist[c_StrategySupportProfile] m_supports
-    shared_ptr[c_PossibleNashStrategySupportsResult] PossibleNashStrategySupports(
-            c_Game
-    ) except +RuntimeError
+    cdef cppclass c_PossibleNashStrategySupports "PossibleNashStrategySupports":
+        c_PossibleNashStrategySupports(c_Game) except +
+        optional[c_StrategySupportProfile] Next() except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
     stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(

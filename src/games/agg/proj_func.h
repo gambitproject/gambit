@@ -88,11 +88,6 @@ struct proj_func {
     return Type == v.Type && Default == v.Default && weights == v.weights;
   }
 
-  bool operator!=(const proj_func &v) const
-  {
-    return Type != v.Type || Default != v.Default || weights != v.weights;
-  }
-
   virtual int operator()(int x, int y) const = 0;
 
   virtual int operator()(std::multiset<int> &s) const = 0;

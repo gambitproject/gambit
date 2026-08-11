@@ -24,6 +24,7 @@
 #define LIBGAMBIT_BEHAV_H
 
 #include <random>
+#include <vector>
 
 #include "game.h"
 #include "seqmixed.h"
@@ -185,10 +186,6 @@ public:
   {
     return (m_support == p_profile.m_support && m_probs == p_profile.m_probs);
   }
-  bool operator!=(const MixedBehaviorProfile<T> &p_profile) const
-  {
-    return (m_support != p_profile.m_support || m_probs != p_profile.m_probs);
-  }
 
   const T &operator[](const GameAction &p_action) const
   {
@@ -301,13 +298,15 @@ public:
   //@}
 };
 
+/// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
+///        set of mixed behavior profiles
 template <class Generator>
-MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
+[[nodiscard]] MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game,
+                                                                    Generator &generator)
 {
-  auto profile =
-      MixedBehaviorProfile<double>(std::const_pointer_cast<GameRep>(shared_from_this()));
+  auto profile = MixedBehaviorProfile<double>(p_game);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
-  for (auto player : GetPlayers()) {
+  for (auto player : p_game->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
         profile[action] = dist(generator);
@@ -317,16 +316,52 @@ MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &genera
   return profile.Normalize();
 }
 
-template <class Generator>
-MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
-                                                                 Generator &generator) const
+/// @brief As NewRandomBehaviorProfile(p_game, generator), using an unseeded-by-the-caller
+///        generator -- for callers who don't need the sequence of profiles drawn to be
+///        reproducible. Pass an explicit generator instead if reproducibility matters.
+[[nodiscard]] inline MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game)
 {
-  auto profile =
-      MixedBehaviorProfile<Rational>(std::const_pointer_cast<GameRep>(shared_from_this()));
-  for (auto player : GetPlayers()) {
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomBehaviorProfile(p_game, generator);
+}
+
+/// @brief Generate `count` mixed behavior profiles, each as
+///        NewRandomBehaviorProfile(p_game, generator).
+template <class Generator>
+[[nodiscard]] std::vector<MixedBehaviorProfile<double>>
+NewRandomBehaviorProfiles(const Game &p_game, int count, Generator &generator)
+{
+  std::vector<MixedBehaviorProfile<double>> profiles;
+  profiles.reserve(count);
+  for (int i = 0; i < count; i++) {
+    profiles.push_back(NewRandomBehaviorProfile(p_game, generator));
+  }
+  return profiles;
+}
+
+/// @brief As NewRandomBehaviorProfiles(p_game, count, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
+[[nodiscard]] inline std::vector<MixedBehaviorProfile<double>>
+NewRandomBehaviorProfiles(const Game &p_game, int count)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomBehaviorProfiles(p_game, count, generator);
+}
+
+/// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
+///        set of mixed behavior profiles, restricted to rational probabilities with denominator
+///        `denom`.
+template <class Generator>
+[[nodiscard]] MixedBehaviorProfile<Rational>
+NewRandomBehaviorProfile(const Game &p_game, int denom, Generator &generator)
+{
+  auto profile = MixedBehaviorProfile<Rational>(p_game);
+  for (auto player : p_game->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      std::list<Rational> dist =
-          UniformOnSimplex(p_denom, infoset->GetActions().size(), generator);
+      const std::list<Rational> dist =
+          UniformOnSimplex(denom, infoset->GetActions().size(), generator);
       auto prob = dist.cbegin();
       for (auto action : infoset->GetActions()) {
         profile[action] = *prob;
@@ -335,6 +370,40 @@ MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
     }
   }
   return profile;
+}
+
+/// @brief As NewRandomBehaviorProfile(p_game, denom, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
+[[nodiscard]] inline MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_game,
+                                                                             int denom)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomBehaviorProfile(p_game, denom, generator);
+}
+
+/// @brief Generate `count` mixed behavior profiles, each as
+///        NewRandomBehaviorProfile(p_game, denom, generator).
+template <class Generator>
+[[nodiscard]] std::vector<MixedBehaviorProfile<Rational>>
+NewRandomBehaviorProfiles(const Game &p_game, int count, int denom, Generator &generator)
+{
+  std::vector<MixedBehaviorProfile<Rational>> profiles;
+  profiles.reserve(count);
+  for (int i = 0; i < count; i++) {
+    profiles.push_back(NewRandomBehaviorProfile(p_game, denom, generator));
+  }
+  return profiles;
+}
+
+/// @brief As NewRandomBehaviorProfiles(p_game, count, denom, generator), using an
+///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
+[[nodiscard]] inline std::vector<MixedBehaviorProfile<Rational>>
+NewRandomBehaviorProfiles(const Game &p_game, int count, int denom)
+{
+  std::random_device rd;
+  std::default_random_engine generator(rd());
+  return NewRandomBehaviorProfiles(p_game, count, denom, generator);
 }
 
 } // end namespace Gambit

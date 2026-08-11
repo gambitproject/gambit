@@ -31,16 +31,12 @@
 namespace Gambit::GUI {
 
 class LabelEditorRefData final : public wxSheetCellTextEditorRefData {
-  LabelCharacterPolicy m_policy{LabelCharacterPolicy::AsciiOnly};
-
 public:
-  explicit LabelEditorRefData(LabelCharacterPolicy p_policy = LabelCharacterPolicy::AsciiOnly);
+  LabelEditorRefData() = default;
 
   void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *) override;
 
   /// Override basic text editor behavior to normalize label editing.
-  bool IsAcceptedKey(wxKeyEvent &) override;
-  void StartingKey(wxKeyEvent &) override;
   bool EndEdit(const wxSheetCoords &, wxSheet *) override;
 
   bool Copy(const LabelEditorRefData &p_other);

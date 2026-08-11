@@ -192,8 +192,6 @@ public:
 
     bool operator==(const iterator &other) const { return m_done == other.m_done; }
 
-    bool operator!=(const iterator &other) const { return !(*this == other); }
-
   private:
     void recompute_from(size_t j0)
     {

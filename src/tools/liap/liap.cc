@@ -35,8 +35,7 @@ template <class Renderer, class Profile>
 void RenderLiapEvent(const Renderer &p_renderer, const LiapEvent<Profile> &p_event)
 {
   std::visit(
-      [&](const auto &event) {
-        using EventType = std::decay_t<decltype(event)>;
+      [&]<typename EventType>(const EventType &event) {
         if constexpr (std::is_same_v<EventType, LiapStartEvent<Profile>>) {
           p_renderer->Render(event.profile, "start");
         }
@@ -77,10 +76,10 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-Array<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game,
-                                                         std::istream &p_stream)
+std::vector<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game,
+                                                               std::istream &p_stream)
 {
-  Array<MixedStrategyProfile<double>> profiles;
+  std::vector<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
     for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
@@ -101,20 +100,10 @@ Array<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game,
   return profiles;
 }
 
-Array<MixedStrategyProfile<double>> RandomStrategyProfiles(const Game &p_game, int p_count)
+std::vector<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game,
+                                                               std::istream &p_stream)
 {
-  std::default_random_engine engine;
-  Array<MixedStrategyProfile<double>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    profiles.push_back(p_game->NewRandomStrategyProfile(engine));
-  }
-  return profiles;
-}
-
-Array<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game,
-                                                         std::istream &p_stream)
-{
-  Array<MixedBehaviorProfile<double>> profiles;
+  std::vector<MixedBehaviorProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
     for (size_t i = 1; i <= p.BehaviorProfileLength(); i++) {
@@ -131,16 +120,6 @@ Array<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game,
     std::string foo;
     std::getline(p_stream, foo);
     profiles.push_back(p);
-  }
-  return profiles;
-}
-
-Array<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, int p_count)
-{
-  std::default_random_engine engine;
-  Array<MixedBehaviorProfile<double>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    profiles.push_back(p_game->NewRandomBehaviorProfile(engine));
   }
   return profiles;
 }
@@ -226,20 +205,21 @@ int main(int argc, char *argv[])
   try {
     const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || !solveAgent) {
-      Array<MixedStrategyProfile<double>> starts;
+      std::vector<MixedStrategyProfile<double>> starts;
       if (!startFile.empty()) {
         std::ifstream startPoints(startFile.c_str());
         starts = ReadStrategyProfiles(game, startPoints);
       }
       else {
         // Generate the desired number of points randomly
-        starts = RandomStrategyProfiles(game, numTries);
+        std::default_random_engine engine;
+        starts = NewRandomStrategyProfiles(game, numTries, engine);
       }
 
-      for (size_t i = 1; i <= starts.size(); i++) {
+      for (const auto &start : starts) {
         auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
         LiapStrategySolve(
-            starts[i], maxregret, maxitsN,
+            start, maxregret, maxitsN,
             [renderer](const MixedStrategyProfile<double> &p_profile) {
               renderer->Render(p_profile);
             },
@@ -251,20 +231,21 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      Array<MixedBehaviorProfile<double>> starts;
+      std::vector<MixedBehaviorProfile<double>> starts;
       if (!startFile.empty()) {
         std::ifstream startPoints(startFile.c_str());
         starts = ReadBehaviorProfiles(game, startPoints);
       }
       else {
         // Generate the desired number of points randomly
-        starts = RandomBehaviorProfiles(game, numTries);
+        std::default_random_engine engine;
+        starts = NewRandomBehaviorProfiles(game, numTries, engine);
       }
 
-      for (size_t i = 1; i <= starts.size(); i++) {
+      for (const auto &start : starts) {
         auto renderer = MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, false);
         LiapAgentSolve(
-            starts[i], maxregret, maxitsN,
+            start, maxregret, maxitsN,
             [renderer](const MixedBehaviorProfile<double> &p_profile) {
               renderer->Render(p_profile);
             },
