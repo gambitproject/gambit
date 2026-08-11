@@ -2014,8 +2014,6 @@ class Game:
                 "make_chance_event(): operation only defined for games with a tree representation"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_chance_event")
-        if not resolved_nodes:
-            raise ValueError("make_chance_event(): `nodes` must not be empty")
         if any(n.is_terminal for n in resolved_nodes):
             raise UndefinedOperationError(
                 "make_chance_event(): all nodes must be nonterminal"
