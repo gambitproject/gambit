@@ -1920,68 +1920,83 @@ class Game:
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_tree"))
         self.game.deref().DeleteTree(resolved_node.node)
 
-    def add_action(self,
-                   infoset: Infoset | str,
-                   before: Action | str | None = None) -> None:
-        """Add an action at the information set `infoset`, with an automatically generated
-        numeric label unique among the actions at `infoset`.  If `before` is not null, the
-        new action is inserted before `before`.
+    def set_actions(self,
+                    infoset: Infoset | str,
+                    actions: list[str],
+                    drop: bool = False,
+                    add: bool = True) -> None:
+        """Set the actions at `infoset` to be `actions`, matching by label.
+
+        An entry of `actions` matching the label of a current action refers to that action;
+        an entry matching no current action creates a new action there, leading to a new terminal;
+        action whose label is not in `actions` is deleted with the subtrees its members root.
+        Listing the current labels in a new order reorders the actions.
+
+        .. versionadded:: 17.0.0
+            Subsumes and replaces `Game.add_action` and `Game.delete_action`.
 
         Parameters
         ----------
         infoset : Infoset or str
-            The information set at which to add an action
-        before : Action or str, optional
-            The action before which to add the new action.  If `before` is not specified,
-            the new action is the first at the information set
+            The information set at which to set the actions, belonging to a personal player.
+        actions : list of str
+            The labels of the actions the information set is to have, in order.
+            Must be nonempty and without duplicates; each label must be a valid, nonempty label.
+        drop : bool, default False
+            Deleting actions is destructive, so it must be explicitly confirmed:
+            if any current action is missing from `actions` and `drop` is `False`,
+            the operation raises without modifying the game.
+        add : bool, default True
+            If `False`, entries of `actions` matching no current action raise.
 
         Raises
         ------
         MismatchError
-            If `infoset` is an `Infoset` from a different game, `before` is an `Action`
-            from a different game, or `before` is not an action at `infoset`.
-        """
-        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "add_action"))
-        if before is None:
-            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
-                                                      cython.cast(c_GameAction, NULL))
-        else:
-            resolved_action = cython.cast(
-                Action, self._resolve_action(before, "add_action", "before")
-            )
-            if resolved_infoset != resolved_action.infoset:
-                raise MismatchError("add_action(): must specify an action from the same infoset")
-            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
-                                                      resolved_action.action)
-
-        current = {action.label for action in resolved_infoset.actions}
-        number = c_action.deref().GetNumber()
-        while str(number) in current:
-            number += 1
-        c_labels = stdmap[string, string]()
-        c_labels[c_action.deref().GetLabel()] = str(number).encode("utf-8")
-        self.game.deref().RelabelActions(resolved_infoset.infoset, c_labels)
-
-    def delete_action(self, action: Action | str) -> None:
-        """Deletes `action` from its information set.  The subtrees which
-        are rooted at nodes that follow the deleted action are also deleted.
-        If the action is at a chance node then the probabilities of any remaining actions
-        are normalized to sum to one; if all remaining actions previously had probability zero
-        then this normalization gives those remaining actions all equal probability.
-
-        Raises
-        ------
+            If `infoset` is an `Infoset` from a different game.
+        KeyError
+            If `infoset` is a string matching no information set.
+        TypeError
+            If `actions` is a string, or not an iterable of strings.
         UndefinedOperationError
-            If `action` is the only action at its information set.
-        MismatchError
-            If `action` is an `Action` from a different game.
+            If `infoset` belongs to the chance player, or `actions` is empty.
+        ValueError
+            If a label in `actions` is repeated, empty, or invalid; if a current
+            action's label is duplicated at the information set.
         """
-        resolved_action = cython.cast(Action, self._resolve_action(action, "delete_action"))
-        if len(resolved_action.infoset.actions) == 1:
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_actions"))
+        if resolved_infoset.is_chance:
             raise UndefinedOperationError(
-                "delete_action(): cannot delete the only action at an information set"
+                "set_actions(): the actions of a chance information set are set "
+                "together with their probabilities"
             )
-        self.game.deref().DeleteAction(resolved_action.action)
+        if isinstance(actions, str) or not hasattr(actions, "__iter__"):
+            raise TypeError("set_actions(): actions must be an iterable of str")
+        labels = list(actions)
+        if any(not isinstance(label, str) for label in labels):
+            raise TypeError("set_actions(): actions must be an iterable of str")
+        if not labels:
+            raise UndefinedOperationError("set_actions(): `actions` must be a nonempty list")
+        current = [action.label for action in resolved_infoset.actions]
+        if len(set(current)) != len(current):
+            raise ValueError(
+                "set_actions(): the information set has duplicate action labels, "
+                "so matching by label is not well-defined"
+            )
+        current_set = set(current)
+        declared = set(labels)
+        added = [label for label in labels if label not in current_set]
+        missing = [label for label in current if label not in declared]
+        if added and not add:
+            raise ValueError(f"set_actions(): would create new actions {added}")
+        if missing and not drop:
+            raise ValueError(
+                f"set_actions(): would delete actions {missing} and the subtrees they "
+                f"lead to; pass drop=True to confirm"
+            )
+        c_labels = stdvector[string]()
+        for label in labels:
+            c_labels.push_back(label.encode("utf-8"))
+        self.game.deref().SetActions(resolved_infoset.infoset, c_labels)
 
     def make_event(self,
                    nodes: Node | NodeReferenceSet,
