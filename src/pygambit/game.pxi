@@ -2104,7 +2104,7 @@ class Game:
         for n in resolved_nodes:
             c_nodes.push_back(cython.cast(Node, n).node)
         self.game.deref().MakeInfoset(c_nodes, resolved_player.player,
-                                      (label or "").encode("ascii"))
+                                      (label or "").encode())
 
     def leave_infoset(self, node: Node | str):
         """Remove `node` from its information set, placing it in a new singleton.
