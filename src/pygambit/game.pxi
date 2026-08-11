@@ -1707,7 +1707,7 @@ class Game:
         )
 
     def _resolve_probs(self,
-                       probs: typing.Any,
+                       probs: typing.Sequence | typing.Mapping,
                        action_labels: list[str],
                        funcname: str) -> list:
         """Resolve a probability specification against an ordered list of action labels.
@@ -1716,7 +1716,7 @@ class Game:
         or a mapping from action labels to values (may be sparse; omitted labels are
         assigned zero).  Returns a dense list of values in action order.
         """
-        if hasattr(probs, "keys"):
+        if isinstance(probs, typing.Mapping):
             unknown = [k for k in probs if k not in action_labels]
             if unknown:
                 raise KeyError(f"{funcname}(): no action with label '{unknown[0]}'")
