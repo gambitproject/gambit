@@ -29,11 +29,9 @@
 #include <memory>
 #include <numeric>
 #include <queue>
+#include <random>
 #include <set>
 #include <stack>
-#include <queue>
-#include <memory>
-#include <random>
 
 #include "number.h"
 #include "gameobject.h"
