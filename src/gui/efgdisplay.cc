@@ -1207,6 +1207,7 @@ void EfgDisplay::OnLeftClick(wxMouseEvent &p_event)
 //
 void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
+  using enum HitRegion;
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
   x = DeviceToLayout(x);
@@ -1214,22 +1215,22 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 
   const auto hit = m_layout.HitTest(x, y);
 
-  if (hit.region == HitRegion::Node) {
+  if (hit.region == Node) {
     m_doc->SetSelectNode(hit.node);
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
     wxPostEvent(this, event);
     return;
   }
 
-  if (hit.region == HitRegion::Outcome || hit.region == HitRegion::Payoff) {
-    const int initialPlayer = (hit.region == HitRegion::Payoff) ? hit.payoffPlayer : 0;
+  if (hit.region == Outcome || hit.region == Payoff) {
+    const int initialPlayer = (hit.region == Payoff) ? hit.payoffPlayer : 0;
     m_outcomeEditor->BeginEdit(hit.node, initialPlayer);
     return;
   }
 
-  const bool aboveClickable = hit.region == HitRegion::BranchAbove &&
+  const bool aboveClickable = hit.region == BranchAbove &&
                               m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL;
-  const bool belowClickable = hit.region == HitRegion::BranchBelow &&
+  const bool belowClickable = hit.region == BranchBelow &&
                               m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL;
   if (aboveClickable || belowClickable) {
     // hit.node is the child whose incoming branch was hit; the old behavior
@@ -1249,6 +1250,7 @@ void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
 
 void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
+  using enum HitRegion;
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     int x, y;
     CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
@@ -1257,7 +1259,7 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 
     const auto hit = m_layout.HitTest(x, y);
 
-    if (hit.region == HitRegion::Node && !hit.node->IsTerminal()) {
+    if (hit.region == Node && !hit.node->IsTerminal()) {
       wxString label;
       label << "N" << hit.node->GetNumber();
       wxTextDataObject textData(label);
@@ -1267,8 +1269,7 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       return;
     }
 
-    if ((hit.region == HitRegion::Outcome || hit.region == HitRegion::Payoff) &&
-        hit.node->GetOutcome()) {
+    if ((hit.region == Outcome || hit.region == Payoff) && hit.node->GetOutcome()) {
       wxString label;
       label << "O" << hit.node->GetNumber();
       wxTextDataObject textData(label);
