@@ -51,7 +51,6 @@ public:
     }
     return true;
   }
-  bool operator!=(const BFS &M) const { return !(*this == M); }
 
   // Provide map-like operations
   int count(int key) const { return (m_map.count(key) > 0); }

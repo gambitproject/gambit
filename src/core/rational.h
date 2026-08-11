@@ -58,7 +58,6 @@ public:
   Rational &operator=(const Rational &y);
 
   bool operator==(const Rational &y) const;
-  bool operator!=(const Rational &y) const;
   bool operator<(const Rational &y) const;
   bool operator<=(const Rational &y) const;
   bool operator>(const Rational &y) const;

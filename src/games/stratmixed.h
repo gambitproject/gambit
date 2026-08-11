@@ -185,12 +185,6 @@ public:
     return (m_rep->GetSupport() == p_profile.m_rep->GetSupport() &&
             m_rep->GetProbVector() == p_profile.m_rep->GetProbVector());
   }
-  /// Test for the inequality of two profiles
-  bool operator!=(const MixedStrategyProfile &p_profile) const
-  {
-    return (m_rep->GetSupport() != p_profile.m_rep->GetSupport() ||
-            m_rep->GetProbVector() != p_profile.m_rep->GetProbVector());
-  }
 
   /// Vector-style access to probabilities
   const T &operator[](int i) const

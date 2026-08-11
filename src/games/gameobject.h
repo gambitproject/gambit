@@ -129,10 +129,6 @@ public:
   bool operator==(const std::shared_ptr<T> &r) const { return (m_rep == r); }
   bool operator==(const std::shared_ptr<const T> &r) const { return (m_rep == r); }
   bool operator==(const std::nullptr_t &) const { return m_rep == nullptr; }
-  bool operator!=(const GameObjectPtr<T> &r) const { return (m_rep != r.m_rep); }
-  bool operator!=(const std::shared_ptr<T> &r) const { return (m_rep != r); }
-  bool operator!=(const std::shared_ptr<const T> &r) const { return (m_rep != r); }
-  bool operator!=(const std::nullptr_t &) const { return m_rep != nullptr; }
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
   /// Explicit three-way comparison, so that containers built on `std::pair`/`std::tuple`
   /// of game-object handles (e.g. `std::map<std::pair<int, GameInfoset>, int>`) order
@@ -180,11 +176,6 @@ public:
     {
       return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
              m_index == p_iter.m_index;
-    }
-    bool operator!=(const iterator &p_iter) const
-    {
-      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
-             m_index != p_iter.m_index;
     }
 
     iterator &operator++()
@@ -308,7 +299,6 @@ public:
       return m_outerIt == p_other.m_outerIt &&
              (m_outerIt == m_outerEnd || m_innerIt == p_other.m_innerIt);
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   };
 
   explicit NestedElementCollection(T owner) : m_owner(owner) {}

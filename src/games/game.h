@@ -790,8 +790,6 @@ public:
     return m_child_it == p_other.m_child_it;
   }
 
-  /// Compares two iterators for inequality.
-  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   //@}
 
   GameNode GetOwner() const;
@@ -1131,7 +1129,6 @@ public:
       {
         return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;

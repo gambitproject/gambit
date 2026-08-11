@@ -186,10 +186,6 @@ public:
   {
     return (m_support == p_profile.m_support && m_probs == p_profile.m_probs);
   }
-  bool operator!=(const MixedBehaviorProfile<T> &p_profile) const
-  {
-    return (m_support != p_profile.m_support || m_probs != p_profile.m_probs);
-  }
 
   const T &operator[](const GameAction &p_action) const
   {

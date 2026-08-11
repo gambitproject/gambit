@@ -426,11 +426,6 @@ bool Rational::operator==(const Rational &y) const
   return compare(num, y.num) == 0 && compare(den, y.den) == 0;
 }
 
-bool Rational::operator!=(const Rational &y) const
-{
-  return compare(num, y.num) != 0 || compare(den, y.den) != 0;
-}
-
 bool Rational::operator<(const Rational &y) const { return compare(*this, y) < 0; }
 
 bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <= 0; }

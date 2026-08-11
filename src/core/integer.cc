@@ -2430,10 +2430,6 @@ bool Integer::operator==(const Integer &y) const { return compare(*this, y) == 0
 
 bool Integer::operator==(long y) const { return compare(*this, y) == 0; }
 
-bool Integer::operator!=(const Integer &y) const { return compare(*this, y) != 0; }
-
-bool Integer::operator!=(long y) const { return compare(*this, y) != 0; }
-
 bool Integer::operator<(const Integer &y) const { return compare(*this, y) < 0; }
 
 bool Integer::operator<(long y) const { return compare(*this, y) < 0; }

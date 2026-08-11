@@ -92,11 +92,6 @@ public:
   {
     return m_space == y.m_space && m_components == y.m_components;
   }
-  bool operator!=(const ExponentVector &y) const
-  {
-    return m_space != y.m_space || m_components != y.m_components;
-  }
-
   bool operator<(const ExponentVector &y) const
   {
     if (m_space != y.m_space) {
@@ -183,7 +178,6 @@ public:
 
   bool IsZero() const { return coef == static_cast<T>(0); }
   bool operator==(const Monomial &y) const { return (coef == y.coef && exps == y.exps); }
-  bool operator!=(const Monomial &y) const { return (coef != y.coef || exps != y.exps); }
   bool operator<(const Monomial &y) const { return exps < y.exps; }
   Monomial operator*(const Monomial &y) const
   {
@@ -349,11 +343,6 @@ public:
   {
     return m_space == p.m_space && m_terms == p.m_terms;
   }
-  bool operator!=(const Polynomial &p) const
-  {
-    return m_space != p.m_space || m_terms != p.m_terms;
-  }
-
   Polynomial pow(int exponent) const;
 
   //-------------

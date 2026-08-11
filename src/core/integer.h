@@ -113,8 +113,6 @@ public:
   //@{
   bool operator==(const Integer &) const;
   bool operator==(long) const;
-  bool operator!=(const Integer &) const;
-  bool operator!=(long) const;
   bool operator<(const Integer &) const;
   bool operator<(long) const;
   bool operator<=(const Integer &) const;

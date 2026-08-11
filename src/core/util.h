@@ -149,8 +149,6 @@ public:
       return a.m_current == b.m_current;
     }
 
-    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
-
   private:
     Iter m_current, m_end;
     Pred m_pred;
@@ -210,8 +208,6 @@ public:
     {
       return m_first == other.m_first && m_current == other.m_current;
     }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
     std::optional<Value> m_first;

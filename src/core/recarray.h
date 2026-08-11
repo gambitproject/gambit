@@ -69,7 +69,6 @@ public:
       }
 
       bool operator==(const iterator &p_other) const { return m_col == p_other.m_col; }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     RowView(RectArray &p_array, int p_row) : m_array(&p_array), m_row(p_row)
@@ -115,7 +114,6 @@ public:
       }
 
       bool operator==(const iterator &p_other) const { return m_row == p_other.m_row; }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     ColumnView(RectArray &p_array, int p_col) : m_array(&p_array), m_col(p_col)
