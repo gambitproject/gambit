@@ -85,11 +85,11 @@ public:
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
   /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetPlayerMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
   Rational GetMaxPayoff() const override { return Rational(aggPtr->getMaxPayoff()); }
   /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetPlayerMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Modification

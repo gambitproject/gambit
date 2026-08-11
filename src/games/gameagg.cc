@@ -247,6 +247,26 @@ bool GameAGGRep::IsConstSum() const
                      [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
 }
 
+Rational GameAGGRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  Rational minpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    minpay = std::min(minpay, profile->GetPayoff(p_player));
+  }
+  return minpay;
+}
+
+Rational GameAGGRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  Rational maxpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    maxpay = std::max(maxpay, profile->GetPayoff(p_player));
+  }
+  return maxpay;
+}
+
 //------------------------------------------------------------------------
 //                   GameAGGRep: Writing data files
 //------------------------------------------------------------------------

@@ -145,7 +145,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps)
                                             ->GetStrategy(j + 1);
           const int ind = this->m_profileIndex.at(strategy);
           s.at(g.baggPtr->firstAction(i, tp) + j) =
-              (ind == -1) ? Rational(0) : this->m_probs.GetFlattened()[ind];
+              (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
         }
       }
     }
@@ -231,6 +231,42 @@ Game GameBAGGRep::Copy() const
   WriteBaggFile(os);
   std::istringstream is(os.str());
   return ReadBaggFile(is);
+}
+
+//------------------------------------------------------------------------
+//                  GameBAGGRep: General data access
+//------------------------------------------------------------------------
+
+bool GameBAGGRep::IsConstSum() const
+{
+  auto payoff_sum = [&](const PureStrategyProfile &p) {
+    return sum_function(m_players, [&](const auto &player) { return p->GetPayoff(player); });
+  };
+  const Rational sum = payoff_sum(NewPureStrategyProfile());
+
+  auto contingencies = StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()));
+  return std::all_of(contingencies.begin(), contingencies.end(),
+                     [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
+}
+
+Rational GameBAGGRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  Rational minpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    minpay = std::min(minpay, profile->GetPayoff(p_player));
+  }
+  return minpay;
+}
+
+Rational GameBAGGRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  Rational maxpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    maxpay = std::max(maxpay, profile->GetPayoff(p_player));
+  }
+  return maxpay;
 }
 
 //------------------------------------------------------------------------
