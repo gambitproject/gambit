@@ -13,7 +13,7 @@ This code is organised into three directories:
 * ``src/solvers``: Implementation of algorithms for computation on games, principally for the
   computation of (exact or approximate) Nash equilibria.
 
-Gambit is written to the C++17 standard.  Because Gambit is cross-platform, C++ library
+Gambit is written to the C++20 standard.  Because Gambit is cross-platform, C++ library
 dependencies are avoided to facilitate development and packaging.
 
 The principal way in which code is written to use Gambit is via the Python package

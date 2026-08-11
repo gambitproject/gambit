@@ -927,13 +927,13 @@ void EfgDisplay::OnUpdate()
 
   const GameNode selectNode = m_doc->GetSelectNode();
 
-  m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode);
+  m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, static_cast<bool>(selectNode));
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, selectNode);
+  m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, static_cast<bool>(selectNode));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, selectNode && selectNode->GetInfoset());
 }
 

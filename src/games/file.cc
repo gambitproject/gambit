@@ -820,7 +820,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
       }
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }
