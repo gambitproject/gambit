@@ -1,6 +1,8 @@
 ## [17.0.0-alpha.1] - unreleased
 
 ### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
 - Added `Game.make_chance_event`, which forms a collection of nodes into a single chance event with a
   specified probability distribution over its actions. (#1009)
 
@@ -19,13 +21,7 @@
   removes dependency on tinyxml.  (#897)
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
-- Introduced `Game.make_infoset`, which subsumes operations previously written as `Game.leave_infoset`,
-  `Game.set_infoset`, and `Game.set_player`.
 - `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
-
-### Added
-- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
-  information set; the primitive operation for editing information structures.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
