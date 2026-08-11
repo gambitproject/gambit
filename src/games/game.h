@@ -1692,7 +1692,7 @@ template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
   // NOLINTBEGIN(misc-const-correctness)
-  std::uniform_int_distribution dist(1, p_denom + static_cast<int>(p_dim) - 1);
+  std::uniform_int_distribution<int> dist(1, p_denom + static_cast<int>(p_dim) - 1);
   // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {
