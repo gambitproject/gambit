@@ -160,21 +160,27 @@ public:
             m_maxcol == m.m_maxcol);
   }
   /// check for correct row index
-  bool CheckRow(const int row) const { return (m_minrow <= row && row <= m_maxrow); }
+  [[nodiscard]] bool CheckRow(const int row) const { return (m_minrow <= row && row <= m_maxrow); }
   /// check row vector for correct column boundaries
   template <class V> bool ConformsToRow(const V &v) const
   {
     return v.front_index() == m_mincol && v.back_index() == m_maxcol;
   }
   /// check for correct column index
-  bool CheckColumn(const int col) const { return (m_mincol <= col && col <= m_maxcol); }
+  [[nodiscard]] bool CheckColumn(const int col) const
+  {
+    return (m_mincol <= col && col <= m_maxcol);
+  }
   /// check column vector for correct row boundaries
   template <class V> bool ConformsToColumn(const V &v) const
   {
     return (v.front_index() == m_minrow && v.back_index() == m_maxrow);
   }
   /// check row and column indices
-  bool Check(const int row, const int col) const { return CheckRow(row) && CheckColumn(col); }
+  [[nodiscard]] bool Check(const int row, const int col) const
+  {
+    return CheckRow(row) && CheckColumn(col);
+  }
 
   //@}
   /// @name General data access

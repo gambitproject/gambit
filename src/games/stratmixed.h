@@ -347,7 +347,8 @@ public:
 /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
 ///        set of mixed strategy profiles
 template <class Generator>
-MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game, Generator &generator)
+[[nodiscard]] MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game,
+                                                                    Generator &generator)
 {
   auto profile = p_game->NewMixedStrategyProfile(0.0);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
@@ -362,7 +363,7 @@ MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game, Genera
 /// @brief As NewRandomStrategyProfile(p_game, generator), using an unseeded-by-the-caller
 ///        generator -- for callers who don't need the sequence of profiles drawn to be
 ///        reproducible. Pass an explicit generator instead if reproducibility matters.
-inline MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game)
+[[nodiscard]] inline MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -372,8 +373,8 @@ inline MixedStrategyProfile<double> NewRandomStrategyProfile(const Game &p_game)
 /// @brief Generate `count` mixed strategy profiles, each as
 ///        NewRandomStrategyProfile(p_game, generator).
 template <class Generator>
-std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const Game &p_game, int count,
-                                                                    Generator &generator)
+[[nodiscard]] std::vector<MixedStrategyProfile<double>>
+NewRandomStrategyProfiles(const Game &p_game, int count, Generator &generator)
 {
   std::vector<MixedStrategyProfile<double>> profiles;
   profiles.reserve(count);
@@ -385,8 +386,8 @@ std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const Game &
 
 /// @brief As NewRandomStrategyProfiles(p_game, count, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
-inline std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const Game &p_game,
-                                                                           int count)
+[[nodiscard]] inline std::vector<MixedStrategyProfile<double>>
+NewRandomStrategyProfiles(const Game &p_game, int count)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -397,8 +398,8 @@ inline std::vector<MixedStrategyProfile<double>> NewRandomStrategyProfiles(const
 ///        set of mixed strategy profiles, restricted to rational probabilities with denominator
 ///        `denom`.
 template <class Generator>
-MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game, int denom,
-                                                        Generator &generator)
+[[nodiscard]] MixedStrategyProfile<Rational>
+NewRandomStrategyProfile(const Game &p_game, int denom, Generator &generator)
 {
   auto profile = p_game->NewMixedStrategyProfile(Rational(0));
   for (auto player : p_game->GetPlayers()) {
@@ -415,7 +416,8 @@ MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game, int 
 
 /// @brief As NewRandomStrategyProfile(p_game, denom, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
-inline MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game, int denom)
+[[nodiscard]] inline MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_game,
+                                                                             int denom)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -425,7 +427,7 @@ inline MixedStrategyProfile<Rational> NewRandomStrategyProfile(const Game &p_gam
 /// @brief Generate `count` mixed strategy profiles, each as
 ///        NewRandomStrategyProfile(p_game, denom, generator).
 template <class Generator>
-std::vector<MixedStrategyProfile<Rational>>
+[[nodiscard]] std::vector<MixedStrategyProfile<Rational>>
 NewRandomStrategyProfiles(const Game &p_game, int count, int denom, Generator &generator)
 {
   std::vector<MixedStrategyProfile<Rational>> profiles;
@@ -438,8 +440,8 @@ NewRandomStrategyProfiles(const Game &p_game, int count, int denom, Generator &g
 
 /// @brief As NewRandomStrategyProfiles(p_game, count, denom, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomStrategyProfile(p_game) above.
-inline std::vector<MixedStrategyProfile<Rational>> NewRandomStrategyProfiles(const Game &p_game,
-                                                                             int count, int denom)
+[[nodiscard]] inline std::vector<MixedStrategyProfile<Rational>>
+NewRandomStrategyProfiles(const Game &p_game, int count, int denom)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());

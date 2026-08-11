@@ -301,7 +301,8 @@ public:
 /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
 ///        set of mixed behavior profiles
 template <class Generator>
-MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game, Generator &generator)
+[[nodiscard]] MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game,
+                                                                    Generator &generator)
 {
   auto profile = MixedBehaviorProfile<double>(p_game);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
@@ -318,7 +319,7 @@ MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game, Genera
 /// @brief As NewRandomBehaviorProfile(p_game, generator), using an unseeded-by-the-caller
 ///        generator -- for callers who don't need the sequence of profiles drawn to be
 ///        reproducible. Pass an explicit generator instead if reproducibility matters.
-inline MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game)
+[[nodiscard]] inline MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -328,8 +329,8 @@ inline MixedBehaviorProfile<double> NewRandomBehaviorProfile(const Game &p_game)
 /// @brief Generate `count` mixed behavior profiles, each as
 ///        NewRandomBehaviorProfile(p_game, generator).
 template <class Generator>
-std::vector<MixedBehaviorProfile<double>> NewRandomBehaviorProfiles(const Game &p_game, int count,
-                                                                    Generator &generator)
+[[nodiscard]] std::vector<MixedBehaviorProfile<double>>
+NewRandomBehaviorProfiles(const Game &p_game, int count, Generator &generator)
 {
   std::vector<MixedBehaviorProfile<double>> profiles;
   profiles.reserve(count);
@@ -341,8 +342,8 @@ std::vector<MixedBehaviorProfile<double>> NewRandomBehaviorProfiles(const Game &
 
 /// @brief As NewRandomBehaviorProfiles(p_game, count, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
-inline std::vector<MixedBehaviorProfile<double>> NewRandomBehaviorProfiles(const Game &p_game,
-                                                                           int count)
+[[nodiscard]] inline std::vector<MixedBehaviorProfile<double>>
+NewRandomBehaviorProfiles(const Game &p_game, int count)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -353,8 +354,8 @@ inline std::vector<MixedBehaviorProfile<double>> NewRandomBehaviorProfiles(const
 ///        set of mixed behavior profiles, restricted to rational probabilities with denominator
 ///        `denom`.
 template <class Generator>
-MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_game, int denom,
-                                                        Generator &generator)
+[[nodiscard]] MixedBehaviorProfile<Rational>
+NewRandomBehaviorProfile(const Game &p_game, int denom, Generator &generator)
 {
   auto profile = MixedBehaviorProfile<Rational>(p_game);
   for (auto player : p_game->GetPlayers()) {
@@ -373,7 +374,8 @@ MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_game, int 
 
 /// @brief As NewRandomBehaviorProfile(p_game, denom, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
-inline MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_game, int denom)
+[[nodiscard]] inline MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_game,
+                                                                             int denom)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
@@ -383,7 +385,7 @@ inline MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(const Game &p_gam
 /// @brief Generate `count` mixed behavior profiles, each as
 ///        NewRandomBehaviorProfile(p_game, denom, generator).
 template <class Generator>
-std::vector<MixedBehaviorProfile<Rational>>
+[[nodiscard]] std::vector<MixedBehaviorProfile<Rational>>
 NewRandomBehaviorProfiles(const Game &p_game, int count, int denom, Generator &generator)
 {
   std::vector<MixedBehaviorProfile<Rational>> profiles;
@@ -396,8 +398,8 @@ NewRandomBehaviorProfiles(const Game &p_game, int count, int denom, Generator &g
 
 /// @brief As NewRandomBehaviorProfiles(p_game, count, denom, generator), using an
 ///        unseeded-by-the-caller generator -- see NewRandomBehaviorProfile(p_game) above.
-inline std::vector<MixedBehaviorProfile<Rational>> NewRandomBehaviorProfiles(const Game &p_game,
-                                                                             int count, int denom)
+[[nodiscard]] inline std::vector<MixedBehaviorProfile<Rational>>
+NewRandomBehaviorProfiles(const Game &p_game, int count, int denom)
 {
   std::random_device rd;
   std::default_random_engine generator(rd());
