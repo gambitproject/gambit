@@ -401,7 +401,7 @@ bool GameNodeRep::IsSubgameRoot() const
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  return tree_game->GetSubgameData().m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
+  return tree_game->GetSubgameData().m_subgameByRoot.contains(const_cast<GameNodeRep *>(this));
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -409,7 +409,7 @@ bool GameNodeRep::IsStrategyReachable() const
   auto tree_game = static_cast<GameTreeRep *>(m_game);
 
   // A node is reachable if it is NOT in the set of unreachable nodes.
-  return !contains(tree_game->GetUnreachableNodes(), const_cast<GameNodeRep *>(this));
+  return !tree_game->GetUnreachableNodes().contains(const_cast<GameNodeRep *>(this));
 }
 
 void GameTreeRep::DeleteParent(GameNode p_node)
@@ -593,7 +593,7 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
       if (infoset->GetLabel() == p_label &&
           std::all_of(infoset->m_members.begin(), infoset->m_members.end(),
                       [&selected](const std::shared_ptr<GameNodeRep> &m) {
-                        return contains(selected, m.get());
+                        return selected.contains(m.get());
                       })) {
         absorbed.insert(infoset.get());
       }
@@ -937,7 +937,7 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
     throw MismatchException();
   }
   EnsureOwnPriorActions();
-  return contains(m_absentMindedInfosets, p_infoset.get());
+  return m_absentMindedInfosets.contains(p_infoset.get());
 }
 
 GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
@@ -1278,7 +1278,7 @@ const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
       if (!child->IsTerminal()) {
         // On a re-entry, a pure strategy replays the action chosen at the earlier visit,
         // so only that branch is reachable; prune the rest.
-        if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        if (path_choices.contains(child->m_infoset->shared_from_this())) {
           const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
           position.emplace(AbsentMindedEdge{replay_action, child});
 
@@ -1445,7 +1445,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
           return DFSCallbackResult::Continue;
         }
         GameNodeRep *node = p_node.get();
-        if (contains(m_roots, node)) {
+        if (m_roots.contains(node)) {
           auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
           if (!m_stack.empty()) {
             auto &parent_subgame = m_cache.at(m_stack.back());

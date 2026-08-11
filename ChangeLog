@@ -7,6 +7,7 @@
   specified probability distribution over its actions. (#1009)
 
 ### Changed
+- Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
 - Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
   still not contain control characters, begin/end with whitespace, or contain two consecutive
   whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0

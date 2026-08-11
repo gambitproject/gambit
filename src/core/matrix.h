@@ -113,9 +113,7 @@ public:
   /// Element-wise comparisons
   ///@{
   bool operator==(const Matrix &) const;
-  bool operator!=(const Matrix &M) const { return !(*this == M); }
   bool operator==(const T &) const;
-  bool operator!=(const T &c) const { return !(*this == c); }
   ///@}
 
   /// @name Arithmetic operators

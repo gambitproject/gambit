@@ -46,10 +46,6 @@ public:
   {
     return lower_bd == p_rhs.lower_bd && upper_bd == p_rhs.upper_bd;
   }
-  bool operator!=(const Interval<T> &p_rhs) const
-  {
-    return lower_bd != p_rhs.lower_bd || upper_bd != p_rhs.upper_bd;
-  }
 
   const T &LowerBound() const { return lower_bd; }
   const T &UpperBound() const { return upper_bd; }
@@ -120,7 +116,6 @@ public:
       {
         return (m_orthants == it.m_orthants) && (m_index == it.m_index);
       }
-      bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
     Orthants(const Rectangle<T> &p_rect) : m_rect(p_rect) {}
@@ -140,7 +135,6 @@ public:
 
   Rectangle<T> &operator=(const Rectangle<T> &) = delete;
   bool operator==(const Rectangle<T> &y) const { return sides == y.sides; }
-  bool operator!=(const Rectangle<T> &y) const { return sides != y.sides; }
 
   int Dmnsn() const { return sides.size(); }
   Orthants Orthants() const { return {*this}; }

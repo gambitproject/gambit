@@ -426,11 +426,6 @@ bool Rational::operator==(const Rational &y) const
   return compare(num, y.num) == 0 && compare(den, y.den) == 0;
 }
 
-bool Rational::operator!=(const Rational &y) const
-{
-  return compare(num, y.num) != 0 || compare(den, y.den) != 0;
-}
-
 bool Rational::operator<(const Rational &y) const { return compare(*this, y) < 0; }
 
 bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <= 0; }
@@ -438,6 +433,11 @@ bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <=
 bool Rational::operator>(const Rational &y) const { return compare(*this, y) > 0; }
 
 bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >= 0; }
+
+std::strong_ordering Rational::operator<=>(const Rational &y) const
+{
+  return compare(*this, y) <=> 0;
+}
 
 void Rational::negate() { num.negate(); }
 

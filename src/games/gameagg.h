@@ -113,7 +113,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .agg format.
-Game ReadAggFile(std::istream &p_stream);
+[[nodiscard]] Game ReadAggFile(std::istream &p_stream);
 
 } // namespace Gambit
 

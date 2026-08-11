@@ -60,12 +60,6 @@ template <class C, class T> bool contains(const C &p_container, const T &p_value
   return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
 }
 
-template <class Key, class T> bool contains(const std::map<Key, T> &map, const Key &key)
-// TODO: remove when we move to C++20 which already includes a "contains" method
-{
-  return map.find(key) != map.end();
-}
-
 template <class C> class EnumerateView {
 public:
   explicit EnumerateView(C &p_range) : m_range(p_range) {}
@@ -149,8 +143,6 @@ public:
       return a.m_current == b.m_current;
     }
 
-    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
-
   private:
     Iter m_current, m_end;
     Pred m_pred;
@@ -182,7 +174,6 @@ public:
   class iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
-    ;
     using value_type = Value;
     using difference_type = std::ptrdiff_t;
     using reference = Value;
@@ -210,8 +201,6 @@ public:
     {
       return m_first == other.m_first && m_current == other.m_current;
     }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
     std::optional<Value> m_first;

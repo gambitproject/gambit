@@ -222,7 +222,7 @@ bool EditMoveDialog::ValidateLabels()
       return false;
     }
 
-    if (contains(actionLabels, actionLabel)) {
+    if (actionLabels.contains(actionLabel)) {
       wxRichMessageDialog(this, _("Action labels must be unique within the information set."),
                           _("Error"), wxOK | wxCENTRE | wxICON_ERROR)
           .ShowModal();

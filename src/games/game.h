@@ -24,10 +24,12 @@
 #define LIBGAMBIT_GAME_H
 
 #include <algorithm>
+#include <compare>
 #include <list>
 #include <memory>
 #include <numeric>
 #include <queue>
+#include <random>
 #include <set>
 #include <stack>
 
@@ -561,9 +563,12 @@ public:
   GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
-  bool operator<(const GameSequenceRep &other) const
+  std::strong_ordering operator<=>(const GameSequenceRep &other) const
   {
-    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
+    if (const auto cmp = m_player <=> other.m_player; cmp != 0) {
+      return cmp;
+    }
+    return m_action <=> other.m_action;
   }
   bool operator==(const GameSequenceRep &other) const
   {
@@ -792,8 +797,6 @@ public:
     return m_child_it == p_other.m_child_it;
   }
 
-  /// Compares two iterators for inequality.
-  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   //@}
 
   GameNode GetOwner() const;
@@ -1147,7 +1150,6 @@ public:
       {
         return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
@@ -1528,7 +1530,7 @@ GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
     return;
   }
   for (const auto &infoset : m_infosets) {
-    if (p_ignore.count(infoset.get()) == 0 && infoset->GetLabel() == p_label) {
+    if (!p_ignore.contains(infoset.get()) && infoset->GetLabel() == p_label) {
       throw ValueException("Infoset label must be unique for the player");
     }
   }
@@ -1675,9 +1677,9 @@ inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this();
 //=======================================================================
 
 /// Factory function to create new game tree
-Game NewTree();
+[[nodiscard]] Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+[[nodiscard]] Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///
@@ -1686,7 +1688,7 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadEfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
@@ -1694,7 +1696,7 @@ Game ReadEfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadNfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
@@ -1702,12 +1704,12 @@ Game ReadNfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+[[nodiscard]] Game ReadGbtFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+[[nodiscard]] Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator
@@ -1715,7 +1717,7 @@ template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
   // NOLINTBEGIN(misc-const-correctness)
-  std::uniform_int_distribution dist(1, p_denom + static_cast<int>(p_dim) - 1);
+  std::uniform_int_distribution<int> dist(1, p_denom + static_cast<int>(p_dim) - 1);
   // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {

@@ -35,8 +35,7 @@ template <class Renderer, class Profile>
 void RenderLiapEvent(const Renderer &p_renderer, const LiapEvent<Profile> &p_event)
 {
   std::visit(
-      [&](const auto &event) {
-        using EventType = std::decay_t<decltype(event)>;
+      [&]<typename EventType>(const EventType &event) {
         if constexpr (std::is_same_v<EventType, LiapStartEvent<Profile>>) {
           p_renderer->Render(event.profile, "start");
         }
