@@ -71,7 +71,7 @@ Transforming game information structure
    Game.make_infoset
    Game.set_infoset
    Game.leave_infoset
-   Game.set_chance_probs
+   Game.make_event
    Game.reveal
 
 
