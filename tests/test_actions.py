@@ -116,53 +116,98 @@ def test_action_precedes_nonnode(game: gbt.Game):
         action.precedes(game)
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_personal(game: gbt.Game):
-    node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
-    action_count = len(node.infoset.actions)
-    game.delete_action(next(iter(node.infoset.actions)))
-    assert len(node.infoset.actions) == action_count - 1
+def test_set_actions_drop_shrinks_actions_and_children():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    node = next(iter(infoset.members))
+    action_count = len(infoset.actions)
+    remaining = [action.label for action in infoset.actions][1:]
+    game.set_actions(infoset, remaining, drop=True)
+    assert len(infoset.actions) == action_count - 1
     assert len(node.children) == action_count - 1
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_last(game: gbt.Game):
+def test_set_actions_cannot_remove_the_only_action():
+    game = games.create_stripped_down_poker_efg()
     infoset = game.players["Alice"].infosets["Alice has King"]
-    while len(infoset.actions) > 1:
-        game.delete_action(next(iter(infoset.actions)))
+    last = next(iter(infoset.actions)).label
+    game.set_actions(infoset, [last], drop=True)
+    assert [action.label for action in infoset.actions] == [last]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(infoset.actions)))
+        game.set_actions(infoset, [], drop=True)
 
 
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
-        games.create_stripped_down_poker_efg(),
-        games.read_from_file("chance_root_5_moves_no_nonterm_player_nodes.efg"),
-    ],
-)
-def test_action_delete_chance(game: gbt.Game):
-    """Test the renormalization of action probabilities when an action is deleted at a chance
-    node
-    """
-    chance_infoset = next(iter(game.players.chance.infosets))
-    while len(chance_infoset.actions) > 1:
-        old_probs = [a.prob for a in chance_infoset.actions]
-        game.delete_action(next(iter(chance_infoset.actions)))
-        new_probs = [a.prob for a in chance_infoset.actions]
-        assert sum(new_probs) == 1
-        if sum(old_probs[1:]) == 0:
-            for p in new_probs:
-                assert p == 1 / len(new_probs)
-        else:
-            for p1, p2 in zip(old_probs[1:], new_probs, strict=True):
-                if p1 == 0:
-                    assert p2 == 0
-                else:
-                    assert p2 == p1 / (1 - old_probs[0])
+def test_set_actions_reorder_carries_subtrees():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Bob"].infosets["Bob's response"]
+    members = list(infoset.members)
+    before = [list(member.children) for member in members]
+    game.set_actions(infoset, ["Fold", "Call"])
+    assert [action.label for action in infoset.actions] == ["Fold", "Call"]
+    for member, children in zip(members, before, strict=True):
+        assert list(member.children) == list(reversed(children))
+
+
+def test_set_actions_add_drop_and_reorder_together():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    nodes_before = len(game.nodes)
+    game.set_actions(infoset, ["Raise", "Fold"], drop=True)
+    assert [action.label for action in infoset.actions] == ["Raise", "Fold"]
+    # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
+    assert len(game.nodes) == nodes_before - 3 + 1
+    assert len(game.players["Bob"].infosets["Bob's response"].members) == 1
+
+
+def test_set_actions_unconfirmed_drop_and_disabled_add_raise():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_actions(infoset, ["Bet"])
+    with pytest.raises(ValueError):
+        game.set_actions(infoset, ["Bet", "Fold", "Raise"], add=False)
+    assert game.to_efg() == before
+
+
+@pytest.mark.parametrize("bad_labels", [["Bet", "Bet"], ["Bet", ""], ["Bet", " x"]])
+def test_set_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
+    """Duplicate, empty, and invalid labels in `actions` are rejected in C++,
+    after the Python guards pass; the game must be unmodified by the failure."""
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_actions(infoset, bad_labels, drop=True)
+    assert game.to_efg() == before
+
+
+def test_set_actions_chance_raises_undefined_operation():
+    game = games.create_stripped_down_poker_efg()
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(chance_infoset.actions)))
+        game.set_actions(game.root.infoset, ["King", "Queen"])
+
+
+@pytest.mark.filterwarnings("ignore::FutureWarning")
+def test_set_actions_ambiguous_current_labels_raises_valueerror():
+    """A game file may have duplicate action labels; matching by label is then not
+    well-defined, so the operation refuses."""
+    game = gbt.Game.new_tree(players=["Alice"])
+    game.append_move(game.root, "Alice", ["a", "a"])
+    with pytest.raises(ValueError):
+        game.set_actions(game.root.infoset, ["a", "x"])
+
+
+def test_set_actions_absent_minded_drop_and_add():
+    """Dropping an action whose subtree contains another member of the same information
+    set deletes that member with the subtree."""
+    game = gbt.Game.new_tree(players=["Alice"])
+    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_infoset(game.root.children["a"], game.root.infoset)
+    game.set_actions(game.root.infoset, ["b", "c"], drop=True)
+    assert [action.label for action in game.root.infoset.actions] == ["b", "c"]
+    assert len(game.root.infoset.members) == 1
+    assert len(game.nodes) == 3
 
 
 def test_action_plays():

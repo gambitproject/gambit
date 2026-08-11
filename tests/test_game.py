@@ -210,8 +210,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    action_to_delete = game.root.infoset.actions["U1"]
-    game.delete_action(action_to_delete)
+    game.set_actions(game.root.infoset, ["D1"], drop=True)
     strategy1, strategy2, *_ = game.strategies
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -250,8 +249,7 @@ def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    action_to_delete = game.root.infoset.actions["U1"]
-    game.delete_action(action_to_delete)
+    game.set_actions(game.root.infoset, ["D1"], drop=True)
     action = next(iter(game.actions))
     infoset = next(iter(game.infosets))
     infoset_action = next(iter(infoset.actions))
