@@ -24,6 +24,10 @@
   lazy generator algorithm rather than materialising all as a single list up front.
 - `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
 
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
+
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
   no longer inserts spurious entries into a strategy's internal action map.
@@ -33,6 +37,8 @@
   information set and the new player.  (#999)
 - `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
   information sets and their members is now maintained automatically.  (#999)
+- Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces
+  nonempty, unique labels.  (#1026)
 - `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
   probabilities as forming the nodes of the event with the required distribution.  (#1009)
 

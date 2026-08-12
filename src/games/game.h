@@ -391,11 +391,6 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
 
   bool Precedes(const GameNode &) const;
 };
@@ -441,6 +436,10 @@ public:
   bool IsChanceInfoset() const;
 
   void SetLabel(const std::string &p_label);
+  /// Validate that p_label is a nonempty, valid label for an action of this
+  /// information set, unique among its actions disregarding any in p_ignore.
+  void CheckActionLabel(const std::string &p_label,
+                        const std::set<const GameActionRep *> &p_ignore) const;
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -1261,8 +1260,9 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Append a move for p_player at p_node, with actions labeled per p_actions.
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
@@ -1270,8 +1270,15 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Insert a move for p_player prior to p_node, with p_actions actions bearing
+  /// automatically generated, sequentially numbered labels.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a move for p_player prior to p_node, with actions labeled per p_actions.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
@@ -1298,6 +1305,12 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
+  /// Simultaneously reassign action labels at an information set.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
   virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
@@ -1543,6 +1556,19 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::CheckActionLabel(const std::string &p_label,
+                                             const std::set<const GameActionRep *> &p_ignore) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Action label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &action : m_actions) {
+    if (p_ignore.count(action.get()) == 0 && action->GetLabel() == p_label) {
+      throw ValueException("Action label must be unique within the information set");
+    }
+  }
+}
 inline void GameInfosetRep::SetLabel(const std::string &p_label)
 {
   if (p_label == m_label) {

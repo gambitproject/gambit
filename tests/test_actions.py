@@ -6,23 +6,11 @@ from . import games
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_set_action_label(label: str):
+def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    action.label = label
+    game.relabel_actions(game.root.infoset, {action.label: label})
     assert action.label == label
-
-
-def test_set_empty_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = ""
-
-
-def test_set_duplicate_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = "Queen"
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
@@ -30,16 +18,88 @@ def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
     with pytest.raises(ValueError):
-        action.label = label
+        game.relabel_actions(game.root.infoset, {action.label: label})
 
 
-@pytest.mark.parametrize("label", games.UNICODE_LABELS)
-def test_action_label_unicode_accepted(label: str):
-    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
+def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    action.label = label
-    assert action.label == label
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {action.label: ""})
+
+
+def test_relabel_actions_duplicate_raises_valueerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Queen"})
+
+
+def test_relabel_actions_simultaneous_swap():
+    """Reassignment is simultaneous, so a swap is well-defined; applying the entries one
+    at a time would collide on the intermediate state.
+    """
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root.infoset, {"King": "Queen", "Queen": "King"})
+    assert [action.label for action in game.root.infoset.actions] == ["Queen", "King"]
+
+
+def test_relabel_actions_duplicate_targets_raises_valueerror():
+    """Both replacements are free of the actions left untouched but collide with each
+    other, so checking each against the untouched actions alone would let this through.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Ace", "Queen": "Ace"})
+
+
+def test_relabel_actions_unknown_label_raises_keyerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(KeyError):
+        game.relabel_actions(game.root.infoset, {"Jack": "Ace"})
+
+
+def test_relabel_actions_unknown_label_not_strict_is_ignored():
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root.infoset, {"Jack": "Ace", "King": "Ace"}, strict=False)
+    assert [action.label for action in game.root.infoset.actions] == ["Ace", "Queen"]
+
+
+def test_relabel_actions_failure_leaves_game_unchanged():
+    """The whole mapping is validated before any label is written, so a mapping that
+    fails part way through leaves no partial reassignment behind.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Ace", "Queen": ""})
+    assert [action.label for action in game.root.infoset.actions] == ["King", "Queen"]
+
+
+def test_relabel_actions_scope_is_the_information_set():
+    """Action labels are unique within an information set, not within a player: Alice's
+    two information sets both offer "Bet", and relabelling one leaves the other untouched
+    and free to take the same new label.
+    """
+    game = games.create_stripped_down_poker_efg()
+    king = game.players["Alice"].infosets["Alice has King"]
+    queen = game.players["Alice"].infosets["Alice has Queen"]
+    game.relabel_actions(king, {"Bet": "Raise"})
+    assert [action.label for action in king.actions] == ["Raise", "Fold"]
+    assert [action.label for action in queen.actions] == ["Bet", "Fold"]
+    game.relabel_actions(queen, {"Bet": "Raise"})
+    assert [action.label for action in queen.actions] == ["Raise", "Fold"]
+
+
+def test_relabel_actions_not_a_mapping_raises_typeerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, [("King", "Queen")])
+
+
+@pytest.mark.parametrize("labels", [{1: "Queen"}, {"King": 1}])
+def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, labels)
 
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
