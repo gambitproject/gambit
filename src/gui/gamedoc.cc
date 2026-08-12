@@ -462,9 +462,10 @@ void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_la
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
+void GameDocument::DoRelabelActions(GameInfoset p_infoset,
+                                    const std::map<std::string, std::string> &p_labels)
 {
-  p_action->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelActions(p_infoset, p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -497,8 +498,18 @@ void GameDocument::DoInsertAction(GameNode p_node)
   if (!p_node || !p_node->GetInfoset()) {
     return;
   }
-  const GameAction action = m_game->InsertAction(p_node->GetInfoset());
-  action->SetLabel(std::to_string(action->GetNumber()));
+  const GameInfoset infoset = p_node->GetInfoset();
+  const GameAction action = m_game->InsertAction(infoset);
+
+  std::set<std::string> actionLabels;
+  for (const auto &sibling : infoset->GetActions()) {
+    actionLabels.insert(sibling->GetLabel());
+  }
+  int number = action->GetNumber();
+  while (contains(actionLabels, std::to_string(number))) {
+    number++;
+  }
+  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
   NotifyChanged(GameModificationType::GameForm);
 }
 
