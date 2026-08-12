@@ -56,15 +56,12 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       if (!has_crossed) {
         has_crossed = true;
       }
-      else {
-        // Criterion function is not working; polish will do the job
-        if (t > last_t + tol) {
-          return true;
-        }
+      else if (t > last_t + tol) { // Criterion function is not working; polish will do the job
+        return true;
       }
     }
     else {
-      // Criterion function might take t back to being minor than t_target
+      // Criterion function might take t back to being less than t_target
       has_crossed = false;
     }
 
@@ -86,24 +83,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, omega, termination_condition,
-      [&system](const Vector<double> &point) {
-        std::cout << std::fixed << std::setprecision(8);
-        std::cout << "[Path Tracer Step] t = " << point[1];
-        std::cout << " | Alfas: ";
-        for (size_t i = 2; i <= 5; ++i) {
-          std::cout << point[i] << " ";
-        }
-        std::cout << "| Mu: " << point[6] << " " << point[7] << std::endl;
-
-        std::cout << "Full point vector in probabilities: ";
-        Vector<double> prob_vector = system.ExtractEquilibrium(point).GetProbVector();
-        for (size_t i = 1; i <= prob_vector.size(); ++i) {
-          std::cout << prob_vector[i] << " ";
-        }
-        std::cout << std::endl;
-      },
-      criterion_function);
+      x, omega, termination_condition, NullCallbackFunction, criterion_function);
 
   int polish_step = 1;
   const PolishResult polishing_result = PolishPoint(
@@ -111,28 +91,11 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, t_target, 1, polishing_termination_condition, 100,
-      [&system, &polish_step, tol](const Vector<double> &point) {
-        const MixedStrategyProfile<double> profile = system.ExtractEquilibrium(point);
-        const double regret = profile.GetMaxRegret();
+      x, t_target, 1, polishing_termination_condition, 100, NullCallbackFunction);
 
-        std::cout << "[Polish Step " << polish_step++ << "] ";
-        std::cout << "Regret: " << regret << " | Probabilities: ";
-
-        Vector<double> prob_vector = profile.GetProbVector();
-        std::cout << std::fixed << std::setprecision(5);
-        for (size_t i = 1; i <= prob_vector.size(); ++i) {
-          std::cout << prob_vector[i] << " ";
-        }
-        if (regret <= tol) {
-          std::cout << " | Polishing successful (" << regret << " <= " << tol << ")";
-        }
-        else {
-          std::cout << " | Polishing failed (" << regret << " > " << tol << ")";
-        }
-        std::cout << std::endl;
-      });
-
+  if (!polishing_result.status) {
+    return {};
+  }
   equilibria.push_back(system.ExtractEquilibrium(x));
 
   return equilibria;

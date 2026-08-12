@@ -132,15 +132,15 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
                       CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
                       CriterionBracketFunctionType p_criterionBracket) const
 {
-  const double c_tol = 1.0e-4;      // tolerance for corrector iteration
-  const double c_maxDist = 0.4;     // maximal distance to curve
-  const double c_maxContr = 0.6;    // maximal contraction rate in corrector
-  const double c_eta = 0.1;         // perturbation to avoid cancellation
-                                    // in calculating contraction rate
-  double h = m_hStart;              // initial stepsize
-  const double c_hmin = 1.0e-8;     // minimal stepsize
-  const int c_maxIter = 100;        // maximum iterations in corrector
-  const double newton_tol = 1.0e-8; // tolerance for Newton convergence
+  const double c_tol = 1.0e-4;       // tolerance for corrector iteration
+  const double c_maxDist = 0.4;      // maximal distance to curve
+  const double c_maxContr = 0.6;     // maximal contraction rate in corrector
+  const double c_eta = 0.1;          // perturbation to avoid cancellation
+                                     // in calculating contraction rate
+  double h = m_hStart;               // initial stepsize
+  const double c_hmin = 1.0e-8;      // minimal stepsize
+  const int c_maxIter = 100;         // maximum iterations in corrector
+  const double c_newtonTol = 1.0e-8; // tolerance for Newton convergence
 
   bool newton = false;             // using Newton steplength (for zero-finding)
   const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
@@ -165,8 +165,10 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      if (newton && std::abs(p_criterion(x, t)) < newton_tol) {
-        return {x, true, "Path tracing terminated successfully (Newton convergence)", steps};
+      if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
+        return {x, true,
+                "Path following terminated successfully at point satisfying criterion function.",
+                steps};
       }
       else {
         return {x, false, "Stepsize fell below minimum threshold.", steps};
@@ -235,8 +237,10 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        if (newton && std::abs(p_criterion(x, t)) < newton_tol) {
-          return {x, true, "Path tracing terminated successfully (Newton convergence)", steps};
+        if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
+          return {x, true,
+                  "Path following terminated successfully at point satisfying criterion function.",
+                  steps};
         }
         else {
           return {x, false, "Stepsize fell below minimum threshold.", steps};
