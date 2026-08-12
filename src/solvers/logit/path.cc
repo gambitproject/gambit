@@ -38,16 +38,16 @@ inline double sqr(double x) { return x * x; }
 
 void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1, int l2, int l3)
 {
-  if (fabs(c1) + fabs(c2) == 0.0) {
+  if (std::abs(c1) + std::abs(c2) == 0.0) {
     return;
   }
 
   double sn;
-  if (fabs(c2) >= fabs(c1)) {
-    sn = std::sqrt(1.0 + sqr(c1 / c2)) * fabs(c2);
+  if (std::abs(c2) >= std::abs(c1)) {
+    sn = std::sqrt(1.0 + sqr(c1 / c2)) * std::abs(c2);
   }
   else {
-    sn = std::sqrt(1.0 + sqr(c2 / c1)) * fabs(c1);
+    sn = std::sqrt(1.0 + sqr(c2 / c1)) * std::abs(c1);
   }
   const double s1 = c1 / sn;
   const double s2 = c2 / sn;
@@ -146,7 +146,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
-  const double orientation_tol = 1.0e-8; // tolerance for detecting change in orientation
+  const double c_orientTol = 1.0e-8; // tolerance for detecting change in orientation
 
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
@@ -169,17 +169,17 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   while (!p_terminate(x)) {
     bool accept = true;
 
-    if (fabs(h) <= c_hmin) {
+    if (std::abs(h) <= c_hmin) {
       return {x, false, "Stepsize fell below minimum threshold."};
     }
 
     if (first_step) {
-      if (std::abs(t[p_trackingIndex]) <= orientation_tol) {
+      if (std::abs(t[p_trackingIndex]) <= c_orientTol) {
         return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
       }
       // Ensure that the tangent is oriented in the same direction as
       // the path-following direction.
-      else if (t[p_trackingIndex] < -orientation_tol) {
+      else if (t[p_trackingIndex] < -c_orientTol) {
         omega *= -1.0;
       }
       first_step = false;
@@ -246,7 +246,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
-      if (fabs(h) <= c_hmin) {
+      if (std::abs(h) <= c_hmin) {
         return {x, false, "Stepsize fell below minimum threshold."};
       }
       continue;
@@ -271,7 +271,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     }
     else {
       // Standard steplength adaptation
-      h = fabs(h / decel);
+      h = std::abs(h / decel);
     }
 
     // PC step was successful; update and iterate
