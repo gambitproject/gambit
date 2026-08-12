@@ -1818,7 +1818,7 @@ GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
                                                    chance.get(), reference.size());
   auto dest = newEvent->m_actions.begin();
   for (const auto &action : reference) {
-    (*dest)->SetLabel(action->GetLabel());
+    (*dest)->m_label = action->m_label;
     ++dest;
   }
   std::copy(p_probs.begin(), p_probs.end(), newEvent->m_probs.begin());
