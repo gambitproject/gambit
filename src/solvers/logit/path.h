@@ -84,7 +84,7 @@ public:
   TracePathResult
   TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
             std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &p_x, TraceDirection p_direction, size_t p_tracking_index,
+            Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
             TerminationFunctionType p_terminate,
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
