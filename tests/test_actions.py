@@ -89,16 +89,6 @@ def test_relabel_actions_scope_is_the_information_set():
     assert [action.label for action in queen.actions] == ["Raise", "Fold"]
 
 
-def test_relabel_actions_ambiguous_label_raises_valueerror():
-    """A game may already carry duplicate action labels, in which case a key of the
-    mapping does not identify a single action.
-    """
-    game = gbt.Game.new_tree(players=["Alice"])
-    game.append_move(game.root, "Alice", ["Bet", "Bet"])
-    with pytest.raises(ValueError):
-        game.relabel_actions(game.root.infoset, {"Bet": "Raise"})
-
-
 def test_relabel_actions_not_a_mapping_raises_typeerror():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(TypeError):

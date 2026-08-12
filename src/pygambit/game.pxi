@@ -1762,11 +1762,16 @@ class Game:
             If an element from `nodes` is a `Node` from a different game,
             or `player` is a `Player` from a different game.
         ValueError
-            If `nodes` has duplicated elements, or is empty.
+            If `nodes` has duplicated elements, or is empty; or if `actions` contains
+            an empty or a duplicated label.
         """
         resolved_player = cython.cast(Player, self._resolve_player(player, "append_move"))
         if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+        if any(not label for label in actions):
+            raise ValueError("append_move(): action labels must not be empty")
+        if len(set(actions)) != len(actions):
+            raise ValueError("append_move(): action labels must be unique")
         resolved_nodes = self._resolve_nodes(nodes, "append_move", "nodes")
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
@@ -1930,8 +1935,9 @@ class Game:
     def add_action(self,
                    infoset: Infoset | str,
                    before: Action | str | None = None) -> None:
-        """Add an action at the information set `infoset`.   If `before` is not null, the new
-        action is inserted before `before`.
+        """Add an action at the information set `infoset`, with an automatically generated
+        numeric label unique among the actions at `infoset`.  If `before` is not null, the
+        new action is inserted before `before`.
 
         Parameters
         ----------
@@ -1949,15 +1955,24 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "add_action"))
         if before is None:
-            self.game.deref().InsertAction(resolved_infoset.infoset,
-                                           cython.cast(c_GameAction, NULL))
+            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
+                                                      cython.cast(c_GameAction, NULL))
         else:
             resolved_action = cython.cast(
                 Action, self._resolve_action(before, "add_action", "before")
             )
             if resolved_infoset != resolved_action.infoset:
                 raise MismatchError("add_action(): must specify an action from the same infoset")
-            self.game.deref().InsertAction(resolved_infoset.infoset, resolved_action.action)
+            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
+                                                      resolved_action.action)
+
+        current = {action.label for action in resolved_infoset.actions}
+        number = c_action.deref().GetNumber()
+        while str(number) in current:
+            number += 1
+        c_labels = stdmap[string, string]()
+        c_labels[c_action.deref().GetLabel()] = str(number).encode("utf-8")
+        self.game.deref().RelabelActions(resolved_infoset.infoset, c_labels)
 
     def delete_action(self, action: Action | str) -> None:
         """Deletes `action` from its information set.  The subtrees which

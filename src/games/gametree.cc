@@ -251,6 +251,13 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
     throw MismatchException();
   }
   // Resolve each key to exactly one action at the information set.
+  //
+  // The ambiguous-match check below defends against a state that pygambit's own
+  // callers can no longer produce (append_move and add_action both guarantee
+  // unique, nonempty action labels, and file loading normalizes labels before
+  // returning a game), but this is a public entry point on the base Game
+  // interface, so a duplicate label reaching here from some other caller must
+  // still be rejected rather than silently resolved to an arbitrary action.
   std::map<GameActionRep *, std::string> assignment;
   std::set<const GameActionRep *> relabeled;
   for (const auto &[old_label, new_label] : p_labels) {
@@ -646,7 +653,7 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
                                                      p_player.get(), reference.size());
   auto dest = newInfoset->m_actions.begin();
   for (const auto &action : reference) {
-    (*dest)->SetLabel(action->GetLabel());
+    (*dest)->m_label = action->GetLabel();
     ++dest;
   }
   p_player->m_infosets.push_back(newInfoset);
@@ -707,7 +714,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   node->m_infoset->m_members.push_back(p_node);
   for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
        old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
-    (*new_act)->SetLabel((*old_act)->GetLabel());
+    (*new_act)->m_label = (*old_act)->GetLabel();
   }
   ClearComputedValues();
   InvalidateInfosetOrdering();
@@ -731,7 +738,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   p_player->m_infosets.push_back(newInfoset);
   if (p_generateLabels) {
     std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+                  [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
   }
   return AppendMove(p_node, newInfoset);
 }
@@ -776,7 +783,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   p_player->m_infosets.push_back(newInfoset);
   if (p_generateLabels) {
     std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+                  [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
   }
   return InsertMove(p_node, newInfoset);
 }
