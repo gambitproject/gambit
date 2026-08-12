@@ -71,6 +71,22 @@ void LabelCellEditor::Create(wxWindow *parent, wxWindowID id, wxEvtHandler *evtH
   }
 }
 
+//!
+//! Keeps the full cell width (so a longer replacement value has room to
+//! grow into), but the height must be the *exact* single-line height, not
+//! padded: a single-line wxTextCtrl does not itself center its text
+//! vertically when its own height exceeds one line, so any extra height
+//! here just reproduces the top-alignment problem one level in. Centering
+//! the (exactly one line tall) control within the taller cell via
+//! DoPositionEditor is what actually provides the vertical centering.
+//!
+void LabelCellEditor::PositionInCell(int row, int col)
+{
+  const wxRect rect = m_grid->CellToRect(row, col);
+  const wxSize size(rect.width, Text()->GetBestSize().GetHeight());
+  DoPositionEditor(size, rect, wxALIGN_CENTRE, wxALIGN_CENTRE_VERTICAL);
+}
+
 void LabelCellEditor::BeginEdit(int row, int col, wxGrid *grid)
 {
   m_grid = grid;
@@ -82,7 +98,7 @@ void LabelCellEditor::BeginEdit(int row, int col, wxGrid *grid)
   Text()->SetValue(m_startValue);
   // In case SetSize() already ran (before m_grid was set above) with a rect
   // that isn't span-aware, apply the correct one now too.
-  Text()->SetSize(grid->CellToRect(m_row, m_col));
+  PositionInCell(m_row, m_col);
   Text()->SelectAll();
   Text()->SetFocus();
 }
@@ -116,7 +132,7 @@ void LabelCellEditor::Reset() { Text()->SetValue(m_startValue); }
 void LabelCellEditor::SetSize(const wxRect &)
 {
   if (m_grid) {
-    Text()->SetSize(m_grid->CellToRect(m_row, m_col));
+    PositionInCell(m_row, m_col);
   }
 }
 

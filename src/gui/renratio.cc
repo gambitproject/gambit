@@ -174,6 +174,21 @@ void RationalCellEditor::Create(wxWindow *parent, wxWindowID id, wxEvtHandler *e
   SetValidator(NumberValidator(nullptr));
 }
 
+void RationalCellEditor::SetSize(const wxRect &rect)
+{
+  // Keep the full cell width (so a longer replacement value has room to
+  // grow into, rather than being shrink-wrapped to the starting value's
+  // rendered width), but the height must be the *exact* single-line
+  // height, not padded: a single-line wxTextCtrl does not itself center
+  // its text vertically when its own height exceeds one line, so any
+  // extra height here just reproduces the top-alignment problem one level
+  // in. Centering the (exactly one line tall) control within the taller
+  // cell via DoPositionEditor is what actually provides the vertical
+  // centering.
+  const wxSize size(rect.width, Text()->GetBestSize().GetHeight());
+  DoPositionEditor(size, rect, wxALIGN_CENTRE, wxALIGN_CENTRE_VERTICAL);
+}
+
 bool RationalCellEditor::IsAcceptedKey(wxKeyEvent &p_event)
 {
   if (wxGridCellEditor::IsAcceptedKey(p_event)) {

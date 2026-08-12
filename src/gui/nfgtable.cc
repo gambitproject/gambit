@@ -263,22 +263,27 @@ wxGridCellAttr *RowPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttr
     m_editor->IncRef();
     attr->SetEditor(m_editor);
     attr->SetReadOnly(m_table->IsReadOnly());
-
-    // GetAttr() constructs a fresh attr on every call, so the span has to be
-    // computed and set directly here rather than via wxGrid::SetCellSize()
-    // -- that call (and GetCellSize()) themselves go through GetAttr(),
-    // which would recurse infinitely if this override tried to consult it.
-    // Only the anchor (first row of each span group) gets a non-trivial
-    // size; interior rows are left at the default 1x1.
-    const int span = m_table->GetRowHeaderRowSpan(col);
-    if (span > 1 && row % span == 0) {
-      attr->SetSize(span, 1);
-    }
   }
   else {
     attr->SetTextColour(*wxBLACK);
     attr->SetReadOnly(true);
   }
+
+  // GetAttr() constructs a fresh attr on every call, so the span has to be
+  // computed and set directly here rather than via wxGrid::SetCellSize()
+  // -- that call (and GetCellSize()) themselves go through GetAttr(), which
+  // would recurse infinitely if this override tried to consult it. Only
+  // the anchor (first row of each span group) gets a non-trivial size;
+  // interior rows are left at the default 1x1. Computed unconditionally
+  // (matching ColPlayerTable::GetAttr) rather than gated on
+  // GetRowHeaderColCount() > 0, for the same reason: don't rely on a
+  // formula's edge-case behaviour matching whichever branch happens to
+  // call it.
+  const int span = m_table->GetRowHeaderRowSpan(col);
+  if (span > 1 && row % span == 0) {
+    attr->SetSize(span, 1);
+  }
+
   attr->SetBackgroundColour(*wxLIGHT_GREY);
   m_renderer->IncRef();
   attr->SetRenderer(m_renderer);
@@ -579,19 +584,23 @@ wxGridCellAttr *ColPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttr
     m_editor->IncRef();
     attr->SetEditor(m_editor);
     attr->SetReadOnly(m_table->IsReadOnly());
-
-    // See the equivalent comment in RowPlayerTable::GetAttr: span has to be
-    // computed directly here, not via SetCellSize()/GetCellSize(), which
-    // would recurse back into this same override.
-    const int span = m_table->GetColHeaderColSpan(row);
-    if (span > 1 && col % span == 0) {
-      attr->SetSize(1, span);
-    }
   }
   else {
     attr->SetTextColour(*wxBLACK);
     attr->SetReadOnly(true);
   }
+
+  // See the equivalent comment in RowPlayerTable::GetAttr: span has to be
+  // computed directly here, not via SetCellSize()/GetCellSize(), which
+  // would recurse back into this same override. Computed unconditionally
+  // (not just when there are real column players): with zero column
+  // players, GetColHeaderColSpan's formula naturally evaluates to the full
+  // width, merging the "Payoffs" placeholder header across every column.
+  const int span = m_table->GetColHeaderColSpan(row);
+  if (span > 1 && col % span == 0) {
+    attr->SetSize(1, span);
+  }
+
   attr->SetBackgroundColour(*wxLIGHT_GREY);
   m_renderer->IncRef();
   attr->SetRenderer(m_renderer);
@@ -779,15 +788,27 @@ bool ColPlayerGrid::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 
 //!
 //! Draws payoff cells: rational-number rendering (from RationalCellRenderer),
-//! plus the dominance-indicator overlay. Cell separation itself is left to
-//! the grid's own default gridlines (see TableWidget's constructor); an
-//! extra-thick line at contingency boundaries -- what the original
-//! wxSheet-based renderer additionally drew here -- is a follow-up design
-//! detail, not reproduced yet: custom lines drawn at the exact cell-boundary
-//! pixel end up painted over by wxGrid's own subsequent gridline pass.
+//! regular-weight black lines marking contingency/row boundaries (with the
+//! grid's own light-gray default gridlines left to separate the columns
+//! within a single contingency), and the dominance-indicator overlay.
 //!
 class PayoffCellRenderer final : public RationalCellRenderer {
   TableWidget *m_table;
+
+  //!
+  //! Draws a 1px black line inset within this cell's own rect (not at the
+  //! exact shared pixel with the next cell/row) so it survives painting
+  //! regardless of draw order between adjacent cells: the neighbouring
+  //! cell's own background fill covers only its own rect and never reaches
+  //! back into pixels this cell already owns, whereas a line drawn exactly
+  //! at the shared boundary pixel sits in the neighbour's own territory and
+  //! gets erased by its fill.
+  //!
+  static void DrawInsetLine(wxDC &dc, int x1, int y1, int x2, int y2)
+  {
+    dc.SetPen(wxPen(*wxBLACK, 1, wxPENSTYLE_SOLID));
+    dc.DrawLine(x1, y1, x2, y2);
+  }
 
 public:
   explicit PayoffCellRenderer(TableWidget *p_table) : m_table(p_table) {}
@@ -796,6 +817,23 @@ public:
             bool isSelected) override
   {
     RationalCellRenderer::Draw(grid, attr, dc, rect, row, col, isSelected);
+
+    // Vertical: black at contingency boundaries (grid's own light-gray
+    // default gridlines already separate the columns within a contingency).
+    const int perContingency = m_table->GetPayoffColumnsPerContingency();
+    if ((col + 1) % perContingency == 0) {
+      const int x = rect.x + rect.width - 1;
+      DrawInsetLine(dc, x, rect.y, x, rect.y + rect.height);
+    }
+
+    // Horizontal: every row is its own contingency, so every row boundary
+    // is black -- bottom of every cell, plus the top edge for row 0 (no
+    // preceding row's bottom line to serve as its top).
+    DrawInsetLine(dc, rect.x, rect.y + rect.height - 1, rect.x + rect.width,
+                  rect.y + rect.height - 1);
+    if (row == 0) {
+      DrawInsetLine(dc, rect.x, rect.y, rect.x + rect.width, rect.y);
+    }
 
     if (!m_table->ShowDominance()) {
       return;
@@ -1061,7 +1099,20 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
   m_rowGrid = new RowPlayerGrid(this);
   m_colGrid = new ColPlayerGrid(this);
   // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
-  m_payoffGrid->SetGridLineColour(*wxBLACK);
+  // Near-invisible default gridlines for separators within a contingency
+  // (columns sharing the same strategy profile, one per player) -- the
+  // player colour-coding on the text already carries that grouping, so the
+  // line doesn't need to compete for attention. PayoffCellRenderer draws a
+  // full-black line specifically at contingency/row boundaries, which is
+  // the one structural division actually worth emphasizing.
+  m_payoffGrid->SetGridLineColour(wxColour(238, 238, 238));
+
+  // A touch more row height/breathing room reads as calmer than the tightly
+  // packed default; the row header pane has to match since its rows are
+  // the same logical rows as the payoff pane's.
+  const int rowHeight = m_payoffGrid->GetDefaultRowSize() + 4;
+  m_payoffGrid->SetDefaultRowSize(rowHeight, true);
+  m_rowGrid->SetDefaultRowSize(rowHeight, true);
 
   auto *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
   topSizer->AddGrowableRow(1);

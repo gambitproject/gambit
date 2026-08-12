@@ -60,6 +60,11 @@ public:
   bool IsAcceptedKey(wxKeyEvent &event) override;
   void StartingKey(wxKeyEvent &event) override;
 
+  /// Centers the (single-line) text control vertically within the cell
+  /// rect rather than stretching it to fill the full height, which pins
+  /// the text to the top on cells taller than one line.
+  void SetSize(const wxRect &rect) override;
+
   wxGridCellEditor *Clone() const override { return new RationalCellEditor(); }
 };
 

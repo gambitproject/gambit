@@ -46,6 +46,10 @@ class LabelCellEditor final : public wxGridCellEditor {
 
   LabelTextCtrl *Text() const { return static_cast<LabelTextCtrl *>(GetWindow()); }
 
+  /// Positions the editor within (row, col)'s cell: full width, natural
+  /// single-line height, centered vertically. See the definition for why.
+  void PositionInCell(int row, int col);
+
 public:
   LabelCellEditor() = default;
 
