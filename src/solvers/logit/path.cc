@@ -128,7 +128,7 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 TracePathResult
 PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
                       std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                      Vector<double> &x, TraceDirection p_direction, size_t p_tracking_index,
+                      Vector<double> &x, TraceDirection p_direction, size_t p_trackingIndex,
                       TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
                       CriterionFunctionType p_criterion,
                       CriterionBracketFunctionType p_criterionBracket) const
@@ -162,7 +162,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   bool first_step = true;
   double omega = (p_direction == TraceDirection::Positive) ? 1.0 : -1.0;
 
-  if (p_tracking_index > x.size() || p_tracking_index < 1) {
+  if (p_trackingIndex > x.size() || p_trackingIndex < 1) {
     return {x, false, "Tracking index exceeds dimension of point vector."};
   }
 
@@ -174,12 +174,12 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     }
 
     if (first_step) {
-      if (std::abs(t[p_tracking_index]) <= orientation_tol) {
+      if (std::abs(t[p_trackingIndex]) <= orientation_tol) {
         return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
       }
       // Ensure that the tangent is oriented in the same direction as
       // the path-following direction.
-      else if (t[p_tracking_index] < -orientation_tol) {
+      else if (t[p_trackingIndex] < -orientation_tol) {
         omega *= -1.0;
       }
       first_step = false;
