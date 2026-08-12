@@ -30,9 +30,8 @@ import setuptools.command.build_py
 
 cppgambit_include_dirs = ["src"]
 cppgambit_cflags = (
-    ["-std=c++17"] if platform.system() == "Darwin"
-    else ["/std:c++17"] if platform.system() == "Windows"
-    else []
+    ["/std:c++20"] if platform.system() == "Windows"
+    else ["-std=c++20"]
 )
 
 cppgambit_core = (
@@ -107,11 +106,7 @@ libgambit = setuptools.Extension(
     sources=["src/pygambit/gambit.pyx"],
     language="c++",
     include_dirs=["src", "src/pygambit"],
-    extra_compile_args=(
-        ["-std=c++17"] if platform.system() == "Darwin"
-        else ["/std:c++17"] if platform.system() == "Windows"
-        else []
-    )
+    extra_compile_args=cppgambit_cflags
 )
 
 setuptools.setup(

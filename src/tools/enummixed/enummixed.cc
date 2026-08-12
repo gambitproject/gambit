@@ -64,11 +64,12 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
 {
+  opterr = 0;
   int c;
   bool useFloat = false, quiet = false;
   bool showConnect = false;
@@ -77,11 +78,11 @@ int main(int argc, char *argv[])
   int long_opt_index = 0;
   option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
-  while ((c = getopt_long(argc, argv, "d:vhqcS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:vhqc", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);
@@ -91,8 +92,6 @@ int main(int argc, char *argv[])
       break;
     case 'c':
       showConnect = true;
-      break;
-    case 'S':
       break;
     case 'q':
       quiet = true;

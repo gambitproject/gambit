@@ -1,6 +1,13 @@
 ## [17.0.0-alpha.1] - unreleased
 
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
+- Added `Game.make_event`, which forms a collection of nodes into a single event with a
+  specified probability distribution over its actions. (#1009)
+
 ### Changed
+- Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
 - Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
   still not contain control characters, begin/end with whitespace, or contain two consecutive
   whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0
@@ -15,15 +22,11 @@
   removes dependency on tinyxml.  (#897)
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
-- Introduced `Game.make_infoset`, which subsumes operations previously written as `Game.leave_infoset`,
-  `Game.set_infoset`, and `Game.set_player`.
 - `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
 
 ### Added
 - Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
   information set; the primitive operation for editing information structures.  (#999)
-- Added `Game.relabel_actions`, which simultaneously reassigns the labels of actions at an
-  information set via a mapping from current to replacement labels.  (#1026)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -36,6 +39,8 @@
   information sets and their members is now maintained automatically.  (#999)
 - Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces
   nonempty, unique labels.  (#1026)
+- `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
+  probabilities as forming the nodes of the event with the required distribution.  (#1009)
 
 ## [16.7.0] - 2026-07-11
 

@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <ranges>
+
 #include "gambit.h"
 
 namespace Gambit {
@@ -115,15 +117,14 @@ BehaviorContingencies::iterator::iterator(BehaviorContingencies *p_cont, bool p_
 
 BehaviorContingencies::iterator &BehaviorContingencies::iterator::operator++()
 {
-  for (auto infoset = m_cont->m_reachableInfosets.crbegin();
-       infoset != m_cont->m_reachableInfosets.crend(); ++infoset) {
-    ++m_currentBehav[*infoset];
-    if (m_currentBehav.at(*infoset) != m_cont->m_support.GetActions(*infoset).end()) {
-      m_profile.SetAction(*m_currentBehav[*infoset]);
+  for (const auto &infoset : std::ranges::reverse_view(m_cont->m_reachableInfosets)) {
+    ++m_currentBehav[infoset];
+    if (m_currentBehav.at(infoset) != m_cont->m_support.GetActions(infoset).end()) {
+      m_profile.SetAction(*m_currentBehav[infoset]);
       return *this;
     }
-    m_currentBehav[*infoset] = m_cont->m_support.GetActions(*infoset).begin();
-    m_profile.SetAction(*m_currentBehav[*infoset]);
+    m_currentBehav[infoset] = m_cont->m_support.GetActions(infoset).begin();
+    m_profile.SetAction(*m_currentBehav[infoset]);
   }
   m_atEnd = true;
   return *this;

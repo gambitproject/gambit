@@ -114,7 +114,6 @@ public:
       }
       return (m_profile == p_other.m_profile);
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
 
     PureBehaviorProfile &operator*() { return m_profile; }
     const PureBehaviorProfile &operator*() const { return m_profile; }

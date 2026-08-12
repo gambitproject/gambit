@@ -44,13 +44,27 @@ using SimpdivEventCallbackType = std::function<void(const SimpdivEvent &)>;
 inline void NullSimpdivEventCallback(const SimpdivEvent &) {}
 
 ///
+/// Returns the mixed strategy profile in which each player plays their
+/// first strategy with probability one.
+///
+/// This is the default starting point for SimpdivStrategySolve() when no
+/// other starting profile is specified.  It is a not-unreasonable default in
+/// that it starts with a very coarse grid and, if the game has an
+/// equilibrium in pure strategies, or in mixed strategies with small
+/// denominators, it will find it quickly.  Starting with a strategy profile
+/// with a smaller denominator can lead to a long initial search before
+/// reaching a candidate neighborhood for an equilibrium.
+///
+MixedStrategyProfile<Rational> SimpdivDefaultStart(const Game &p_game);
+
+///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
 /// van Der Laan, Talman and van Der Heyden, Math of Oper Res, 1987.
 ///
 std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
     const MixedStrategyProfile<Rational> &p_start,
-    const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
+    const Rational &p_maxregret = Rational(1, 10000000), int p_gridResize = 2,
     int p_leashLength = 0,
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
     SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback);

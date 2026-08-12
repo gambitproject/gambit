@@ -183,6 +183,8 @@ public:
   void SetInfoset(GameNode, GameInfoset) override;
   GameInfoset LeaveInfoset(GameNode) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
+  GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                        const std::string &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;

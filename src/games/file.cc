@@ -361,7 +361,7 @@ void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
     do {
       const auto index = ++visited[label];
       candidate = label + "_" + std::to_string(index);
-    } while (used.count(candidate) > 0);
+    } while (used.contains(candidate));
     used.insert(candidate);
     p_set(element, candidate);
   }
@@ -373,6 +373,24 @@ template <class Container> void NormalizeLabelStrings(Container &p_labels)
   NormalizeLabels(
       p_labels, [](const std::string &s) { return s; },
       [](std::string &s, const std::string &v) { s = v; });
+}
+
+template <class Container>
+void RelabelWithoutCollision(Container &&p_container, const std::vector<std::string> &p_labels)
+{
+  const std::set<std::string> forbidden(p_labels.begin(), p_labels.end());
+  size_t scratchIndex = 0;
+  for (auto &&element : p_container) {
+    std::string candidate;
+    do {
+      candidate = "_gambit_reader_scratch_" + std::to_string(scratchIndex++);
+    } while (forbidden.contains(candidate));
+    element->SetLabel(candidate);
+  }
+  size_t index = 0;
+  for (auto &&element : p_container) {
+    element->SetLabel(p_labels[index++]);
+  }
 }
 
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
@@ -515,11 +533,20 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   nfg->SetTitle(p_data.m_title);
   nfg->SetDescription(p_data.m_comment);
 
+  std::vector<std::string> playerLabels;
   for (auto player : nfg->GetPlayers()) {
-    player->SetLabel(p_data.GetPlayer(player->GetNumber()));
+    playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
+  }
+  NormalizeLabelStrings(playerLabels);
+  RelabelWithoutCollision(nfg->GetPlayers(), playerLabels);
+
+  for (auto player : nfg->GetPlayers()) {
+    std::vector<std::string> strategyLabels;
     for (auto strategy : player->GetStrategies()) {
-      strategy->SetLabel(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
+      strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
+    NormalizeLabelStrings(strategyLabels);
+    RelabelWithoutCollision(player->GetStrategies(), strategyLabels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
@@ -624,7 +651,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
       p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
@@ -637,7 +664,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
     p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
@@ -825,7 +852,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
       infoset->SetLabel(label);
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }

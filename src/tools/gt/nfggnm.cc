@@ -38,8 +38,7 @@ void RenderGNMEvent(const GNMEvent &p_event,
                     const std::shared_ptr<MixedProfileRenderer<double>> &p_renderer)
 {
   std::visit(
-      [p_renderer](const auto &event) {
-        using Event = std::decay_t<decltype(event)>;
+      [p_renderer]<typename Event>(const Event &event) {
         if constexpr (std::is_same_v<Event, GNMPerturbationEvent>) {
           p_renderer->Render(event.profile, "pert");
         }
@@ -76,6 +75,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
+  std::cerr << "                   (ignored if -s is given)\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -m LAMBDA        lambda to end tracing (must be negative, default "
             << std::to_string(GNM_LAMBDA_END_DEFAULT) << ")\n";
@@ -88,7 +88,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -108,12 +108,12 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:m:f:i:c:qvVhS", long_options, &long_opt_index)) !=
+  while ((c = getopt_long(argc, argv, "d:n:s:m:f:i:c:qvVh", long_options, &long_opt_index)) !=
          -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'q':
       quiet = true;
       break;
@@ -140,8 +140,6 @@ int main(int argc, char *argv[])
       break;
     case 'c':
       steps = atoi(optarg);
-      break;
-    case 'S':
       break;
     case 'h':
       PrintHelp(argv[0]);

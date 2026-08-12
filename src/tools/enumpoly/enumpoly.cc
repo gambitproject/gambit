@@ -57,9 +57,9 @@ void PrintHelp(char *progname)
   std::cerr << "                   (default is to search in all supports)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows supports investigated)\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is only to show equilibria)\n";
-  exit(1);
+  std::cerr << "  -v, --version    print version information\n";
+  exit(0);
 }
 
 void PrintProfile(std::ostream &p_stream, const std::string &p_label,
@@ -121,8 +121,7 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
 template <class Support> void PrintEnumPolyEvent(const EnumPolyEvent<Support> &p_event)
 {
   std::visit(
-      [](const auto &event) {
-        using Event = std::decay_t<decltype(event)>;
+      []<typename Event>(const Event &event) {
         if constexpr (std::is_same_v<Event, EnumPolyCandidateSupportEvent<Support>>) {
           PrintSupport(std::cout, "candidate", event.support);
         }
@@ -152,7 +151,7 @@ int main(int argc, char *argv[])
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       g_numDecimals = atoi(optarg);
       break;

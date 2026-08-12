@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include "gambit.h"
 #include "solvers/linalg/lhtab.h"
 #include "solvers/lcp/lcp.h"
@@ -137,7 +139,12 @@ public:
   Array<linalg::BFS<T>> m_bfsList;
   std::list<MixedStrategyProfile<T>> m_equilibria;
 
-  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return contains(m_bfsList, p_bfs); }
+  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const
+  {
+    const auto keys = p_bfs.Keys();
+    return std::any_of(m_bfsList.begin(), m_bfsList.end(),
+                       [&keys](const Gambit::linalg::BFS<T> &bfs) { return bfs.Keys() == keys; });
+  }
   void push_back(const Gambit::linalg::BFS<T> &p_bfs) { m_bfsList.push_back(p_bfs); }
 
   int EquilibriumCount() const { return m_equilibria.size(); }

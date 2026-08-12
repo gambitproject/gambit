@@ -60,7 +60,6 @@ public:
     {
       return (m_vector == it.m_vector) && (m_index == it.m_index);
     }
-    bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
   class const_iterator {
@@ -87,7 +86,6 @@ public:
     {
       return (m_vector == it.m_vector) && (m_index == it.m_index);
     }
-    bool operator!=(const const_iterator &it) const { return !(*this == it); }
   };
 
   cvector() : m(1), x(new double[1]) {}
@@ -272,24 +270,6 @@ public:
       }
     }
     return true;
-  }
-
-  bool operator!=(const cvector &v) const
-  {
-    if (m != v.m) {
-      return true;
-    }
-    return memcmp(x, v.x, m * sizeof(double)) != 0;
-  }
-
-  bool operator!=(const double &a) const
-  {
-    for (int i = 0; i < m; i++) {
-      if (a != x[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   double norm2() const
@@ -687,24 +667,6 @@ public:
       }
     }
     return true;
-  }
-
-  bool operator!=(const cmatrix &ma) const
-  {
-    if (ma.n != n || ma.m != m) {
-      return true;
-    }
-    return memcmp(ma.x, x, s * sizeof(double)) != 0;
-  }
-
-  bool operator!=(const double &a) const
-  {
-    for (int i = 0; i < s; i++) {
-      if (x[i] != a) {
-        return true;
-      }
-    }
-    return false;
   }
 
   // returns the square of the frobenius norm
