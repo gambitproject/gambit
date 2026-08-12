@@ -1966,8 +1966,7 @@ class Game:
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_actions"))
         if resolved_infoset.is_chance:
             raise UndefinedOperationError(
-                "set_actions(): the actions of a chance information set are set "
-                "together with their probabilities"
+                "set_actions(): the actions of an event are set together with their probabilities"
             )
         if isinstance(actions, str) or not hasattr(actions, "__iter__"):
             raise TypeError("set_actions(): actions must be an iterable of str")

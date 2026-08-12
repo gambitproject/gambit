@@ -75,7 +75,6 @@ Transforming game information structure
    Game.set_chance_probs
    Game.relabel_actions
    Game.set_actions
-   Game.set_chance_probs
    Game.reveal
 
 

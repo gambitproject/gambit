@@ -298,8 +298,7 @@ void GameTreeRep::SetActions(const GameInfoset &p_infoset,
     throw MismatchException();
   }
   if (p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "The actions of a chance information set are set together with their probabilities");
+    throw UndefinedException("The actions of an event are set together with their probabilities");
   }
   if (p_labels.empty()) {
     throw ValueException("At least one action must be specified");
@@ -1841,8 +1840,7 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "Action probabilities can only be specified for chance information sets");
+    throw UndefinedException("Action probabilities can only be specified for events");
   }
   if (p_infoset->m_actions.size() != p_probs.size()) {
     throw DimensionException("The number of probabilities given must match the number of actions");
@@ -1931,8 +1929,7 @@ Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "Action probabilities can only be normalized for chance information sets");
+    throw UndefinedException("Action probabilities can only be normalized for eventss");
   }
   IncrementVersion();
   auto &probs = p_infoset->m_probs;
