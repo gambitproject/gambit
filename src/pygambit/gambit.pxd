@@ -4,6 +4,7 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
 from libcpp.set cimport set as stdset
+from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
 
 
@@ -120,7 +121,6 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         cppclass Actions:
@@ -354,9 +354,10 @@ cdef extern from "games/game.h":
         bool IsPerfectRecall() except +
         bool IsAbsentMinded(c_GameInfoset) except +
 
-        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GameInfoset) except +ValueError
         void CopyTree(c_GameNode dest, c_GameNode src) except +ValueError
         void MoveTree(c_GameNode dest, c_GameNode src) except +ValueError
@@ -369,6 +370,7 @@ cdef extern from "games/game.h":
         c_GameInfoset LeaveInfoset(c_GameNode) except +
         c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
         void DeleteAction(c_GameAction) except +ValueError
+        void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
         c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],

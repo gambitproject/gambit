@@ -1034,9 +1034,12 @@ void GameFrame::OnEditMove(wxCommandEvent &)
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
+      std::map<std::string, std::string> labels;
       for (const auto &action : infoset->GetActions()) {
-        m_doc->DoSetActionLabel(action, dialog.GetActionLabel(action->GetNumber()));
+        labels[action->GetLabel()] =
+            dialog.GetActionLabel(action->GetNumber()).ToStdString(wxConvUTF8);
       }
+      m_doc->DoRelabelActions(infoset, labels);
       if (infoset->IsChanceInfoset()) {
         m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
       }

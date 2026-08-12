@@ -23,6 +23,7 @@
 #ifndef GAMBIT_LINALG_VERTENUM_H
 #define GAMBIT_LINALG_VERTENUM_H
 
+#include "core/cancel.h"
 #include "gambit.h"
 #include "lptab.h"
 
@@ -51,13 +52,15 @@ private:
   Vector<T> btemp;
   Array<BFS<T>> m_list, m_duallist;
   Array<long> visits, branches;
+  CancelToken m_cancel;
 
   void Deeper();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 
 public:
-  VertexEnumerator(const Matrix<T> &, const Vector<T> &);
+  VertexEnumerator(const Matrix<T> &, const Vector<T> &,
+                   const CancelToken &p_cancel = CancelToken());
   // explicit VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() = default;
 

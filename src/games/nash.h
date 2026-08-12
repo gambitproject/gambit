@@ -24,6 +24,7 @@
 #define LIBGAMBIT_NASH_H
 
 #include <functional>
+#include "core/cancel.h"
 #include "gambit.h"
 
 namespace Gambit::Nash {

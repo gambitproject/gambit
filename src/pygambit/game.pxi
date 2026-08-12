@@ -1735,24 +1735,30 @@ class Game:
         Raises
         ------
         UndefinedOperationError
-            If `nodes` are not all terminal, or `actions` is not a positive number.
+            If `nodes` are not all terminal, or `actions` is empty.
         MismatchError
             If an element from `nodes` is a `Node` from a different game,
             or `player` is a `Player` from a different game.
         ValueError
-            If `nodes` has duplicated elements, or is empty.
+            If `nodes` has duplicated elements, or is empty; or if `actions` contains
+            an empty or a duplicated label.
         """
         resolved_player = cython.cast(Player, self._resolve_player(player, "append_move"))
         if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+        if any(not label for label in actions):
+            raise ValueError("append_move(): action labels must not be empty")
+        if len(set(actions)) != len(actions):
+            raise ValueError("append_move(): action labels must be unique")
         resolved_nodes = self._resolve_nodes(nodes, "append_move", "nodes")
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
-        for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
-            action.label = label
+        c_actions = stdvector[string]()
+        for label in actions:
+            c_actions.push_back(label.encode("utf-8"))
+        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, c_actions)
         resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
@@ -1779,23 +1785,32 @@ class Game:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def insert_move(self, node: Node | str,
-                    player: Player | str, actions: int) -> None:
-        """Insert a move for `player` prior to the node `node`, with `actions` actions.
-        `node` becomes the first child of the newly-inserted node.
+                    player: Player | str, actions: list[str]) -> None:
+        """Insert a move for `player` prior to the node `node`, with actions labeled
+        according to `actions`.  `node` becomes the first child of the newly-inserted node.
 
         Raises
         ------
         UndefinedOperationError
-            If `actions` is not a positive number.
+            If `actions` is empty.
         MismatchError
             If `node` is a `Node` from a different game, or `player` is a `Player` from a
             different game.
+        ValueError
+            If `actions` contains an empty or a duplicated label.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_move"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "insert_move"))
-        if actions < 1:
-            raise UndefinedOperationError("insert_move(): `actions` must be a positive number")
-        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, actions)
+        if not actions:
+            raise UndefinedOperationError("insert_move(): `actions` must be a nonempty list")
+        if any(not label for label in actions):
+            raise ValueError("insert_move(): action labels must not be empty")
+        if len(set(actions)) != len(actions):
+            raise ValueError("insert_move(): action labels must be unique")
+        c_actions = stdvector[string]()
+        for label in actions:
+            c_actions.push_back(label.encode("utf-8"))
+        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, c_actions)
 
     def insert_infoset(self, node: Node | str,
                        infoset: Infoset | str) -> None:
@@ -1908,8 +1923,9 @@ class Game:
     def add_action(self,
                    infoset: Infoset | str,
                    before: Action | str | None = None) -> None:
-        """Add an action at the information set `infoset`.   If `before` is not null, the new
-        action is inserted before `before`.
+        """Add an action at the information set `infoset`, with an automatically generated
+        numeric label unique among the actions at `infoset`.  If `before` is not null, the
+        new action is inserted before `before`.
 
         Parameters
         ----------
@@ -1927,15 +1943,24 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "add_action"))
         if before is None:
-            self.game.deref().InsertAction(resolved_infoset.infoset,
-                                           cython.cast(c_GameAction, NULL))
+            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
+                                                      cython.cast(c_GameAction, NULL))
         else:
             resolved_action = cython.cast(
                 Action, self._resolve_action(before, "add_action", "before")
             )
             if resolved_infoset != resolved_action.infoset:
                 raise MismatchError("add_action(): must specify an action from the same infoset")
-            self.game.deref().InsertAction(resolved_infoset.infoset, resolved_action.action)
+            c_action = self.game.deref().InsertAction(resolved_infoset.infoset,
+                                                      resolved_action.action)
+
+        current = {action.label for action in resolved_infoset.actions}
+        number = c_action.deref().GetNumber()
+        while str(number) in current:
+            number += 1
+        c_labels = stdmap[string, string]()
+        c_labels[c_action.deref().GetLabel()] = str(number).encode("utf-8")
+        self.game.deref().RelabelActions(resolved_infoset.infoset, c_labels)
 
     def delete_action(self, action: Action | str) -> None:
         """Deletes `action` from its information set.  The subtrees which
@@ -2034,6 +2059,76 @@ class Game:
         for p in resolved_probs:
             c_probs.push_back(_to_number(p))
         self.game.deref().MakeEvent(c_nodes, c_probs, (label or "").encode("utf-8"))
+
+    def relabel_actions(self,
+                        infoset: Infoset | str,
+                        labels: typing.Mapping[str, str],
+                        strict: bool = True) -> None:
+        """Simultaneously reassign the labels of actions at `infoset`.
+
+        `labels` maps current action labels to their replacements.  The reassignment
+        is simultaneous, so labels can be swapped directly, e.g. ``{"a": "b", "b": "a"}``.
+        Actions are not re-ordered: each relabelled action keeps its position and,
+        at a chance information set, its probability.  After the operation, the
+        labels at the information set must be nonempty and unique.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set at which to relabel actions.  If a string is passed,
+            the information set is determined by finding the personal-player
+            information set with that label, if any.
+        labels : Mapping[str, str]
+            A mapping from current action labels to replacement labels.  Entries
+            whose key equals their value are ignored.
+        strict : bool, default True
+            If `True`, every key of `labels` must be the label of an action at
+            `infoset`, and unknown keys raise ``KeyError``.  If `False`, unknown
+            keys are ignored.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an `Infoset` from a different game.
+        KeyError
+            If `infoset` is a string matching no information set; or, when `strict`
+            is `True`, if a key of `labels` matches no action at `infoset`.
+        TypeError
+            If `labels` is not a mapping, or any key or value is not a string.
+        ValueError
+            If a key of `labels` matches more than one action at `infoset` (possible
+            in games read from files predating unique-label enforcement); or if any
+            replacement label is empty, is not a valid label, or would result in a
+            duplicate label at the information set.
+        """
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "relabel_actions"))
+        if not hasattr(labels, "items"):
+            raise TypeError(
+                f"relabel_actions(): labels must be a mapping, "
+                f"not {labels.__class__.__name__}"
+            )
+        current = [action.label for action in resolved_infoset.actions]
+        c_labels = stdmap[string, string]()
+        for old, new in labels.items():
+            if not isinstance(old, str) or not isinstance(new, str):
+                raise TypeError("relabel_actions(): labels must map str to str")
+            matches = current.count(old)
+            if matches > 1:
+                raise ValueError(
+                    f"relabel_actions(): label '{old}' is ambiguous at this information set"
+                )
+            if matches == 0:
+                if strict:
+                    raise KeyError(f"relabel_actions(): no action with label '{old}'")
+                continue
+            if new == old:
+                continue
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
+        if c_labels.empty():
+            return
+        self.game.deref().RelabelActions(resolved_infoset.infoset, c_labels)
 
     def make_infoset(self,
                      nodes: Node | NodeReferenceSet,

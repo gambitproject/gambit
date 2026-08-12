@@ -309,11 +309,10 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 
 namespace Gambit {
 
-std::list<LogitQREMixedBehaviorProfile>
-LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
-                   Nash::BehaviorCallbackType<double> p_onEquilibrium,
-                   LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
+std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(
+    const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
+    double p_firstStep, double p_maxAccel, Nash::BehaviorCallbackType<double> p_onEquilibrium,
+    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent, const CancelToken &p_cancel)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -341,7 +340,8 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
       [game, p_regret](const Vector<double> &p_point) {
         return RegretTerminationFunction(game, p_point, p_regret);
       },
-      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
+      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
+      NullCriterionFunction, NullCriterionBracketFunction, p_cancel);
   const auto &profiles = callback.GetProfiles();
   p_onEquilibrium(profiles.back().GetProfile());
   return profiles;
