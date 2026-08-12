@@ -99,6 +99,19 @@ def test_relabel_actions_ambiguous_label_raises_valueerror():
         game.relabel_actions(game.root.infoset, {"Bet": "Raise"})
 
 
+def test_relabel_actions_not_a_mapping_raises_typeerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, [("King", "Queen")])
+
+
+@pytest.mark.parametrize("labels", [{1: "Queen"}, {"King": 1}])
+def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, labels)
+
+
 @pytest.mark.parametrize(
     "game,inprobs,outprobs",
     [
