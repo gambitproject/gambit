@@ -31,7 +31,6 @@
 #include <cstring>
 #include <optional>
 #include <variant>
-#include "wx/sheet/sheet.h"
 
 #include "gamedoc.h"
 #include "nashspec.h"
