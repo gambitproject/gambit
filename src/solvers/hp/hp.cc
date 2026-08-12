@@ -37,8 +37,8 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   Vector<double> x = system.ComputeInitialPoint();
 
   const PathTracer tracer;
-  double omega = 1.0;
-
+  const PathTracer::TraceDirection direction = PathTracer::TraceDirection::Positive;
+  const size_t tracking_index = 1; // Track the first variable (t) for orientation
   auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
   auto criterion_function = [](const Vector<double> &point,
                                const Vector<double> &tangent) -> double { return point[1] - 1.0; };
@@ -48,7 +48,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, omega, termination_condition,
+      x, direction, tracking_index, termination_condition,
       [&system](const Vector<double> &point) {
         std::cout << "[Path Tracer Step] t = " << point[1];
         std::cout << " | Alfas: ";
