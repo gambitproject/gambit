@@ -375,6 +375,24 @@ template <class Container> void NormalizeLabelStrings(Container &p_labels)
       [](std::string &s, const std::string &v) { s = v; });
 }
 
+template <class Container>
+void RelabelWithoutCollision(Container &&p_container, const std::vector<std::string> &p_labels)
+{
+  const std::set<std::string> forbidden(p_labels.begin(), p_labels.end());
+  size_t scratchIndex = 0;
+  for (auto &&element : p_container) {
+    std::string candidate;
+    do {
+      candidate = "_gambit_reader_scratch_" + std::to_string(scratchIndex++);
+    } while (forbidden.contains(candidate));
+    element->SetLabel(candidate);
+  }
+  size_t index = 0;
+  for (auto &&element : p_container) {
+    element->SetLabel(p_labels[index++]);
+  }
+}
+
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
@@ -515,11 +533,20 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   nfg->SetTitle(p_data.m_title);
   nfg->SetDescription(p_data.m_comment);
 
+  std::vector<std::string> playerLabels;
   for (auto player : nfg->GetPlayers()) {
-    player->SetLabel(p_data.GetPlayer(player->GetNumber()));
+    playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
+  }
+  NormalizeLabelStrings(playerLabels);
+  RelabelWithoutCollision(nfg->GetPlayers(), playerLabels);
+
+  for (auto player : nfg->GetPlayers()) {
+    std::vector<std::string> strategyLabels;
     for (auto strategy : player->GetStrategies()) {
-      strategy->SetLabel(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
+      strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
+    NormalizeLabelStrings(strategyLabels);
+    RelabelWithoutCollision(player->GetStrategies(), strategyLabels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
