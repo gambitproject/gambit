@@ -45,20 +45,22 @@ void PrintHelp(char *progname)
   PrintBanner(std::cerr);
   std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
   std::cerr << "If file is not specified, attempts to read game from standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
+  std::cerr << "With no options, computes one Nash equilibrium.\n\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
+  std::cerr << "  -D               print detailed information about equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
 {
+  opterr = 0;
   int c;
   int numDecimals = 6;
   bool useFloat = false, useStrategic = false, quiet = false, printDetail = false;
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);

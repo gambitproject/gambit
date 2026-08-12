@@ -438,7 +438,7 @@ def simpdiv_solve(
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
 
-    maxregret : Rational, default 1e-8
+    maxregret : Rational, default 1e-7
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game

@@ -8,7 +8,11 @@ See the :ref:`algorithm description <simpdiv>`.
 
 The algorithm begins with any mixed strategy profile consisting of
 rational numbers as probabilities. Without any options, the algorithm
-begins with the centroid, and computes one Nash equilibrium. To
+begins with the pure strategy profile in which each player plays his
+or her first strategy, and computes one Nash equilibrium. This is a
+not-unreasonable default, in that it starts with a very coarse grid
+and, if the game has an equilibrium in pure strategies, or in mixed
+strategies with small denominators, it will find it quickly. To
 attempt to compute other equilibria that may exist, use the
 :option:`gambit-simpdiv -r` or :option:`gambit-simpdiv -s`
 options to specify additional starting points for the algorithm.
@@ -56,7 +60,7 @@ options to specify additional starting points for the algorithm.
    .. versionadded:: 16.2.0
 
    Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
-   (default is 1e-8).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
+   (default is 1e-7).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
 
 .. cmdoption:: -d DECIMALS
 
@@ -69,11 +73,15 @@ options to specify additional starting points for the algorithm.
    this option sacrifices some precision in reporting the output of the method, in exchange for
    probabilities which are more human-readable.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, initial points, as well as
    the approximations computed at each grid refinement, are all output,
    in addition to the approximate equilibrium profile found.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
 
 
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
