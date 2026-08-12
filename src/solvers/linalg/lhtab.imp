@@ -117,7 +117,7 @@ template <class T> int LHTableau<T>::ExitIndex(int inlabel)
   return 0;
 }
 
-template <class T> int LHTableau<T>::LemkePath(int dup)
+template <class T> int LHTableau<T>::LemkePath(int dup, const CancelToken &p_cancel)
 {
   int enter, exit;
   enter = dup;
@@ -126,6 +126,7 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
   }
   // Central loop - pivot until another CBFS is found
   do {
+    p_cancel.Check();
     exit = PivotIn(enter);
     enter = -exit;
   } while ((exit != dup) && (exit != -dup));

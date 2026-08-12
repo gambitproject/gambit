@@ -213,6 +213,7 @@ core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
+	src/core/cancel.h \
 	src/core/lazy.h \
 	src/core/vector.h \
 	src/core/segment.h \
@@ -449,6 +450,23 @@ gambit_simpdiv_SOURCES = \
 
 gambit_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
+	${linalg_SOURCES} \
+	src/solvers/enummixed/clique.cc \
+	src/solvers/enummixed/clique.h \
+	src/solvers/enummixed/enummixed.cc \
+	src/solvers/enummixed/enummixed.h \
+	src/solvers/lcp/lcp.h \
+	src/solvers/lcp/efglcp.cc \
+	src/solvers/lcp/nfglcp.cc \
+	src/solvers/lp/lp.h \
+	src/solvers/lp/lp.cc \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+	src/solvers/logit/logit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.cc \
 	src/labenski/src/sheetatr.cpp \
 	src/labenski/src/sheet.cpp \
 	src/labenski/src/sheetedg.cpp \
@@ -498,6 +516,7 @@ gambit_SOURCES = \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
+	src/gui/nashspec.cc \
 	src/gui/nashspec.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \

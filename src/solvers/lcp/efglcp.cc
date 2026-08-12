@@ -179,7 +179,8 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
 //
 template <class T>
 std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
-                                                    BehaviorCallbackType<T> p_onEquilibrium)
+                                                    BehaviorCallbackType<T> p_onEquilibrium,
+                                                    const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -193,7 +194,7 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   linalg::LemkeTableau<T> tab(ConstructMatrix<T>(columns), ConstructVector<T>(columns));
 
   tab.Pivot(columns.rootIndex1, 0);
-  tab.SF_LCPPath(columns.rootIndex1);
+  tab.SF_LCPPath(columns.rootIndex1, p_cancel);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.BasisVector(sol);
 
@@ -206,9 +207,9 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   return equilibria;
 }
 
-template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &,
-                                                                  BehaviorCallbackType<double>);
+template std::list<MixedBehaviorProfile<double>>
+LcpBehaviorSolve(const Game &, BehaviorCallbackType<double>, const CancelToken &);
 template std::list<MixedBehaviorProfile<Rational>>
-LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>);
+LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>, const CancelToken &);
 
 } // end namespace Gambit::Nash

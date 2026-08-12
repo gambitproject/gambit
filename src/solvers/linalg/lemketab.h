@@ -23,6 +23,7 @@
 #ifndef GAMBIT_LINALG_LEMKETAB_H
 #define GAMBIT_LINALG_LEMKETAB_H
 
+#include "core/cancel.h"
 #include "tableau.h"
 
 namespace Gambit::linalg {
@@ -44,7 +45,9 @@ public:
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
-  int SF_LCPPath(int dup); // follow a path of ACBFS's from one CBFS to another
+  int SF_LCPPath(int dup,
+                 const CancelToken &p_cancel = CancelToken()); // follow a path of ACBFS's
+                                                               // from one CBFS to another
   int ExitIndex(int i);
 };
 

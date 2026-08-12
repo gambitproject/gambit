@@ -79,7 +79,8 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
 
 template <class T>
 std::shared_ptr<EnumMixedStrategySolution<T>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium)
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium,
+                               const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -127,8 +128,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   b2 = (T)-1;
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
-  const VertexEnumerator<T> poly1(A1, b1);
-  const VertexEnumerator<T> poly2(A2, b2);
+  const VertexEnumerator<T> poly1(A1, b1, p_cancel);
+  const VertexEnumerator<T> poly2(A2, b2, p_cancel);
 
   const auto &verts1(poly1.VertexList());
   const auto &verts2(poly2.VertexList());
@@ -145,6 +146,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   for (int i2 = 2; i2 <= solution->m_v2; i2++) {
     const BFS<T> &bfs1 = verts2[i2];
     for (int i1 = 2; i1 <= solution->m_v1; i1++) {
+      p_cancel.Check();
       const BFS<T> &bfs2 = verts1[i1];
 
       // check if solution is nash
@@ -204,8 +206,10 @@ template class EnumMixedStrategySolution<double>;
 template class EnumMixedStrategySolution<Rational>;
 
 template std::shared_ptr<EnumMixedStrategySolution<double>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium);
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium,
+                               const CancelToken &p_cancel);
 template std::shared_ptr<EnumMixedStrategySolution<Rational>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<Rational> p_onEquilibrium);
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<Rational> p_onEquilibrium,
+                               const CancelToken &p_cancel);
 
 } // end namespace Gambit::Nash
