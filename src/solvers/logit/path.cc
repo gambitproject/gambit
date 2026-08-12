@@ -196,6 +196,18 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       first_step = false;
     }
 
+    if (first_step) {
+      if (std::abs(t[p_trackingIndex]) <= c_orientTol) {
+        return {x, false, "Initial tangent vector is orthogonal to path-following direction."};
+      }
+      // Ensure that the tangent is oriented in the same direction as
+      // the path-following direction.
+      else if (t[p_trackingIndex] < -c_orientTol) {
+        omega *= -1.0;
+      }
+      first_step = false;
+    }
+
     // Predictor step
     for (size_t k = 1; k <= x.size(); k++) {
       u[k] = x[k] + h * omega * t[k];
