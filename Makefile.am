@@ -28,8 +28,6 @@ EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
-	src/labenski/README.txt \
-	src/labenski/doc/README-sheet.txt \
 	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/adddecimal.xpm \
 	src/gui/bitmaps/calc.xpm \
@@ -449,24 +447,6 @@ gambit_simpdiv_SOURCES = \
 
 gambit_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/labenski/src/sheetatr.cpp \
-	src/labenski/src/sheet.cpp \
-	src/labenski/src/sheetedg.cpp \
-	src/labenski/src/sheetedt.cpp \
-	src/labenski/src/sheetren.cpp \
-	src/labenski/src/sheetsel.cpp \
-	src/labenski/src/sheetspt.cpp \
-	src/labenski/src/sheettbl.cpp \
-	src/labenski/include/wx/sheet/pairarr.h \
-	src/labenski/include/wx/sheet/sheetatr.h \
-	src/labenski/include/wx/sheet/sheetdef.h \
-	src/labenski/include/wx/sheet/sheetedg.h \
-	src/labenski/include/wx/sheet/sheetedt.h \
-	src/labenski/include/wx/sheet/sheet.h \
-	src/labenski/include/wx/sheet/sheetren.h \
-	src/labenski/include/wx/sheet/sheetsel.h \
-	src/labenski/include/wx/sheet/sheetspt.h \
-	src/labenski/include/wx/sheet/sheettbl.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
@@ -533,7 +513,7 @@ gambit_SOURCES = \
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
-gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -I$(top_srcdir)/src/labenski/include
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP

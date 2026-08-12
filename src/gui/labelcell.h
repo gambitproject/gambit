@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/labelcell.h
-// Declaration of wxSheet editor for Gambit labels
+// Declaration of wxGrid editor for Gambit labels
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,26 +23,51 @@
 #ifndef GAMBIT_GUI_LABELCELLEDITOR_H
 #define GAMBIT_GUI_LABELCELLEDITOR_H
 
-#include "wx/sheet/sheet.h"
+#include <wx/grid.h>
 
 #include "editlabel.h"
-#include "renratio.h" // for DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS
 
 namespace Gambit::GUI {
 
-class LabelEditorRefData final : public wxSheetCellTextEditorRefData {
+//!
+//! Cell editor for strategy/action label renaming. Wraps LabelTextCtrl,
+//! which does its own live whitespace normalization; this class only
+//! handles the wxGridCellEditor lifecycle (open/commit/cancel) around it.
+//!
+class LabelCellEditor final : public wxGridCellEditor {
+  wxString m_startValue;
+  wxString m_newValue;
+
+  /// Cell this editor is currently attached to, kept so SetSize() can
+  /// recompute the correct on-screen rect itself -- see the comment there.
+  wxGrid *m_grid{nullptr};
+  int m_row{0};
+  int m_col{0};
+
+  LabelTextCtrl *Text() const { return static_cast<LabelTextCtrl *>(GetWindow()); }
+
 public:
-  LabelEditorRefData() = default;
+  LabelCellEditor() = default;
 
-  void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *) override;
+  void Create(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler) override;
+  void BeginEdit(int row, int col, wxGrid *grid) override;
+  bool EndEdit(int row, int col, const wxGrid *grid, const wxString &oldval,
+               wxString *newval) override;
+  void ApplyEdit(int row, int col, wxGrid *grid) override;
+  void Reset() override;
 
-  /// Override basic text editor behavior to normalize label editing.
-  bool EndEdit(const wxSheetCoords &, wxSheet *) override;
+  /// wxGrid's own editor-positioning logic isn't aware of merged (spanned)
+  /// cells the way CellToRect() is, so the correct rect for a spanned
+  /// header cell is recomputed here directly rather than trusting whatever
+  /// rect wxGrid passes in.
+  void SetSize(const wxRect &rect) override;
 
-  bool Copy(const LabelEditorRefData &p_other);
+  /// Injects the keystroke that triggered editing (typing directly on a
+  /// selected cell, rather than clicking/F2) into the editor.
+  void StartingKey(wxKeyEvent &event) override;
 
-  // NOLINTNEXTLINE(modernize-use-auto)
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(LabelEditorRefData, wxSheetCellTextEditorRefData)
+  wxGridCellEditor *Clone() const override { return new LabelCellEditor(); }
+  wxString GetValue() const override { return Text()->GetValue(); }
 };
 
 } // namespace Gambit::GUI
