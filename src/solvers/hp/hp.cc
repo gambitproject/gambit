@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hp.h"
 #include "solvers/hp/hpsystem.h"
@@ -37,7 +36,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   Vector<double> x = system.ComputeInitialPoint();
 
   const PathTracer tracer;
-  double omega = 1.0;
+  const PathTracer::TraceDirection direction = PathTracer::TraceDirection::Positive;
+  const size_t tracking_index = 1; // Track the first variable (t) for orientation
+
   const double t_target = 1.0;
   const double tol = 1e-8;
   double last_t = 0.0;
@@ -83,9 +84,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, omega, termination_condition, NullCallbackFunction, criterion_function);
+      x, direction, tracking_index, termination_condition, NullCallbackFunction,
+      criterion_function);
 
-  int polish_step = 1;
   const PolishResult polishing_result = PolishPoint(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {

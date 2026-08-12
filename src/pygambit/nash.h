@@ -22,6 +22,7 @@
 
 #include "gambit.h"
 #include "solvers/logit/logit.h"
+#include "solvers/logit/path.h"
 
 using namespace std;
 using namespace Gambit;
@@ -32,8 +33,8 @@ std::list<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_
                                                                   double p_maxAccel)
 {
   std::list<MixedBehaviorProfile<double>> ret;
-  ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0,
-                                   p_firstStep, p_maxAccel)
+  ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
+                                   PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
                     .back()
                     .GetProfile());
   return ret;
@@ -43,16 +44,17 @@ inline std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0, p_firstStep,
-                            p_maxAccel);
+  return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
+                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
 }
 
 std::shared_ptr<LogitQREMixedBehaviorProfile>
 LogitBehaviorEstimateWrapper(std::shared_ptr<MixedBehaviorProfile<double>> p_frequencies,
                              bool p_stopAtLocal, double p_firstStep, double p_maxAccel)
 {
-  return make_shared<LogitQREMixedBehaviorProfile>(LogitBehaviorEstimate(
-      *p_frequencies, 1000000.0, 1.0, p_stopAtLocal, p_firstStep, p_maxAccel));
+  return make_shared<LogitQREMixedBehaviorProfile>(
+      LogitBehaviorEstimate(*p_frequencies, 1000000.0, PathTracer::TraceDirection::Positive,
+                            p_stopAtLocal, p_firstStep, p_maxAccel));
 }
 
 std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>
@@ -61,7 +63,8 @@ LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targ
 {
   LogitQREMixedBehaviorProfile start(p_game);
   std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> ret;
-  for (auto &qre : LogitBehaviorSolveLambda(start, p_targetLambda, 1.0, p_firstStep, p_maxAccel)) {
+  for (auto &qre : LogitBehaviorSolveLambda(
+           start, p_targetLambda, PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)) {
     ret.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
   }
   return ret;
@@ -73,8 +76,8 @@ std::list<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_
                                                                   double p_maxAccel)
 {
   std::list<MixedStrategyProfile<double>> ret;
-  ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0,
-                                   p_firstStep, p_maxAccel)
+  ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
+                                   PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
                     .back()
                     .GetProfile());
   return ret;
@@ -84,8 +87,8 @@ inline std::list<LogitQREMixedStrategyProfile>
 LogitStrategyPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0, p_firstStep,
-                            p_maxAccel);
+  return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
+                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
 }
 
 std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>
@@ -94,7 +97,8 @@ LogitStrategyAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targ
 {
   LogitQREMixedStrategyProfile start(p_game);
   std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> ret;
-  for (auto &qre : LogitStrategySolveLambda(start, p_targetLambda, 1.0, p_firstStep, p_maxAccel)) {
+  for (auto &qre : LogitStrategySolveLambda(
+           start, p_targetLambda, PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)) {
     ret.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
   }
   return ret;
@@ -104,6 +108,7 @@ std::shared_ptr<LogitQREMixedStrategyProfile>
 LogitStrategyEstimateWrapper(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies,
                              bool p_stopAtLocal, double p_firstStep, double p_maxAccel)
 {
-  return make_shared<LogitQREMixedStrategyProfile>(LogitStrategyEstimate(
-      *p_frequencies, 1000000.0, 1.0, p_stopAtLocal, p_firstStep, p_maxAccel));
+  return make_shared<LogitQREMixedStrategyProfile>(
+      LogitStrategyEstimate(*p_frequencies, 1000000.0, PathTracer::TraceDirection::Positive,
+                            p_stopAtLocal, p_firstStep, p_maxAccel));
 }

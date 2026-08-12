@@ -1,0 +1,14 @@
+EFG 2 R "Fig 5.11 from Shoham and Leyton-Brown (2008)" { "1" "2" }
+
+"
+Figure 5.11 from :cite:p:`ShoLeyB08`.
+The Prisoner's Dilemma game in extensive form.
+"
+
+p "" 1 2 "" { "C" "D" } 0
+p "" 2 1 "" { "c" "d" } 0
+t "" 1 "" { -1 -1 }
+t "" 2 "" { -4 0 }
+p "" 2 1 0
+t "" 3 "" { 0 -4 }
+t "" 4 "" { -3 -3 }

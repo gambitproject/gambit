@@ -24,6 +24,7 @@
 #define SOLVERS_LOGIT_H
 
 #include <functional>
+#include "solvers/logit/path.h"
 
 namespace Gambit {
 
@@ -85,18 +86,19 @@ using MixedStrategyObserverFunctionType =
 inline void NullMixedStrategyObserver(const LogitQREMixedStrategyProfile &) {}
 
 std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
-    const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
-    double p_firstStep, double p_maxAccel,
+    const LogitQREMixedStrategyProfile &p_start, double p_regret,
+    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
 std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
     const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
-    double p_omega, double p_firstStep, double p_maxAccel,
+    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,
-                      double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
+                      PathTracer::TraceDirection p_direction, double p_stopAtLocal,
+                      double p_firstStep, double p_maxAccel,
                       MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
 
 using LogitQREMixedBehaviorProfile = LogitQRE<MixedBehaviorProfile<double>>;
@@ -107,19 +109,19 @@ using MixedBehaviorObserverFunctionType =
 inline void NullMixedBehaviorObserver(const LogitQREMixedBehaviorProfile &) {}
 
 std::list<LogitQREMixedBehaviorProfile>
-LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
+LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
+                   PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
                    MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
 
-std::list<LogitQREMixedBehaviorProfile>
-LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
-                         const std::list<double> &p_targetLambda, double p_omega,
-                         double p_firstStep, double p_maxAccel,
-                         MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
+std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
+    const LogitQREMixedBehaviorProfile &p_start, const std::list<double> &p_targetLambda,
+    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
+    MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
 
 LogitQREMixedBehaviorProfile
 LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
-                      double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
+                      PathTracer::TraceDirection p_direction, double p_stopAtLocal,
+                      double p_firstStep, double p_maxAccel,
                       MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
 
 } // namespace Gambit

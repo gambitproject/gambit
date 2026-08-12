@@ -206,7 +206,8 @@ int main(int argc, char *argv[])
         }
       };
       auto result =
-          LogitStrategyEstimate(frequencies, maxLambda, 1.0, false, hStart, maxDecel, printer);
+          LogitStrategyEstimate(frequencies, maxLambda, PathTracer::TraceDirection::Positive,
+                                false, hStart, maxDecel, printer);
       PrintProfile(std::cout, decimals, result);
       return 0;
     }
@@ -219,14 +220,15 @@ int main(int argc, char *argv[])
       };
       const LogitQREMixedStrategyProfile start(game);
       if (!targetLambda.empty()) {
-        auto result =
-            LogitStrategySolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
+        auto result = LogitStrategySolveLambda(
+            start, targetLambda, PathTracer::TraceDirection::Positive, hStart, maxDecel, printer);
         for (auto &profile : result) {
           PrintProfile(std::cout, decimals, profile);
         }
       }
       else {
-        auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        auto result = LogitStrategySolve(start, maxregret, PathTracer::TraceDirection::Positive,
+                                         hStart, maxDecel, printer);
         PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
@@ -238,14 +240,15 @@ int main(int argc, char *argv[])
       };
       const LogitQREMixedBehaviorProfile start(game);
       if (!targetLambda.empty()) {
-        auto result =
-            LogitBehaviorSolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
+        auto result = LogitBehaviorSolveLambda(
+            start, targetLambda, PathTracer::TraceDirection::Positive, hStart, maxDecel, printer);
         for (auto &profile : result) {
           PrintProfile(std::cout, decimals, profile);
         }
       }
       else {
-        auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        auto result = LogitBehaviorSolve(start, maxregret, PathTracer::TraceDirection::Positive,
+                                         hStart, maxDecel, printer);
         PrintProfile(std::cout, decimals, result.back(), true);
       }
     }

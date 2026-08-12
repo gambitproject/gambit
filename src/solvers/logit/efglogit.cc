@@ -309,8 +309,8 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 namespace Gambit {
 
 std::list<LogitQREMixedBehaviorProfile>
-LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
+LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
+                   PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
                    MixedBehaviorObserverFunctionType p_observer)
 {
   if (p_start.size() == 0) {
@@ -335,7 +335,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
       [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
         system.GetJacobian(p_point, p_jac);
       },
-      x, p_omega,
+      x, p_direction, x.size(),
       [game, p_regret](const Vector<double> &p_point) {
         return RegretTerminationFunction(game, p_point, p_regret);
       },
@@ -345,9 +345,9 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
 
 std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
-                         const std::list<double> &p_targetLambda, double p_omega,
-                         double p_firstStep, double p_maxAccel,
-                         MixedBehaviorObserverFunctionType p_observer)
+                         const std::list<double> &p_targetLambda,
+                         PathTracer::TraceDirection p_direction, double p_firstStep,
+                         double p_maxAccel, MixedBehaviorObserverFunctionType p_observer)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -369,7 +369,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
         [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
           system.GetJacobian(p_point, p_jac);
         },
-        x, p_omega, LambdaPositiveTerminationFunction,
+        x, p_direction, x.size(), LambdaPositiveTerminationFunction,
         [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
         [lam](const Vector<double> &x, const Vector<double> &) -> double {
           return x.back() - lam;
@@ -381,7 +381,8 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
 
 LogitQREMixedBehaviorProfile
 LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
-                      double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
+                      PathTracer::TraceDirection p_direction, double p_stopAtLocal,
+                      double p_firstStep, double p_maxAccel,
                       MixedBehaviorObserverFunctionType p_observer)
 {
   const LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
@@ -405,7 +406,7 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
         [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
           system.GetJacobian(p_point, p_jac);
         },
-        x, p_omega,
+        x, p_direction, x.size(),
         [p_maxLambda](const Vector<double> &p_point) {
           return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
         },
