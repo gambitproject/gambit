@@ -279,12 +279,9 @@ void EditMoveDialog::UpdateValidation()
     message = _("Information set label must be unique for the player.");
   }
 
-  if (actionLabels.contains(actionLabel)) {
-    wxRichMessageDialog(this, _("Action labels must be unique within the information set."),
-                        _("Error"), wxOK | wxCENTRE | wxICON_ERROR)
-        .ShowModal();
-    m_actionPanel->FocusActionLabel(act);
-    return false;
+  const wxString actionMessage = m_actionPanel->ValidateLabels();
+  if (message.empty()) {
+    message = actionMessage;
   }
 
   m_errorText->SetLabel(message);
