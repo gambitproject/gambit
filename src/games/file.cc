@@ -753,14 +753,11 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
+      infoset =
+          p_game->AppendMove(p_node, p_game->GetChance(),
+                             std::vector<std::string>(action_labels.begin(), action_labels.end()));
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
       p_game->SetChanceProbs(infoset, probs);
     }
     else {
@@ -810,14 +807,10 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, player, action_labels.size());
+      infoset = p_game->AppendMove(
+          p_node, player, std::vector<std::string>(action_labels.begin(), action_labels.end()));
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
     }
     else {
       CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);

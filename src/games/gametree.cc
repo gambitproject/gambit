@@ -721,24 +721,28 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                    bool p_generateLabels)
+GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player,
+                                    const std::vector<std::string> &p_actions)
 {
   const GameNodeRep *node = p_node.get();
-  if (p_actions <= 0 || !node->m_children.empty()) {
+  if (p_actions.empty() || !node->m_children.empty()) {
     throw UndefinedException();
   }
   if (p_node->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
 
   IncrementVersion();
-  auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
-                                                     p_player.get(), p_actions);
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
   p_player->m_infosets.push_back(newInfoset);
-  if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
   }
   return AppendMove(p_node, newInfoset);
 }
@@ -767,8 +771,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                    bool p_generateLabels)
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
 {
   if (p_actions <= 0) {
     throw UndefinedException();
@@ -781,9 +784,32 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
-  if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
+  std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
+  return InsertMove(p_node, newInfoset);
+}
+
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player,
+                                    const std::vector<std::string> &p_actions)
+{
+  if (p_actions.empty()) {
+    throw UndefinedException();
+  }
+  if (p_player->m_game != this) {
+    throw MismatchException();
+  }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
+
+  IncrementVersion();
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
+  p_player->m_infosets.push_back(newInfoset);
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
   }
   return InsertMove(p_node, newInfoset);
 }

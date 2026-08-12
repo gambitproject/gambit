@@ -1757,7 +1757,7 @@ class Game:
         Raises
         ------
         UndefinedOperationError
-            If `nodes` are not all terminal, or `actions` is not a positive number.
+            If `nodes` are not all terminal, or `actions` is empty.
         MismatchError
             If an element from `nodes` is a `Node` from a different game,
             or `player` is a `Player` from a different game.
@@ -1777,9 +1777,10 @@ class Game:
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
-        for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
-            cython.cast(Action, action).action.deref().SetLabel(label.encode("utf-8"))
+        c_actions = stdvector[string]()
+        for label in actions:
+            c_actions.push_back(label.encode("utf-8"))
+        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, c_actions)
         resolved_infoset = cython.cast(NodeInfoset, resolved_node.infoset)._resolve()
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
@@ -1806,23 +1807,32 @@ class Game:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def insert_move(self, node: Node | str,
-                    player: Player | str, actions: int) -> None:
-        """Insert a move for `player` prior to the node `node`, with `actions` actions.
-        `node` becomes the first child of the newly-inserted node.
+                    player: Player | str, actions: list[str]) -> None:
+        """Insert a move for `player` prior to the node `node`, with actions labeled
+        according to `actions`.  `node` becomes the first child of the newly-inserted node.
 
         Raises
         ------
         UndefinedOperationError
-            If `actions` is not a positive number.
+            If `actions` is empty.
         MismatchError
             If `node` is a `Node` from a different game, or `player` is a `Player` from a
             different game.
+        ValueError
+            If `actions` contains an empty or a duplicated label.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_move"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "insert_move"))
-        if actions < 1:
-            raise UndefinedOperationError("insert_move(): `actions` must be a positive number")
-        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, actions)
+        if not actions:
+            raise UndefinedOperationError("insert_move(): `actions` must be a nonempty list")
+        if any(not label for label in actions):
+            raise ValueError("insert_move(): action labels must not be empty")
+        if len(set(actions)) != len(actions):
+            raise ValueError("insert_move(): action labels must be unique")
+        c_actions = stdvector[string]()
+        for label in actions:
+            c_actions.push_back(label.encode("utf-8"))
+        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, c_actions)
 
     def insert_infoset(self, node: Node | str,
                        infoset: Infoset | str) -> None:

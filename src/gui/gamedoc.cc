@@ -527,7 +527,7 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 
 void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  m_game->InsertMove(p_node, p_player, p_actions, true);
+  m_game->InsertMove(p_node, p_player, p_actions);
   NotifyChanged(GameModificationType::GameForm);
 }
 

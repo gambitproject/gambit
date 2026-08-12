@@ -1247,8 +1247,9 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Append a move for p_player at p_node, with actions labeled per p_actions.
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
@@ -1256,8 +1257,15 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Insert a move for p_player prior to p_node, with p_actions actions bearing
+  /// automatically generated, sequentially numbered labels.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a move for p_player prior to p_node, with actions labeled per p_actions.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }

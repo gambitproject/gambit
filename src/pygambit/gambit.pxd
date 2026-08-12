@@ -355,9 +355,10 @@ cdef extern from "games/game.h":
         bool IsPerfectRecall() except +
         bool IsAbsentMinded(c_GameInfoset) except +
 
-        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GameInfoset) except +ValueError
         void CopyTree(c_GameNode dest, c_GameNode src) except +ValueError
         void MoveTree(c_GameNode dest, c_GameNode src) except +ValueError
