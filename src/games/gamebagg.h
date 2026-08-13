@@ -105,14 +105,6 @@ public:
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
   virtual void WriteBaggFile(std::ostream &) const;
   //@}
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
-  //@}
 };
 
 /// @brief Reads a game representation in .bagg format

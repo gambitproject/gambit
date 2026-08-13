@@ -1256,10 +1256,6 @@ public:
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
 
-  virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-  {
-    throw UndefinedException();
-  }
   /// Append a move for p_player at p_node, with actions labeled per p_actions.
   virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
                                  const std::vector<std::string> &p_actions)
@@ -1286,20 +1282,32 @@ public:
   {
     throw UndefinedException();
   }
+  /// Add a chance move for p_actions, with distribution p_probs, at terminal p_node.
+  virtual GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a chance move for p_actions, with distribution p_probs, prior to p_node.
+  virtual GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
   virtual void DeleteParent(GameNode) { throw UndefinedException(); }
   virtual void DeleteTree(GameNode) { throw UndefinedException(); }
   virtual void CopyTree(GameNode dest, GameNode src) { throw UndefinedException(); }
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame(GameNode) const { throw UndefinedException(); }
   virtual void MoveTree(GameNode dest, GameNode src) { throw UndefinedException(); }
-  virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
-  virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
-  virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
   virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                                   const std::string &)
   {
     throw UndefinedException();
   }
+  /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
+  /// so that any two nodes reached via different actions at p_infoset are distinguished.
+  virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
   virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
   {
     throw UndefinedException();
@@ -1439,8 +1447,6 @@ public:
 
   /// @name Modification
   //@{
-  /// Set the probability distribution of actions at a chance node
-  virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   /// Form the collection of nodes into a single event carrying the given
   /// probability distribution over its actions.  The nodes need not currently be
   /// chance nodes; personal decision nodes are converted.

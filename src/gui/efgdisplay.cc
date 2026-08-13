@@ -929,7 +929,9 @@ void EfgDisplay::OnUpdate()
 
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, static_cast<bool>(selectNode));
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
+  m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL,
+                     selectNode && selectNode->GetInfoset() &&
+                         !m_doc->GetGame()->IsAbsentMinded(selectNode->GetInfoset()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());

@@ -789,12 +789,11 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     if (!infoset) {
       auto normalized_labels = action_labels;
       NormalizeLabelStrings(normalized_labels);
-      infoset = p_game->AppendMove(
-          p_node, p_game->GetChance(),
-          std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()));
+      infoset = p_game->AppendEvent(
+          p_node, std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()),
+          std::vector<Number>(probs.begin(), probs.end()));
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
-      p_game->SetChanceProbs(infoset, probs);
     }
     else {
       CheckInfosetActions(p_state, 0, infosetId, infoset, label, action_labels);

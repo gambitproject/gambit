@@ -118,7 +118,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
                                             poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
-    g.append_move(g.root, g.players.chance, deals)
+    g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
 
     ante_outcome = g.add_outcome("Ante", [-1, -1])
     g.set_outcome(g.root, ante_outcome)
@@ -161,8 +161,7 @@ def _create_kuhn_poker_efg_without_outcomes():
         player_idx = 0 if player == "Alice" else 1
         return [d for d in deals if d[player_idx] == card]
 
-    g.append_move(g.root, g.players.chance, deals)
-    g.make_event([g.root], [gbt.Rational(1, 6)] * 6)
+    g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
         term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
@@ -686,7 +685,10 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
-                g.set_infoset(n.children["R"], n.children["L"].infoset)
+                left = n.children["L"]
+                g.make_infoset(list(left.infoset.members) + [n.children["R"]],
+                               left.infoset.player.label,
+                               left.infoset.label or None)
         return g
 
     def reduced_strategic_form(self):
