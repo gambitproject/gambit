@@ -182,10 +182,53 @@ def test_set_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
     assert game.to_efg() == before
 
 
-def test_set_actions_chance_raises_undefined_operation():
+def test_set_actions_at_event_reorder_carries_probabilities():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    game.set_actions(event, ["King", "Queen"], probs=["3/4", "1/4"])
+    game.set_actions(event, ["Queen", "King"])
+    assert [(a.label, a.prob) for a in event.actions] == [("Queen", gbt.Rational(1, 4)),
+                                                          ("King", gbt.Rational(3, 4))]
+
+
+def test_set_actions_at_event_add_with_probs_sequence():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    nodes_before = len(game.nodes)
+    game.set_actions(event, ["Jack", "King", "Queen"], probs=["1/2", "1/4", "1/4"])
+    assert [(a.label, a.prob) for a in event.actions] == [("Jack", gbt.Rational(1, 2)),
+                                                          ("King", gbt.Rational(1, 4)),
+                                                          ("Queen", gbt.Rational(1, 4))]
+    assert len(game.nodes) == nodes_before + 1
+
+
+def test_set_actions_at_event_drop_with_probs_mapping():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    game.set_actions(event, ["King"], probs={"King": 1}, drop=True)
+    assert [(a.label, a.prob) for a in event.actions] == [("King", 1)]
+
+
+def test_set_actions_at_event_requires_probs_when_arity_changes():
+    """Deleting an action never renormalizes: the distribution over what remains is
+    declared, not inferred."""
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(gbt.UndefinedOperationError):
-        game.set_actions(game.root.infoset, ["King", "Queen"])
+        game.set_actions(game.root.infoset, ["King"], drop=True)
+
+
+@pytest.mark.parametrize(
+    "probs,error",
+    [(["3/4", "1/2"], ValueError), (["1/2"], IndexError), ({"Jack": 1}, KeyError)],
+)
+def test_set_actions_at_event_bad_probs_raise_and_leave_game_unchanged(probs, error):
+    """A distribution that does not sum to one, is the wrong length, or names an
+    undeclared action is rejected before the game is modified."""
+    game = games.create_stripped_down_poker_efg()
+    before = game.to_efg()
+    with pytest.raises(error):
+        game.set_actions(game.root.infoset, ["King", "Queen"], probs=probs)
+    assert game.to_efg() == before
 
 
 def test_set_actions_absent_minded_drop_and_add():
