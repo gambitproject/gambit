@@ -1015,48 +1015,6 @@ class Game:
             )
         return StrategyBehavior.wrap(resolved_player, resolved_strategy)
 
-    def set_chance_probs(self, infoset: Infoset | str, probs: typing.Sequence):
-        """Set the action probabilities at chance information set `infoset`.
-
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The chance information set at which to set the action probabilities.
-            If a string is passed, the information set is determined by finding the chance
-            information set with that label, if any.
-        probs : array-like
-            The action probabilities to set
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is not an information set in this game
-        UndefinedOperationError
-            If `infoset` is not an information set of the chance player
-        IndexError
-            If the length of `probs` is not the same as the number of actions at the
-            information set
-        ValueError
-            If any of the elements of `probs` are not interpretable as numbers, or the values of
-            `probs` are not non-negative numbers that sum to exactly one.
-        """
-        infoset = self._resolve_infoset(infoset, "set_chance_probs")
-        if not infoset.is_chance:
-            raise UndefinedOperationError(
-                "set_chance_probs() first argument must be a chance infoset"
-            )
-        if len(infoset.actions) != len(probs):
-            raise IndexError("set_chance_probs(): must specify exactly one probability per action")
-        numbers = Array[c_Number](len(probs))
-        for i in range(1, len(probs)+1):
-            setitem_array_number(numbers, i, _to_number(probs[i-1]))
-        try:
-            self.game.deref().SetChanceProbs(cython.cast(Infoset, infoset).infoset, numbers)
-        except RuntimeError:
-            raise ValueError(
-                "set_chance_probs(): must specify non-negative probabilities that sum to one"
-            ) from None
-
     def _get_contingency(self, *args):
         psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
             self.game.deref().NewPureStrategyProfile()
