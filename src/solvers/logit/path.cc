@@ -162,6 +162,15 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   p_callback(x);
   int steps = 0;
 
+  auto stepsizeBelowMinimum = [&]() -> TracePathResult {
+    if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
+      return {x, true,
+              "Path following terminated successfully at point satisfying criterion function.",
+              steps};
+    }
+    return {x, false, "Stepsize fell below minimum threshold.", steps};
+  };
+
   bool first_step = true;
   double omega = (p_direction == TraceDirection::Positive) ? 1.0 : -1.0;
 
@@ -173,14 +182,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     bool accept = true;
 
     if (std::abs(h) <= c_hmin) {
-      if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
-        return {x, true,
-                "Path following terminated successfully at point satisfying criterion function.",
-                steps};
-      }
-      else {
-        return {x, false, "Stepsize fell below minimum threshold.", steps};
-      }
+      return stepsizeBelowMinimum();
     }
 
     if (first_step) {
@@ -190,7 +192,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       }
       // Ensure that the tangent is oriented in the same direction as
       // the path-following direction.
-      else if (t[p_trackingIndex] < -c_orientTol) {
+      if (t[p_trackingIndex] < -c_orientTol) {
         omega *= -1.0;
       }
       first_step = false;
@@ -258,14 +260,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (std::abs(h) <= c_hmin) {
-        if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
-          return {x, true,
-                  "Path following terminated successfully at point satisfying criterion function.",
-                  steps};
-        }
-        else {
-          return {x, false, "Stepsize fell below minimum threshold.", steps};
-        }
+        return stepsizeBelowMinimum();
       }
       continue;
     }

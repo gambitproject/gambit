@@ -86,6 +86,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       },
       x, direction, tracking_index, termination_condition, NullCallbackFunction,
       criterion_function);
+  if (!result.status) {
+    return {};
+  }
 
   const PolishResult polishing_result = PolishPoint(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
