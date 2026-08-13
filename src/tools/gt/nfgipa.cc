@@ -29,7 +29,6 @@
 
 using namespace Gambit;
 using namespace Gambit::Nash;
-using namespace Gambit::gametracer;
 
 extern std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
                                                                            std::istream &p_stream);

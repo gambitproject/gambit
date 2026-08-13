@@ -928,7 +928,10 @@ LCP_STRATEGY_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_11",
     ),
-    # Action graph game
+    # Action graph game.  Exact throughout: pure-strategy payoffs via
+    # agg::AGG::getExactPurePayoff, and the genuinely mixed equilibrium found here via
+    # agg::AGG::getExactMixedPayoff (Rational arithmetic through the same convolution
+    # algorithm the double engine uses).
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),
