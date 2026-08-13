@@ -69,8 +69,6 @@ Transforming game information structure
    :toctree: api/
 
    Game.make_infoset
-   Game.set_infoset
-   Game.leave_infoset
    Game.make_event
    Game.relabel_actions
    Game.reveal

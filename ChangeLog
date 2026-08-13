@@ -39,6 +39,10 @@
 ### Removed
 - `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the
   information set and the new player.  (#999)
+- `Game.set_infoset` has been removed; use `Game.make_infoset`, specifying the members of the
+  target information set together with the node to add.  (#999)
+- `Game.leave_infoset` has been removed; use `Game.make_infoset` with a single node, specifying
+  the current label if it should be retained.  (#999)
 - `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
   information sets and their members is now maintained automatically.  (#999)
 - Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces

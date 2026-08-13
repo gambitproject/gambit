@@ -686,7 +686,10 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
-                g.set_infoset(n.children["R"], n.children["L"].infoset)
+                left = n.children["L"]
+                g.make_infoset(list(left.infoset.members) + [n.children["R"]],
+                               left.infoset.player.label,
+                               left.infoset.label or None)
         return g
 
     def reduced_strategic_form(self):
