@@ -648,8 +648,10 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
-  /// Validate that p_label is a nonempty, valid, unique label for a strategy of this player.
-  void CheckStrategyLabel(const std::string &p_label) const;
+  /// Validate that p_label is a valid label for a strategy of this player,
+  /// disregarding any strategies in p_ignore.
+  void CheckStrategyLabel(const std::string &p_label,
+                          const std::set<const GameStrategyRep *> &p_ignore) const;
   //@}
 
   /// @name Sequences
@@ -1377,6 +1379,12 @@ public:
   }
   /// Remove the strategy from the game
   virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Simultaneously reassign strategy labels for a player: keys are current labels.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   //@}
@@ -1522,18 +1530,20 @@ inline void GameStrategyRep::SetLabel(const std::string &p_label)
   if (p_label == m_label) {
     return;
   }
-  GetPlayer()->CheckStrategyLabel(p_label);
+  GetPlayer()->CheckStrategyLabel(p_label, {this});
   m_label = p_label;
 }
 
-inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
+inline void
+GamePlayerRep::CheckStrategyLabel(const std::string &p_label,
+                                  const std::set<const GameStrategyRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Strategy label must not be empty");
   }
   CheckLabel(p_label);
   for (const auto &strategy : m_strategies) {
-    if (strategy->GetLabel() == p_label) {
+    if (p_ignore.count(strategy.get()) == 0 && strategy->GetLabel() == p_label) {
       throw ValueException("Strategy label must be unique for the player");
     }
   }

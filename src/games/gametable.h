@@ -100,6 +100,7 @@ public:
   //@{
   GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
   void DeleteStrategy(const GameStrategy &p_strategy) override;
+  void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &) override;
   //@}
 
   /// @name Writing data files
