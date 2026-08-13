@@ -81,13 +81,14 @@ def test_make_infoset_terminal_node_raises():
         game.make_infoset([terminal], game.root.player.label)
 
 
-def test_make_infoset_chance_node_raises():
-    """All nodes must belong to a personal player, not chance."""
+def test_make_infoset_converts_chance_node():
+    """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
     personal = next(n for n in game.nodes if not n.is_terminal and not n.infoset.is_chance)
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.make_infoset([chance_node], personal.infoset.player.label)
+    game.make_infoset([chance_node], personal.infoset.player.label)
+    assert not chance_node.infoset.is_chance
+    assert chance_node.infoset.player == personal.infoset.player
 
 
 @pytest.mark.parametrize("node_actions", [["c", "d"], ["b", "a"]])
@@ -586,6 +587,13 @@ def test_reveal_splits_infoset_by_action():
     assert len(bob) == 2
     assert all(len(list(i.members)) == 1 for i in bob)
     assert len(list(game.players["Alice"].infosets)) == n_alice
+
+
+def test_reveal_chance_player_raises():
+    """`player` must be a personal player; revealing to chance is not well-defined."""
+    game = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.reveal(game.root.infoset, game.players.chance)
 
 
 def test_reveal_absent_minded_infoset_raises():

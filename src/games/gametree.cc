@@ -563,9 +563,6 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
     if (node->IsTerminal()) {
       throw UndefinedException("All nodes must be decision nodes");
     }
-    if (node->m_infoset->IsChanceInfoset()) {
-      throw UndefinedException("All nodes must belong to a personal player, not chance");
-    }
     if (!selected.insert(node.get()).second) {
       throw ValueException("Each node may be referenced only once");
     }
@@ -622,6 +619,9 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
   if (p_atInfoset->m_game != this || p_player->m_game != this) {
     throw MismatchException();
+  }
+  if (p_player->IsChance()) {
+    throw UndefinedException("Reveal() requires a personal player");
   }
   if (IsAbsentMinded(p_atInfoset)) {
     throw UndefinedException(

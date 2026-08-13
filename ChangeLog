@@ -48,6 +48,13 @@
   with a uniform default when creating a fresh move, but now do so through `Game::InsertEvent`;
   collecting the actual distribution at creation time in the GUI is left as a separate piece
   of UX work.  (#999)
+- `Game.reveal` now requires `player` to be a personal player; previously passing the chance
+  player was either a silent no-op or raised an uninformative `RuntimeError`, depending on the
+  game's structure, rather than a proper `UndefinedOperationError`.  (#999)
+- `Game.make_infoset` now accepts nodes belonging to a chance event, converting them to
+  personal decision nodes and discarding their probabilities; previously only personal decision
+  nodes were accepted.  This matches `Game.make_event`, which has always accepted personal
+  decision nodes and converted them to a chance event.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs

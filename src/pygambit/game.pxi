@@ -2318,11 +2318,12 @@ class Game:
                      label: str | None = None) -> None:
         """Form `nodes` into a single information set belonging to `player`.
 
-        The nodes must all: (i) be personal decision nodes of this game,
-        (ii) have the same actions, with the same labels in the same order.
-        Nodes are removed from whatever information sets they currently belong to; any of
-        those information sets which retain members after removal survive, keeping their labels.
-        Infosets left with no members are deleted.
+        The nodes must all: (i) be nonterminal nodes of this game, (ii) have the same
+        actions, with the same labels in the same order.  They need not currently be
+        personal decision nodes; nodes belonging to a chance event are converted, discarding
+        their probabilities.  Nodes are removed from whatever information sets or events
+        they currently belong to; any of those which retain members after removal survive,
+        keeping their labels.  Infosets left with no members are deleted.
 
         The structure of the tree is unchanged: no nodes are created or removed.
         This operation may introduce imperfect recall or absent-mindedness.
@@ -2351,7 +2352,7 @@ class Game:
         TypeError
             If any of `nodes`, or `player`, is not of an accepted type.
         UndefinedOperationError
-            If any of `nodes` is a terminal node or a chance node, or if the game is not a tree.
+            If any of `nodes` is a terminal node, or if the game is not a tree.
         ValueError
             If `nodes` is empty or contains a repeated node; if the nodes do not all
             have the same actions in the same order; or if `label` is not unique among
@@ -2367,10 +2368,6 @@ class Game:
             if n.is_terminal:
                 raise UndefinedOperationError(
                     "make_infoset(): all nodes must be decision nodes"
-                )
-            if n.infoset.player.is_chance:
-                raise UndefinedOperationError(
-                    "make_infoset(): all nodes must be personal player nodes, not chance"
                 )
         c_nodes = stdvector[c_GameNode]()
         for n in resolved_nodes:
@@ -2406,10 +2403,14 @@ class Game:
             If `infoset` is an `Infoset` from a different game, or
             `player` is a `Player` from a different game.
         UndefinedOperationError
-            If `infoset` is absent-minded.
+            If `infoset` is absent-minded, or if `player` is the chance player.
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "reveal"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
+        if resolved_player.is_chance:
+            raise UndefinedOperationError(
+                "reveal(): `player` must be a personal player"
+            )
         if resolved_infoset.is_absent_minded:
             raise UndefinedOperationError(
                 "reveal(): revealing the move at an absent-minded information set "
