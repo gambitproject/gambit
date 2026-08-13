@@ -117,40 +117,6 @@ bool GameActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
-void GameTreeRep::DeleteAction(GameAction p_action)
-{
-  auto action = p_action.get();
-  auto *infoset = action->m_infoset;
-  if (infoset->m_game != this) {
-    throw MismatchException();
-  }
-  if (infoset->m_actions.size() == 1) {
-    throw UndefinedException();
-  }
-
-  IncrementVersion();
-  auto where =
-      std::find(infoset->m_actions.begin(), infoset->m_actions.end(), p_action.get_shared());
-  auto offset = where - infoset->m_actions.begin();
-  (*where)->Invalidate();
-  infoset->m_actions.erase(where);
-  if (infoset->m_player->IsChance()) {
-    infoset->m_probs.erase(std::next(infoset->m_probs.begin(), offset));
-    NormalizeChanceProbs(infoset);
-  }
-  infoset->RenumberActions();
-
-  for (auto member : infoset->m_members) {
-    auto it = std::next(member->m_children.begin(), offset);
-    DeleteTree(*it);
-    m_numNodes--;
-    (*it)->Invalidate();
-    member->m_children.erase(it);
-  }
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-}
-
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
 
 //========================================================================
@@ -1936,30 +1902,6 @@ GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
   ClearComputedValues();
   InvalidateInfosetOrdering();
   return newEvent;
-}
-
-Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
-{
-  if (p_infoset->m_game != this) {
-    throw MismatchException();
-  }
-  if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException("Action probabilities can only be normalized for eventss");
-  }
-  IncrementVersion();
-  auto &probs = p_infoset->m_probs;
-  auto sum = std::accumulate(
-      probs.begin(), probs.end(), Rational(0),
-      [](const Rational &s, const Number &n) { return s + static_cast<Rational>(n); });
-  if (sum == Rational(0)) {
-    // all remaining moves have prob zero; split prob 1 equally among them
-    std::fill(probs.begin(), probs.end(), Rational(1, probs.size()));
-  }
-  else {
-    std::transform(probs.begin(), probs.end(), probs.begin(),
-                   [&sum](const Number &n) { return static_cast<Rational>(n) / sum; });
-  }
-  return shared_from_this();
 }
 
 //------------------------------------------------------------------------

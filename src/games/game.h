@@ -1304,7 +1304,6 @@ public:
   {
     throw UndefinedException();
   }
-  virtual void DeleteAction(GameAction) { throw UndefinedException(); }
   /// Simultaneously reassign action labels at an information set.
   /// Keys of p_labels are current action labels; values are their replacements.
   virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)

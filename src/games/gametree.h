@@ -68,8 +68,6 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
-  /// Normalize the probability distribution of actions at a chance node
-  Game NormalizeChanceProbs(GameInfosetRep *);
   //@}
 
   /// @name Managing the representation
@@ -186,7 +184,6 @@ public:
   GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
                         const std::string &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
-  void DeleteAction(GameAction) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
   void SetActions(const GameInfoset &, const std::vector<std::string> &,
                   const std::vector<Number> & = {}) override;
