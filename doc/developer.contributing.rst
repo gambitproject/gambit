@@ -280,6 +280,17 @@ When making a new release of Gambit, follow these steps:
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
+   The Windows ``.msi`` installer is the one exception: Windows Installer's ``ProductVersion``
+   must be a plain numeric ``major.minor.build`` triple.  So, ``configure.ac`` derives a separate
+   ``GAMBIT_MSI_VERSION`` for ``gambit.wxs`` instead of substituting ``GAMBIT_VERSION`` directly.
+   The build field is banded by release stage so that alpha < beta < rc < the final release of
+   the same version compares correctly to Windows Installer:
+
+   - ``X.Y.Z-alpha.N`` -> build ``0 + N``
+   - ``X.Y.Z-beta.N``  -> build ``10000 + N``
+   - ``X.Y.Z-rc.N``    -> build ``20000 + N``
+   - ``X.Y.Z`` (final) -> build ``60000``
+
 3. Update the ``ChangeLog`` file at the repository root with a summary of changes for this release.
    This file is the single source of truth for release notes — it is surfaced in the documentation
    (see :ref:`releases`) and used to populate the GitHub release automatically.
