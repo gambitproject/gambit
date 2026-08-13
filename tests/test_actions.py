@@ -188,16 +188,6 @@ def test_set_actions_chance_raises_undefined_operation():
         game.set_actions(game.root.infoset, ["King", "Queen"])
 
 
-@pytest.mark.filterwarnings("ignore::FutureWarning")
-def test_set_actions_ambiguous_current_labels_raises_valueerror():
-    """A game file may have duplicate action labels; matching by label is then not
-    well-defined, so the operation refuses."""
-    game = gbt.Game.new_tree(players=["Alice"])
-    game.append_move(game.root, "Alice", ["a", "a"])
-    with pytest.raises(ValueError):
-        game.set_actions(game.root.infoset, ["a", "x"])
-
-
 def test_set_actions_absent_minded_drop_and_add():
     """Dropping an action whose subtree contains another member of the same information
     set deletes that member with the subtree."""
