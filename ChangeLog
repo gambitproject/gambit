@@ -5,6 +5,8 @@
   information set; the primitive operation for editing information structures.  (#999)
 - Added `Game.make_event`, which forms a collection of nodes into a single event with a
   specified probability distribution over its actions. (#1009)
+- `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
+  information sets; the unreachable information sets are absent.  (#1002)
 
 ### Changed
 - Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
@@ -20,13 +22,11 @@
   the run.  (#998)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
+- Reduced strategies of extensive games are now labelled by sequential per-player integers ("1", "2", ...)
+  in the deterministic order in which they are generated, matching the labelling of strategies in strategic games.
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
 - `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
-
-### Added
-- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
-  information set; the primitive operation for editing information structures.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs

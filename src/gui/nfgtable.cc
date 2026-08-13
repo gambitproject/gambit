@@ -27,6 +27,7 @@
 #include <wx/dnd.h>   // for drag-and-drop support
 #include <wx/print.h> // for printing support
 #include <wx/dcsvg.h> // for SVG output
+#include <wx/popupwin.h>
 
 #include <wx/grid.h>
 
@@ -58,8 +59,10 @@ class TableGridBase : public wxGrid {
   void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
   //@}
 
-  /// Shows the editor on one click
-  void OnCellLeftClick(wxGridEvent &p_event)
+protected:
+  /// Shows the editor on one click; overridden by the header grids to show
+  /// a strategy description popup instead when the grid is read-only.
+  virtual void OnCellLeftClick(wxGridEvent &p_event)
   {
     SetGridCursor(p_event.GetRow(), p_event.GetCol());
     EnableCellEditControl();
@@ -348,6 +351,7 @@ class RowPlayerGrid final : public TableGridBase {
   TableWidget *m_table;
   RowPlayerTable *m_gridTable;
 
+  void OnCellLeftClick(wxGridEvent &) override;
   void OnCellRightClick(wxGridEvent &);
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
@@ -379,6 +383,99 @@ RowPlayerGrid::RowPlayerGrid(TableWidget *p_parent)
   GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
 
   Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &RowPlayerGrid::OnCellRightClick, this);
+}
+
+namespace {
+wxString GetStrategyTooltip(const GameStrategy &p_strategy)
+{
+  if (!p_strategy->GetGame()->IsTree()) {
+    return {};
+  }
+
+  wxString tooltip;
+  for (const auto &infoset : p_strategy->GetPlayer()->GetInfosets()) {
+    const auto action = p_strategy->GetAction(infoset);
+    if (!action) {
+      continue;
+    }
+
+    if (!tooltip.empty()) {
+      tooltip << wxT("\n");
+    }
+    tooltip << wxString::Format(_("Information set %d"), infoset->GetNumber());
+    if (!infoset->GetLabel().empty()) {
+      tooltip << wxT(" (") << wxString(infoset->GetLabel().c_str(), *wxConvCurrent) << wxT(")");
+    }
+    tooltip << wxT(": ");
+    if (action->GetLabel().empty()) {
+      tooltip << wxString::Format(_("action %d"), action->GetNumber());
+    }
+    else {
+      tooltip << wxString(action->GetLabel().c_str(), *wxConvCurrent);
+    }
+  }
+  return tooltip;
+}
+
+class StrategyDescriptionPopup final : public wxPopupTransientWindow {
+public:
+  StrategyDescriptionPopup(wxWindow *p_parent, const GameStrategy &p_strategy)
+    : wxPopupTransientWindow(p_parent, wxBORDER_NONE)
+  {
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
+
+    auto *content = new wxPanel(this);
+    content->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
+    auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+    const wxString label(p_strategy->GetLabel().c_str(), *wxConvCurrent);
+    auto *heading = new wxStaticText(content, wxID_ANY, wxString::Format(_("Strategy %s"), label));
+    wxFont headingFont = heading->GetFont();
+    headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+    headingFont.SetPointSize(headingFont.GetPointSize() + 1);
+    heading->SetFont(headingFont);
+    contentSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+
+    auto *description = new wxStaticText(content, wxID_ANY, GetStrategyTooltip(p_strategy));
+    description->Wrap(FromDIP(420));
+    contentSizer->Add(description, 0, wxALL, FromDIP(12));
+    content->SetSizer(contentSizer);
+
+    auto *popupSizer = new wxBoxSizer(wxVERTICAL);
+    popupSizer->Add(content, 1, wxEXPAND | wxALL, FromDIP(1));
+    SetSizerAndFit(popupSizer);
+  }
+
+protected:
+  void OnDismiss() override { Destroy(); }
+};
+
+void ShowStrategyPopup(wxGrid *p_grid, int p_row, int p_col, const GameStrategy &p_strategy)
+{
+  auto *popup = new StrategyDescriptionPopup(p_grid, p_strategy);
+  const wxRect cellRect = p_grid->CellToRect(p_row, p_col);
+  const wxPoint anchor = p_grid->GetGridWindow()->ClientToScreen(cellRect.GetBottomLeft());
+  popup->Position(anchor, wxSize(popup->FromDIP(8), popup->FromDIP(8)));
+  popup->Popup();
+}
+
+} // namespace
+
+void RowPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
+{
+  if (!m_table->IsReadOnly() || m_table->GetRowHeaderColCount() == 0) {
+    TableGridBase::OnCellLeftClick(p_event);
+    return;
+  }
+
+  const int row = p_event.GetRow();
+  const int col = p_event.GetCol();
+  const int player = m_table->GetRowHeaderPlayer(col);
+  const int strategy = m_table->GetRowHeaderStrategy(col, row);
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  if (!GetStrategyTooltip(gameStrategy).empty()) {
+    ShowStrategyPopup(this, row, col, gameStrategy);
+  }
 }
 
 void RowPlayerGrid::OnCellRightClick(wxGridEvent &p_event)
@@ -665,6 +762,7 @@ class ColPlayerGrid final : public TableGridBase {
   TableWidget *m_table;
   ColPlayerTable *m_gridTable;
 
+  void OnCellLeftClick(wxGridEvent &) override;
   void OnCellRightClick(wxGridEvent &);
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
@@ -695,6 +793,23 @@ ColPlayerGrid::ColPlayerGrid(TableWidget *p_parent)
   GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
 
   Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &ColPlayerGrid::OnCellRightClick, this);
+}
+
+void ColPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
+{
+  if (!m_table->IsReadOnly() || m_table->GetColHeaderRowCount() == 0) {
+    TableGridBase::OnCellLeftClick(p_event);
+    return;
+  }
+
+  const int row = p_event.GetRow();
+  const int col = p_event.GetCol();
+  const int player = m_table->GetColHeaderPlayer(row);
+  const int strategy = m_table->GetColHeaderStrategy(row, col);
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  if (!GetStrategyTooltip(gameStrategy).empty()) {
+    ShowStrategyPopup(this, row, col, gameStrategy);
+  }
 }
 
 void ColPlayerGrid::OnCellRightClick(wxGridEvent &p_event)

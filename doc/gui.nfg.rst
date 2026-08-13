@@ -17,6 +17,12 @@ of an extensive game cannot be modified directly. Instead, edit the
 original extensive game; Gambit automatically recomputes the strategic
 game after any changes to the extensive game.
 
+Strategies in a reduced strategic game are assigned numeric labels for
+identification.  These labels are assigned via a deterministic algorithm for
+constructing the reduced strategic game from an extensive game.
+Click a strategy label to open a popup listing the action selected at each
+information set where the reduced strategy specifies an action.
+
 Strategic games may also be input directly. To create a new strategic
 game, select :menuselection:`File --> New --> Strategic game`,
 or click the new strategic game icon on the toolbar.

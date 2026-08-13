@@ -496,9 +496,28 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
 
         return (
             game.gbt_game(),
-            game.reduced_strategies(),
+            [[str(i) for i in range(1, len(r) + 1)] for r in game.reduced_strategies()],
             game.reduced_strategic_form(),
         )
+
+    @classmethod
+    def get_map_test_data(cls, **params):
+        """
+        given the provided parameters, return a tuple with:
+            - the game as a gbt.Game object
+            - the expected infoset-to-action map of each reduced strategy, per player:
+              the pre-17.0 signature split per information set ("*" = no action
+              prescribed), or the empty tuple for the single trivial strategy of a
+              player who has no information sets
+        the tuple is used directly in test_reduced_strategy_maps in test_extensive.py
+        """
+        game = cls(params)
+        gbt_game = game.gbt_game()
+        maps = [
+            [tuple(sig) if len(player.infosets) > 0 else () for sig in sigs]
+            for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
+        ]
+        return (gbt_game, maps)
 
 
 class Centipede(EfgFamilyForReducedStrategicFormTests):
