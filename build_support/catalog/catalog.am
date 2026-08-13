@@ -29,7 +29,7 @@ CATALOG_FILES = \
 	catalog/conf/itcs/jakobsen2016/fig1b.efg \
 	catalog/conf/itcs/jakobsen2016/fig1c.efg \
 	catalog/conf/itcs/jakobsen2016/fig3.efg \
-	catalog/journals/dcg/vonstengel1999/test.nfg \
+	catalog/journals/dcg/vonstengel1999/6x6_game_with_75_eq.nfg \
 	catalog/journals/geb/bagwell1995.efg \
 	catalog/journals/geb/gilboa1997/fig1.efg \
 	catalog/journals/geb/gilboa1997/fig2.efg \
