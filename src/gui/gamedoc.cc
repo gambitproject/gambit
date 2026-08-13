@@ -477,13 +477,27 @@ void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  m_game->SetInfoset(p_node, p_infoset);
+  if (p_node->GetInfoset() == p_infoset) {
+    return;
+  }
+  std::vector<GameNode> nodes(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  nodes.push_back(p_node);
+  m_game->MakeInfoset(nodes, p_infoset->GetPlayer(), p_infoset->GetLabel());
   NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
-  m_game->LeaveInfoset(p_node);
+  const GameInfoset infoset = p_node->GetInfoset();
+  if (!infoset) {
+    return;
+  }
+  std::vector<GameNode> members(infoset->GetMembers().begin(), infoset->GetMembers().end());
+  if (members.size() == 1) {
+    // Already a singleton: a no-op that keeps the infoset's identity and label.
+    return;
+  }
+  m_game->MakeInfoset({p_node}, infoset->GetPlayer(), "");
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -566,20 +580,21 @@ void GameDocument::DoDeleteTree(GameNode p_node)
 
 void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
+  if (p_player->IsChance() || p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_infoset, p_player);
-    NotifyChanged(GameModificationType::GameForm);
+    return;
   }
+  if (p_infoset->GetPlayer() == p_player) {
+    return;
+  }
+  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  m_game->MakeInfoset(members, p_player, p_infoset->GetLabel());
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
-    // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_node->GetInfoset(), p_player);
-    NotifyChanged(GameModificationType::GameForm);
-  }
+  DoSetPlayer(p_node->GetInfoset(), p_player);
 }
 
 namespace {

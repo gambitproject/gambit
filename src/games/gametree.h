@@ -176,12 +176,9 @@ public:
   void MoveTree(GameNode dest, GameNode src) override;
   void DeleteParent(GameNode) override;
   void DeleteTree(GameNode) override;
-  void SetPlayer(GameInfoset, GamePlayer) override;
-  void Reveal(GameInfoset, GamePlayer) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
-  void SetInfoset(GameNode, GameInfoset) override;
-  GameInfoset LeaveInfoset(GameNode) override;
+  void Reveal(GameInfoset, GamePlayer) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
                         const std::string &) override;

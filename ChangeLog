@@ -26,11 +26,16 @@
   in the deterministic order in which they are generated, matching the labelling of strategies in strategic games.
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
-- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
-- The GUI's infoset editing actions (assigning a node to an infoset, leaving an infoset, revealing an
-  action) now enforce the same rules as `Game.make_infoset`, e.g. matching action labels rather than
-  just a matching count; assigning a terminal node to an infoset now raises rather than silently
-  doing nothing.  (#999)
+- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.
+  The C++ `Game::Reveal` now enforces this too, since it is the single implementation shared by
+  `Game.reveal` and the GUI's reveal-action command (previously each had its own copy of the
+  algorithm, and only the Python one checked for absent-mindedness).  In the GUI, the Reveal menu
+  item (both the Edit menu and the node's context menu) is now disabled at an absent-minded
+  information set, rather than letting the action be attempted and rejected.  (#999)
+- The GUI's infoset editing actions (assigning a node to an infoset, leaving an infoset) now enforce
+  the same rules as `Game.make_infoset`, e.g. matching action labels rather than just a matching
+  count; assigning a terminal node to an infoset now raises rather than silently doing nothing.
+  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -49,6 +54,12 @@
   nonempty, unique labels.  (#1026)
 - `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
   probabilities as forming the nodes of the event with the required distribution.  (#1009)
+- The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
+  removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
+  only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
+  calls directly.  `Game::Reveal` is kept, as a composite operation genuinely useful in its own
+  right, but is now implemented once in C++ rather than duplicated in `pygambit` and the GUI.
+  (#999)
 
 ## [16.7.0] - 2026-07-11
 

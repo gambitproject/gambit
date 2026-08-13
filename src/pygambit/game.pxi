@@ -2289,11 +2289,7 @@ class Game:
                 "reveal(): revealing the move at an absent-minded information set "
                 "is not well-defined"
             )
-        for action in resolved_infoset.actions:
-            for iset in list(resolved_player.infosets):
-                group = [m for m in iset.members if action.precedes(m)]
-                if group:
-                    self.make_infoset(group, resolved_player.label)
+        self.game.deref().Reveal(resolved_infoset.infoset, resolved_player.player)
 
     def add_player(self, label: str) -> Player:
         """Add a new player to the game.

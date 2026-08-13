@@ -1256,10 +1256,6 @@ public:
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
 
-  virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-  {
-    throw UndefinedException();
-  }
   /// Append a move for p_player at p_node, with actions labeled per p_actions.
   virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
                                  const std::vector<std::string> &p_actions)
@@ -1292,14 +1288,14 @@ public:
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame(GameNode) const { throw UndefinedException(); }
   virtual void MoveTree(GameNode dest, GameNode src) { throw UndefinedException(); }
-  virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
-  virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
-  virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
   virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                                   const std::string &)
   {
     throw UndefinedException();
   }
+  /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
+  /// so that any two nodes reached via different actions at p_infoset are distinguished.
+  virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
   virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
   {
     throw UndefinedException();

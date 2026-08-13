@@ -176,29 +176,6 @@ GameInfosetRep::~GameInfosetRep()
                 [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
 }
 
-void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-{
-  if (p_infoset->m_game != this || p_player->m_game != this) {
-    throw MismatchException();
-  }
-  if (p_infoset->GetPlayer()->IsChance() || p_player->IsChance()) {
-    throw UndefinedException();
-  }
-  if (p_infoset->GetPlayer() == p_player) {
-    return;
-  }
-
-  const auto oldPlayer = p_infoset->GetPlayer().get();
-  IncrementVersion();
-  oldPlayer->m_infosets.erase(std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(),
-                                        p_infoset.get_shared()));
-  p_infoset->m_player = p_player.get();
-  p_player->m_infosets.push_back(p_infoset);
-
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-}
-
 bool GameInfosetRep::Precedes(GameNode p_node) const
 {
   auto node = p_node.get();
@@ -303,27 +280,6 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
   }
   InvalidateTreeOrdering();
-}
-
-void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
-{
-  for (const auto &action : p_atInfoset->m_actions) {
-    auto infosets = p_player->m_infosets;
-    for (const auto &infoset : infosets) {
-      auto members = infoset->m_members;
-      // Members of this information set which follow 'action' are grouped
-      // into a single new information set.
-      std::vector<GameNode> group;
-      for (const auto &member : members) {
-        if (action->Precedes(member)) {
-          group.emplace_back(member);
-        }
-      }
-      if (!group.empty()) {
-        MakeInfoset(group, p_player, "");
-      }
-    }
-  }
 }
 
 //========================================================================
@@ -662,33 +618,32 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
   return newInfoset;
 }
 
-void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
+void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
-  if (p_node->m_game != this || p_infoset->m_game != this) {
+  if (p_atInfoset->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
-  if (p_node->m_infoset == p_infoset.get()) {
-    return;
+  if (IsAbsentMinded(p_atInfoset)) {
+    throw UndefinedException(
+        "Revealing the move at an absent-minded information set is not well-defined");
   }
-  std::vector<GameNode> nodes(p_infoset->m_members.begin(), p_infoset->m_members.end());
-  nodes.push_back(p_node);
-  MakeInfoset(nodes, p_infoset->m_player->shared_from_this(), p_infoset->GetLabel());
-}
-
-GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
-{
-  GameNodeRep *node = p_node.get();
-  if (node->m_game != this) {
-    throw MismatchException();
+  for (const auto &action : p_atInfoset->m_actions) {
+    auto infosets = p_player->m_infosets;
+    for (const auto &infoset : infosets) {
+      auto members = infoset->m_members;
+      // Members of this information set which follow 'action' are grouped
+      // into a single new information set.
+      std::vector<GameNode> group;
+      for (const auto &member : members) {
+        if (action->Precedes(member)) {
+          group.emplace_back(member);
+        }
+      }
+      if (!group.empty()) {
+        MakeInfoset(group, p_player, "");
+      }
+    }
   }
-  if (!node->m_infoset) {
-    return nullptr;
-  }
-  auto *oldInfoset = node->m_infoset;
-  if (oldInfoset->m_members.size() == 1) {
-    return oldInfoset->shared_from_this();
-  }
-  return MakeInfoset({p_node}, oldInfoset->m_player->shared_from_this(), "");
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player,
