@@ -12,7 +12,7 @@
         </UI>
 
         <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramFilesFolder">
+            <Directory Id="ProgramFiles64Folder">
                 <Directory Id="ApplicationRootDirectory" Name="Gambit"/>
             </Directory>
             <Directory Id="ProgramMenuFolder">
