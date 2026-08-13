@@ -102,7 +102,7 @@ class Action:
         """
         if not self.infoset.is_chance:
             raise UndefinedOperationError(
-                "action probabilities are only defined at chance information sets"
+                "action probabilities are only defined at events"
             )
         py_string = cython.cast(
             string,

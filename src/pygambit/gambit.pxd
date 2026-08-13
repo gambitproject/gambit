@@ -335,6 +335,7 @@ cdef extern from "games/game.h":
         c_GameStrategy GetStrategy(int) except +IndexError
         c_GameStrategy NewStrategy(c_GamePlayer, string) except +ValueError
         void DeleteStrategy(c_GameStrategy) except +
+        void RelabelStrategies(c_GamePlayer, stdmap[string, string]) except +ValueError
         int MixedProfileLength() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError
