@@ -101,6 +101,27 @@ def test_make_infoset_requires_matching_action_labels(node_actions):
         game.make_infoset([game.root, game.root.children["a"]], "1")
 
 
+def test_make_infoset_empty_nodes_raises():
+    """`nodes` must be nonempty."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.make_infoset([], game.root.player.label)
+
+
+def test_make_infoset_repeated_node_raises():
+    """Each node may be referenced only once."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.make_infoset([game.root, game.root], game.root.player.label)
+
+
+def test_make_infoset_strategic_game_raises():
+    """`make_infoset` is only defined for games with a tree representation."""
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.make_infoset([], "1")
+
+
 def test_infoset_add_action_end():
     game = games.read_from_file("basic_extensive_game.efg")
     actions = list(game.root.infoset.actions)
