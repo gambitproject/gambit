@@ -73,7 +73,6 @@ public:
   {
     return m_offset == p_other.m_offset && m_data == p_other.m_data;
   }
-  bool operator!=(const Array &p_other) const { return !(*this == p_other); }
 
   const_reference operator[](const int p_index) const
   {

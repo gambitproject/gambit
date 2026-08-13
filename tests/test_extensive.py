@@ -33,6 +33,24 @@ def test_game_description(description: str):
     assert game.description == description
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        " leading and trailing spaces, and  double  spaces ",
+        "a\ttab\nand\na newline",
+        "日本語 title with a trailing space ",
+    ],
+)
+def test_game_title_accepts_text_invalid_for_a_label(text: str):
+    """Title/description have no printable-character or spacing restriction (#862):
+    only well-formedness of the UTF-8 text is required, unlike object labels."""
+    game = gbt.Game.new_tree()
+    game.title = text
+    game.description = text
+    assert game.title == text
+    assert game.description == text
+
+
 @pytest.mark.parametrize("players", [["Alice"], ["Oscar", "Felix"]])
 def test_game_add_players_label(players: list):
     game = gbt.Game.new_tree()

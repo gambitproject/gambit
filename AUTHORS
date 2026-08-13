@@ -49,11 +49,3 @@ The global Newton and iterated polymatrix implementations are based on
 those in Gametracer 0.2, copyright (C) 2002 by Ben Blum and
 Christian Shelton, distributed under the GPL.  See the directory
 sources/tools/gt in the distribution.
-
-wxSheet classes:
-----------------
-The graphical interface makes significant use of the wxSheet classes for
-wxWidgets, which are Copyright (C) 2004-5 by John Labenski, and distributed
-under the wxWidgets license.  The version included here is the version
-dated 20 July 2005; see http://wxcode.sourceforge.net for details on these
-classes.

@@ -68,12 +68,13 @@ Transforming game information structure
 .. autosummary::
    :toctree: api/
 
-   Game.set_player
+   Game.make_infoset
    Game.set_infoset
    Game.leave_infoset
+   Game.make_event
    Game.set_chance_probs
+   Game.relabel_actions
    Game.reveal
-   Game.sort_infosets
 
 
 Transforming game components

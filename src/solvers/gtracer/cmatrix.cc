@@ -87,7 +87,11 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
     }
     ix[j] = imax;
     if (LU.x[j * n + j] == 0) {
-      LU.x[j * n + j] = (double)1.0e-20;
+      // The matrix is exactly singular: this pivot cannot be completed without
+      // dividing by zero.  Report failure rather than substituting a fake pivot,
+      // which would silently blow up the solution during back-substitution.
+      delete[] vv;
+      return 0;
     }
     if (j != n - 1) {
       dum = 1 / LU.x[j * n + j];

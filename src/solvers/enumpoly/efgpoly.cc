@@ -22,7 +22,6 @@
 
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
-#include "games/gameseq.h"
 #include "polysystem.h"
 #include "polysolver.h"
 #include "indexproduct.h"
@@ -46,8 +45,7 @@ namespace {
 //    sequence probabilities (after the substitutions mentioned above)
 //    and setting those to zero.
 
-class ProblemData {
-public:
+struct ProblemData {
   BehaviorSupportProfile m_support;
   std::shared_ptr<VariableSpace> space;
   std::map<GameSequence, int> var;
@@ -56,24 +54,31 @@ public:
   explicit ProblemData(const BehaviorSupportProfile &p_support);
 };
 
-Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
-                                         const std::map<GameSequence, int> &var)
+// A sequence's variable is eliminated in favour of the other sequences at
+// its information set exactly when it is the last (in the support's
+// ordering) action at that information set.
+bool IsEliminated(const BehaviorSupportProfile &p_support, const GameSequence &p_sequence)
+{
+  return p_sequence->GetAction() == p_support.GetActions(p_sequence->GetInfoset()).back();
+}
+
+Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence)
 {
   if (!p_sequence->GetAction()) {
     return Polynomial<double>(p_data.space, 1);
   }
-  if (p_sequence->GetAction() != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
-    return Polynomial<double>(p_data.space, var.at(p_sequence), 1);
+  if (!IsEliminated(p_data.m_support, p_sequence)) {
+    return Polynomial<double>(p_data.space, p_data.var.at(p_sequence), 1);
   }
 
-  Polynomial<double> equation(p_data.space);
-  for (auto seq : p_data.m_support.GetSequences(p_sequence->GetPlayer())) {
-    if (seq == p_sequence) {
-      continue;
-    }
-    if (const int constraint_coef =
-            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->GetAction())) {
-      equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
+  // The last action at an information set is eliminated using the
+  // sum-to-one relation among the sequences at that information set: its
+  // probability is that of its parent sequence, less the probabilities of
+  // its sibling sequences (the other actions at the same information set).
+  Polynomial<double> equation = BuildSequenceVariable(p_data, p_sequence->GetParent());
+  for (const auto &sibling : p_data.m_support.GetSequences(p_sequence->GetInfoset())) {
+    if (sibling != p_sequence) {
+      equation -= BuildSequenceVariable(p_data, sibling);
     }
   }
   return equation;
@@ -85,27 +90,26 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
                                                                 m_support.GetPlayers().size()))
 {
   for (auto sequence : m_support.GetSequences()) {
-    if (sequence->GetAction() &&
-        (sequence->GetAction() != p_support.GetActions(sequence->GetInfoset()).back())) {
+    if (sequence->GetAction() && !IsEliminated(m_support, sequence)) {
       var[sequence] = var.size() + 1;
     }
   }
 
   for (auto sequence : m_support.GetSequences()) {
-    variables.emplace(sequence, BuildSequenceVariable(*this, sequence, var));
+    variables.emplace(sequence, BuildSequenceVariable(*this, sequence));
   }
 }
 
-Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
+Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &p_player)
 {
   Polynomial<double> equation(p_data.space);
 
   for (auto profile : p_data.m_support.GetSequenceContingencies()) {
-    auto pay = p_data.m_support.GetPayoff(profile, p_player);
+    auto pay = profile.GetPayoff(p_player);
     if (pay != Rational(0)) {
-      Polynomial<double> term(p_data.space, double(pay));
+      Polynomial<double> term(p_data.space, pay);
       for (auto player : p_data.m_support.GetPlayers()) {
-        term *= p_data.variables.at(profile[player]);
+        term *= p_data.variables.at(profile.GetSequence(player));
       }
       equation += term;
     }
@@ -116,15 +120,13 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto player : p_data.m_support.GetPlayers()) {
-    const Polynomial<double> payoff = GetPayoff(p_data, player);
+    const Polynomial<double> payoff = BuildPayoffPolynomial(p_data, player);
     for (auto sequence : p_data.m_support.GetSequences(player)) {
-      try {
-        p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
+      if (auto it = p_data.var.find(sequence); it != p_data.var.end()) {
+        p_equations.push_back(payoff.PartialDerivative(it->second));
       }
-      catch (std::out_of_range &) {
-        // This sequence's variable was already substituted out in terms of
-        // the probabilities of other sequences
-      }
+      // Sequences with no entry in p_data.var have had their variable
+      // substituted out in terms of the probabilities of other sequences.
     }
   }
 }
@@ -135,8 +137,8 @@ void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<do
     if (!sequence->GetAction()) {
       continue;
     }
-    const auto &actions = p_data.m_support.GetActions(sequence->GetAction()->GetInfoset());
-    if (actions.size() > 1 && sequence->GetAction() == actions.back()) {
+    if (p_data.m_support.GetActions(sequence->GetInfoset()).size() > 1 &&
+        IsEliminated(p_data.m_support, sequence)) {
       p_equations.push_back(p_data.variables.at(sequence));
     }
   }
@@ -238,9 +240,9 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   }
 
   std::list<MixedBehaviorProfile<double>> ret;
-  auto possible_supports = PossibleNashBehaviorSupports(p_game);
+  PossibleNashBehaviorSupports possible_supports(p_game);
 
-  for (auto support : possible_supports->m_supports) {
+  for (auto support : possible_supports) {
     p_onEvent(EnumPolyCandidateSupportEvent<BehaviorSupportProfile>{support});
     bool isSingular = false;
     for (const auto &solution :

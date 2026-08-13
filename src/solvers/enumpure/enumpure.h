@@ -46,7 +46,8 @@ inline bool IsNash(const PureStrategyProfile &p_profile)
 ///
 inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
     const Game &p_game,
-    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
+    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
+    const CancelToken &p_cancel = CancelToken())
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -54,6 +55,7 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
   }
   std::list<MixedStrategyProfile<Rational>> solutions;
   for (const auto &profile : StrategyContingencies(p_game)) {
+    p_cancel.Check();
     if (IsNash(profile)) {
       solutions.push_back(profile->ToMixedStrategyProfile());
       p_onEquilibrium(solutions.back());

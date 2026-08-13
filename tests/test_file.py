@@ -28,6 +28,34 @@ def test_read_efg_repeated_outcome_id_consistent():
     assert len(g.outcomes) == 1
 
 
+def test_read_efg_empty_action_labels_are_normalized():
+    g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "" "" } 0\n'
+                   't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [a.label for a in g.root.infoset.actions] == ["_1", "_2"]
+
+
+def test_read_efg_duplicate_action_labels_are_normalized():
+    g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "l" } 0\n'
+                   't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+
+
+def test_read_efg_repeated_infoset_duplicate_labels_consistent():
+    """A personal infoset spanning two nodes restates its (duplicate) action labels at
+    each node; both restatements must normalize the same way, or the second would be
+    (incorrectly) rejected as inconsistent with the first.
+    """
+    g = _parse_efg(
+        'EFG 2 R "t" { "A" "B" }\n""\n'
+        'p "" 1 1 "" { "l" "l" } 0\n'
+        'p "" 1 1 "" { "l" "l" } 0\n'
+        't "" 1 "" { 1, -1 }\n'
+        't "" 2 "" { 2, -2 }\n'
+        't "" 3 "" { 3, -3 }\n'
+    )
+    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+
+
 def test_string_empty():
     with pytest.raises(ValueError) as excinfo:
         _parse_efg("")
@@ -143,6 +171,36 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 """
     with pytest.raises(ValueError, match="Expected outcome index"):
         _parse_nfg(data)
+
+
+def test_efg_label_malformed_utf8_rejected():
+    """A genuinely ill-formed UTF-8 byte sequence in a label is rejected (#862).
+
+    A Python ``str`` cannot hold ill-formed UTF-8, so this is not reachable through the
+    normal string-based read_efg/label-setter API; it is exercised here by feeding raw
+    bytes directly through a binary buffer, bypassing the encode step in read_game().
+    """
+    file_bytes = b'EFG 2 R "t" { "A\x80" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid label"):
+        gbt.read_efg(f)
+
+
+def test_efg_action_label_malformed_utf8_rejected():
+    """Malformed UTF-8 in an action label is rejected the same way, via the format check
+    inside AppendMove/InsertMove rather than the (now-removed) Action.SetLabel.
+    """
+    file_bytes = b'EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l\x80" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid label"):
+        gbt.read_efg(f)
+
+
+def test_efg_title_malformed_utf8_rejected():
+    """Malformed UTF-8 in the game title is rejected too, but via CheckText (#862):
+    the message is distinct from a label's, since title has no printable/spacing rule.
+    """
+    file_bytes = b'EFG 2 R "t\x80" { "A" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid text"):
+        gbt.read_efg(f)
 
 
 def test_nfg_outcomes_too_many():

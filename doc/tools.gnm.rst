@@ -68,10 +68,14 @@ subsets of equilibria being found.
    Specifies the number of steps to take within a support cell.  Larger values
    trade off speed for security in tracing the path.  Default is 100.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Show intermediate output of the algorithm.  If this option is
    not specified, only the equilibria found are reported.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
 
 Computing an equilibrium of
 the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::

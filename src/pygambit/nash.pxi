@@ -160,13 +160,20 @@ def _gnm_strategy_solve(
         raise
 
 
-def _nashsupport_strategy_solve(game: Game) -> list[StrategySupportProfile]:
-    return [
-        StrategySupportProfile.wrap(support)
-        for support in make_list_of_pointer(
-            deref(PossibleNashStrategySupports(game.game)).m_supports
+def _nashsupport_strategy_solve(
+        game: Game
+) -> typing.Generator[StrategySupportProfile, None, None]:
+    generator: shared_ptr[c_PossibleNashStrategySupports] = (
+        shared_ptr[c_PossibleNashStrategySupports](
+            new c_PossibleNashStrategySupports(game.game)
         )
-    ]
+    )
+    result: optional[c_StrategySupportProfile]
+    while True:
+        result = deref(generator).Next()
+        if not result.has_value():
+            return
+        yield StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](result.value()))
 
 
 def _enumpoly_strategy_solve(

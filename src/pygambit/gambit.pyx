@@ -21,7 +21,6 @@
 #
 import decimal
 import fractions
-import warnings
 import typing
 
 import cython

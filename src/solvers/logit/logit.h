@@ -96,7 +96,8 @@ std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
     double p_firstStep, double p_maxAccel,
     Nash::StrategyCallbackType<double> p_onEquilibrium = Nash::NullStrategyCallback<double>,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
-        NullLogitEventCallback<LogitQREMixedStrategyProfile>);
+        NullLogitEventCallback<LogitQREMixedStrategyProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
 std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
@@ -118,7 +119,8 @@ std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(
     double p_firstStep, double p_maxAccel,
     Nash::BehaviorCallbackType<double> p_onEquilibrium = Nash::NullBehaviorCallback<double>,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
-        NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
+        NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
 std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,

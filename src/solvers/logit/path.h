@@ -24,6 +24,7 @@
 #define PATH_H
 
 #include <functional>
+#include "core/cancel.h"
 
 namespace Gambit {
 
@@ -86,7 +87,8 @@ public:
             Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
-            CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction) const;
+            CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction,
+            const CancelToken &p_cancel = CancelToken()) const;
 
 private:
   double m_maxDecel{1.1}, m_hStart{0.03};

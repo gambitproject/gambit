@@ -110,11 +110,13 @@ void FindUniquePerturbedEquilibrium(const gnmgame &A, const cvector &g, std::vec
   }
 }
 
-void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
-         int LNMMax, double LambdaMin, bool wobble, double threshold,
-         std::function<void(const std::string &, const cvector &)> p_onStep,
-         std::string &returnMessage)
+GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
+              double LambdaMin, bool wobble, double threshold,
+              std::function<void(const std::string &, const cvector &)> p_onStep)
 {
+  std::list<cvector> equilibria;
+  int numSteps = 0, numBoundaryCrossings = 0, numLNMCalls = 0;
+
   int n_hat,          // player whose pure strategy next enters or leaves the support
       s_hat_old = -1, // the last pure strategy to enter or leave the support
       s_hat,          // the next pure strategy to enter or leave the support
@@ -161,8 +163,6 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
   cvector G(N), yn1(N), ym1(M), ym2(M), ym3(M);
 
   // INITIALIZATION
-  Eq.clear();
-
   FindUniquePerturbedEquilibrium(A, g, s, B, G);
 
   // initialize sigma to be the pure strategy profile
@@ -220,6 +220,7 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
 
     // take the specified number of steps within these support boundaries.
     for (stepsLeft = steps; stepsLeft > 0; stepsLeft--) {
+      numSteps++;
       // find J = Adj psi
       J = I;
       J += DG;
@@ -280,8 +281,13 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
       // there are no more equilibria on the path.  This could be
       // handled differently.
       if (minBound == BIGFLOAT && Index * (lambda + dlambda * delta) > 0) {
-        returnMessage = "path crosses no more support boundaries and no next equilibrium";
-        return;
+        return {std::move(equilibria),
+                GNMTerminationReason::NoMoreBoundaries,
+                "path crosses no more support boundaries and no next equilibrium",
+                numSteps,
+                numBoundaryCrossings,
+                numLNMCalls,
+                lambda};
       }
 
       // each step covers 1.0/steps of the distance to the boundary
@@ -316,17 +322,23 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
             // J=I-((I+DG)*R);
             det = J.adjoint();
             ee = LNM(A, z, nothing, det, J, DG, sigma, LNMMax, fuzz, ym1, ym2, ym3);
+            numLNMCalls++;
           }
           for (int idx = 0; idx < M; idx++) {
             if (!std::isfinite(sigma[idx])) {
-              returnMessage = "sigma is not finite";
-              return;
+              return {std::move(equilibria),
+                      GNMTerminationReason::NonfiniteStrategy,
+                      "sigma is not finite",
+                      numSteps,
+                      numBoundaryCrossings,
+                      numLNMCalls,
+                      lambda};
             }
           }
           if (ee < fuzz) { // only save high quality equilibria;
             // this restriction could be removed.
-            Eq.push_back(sigma);
-            p_onStep("NE", Eq.back());
+            equilibria.push_back(sigma);
+            p_onStep("NE", equilibria.back());
           }
           Index = -Index;
           s_hat_old = -1;
@@ -335,7 +347,13 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
         }
       }
       if (del == BIGFLOAT) {
-        returnMessage = "no next support boundary after this equilibrium";
+        return {std::move(equilibria),
+                GNMTerminationReason::NoNextBoundary,
+                "no next support boundary after this equilibrium",
+                numSteps,
+                numBoundaryCrossings,
+                numLNMCalls,
+                lambda};
       }
 
       backup = z;
@@ -350,7 +368,13 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
       if (lambda < LambdaMin && Index == -1) {
-        returnMessage = "too far out in the reverse direction";
+        return {std::move(equilibria),
+                GNMTerminationReason::LambdaOutOfRange,
+                "too far out in the reverse direction",
+                numSteps,
+                numBoundaryCrossings,
+                numLNMCalls,
+                lambda};
       }
       A.retract(sigma, z);
       A.payoffMatrix(DG, sigma, fuzz);
@@ -383,18 +407,26 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
           // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
         }
         else {
-          returnMessage = "too much error; error is " + std::to_string(ee);
+          return {std::move(equilibria),
+                  GNMTerminationReason::ExcessiveError,
+                  "too much error; error is " + std::to_string(ee),
+                  numSteps,
+                  numBoundaryCrossings,
+                  numLNMCalls,
+                  lambda};
         }
       }
 
       // if we've done LNMMax repetitions, time to get back on the path
       if (stepsLeft > 1 && (++k == LNMFreq)) {
         LNM(A, z, g0, det, J, DG, sigma, LNMMax, fuzz, ym1, ym2, ym3);
+        numLNMCalls++;
         k = 0;
       }
     } // end of for loop
 
     // now we've reached a support boundary
+    numBoundaryCrossings++;
 
     // if a player's current best response is leaving the
     // support, we must find a new one for that player

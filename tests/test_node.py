@@ -576,11 +576,25 @@ def test_append_move_error_infoset_mismatch():
         game1.append_infoset(game1.root, game2.root.infoset)
 
 
+def test_append_move_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.append_move(game.root, game.players["Player 1"], ["a", ""])
+
+
+def test_append_move_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.append_move(game.root, game.players["Player 1"], ["a", "a"])
+
+
 def test_insert_move_error_player_actions():
     """Test to ensure there are actions when inserting with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.insert_move(game.root, game.players["Player 1"], 0)
+        game.insert_move(game.root, game.players["Player 1"], [])
 
 
 def test_insert_move_error_player_mismatch():
@@ -588,17 +602,21 @@ def test_insert_move_error_player_mismatch():
     game1 = gbt.Game.new_tree()
     game2 = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.MismatchError):
-        game1.insert_move(game1.root, game2.players["Player 1"], 1)
+        game1.insert_move(game1.root, game2.players["Player 1"], ["a"])
 
 
-def test_node_leave_infoset():
-    """A node-anchored infoset proxy is lazy: it re-resolves after the node leaves its infoset."""
+def test_insert_move_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
-    proxy = node.infoset
-    assert len(proxy.members) == 2
-    game.leave_infoset(node)
-    assert list(proxy.members) == [node]
+    with pytest.raises(ValueError):
+        game.insert_move(game.root, game.players["Player 1"], ["a", ""])
+
+
+def test_insert_move_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.insert_move(game.root, game.players["Player 1"], ["a", "a"])
 
 
 def test_node_infoset_becomes_null_when_truncated():
@@ -1014,11 +1032,19 @@ def test_len_after_insert_move():
 
     node_to_insert_above = game.root.children["L"].children["R"]  # the [1, 0] node
     player = game.players["Player 2"]
-    num_actions_to_add = 3
+    actions_to_add = ["a", "b", "c"]
 
-    game.insert_move(node_to_insert_above, player, num_actions_to_add)
+    game.insert_move(node_to_insert_above, player, actions_to_add)
 
-    assert len(game.nodes) == initial_number_of_nodes + num_actions_to_add
+    assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
+
+
+def test_insert_move_actions_labeled():
+    """Test that the inserted move's actions are labeled according to `actions`."""
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
+    node = game.root.children["L"].children["R"]
+    game.insert_move(node, game.players["Player 2"], ["Up", "Down"])
+    assert [a.label for a in node.parent.infoset.actions] == ["Up", "Down"]
 
 
 def test_len_after_insert_infoset():
@@ -1148,11 +1174,12 @@ def test_node_label_invalid_raises_valueerror(label):
         game.root.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_node_label_non_ascii_rejected(label):
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_node_label_unicode_accepted(label):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(UnicodeEncodeError):
-        game.root.label = label
+    game.root.label = label
+    assert game.root.label == label
 
 
 @pytest.mark.parametrize(

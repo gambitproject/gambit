@@ -40,8 +40,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, 5);
-  m_nodeLabel =
-      new LabelTextCtrl(this, wxID_ANY, wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
+  m_nodeLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(m_node->GetLabel()));
   labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -133,7 +132,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
       item += ")";
     }
 
-    m_outcome->Append(wxString(item.c_str(), *wxConvCurrent));
+    m_outcome->Append(wxString::FromUTF8(item));
     if (m_node->GetOutcome() == outcome) {
       m_outcome->SetSelection(outcome->GetNumber());
     }

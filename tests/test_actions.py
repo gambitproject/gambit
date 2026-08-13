@@ -6,23 +6,11 @@ from . import games
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_set_action_label(label: str):
+def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    action.label = label
+    game.relabel_actions(game.root.infoset, {action.label: label})
     assert action.label == label
-
-
-def test_set_empty_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = ""
-
-
-def test_set_duplicate_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = "Queen"
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
@@ -30,65 +18,88 @@ def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
     with pytest.raises(ValueError):
-        action.label = label
+        game.relabel_actions(game.root.infoset, {action.label: label})
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_action_label_non_ascii_rejected(label: str):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
-    with pytest.raises(UnicodeEncodeError):
-        action.label = label
-
-
-@pytest.mark.parametrize(
-    "game,inprobs,outprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, 0.25], [0.75, 0.25]),
-        (
-            games.create_stripped_down_poker_efg(),
-            ["16/17", "1/17"],
-            [gbt.Rational("16/17"), gbt.Rational("1/17")],
-        ),
-    ],
-)
-def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
-    game.set_chance_probs(game.root.infoset, inprobs)
-    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
-        assert action.prob == prob
-
-
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, -0.10]),
-        (games.create_stripped_down_poker_efg(), [0.75, 0.40]),
-        (games.create_stripped_down_poker_efg(), ["foo", "bar"]),
-    ],
-)
-def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
     with pytest.raises(ValueError):
-        game.set_chance_probs(game.root.infoset, inprobs)
+        game.relabel_actions(game.root.infoset, {action.label: ""})
 
 
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.25, 0.75, 0.25]),
-        (games.create_stripped_down_poker_efg(), [1.00]),
-    ],
-)
-def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
-    with pytest.raises(IndexError):
-        game.set_chance_probs(game.root.infoset, inprobs)
+def test_relabel_actions_duplicate_raises_valueerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Queen"})
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_set_chance_personal(game: gbt.Game):
-    with pytest.raises(gbt.UndefinedOperationError):
-        personal_infoset = next(iter(game.players["Alice"].infosets))
-        game.set_chance_probs(personal_infoset, [0.75, 0.25])
+def test_relabel_actions_simultaneous_swap():
+    """Reassignment is simultaneous, so a swap is well-defined; applying the entries one
+    at a time would collide on the intermediate state.
+    """
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root.infoset, {"King": "Queen", "Queen": "King"})
+    assert [action.label for action in game.root.infoset.actions] == ["Queen", "King"]
+
+
+def test_relabel_actions_duplicate_targets_raises_valueerror():
+    """Both replacements are free of the actions left untouched but collide with each
+    other, so checking each against the untouched actions alone would let this through.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Ace", "Queen": "Ace"})
+
+
+def test_relabel_actions_unknown_label_raises_keyerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(KeyError):
+        game.relabel_actions(game.root.infoset, {"Jack": "Ace"})
+
+
+def test_relabel_actions_unknown_label_not_strict_is_ignored():
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root.infoset, {"Jack": "Ace", "King": "Ace"}, strict=False)
+    assert [action.label for action in game.root.infoset.actions] == ["Ace", "Queen"]
+
+
+def test_relabel_actions_failure_leaves_game_unchanged():
+    """The whole mapping is validated before any label is written, so a mapping that
+    fails part way through leaves no partial reassignment behind.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root.infoset, {"King": "Ace", "Queen": ""})
+    assert [action.label for action in game.root.infoset.actions] == ["King", "Queen"]
+
+
+def test_relabel_actions_scope_is_the_information_set():
+    """Action labels are unique within an information set, not within a player: Alice's
+    two information sets both offer "Bet", and relabelling one leaves the other untouched
+    and free to take the same new label.
+    """
+    game = games.create_stripped_down_poker_efg()
+    king = game.players["Alice"].infosets["Alice has King"]
+    queen = game.players["Alice"].infosets["Alice has Queen"]
+    game.relabel_actions(king, {"Bet": "Raise"})
+    assert [action.label for action in king.actions] == ["Raise", "Fold"]
+    assert [action.label for action in queen.actions] == ["Bet", "Fold"]
+    game.relabel_actions(queen, {"Bet": "Raise"})
+    assert [action.label for action in queen.actions] == ["Raise", "Fold"]
+
+
+def test_relabel_actions_not_a_mapping_raises_typeerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, [("King", "Queen")])
+
+
+@pytest.mark.parametrize("labels", [{1: "Queen"}, {"King": 1}])
+def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root.infoset, labels)
 
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])

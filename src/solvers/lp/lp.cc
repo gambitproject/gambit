@@ -26,113 +26,161 @@
 
 namespace Gambit::Nash {
 
-template <class T> class GameData {
-public:
-  int ns1, ns2;
-  Rational minpay;
-  std::map<GameInfoset, int> infosetOffset;
+namespace {
 
-  explicit GameData(const Game &);
+// Holds the correspondence between the sequences (and information sets) of
+// a two-player constant-sum game and the rows/columns of the sequence-form
+// LP tableau.  Player 1's sequences occupy rows and
+// player 2's occupy columns; each player's information sets occupy a
+// block on the *other* axis, expressing the sum-to-one relation among
+// that player's own sequences.
+struct TableauIndexMap {
+  Game game;
+  // The row assigned to each of player 1's sequences (1..rowAnchor-1), and
+  // the column assigned to each of player 2's sequences (1..colAnchor-1).
+  std::map<GameSequence, int> rowIndex, colIndex;
+  // The column assigned to the sum-to-one constraint at each of player 1's
+  // information sets, and the row assigned to the same for player 2's.
+  // Each block reserves its first (colAnchor/rowAnchor) index for the
+  // constraint anchoring the probability of the empty sequence at 1.
+  std::map<GameInfoset, int> colInfosetIndex, rowInfosetIndex;
+  // The number of rows/columns of the tableau, the row/column of each
+  // player's information-set block anchor, and the number of rows (all in
+  // player 2's block) that hold with equality rather than inequality.
+  int rows, cols, rowAnchor, colAnchor, equalityRows;
 
-  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2, T payoff);
+  explicit TableauIndexMap(const Game &p_game) : game(p_game)
+  {
+    const GamePlayer player1 = game->GetPlayer(1);
+    const GamePlayer player2 = game->GetPlayer(2);
 
-  void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
-                   const GameNode &, int, int);
+    const int ns1 = static_cast<int>(player1->GetSequences().size());
+    const int ns2 = static_cast<int>(player2->GetSequences().size());
+    const int ni1 = static_cast<int>(player1->GetInfosets().size()) + 1;
+    const int ni2 = static_cast<int>(player2->GetInfosets().size()) + 1;
+    rows = ns1 + ni2;
+    cols = ns2 + ni1;
+    rowAnchor = ns1 + 1;
+    colAnchor = ns2 + 1;
+    equalityRows = ni2;
+
+    auto sequences1 = player1->GetSequences();
+    for (auto [i, sequence] : enumerate(sequences1)) {
+      rowIndex[sequence] = static_cast<int>(i) + 1;
+    }
+    auto sequences2 = player2->GetSequences();
+    for (auto [i, sequence] : enumerate(sequences2)) {
+      colIndex[sequence] = static_cast<int>(i) + 1;
+    }
+
+    // index 1 in each information-set block is reserved for the anchor
+    auto infosets1 = player1->GetInfosets();
+    for (auto [i, infoset] : enumerate(infosets1)) {
+      colInfosetIndex[infoset] = ns2 + static_cast<int>(i) + 2;
+    }
+    auto infosets2 = player2->GetInfosets();
+    for (auto [i, infoset] : enumerate(infosets2)) {
+      rowInfosetIndex[infoset] = ns1 + static_cast<int>(i) + 2;
+    }
+  }
 };
 
-template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->GetMinPayoff())
+template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
 {
-  ns1 = p_game->GetPlayer(1)->GetSequences().size();
-  ns2 = p_game->GetPlayer(2)->GetSequences().size();
-  for (const auto &player : p_game->GetPlayers()) {
-    int offset = 1;
-    for (const auto &infoset : player->GetInfosets()) {
-      infosetOffset[infoset] = offset;
-      offset += infoset->GetActions().size();
+  Matrix<T> A(1, p_indexMap.rows, 1, p_indexMap.cols);
+  A = T{0};
+
+  const Game &game = p_indexMap.game;
+  const GamePlayer player1 = game->GetPlayer(1);
+  const GamePlayer player2 = game->GetPlayer(2);
+
+  // A constant subtracted from every payoff so that all entries of the
+  // payoff block become non-negative, as this LP's standard form requires.
+  const Rational payoffShift = game->GetMinPayoff();
+
+  // Payoff block: for every pair of sequences (one per player), player 1's
+  // payoff when that pair is exactly realised, shifted by payoffShift and
+  // weighted by chance's probability of that pair actually being realised
+  // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
+  // Player 2's payoff is not separately represented, since the game is
+  // constant-sum.
+  for (auto profile : game->GetSequenceContingencies()) {
+    const GameSequence &seq1 = profile.GetSequence(player1);
+    const GameSequence &seq2 = profile.GetSequence(player2);
+    const Rational prob = profile.GetRealizationProbability();
+    const Rational pay1 = profile.GetPayoff(player1) - payoffShift * prob;
+    A(p_indexMap.rowIndex.at(seq1), p_indexMap.colIndex.at(seq2)) = static_cast<T>(pay1);
+  }
+
+  // Constraint block for player 1: the sum-to-one relation between the
+  // probability of the sequence leading to an information set and the
+  // sum of the probabilities of its own actions' sequences, expressed in
+  // the column reserved for that information set.
+  for (const auto &infoset : player1->GetInfosets()) {
+    const int col = p_indexMap.colInfosetIndex.at(infoset);
+    const auto children = infoset->GetSequences();
+    const int arrivalRow = p_indexMap.rowIndex.at(children.front()->GetParent());
+    A(arrivalRow, col) = T{1};
+    for (const auto &child : children) {
+      A(p_indexMap.rowIndex.at(child), col) = T{-1};
     }
   }
+
+  // Likewise for player 2, expressed in the row reserved for each of
+  // their information sets.
+  for (const auto &infoset : player2->GetInfosets()) {
+    const int row = p_indexMap.rowInfosetIndex.at(infoset);
+    const auto children = infoset->GetSequences();
+    const int arrivalCol = p_indexMap.colIndex.at(children.front()->GetParent());
+    A(row, arrivalCol) = T{-1};
+    for (const auto &child : children) {
+      A(row, p_indexMap.colIndex.at(child)) = T{1};
+    }
+  }
+
+  // The two "anchor" entries are the standard sequence-form LP fixtures
+  // that link each player's own root sequence to the other player's
+  // information-set block, anchoring the probability of the empty
+  // sequence at 1.
+  const GameSequence root1 = player1->GetSequences().front();
+  const GameSequence root2 = player2->GetSequences().front();
+  A(p_indexMap.rowIndex.at(root1), p_indexMap.colAnchor) = T{-1};
+  A(p_indexMap.rowAnchor, p_indexMap.colIndex.at(root2)) = T{1};
+
+  return A;
 }
 
-//
-// Recursively fills the constraint matrix A for the subtree rooted at 'n'.
-//
-template <class T>
-void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2,
-                              T payoff)
+template <class T> Vector<T> ConstructB(const TableauIndexMap &p_indexMap)
 {
-  const GameOutcome outcome = n->GetOutcome();
-  if (outcome) {
-    payoff += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1));
-  }
-  if (n->IsTerminal()) {
-    A(s1, s2) += Rational(prob) * (payoff - minpay);
-    return;
-  }
-  const GameInfoset infoset = n->GetInfoset();
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &action : infoset->GetActions()) {
-      FillTableau(A, n->GetChild(action), prob * static_cast<T>(infoset->GetActionProb(action)),
-                  s1, s2, payoff);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    const int col = ns2 + infoset->GetNumber() + 1;
-    int snew = infosetOffset.at(infoset);
-    A(s1, col) = static_cast<T>(1);
-    for (const auto &child : n->GetChildren()) {
-      A(++snew, col) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2, payoff);
-    }
-  }
-  else {
-    const int row = ns1 + infoset->GetNumber() + 1;
-    int snew = infosetOffset.at(infoset);
-    A(row, s2) = static_cast<T>(-1);
-    for (const auto &child : n->GetChildren()) {
-      A(row, ++snew) = static_cast<T>(1);
-      FillTableau(A, child, prob, s1, snew, payoff);
-    }
-  }
+  Vector<T> b(1, p_indexMap.rows);
+  b = T{0};
+  b[p_indexMap.rowAnchor] = T{1};
+  return b;
 }
 
-//
-// Recursively construct the behavior profile from the sequence form
-// solution represented by 'p_primal' (containing player 2's
-// sequences) and 'p_dual' (containing player 1's sequences).
-//
-// Any information sets not reached with positive probability have
-// their action probabilities set to zero.
-//
-template <class T>
-void GameData<T>::GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &p_primal,
-                              const Array<T> &p_dual, const GameNode &n, int s1, int s2)
+template <class T> Vector<T> ConstructC(const TableauIndexMap &p_indexMap)
 {
-  if (n->IsTerminal()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &child : n->GetChildren()) {
-      GetBehavior(v, p_primal, p_dual, child, s1, s2);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 2) {
-    int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] =
-          (p_primal[s1] > static_cast<T>(0)) ? p_primal[snew] / p_primal[s1] : static_cast<T>(0);
-      GetBehavior(v, p_primal, p_dual, n->GetChild(action), snew, s2);
-    }
-  }
-  else {
-    int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = (p_dual[s2] > static_cast<T>(0)) ? p_dual[snew] / p_dual[s2] : static_cast<T>(0);
-      GetBehavior(v, p_primal, p_dual, n->GetChild(action), s1, snew);
-    }
-  }
+  Vector<T> c(1, p_indexMap.cols);
+  c = T{0};
+  c[p_indexMap.colAnchor] = T{-1};
+  return c;
 }
+
+template <class T>
+MixedBehaviorProfile<T> GetBehavior(const Array<T> &p_primal, const Array<T> &p_dual,
+                                    const TableauIndexMap &p_indexMap)
+{
+  std::map<GameSequence, T> x;
+  for (const auto &[sequence, row] : p_indexMap.rowIndex) {
+    x[sequence] = p_dual[row];
+  }
+  for (const auto &[sequence, col] : p_indexMap.colIndex) {
+    x[sequence] = p_primal[col];
+  }
+  return MixedBehaviorProfile<T>(MixedSequenceProfile<T>(p_indexMap.game, x));
+}
+
+} // end anonymous namespace
 
 //
 // The routine to actually solve the LP
@@ -149,9 +197,9 @@ void GameData<T>::GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &p_prim
 //
 template <class T>
 void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals,
-             Array<T> &p_primal, Array<T> &p_dual)
+             Array<T> &p_primal, Array<T> &p_dual, const CancelToken &p_cancel = CancelToken())
 {
-  const linalg::LPSolve<T> LP(A, b, c, nequals);
+  const linalg::LPSolve<T> LP(A, b, c, nequals, p_cancel);
   const auto &cbfs = LP.OptimumBFS();
 
   for (size_t i = 1; i <= A.NumColumns(); i++) {
@@ -164,7 +212,8 @@ void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int neq
 
 template <class T>
 std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
-                                                   BehaviorCallbackType<T> p_onEquilibrium)
+                                                   BehaviorCallbackType<T> p_onEquilibrium,
+                                                   const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -177,43 +226,32 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  GameData<T> data(p_game);
-
-  Matrix<T> A(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1, 1,
-              data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
-  Vector<T> b(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1);
-  Vector<T> c(1, data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
-
-  A = static_cast<T>(0);
-  b = static_cast<T>(0);
-  c = static_cast<T>(0);
-
-  data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, static_cast<T>(0));
-  A(1, data.ns2 + 1) = static_cast<T>(-1);
-  A(data.ns1 + 1, 1) = static_cast<T>(1);
-
-  b[data.ns1 + 1] = static_cast<T>(1);
-  c[data.ns2 + 1] = static_cast<T>(-1);
+  const TableauIndexMap indexMap(p_game);
+  const Matrix<T> A = ConstructMatrix<T>(indexMap);
+  const Vector<T> b = ConstructB<T>(indexMap);
+  const Vector<T> c = ConstructC<T>(indexMap);
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  std::list<MixedBehaviorProfile<T>> solution;
-  SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
-  MixedBehaviorProfile<T> profile(p_game);
-  data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
+  SolveLP(A, b, c, indexMap.equalityRows, primal, dual, p_cancel);
+
+  MixedBehaviorProfile<T> profile = GetBehavior(primal, dual, indexMap);
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile);
+
+  std::list<MixedBehaviorProfile<T>> solution;
   solution.push_back(profile);
   return solution;
 }
 
-template std::list<MixedBehaviorProfile<double>> LpBehaviorSolve(const Game &,
-                                                                 BehaviorCallbackType<double>);
-template std::list<MixedBehaviorProfile<Rational>> LpBehaviorSolve(const Game &,
-                                                                   BehaviorCallbackType<Rational>);
+template std::list<MixedBehaviorProfile<double>>
+LpBehaviorSolve(const Game &, BehaviorCallbackType<double>, const CancelToken &);
+template std::list<MixedBehaviorProfile<Rational>>
+LpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>, const CancelToken &);
 
 template <class T>
 std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
-                                                   StrategyCallbackType<T> p_onEquilibrium)
+                                                   StrategyCallbackType<T> p_onEquilibrium,
+                                                   const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -255,7 +293,7 @@ std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
   c[m + 1] = static_cast<T>(1);
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  SolveLP(A, b, c, 1, primal, dual);
+  SolveLP(A, b, c, 1, primal, dual, p_cancel);
 
   MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
   for (int j = 1; j <= m; j++) {
@@ -270,9 +308,9 @@ std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
   return solution;
 }
 
-template std::list<MixedStrategyProfile<double>> LpStrategySolve(const Game &,
-                                                                 StrategyCallbackType<double>);
-template std::list<MixedStrategyProfile<Rational>> LpStrategySolve(const Game &,
-                                                                   StrategyCallbackType<Rational>);
+template std::list<MixedStrategyProfile<double>>
+LpStrategySolve(const Game &, StrategyCallbackType<double>, const CancelToken &);
+template std::list<MixedStrategyProfile<Rational>>
+LpStrategySolve(const Game &, StrategyCallbackType<Rational>, const CancelToken &);
 
 } // end namespace Gambit::Nash

@@ -126,7 +126,13 @@ class InfosetActions:
 
 @cython.cclass
 class Infoset:
-    """An information set in a ``Game``."""
+    """An information set in a ``Game``.
+
+    An information set belonging to a personal player is a decision: the point at
+    which that player chooses an action, and so the object of potential optimisation.
+    An information set belonging to the chance player is instead called an event: its
+    probability distribution over actions is exogenously specified, not chosen.
+    """
     infoset = cython.declare(c_GameInfoset)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -166,15 +172,17 @@ class Infoset:
     def label(self) -> str:
         """Get or set the text label of the information set.
 
-        .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+        .. versionchanged:: 17.0.0
+            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
+            contain no control characters, and must not begin/end with whitespace or have
+            two consecutive whitespace characters.  "Whitespace" means any Unicode space
+            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
         """
-        return self.infoset.deref().GetLabel().decode("ascii")
+        return self.infoset.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.infoset.deref().SetLabel(value.encode("ascii"))
+        self.infoset.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def number(self) -> int:
@@ -185,7 +193,9 @@ class Infoset:
 
     @property
     def is_chance(self) -> bool:
-        """Whether the information set belongs to the chance player."""
+        """Whether the information set belongs to the chance player, i.e. is an event
+        rather than a decision.
+        """
         return self.infoset.deref().IsChanceInfoset()
 
     @property
@@ -235,11 +245,6 @@ class Infoset:
 
         The iteration order of information set members is the order in which they
         are encountered in the pre-order depth first traversal of the game tree.
-
-        .. versionchanged:: 16.5.0
-           It is no longer necessary to call `Game.sort_infosets` to standardise
-           iteration order.
-
         """
         return InfosetMembers.wrap(self.infoset)
 

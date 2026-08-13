@@ -183,8 +183,6 @@ public:
       return m_profile.operator->() == other.m_profile.operator->();
     }
 
-    bool operator!=(const iterator &other) const { return !(*this == other); }
-
     PureStrategyProfile &operator*() { return m_profile; }
     const PureStrategyProfile &operator*() const { return m_profile; }
   };

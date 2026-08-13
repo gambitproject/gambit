@@ -51,10 +51,6 @@ public:
   {
     return m_space == rhs.m_space && m_system == rhs.m_system;
   }
-  bool operator!=(const PolynomialSystem<T> &rhs) const
-  {
-    return m_space != rhs.m_space || m_system != rhs.m_system;
-  }
   void push_back(const Polynomial<T> &x) { m_system.push_back(x); }
   void push_back(const PolynomialSystem<T> &x)
   {

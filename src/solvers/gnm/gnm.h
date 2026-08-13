@@ -48,7 +48,14 @@ struct GNMStepEvent {
   double lambda;
 };
 
-using GNMEvent = std::variant<GNMPerturbationEvent, GNMStartEvent, GNMStepEvent>;
+/// @brief Reports why GNM's path-following terminated, once at the end of the run
+struct GNMTerminationEvent {
+  gametracer::GNMTerminationReason reason;
+  std::string message;
+};
+
+using GNMEvent =
+    std::variant<GNMPerturbationEvent, GNMStartEvent, GNMStepEvent, GNMTerminationEvent>;
 using GNMEventCallbackType = std::function<void(const GNMEvent &)>;
 
 inline void NullGNMEventCallback(const GNMEvent &) {}

@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GUI_GAMEDOC_H
 #define GAMBIT_GUI_GAMEDOC_H
 
+#include <map>
+
 #include "gambit.h"
 #include "style.h"
 #include "analysis.h"
@@ -299,7 +301,7 @@ public:
   void DoDeleteStrategy(GameStrategy p_strategy);
   void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
-  void DoSetActionLabel(GameAction p_action, const wxString &p_label);
+  void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
   void DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs);
   void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
   void DoLeaveInfoset(GameNode p_node);

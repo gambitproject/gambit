@@ -26,13 +26,13 @@ def test_player_label_invalid_raises_valueerror(label):
         player.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_player_label_non_ascii_rejected(label):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_player_label_unicode_accepted(label):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    with pytest.raises(UnicodeEncodeError):
-        player.label = label
+    player.label = label
+    assert player.label == label
 
 
 def test_add_player_requires_label():
@@ -164,6 +164,64 @@ def test_strategic_game_delete_strategy():
     assert len(pl1.strategies) == 1
 
 
+def _tag_contingencies(game: gbt.Game) -> None:
+    """Gives every contingency's outcome a payoff vector that encodes the
+    strategy labels of the contingency, so a contingency's expected payoffs
+    can be recomputed from its strategies' labels after the game is mutated.
+    """
+    players = list(game.players)
+    for contingency in game.contingencies:
+        outcome = game[contingency]
+        strategies = [list(p.strategies)[i] for p, i in zip(players, contingency, strict=True)]
+        for pl_index, (player, strategy) in enumerate(zip(players, strategies, strict=True)):
+            outcome[player] = int(f"{pl_index}{strategy.label}")
+
+
+def test_strategic_game_delete_strategy_preserves_other_payoffs():
+    game = gbt.Game.new_table([4, 2, 2])
+    pl1, pl2, pl3 = game.players
+    _tag_contingencies(game)
+
+    # Record expected payoffs by label (a stable identity), for the
+    # strategies of pl1 that survive deleting its second strategy.
+    surviving = [s for s in pl1.strategies if s.label != "2"]
+    expected = {
+        (s1.label, s2.label, s3.label):
+            tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+        for s1 in surviving for s2 in pl2.strategies for s3 in pl3.strategies
+    }
+
+    game.delete_strategy(pl1.strategies["2"])
+
+    assert len(pl1.strategies) == 3
+    for s1 in pl1.strategies:
+        for s2 in pl2.strategies:
+            for s3 in pl3.strategies:
+                key = (s1.label, s2.label, s3.label)
+                actual = tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+                assert actual == expected[key]
+
+
+def test_strategic_game_delete_first_strategy_preserves_other_payoffs():
+    game = gbt.Game.new_table([3, 2])
+    pl1, pl2 = game.players
+    _tag_contingencies(game)
+
+    surviving = [s for s in pl1.strategies if s.label != "1"]
+    expected = {
+        (s1.label, s2.label): tuple(game[s1, s2][p] for p in (pl1, pl2))
+        for s1 in surviving for s2 in pl2.strategies
+    }
+
+    game.delete_strategy(pl1.strategies["1"])
+
+    assert len(pl1.strategies) == 2
+    for s1 in pl1.strategies:
+        for s2 in pl2.strategies:
+            key = (s1.label, s2.label)
+            assert tuple(game[s1, s2][p] for p in (pl1, pl2)) == expected[key]
+
+
 def test_strategic_game_delete_last_strategy():
     game = gbt.Game.new_table([1, 2])
     pl1 = next(iter(game.players))
@@ -277,6 +335,14 @@ def test_player_sequence_tree():
         # with non-terminal outcomes
         (games.create_kuhn_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
         (games.create_stripped_down_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
+        # AGGs/BAGGs
+        (games.read_from_file("2x2.agg"), [-10, -10], [95, 95]),
+        (games.read_from_file("2x2.bagg"), [-10, -10], [95, 95]),
+        (
+            games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg"),
+            [0, 0, 0, 0, 0, 0],
+            [99, 90, 99, 90, 99, 90],
+        ),
     ],
 )
 def test_player_get_min_max_payoff(game: gbt.Game, exp_min_payoffs: list, exp_max_payoffs: list):

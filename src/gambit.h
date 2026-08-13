@@ -31,6 +31,8 @@
 #include "games/behavspt.h"
 #include "games/behavmixed.h"
 #include "games/behavpure.h"
+#include "games/seqpure.h"
+#include "games/seqmixed.h"
 
 #include "games/stratspt.h"
 #include "games/stratpure.h"

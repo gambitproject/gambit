@@ -204,7 +204,6 @@ public:
     explicit Edge(const int n1, const int n2) : node1(n1), node2(n2) {}
     ~Edge() = default;
     bool operator==(const Edge &y) const { return (node1 == y.node1 && node2 == y.node2); }
-    bool operator!=(const Edge &y) const { return !(*this == y); }
   };
 
   CliqueEnumerator(Array<Edge> &, int, int);

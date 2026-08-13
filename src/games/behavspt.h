@@ -25,15 +25,11 @@
 
 #include <list>
 #include <map>
+#include "core/lazy.h"
 #include "game.h"
+#include "seqpure.h"
 
 namespace Gambit {
-
-class GameSequenceForm;
-class SequencesWrapper;
-class PlayerSequencesWrapper;
-class InfosetsWrapper;
-class ContingenciesWrapper;
 
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
@@ -43,10 +39,16 @@ class ContingenciesWrapper;
 /// computational approaches that enumerate possible equilibrium
 /// supports.
 class BehaviorSupportProfile {
+public:
+  /// The sequences of each player that are consistent with this support,
+  /// i.e. those whose action is in the support (or the empty sequence).
+  using SequenceMap = Gambit::SequenceMap;
+
+private:
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
-  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
-  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
+  mutable Lazy<std::shared_ptr<SequenceMap>> m_sequences;
+  mutable Lazy<std::shared_ptr<std::map<GameInfoset, bool>>> m_reachableInfosets;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -54,6 +56,8 @@ class BehaviorSupportProfile {
   bool HasReachableMembers(const GameInfoset &) const;
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
+  std::shared_ptr<SequenceMap> GetSequenceMap() const;
+  void FindReachableInfosets(GameNode p_node, std::map<GameInfoset, bool> &p_reachable) const;
 
 public:
   class Support {
@@ -92,10 +96,6 @@ public:
   bool operator==(const BehaviorSupportProfile &p_support) const
   {
     return m_actions == p_support.m_actions;
-  }
-  bool operator!=(const BehaviorSupportProfile &p_support) const
-  {
-    return m_actions != p_support.m_actions;
   }
 
   /// @name General information
@@ -156,12 +156,12 @@ public:
 
   public:
     class iterator {
-      const std::shared_ptr<GameSequenceForm> m_sfg;
-      std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
+      const std::shared_ptr<SequenceMap> m_sequences;
+      SequenceMap::const_iterator m_currentPlayer;
       std::vector<GameSequence>::const_iterator m_currentSequence;
 
     public:
-      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end);
+      iterator(const std::shared_ptr<SequenceMap> p_sequences, bool p_end);
 
       GameSequence operator*() const { return *m_currentSequence; }
       GameSequence operator->() const { return *m_currentSequence; }
@@ -169,7 +169,6 @@ public:
       iterator &operator++();
 
       bool operator==(const iterator &it) const;
-      bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
     Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
@@ -195,53 +194,17 @@ public:
     std::vector<GameSequence>::const_iterator end() const;
   };
 
-  class SequenceContingencies {
-    const BehaviorSupportProfile *m_support;
-
-  public:
-    SequenceContingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
-
-    class iterator {
-    private:
-      const std::shared_ptr<GameSequenceForm> m_sfg;
-      bool m_end{false};
-      std::map<GamePlayer, size_t> m_indices;
-
-    public:
-      using iterator_category = std::input_iterator_tag;
-
-      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end = false);
-
-      std::map<GamePlayer, GameSequence> operator*() const;
-
-      std::map<GamePlayer, GameSequence> operator->() const;
-
-      iterator &operator++();
-
-      bool operator==(const iterator &it) const
-      {
-        return (m_end == it.m_end && m_sfg == it.m_sfg && m_indices == it.m_indices);
-      }
-      bool operator!=(const iterator &it) const { return !(*this == it); }
-    };
-
-    iterator begin() { return {m_support->GetSequenceForm()}; }
-    iterator end() { return {m_support->GetSequenceForm(), true}; }
-  };
-
-  std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
-  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
-  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
-                            const GamePlayer &p_player) const;
+  /// Returns the sequences of the actions at the information set that are
+  /// in the support.
+  std::vector<GameSequence> GetSequences(const GameInfoset &p_infoset) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
-  MixedBehaviorProfile<double>
-  ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
+  template <class T>
+  MixedBehaviorProfile<T> ToMixedBehaviorProfile(const std::map<GameSequence, T> &) const;
   Infosets GetInfosets() const { return {this}; };
   SequenceContingencies GetSequenceContingencies() const;
 
-  void FindReachableInfosets(GameNode p_node) const;
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
 

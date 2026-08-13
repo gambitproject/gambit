@@ -25,9 +25,10 @@
 namespace Gambit::linalg {
 
 template <class T>
-VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
+VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b,
+                                      const CancelToken &p_cancel)
   : mult_opt(std::any_of(b.begin(), b.end(), [](const T &v) { return v == static_cast<T>(0); })),
-    A(A), b(b), btemp(b)
+    A(A), b(b), btemp(b), m_cancel(p_cancel)
 {
   btemp = static_cast<T>(-1); // NOLINT(cppcoreguidelines-prefer-member-initializer)
   LPTableau<T> tab(A, b);
@@ -50,6 +51,7 @@ template <class T> void VertexEnumerator<T>::Deeper()
 
 template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
 {
+  m_cancel.Check();
   Deeper();
   if (tab.IsLexMin()) {
     m_list.push_back(tab.GetBFS1());
@@ -70,6 +72,7 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
 
 template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
 {
+  m_cancel.Check();
   Deeper();
   branches[depth] += 1;
 

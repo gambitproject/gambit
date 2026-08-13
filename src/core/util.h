@@ -60,12 +60,6 @@ template <class C, class T> bool contains(const C &p_container, const T &p_value
   return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
 }
 
-template <class Key, class T> bool contains(const std::map<Key, T> &map, const Key &key)
-// TODO: remove when we move to C++20 which already includes a "contains" method
-{
-  return map.find(key) != map.end();
-}
-
 template <class C> class EnumerateView {
 public:
   explicit EnumerateView(C &p_range) : m_range(p_range) {}
@@ -87,7 +81,11 @@ public:
     }
 
     bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
-    auto operator*() const { return std::tie(m_index, *m_current); }
+    // A copy, not std::tie(): some ranges' iterators (e.g. ElementCollection)
+    // dereference to a prvalue rather than a reference, which std::tie cannot
+    // bind to (and forwarding a reference to it would dangle once this
+    // full-expression ends).
+    auto operator*() const { return std::make_tuple(m_index, *m_current); }
 
   private:
     std::size_t m_index;
@@ -145,8 +143,6 @@ public:
       return a.m_current == b.m_current;
     }
 
-    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
-
   private:
     Iter m_current, m_end;
     Pred m_pred;
@@ -178,7 +174,6 @@ public:
   class iterator {
   public:
     using iterator_category = std::forward_iterator_tag;
-    ;
     using value_type = Value;
     using difference_type = std::ptrdiff_t;
     using reference = Value;
@@ -206,8 +201,6 @@ public:
     {
       return m_first == other.m_first && m_current == other.m_current;
     }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
     std::optional<Value> m_first;

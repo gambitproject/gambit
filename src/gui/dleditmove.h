@@ -32,9 +32,11 @@ class EditMoveDialog final : public wxDialog {
   GameInfoset m_infoset;
   wxChoice *m_player;
   LabelTextCtrl *m_infosetLabel;
+  wxColour m_infosetLabelDefaultBg;
   ActionPanel *m_actionPanel;
+  wxStaticText *m_errorText;
 
-  bool ValidateLabels();
+  void UpdateValidation();
   void OnOK(wxCommandEvent &);
 
 public:
