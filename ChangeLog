@@ -27,6 +27,10 @@
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
 - `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
+- The GUI's infoset editing actions (assigning a node to an infoset, leaving an infoset, revealing an
+  action) now enforce the same rules as `Game.make_infoset`, e.g. matching action labels rather than
+  just a matching count; assigning a terminal node to an infoset now raises rather than silently
+  doing nothing.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs

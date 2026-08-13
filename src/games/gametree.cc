@@ -307,29 +307,23 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 
 void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
-  IncrementVersion();
   for (const auto &action : p_atInfoset->m_actions) {
     auto infosets = p_player->m_infosets;
     for (const auto &infoset : infosets) {
       auto members = infoset->m_members;
-      // This information set holds all members of information set
-      // which follow 'action'.
-      GameInfoset newiset = nullptr;
+      // Members of this information set which follow 'action' are grouped
+      // into a single new information set.
+      std::vector<GameNode> group;
       for (const auto &member : members) {
         if (action->Precedes(member)) {
-          if (!newiset) {
-            newiset = LeaveInfoset(member);
-          }
-          else {
-            SetInfoset(member, newiset);
-          }
+          group.emplace_back(member);
         }
+      }
+      if (!group.empty()) {
+        MakeInfoset(group, p_player, "");
       }
     }
   }
-
-  ClearComputedValues();
-  InvalidateTreeOrdering();
 }
 
 //========================================================================
@@ -673,20 +667,12 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
   if (p_node->m_game != this || p_infoset->m_game != this) {
     throw MismatchException();
   }
-  GameNodeRep *node = p_node.get();
-  if (!node->m_infoset || node->m_infoset == p_infoset.get()) {
+  if (p_node->m_infoset == p_infoset.get()) {
     return;
   }
-  if (p_infoset->m_actions.size() != node->m_children.size()) {
-    throw DimensionException();
-  }
-  IncrementVersion();
-  RemoveMember(node->m_infoset, node);
-  p_infoset->m_members.push_back(p_node);
-  node->m_infoset = p_infoset.get();
-
-  ClearComputedValues();
-  InvalidateInfosetOrdering();
+  std::vector<GameNode> nodes(p_infoset->m_members.begin(), p_infoset->m_members.end());
+  nodes.push_back(p_node);
+  MakeInfoset(nodes, p_infoset->m_player->shared_from_this(), p_infoset->GetLabel());
 }
 
 GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
@@ -698,27 +684,11 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   if (!node->m_infoset) {
     return nullptr;
   }
-
-  IncrementVersion();
   auto *oldInfoset = node->m_infoset;
   if (oldInfoset->m_members.size() == 1) {
     return oldInfoset->shared_from_this();
   }
-
-  GamePlayerRep *player = oldInfoset->m_player;
-  RemoveMember(oldInfoset, node);
-  auto newInfoset = std::make_shared<GameInfosetRep>(this, player->m_infosets.size() + 1, player,
-                                                     node->m_children.size());
-  player->m_infosets.push_back(newInfoset);
-  node->m_infoset = newInfoset.get();
-  node->m_infoset->m_members.push_back(p_node);
-  for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
-       old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
-    (*new_act)->m_label = (*old_act)->GetLabel();
-  }
-  ClearComputedValues();
-  InvalidateInfosetOrdering();
-  return node->m_infoset->shared_from_this();
+  return MakeInfoset({p_node}, oldInfoset->m_player->shared_from_this(), "");
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player,
