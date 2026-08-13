@@ -1,5 +1,5 @@
 % Extensive-form game transcribed from the provided figure.
-% DrawTree .ef format.
+% gtdraw .ef format.
 % Layout is chosen to preserve the original geometry of the image:
 % chance at the top, two Player 1 singleton information sets,
 % crossed middle branches, and two horizontal Player 2 information sets.

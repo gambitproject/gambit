@@ -73,12 +73,12 @@ Currently supported representations are:
 
    For extensive form games, you may optionally commit a curated ``.ef`` file alongside the ``.efg``
    (e.g. ``catalog/source/game.ef``).
-   When present, ``update.py`` will use this file directly as input to DrawTree instead of
+   When present, ``update.py`` will use this file directly as input to gtdraw instead of
    auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
-   Consult the `DrawTree docs <https://www.gambit-project.org/gtdraw/>`_ for the ``.ef`` format.
+   Consult the `gtdraw docs <https://www.gambit-project.org/gtdraw/>`_ for the ``.ef`` format.
 
    In general, ``.ef`` files should only be added when the layout they provide differs significantly
-   from what DrawTree produces automatically; if the auto-generated layout is reasonable, there is
+   from what gtdraw produces automatically; if the auto-generated layout is reasonable, there is
    no need to include one.
 
    If the game has an original layout from a published source (e.g. a textbook or journal article),
@@ -104,7 +104,7 @@ Currently supported representations are:
    If you want to customise the visualisation parameters for your game(s), edit ``build_support/catalog/gtdraw_settings.yaml``.
    Add an entry under ``overrides`` keyed by your game's exact slug, or by a shared prefix (e.g. the author-year folder name) to apply settings to all games from that source.
    More specific entries (longer keys) take precedence over shorter ones.
-   Consult the `DrawTree docs <https://www.gambit-project.org/gtdraw/>`_ for available settings.
+   Consult the `gtdraw docs <https://www.gambit-project.org/gtdraw/>`_ for available settings.
 
    .. code-block:: bash
 
@@ -129,7 +129,7 @@ Currently supported representations are:
 
    .. tip::
 
-      If the game visuals for extensive form games need some work and you aren't sure which settings to change in ``build_support/catalog/gtdraw_settings.yaml``, try loading the EFG in the DrawTree GUI and adjusting the layout there.
+      If the game visuals for extensive form games need some work and you aren't sure which settings to change in ``build_support/catalog/gtdraw_settings.yaml``, try loading the EFG in the gtdraw GUI and adjusting the layout there.
       There is an option to `download settings <https://www.gambit-project.org/gtdraw/gui/#exporting-and-reusing-settings>`_ which can be used in the Gambit catalog.
 
 5. **[Optional] Test your updates to the documentation locally:**
