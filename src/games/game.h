@@ -1282,6 +1282,18 @@ public:
   {
     throw UndefinedException();
   }
+  /// Add a chance move for p_actions, with distribution p_probs, at terminal p_node.
+  virtual GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a chance move for p_actions, with distribution p_probs, prior to p_node.
+  virtual GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
   virtual void DeleteParent(GameNode) { throw UndefinedException(); }
   virtual void DeleteTree(GameNode) { throw UndefinedException(); }
   virtual void CopyTree(GameNode dest, GameNode src) { throw UndefinedException(); }
@@ -1435,8 +1447,6 @@ public:
 
   /// @name Modification
   //@{
-  /// Set the probability distribution of actions at a chance node
-  virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   /// Form the collection of nodes into a single event carrying the given
   /// probability distribution over its actions.  The nodes need not currently be
   /// chance nodes; personal decision nodes are converted.

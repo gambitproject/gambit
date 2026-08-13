@@ -54,8 +54,10 @@ Transforming game trees
 
    Game.append_move
    Game.append_infoset
+   Game.append_event
    Game.insert_move
    Game.insert_infoset
+   Game.insert_event
    Game.copy_tree
    Game.move_tree
    Game.delete_parent

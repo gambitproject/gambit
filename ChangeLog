@@ -5,6 +5,10 @@
   information set; the primitive operation for editing information structures.  (#999)
 - Added `Game.make_event`, which forms a collection of nodes into a single event with a
   specified probability distribution over its actions. (#1009)
+- Added `Game.append_event` and `Game.insert_event`, the chance-move counterparts of
+  `Game.append_move` and `Game.insert_move`: they add a brand-new chance move at a terminal
+  node or before an existing node respectively, requiring the probability distribution over
+  its actions to be specified up front, just as `Game.make_event` does.  (#999)
 - `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
   information sets; the unreachable information sets are absent.  (#1002)
 
@@ -36,6 +40,14 @@
   the same rules as `Game.make_infoset`, e.g. matching action labels rather than just a matching
   count; assigning a terminal node to an infoset now raises rather than silently doing nothing.
   (#999)
+- `Game.append_move` and `Game.insert_move` now require `player` to be a personal player;
+  previously passing the chance player would silently create a new chance move with an
+  unrequested uniform distribution, bypassing the validation that `Game.make_event` (and now
+  `Game.append_event`/`Game.insert_event`) otherwise enforce for chance moves.  In the GUI, the
+  "Insert Move" dialog and the chance-token drag-and-drop action still create a chance move
+  with a uniform default when creating a fresh move, but now do so through `Game::InsertEvent`;
+  collecting the actual distribution at creation time in the GUI is left as a separate piece
+  of UX work.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -60,6 +72,10 @@
   calls directly.  `Game::Reveal` is kept, as a composite operation genuinely useful in its own
   right, but is now implemented once in C++ rather than duplicated in `pygambit` and the GUI.
   (#999)
+- The C++ `Game` interface's `SetChanceProbs` method has been removed, along with the
+  stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
+  `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
+  now builds the equivalent `MakeEvent` call directly.  (#999)
 
 ## [16.7.0] - 2026-07-11
 
