@@ -1923,25 +1923,36 @@ class Game:
     def set_actions(self,
                     infoset: Infoset | str,
                     actions: list[str],
+                    probs: typing.Sequence | typing.Mapping | None = None,
                     drop: bool = False,
                     add: bool = True) -> None:
         """Set the actions at `infoset` to be `actions`, matching by label.
 
-        An entry of `actions` matching the label of a current action refers to that action;
-        an entry matching no current action creates a new action there, leading to a new terminal;
-        action whose label is not in `actions` is deleted with the subtrees its members root.
-        Listing the current labels in a new order reorders the actions.
+        An entry of `actions` matching the label of a current action refers to that action,
+        which keeps its subtrees; an entry matching no current action creates a new action there,
+        leading to a new terminal node at every member; a current action whose label is not
+        in `actions` is deleted, along with the subtrees its branches lead to.
+        Listing the current labels in a new order reorders the actions as well as the children.
+
+        At an event, the probability distribution is declared as part of the operation,
+        rather than inferred from the actions which remain.  It may be omitted only when
+        `actions` is a permutation of the current labels, in which case each probability
+        stays with its action.
 
         .. versionadded:: 17.0.0
-            Subsumes and replaces `Game.add_action` and `Game.delete_action`.
 
         Parameters
         ----------
         infoset : Infoset or str
-            The information set at which to set the actions, belonging to a personal player.
+            The information set at which to set the actions.
         actions : list of str
             The labels of the actions the information set is to have, in order.
             Must be nonempty and without duplicates; each label must be a valid, nonempty label.
+        probs : array-like or dict-like, optional
+            The probabilities of the actions at an event, either one per entry of `actions`,
+            or a mapping from labels in `actions` to probabilities (omitted labels are assigned 0)
+            Must be non-negative and sum to 1. Required at an event unless `actions` is a
+            permutation of the current labels; not accepted at a personal player's infoset.
         drop : bool, default False
             Deleting actions is destructive, so it must be explicitly confirmed:
             if any current action is missing from `actions` and `drop` is `False`,
@@ -1954,20 +1965,24 @@ class Game:
         MismatchError
             If `infoset` is an `Infoset` from a different game.
         KeyError
-            If `infoset` is a string matching no information set.
+            If `infoset` is a string matching no information set, or a key of `probs`
+            is not a label in `actions`.
+        IndexError
+            If `probs` is a sequence whose length is not that of `actions`.
         TypeError
             If `actions` is a string, or not an iterable of strings.
         UndefinedOperationError
-            If `infoset` belongs to the chance player, or `actions` is empty.
+            If `actions` is empty; if `probs` is given at a personal player's information set;
+            or if `probs` is omitted at an event whose action set would change.
         ValueError
-            If a label in `actions` is repeated, empty, or invalid; if a current
-            action's label is duplicated at the information set.
+            If a label in `actions` is repeated, empty, or invalid, or if `probs` are
+            not non-negative numbers summing to exactly one.
+
+        See Also
+        --------
+        relabel_actions : Change the labels of actions, leaving the tree unchanged.
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_actions"))
-        if resolved_infoset.is_chance:
-            raise UndefinedOperationError(
-                "set_actions(): the actions of an event are set together with their probabilities"
-            )
         if isinstance(actions, str) or not hasattr(actions, "__iter__"):
             raise TypeError("set_actions(): actions must be an iterable of str")
         labels = list(actions)
@@ -1995,7 +2010,24 @@ class Game:
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
-        self.game.deref().SetActions(resolved_infoset.infoset, c_labels)
+        c_probs = stdvector[c_Number]()
+        if not resolved_infoset.is_chance:
+            if probs is not None:
+                raise UndefinedOperationError(
+                    "set_actions(): probabilities can only be specified at an event"
+                )
+        elif probs is None:
+            if added or missing:
+                raise UndefinedOperationError(
+                    "set_actions(): `probs` must be specified when the actions of an event "
+                    "are added or deleted"
+                )
+            for label in labels:
+                c_probs.push_back(_to_number(resolved_infoset.actions[label].prob))
+        else:
+            for value in self._resolve_probs(probs, labels, "set_actions"):
+                c_probs.push_back(_to_number(value))
+        self.game.deref().SetActions(resolved_infoset.infoset, c_labels, c_probs)
 
     def make_event(self,
                    nodes: Node | NodeReferenceSet,

@@ -1311,8 +1311,10 @@ public:
   {
     throw UndefinedException();
   }
-  /// Declare an ordered action list of a personal player's information set.
-  virtual void SetActions(const GameInfoset &, const std::vector<std::string> &)
+  /// Declare an ordered action list of an information set;
+  /// at an event, the probability distribution over the actions is declared with them.
+  virtual void SetActions(const GameInfoset &, const std::vector<std::string> &,
+                          const std::vector<Number> & = {})
   {
     throw UndefinedException();
   }

@@ -292,13 +292,25 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
 }
 
 void GameTreeRep::SetActions(const GameInfoset &p_infoset,
-                             const std::vector<std::string> &p_labels)
+                             const std::vector<std::string> &p_labels,
+                             const std::vector<Number> &p_probs)
 {
   if (p_infoset->m_game != this) {
     throw MismatchException();
   }
   if (p_infoset->IsChanceInfoset()) {
-    throw UndefinedException("The actions of an event are set together with their probabilities");
+    if (p_probs.empty()) {
+      throw UndefinedException(
+          "The actions of an event are set together with their probabilities");
+    }
+    if (p_labels.size() != p_probs.size()) {
+      throw DimensionException(
+          "The number of probabilities given must match the number of actions");
+    }
+    ValidateDistribution(p_probs);
+  }
+  else if (!p_probs.empty()) {
+    throw UndefinedException("Probabilities can only be specified for the actions of an event");
   }
   if (p_labels.empty()) {
     throw ValueException("At least one action must be specified");
@@ -377,6 +389,9 @@ void GameTreeRep::SetActions(const GameInfoset &p_infoset,
   }
   p_infoset->m_actions = std::move(newActions);
   p_infoset->RenumberActions();
+  if (p_infoset->IsChanceInfoset()) {
+    p_infoset->m_probs = p_probs;
+  }
   ClearComputedValues();
   InvalidateTreeOrdering();
 }

@@ -188,7 +188,8 @@ public:
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
-  void SetActions(const GameInfoset &, const std::vector<std::string> &) override;
+  void SetActions(const GameInfoset &, const std::vector<std::string> &,
+                  const std::vector<Number> & = {}) override;
   void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
