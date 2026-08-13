@@ -2225,8 +2225,7 @@ class Game:
         TypeError
             If any of `nodes`, or `player`, is not of an accepted type.
         UndefinedOperationError
-            If any of `nodes` is a terminal node or a chance node, or if `player`
-            is the chance player, or if the game is not a tree.
+            If any of `nodes` is a terminal node or a chance node, or if the game is not a tree.
         ValueError
             If `nodes` is empty or contains a repeated node; if the nodes do not all
             have the same actions in the same order; or if `label` is not unique among
@@ -2238,10 +2237,6 @@ class Game:
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_infoset")
         resolved_player = cython.cast(Player, self._resolve_player(player, "make_infoset"))
-        if resolved_player.is_chance:
-            raise UndefinedOperationError(
-                "make_infoset(): `player` must be a personal player"
-            )
         for n in resolved_nodes:
             if n.is_terminal:
                 raise UndefinedOperationError(
