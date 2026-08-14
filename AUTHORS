@@ -6,7 +6,7 @@ providing tools and methods for computation in game theory.
 Contacting Gambit:
 ------------------
 
-The Gambit developers can be reached at ted.turocy (at) uea.ac.uk
+The Gambit developers can be reached at ted.turocy (at) gmail.com
 
 Other sources of code in this distribution:
 -------------------------------------------
@@ -16,36 +16,23 @@ These are acknowledged individually below.
 
 Integer/Rational classes:
 -------------------------
-The files integer.(cc,h), rational.(cc,h), and gnulib.(cc,h) in
-sources/base are from an old GNU g++ library, with copyright statement:
+The files integer.(cc,h) and rational.(cc,h) in
+src/core are based originally an old GNU g++ library, with copyright statement:
 
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
-These files have been modified only to work as appropriate with other
-Gambit classes.
-
 Function minimization code:
 ---------------------------
-The files gfuncmin.(cc,h) in sources/numerical contain source code derived
+The files function.(cc,h) in src/core are based on source code derived
 from the GNU Scientific Library, version 1.2.  The original files have
 the copyright statement:
 
 Copyright (C) 1996, 1997, 1998, 1999, 2000 Fabrice Rossi
-
-These files have been modified only to port them from C to C++ and
-to use the gFunction class.
-
-Clique determination:
----------------------
-The gambit-nfg-enummixed program incorporates the code of
-Bernhard von Stengel to determine the connectedness of components of
-Nash equilibria.  (BvS has also contributed numerous other improvements
-and fixes to other areas of Gambit.)
 
 Gametracer:
 -----------
 The global Newton and iterated polymatrix implementations are based on
 those in Gametracer 0.2, copyright (C) 2002 by Ben Blum and
 Christian Shelton, distributed under the GPL.  See the directory
-sources/tools/gt in the distribution.
+src/solvers/gtracer in the distribution.
