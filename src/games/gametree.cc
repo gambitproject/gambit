@@ -154,39 +154,6 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
   return false;
 }
 
-GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
-{
-  if (p_action && p_action->GetInfoset() != p_infoset) {
-    throw MismatchException();
-  }
-  if (p_infoset->m_game != this) {
-    throw MismatchException();
-  }
-
-  IncrementVersion();
-  auto where = (p_action) ? std::find(p_infoset->m_actions.begin(), p_infoset->m_actions.end(),
-                                      p_action.get_shared())
-                          : p_infoset->m_actions.end();
-  auto offset = where - p_infoset->m_actions.begin();
-
-  auto action = std::make_shared<GameActionRep>(offset + 1, "", p_infoset.get());
-  p_infoset->m_actions.insert(where, action);
-  if (p_infoset->m_player->IsChance()) {
-    p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), offset), Number());
-  }
-  p_infoset->RenumberActions();
-  for (const auto &member : p_infoset->m_members) {
-    member->m_children.insert(std::next(member->m_children.cbegin(), offset),
-                              std::make_shared<GameNodeRep>(this, member.get()));
-  }
-
-  m_numNodes += p_infoset->m_members.size();
-  // m_numNonterminalNodes stays unchanged when an action is appended to an information set
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-  return action;
-}
-
 void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
                                  const std::map<std::string, std::string> &p_labels)
 {

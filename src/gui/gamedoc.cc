@@ -515,17 +515,26 @@ void GameDocument::DoInsertAction(GameNode p_node)
     return;
   }
   const GameInfoset infoset = p_node->GetInfoset();
-  const GameAction action = m_game->InsertAction(infoset);
 
   std::set<std::string> actionLabels;
-  for (const auto &sibling : infoset->GetActions()) {
-    actionLabels.insert(sibling->GetLabel());
+  std::vector<std::string> labels;
+  std::vector<Number> probs;
+  for (const auto &action : infoset->GetActions()) {
+    actionLabels.insert(action->GetLabel());
+    labels.push_back(action->GetLabel());
+    if (infoset->IsChanceInfoset()) {
+      probs.push_back(infoset->GetActionProb(action));
+    }
   }
-  int number = action->GetNumber();
+  int number = static_cast<int>(labels.size()) + 1;
   while (contains(actionLabels, std::to_string(number))) {
     number++;
   }
-  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
+  labels.push_back(std::to_string(number));
+  if (infoset->IsChanceInfoset()) {
+    probs.emplace_back();
+  }
+  m_game->SetActions(infoset, labels, probs);
   NotifyChanged(GameModificationType::GameForm);
 }
 

@@ -183,7 +183,6 @@ public:
   void Reveal(GameInfoset, GamePlayer) override;
   GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
                         const std::string &) override;
-  GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
   void SetActions(const GameInfoset &, const std::vector<std::string> &,
                   const std::vector<Number> & = {}) override;
