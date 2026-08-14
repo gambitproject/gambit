@@ -278,7 +278,6 @@ game_SOURCES = \
 	src/games/nash.h
 
 linalg_SOURCES = \
-	src/solvers/linalg/btableau.h \
 	src/solvers/linalg/lpsolve.cc \
 	src/solvers/linalg/lpsolve.h \
 	src/solvers/linalg/lpsolve.imp \
