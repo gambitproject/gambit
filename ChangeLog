@@ -11,6 +11,7 @@
   its actions to be specified up front, just as `Game.make_event` does.  (#999)
 - `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
   information sets; the unreachable information sets are absent.  (#1002)
+- Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
 
 ### Changed
 - Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
@@ -83,6 +84,8 @@
   stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
   `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
   now builds the equivalent `MakeEvent` call directly.  (#999)
+- Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
+  nonempty, unique labels.  (#1047)
 
 ## [16.7.0] - 2026-07-11
 
