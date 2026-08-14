@@ -302,11 +302,21 @@ public:
   void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
   void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
-  void DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs);
+  /// Declare the actions of `p_infoset` in a single operation, covering any combination
+  /// of adding, deleting, reordering, and relabeling actions.
+  ///
+  /// `p_stableLabels` identifies each action as it was before this edit (an existing
+  /// action's current label, or a placeholder for one newly created); `p_labels` is what
+  /// that same action, by position, is to be labeled after the edit.  Structure (which
+  /// actions exist, and in what order) is resolved first, purely from `p_stableLabels` and
+  /// `p_probs`; labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in
+  /// this order means a rename that reuses a label freed up by a simultaneous deletion
+  /// never collides with the not-yet-renamed original.
+  void DoSetActions(GameInfoset p_infoset, const std::vector<std::string> &p_stableLabels,
+                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
   void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
   void DoLeaveInfoset(GameNode p_node);
   void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
-  void DoInsertAction(GameNode p_node);
   void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
   void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
   void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);

@@ -588,8 +588,6 @@ void EfgDisplay::MakeMenus()
 {
   m_nodeMenu = new wxMenu;
   m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), _("Insert a move"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
-                     _("Insert an action at the current move"));
   m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), _("Reveal choice at node"));
   m_nodeMenu->AppendSeparator();
 
@@ -602,7 +600,7 @@ void EfgDisplay::MakeMenus()
   m_nodeMenu->AppendSeparator();
 
   m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties"), _("Edit properties of the node"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move properties"), _("Edit properties of the move"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Edit move"), _("Edit properties of the move"));
 
   m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties"), _("Edit properties of the game"));
@@ -614,6 +612,9 @@ bool EfgDisplay::ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlay
   if (!p_targetNode || !p_player) {
     return false;
   }
+  if (!p_targetNode->IsTerminal() && p_targetNode->GetPlayer() == p_player) {
+    return false; // already this player's move; nothing to do via drag-and-drop
+  }
 
   const int operationId = wxWindow::NewControlId();
 
@@ -621,9 +622,6 @@ bool EfgDisplay::ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlay
 
   if (p_targetNode->IsTerminal()) {
     menu.Append(operationId, _("Insert move for this player"));
-  }
-  else if (p_targetNode->GetPlayer() == p_player) {
-    menu.Append(operationId, _("Insert action at this move"));
   }
   else {
     menu.Append(operationId, _("Assign this move to this player"));
@@ -637,9 +635,6 @@ bool EfgDisplay::ShowPlayerDropMenu(const GameNode &p_targetNode, const GamePlay
   try {
     if (p_targetNode->IsTerminal()) {
       m_doc->DoInsertMove(p_targetNode, p_player, 2);
-    }
-    else if (p_targetNode->GetPlayer() == p_player) {
-      m_doc->DoInsertAction(p_targetNode);
     }
     else {
       m_doc->DoSetPlayer(p_targetNode, p_player);
@@ -928,7 +923,6 @@ void EfgDisplay::OnUpdate()
   const GameNode selectNode = m_doc->GetSelectNode();
 
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, static_cast<bool>(selectNode));
-  m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL,
                      selectNode && selectNode->GetInfoset() &&
                          !m_doc->GetGame()->IsAbsentMinded(selectNode->GetInfoset()));
