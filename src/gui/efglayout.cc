@@ -627,14 +627,23 @@ void TreeLayout::Layout(const Game &p_game)
 {
   m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
-    // We only rebuild the node list if the number of nodes changes.  If we only have
-    // information set changes this can be handled just by the traversal below
-    BuildNodeList(p_game);
-  }
-
   auto layout = Gambit::Layout(m_doc->GetGame());
   layout.LayoutTree(p_game);
+
+  // We only rebuild the node list if the set of nodes has changed.  If we only have
+  // information set changes this can be handled just by the traversal below.  A count
+  // comparison alone isn't enough to detect that: an edit that drops one node and creates
+  // another in the same operation (e.g. simultaneously adding and removing actions at an
+  // information set) leaves the count unchanged while still swapping out which nodes exist,
+  // so we also check that every node in the freshly computed layout is one we already have
+  // an entry for.
+  const bool nodeSetChanged =
+      m_nodeList.size() != m_doc->GetGame()->NumNodes() ||
+      std::any_of(layout.GetNodeMap().begin(), layout.GetNodeMap().end(),
+                  [this](const auto &p_pair) { return !m_nodeMap.contains(p_pair.first); });
+  if (nodeSetChanged) {
+    BuildNodeList(p_game);
+  }
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
   for (auto [node, entry] : layout.GetNodeMap()) {
