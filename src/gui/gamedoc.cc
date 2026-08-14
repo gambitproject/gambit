@@ -452,7 +452,8 @@ void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 
 void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelStrategies(p_strategy->GetPlayer(),
+                            {{p_strategy->GetLabel(), p_label.ToStdString(wxConvUTF8)}});
   NotifyChanged(GameModificationType::GameLabels);
 }
 
