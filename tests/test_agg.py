@@ -1,6 +1,8 @@
 """Tests of generic Game operations on action graph game (AGG/BAGG) representations.
 """
 
+import itertools
+
 import pytest
 
 import pygambit as gbt
@@ -124,3 +126,50 @@ def test_agg_bagg_rational_algorithms_find_exact_mixed_equilibrium(game_path):
             for strategy in player.strategies:
                 assert mixed[0][strategy] in (gbt.Rational(10, 11), gbt.Rational(1, 11))
         assert mixed[0].max_regret() == 0
+
+
+def _set_pure_profile(profile, players, contingency):
+    for player, strat_index in zip(players, contingency, strict=True):
+        for i, strategy in enumerate(player.strategies):
+            profile[strategy] = gbt.Rational(1) if i == strat_index else gbt.Rational(0)
+
+
+@pytest.mark.parametrize("game_path", ["2x2.bagg", "2x2_fraction_types.bagg"])
+def test_bagg_pure_strategy_payoff_matches_degenerate_mixed_profile(game_path):
+    """BAGG's exact pure-strategy payoff agrees, for every pure-strategy contingency, with the
+    payoff of the corresponding degenerate mixed profile computed via the general convolution
+    engine -- covering agg::BAGG::getPurePayoff<Rational>, which had no dedicated test before.
+    """
+    game = games.read_from_file(game_path)
+    players = list(game.players)
+    for contingency in itertools.product(*(range(len(list(p.strategies))) for p in players)):
+        pure_payoffs = [game[contingency][p] for p in players]
+
+        profile = game.mixed_strategy_profile(rational=True)
+        _set_pure_profile(profile, players, contingency)
+        mixed_payoffs = [profile.payoff(p) for p in players]
+
+        assert pure_payoffs == mixed_payoffs
+
+
+def test_bagg_pure_strategy_payoff_with_multiple_players_and_types():
+    """Same cross-check as above, sampled (full enumeration is 7**6 contingencies) on a BAGG
+    with several players each holding several types, to exercise getPurePayoff<Rational>'s
+    handling of more than one other player's type distribution at once.
+    """
+    game = games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg")
+    players = list(game.players)
+    sizes = [len(list(p.strategies)) for p in players]
+    contingencies = [
+        tuple(0 for _ in sizes),
+        tuple(size - 1 for size in sizes),
+        tuple(i % size for i, size in enumerate(sizes)),
+    ]
+    for contingency in contingencies:
+        pure_payoffs = [game[contingency][p] for p in players]
+
+        profile = game.mixed_strategy_profile(rational=True)
+        _set_pure_profile(profile, players, contingency)
+        mixed_payoffs = [profile.payoff(p) for p in players]
+
+        assert pure_payoffs == mixed_payoffs

@@ -268,61 +268,19 @@ template double BAGG::getMixedPayoff<double>(int player, int tp,
 template Rational BAGG::getMixedPayoff<Rational>(int player, int tp,
                                                  const StrategyProfile<Rational> &s) const;
 
-double BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
+// payoff of the pure profile ps, via the degenerate mixed profile and the convolution engine
+// (mirrors AGG::getPurePayoff<V>).
+template <class V> V BAGG::getPurePayoff(int player, int tp, const std::vector<int> &ps) const
 {
-  StrategyProfile<double> st(strategyOffset[typeOffset[numPlayers]]);
-  for (int i = 0; i < strategyOffset[typeOffset[numPlayers]]; i++) {
-    st[i] = (double)0.0;
-  }
+  StrategyProfile<V> s(strategyOffset[typeOffset[numPlayers]]);
   for (int i = 0; i < typeOffset[numPlayers]; i++) {
-    st[strategyOffset[i] + ps[i]] = (double)1.0;
+    s[strategyOffset[i] + ps[i]] = V(1);
   }
-  return getMixedPayoff(player, tp, st);
+  return getMixedPayoff(player, tp, s);
 }
-
-// Unlike getPurePayoff() above, this does NOT delegate to the general mixed-payoff convolution
-// engine.  A BAGG pure profile only leaves the OTHER players' realized types uncertain (each
-// independent, per exactIndepTypeDist), not their actions -- so the expectation is a small,
-// exact, finite sum over the Cartesian product of the other players' types (bounded by the
-// product of their type counts, not their action counts), each term an exact AGG-level pure
-// payoff via AGG::getPurePayoff<Rational>.
-Rational BAGG::getExactPurePayoff(int player, int tp, const std::vector<int> &ps) const
-{
-  std::vector<int> others;
-  for (int pl = 0; pl < numPlayers; ++pl) {
-    if (pl != player) {
-      others.push_back(pl);
-    }
-  }
-
-  std::vector<int> sAGG(numPlayers);
-  sAGG[player] = typeAction2ActionIndex[player][tp][ps[typeOffset[player] + tp]];
-
-  std::vector<int> typeIndex(others.size(), 0);
-  Rational total(0);
-  while (true) {
-    Rational weight(1);
-    for (size_t k = 0; k < others.size(); ++k) {
-      const int pl = others[k];
-      const int t = typeIndex[k];
-      sAGG[pl] = typeAction2ActionIndex[pl][t][ps[typeOffset[pl] + t]];
-      weight *= static_cast<Rational>(exactIndepTypeDist[pl][t]);
-    }
-    total += weight * aggPtr->getPurePayoff<Rational>(player, sAGG);
-
-    size_t k = 0;
-    for (; k < others.size(); ++k) {
-      if (++typeIndex[k] < numTypes[others[k]]) {
-        break;
-      }
-      typeIndex[k] = 0;
-    }
-    if (k == others.size()) {
-      break;
-    }
-  }
-  return total;
-}
+template double BAGG::getPurePayoff<double>(int player, int tp, const std::vector<int> &ps) const;
+template Rational BAGG::getPurePayoff<Rational>(int player, int tp,
+                                                const std::vector<int> &ps) const;
 
 void BAGG::getSymAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s)
 {
