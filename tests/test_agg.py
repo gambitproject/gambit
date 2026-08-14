@@ -43,10 +43,8 @@ def test_agg_bagg_to_nfg(game_path):
 
 
 def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
-    """Payoffs written in an .agg file as a fraction ("1/3") or a decimal needing more than
-    double's ~15-17 significant digits of precision to round-trip are parsed into exact
-    Rationals (via Number, agg::AGG::exactPayoffs), not silently rounded through a bare
-    `istream >> double` read.
+    """Payoffs written as a fraction ("1/3") or a decimal too precise for a double to round-trip
+    are parsed into exact Rationals, not silently rounded through a bare double read.
 
     2x2_fraction_payoffs.agg is 2x2.agg with two of its four payoffs replaced: 35 -> 1/3 and
     95 -> 0.123456789012345.
@@ -58,8 +56,7 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
         assert player.max_payoff == gbt.Rational(1, 3)
         assert player.min_payoff == -10
 
-    # pure-strategy payoff lookup (AGGPureStrategyProfileRep::GetPayoff) also reports the
-    # exact value, not a double-rounded approximation
+    # pure-strategy payoff lookup also reports the exact value, not a rounded approximation
     profile = game.mixed_strategy_profile(rational=True)
     p0, p1 = game.players
     s0 = list(p0.strategies)
@@ -72,9 +69,9 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
 
 
 def test_bagg_fraction_type_distribution_parsed_exactly():
-    """BAGG type-distribution probabilities written as a fraction ("1/3") are parsed exactly
-    (agg::BAGG::exactIndepTypeDist) and the exact weighted-sum payoff computation over them
-    (agg::BAGG::getExactMixedPayoff) agrees with the double engine on the same profile.
+    """BAGG type-distribution probabilities written as a fraction ("1/3") are parsed exactly,
+    and the exact payoff computation over them agrees with the double engine on the same
+    profile.
 
     2x2_fraction_types.bagg: player 1 has two types (weights 1/3, 2/3), player 2 has one.
     """
@@ -93,13 +90,10 @@ def test_bagg_fraction_type_distribution_parsed_exactly():
 
 @pytest.mark.parametrize("game_path", ["2x2.agg", "2x2.bagg"])
 def test_agg_bagg_mixed_strategy_profile_rational_exact_payoff(game_path):
-    """AGG/BAGG mixed-strategy payoffs support exact (rational) computation: the convolution
-    algorithm (agg::AGG::getMixedPayoff et al.) is generic in its numeric type, so it also runs
-    with Rational arithmetic throughout (agg::AGG::getExactMixedPayoff), not just double.
+    """AGG/BAGG mixed-strategy payoffs support exact (rational) computation, not just double.
 
     2x2.agg has a known mixed equilibrium at (10/11, 1/11) for both players, with payoff
-    exactly -5/11 to each -- computed here directly (not via a solver), confirming the exact
-    engine reproduces it with zero regret.
+    exactly -5/11 to each -- computed here directly (not via a solver), confirming zero regret.
     """
     game = games.read_from_file(game_path)
     profile = game.mixed_strategy_profile(rational=True)

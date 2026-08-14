@@ -287,10 +287,6 @@ MixedStrategyProfile<double> GameBAGGRep::NewMixedStrategyProfile(double) const
 
 MixedStrategyProfile<Rational> GameBAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
-  // Constructing the profile itself is fine (e.g. to exactly represent a pure-strategy
-  // profile as a degenerate mixed one, as EnumPureStrategySolve does) -- it's specifically
-  // *payoff computation* on it that BAGG cannot do exactly; see
-  // BAGGMixedStrategyProfileRep<Rational>::GetPayoff.
   return MixedStrategyProfile<Rational>(std::make_unique<BAGGMixedStrategyProfileRep<Rational>>(
       StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }

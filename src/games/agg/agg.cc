@@ -392,10 +392,8 @@ void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<do
   transform(order.begin(), order.end(), p, select2nd);
 }
 
-// compute the induced distribution. The action graph structure (projection, Porder,
-// projFunctions, actionSets, neighbors) is purely combinatorial -- built once from integer data,
-// independent of payoff/probability values -- so it's shared by both V; only the numeric working
-// state, reached via state<V>(), differs by V.
+// compute the induced distribution; only the working state (state<V>()) varies with V, the
+// action graph structure itself is shared.
 template <class V> void AGG::computeP(int player, int act, int player2, int act2)
 {
   auto &s = state<V>();

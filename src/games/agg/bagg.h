@@ -66,14 +66,11 @@ public:
   template <class V> V getMaxPayoff() const { return aggPtr->getMaxPayoff<V>(); }
   template <class V> V getMinPayoff() const { return aggPtr->getMinPayoff<V>(); }
 
-  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart --
-  // unused outside this class; getPurePayoff and GameBAGGRep only ever go through the per-type
-  // overload below.
+  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart;
+  // callers go through the per-type overload below.
   double getMixedPayoff(int player, StrategyProfile<double> &s);
 
   // exp payoff for player, conditioned on her receiving type tp, via the convolution algorithm.
-  // V=double runs the floating-point engine; V=Rational runs the exact-arithmetic counterpart
-  // throughout -- see agg.h::getMixedPayoff for how the dispatch works.
   template <class V> V getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const;
 
   void getPayoffVector(std::vector<double> &dest, int player, int tp,
