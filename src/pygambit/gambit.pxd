@@ -359,20 +359,20 @@ cdef extern from "games/game.h":
         c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, int) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GameInfoset) except +ValueError
+        c_GameInfoset AppendEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
+        c_GameInfoset InsertEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
         void CopyTree(c_GameNode dest, c_GameNode src) except +ValueError
         void MoveTree(c_GameNode dest, c_GameNode src) except +ValueError
         void DeleteParent(c_GameNode) except +
         void DeleteTree(c_GameNode) except +
-        void SetPlayer(c_GameInfoset, c_GamePlayer) except +
-        void Reveal(c_GameInfoset, c_GamePlayer) except +
         c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
-        void SetInfoset(c_GameNode, c_GameInfoset) except +ValueError
-        c_GameInfoset LeaveInfoset(c_GameNode) except +
+        void Reveal(c_GameInfoset, c_GamePlayer) except +
         c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetActions(c_GameInfoset, stdvector[string], stdvector[c_Number]) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
-        c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
         c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
                                 string) except +ValueError
 

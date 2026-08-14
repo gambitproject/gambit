@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: Gambit
+abstract: "The package for computation in game theory"
+type: software
+authors:
+  - given-names: Theodore
+    family-names: Turocy
+    email: ted.turocy@gmail.com
+  - given-names: Rahul
+    family-names: Savani
+    email: rahul.savani@liverpool.ac.uk
+repository-code: "https://github.com/gambitproject/gambit"
+url: "https://www.gambit-project.org/"
+license: GPL-2.0-or-later
+keywords:
+  - game theory
+  - Nash equilibrium
+version: 17.0.0-alpha.1
+date-released: "2026-08-13"
