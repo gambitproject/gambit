@@ -955,7 +955,7 @@ template <class V> V AGG::getMaxPayoff() const
   assert(numActionNodes > 0);
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : exactPayoffs[i]) {
         result = max(result, static_cast<Rational>(it.second));
       }
@@ -964,7 +964,7 @@ template <class V> V AGG::getMaxPayoff() const
   }
   else {
     double result = payoffs[0].begin()->second;
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : payoffs[i]) {
         result = max(result, it.second);
       }
@@ -978,7 +978,7 @@ template <class V> V AGG::getMinPayoff() const
   assert(numActionNodes > 0);
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : exactPayoffs[i]) {
         result = min(result, static_cast<Rational>(it.second));
       }
@@ -987,7 +987,7 @@ template <class V> V AGG::getMinPayoff() const
   }
   else {
     double result = payoffs[0].begin()->second;
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : payoffs[i]) {
         result = min(result, it.second);
       }
