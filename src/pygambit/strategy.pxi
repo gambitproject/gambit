@@ -60,13 +60,10 @@ class Strategy:
             two consecutive whitespace characters.  "Whitespace" means any Unicode space
             separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
 
-            The label is now read-only; use `Game.relabel_strategies` to change it.
+            The label is now read-only, and must be nonempty and unique among the player's
+            strategies; use `Game.relabel_strategies` to change it.
         """
         return self.strategy.deref().GetLabel().decode("utf-8")
-
-    @label.setter
-    def label(self, value: str) -> None:
-        self.strategy.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def game(self) -> Game:
