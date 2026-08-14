@@ -245,11 +245,40 @@ Gambit is set up with `All Contributors <https://allcontributors.org/>`__ to rec
 
 You can see the list of contributors on the README page of the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__.
 
-To add a contributor, comment on a GitHub Issue or Pull Request, asking @all-contributors to add a contributor:
+To add a contributor, use the `All Contributors CLI <https://allcontributors.org/docs/en/cli/usage>`__.
+To keep the contributor table consistent, use one or more of the following contribution types
+(a subset of the full `emoji key <https://allcontributors.org/docs/en/emoji-key>`__):
 
- @all-contributors please add @<username> for <contributions>
+======================  ==================================================
+Type                    Description
+======================  ==================================================
+``code``                Code
+``doc``                 Documentation
+``bug``                 Bug reports
+``test``                Tests
+``research``            Research
+``maintenance``         Maintenance
+``infra``               Infrastructure (hosting, build tools, CI, etc.)
+``ideas``               Ideas, planning, & feedback
+``tutorial``            Tutorials
+``question``            Answering questions
+``review``              Reviewed pull requests
+``userTesting``         User testing
+======================  ==================================================
 
-Refer to the `emoji key <https://allcontributors.org/docs/en/emoji-key>`__ for a list of contribution types.
+For example, to credit a contributor for code and documentation:
+
+.. code-block:: bash
+
+   npx all-contributors-cli add <username> code,doc
+
+This updates ``.all-contributorsrc`` and regenerates the contributor table in the README automatically.
+
+From time to time, run the following to check whether any GitHub contributors are missing from the list:
+
+.. code-block:: bash
+
+   npx all-contributors-cli check
 
 Releases & maintenance branches
 -------------------------------
@@ -290,6 +319,9 @@ When making a new release of Gambit, follow these steps:
    - ``X.Y.Z-beta.N``  -> build ``10000 + N``
    - ``X.Y.Z-rc.N``    -> build ``20000 + N``
    - ``X.Y.Z`` (final) -> build ``60000``
+
+   ``CITATION.cff`` is the one file that does *not* read from ``GAMBIT_VERSION`` automatically.
+   Update its ``version`` and ``date-released`` fields by hand to match the new release.
 
 3. Update the ``ChangeLog`` file at the repository root with a summary of changes for this release.
    This file is the single source of truth for release notes — it is surfaced in the documentation

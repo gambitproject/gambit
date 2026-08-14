@@ -6,7 +6,7 @@
 
         <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed." />
 
-        <WixVariable Id="WixUILicenseRtf" Value="license.rtf"/>
+        <WixVariable Id="WixUILicenseRtf" Value="build_support/msw/license.rtf"/>
         <UI>
             <UIRef Id="WixUI_Minimal"/>
         </UI>
