@@ -129,7 +129,7 @@ struct SimpdivNashSpec {
   int leashLength{0};
   Rational maxRegret{1, 10000000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 using NashMethodSpec =

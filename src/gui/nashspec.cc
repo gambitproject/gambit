@@ -28,6 +28,7 @@
 #include "solvers/lcp/lcp.h"
 #include "solvers/logit/logit.h"
 #include "solvers/lp/lp.h"
+#include "solvers/simpdiv/simpdiv.h"
 
 namespace Gambit::GUI {
 
@@ -140,6 +141,24 @@ std::optional<SolverFunction> LogitNashSpec::MakeSolver(NashRepresentation p_rep
         start, spec.maxRegret, spec.omega, spec.firstStep, spec.maxAcceleration,
         [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
         NullLogitEventCallback<LogitQREMixedStrategyProfile>, p_cancel);
+  };
+}
+
+std::optional<SolverFunction> SimpdivNashSpec::MakeSolver(NashRepresentation) const
+{
+  const SimpdivNashSpec spec = *this;
+  return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                const CancelToken &p_cancel) {
+    for (const auto &start :
+         NewRandomStrategyProfiles(p_game, spec.startingPoints, spec.randomDenominator)) {
+      p_cancel.Check();
+      Nash::SimpdivStrategySolve(
+          start, spec.maxRegret, spec.gridResize, spec.leashLength,
+          [&p_callback](const MixedStrategyProfile<Rational> &p) {
+            p_callback(ComputedProfile(p));
+          },
+          Nash::NullSimpdivEventCallback, p_cancel);
+    }
   };
 }
 
