@@ -417,9 +417,6 @@ GamePlayer GameDocument::DoNewPlayer()
     number++;
   }
   const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
-  if (!m_game->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
-  }
   NotifyChanged(GameModificationType::GameForm);
   return player;
 }

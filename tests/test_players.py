@@ -128,6 +128,7 @@ def test_strategic_game_add_player():
     new_player = game.add_player("Player 3")
     assert len(game.players) == 3
     assert len(new_player.strategies) == 1
+    assert next(iter(new_player.strategies)).label == "1"
 
 
 def test_extensive_game_add_player():

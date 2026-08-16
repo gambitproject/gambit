@@ -107,7 +107,6 @@ cdef extern from "games/game.h":
         int GetId() except +
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
         c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameSequenceRep "GameSequenceRep":
