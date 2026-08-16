@@ -60,6 +60,9 @@
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
   no longer inserts spurious entries into a strategy's internal action map.
+- `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
+  strategy with an empty label; it is now labeled `"1"`, as `Game.new_table` already labels
+  every other player's initial strategies.  (#1047)
 
 ### Removed
 - `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the

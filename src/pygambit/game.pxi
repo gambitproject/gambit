@@ -2425,6 +2425,10 @@ class Game:
             In extensive games, the label cannot be ``"Chance"``, which is reserved for the
             chance player.
 
+        .. versionchanged:: 17.0.0
+            In a game with a strategic representation, the new player's sole strategy is
+            labeled ``"1"``.
+
         Parameters
         ----------
         label : str
