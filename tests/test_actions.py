@@ -105,15 +105,9 @@ def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
 def test_action_precedes(game: gbt.Game):
     child = game.root.children["King"]
-    assert game.root.infoset.actions["King"].precedes(child)
-    assert not game.root.infoset.actions["Queen"].precedes(child)
-
-
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_precedes_nonnode(game: gbt.Game):
-    action = next(iter(game.root.infoset.actions))
-    with pytest.raises(TypeError):
-        action.precedes(game)
+    infoset = game.root.infoset
+    assert any(child.is_successor_of(m.children["King"]) for m in infoset.members)
+    assert not any(child.is_successor_of(m.children["Queen"]) for m in infoset.members)
 
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])

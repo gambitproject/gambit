@@ -174,7 +174,6 @@ Information about the game
    Infoset.player
    Infoset.actions
    Infoset.members
-   Infoset.precedes
    Infoset.plays
    Infoset.own_prior_actions
 
@@ -184,7 +183,6 @@ Information about the game
 
    Action.label
    Action.infoset
-   Action.precedes
    Action.prob
    Action.plays
 

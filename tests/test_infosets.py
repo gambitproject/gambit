@@ -49,8 +49,11 @@ def test_infoset_player_retrieval():
 
 def test_infoset_node_precedes():
     game = games.read_from_file("basic_extensive_game.efg")
-    assert not game.root.infoset.precedes(game.root)
-    assert game.root.children["U1"].infoset.precedes(game.root.children["U1"])
+    assert any(game.root.is_successor_of(m) for m in game.root.infoset.members)
+    assert any(
+        game.root.children["U1"].is_successor_of(m)
+        for m in game.root.children["U1"].infoset.members
+    )
 
 
 def test_make_infoset_change_player_keeps_label():

@@ -57,19 +57,6 @@ class Action:
         """
         return self.action.deref().GetNumber() - 1
 
-    def precedes(self, node: Node) -> bool:
-        """Returns whether `node` precedes this action in the
-        extensive game.
-
-        Raises
-        ------
-        MismatchError
-            If `node` is not in the same game as the action.
-        """
-        if self.infoset.game != node.game:
-            raise MismatchError("precedes() requires a node from the same game as the action")
-        return self.action.deref().Precedes(cython.cast(Node, node).node)
-
     @property
     def label(self) -> str:
         """The text label of the action.

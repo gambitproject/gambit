@@ -104,19 +104,6 @@ template class TreeMixedStrategyProfileRep<Rational>;
 //                     class GameActionRep
 //========================================================================
 
-bool GameActionRep::Precedes(const GameNode &n) const
-{
-  GameNode node = n;
-
-  while (node != node->GetGame()->GetRoot()) {
-    if (node->GetPriorAction().get() == this) {
-      return true;
-    }
-    node = node->GetParent();
-  }
-  return false;
-}
-
 void GameTreeRep::DeleteAction(GameAction p_action)
 {
   auto action = p_action.get();
@@ -174,18 +161,6 @@ GameInfosetRep::~GameInfosetRep()
 {
   std::for_each(m_actions.begin(), m_actions.end(),
                 [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
-}
-
-bool GameInfosetRep::Precedes(GameNode p_node) const
-{
-  auto node = p_node.get();
-  while (node->m_parent) {
-    if (node->m_infoset == this) {
-      return true;
-    }
-    node = node->m_parent;
-  }
-  return false;
 }
 
 GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
@@ -635,7 +610,12 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
       // into a single new information set.
       std::vector<GameNode> group;
       for (const auto &member : members) {
-        if (action->Precedes(member)) {
+        const bool follows_action =
+            std::any_of(p_atInfoset->m_members.begin(), p_atInfoset->m_members.end(),
+                        [&](const std::shared_ptr<GameNodeRep> &at_member) {
+                          return member->IsSuccessorOf(at_member->GetChild(action));
+                        });
+        if (follows_action) {
           group.emplace_back(member);
         }
       }

@@ -391,8 +391,6 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-
-  bool Precedes(const GameNode &) const;
 };
 
 /// An information set in an extensive game
@@ -458,8 +456,6 @@ public:
 
   GameNode GetMember(int p_index) const;
   Members GetMembers() const;
-
-  bool Precedes(GameNode) const;
 
   std::set<GameAction> GetOwnPriorActions() const;
 
