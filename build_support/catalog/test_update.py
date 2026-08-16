@@ -204,7 +204,7 @@ class TestCatalogResourceSelection:
 
 
 @pytest.mark.catalog_update
-class TestCatalogDrawTreeSettings:
+class TestCatalogGtDrawSettings:
     """Unit tests for ``catalog_gtdraw_settings(slug) -> dict``.
 
     Each test writes a temporary YAML config and redirects the module-level

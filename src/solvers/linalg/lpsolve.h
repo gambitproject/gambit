@@ -23,6 +23,7 @@
 #ifndef LPSOLVE_H
 #define LPSOLVE_H
 
+#include "core/cancel.h"
 #include "gambit.h"
 #include "lptab.h"
 
@@ -50,6 +51,7 @@ private:
   Array<T> ub, lb;
   Vector<T> xx, cost;
   Vector<T> y, x, d;
+  CancelToken m_cancel;
 
   void Solve(int phase = 0);
   int Enter();
@@ -57,7 +59,8 @@ private:
 
 public:
   LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
-          int nequals); // nequals = number of equalities (last nequals rows)
+          int nequals, // nequals = number of equalities (last nequals rows)
+          const CancelToken &p_cancel = CancelToken());
   ~LPSolve() = default;
 
   T OptimumCost() const { return total_cost; }

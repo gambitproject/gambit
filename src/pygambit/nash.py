@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
+from collections.abc import Iterator
 
 import pygambit.gambit as libgbt
 
@@ -437,7 +438,7 @@ def simpdiv_solve(
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
 
-    maxregret : Rational, default 1e-8
+    maxregret : Rational, default 1e-7
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
@@ -636,25 +637,25 @@ def gnm_solve(
         raise
 
 
-def possible_nash_supports(game: libgbt.Game) -> list[libgbt.StrategySupportProfile]:
-    """Compute the set of support profiles which could possibly form the support
+def possible_nash_supports(game: libgbt.Game) -> Iterator[libgbt.StrategySupportProfile]:
+    """Generate the support profiles which could possibly form the support
     of a totally-mixed Nash equilibrium.
 
-    Warnings
-    --------
-    This implementation is currently experimental.
+    .. versionchanged:: 17.0.0
+
+       Returns a generator instead of a list.
 
     Parameters
     ----------
     game : Game
         The game to compute the supports in.
 
-    Returns
-    -------
-    res : list of StrategySupportProfile
-        The list of computed support profiles
+    Yields
+    ------
+    StrategySupportProfile
+        The next computed support profile.
     """
-    return libgbt._nashsupport_strategy_solve(game)
+    yield from libgbt._nashsupport_strategy_solve(game)
 
 
 def enumpoly_solve(

@@ -64,8 +64,8 @@ EditableLabelText::EditableLabelText(wxWindow *p_parent, int p_id, const wxStrin
   Connect(m_staticText->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(EditableLabelText::OnClick));
 
-  m_textCtrl = new LabelTextCtrl(this, wxID_ANY, p_value, LabelCharacterPolicy::AsciiOnly,
-                                 wxPoint(0, 0), p_size, wxTE_PROCESS_ENTER);
+  m_textCtrl =
+      new LabelTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxTE_PROCESS_ENTER);
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
           wxCommandEventHandler(EditableLabelText::OnAccept));
 

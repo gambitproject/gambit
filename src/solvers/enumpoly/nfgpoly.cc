@@ -154,9 +154,9 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   }
 
   std::list<MixedStrategyProfile<double>> ret;
-  auto possible_supports = PossibleNashStrategySupports(p_game);
+  PossibleNashStrategySupports possible_supports(p_game);
 
-  for (auto support : possible_supports->m_supports) {
+  for (auto support : possible_supports) {
     p_onEvent(EnumPolyCandidateSupportEvent<StrategySupportProfile>{support});
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(

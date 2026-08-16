@@ -23,11 +23,15 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <algorithm>
+#include <compare>
 #include <list>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
 #include <set>
 #include <stack>
-#include <queue>
-#include <memory>
 
 #include "number.h"
 #include "gameobject.h"
@@ -117,38 +121,169 @@ public:
 //                       Validation of labels
 //=======================================================================
 
+/// @brief Decodes p_text as UTF-8, appending each decoded code point to p_codepoints.
+///
+/// Validates well-formedness per the Unicode Standard's table of well-formed UTF-8
+/// byte sequences: rejects truncated sequences, overlong encodings, encoded
+/// surrogate code points (U+D800-DFFF), and code points beyond U+10FFFF.
+///
+/// @return true if p_text is well-formed UTF-8. On failure, p_codepoints holds
+///         only the code points decoded before the invalid byte was reached,
+///         and should not be used.
+inline bool DecodeUtf8(const std::string &p_text, std::vector<char32_t> &p_codepoints)
+{
+  p_codepoints.clear();
+  auto byte_at = [&p_text](size_t i) { return static_cast<unsigned char>(p_text[i]); };
+  size_t i = 0;
+  const size_t n = p_text.size();
+  while (i < n) {
+    const unsigned char b0 = byte_at(i);
+    char32_t codepoint;
+    size_t length;
+    unsigned char lo1 = 0x80, hi1 = 0xbf; // valid range for the first continuation byte
+    if (b0 <= 0x7f) {
+      p_codepoints.push_back(b0);
+      ++i;
+      continue;
+    }
+    else if (b0 >= 0xc2 && b0 <= 0xdf) {
+      length = 2;
+      codepoint = b0 & 0x1f;
+    }
+    else if (b0 == 0xe0) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+      lo1 = 0xa0; // excludes overlong 3-byte encodings
+    }
+    else if ((b0 >= 0xe1 && b0 <= 0xec) || (b0 >= 0xee && b0 <= 0xef)) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+    }
+    else if (b0 == 0xed) {
+      length = 3;
+      codepoint = b0 & 0x0f;
+      hi1 = 0x9f; // excludes encoded surrogate code points U+D800-DFFF
+    }
+    else if (b0 == 0xf0) {
+      length = 4;
+      codepoint = b0 & 0x07;
+      lo1 = 0x90; // excludes overlong 4-byte encodings
+    }
+    else if (b0 >= 0xf1 && b0 <= 0xf3) {
+      length = 4;
+      codepoint = b0 & 0x07;
+    }
+    else if (b0 == 0xf4) {
+      length = 4;
+      codepoint = b0 & 0x07;
+      hi1 = 0x8f; // excludes code points beyond U+10FFFF
+    }
+    else {
+      return false; // stray continuation byte, 0xc0/0xc1, or 0xf5-0xff
+    }
+    if (i + length > n) {
+      return false; // truncated sequence
+    }
+    for (size_t k = 1; k < length; k++) {
+      const unsigned char b = byte_at(i + k);
+      const unsigned char lo = (k == 1) ? lo1 : 0x80;
+      const unsigned char hi = (k == 1) ? hi1 : 0xbf;
+      if (b < lo || b > hi) {
+        return false;
+      }
+      codepoint = (codepoint << 6) | (b & 0x3f);
+    }
+    p_codepoints.push_back(codepoint);
+    i += length;
+  }
+  return true;
+}
+
+/// @brief Returns whether p_text is well-formed UTF-8.
+/// @sa DecodeUtf8
+inline bool IsWellFormedUtf8(const std::string &p_text)
+{
+  std::vector<char32_t> codepoints;
+  return DecodeUtf8(p_text, codepoints);
+}
+
+/// @brief Returns whether c is a Unicode space separator (category Zs).
+///
+/// This is the complete, fixed set of "blank" characters that a label treats as
+/// whitespace for the no-leading/trailing, single-whitespace-between-printables
+/// rule -- the same treatment historically given only to the literal ASCII space.
+/// The set has been stable across Unicode versions for a long time, so it is
+/// hardcoded here rather than obtained from a full Unicode character database.
+inline bool IsUnicodeSpaceSeparator(char32_t c)
+{
+  switch (c) {
+  case 0x0020: // SPACE
+  case 0x00a0: // NO-BREAK SPACE
+  case 0x1680: // OGHAM SPACE MARK
+  case 0x2000: // EN QUAD
+  case 0x2001: // EM QUAD
+  case 0x2002: // EN SPACE
+  case 0x2003: // EM SPACE
+  case 0x2004: // THREE-PER-EM SPACE
+  case 0x2005: // FOUR-PER-EM SPACE
+  case 0x2006: // SIX-PER-EM SPACE
+  case 0x2007: // FIGURE SPACE
+  case 0x2008: // PUNCTUATION SPACE
+  case 0x2009: // THIN SPACE
+  case 0x200a: // HAIR SPACE
+  case 0x202f: // NARROW NO-BREAK SPACE
+  case 0x205f: // MEDIUM MATHEMATICAL SPACE
+  case 0x3000: // IDEOGRAPHIC SPACE
+    return true;
+  default:
+    return false;
+  }
+}
+
 /// @brief Returns whether p_label is a valid label for a game object.
 ///
 /// A valid label either is the empty string (denoting the absence of a label),
-/// or consists only of printable ASCII characters and spaces, begins and ends
-/// with a printable character, and contains no two consecutive spaces.
+/// or is well-formed UTF-8 containing no control characters (Unicode category Cc,
+/// i.e. U+0000-001F, U+007F, and U+0080-009F, plus the line/paragraph separators
+/// U+2028 and U+2029), begins and ends with a non-whitespace, non-control
+/// character, and contains no two consecutive whitespace characters.  "Whitespace"
+/// here means any Unicode space separator (category Zs; see IsUnicodeSpaceSeparator),
+/// not just the literal ASCII space -- so, for example, a label may not begin with
+/// a no-break space (U+00A0) any more than it may begin with an ordinary space.
 ///
-/// @note The set of valid labels is intended to be widened to permit Unicode in
-///       a future version; this function is the single point at which the
-///       definition is enforced.
+/// @note Categories other than Cc/Zl/Zp/Zs (for example, format or private-use
+///       characters) are deliberately not excluded: labels exist for object
+///       identity and display, not as a place to police the full space of Unicode.
 inline bool IsValidLabel(const std::string &p_label)
 {
   if (p_label.empty()) {
     return true;
   }
-  auto is_printable = [](unsigned char c) { return c >= 0x21 && c <= 0x7e; };
-  if (!is_printable(p_label.front()) || !is_printable(p_label.back())) {
+  std::vector<char32_t> codepoints;
+  if (!DecodeUtf8(p_label, codepoints)) {
     return false;
   }
-  bool previous_was_space = false;
-  for (const char ch : p_label) {
-    const auto c = static_cast<unsigned char>(ch);
-    if (c == ' ') {
-      if (previous_was_space) {
-        return false; // two consecutive spaces
+  auto is_control = [](char32_t c) {
+    return c <= 0x1f || c == 0x7f || (c >= 0x80 && c <= 0x9f) || c == 0x2028 || c == 0x2029;
+  };
+  auto is_whitespace = [](char32_t c) { return IsUnicodeSpaceSeparator(c); };
+  auto is_printable = [&](char32_t c) { return !is_control(c) && !is_whitespace(c); };
+  if (!is_printable(codepoints.front()) || !is_printable(codepoints.back())) {
+    return false;
+  }
+  bool previous_was_whitespace = false;
+  for (const char32_t c : codepoints) {
+    if (is_whitespace(c)) {
+      if (previous_was_whitespace) {
+        return false; // two consecutive whitespace characters
       }
-      previous_was_space = true;
+      previous_was_whitespace = true;
     }
     else if (is_printable(c)) {
-      previous_was_space = false;
+      previous_was_whitespace = false;
     }
     else {
-      return false; // tab, newline, other control, or non-ASCII byte
+      return false; // control character
     }
   }
   return true;
@@ -159,9 +294,27 @@ inline bool IsValidLabel(const std::string &p_label)
 inline void CheckLabel(const std::string &p_label)
 {
   if (!IsValidLabel(p_label)) {
-    throw ValueException("Invalid label: a label may contain only printable ASCII "
-                         "characters and spaces, must not begin or end with a space, "
-                         "and must not contain two consecutive spaces");
+    throw ValueException("Invalid label: a label must be well-formed UTF-8 text "
+                         "containing no control characters, must not begin or end "
+                         "with whitespace, and must not contain two consecutive "
+                         "whitespace characters");
+  }
+}
+
+/// @brief Returns whether p_text is valid free-form text (a game title or description).
+///
+/// Unlike labels, free-form text has no semantic role in the model (it does not
+/// identify an object or participate in any uniqueness constraint), so the only
+/// requirement is that it be well-formed UTF-8.
+/// @sa IsValidLabel
+inline bool IsValidText(const std::string &p_text) { return IsWellFormedUtf8(p_text); }
+
+/// @brief Throws ValueException if p_text is not valid free-form text.
+/// @sa IsValidText
+inline void CheckText(const std::string &p_text)
+{
+  if (!IsValidText(p_text)) {
+    throw ValueException("Invalid text: must be well-formed UTF-8");
   }
 }
 
@@ -238,11 +391,6 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
 
   bool Precedes(const GameNode &) const;
 };
@@ -288,6 +436,10 @@ public:
   bool IsChanceInfoset() const;
 
   void SetLabel(const std::string &p_label);
+  /// Validate that p_label is a nonempty, valid label for an action of this
+  /// information set, unique among its actions disregarding any in p_ignore.
+  void CheckActionLabel(const std::string &p_label,
+                        const std::set<const GameActionRep *> &p_ignore) const;
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -410,9 +562,12 @@ public:
   GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
-  bool operator<(const GameSequenceRep &other) const
+  std::strong_ordering operator<=>(const GameSequenceRep &other) const
   {
-    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
+    if (const auto cmp = m_player <=> other.m_player; cmp != 0) {
+      return cmp;
+    }
+    return m_action <=> other.m_action;
   }
   bool operator==(const GameSequenceRep &other) const
   {
@@ -481,6 +636,11 @@ public:
   GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
   Infosets GetInfosets() const;
+  /// Validate that p_label is a valid label for an information set of this player,
+  /// disregarding any information sets in p_ignore.
+  void CheckInfosetLabel(const std::string &p_label,
+                         const std::set<const GameInfosetRep *> &p_ignore) const;
+  //@}
 
   /// @name Strategies
   //@{
@@ -636,8 +796,6 @@ public:
     return m_child_it == p_other.m_child_it;
   }
 
-  /// Compares two iterators for inequality.
-  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   //@}
 
   GameNode GetOwner() const;
@@ -671,19 +829,33 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
-inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+inline void ValidateDistribution(std::vector<Number>::const_iterator p_begin,
+                                 std::vector<Number>::const_iterator p_end,
+                                 const bool p_normalized)
 {
-  if (std::any_of(p_probs.begin(), p_probs.end(),
+  if (std::any_of(p_begin, p_end,
                   [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
     throw ValueException("Probabilities must be non-negative numbers");
   }
   if (!p_normalized) {
     return;
   }
-  if (sum_function(p_probs, [](const Number &n) { return static_cast<Rational>(n); }) !=
-      Rational(1)) {
+  if (std::accumulate(p_begin, p_end, Rational(0), [](const Rational &s, const Number &n) {
+        return s + static_cast<Rational>(n);
+      }) != Rational(1)) {
     throw ValueException("Probabilities must sum to exactly one");
   }
+}
+
+inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
+}
+
+inline void ValidateDistribution(const std::vector<Number> &p_probs,
+                                 const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
 }
 
 class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
@@ -977,7 +1149,6 @@ public:
       {
         return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
@@ -1010,12 +1181,20 @@ public:
   /// Get the text label associated with the game
   virtual const std::string &GetTitle() const { return m_title; }
   /// Set the text label associated with the game
-  virtual void SetTitle(const std::string &p_title) { m_title = p_title; }
+  virtual void SetTitle(const std::string &p_title)
+  {
+    CheckText(p_title);
+    m_title = p_title;
+  }
 
   /// Get the text comment associated with the game
   virtual const std::string &GetDescription() const { return m_comment; }
   /// Set the text comment associated with the game
-  virtual void SetDescription(const std::string &p_comment) { m_comment = p_comment; }
+  virtual void SetDescription(const std::string &p_comment)
+  {
+    CheckText(p_comment);
+    m_comment = p_comment;
+  }
 
   /// Return the version number of the game.  The version is incremented after each
   /// substantive change to the game (i.e. not merely involving labels)
@@ -1077,12 +1256,9 @@ public:
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
 
-  virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-  {
-    throw UndefinedException();
-  }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Append a move for p_player at p_node, with actions labeled per p_actions.
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
@@ -1090,12 +1266,31 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Insert a move for p_player prior to p_node, with p_actions actions bearing
+  /// automatically generated, sequentially numbered labels.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a move for p_player prior to p_node, with actions labeled per p_actions.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
   virtual GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset)
+  {
+    throw UndefinedException();
+  }
+  /// Add a chance move for p_actions, with distribution p_probs, at terminal p_node.
+  virtual GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a chance move for p_actions, with distribution p_probs, prior to p_node.
+  virtual GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
   {
     throw UndefinedException();
   }
@@ -1105,14 +1300,25 @@ public:
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame(GameNode) const { throw UndefinedException(); }
   virtual void MoveTree(GameNode dest, GameNode src) { throw UndefinedException(); }
-  virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
-  virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
-  virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
+  virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
+                                  const std::string &)
+  {
+    throw UndefinedException();
+  }
+  /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
+  /// so that any two nodes reached via different actions at p_infoset are distinguished.
+  virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
   virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
   {
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
+  /// Simultaneously reassign action labels at an information set.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
   virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
@@ -1122,33 +1328,11 @@ public:
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
 
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles
-  template <class Generator>
-  MixedStrategyProfile<double> NewRandomStrategyProfile(Generator &generator) const;
-  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed strategy profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedStrategyProfile<Rational> NewRandomStrategyProfile(int denom, Generator &generator) const;
   virtual MixedStrategyProfile<double>
   NewMixedStrategyProfile(double, const StrategySupportProfile &) const = 0;
   virtual MixedStrategyProfile<Rational>
   NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const = 0;
 
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles
-  template <class Generator>
-  MixedBehaviorProfile<double> NewRandomBehaviorProfile(Generator &generator) const;
-  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
-  /// set of
-  ///        mixed behavior profiles, restricted to rational probabilities with denominator
-  ///        `denom`.
-  template <class Generator>
-  MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(int denom, Generator &generator) const;
   /// @name Players
   //@{
   /// Returns the number of players in the game
@@ -1174,7 +1358,7 @@ public:
   /// Returns the set of strategies in the game
   Strategies GetStrategies() const
   {
-    BuildComputedValues();
+    EnsureStrategies();
     return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
   /// Gets the i'th strategy in the game, numbered globally starting from 1
@@ -1263,12 +1447,18 @@ public:
 
   /// @name Modification
   //@{
-  /// Set the probability distribution of actions at a chance node
-  virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
+  /// Form the collection of nodes into a single event carrying the given
+  /// probability distribution over its actions.  The nodes need not currently be
+  /// chance nodes; personal decision nodes are converted.
+  virtual GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                const std::string &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
-  /// Build any computed values anew
-  virtual void BuildComputedValues() const {}
+  /// Ensure the reduced-form strategies have been derived and indexed
+  virtual void EnsureStrategies() const {}
   /// Ensure sequences have been computed
   virtual void EnsureSequences() const { throw UndefinedException(); }
 
@@ -1349,6 +1539,22 @@ inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
   }
 }
 
+inline void
+GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
+                                 const std::set<const GameInfosetRep *> &p_ignore) const
+{
+  CheckLabel(p_label);
+  // Infoset labels may be empty; a nonempty label must be unique among the infosets of the player.
+  if (p_label.empty()) {
+    return;
+  }
+  for (const auto &infoset : m_infosets) {
+    if (!p_ignore.contains(infoset.get()) && infoset->GetLabel() == p_label) {
+      throw ValueException("Infoset label must be unique for the player");
+    }
+  }
+}
+
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
 inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
 
@@ -1356,21 +1562,25 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::CheckActionLabel(const std::string &p_label,
+                                             const std::set<const GameActionRep *> &p_ignore) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Action label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &action : m_actions) {
+    if (p_ignore.count(action.get()) == 0 && action->GetLabel() == p_label) {
+      throw ValueException("Action label must be unique within the information set");
+    }
+  }
+}
 inline void GameInfosetRep::SetLabel(const std::string &p_label)
 {
   if (p_label == m_label) {
     return;
   }
-  CheckLabel(p_label);
-  // Infoset labels may be empty, but a non-empty label must be unique among
-  // the infosets of the same player.
-  if (!p_label.empty()) {
-    for (const auto &infoset : GetPlayer()->GetInfosets()) {
-      if (infoset.get() != this && infoset->GetLabel() == p_label) {
-        throw ValueException("Infoset label must be unique for the player");
-      }
-    }
-  }
+  m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
 }
 inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
@@ -1416,12 +1626,12 @@ inline void GamePlayerRep::SetLabel(const std::string &p_label)
 }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   return m_strategies.at(st - 1);
 }
 inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
 }
 inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
@@ -1499,9 +1709,9 @@ inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this();
 //=======================================================================
 
 /// Factory function to create new game tree
-Game NewTree();
+[[nodiscard]] Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+[[nodiscard]] Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///
@@ -1510,7 +1720,7 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadEfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
@@ -1518,7 +1728,7 @@ Game ReadEfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadNfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
@@ -1526,12 +1736,12 @@ Game ReadNfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+[[nodiscard]] Game ReadGbtFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+[[nodiscard]] Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator
@@ -1539,7 +1749,7 @@ template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
   // NOLINTBEGIN(misc-const-correctness)
-  std::uniform_int_distribution dist(1, p_denom + static_cast<int>(p_dim) - 1);
+  std::uniform_int_distribution<int> dist(1, p_denom + static_cast<int>(p_dim) - 1);
   // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {

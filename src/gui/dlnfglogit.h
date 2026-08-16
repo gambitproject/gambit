@@ -27,13 +27,13 @@
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
-class LogitMixedList;
+class LogitMixedGrid;
 
 class LogitMixedDialog final : public wxDialog {
   GameDocument *m_doc;
   int m_pid{0};
   wxProcess *m_process;
-  LogitMixedList *m_mixedList;
+  LogitMixedGrid *m_mixedList;
   wxStaticText *m_statusText;
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
   wxTimer m_timer;

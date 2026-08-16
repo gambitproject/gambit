@@ -85,19 +85,11 @@ public:
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
   /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetPlayerMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
   Rational GetMaxPayoff() const override { return Rational(aggPtr->getMaxPayoff()); }
   /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetPlayerMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
-  //@}
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Writing data files
@@ -113,7 +105,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .agg format.
-Game ReadAggFile(std::istream &p_stream);
+[[nodiscard]] Game ReadAggFile(std::istream &p_stream);
 
 } // namespace Gambit
 

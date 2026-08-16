@@ -310,11 +310,10 @@ void GameFrame::OnUpdate()
   gameTitle = m_doc->GetGame()->GetTitle();
 
   if (!m_doc->GetFilename().empty()) {
-    SetTitle(wxT("Gambit - [") + m_doc->GetFilename() + wxT("] ") +
-             wxString(gameTitle.c_str(), *wxConvCurrent));
+    SetTitle(wxT("Gambit - [") + m_doc->GetFilename() + wxT("] ") + wxString::FromUTF8(gameTitle));
   }
   else {
-    SetTitle(wxT("Gambit - ") + wxString(gameTitle.c_str(), *wxConvCurrent));
+    SetTitle(wxT("Gambit - ") + wxString::FromUTF8(gameTitle));
   }
 
   if (m_doc->IsModified()) {
@@ -326,7 +325,9 @@ void GameFrame::OnUpdate()
 
   menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
-  menuBar->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
+  menuBar->Enable(GBT_MENU_EDIT_REVEAL,
+                  selectNode && selectNode->GetInfoset() &&
+                      !m_doc->GetGame()->IsAbsentMinded(selectNode->GetInfoset()));
   menuBar->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
   menuBar->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
   menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());
@@ -1035,9 +1036,12 @@ void GameFrame::OnEditMove(wxCommandEvent &)
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
+      std::map<std::string, std::string> labels;
       for (const auto &action : infoset->GetActions()) {
-        m_doc->DoSetActionLabel(action, dialog.GetActionLabel(action->GetNumber()));
+        labels[action->GetLabel()] =
+            dialog.GetActionLabel(action->GetNumber()).ToStdString(wxConvUTF8);
       }
+      m_doc->DoRelabelActions(infoset, labels);
       if (infoset->IsChanceInfoset()) {
         m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
       }

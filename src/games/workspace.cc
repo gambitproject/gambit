@@ -386,13 +386,13 @@ std::string Attribute(const Element *p_element, const std::string &p_name,
 
 std::string UnwrapPayload(std::string p_value)
 {
-  if (p_value.rfind("\r\n", 0) == 0) {
+  if (p_value.starts_with("\r\n")) {
     p_value.erase(0, 2);
   }
   else if (!p_value.empty() && p_value.front() == '\n') {
     p_value.erase(0, 1);
   }
-  if (p_value.size() >= 2 && p_value.compare(p_value.size() - 2, 2, "\r\n") == 0) {
+  if (p_value.ends_with("\r\n")) {
     p_value.erase(p_value.size() - 2);
   }
   else if (!p_value.empty() && p_value.back() == '\n') {

@@ -192,8 +192,6 @@ public:
 
     bool operator==(const iterator &other) const { return m_done == other.m_done; }
 
-    bool operator!=(const iterator &other) const { return !(*this == other); }
-
   private:
     void recompute_from(size_t j0)
     {
@@ -557,13 +555,15 @@ void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
   }
 
   IncrementVersion();
-  player->m_strategies.erase(std::find(player->m_strategies.begin(), player->m_strategies.end(),
-                                       std::shared_ptr<GameStrategyRep>(p_strategy)));
-  std::for_each(
-      player->m_strategies.begin(), player->m_strategies.end(),
-      [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable { s->m_number = st++; });
-  // Note that we do not reindex strategies, and so we do not need to re-build the
-  // table of outcomes.
+  std::vector<long> old_radices;
+  for (const auto &pl : m_players) {
+    old_radices.push_back(pl->m_strategies.size());
+  }
+  const auto deletedIt = std::find(player->m_strategies.begin(), player->m_strategies.end(),
+                                   std::shared_ptr<GameStrategyRep>(p_strategy));
+  const long deletedDigit = deletedIt - player->m_strategies.begin();
+  player->m_strategies.erase(deletedIt);
+  RebuildTable(old_radices, player->GetNumber() - 1, deletedDigit);
   p_strategy->Invalidate();
 }
 
@@ -600,9 +600,10 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 //------------------------------------------------------------------------
 
 /// This rebuilds a new table of outcomes after the game has been
-/// redimensioned (change in the number of strategies).  Strategies
-/// numbered -1 are identified as the new strategies.
-void GameTableRep::RebuildTable(const std::vector<long> &old_radices)
+/// redimensioned (change in the number of strategies).  See the declaration
+/// in gametable.h for the meaning of p_deletedPlayer/p_deletedDigit.
+void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_deletedPlayer,
+                                long p_deletedDigit)
 {
   std::vector<long> old_strides(old_radices.size());
   long stride = 1;
@@ -624,9 +625,18 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices)
     if (m_results[old_index] == nullptr) {
       continue;
     }
+    if (p_deletedPlayer >= 0 &&
+        (old_index / old_strides[p_deletedPlayer]) % old_radices[p_deletedPlayer] ==
+            p_deletedDigit) {
+      // This contingency used the strategy that was deleted.
+      continue;
+    }
     long new_index = 0;
     for (size_t i = 0; i < m_players.size(); ++i) {
-      const long digit = (old_index / old_strides[i]) % old_radices[i];
+      long digit = (old_index / old_strides[i]) % old_radices[i];
+      if (static_cast<long>(i) == p_deletedPlayer && digit > p_deletedDigit) {
+        --digit;
+      }
       new_index += digit * new_strides[i];
     }
     newResults[new_index] = m_results[old_index];

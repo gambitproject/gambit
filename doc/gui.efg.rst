@@ -74,6 +74,41 @@ that a move can be added for a new, as-yet-undefined player, a move
 can be added directly into an existing information set, and a move can
 be immediately given more than two actions.
 
+A single action can also be added to an existing move without
+drag-and-drop, by clicking on any node belonging to the move and
+selecting :menuselection:`Edit --> Insert action`.  The new action is
+given an automatically generated numeric label, which can be changed
+afterward as described below in :ref:`editing-moves`.
+
+
+.. _editing-moves:
+
+Editing move properties
+------------------------
+
+The properties of an existing move -- the label of its information
+set, the player to which it belongs, and the labels of its actions --
+can be changed by clicking on any node belonging to the move and
+selecting :menuselection:`Edit --> Move`. This displays the
+:guilabel:`Move properties` dialog, which lists a text field for the
+information set's label, a dropdown for the player to which the move
+belongs, and one text field per action, prefilled with the action's
+current label. For moves belonging to the chance player, a probability
+field is shown alongside each action instead of the player dropdown.
+
+Action labels must be nonempty, and unique among the actions at the
+move; the information set's label, if not left blank, must similarly
+be unique among the information sets belonging to the same player. Any
+field that currently violates one of these rules is highlighted, and a
+description of the problem is shown below the list of actions; the
+:guilabel:`OK` button is disabled until all fields are valid. Because
+the labels of all the actions at the move are reassigned
+simultaneously when :guilabel:`OK` is clicked, two actions can have
+their labels swapped directly, for instance by relabeling
+:guilabel:`Left` to :guilabel:`Right` and :guilabel:`Right` to
+:guilabel:`Left` at the same time.
+
+
 .. _copying-trees:
 
 Copying and moving subtrees

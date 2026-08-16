@@ -6,7 +6,7 @@
 Compute equilibria of a game using polynomial systems of equations
 See the :ref:`algorithm description <enumpoly>` for full details.
 
-When the verbose switch `-v` is used, the program outputs each support
+When the verbose switch `-V` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
 list of binary strings, where each entry represents one player. The
 digit 1 represents a strategy which is present in the support, and the
@@ -16,7 +16,7 @@ support is printed with the label "candidate,".
 The approach of subdividing the space of totally mixed profiles assumes
 solutions to the system of equations and inequalities are isolated
 points.  In the case of degeneracies in the resulting system,
-When the verbose switch `-v` is used, these supports are identified on
+When the verbose switch `-V` is used, these supports are identified on
 standard output with the label "singular,".   This will occur
 if there is a positive-dimensional set of equilibria which all
 share the listed support.  However, the converse is not true:
@@ -33,13 +33,6 @@ support of some set of equilibria.
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
-
-.. cmdoption:: -H
-
-   By default, the program uses an enumeration method designed to
-   visit as few supports as possible in searching for all equilibria.
-   With this switch,  This switch only has an
-   effect when solving strategic games.
 
 .. cmdoption:: -S
 
@@ -66,12 +59,16 @@ support of some set of equilibria.
 
    Suppresses printing of the banner at program launch.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, supports are printed on
    standard output with the label "candidate" as they are considered, and
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
 
 Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
 "Selten's horse"::

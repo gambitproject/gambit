@@ -35,8 +35,7 @@ template <class Renderer>
 void RenderSimpdivEvent(const Renderer &p_renderer, const SimpdivEvent &p_event)
 {
   std::visit(
-      [&](const auto &event) {
-        using EventType = std::decay_t<decltype(event)>;
+      [&]<typename EventType>(const EventType &event) {
         if constexpr (std::is_same_v<EventType, SimpdivStartEvent>) {
           p_renderer->Render(event.profile, "start");
         }
@@ -47,36 +46,28 @@ void RenderSimpdivEvent(const Renderer &p_renderer, const SimpdivEvent &p_event)
       p_event);
 }
 
-Array<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
+std::vector<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game,
+                                                         std::istream &p_stream)
 {
-  Array<MixedStrategyProfile<Rational>> profiles;
+  std::vector<MixedStrategyProfile<Rational>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
-    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
+    p_stream >> p[1];
+    if (!p_stream) {
+      break;
+    }
+    for (size_t i = 2; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
+      char comma;
+      p_stream >> comma;
       p_stream >> p[i];
-      if (i < p.MixedProfileLength()) {
-        char comma;
-        p_stream >> comma;
-      }
     }
     // Read in the rest of the line and discard
     std::string foo;
     std::getline(p_stream, foo);
     profiles.push_back(p);
-  }
-  return profiles;
-}
-
-Array<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
-                                                     const Rational &denom)
-{
-  std::default_random_engine engine;
-  Array<MixedStrategyProfile<Rational>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    profiles.push_back(p_game->NewRandomStrategyProfile(denom, engine));
   }
   return profiles;
 }
@@ -129,12 +120,12 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show profiles as floating point with DECIMALS digits\n";
   std::cerr << "                   (default is to display rational numbers)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
-  std::cerr << "                   payoffs in the game\n";
+  std::cerr << "                   payoffs in the game (default is 1e-7)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is to only show equilibria)\n";
-  exit(1);
+  std::cerr << "  -v, --version    print version information\n";
+  exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -152,11 +143,11 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:qS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:q", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'g':
       gridResize = atoi(optarg);
       break;
@@ -184,8 +175,6 @@ int main(int argc, char *argv[])
       break;
     case 'V':
       verbose = true;
-      break;
-    case 'S':
       break;
     case '?':
       if (isprint(optopt)) {
@@ -219,20 +208,17 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    Array<MixedStrategyProfile<Rational>> starts;
+    std::vector<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
-      starts = RandomProfiles(game, stopAfter, Rational(randDenom));
+      std::default_random_engine engine;
+      starts = NewRandomStrategyProfiles(game, stopAfter, randDenom, engine);
     }
     else {
-      starts.push_back(game->NewMixedStrategyProfile(Rational(0)));
-      starts.back() = Rational(0);
-      for (const auto &player : game->GetPlayers()) {
-        starts.back()[player->GetStrategies().back()] = Rational(1);
-      }
+      starts.push_back(SimpdivDefaultStart(game));
     }
     for (auto start : starts) {
       if (decimals > 0) {

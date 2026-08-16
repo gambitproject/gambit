@@ -31,10 +31,8 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 using namespace Gambit::gametracer;
 
-extern Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                                     std::istream &p_stream);
-extern Array<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
-                                                                       int p_count);
+extern std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                           std::istream &p_stream);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -54,9 +52,11 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
+  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -64,17 +64,17 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false;
   int numDecimals = 6, numVectors = 1;
-  const std::string startFile;
+  std::string startFile;
 
   int long_opt_index = 0;
   option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:vqh", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:vqh", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'q':
       quiet = true;
       break;
@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       numVectors = atoi(optarg);
+      break;
+    case 's':
+      startFile = optarg;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -121,14 +124,15 @@ int main(int argc, char *argv[])
     const Game game = ReadGame(*input_stream);
     auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
 
-    Array<MixedStrategyProfile<double>> perts;
+    std::vector<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {
       std::ifstream startPerts(startFile.c_str());
       perts = ReadStrategyPerturbations(game, startPerts);
     }
     else {
       // Generate the desired number of points randomly
-      perts = RandomStrategyPerturbations(game, numVectors);
+      std::default_random_engine engine;
+      perts = NewRandomStrategyProfiles(game, numVectors, engine);
     }
 
     for (auto pert : perts) {
@@ -138,7 +142,7 @@ int main(int argc, char *argv[])
     }
     return 0;
   }
-  catch (std::runtime_error &e) {
+  catch (std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }

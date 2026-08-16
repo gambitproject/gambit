@@ -9,12 +9,25 @@ import numpy as np
 import pygambit as gbt
 
 # Label-validation fixtures.
-# VALID: accepted by the C++ validator.
-# INVALID: rejected by the validator -> ValueError (reach CheckLabel as ASCII bytes).
-# NON_ASCII: rejected at the pygambit ASCII encode boundary
-VALID_LABELS = ["x", "a b", "a b c"]
-INVALID_LABELS = [" x", "x ", " ", "a  b", "a\tb", "a\nb"]
-NON_ASCII_LABELS = ["é", "naïve"]
+# VALID: accepted by the C++ validator (IsValidLabel in src/games/game.h), including
+#        well-formed UTF-8 text (#862, 17.0.0). A single Unicode whitespace character
+#        (not just ASCII space) between two printables is valid, e.g. a no-break space.
+# INVALID: rejected by the validator -> ValueError.  Includes structural violations
+#          (leading/trailing/double whitespace) and control characters.  "Whitespace"
+#          is generalized to any Unicode space separator (category Zs), not just the
+#          literal ASCII space -- so a no-break space (U+00A0) at the start/end, or
+#          doubled with an ordinary space, is invalid the same way a plain space is.
+#          Also includes control characters, both as literal ASCII bytes and as a
+#          control code point reached via a multi-byte UTF-8 encoding (U+0085 NEL,
+#          U+2028 LINE SEPARATOR).
+# UNICODE_LABELS: non-ASCII labels, also included in VALID_LABELS; kept separate so
+#                 tests can specifically exercise multi-byte UTF-8 decoding.
+UNICODE_LABELS = ["é", "naïve", "日本語", "😀"]
+VALID_LABELS = ["x", "a b", "a b", "a b c", *UNICODE_LABELS]
+INVALID_LABELS = [
+    " x", "x ", " ", "a  b", "a\tb", "a\nb", "a\x01b", "a\x7fb", "ab",
+    " x", "x ", " ", "a  b", "a b",
+]
 
 
 def read_from_file(fn: str) -> gbt.Game:
@@ -105,7 +118,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
                                             poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
-    g.append_move(g.root, g.players.chance, deals)
+    g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
 
     ante_outcome = g.add_outcome("Ante", [-1, -1])
     g.set_outcome(g.root, ante_outcome)
@@ -148,8 +161,7 @@ def _create_kuhn_poker_efg_without_outcomes():
         player_idx = 0 if player == "Alice" else 1
         return [d for d in deals if d[player_idx] == card]
 
-    g.append_move(g.root, g.players.chance, deals)
-    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)] * 6)
+    g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
         term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
@@ -483,9 +495,28 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
 
         return (
             game.gbt_game(),
-            game.reduced_strategies(),
+            [[str(i) for i in range(1, len(r) + 1)] for r in game.reduced_strategies()],
             game.reduced_strategic_form(),
         )
+
+    @classmethod
+    def get_map_test_data(cls, **params):
+        """
+        given the provided parameters, return a tuple with:
+            - the game as a gbt.Game object
+            - the expected infoset-to-action map of each reduced strategy, per player:
+              the pre-17.0 signature split per information set ("*" = no action
+              prescribed), or the empty tuple for the single trivial strategy of a
+              player who has no information sets
+        the tuple is used directly in test_reduced_strategy_maps in test_extensive.py
+        """
+        game = cls(params)
+        gbt_game = game.gbt_game()
+        maps = [
+            [tuple(sig) if len(player.infosets) > 0 else () for sig in sigs]
+            for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
+        ]
+        return (gbt_game, maps)
 
 
 class Centipede(EfgFamilyForReducedStrategicFormTests):
@@ -654,7 +685,10 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
-                g.set_infoset(n.children["R"], n.children["L"].infoset)
+                left = n.children["L"]
+                g.make_infoset(list(left.infoset.members) + [n.children["R"]],
+                               left.infoset.player.label,
+                               left.infoset.label or None)
         return g
 
     def reduced_strategic_form(self):

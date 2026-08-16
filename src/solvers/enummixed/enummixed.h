@@ -64,14 +64,16 @@ public:
 template <class T>
 std::shared_ptr<EnumMixedStrategySolution<T>>
 EnumMixedStrategySolveDetailed(const Game &p_game,
-                               StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
+                               StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                               const CancelToken &p_cancel = CancelToken());
 
 template <class T>
 std::list<MixedStrategyProfile<T>>
 EnumMixedStrategySolve(const Game &p_game,
-                       StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>)
+                       StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                       const CancelToken &p_cancel = CancelToken())
 {
-  return EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium)->m_extremeEquilibria;
+  return EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium, p_cancel)->m_extremeEquilibria;
 }
 
 } // end namespace Gambit::Nash

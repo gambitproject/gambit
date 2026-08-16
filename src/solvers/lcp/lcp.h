@@ -30,12 +30,14 @@ namespace Gambit::Nash {
 template <class T>
 std::list<MixedStrategyProfile<T>>
 LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
-                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
+                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                 const CancelToken &p_cancel = CancelToken());
 
 template <class T>
 std::list<MixedBehaviorProfile<T>>
 LcpBehaviorSolve(const Game &p_game,
-                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
+                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
+                 const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash
 
