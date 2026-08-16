@@ -23,6 +23,7 @@
 #ifndef POLYSOLVER_H
 #define POLYSOLVER_H
 
+#include "core/cancel.h"
 #include "gambit.h"
 #include "rectangle.h"
 #include "polysystem.h"
@@ -71,7 +72,7 @@ private:
   bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &) const;
 
   void FindRoots(std::list<Vector<double>> &rootlist, const Rectangle<double> &r,
-                 const size_t max_roots) const;
+                 const size_t max_roots, const CancelToken &p_cancel) const;
 
 public:
   explicit PolynomialSystemSolver(const PolynomialSystem<double> &p_system)
@@ -96,7 +97,8 @@ public:
   Vector<double> ImprovingNewtonStep(const Vector<double> &) const;
 
   // Find up to `max_roots` roots inside rectangle `r`
-  std::list<Vector<double>> FindRoots(const Rectangle<double> &r, int max_roots);
+  std::list<Vector<double>> FindRoots(const Rectangle<double> &r, int max_roots,
+                                      const CancelToken &p_cancel = CancelToken());
 };
 
 } // end namespace Gambit

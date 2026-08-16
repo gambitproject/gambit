@@ -465,6 +465,19 @@ gambit_SOURCES = \
 	src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc \
+	${gambit_nashsupport_SOURCES} \
+	src/solvers/enumpoly/indexproduct.h \
+	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/poly.cc \
+	src/solvers/enumpoly/poly.h \
+	src/solvers/enumpoly/polysystem.h \
+	src/solvers/enumpoly/polypartial.h \
+	src/solvers/enumpoly/polypartial.imp \
+	src/solvers/enumpoly/polysolver.cc \
+	src/solvers/enumpoly/polysolver.h \
+	src/solvers/enumpoly/efgpoly.cc \
+	src/solvers/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/enumpoly.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \

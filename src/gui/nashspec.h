@@ -75,7 +75,7 @@ struct EnumPolyNashSpec {
   int stopAfter{0};
   double maxRegret{1.0e-4};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct GNMNashSpec {

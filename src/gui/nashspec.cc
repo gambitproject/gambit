@@ -23,6 +23,7 @@
 #include "nashspec.h"
 
 #include "solvers/enummixed/enummixed.h"
+#include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpure/enumpure.h"
 #include "solvers/lcp/lcp.h"
 #include "solvers/logit/logit.h"
@@ -49,6 +50,28 @@ std::optional<SolverFunction> EnumMixedNashSpec::MakeSolver(NashRepresentation) 
         p_game,
         [&p_callback](const MixedStrategyProfile<Rational> &p) { p_callback(ComputedProfile(p)); },
         p_cancel);
+  };
+}
+
+std::optional<SolverFunction>
+EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
+{
+  const EnumPolyNashSpec spec = *this;
+  if (p_representation == NashRepresentation::Behavior) {
+    return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                  const CancelToken &p_cancel) {
+      Nash::EnumPolyBehaviorSolve(
+          p_game, spec.stopAfter, spec.maxRegret,
+          [&p_callback](const MixedBehaviorProfile<double> &p) { p_callback(ComputedProfile(p)); },
+          Nash::NullEnumPolyEventCallback<BehaviorSupportProfile>, p_cancel);
+    };
+  }
+  return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                const CancelToken &p_cancel) {
+    Nash::EnumPolyStrategySolve(
+        p_game, spec.stopAfter, spec.maxRegret,
+        [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
+        Nash::NullEnumPolyEventCallback<StrategySupportProfile>, p_cancel);
   };
 }
 
