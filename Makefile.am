@@ -483,6 +483,9 @@ gambit_SOURCES = \
 	src/solvers/liap/liap.h \
 	src/solvers/liap/efgliap.cc \
 	src/solvers/liap/nfgliap.cc \
+	${gtracer_SOURCES} \
+	src/solvers/ipa/ipa.h \
+	src/solvers/ipa/ipa.cc \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \

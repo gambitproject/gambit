@@ -91,7 +91,7 @@ struct GNMNashSpec {
 struct IPANashSpec {
   int perturbations{1};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct LPNashSpec {
