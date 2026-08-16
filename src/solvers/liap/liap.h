@@ -49,13 +49,15 @@ std::list<MixedBehaviorProfile<double>>
 LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
                LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent =
-                   NullLiapEventCallback<MixedBehaviorProfile<double>>);
+                   NullLiapEventCallback<MixedBehaviorProfile<double>>,
+               const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                   StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                   LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent =
-                      NullLiapEventCallback<MixedStrategyProfile<double>>);
+                      NullLiapEventCallback<MixedStrategyProfile<double>>,
+                  const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

@@ -130,7 +130,8 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 std::list<MixedBehaviorProfile<double>>
 LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                BehaviorCallbackType<double> p_onEquilibrium,
-               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent)
+               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent,
+               const CancelToken &p_cancel)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -150,6 +151,7 @@ LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, 
   minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .001, .00001);
 
   for (int iter = 1; iter <= p_maxitsN; iter++) {
+    p_cancel.Check();
     Vector<double> point(p);
     if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;

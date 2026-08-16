@@ -480,6 +480,9 @@ gambit_SOURCES = \
 	src/solvers/enumpoly/enumpoly.h \
 	src/solvers/simpdiv/simpdiv.cc \
 	src/solvers/simpdiv/simpdiv.h \
+	src/solvers/liap/liap.h \
+	src/solvers/liap/efgliap.cc \
+	src/solvers/liap/nfgliap.cc \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \

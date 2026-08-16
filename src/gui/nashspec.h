@@ -110,7 +110,7 @@ struct LiapNashSpec {
   double maxRegret{1.0e-4};
   int maxIterations{1000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct LogitNashSpec {

@@ -26,6 +26,7 @@
 #include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpure/enumpure.h"
 #include "solvers/lcp/lcp.h"
+#include "solvers/liap/liap.h"
 #include "solvers/logit/logit.h"
 #include "solvers/lp/lp.h"
 #include "solvers/simpdiv/simpdiv.h"
@@ -118,6 +119,21 @@ std::optional<SolverFunction> LCPNashSpec::MakeSolver(NashRepresentation p_repre
         p_game, spec.stopAfter, spec.maxDepth,
         [&p_callback](const MixedStrategyProfile<Rational> &p) { p_callback(ComputedProfile(p)); },
         p_cancel);
+  };
+}
+
+std::optional<SolverFunction> LiapNashSpec::MakeSolver(NashRepresentation) const
+{
+  const LiapNashSpec spec = *this;
+  return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                const CancelToken &p_cancel) {
+    for (const auto &start : NewRandomStrategyProfiles(p_game, spec.startingPoints)) {
+      p_cancel.Check();
+      Nash::LiapStrategySolve(
+          start, spec.maxRegret, spec.maxIterations,
+          [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
+          Nash::NullLiapEventCallback<MixedStrategyProfile<double>>, p_cancel);
+    }
   };
 }
 
