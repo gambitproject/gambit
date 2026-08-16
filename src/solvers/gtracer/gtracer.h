@@ -85,7 +85,8 @@ struct GNMResult {
 ///                   equilibrium is found (with label "NE")
 GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
               double LambdaMin, bool wobble, double threshold,
-              std::function<void(const std::string &, const cvector &)> p_onStep);
+              std::function<void(const std::string &, const cvector &)> p_onStep,
+              const CancelToken &p_cancel = CancelToken());
 
 /// @brief Why a call to IPA terminated
 enum class IPATerminationReason {

@@ -25,6 +25,7 @@
 #include "solvers/enummixed/enummixed.h"
 #include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpure/enumpure.h"
+#include "solvers/gnm/gnm.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/lcp/lcp.h"
 #include "solvers/liap/liap.h"
@@ -75,6 +76,22 @@ EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
         p_game, spec.stopAfter, spec.maxRegret,
         [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
         Nash::NullEnumPolyEventCallback<StrategySupportProfile>, p_cancel);
+  };
+}
+
+std::optional<SolverFunction> GNMNashSpec::MakeSolver(NashRepresentation) const
+{
+  const GNMNashSpec spec = *this;
+  return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                const CancelToken &p_cancel) {
+    for (const auto &pert : NewRandomStrategyProfiles(p_game, spec.perturbations)) {
+      p_cancel.Check();
+      Nash::GNMStrategySolve(
+          pert, spec.lambdaEnd, spec.steps, spec.localNewtonInterval,
+          spec.localNewtonMaxIterations,
+          [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
+          Nash::NullGNMEventCallback, p_cancel);
+    }
   };
 }
 

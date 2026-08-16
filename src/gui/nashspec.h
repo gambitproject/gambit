@@ -85,7 +85,7 @@ struct GNMNashSpec {
   int localNewtonInterval{3};
   int localNewtonMaxIterations{10};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct IPANashSpec {
