@@ -56,13 +56,13 @@ class MixedStrategy:
         return self._player
 
     def __repr__(self) -> str:
-        return str([self.profile[s] for s in self.player.strategies])
+        return str([self[s.label] for s in self.player.strategies])
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedStrategyProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self.profile[strategy]._repr_latex_().replace("$", "")
+                ",".join(self[strategy.label]._repr_latex_().replace("$", "")
                          for strategy in self.player.strategies) +
                 r"\right]$"
             )
@@ -71,42 +71,41 @@ class MixedStrategy:
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, list):
-            return [self[strategy] for strategy in self.player.strategies] == other
+            return [self[strategy.label] for strategy in self.player.strategies] == other
         if not isinstance(other, MixedStrategy) or self.player != other.player:
             return False
         return (
-            [self[strategy] for strategy in self.player.strategies] ==
-            [other[strategy] for strategy in other.player.strategies]
+            [self[strategy.label] for strategy in self.player.strategies] ==
+            [other[strategy.label] for strategy in other.player.strategies]
         )
 
     def __len__(self) -> int:
         return len(self.player.strategies)
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[Strategy, ProfileDType], None, None]:
+    def __iter__(self) -> typing.Iterator[typing.Tuple[str, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to strategies by the mixed strategy.
 
-        .. versionadded:: 16.2.0
+        .. versionchanged:: 17.0.0
+
+            Yields the strategy's label instead of the ``Strategy`` object.
 
         Yields
         ------
-        strategy : Strategy
-            A strategy for the player
+        label : str
+            The label of a strategy for the player
         probability: float or Rational
             The probability the mixed strategy assigns to the strategy being played
         """
         for strategy in self.player.strategies:
-            yield strategy, self[strategy]
+            yield strategy.label, self[strategy.label]
 
-    def __getitem__(self, index: StrategyReference) -> ProfileDType:
-        """Returns the probability that the strategy referred to by `index` is played.
+    def __getitem__(self, index: str) -> ProfileDType:
+        """Returns the probability that the strategy with label `index` is played.
 
         Parameters
         ----------
-        index : Strategy or str
-
-            * If `index` is a ``Strategy``, returns the probability the strategy is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for a strategy with that label.
+        index : str
+            The label of the strategy to look up.
 
         Returns
         -------
@@ -115,55 +114,39 @@ class MixedStrategy:
 
         Raises
         ------
-        MismatchError
-            If `index` is a ``Strategy`` that does not belong to this ``MixedStrategy``'s player.
+        KeyError
+            If no strategy for this player has the label `index`.
         """
         self.profile._check_validity()
-        if isinstance(index, Strategy):
-            if index.player != self.player:
-                raise MismatchError("strategy must belong to this player")
-            return self.profile._getprob_strategy(index)
-        if isinstance(index, str):
-            try:
-                return self.profile._getprob_strategy(self.player.strategies[index])
-            except KeyError:
-                raise KeyError(f"no strategy with label '{index}' for player") from None
-        raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
+        if not isinstance(index, str):
+            raise TypeError(f"strategy index must be str, not {index.__class__.__name__}")
+        try:
+            return self.profile._getprob_strategy(self.player.strategies[index])
+        except KeyError:
+            raise KeyError(f"no strategy with label '{index}' for player") from None
 
-    def __setitem__(self, index: StrategyReference, value: typing.Any) -> None:
-        """Sets the probability a strategy is played.
+    def __setitem__(self, index: str, value: typing.Any) -> None:
+        """Sets the probability that the strategy with label `index` is played.
 
         Parameters
         ----------
-        index : Strategy, or str
-            The part of the profile to set:
-
-            * If `index` is a ``Strategy``, sets the probability the strategy is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for a strategy with that label, and sets the probability for that strategy.
-
+        index : str
+            The label of the strategy to set.
         value
             Any value which can be converted to the data type of the ``MixedStrategyProfile``.
 
         Raises
         ------
-        MismatchError
-            If `strategy` is a ``Strategy`` that does not belong to this ``MixedStrategy``'s
-            player.
+        KeyError
+            If no strategy for this player has the label `index`.
         """
         self.profile._check_validity()
-        if isinstance(index, Strategy):
-            if index.player != self.player:
-                raise MismatchError("strategy must belong to this player")
-            self.profile._setprob_strategy(index, value)
-            return
-        if isinstance(index, str):
-            try:
-                self.profile._setprob_strategy(self.player.strategies[index], value)
-                return
-            except KeyError:
-                raise KeyError(f"no strategy with label '{index}' for player") from None
-        raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
+        if not isinstance(index, str):
+            raise TypeError(f"strategy index must be str, not {index.__class__.__name__}")
+        try:
+            self.profile._setprob_strategy(self.player.strategies[index], value)
+        except KeyError:
+            raise KeyError(f"no strategy with label '{index}' for player") from None
 
 
 @cython.cclass

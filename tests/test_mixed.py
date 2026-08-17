@@ -1459,7 +1459,7 @@ def test_payoff_and_strategy_value_consistency(
             abs(
                 sum(
                     [
-                        profile[player][strategy] * profile.strategy_value(strategy)
+                        profile[player][strategy.label] * profile.strategy_value(strategy)
                         for strategy in player.strategies
                     ]
                 )
