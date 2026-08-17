@@ -191,35 +191,22 @@ class MixedStrategyProfile:
         """The game on which this mixed strategy profile is defined."""
         return self._game
 
-    def mixed_strategies(self) -> typing.Iterator[typing.Tuple[Player, MixedStrategy], None, None]:
-        """Iterate over the mixed strategies in the profile.
+    def __iter__(self) -> typing.Iterator[MixedStrategy, None, None]:
+        """Iterate over the mixed strategies in the profile, one per player.
 
-        .. versionadded:: 16.2.0
+        .. versionchanged:: 17.0.0
+
+            Previously yielded `(Strategy, probability)` pairs flattened across every
+            player's strategies; now yields the `MixedStrategy` for each player, matching
+            what `mixed_strategies()` returned.
 
         Yields
         ------
-        player : Player
-            A player in the game
         strategy : MixedStrategy
             The player's mixed strategy specified in the profile
         """
         for player in self.game.players:
-            yield player, self[player]
-
-    def __iter__(self) -> typing.Iterator[typing.Tuple[Strategy, ProfileDType], None, None]:
-        """Iterate over the probabilities assigned to strategies by the profile.
-
-        .. versionadded:: 16.2.0
-
-        Yields
-        ------
-        strategy : Strategy
-            A strategy in the game
-        probability: float or Rational
-            The probability the profile assigns to the strategy being played
-        """
-        for strategy in self.game.strategies:
-            yield strategy, self[strategy]
+            yield self[player]
 
     def __getitem__(
             self,

@@ -15,10 +15,15 @@
   `Strategy` object; strategy labels are enforced unique within a player's strategies, so there
   is no longer any ambiguity requiring a `Strategy` handle. `MixedStrategy.__iter__` now yields
   `(label, probability)` pairs instead of `(Strategy, probability)`.
+- `MixedStrategyProfile.__iter__` now yields one `MixedStrategy` per player, matching what
+  `mixed_strategies()` returned; previously it yielded `(Strategy, probability)` pairs flattened
+  across every player's strategies, which discarded which player each strategy belonged to.
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
+- `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating
+  the `MixedStrategyProfile` directly.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

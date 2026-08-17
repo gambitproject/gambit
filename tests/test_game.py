@@ -183,9 +183,6 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_strategies())
-        with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
             profile.payoff(player)
@@ -222,9 +219,6 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
             profile.liap_value()
         with pytest.raises(gbt.GameStructureChangedError):
             profile.max_regret()
-        with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_strategies())
         with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):

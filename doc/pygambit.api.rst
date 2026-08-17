@@ -233,7 +233,6 @@ Probability distributions over strategies
 
    MixedStrategyProfile
    MixedStrategyProfile.game
-   MixedStrategyProfile.mixed_strategies
    MixedStrategyProfile.__iter__
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
