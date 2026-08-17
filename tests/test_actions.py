@@ -138,14 +138,23 @@ def test_set_actions_cannot_remove_the_only_action():
 
 
 def test_set_actions_reorder_carries_subtrees():
-    game = games.create_stripped_down_poker_efg()
-    infoset = game.players["Bob"].infosets["Bob's response"]
+    """Reordering three actions as a cycle moves every action to a new position.
+    Each action carries its whole subtree with it, at every member of the information set."""
+    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    game.append_move(game.root, "Bob", ["x", "y"])
+    game.append_move(list(game.root.children), "Alice", ["a", "b", "c"])
+    game.append_move([game.root.children["x"].children["a"],
+                      game.root.children["y"].children["b"]], "Bob", ["l", "r"])
+    infoset = game.root.children["x"].infoset
     members = list(infoset.members)
-    before = [list(member.children) for member in members]
-    game.set_actions(infoset, ["Fold", "Call"])
-    assert [action.label for action in infoset.actions] == ["Fold", "Call"]
-    for member, children in zip(members, before, strict=True):
-        assert list(member.children) == list(reversed(children))
+    children_before = [{label: member.children[label] for label in ("a", "b", "c")}
+                       for member in members]
+    plays_before = {action.label: set(action.plays) for action in infoset.actions}
+    game.set_actions(infoset, ["c", "a", "b"])
+    assert [action.label for action in infoset.actions] == ["c", "a", "b"]
+    for member, children in zip(members, children_before, strict=True):
+        assert list(member.children) == [children["c"], children["a"], children["b"]]
+    assert {action.label: set(action.plays) for action in infoset.actions} == plays_before
 
 
 def test_set_actions_add_drop_and_reorder_together():
