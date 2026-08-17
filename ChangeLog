@@ -18,6 +18,9 @@
 - `MixedStrategyProfile.__iter__` now yields one `MixedStrategy` per player, matching what
   `mixed_strategies()` returned; previously it yielded `(Strategy, probability)` pairs flattened
   across every player's strategies, which discarded which player each strategy belonged to.
+- `repr(MixedAction)`/`repr(MixedStrategy)` now show a `{label: probability}` mapping instead of
+  a bare list of probabilities, reflecting that these are dictionaries keyed by (enforced-unique)
+  action/strategy label, not positional vectors. (#433)
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the

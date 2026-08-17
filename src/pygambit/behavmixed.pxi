@@ -56,7 +56,7 @@ class MixedAction:
         return self._infoset
 
     def __repr__(self) -> str:
-        return str([self[action.label] for action in self.infoset.actions])
+        return str({action.label: self[action.label] for action in self.infoset.actions})
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedBehaviorProfileRational):
