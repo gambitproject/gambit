@@ -56,13 +56,13 @@ class MixedAction:
         return self._infoset
 
     def __repr__(self) -> str:
-        return str([self.profile[action] for action in self.infoset.actions])
+        return str([self[action.label] for action in self.infoset.actions])
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedBehaviorProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self._profile[act]._repr_latex_().replace("$", "")
+                ",".join(self[act.label]._repr_latex_().replace("$", "")
                          for act in self.infoset.actions) +
                 r"\right]$"
             )
@@ -70,42 +70,41 @@ class MixedAction:
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, list):
-            return [self[action] for action in self.infoset.actions] == other
+            return [self[action.label] for action in self.infoset.actions] == other
         if not isinstance(other, MixedAction) or self.infoset != other.infoset:
             return False
         return (
-            [self[action] for action in self.infoset.actions] ==
-            [other[action] for action in other.infoset.actions]
+            [self[action.label] for action in self.infoset.actions] ==
+            [other[action.label] for action in other.infoset.actions]
         )
 
     def __len__(self) -> len:
         return len(self.infoset.actions)
 
-    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[str, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to actions by the mixed action.
 
-        .. versionadded:: 16.2.0
+        .. versionchanged:: 17.0.0
+
+            Yields the action's label instead of the ``Action`` object.
 
         Yields
         ------
-        action : Action
-            An action at the information set
+        label : str
+            The label of an action at the information set
         probability : float or Rational
             The probability the mixed action assigns to the action being played
         """
         for action in self.infoset.actions:
-            yield action, self[action]
+            yield action.label, self[action.label]
 
-    def __getitem__(self, index: ActionReference) -> ProfileDType:
-        """Returns the probability that the action referred to by `index` is played.
+    def __getitem__(self, index: str) -> ProfileDType:
+        """Returns the probability that the action with label `index` is played.
 
         Parameters
         ----------
-        index : Action or str
-
-            * If `index` is an ``Action``, returns the probability the action is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for an action with that label.
+        index : str
+            The label of the action to look up.
 
         Returns
         -------
@@ -114,56 +113,39 @@ class MixedAction:
 
         Raises
         ------
-        MismatchError
-            If `index` is an ``Action`` that does not belong to this ``MixedAction``'s
-            information set.
+        KeyError
+            If no action at this information set has the label `index`.
         """
         self.profile._check_validity()
-        if isinstance(index, Action):
-            if index.infoset != self.infoset:
-                raise MismatchError("action must belong to this infoset")
-            return self.profile._getprob_action(index)
-        if isinstance(index, str):
-            try:
-                return self.profile._getprob_action(self.infoset.actions[index])
-            except KeyError:
-                raise KeyError(f"no action with label '{index}' at infoset") from None
-        raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
+        if not isinstance(index, str):
+            raise TypeError(f"action index must be str, not {index.__class__.__name__}")
+        try:
+            return self.profile._getprob_action(self.infoset.actions[index])
+        except KeyError:
+            raise KeyError(f"no action with label '{index}' at infoset") from None
 
-    def __setitem__(self, index: ActionReference, value: typing.Any) -> None:
-        """Sets the probability an action is played.
+    def __setitem__(self, index: str, value: typing.Any) -> None:
+        """Sets the probability that the action with label `index` is played.
 
         Parameters
         ----------
-        index : Action or str
-            The part of the profile to set:
-
-            * If `index` is an ``Action``, sets the probability the action is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for an action with that label, and sets the probability for that action.
-
+        index : str
+            The label of the action to set.
         value
             Any value which can be converted to the data type of the ``MixedBehaviorProfile``.
 
         Raises
         ------
-        MismatchError
-            If `action` is an ``Action`` that does not belong to this ``MixedAction``'s
-            information set.
+        KeyError
+            If no action at this information set has the label `index`.
         """
         self.profile._check_validity()
-        if isinstance(index, Action):
-            if index.infoset != self.infoset:
-                raise MismatchError("action must belong to this infoset")
-            self.profile._setprob_action(index, value)
-            return
-        if isinstance(index, str):
-            try:
-                self.profile._setprob_action(self.infoset.actions[index], value)
-                return
-            except KeyError:
-                raise KeyError(f"no action with label '{index}' at infoset") from None
-        raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
+        if not isinstance(index, str):
+            raise TypeError(f"action index must be str, not {index.__class__.__name__}")
+        try:
+            self.profile._setprob_action(self.infoset.actions[index], value)
+        except KeyError:
+            raise KeyError(f"no action with label '{index}' at infoset") from None
 
 
 @cython.cclass
