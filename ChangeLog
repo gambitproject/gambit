@@ -1,3 +1,18 @@
+## [17.0.0-alpha.2] - unreleased
+
+### Changed
+- `MixedBehavior.__iter__` now yields `(Infoset, MixedAction)` pairs, one per information set
+  belonging to the player, matching what `mixed_actions()` returned; previously it yielded
+  `(Action, probability)` pairs flattened across all of the player's information sets, which
+  discarded the information set each action belonged to. `len(MixedBehavior)` is now the number
+  of the player's information sets, to match. Use `MixedAction`'s own iteration to get
+  action/probability pairs at a specific information set.
+
+### Removed
+- `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
+  `MixedBehavior` directly.
+
+
 ## [17.0.0-alpha.1] - 2026-08-13
 
 ### Added

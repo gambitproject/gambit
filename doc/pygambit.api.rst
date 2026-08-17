@@ -286,7 +286,6 @@ Probability distributions over behavior
    MixedBehaviorProfile.copy
 
    MixedBehavior
-   MixedBehavior.mixed_actions
    MixedBehavior.__iter__
    MixedBehavior.__getitem__
    MixedBehavior.__setitem__

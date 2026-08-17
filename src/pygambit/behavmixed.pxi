@@ -223,37 +223,29 @@ class MixedBehavior:
         )
 
     def __len__(self) -> int:
-        return len(self.player.actions)
+        return len(self.player.infosets)
 
-    def mixed_actions(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
 
-        .. versionadded:: 16.2.0
+        A ``MixedBehavior`` is a collection of ``MixedAction``\\ s, one per information
+        set belonging to the player; this iterates over those, not over individual
+        actions.
+
+        .. versionchanged:: 17.0.0
+
+            Previously iterated over individual actions and their probabilities; use
+            ``MixedAction``'s own iteration for that at a specific information set.
 
         Yields
         ------
         infoset : Infoset
             An information set belonging to the player
         action : MixedAction
-            The player's mixed action specified in the mixed behavior
+            The player's mixed action specified at the information set
         """
         for infoset in self.player.infosets:
             yield infoset, self[infoset]
-
-    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
-        """Iterate over the probabilities assigned to actions by the mixed behavior.
-
-        .. versionadded:: 16.2.0
-
-        Yields
-        ------
-        action : Action
-            An action for the player
-        probability : float or Rational
-            The probability the behavior assigns to the action being played
-        """
-        for action in self.player.actions:
-            yield action, self[action]
 
     def __getitem__(
             self,
