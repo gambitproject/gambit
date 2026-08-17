@@ -78,29 +78,6 @@ class Action:
         return Infoset.wrap(self.action.deref().GetInfoset())
 
     @property
-    def prob(self) -> decimal.Decimal | Rational:
-        """
-        Get the probability a chance action is played.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the action does not belong to the chance player.
-        """
-        if not self.infoset.is_chance:
-            raise UndefinedOperationError(
-                "action probabilities are only defined at chance information sets"
-            )
-        py_string = cython.cast(
-            string,
-            self.action.deref().GetInfoset().deref().GetActionProb(self.action)
-        )
-        if "." in py_string.decode("ascii"):
-            return decimal.Decimal(py_string.decode("ascii"))
-        else:
-            return Rational(py_string.decode("ascii"))
-
-    @property
     def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """

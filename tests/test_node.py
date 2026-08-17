@@ -932,7 +932,28 @@ def test_append_event_sets_distribution():
     game = games.read_from_file("sample_extensive_game.efg")
     node = game.root.children["1"].children["1"]
     game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.infoset.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+    assert list(node.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+
+
+def test_node_action_probs():
+    """Test that Node.action_probs returns a label-to-probability mapping at an event."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    node = game.root.children["1"].children["1"]
+    game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
+    assert node.action_probs == {"a": gbt.Rational(1, 4), "b": gbt.Rational(3, 4)}
+
+
+def test_node_action_probs_rejects_personal_player():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = game.root.action_probs
+
+
+def test_node_action_probs_rejects_terminal():
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = next(n for n in game.nodes if n.is_terminal)
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = terminal.action_probs
 
 
 def test_append_event_error_actions_empty():
@@ -1017,9 +1038,7 @@ def test_insert_event_sets_distribution():
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root
     game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.parent.infoset.actions] == [
-        gbt.Rational(1, 4), gbt.Rational(3, 4)
-    ]
+    assert list(node.parent.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
 
 def test_insert_event_error_actions_empty():

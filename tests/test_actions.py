@@ -141,10 +141,11 @@ def test_action_delete_chance(game: gbt.Game):
     node
     """
     chance_infoset = next(iter(game.players.chance.infosets))
+    node = next(iter(chance_infoset.members))
     while len(chance_infoset.actions) > 1:
-        old_probs = [a.prob for a in chance_infoset.actions]
+        old_probs = list(node.action_probs.values())
         game.delete_action(next(iter(chance_infoset.actions)))
-        new_probs = [a.prob for a in chance_infoset.actions]
+        new_probs = list(node.action_probs.values())
         assert sum(new_probs) == 1
         if sum(old_probs[1:]) == 0:
             for p in new_probs:

@@ -421,6 +421,33 @@ class Node:
         return NodePlayer.wrap(self.node)
 
     @property
+    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
+        """Returns a mapping from action label to probability, for a node belonging to
+        a chance event.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If this node does not belong to a chance event.
+
+        .. versionadded:: 17.0.0
+        """
+        infoset = self.node.deref().GetInfoset()
+        if infoset == cython.cast(c_GameInfoset, NULL) or not infoset.deref().IsChanceInfoset():
+            raise UndefinedOperationError(
+                "action probabilities are only defined at chance events"
+            )
+        result = {}
+        for action in infoset.deref().GetActions():
+            label = action.deref().GetLabel().decode("utf-8")
+            py_string = cython.cast(string, infoset.deref().GetActionProb(action))
+            if "." in py_string.decode("ascii"):
+                result[label] = decimal.Decimal(py_string.decode("ascii"))
+            else:
+                result[label] = Rational(py_string.decode("ascii"))
+        return result
+
+    @property
     def parent(self) -> Node | None:
         """The parent of this node.
 
