@@ -519,6 +519,73 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._copy()
 
+    # The public API above is implemented once here and dispatches to the hooks below,
+    # each of which is implemented by a concrete dtype-specific subclass
+    # (MixedStrategyProfileDouble/MixedStrategyProfileRational).
+
+    def _check_validity(self) -> None:
+        """Raises GameStructureChangedError if the game has structurally changed since
+        this profile was created.
+        """
+        raise NotImplementedError
+
+    @property
+    def _game(self) -> Game:
+        """The game on which this profile is defined."""
+        raise NotImplementedError
+
+    def _getprob_strategy(self, strategy: Strategy) -> ProfileDType:
+        """Returns the probability with which strategy is played."""
+        raise NotImplementedError
+
+    def _setprob_strategy(self, strategy: Strategy, value: typing.Any) -> None:
+        """Sets the probability with which strategy is played."""
+        raise NotImplementedError
+
+    def _payoff(self, player: Player) -> ProfileDType:
+        """Returns the expected payoff to player."""
+        raise NotImplementedError
+
+    def _strategy_value(self, strategy: Strategy) -> ProfileDType:
+        """Returns the expected payoff to playing strategy."""
+        raise NotImplementedError
+
+    def _strategy_regret(self, strategy: Strategy) -> ProfileDType:
+        """Returns the regret to playing strategy."""
+        raise NotImplementedError
+
+    def _player_regret(self, player: Player) -> ProfileDType:
+        """Returns the regret of player for playing their mixed strategy."""
+        raise NotImplementedError
+
+    def _max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player."""
+        raise NotImplementedError
+
+    def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> ProfileDType:
+        """Returns the derivative of the payoff to strategy with respect to the
+        probability that other is played.
+        """
+        raise NotImplementedError
+
+    def _liap_value(self) -> ProfileDType:
+        """Returns the Lyapunov value of the profile."""
+        raise NotImplementedError
+
+    def _copy(self) -> MixedStrategyProfile:
+        """Creates a copy of the profile."""
+        raise NotImplementedError
+
+    def _as_behavior(self) -> MixedBehaviorProfile:
+        """Creates the equivalent mixed behavior profile."""
+        raise NotImplementedError
+
+    def _normalize(self) -> MixedStrategyProfile:
+        """Creates a copy of the profile, normalized so each player's strategy
+        probabilities sum to one.
+        """
+        raise NotImplementedError
+
     def _all_zero_probs(self) -> bool:
         """Returns True if at least one player has only zero probabilities."""
         return any([all([self._getprob_strategy(s) == 0 for s in p.strategies])
