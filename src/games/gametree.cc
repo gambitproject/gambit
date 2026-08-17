@@ -1559,7 +1559,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
   if (n->IsTerminal()) {
     f << "t ";
   }
-  else if (n->GetInfoset()->IsChanceInfoset()) {
+  else if (n->IsChanceInfoset()) {
     f << "c ";
   }
   else {
@@ -1567,11 +1567,11 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
   }
   f << QuoteString(n->GetLabel()) << ' ';
   if (!n->IsTerminal()) {
-    if (!n->GetInfoset()->IsChanceInfoset()) {
-      f << n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
+    if (!n->IsChanceInfoset()) {
+      f << n->GetPlayer()->GetNumber() << ' ';
     }
-    f << n->GetInfoset()->GetNumber() << " " << QuoteString(n->GetInfoset()->GetLabel()) << ' ';
-    if (n->GetInfoset()->IsChanceInfoset()) {
+    f << n->GetInfoset()->GetNumber() << " " << QuoteString(n->GetInfosetLabel()) << ' ';
+    if (n->IsChanceInfoset()) {
       f << FormatList(n->GetInfoset()->GetActions(), [](const GameAction &a) {
         return QuoteString(a->GetLabel()) + " " + std::string(a->GetInfoset()->GetActionProb(a));
       });

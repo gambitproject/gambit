@@ -674,8 +674,8 @@ void TreeLayout::GenerateLabels() const
 
       const GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {
-        entry->SetActionProb(static_cast<double>(parent->GetInfoset()->GetActionProb(
-            parent->GetInfoset()->GetAction(entry->GetChildNumber()))));
+        entry->SetActionProb(static_cast<double>(
+            parent->GetActionProb(parent->GetInfoset()->GetAction(entry->GetChildNumber()))));
       }
       else {
         const int profile = m_doc->GetWorkspace().GetCurrentProfile();

@@ -480,7 +480,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
     // derivative wrt this path is zero.
     return static_cast<T>(0);
   }
-  if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
+  if (p_node->SameInfoset(p_oppAction->GetInfoset())) {
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
     // be the same.

@@ -38,9 +38,29 @@ def _find_tutorial_notebooks():
 # Discover notebooks at import time so pytest can parametrize them.
 _NOTEBOOKS = _find_tutorial_notebooks()
 
+# Notebooks known to fail for reasons outside this repo's control, with the reason why.
+# `strict=True` so that once the underlying issue is fixed, the resulting XPASS is reported
+# as a failure -- a prompt to remove the marker rather than a result that's easy to miss.
+_XFAIL_NOTEBOOKS = {
+    "03_stripped_down_poker.ipynb": (
+        "gtdraw <= 0.12.1 reads node.prior_action.prob, which was removed from pygambit in "
+        "17.0.0-alpha.2 (see ChangeLog); needs a gtdraw update to use Node.action_probs instead"
+    ),
+    "openspiel.ipynb": (
+        "gtdraw <= 0.12.1 reads node.prior_action.prob, which was removed from pygambit in "
+        "17.0.0-alpha.2 (see ChangeLog); needs a gtdraw update to use Node.action_probs instead"
+    ),
+}
+
+
+def _notebook_param(nb_path: Path) -> pytest.param:
+    reason = _XFAIL_NOTEBOOKS.get(nb_path.name)
+    marks = [pytest.mark.xfail(reason=reason, strict=True)] if reason else []
+    return pytest.param(nb_path, marks=marks, id=nb_path.name)
+
 
 @pytest.mark.tutorials
-@pytest.mark.parametrize("nb_path", _NOTEBOOKS, ids=[p.name for p in _NOTEBOOKS])
+@pytest.mark.parametrize("nb_path", [_notebook_param(p) for p in _NOTEBOOKS])
 def test_execute_notebook(nb_path):
     """Execute a single Jupyter notebook and fail if any cell errors occur.
 

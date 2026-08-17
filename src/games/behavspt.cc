@@ -111,7 +111,7 @@ void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
   if (!n->IsTerminal()) {
     m_nonterminalReachable[n] = true;
     m_infosetReachable[n->GetInfoset()] = true;
-    if (n->GetInfoset()->GetPlayer()->IsChance()) {
+    if (n->GetPlayer()->IsChance()) {
       for (const auto &child : n->GetChildren()) {
         ActivateSubtree(child);
       }

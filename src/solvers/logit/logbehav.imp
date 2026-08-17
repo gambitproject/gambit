@@ -146,8 +146,7 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
     return static_cast<T>(0);
   }
 
-  const GameInfoset infoset = p_node->GetInfoset();
-  if (infoset == p_oppAction->GetInfoset()) {
+  if (p_node->SameInfoset(p_oppAction->GetInfoset())) {
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
     // be the same.

@@ -130,7 +130,7 @@ wxString InfosetIdLabel(const GameNode &n, const AnalysisWorkspace &)
     return {};
   }
   wxString label;
-  if (n->GetInfoset()->IsChanceInfoset()) {
+  if (n->IsChanceInfoset()) {
     label << "C:" << n->GetInfoset()->GetNumber();
   }
   else {
@@ -180,7 +180,7 @@ wxString BranchProbLabel(const GameNode &n, const AnalysisWorkspace &p_workspace
   const int childNumber = n->GetPriorAction()->GetNumber();
   if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
     return {static_cast<std::string>(
-                parent->GetInfoset()->GetActionProb(parent->GetInfoset()->GetAction(childNumber)))
+                parent->GetActionProb(parent->GetInfoset()->GetAction(childNumber)))
                 .c_str(),
             *wxConvCurrent};
   }

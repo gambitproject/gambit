@@ -84,9 +84,8 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
     }
     if (n->GetPlayer()->IsChance()) {
       for (const auto &[action, child] : n->GetActions()) {
-        frames.push({child,
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                     frame.progress});
+        frames.push(
+            {child, frame.prob * static_cast<Rational>(n->GetActionProb(action)), frame.progress});
       }
       continue;
     }
@@ -99,7 +98,7 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
       continue;
     }
     const GameSequence &next = chain[index + 1];
-    if (next->GetInfoset() != n->GetInfoset()) {
+    if (!n->SameInfoset(next->GetInfoset())) {
       // This is not the information set at which this player's next
       // designated move occurs; this branch cannot realise the profile.
       continue;
@@ -168,8 +167,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
     }
     if (n->GetPlayer()->IsChance()) {
       for (const auto &[action, child] : n->GetActions()) {
-        frames.push({child,
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+        frames.push({child, frame.prob * static_cast<Rational>(n->GetActionProb(action)),
                      frame.cumulative, frame.progress});
       }
       continue;
@@ -183,7 +181,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       continue;
     }
     const GameSequence &next = chain[index + 1];
-    if (next->GetInfoset() != n->GetInfoset()) {
+    if (!n->SameInfoset(next->GetInfoset())) {
       // This is not the information set at which this player's next
       // designated move occurs; this branch cannot realise the profile.
       continue;

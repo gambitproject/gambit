@@ -55,10 +55,9 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
   }
 
   if (!p_node->IsTerminal()) {
-    if (p_node->GetInfoset()->IsChanceInfoset()) {
+    if (p_node->IsChanceInfoset()) {
       for (const auto &[action, child] : p_node->GetActions()) {
-        payoff += (static_cast<T>(p_node->GetInfoset()->GetActionProb(action)) *
-                   GetPayoff<T>(child, p_player));
+        payoff += (static_cast<T>(p_node->GetActionProb(action)) * GetPayoff<T>(child, p_player));
       }
     }
     else {

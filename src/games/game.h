@@ -732,6 +732,29 @@ public:
 
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
+  /// @brief Returns the label of this node's information set (empty for a terminal node).
+  const std::string &GetInfosetLabel() const
+  {
+    static const std::string s_empty;
+    return (m_infoset) ? m_infoset->GetLabel() : s_empty;
+  }
+  /// @brief Returns whether this node belongs to a chance information set (event).
+  bool IsChanceInfoset() const { return m_infoset && m_infoset->IsChanceInfoset(); }
+  /// @brief Returns the probability of an action at this node's (chance) information set.
+  ///
+  /// @throws UndefinedException if this node has no information set.
+  const Number &GetActionProb(const GameAction &p_action) const
+  {
+    if (!m_infoset) {
+      throw UndefinedException("GetActionProb() requires a node with an information set");
+    }
+    return m_infoset->GetActionProb(p_action);
+  }
+  /// @brief Returns whether this node belongs to p_infoset (which may be null).
+  bool SameInfoset(const GameInfoset &p_infoset) const
+  {
+    return m_infoset == p_infoset.get_shared().get();
+  }
   GameAction GetPriorAction() const; // returns null if root node
   GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }

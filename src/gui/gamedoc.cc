@@ -479,7 +479,7 @@ void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  if (p_node->GetInfoset() == p_infoset) {
+  if (p_node->SameInfoset(p_infoset)) {
     return;
   }
   std::vector<GameNode> nodes(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
@@ -514,18 +514,17 @@ void GameDocument::DoInsertAction(GameNode p_node)
   if (!p_node || !p_node->GetInfoset()) {
     return;
   }
-  const GameInfoset infoset = p_node->GetInfoset();
-  const GameAction action = m_game->InsertAction(infoset);
+  const GameAction action = m_game->InsertAction(p_node->GetInfoset());
 
   std::set<std::string> actionLabels;
-  for (const auto &sibling : infoset->GetActions()) {
+  for (const auto &sibling : p_node->GetInfoset()->GetActions()) {
     actionLabels.insert(sibling->GetLabel());
   }
   int number = action->GetNumber();
   while (contains(actionLabels, std::to_string(number))) {
     number++;
   }
-  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
+  m_game->RelabelActions(p_node->GetInfoset(), {{action->GetLabel(), std::to_string(number)}});
   NotifyChanged(GameModificationType::GameForm);
 }
 
