@@ -178,17 +178,20 @@ wxString ActionPanel::ValidateLabels()
 //                      class EditMoveDialog
 //======================================================================
 
-EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
+EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-    m_infoset(p_infoset)
+    m_node(p_node)
 {
+  const GameInfoset infoset = p_node->GetInfoset();
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_infosetLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(p_infoset->GetLabel()));
+  m_infosetLabel =
+      new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(p_node->GetInfosetLabel()));
   m_infosetLabelDefaultBg = m_infosetLabel->GetBackgroundColour();
   m_infosetLabel->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_event) {
     UpdateValidation();
@@ -203,7 +206,7 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
 
   {
     wxString label;
-    label << _("Number of members: ") << p_infoset->GetMembers().size();
+    label << _("Number of members: ") << infoset->GetMembers().size();
     topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
   }
 
@@ -211,30 +214,30 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
                    wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_player = new wxChoice(this, wxID_ANY);
-  if (p_infoset->IsChanceInfoset()) {
+  if (p_node->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
     m_player->SetSelection(0);
     m_player->Disable();
   }
   else {
-    for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
+    for (const auto &player : p_node->GetGame()->GetPlayers()) {
       wxString label;
       label << player->GetNumber() << ": " << player->GetLabel();
       m_player->Append(label);
     }
-    m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
+    m_player->SetSelection(p_node->GetPlayer()->GetNumber() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerSizer, 0, wxEXPAND);
 
   auto *actionBoxSizer =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxVERTICAL);
-  m_actionPanel = new ActionPanel(this, p_infoset, [this]() { UpdateValidation(); });
+  m_actionPanel = new ActionPanel(this, infoset, [this]() { UpdateValidation(); });
 
-  const int visibleRows = std::min(static_cast<int>(p_infoset->GetActions().size()), 10);
+  const int visibleRows = std::min(static_cast<int>(infoset->GetActions().size()), 10);
   const int rowHeight = FromDIP(32);
   const int headerHeight = FromDIP(28);
-  m_actionPanel->SetMinSize(wxSize(FromDIP(p_infoset->IsChanceInfoset() ? 400 : 300),
+  m_actionPanel->SetMinSize(wxSize(FromDIP(p_node->IsChanceInfoset() ? 400 : 300),
                                    headerHeight + visibleRows * rowHeight));
 
   actionBoxSizer->Add(m_actionPanel, 1, wxALL | wxEXPAND, 5);
@@ -266,8 +269,8 @@ void EditMoveDialog::UpdateValidation()
   const wxString infosetLabel = m_infosetLabel->GetValue();
   bool infosetValid = true;
   if (!infosetLabel.empty()) {
-    for (const auto &infoset : m_infoset->GetPlayer()->GetInfosets()) {
-      if (infoset != m_infoset && infoset->GetLabel() == infosetLabel) {
+    for (const auto &infoset : m_node->GetPlayer()->GetInfosets()) {
+      if (!m_node->SameInfoset(infoset) && infoset->GetLabel() == infosetLabel) {
         infosetValid = false;
         break;
       }
@@ -296,7 +299,7 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
     return;
   }
 
-  if (!m_infoset->IsChanceInfoset()) {
+  if (!m_node->IsChanceInfoset()) {
     p_event.Skip();
     return;
   }

@@ -30,10 +30,20 @@ namespace Gambit {
 
 BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
 {
+  int infosetIndex = 1;
+  for (const auto &player : p_efg->GetPlayersWithChance()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      m_infosetIndex[infoset] = infosetIndex++;
+    }
+  }
+  m_actions = Array<std::vector<GameAction>>(m_infosetIndex.size());
+  m_infosetReachable = Array<bool>(m_infosetIndex.size());
+  m_nonterminalReachable = Array<bool>(p_efg->NumNodes());
+
   for (const auto &player : p_efg->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       for (const auto &action : infoset->GetActions()) {
-        m_actions[infoset].push_back(action);
+        m_actions[m_infosetIndex.at(infoset)].push_back(action);
       }
     }
   }
@@ -41,9 +51,9 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
   // Initialize the list of reachable information sets and nodes
   for (const auto &player : p_efg->GetPlayersWithChance()) {
     for (const auto &infoset : player->GetInfosets()) {
-      m_infosetReachable[infoset] = true;
+      m_infosetReachable[m_infosetIndex.at(infoset)] = true;
       for (const auto &member : infoset->GetMembers()) {
-        m_nonterminalReachable[member] = true;
+        m_nonterminalReachable[member->GetNumber()] = true;
       }
     }
   }
@@ -56,7 +66,7 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
 size_t BehaviorSupportProfile::BehaviorProfileLength() const
 {
   size_t answer = 0;
-  for (const auto &[infoset, actions] : m_actions) {
+  for (const auto &actions : m_actions) {
     answer += actions.size();
   }
   return answer;
@@ -66,7 +76,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
-  auto &support = m_actions.at(p_action->GetInfoset());
+  auto &support = m_actions[m_infosetIndex.at(p_action->GetInfoset())];
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
   });
@@ -74,8 +84,8 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
     // Action is not in the support at the infoset; add at this location to keep sorted by number
     support.insert(pos, p_action);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
-      if (m_nonterminalReachable[node]) {
-        ActivateSubtree(node->GetChild(p_action));
+      if (m_nonterminalReachable[node->GetNumber()]) {
+        ActivateSubtree(node->GetChild(p_action->GetLabel()));
       }
     }
   }
@@ -85,13 +95,13 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
-  auto &support = m_actions.at(p_action->GetInfoset());
+  auto &support = m_actions[m_infosetIndex.at(p_action->GetInfoset())];
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
     support.erase(pos);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
-      if (m_nonterminalReachable[node]) {
-        DeactivateSubtree(node->GetChild(p_action));
+      if (m_nonterminalReachable[node->GetNumber()]) {
+        DeactivateSubtree(node->GetChild(p_action->GetLabel()));
       }
     }
     return !support.empty();
@@ -103,22 +113,22 @@ bool BehaviorSupportProfile::HasReachableMembers(const GameInfoset &p_infoset) c
 {
   const auto &members = p_infoset->GetMembers();
   return std::any_of(members.begin(), members.end(),
-                     [&](const GameNode &n) { return m_nonterminalReachable.at(n); });
+                     [&](const GameNode &n) { return m_nonterminalReachable[n->GetNumber()]; });
 }
 
 void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) {
-    m_nonterminalReachable[n] = true;
-    m_infosetReachable[n->GetInfoset()] = true;
-    if (n->GetInfoset()->GetPlayer()->IsChance()) {
+    m_nonterminalReachable[n->GetNumber()] = true;
+    m_infosetReachable[m_infosetIndex.at(n->GetInfoset())] = true;
+    if (n->GetPlayer()->IsChance()) {
       for (const auto &child : n->GetChildren()) {
         ActivateSubtree(child);
       }
     }
     else {
       for (const auto &action : GetActions(n->GetInfoset())) {
-        ActivateSubtree(n->GetChild(action));
+        ActivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
   }
@@ -127,18 +137,18 @@ void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
 void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
 {
   if (!n->IsTerminal()) { // THIS ALL LOOKS FISHY
-    m_nonterminalReachable[n] = false;
+    m_nonterminalReachable[n->GetNumber()] = false;
     if (!HasReachableMembers(n->GetInfoset())) {
-      m_infosetReachable[n->GetInfoset()] = false;
+      m_infosetReachable[m_infosetIndex.at(n->GetInfoset())] = false;
     }
     if (!n->GetPlayer()->IsChance()) {
       for (const auto &action : GetActions(n->GetInfoset())) {
-        DeactivateSubtree(n->GetChild(action));
+        DeactivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
     else {
       for (const auto &action : n->GetInfoset()->GetActions()) {
-        DeactivateSubtree(n->GetChild(action));
+        DeactivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
   }
@@ -297,13 +307,13 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node,
     auto infoset = p_node->GetInfoset();
     p_reachable[infoset] = true;
     if (p_node->GetPlayer()->IsChance()) {
-      for (auto action : infoset->GetActions()) {
-        FindReachableInfosets(p_node->GetChild(action), p_reachable);
+      for (const auto &[action, child] : p_node->GetActions()) {
+        FindReachableInfosets(child, p_reachable);
       }
     }
     else {
       for (auto action : GetActions(infoset)) {
-        FindReachableInfosets(p_node->GetChild(action), p_reachable);
+        FindReachableInfosets(p_node->GetChild(action->GetLabel()), p_reachable);
       }
     }
   }

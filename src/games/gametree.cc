@@ -104,19 +104,6 @@ template class TreeMixedStrategyProfileRep<Rational>;
 //                     class GameActionRep
 //========================================================================
 
-bool GameActionRep::Precedes(const GameNode &n) const
-{
-  GameNode node = n;
-
-  while (node != node->GetGame()->GetRoot()) {
-    if (node->GetPriorAction().get() == this) {
-      return true;
-    }
-    node = node->GetParent();
-  }
-  return false;
-}
-
 void GameTreeRep::DeleteAction(GameAction p_action)
 {
   auto action = p_action.get();
@@ -174,18 +161,6 @@ GameInfosetRep::~GameInfosetRep()
 {
   std::for_each(m_actions.begin(), m_actions.end(),
                 [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
-}
-
-bool GameInfosetRep::Precedes(GameNode p_node) const
-{
-  auto node = p_node.get();
-  while (node->m_parent) {
-    if (node->m_infoset == this) {
-      return true;
-    }
-    node = node->m_parent;
-  }
-  return false;
 }
 
 GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
@@ -339,12 +314,12 @@ GameAction GameNodeRep::GetPriorAction() const
   if (!m_parent) {
     return nullptr;
   }
-  for (const auto &action : m_parent->m_infoset->m_actions) {
-    if (m_parent->GetChild(action).get() == this) {
-      return action;
-    }
+  const auto pos = std::find_if(m_parent->m_children.begin(), m_parent->m_children.end(),
+                                [this](const auto &child) { return child.get() == this; });
+  if (pos == m_parent->m_children.end()) {
+    return nullptr;
   }
-  return nullptr;
+  return m_parent->m_infoset->m_actions.at(pos - m_parent->m_children.begin());
 }
 
 GameAction GameNodeRep::GetOwnPriorAction() const
@@ -635,7 +610,12 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
       // into a single new information set.
       std::vector<GameNode> group;
       for (const auto &member : members) {
-        if (action->Precedes(member)) {
+        const bool follows_action = std::any_of(
+            p_atInfoset->m_members.begin(), p_atInfoset->m_members.end(),
+            [&](const std::shared_ptr<GameNodeRep> &at_member) {
+              return member->IsSuccessorOf(at_member->m_children.at(action->GetNumber() - 1));
+            });
+        if (follows_action) {
           group.emplace_back(member);
         }
       }
@@ -1142,7 +1122,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
   else {
     auto *player = n->m_infoset->m_player;
     const auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
-    for (const auto &action : n->m_infoset->m_actions) {
+    for (const auto &[action, child] : n->GetActions()) {
       auto seq_it =
           std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
                        [&action](const auto seq) { return seq->m_action == action.get(); });
@@ -1157,7 +1137,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
         sequence = *seq_it;
       }
       p_currentSequences.SetSequence(sequence);
-      BuildSequences(n->GetChild(action), p_currentSequences);
+      BuildSequences(child, p_currentSequences);
     }
     p_currentSequences.SetSequence(tmp_sequence);
   }
@@ -1342,7 +1322,7 @@ const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
       else {
         std::tie(action, node) = std::get<AbsentMindedEdge>(current_edge);
         position.pop();
-        child = node->GetChild(action);
+        child = node->m_children.at(action->GetNumber() - 1);
       }
 
       if (!child->IsTerminal()) {
@@ -1579,7 +1559,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
   if (n->IsTerminal()) {
     f << "t ";
   }
-  else if (n->GetInfoset()->IsChanceInfoset()) {
+  else if (n->IsChanceInfoset()) {
     f << "c ";
   }
   else {
@@ -1587,11 +1567,11 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
   }
   f << QuoteString(n->GetLabel()) << ' ';
   if (!n->IsTerminal()) {
-    if (!n->GetInfoset()->IsChanceInfoset()) {
-      f << n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
+    if (!n->IsChanceInfoset()) {
+      f << n->GetPlayer()->GetNumber() << ' ';
     }
-    f << n->GetInfoset()->GetNumber() << " " << QuoteString(n->GetInfoset()->GetLabel()) << ' ';
-    if (n->GetInfoset()->IsChanceInfoset()) {
+    f << n->GetInfoset()->GetNumber() << " " << QuoteString(n->GetInfosetLabel()) << ' ';
+    if (n->IsChanceInfoset()) {
       f << FormatList(n->GetInfoset()->GetActions(), [](const GameAction &a) {
         return QuoteString(a->GetLabel()) + " " + std::string(a->GetInfoset()->GetActionProb(a));
       });
@@ -1719,7 +1699,7 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   std::vector<GameNode> plays;
 
   for (const auto &node : action->GetInfoset()->GetMembers()) {
-    std::vector<GameNode> child_plays = GetPlays(node->GetChild(action));
+    std::vector<GameNode> child_plays = GetPlays(node->m_children.at(action->GetNumber() - 1));
     plays.insert(plays.end(), child_plays.begin(), child_plays.end());
   }
   return plays;

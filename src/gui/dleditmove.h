@@ -29,7 +29,7 @@ namespace Gambit::GUI {
 class ActionPanel;
 
 class EditMoveDialog final : public wxDialog {
-  GameInfoset m_infoset;
+  GameNode m_node;
   wxChoice *m_player;
   LabelTextCtrl *m_infosetLabel;
   wxColour m_infosetLabelDefaultBg;
@@ -41,7 +41,7 @@ class EditMoveDialog final : public wxDialog {
 
 public:
   // Lifecycle
-  EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset);
+  EditMoveDialog(wxWindow *p_parent, const GameNode &p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetLabel() const { return m_infosetLabel->GetNormalizedValue(); }

@@ -50,7 +50,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
   m_infoset = new wxChoice(this, wxID_ANY);
   if (!p_node->IsTerminal()) {
     m_infoset->Append(_("New information set"));
-    if (p_node->GetInfoset()->IsChanceInfoset()) {
+    if (p_node->IsChanceInfoset()) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
         if (infoset->GetActions().size() == p_node->GetChildren().size()) {
@@ -58,7 +58,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
           wxString label;
           label << _("Chance infoset ") << infoset->GetNumber();
           m_infoset->Append(label);
-          if (infoset == p_node->GetInfoset()) {
+          if (p_node->SameInfoset(infoset)) {
             selection = m_infosetList.size();
           }
         }
@@ -75,7 +75,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
             label << _("Player ") << player->GetNumber() << _(", Infoset ")
                   << infoset->GetNumber();
             m_infoset->Append(label);
-            if (infoset == p_node->GetInfoset()) {
+            if (p_node->SameInfoset(infoset)) {
               selection = m_infosetList.size();
             }
           }

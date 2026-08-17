@@ -83,10 +83,9 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                     frame.progress});
+      for (const auto &[action, child] : n->GetActions()) {
+        frames.push(
+            {child, frame.prob * static_cast<Rational>(n->GetActionProb(action)), frame.progress});
       }
       continue;
     }
@@ -99,14 +98,14 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
       continue;
     }
     const GameSequence &next = chain[index + 1];
-    if (next->GetInfoset() != n->GetInfoset()) {
+    if (!n->SameInfoset(next->GetInfoset())) {
       // This is not the information set at which this player's next
       // designated move occurs; this branch cannot realise the profile.
       continue;
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push({n->GetChild(next->GetAction()), frame.prob, std::move(progress)});
+    frames.push({n->GetChild(next->GetAction()->GetLabel()), frame.prob, std::move(progress)});
   }
 }
 
@@ -167,9 +166,8 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+      for (const auto &[action, child] : n->GetActions()) {
+        frames.push({child, frame.prob * static_cast<Rational>(n->GetActionProb(action)),
                      frame.cumulative, frame.progress});
       }
       continue;
@@ -183,15 +181,15 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       continue;
     }
     const GameSequence &next = chain[index + 1];
-    if (next->GetInfoset() != n->GetInfoset()) {
+    if (!n->SameInfoset(next->GetInfoset())) {
       // This is not the information set at which this player's next
       // designated move occurs; this branch cannot realise the profile.
       continue;
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push(
-        {n->GetChild(next->GetAction()), frame.prob, frame.cumulative, std::move(progress)});
+    frames.push({n->GetChild(next->GetAction()->GetLabel()), frame.prob, frame.cumulative,
+                 std::move(progress)});
   }
   return payoff;
 }

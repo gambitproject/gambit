@@ -151,6 +151,7 @@ Information about the game
    Node.next_sibling
    Node.infoset
    Node.player
+   Node.action_probs
    Node.is_successor_of
    Node.plays
    Node.own_prior_action
@@ -174,7 +175,6 @@ Information about the game
    Infoset.player
    Infoset.actions
    Infoset.members
-   Infoset.precedes
    Infoset.plays
    Infoset.own_prior_actions
 
@@ -184,8 +184,6 @@ Information about the game
 
    Action.label
    Action.infoset
-   Action.precedes
-   Action.prob
    Action.plays
 
 .. autosummary::

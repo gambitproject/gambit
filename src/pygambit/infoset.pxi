@@ -159,10 +159,6 @@ class Infoset:
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
 
-    def precedes(self, node: Node) -> bool:
-        """Return whether this information set precedes `node` in the game tree."""
-        return self.infoset.deref().Precedes(cython.cast(Node, node).node)
-
     @property
     def game(self) -> Game:
         """The ``Game`` to which the information set belongs."""

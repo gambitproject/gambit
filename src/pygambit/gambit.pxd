@@ -118,7 +118,6 @@ cdef extern from "games/game.h":
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
         c_GameInfoset GetInfoset() except +
-        bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
 
@@ -158,7 +157,6 @@ cdef extern from "games/game.h":
         Members GetMembers() except +
 
         bint IsChanceInfoset() except +
-        bint Precedes(c_GameNode) except +
         stdset[c_GameAction] GetOwnPriorActions() except +
 
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
@@ -238,7 +236,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         c_GameNode GetParent() except +
         Children GetChildren() except +
-        c_GameNode GetChild(c_GameAction) except +IndexError
+        c_GameNode GetChild(string) except +IndexError
         c_GameOutcome GetOutcome() except +
         c_GameNode GetPriorSibling() except +
         c_GameNode GetNextSibling() except +

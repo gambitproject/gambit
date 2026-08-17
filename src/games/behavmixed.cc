@@ -32,6 +32,22 @@ namespace Gambit {
 //                  MixedBehaviorProfile<T>: Lifecycle
 //========================================================================
 
+template <class T> void MixedBehaviorProfile<T>::BuildIndexes()
+{
+  int actionIndex = 1;
+  for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      m_actionIndex[action] = actionIndex++;
+    }
+  }
+  int infosetIndex = 1;
+  for (const auto &player : m_support.GetGame()->GetPlayersWithChance()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      m_infosetIndex[infoset] = infosetIndex++;
+    }
+  }
+}
+
 template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : m_probs(p_game->BehavProfileLength()), m_support(BehaviorSupportProfile(p_game)),
@@ -44,6 +60,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
       m_profileIndex[action] = index++;
     }
   }
+  BuildIndexes();
   SetCentroid();
 }
 
@@ -64,6 +81,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_su
       }
     }
   }
+  BuildIndexes();
   SetCentroid();
 }
 
@@ -136,6 +154,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
       m_probs[index++] = static_cast<T>(0);
     }
   }
+  BuildIndexes();
 
   GameNodeRep *root = m_support.GetGame()->GetRoot().get();
 
@@ -170,6 +189,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedSequenceProfile<T> &p_p
       m_profileIndex[action] = index++;
     }
   }
+  BuildIndexes();
   for (auto player : game->GetPlayers()) {
     for (auto sequence : player->GetSequences()) {
       if (!sequence->GetAction()) {
@@ -291,8 +311,9 @@ template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
     if (GetInfosetProb(infoset) == T{0}) {
       continue;
     }
+    const T &infosetValue = m_cache.m_infosetValues[m_infosetIndex.at(infoset)];
     for (auto action : m_support.GetActions(infoset)) {
-      value += sqr(std::max(m_cache.m_actionValues[action] - m_cache.m_infosetValues[infoset],
+      value += sqr(std::max(m_cache.m_actionValues[m_actionIndex.at(action)] - infosetValue,
                             static_cast<T>(0)));
     }
   }
@@ -303,14 +324,14 @@ template <class T> const T &MixedBehaviorProfile<T>::GetRealizProb(const GameNod
 {
   CheckVersion();
   EnsureRealizations();
-  return m_cache.m_realizProbs[node];
+  return m_cache.m_realizProbs[node->GetNumber()];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &p_infoset) const
 {
   CheckVersion();
   EnsureRealizations();
-  return m_cache.m_infosetProbs[p_infoset];
+  return m_cache.m_infosetProbs[m_infosetIndex.at(p_infoset)];
 }
 
 template <class T>
@@ -321,7 +342,7 @@ std::optional<T> MixedBehaviorProfile<T>::GetBeliefProb(const GameNode &node) co
   if (!node->GetInfoset() || GetInfosetProb(node->GetInfoset()) == T{0}) {
     return std::nullopt;
   }
-  return m_cache.m_beliefs[node];
+  return m_cache.m_beliefs[node->GetNumber()];
 }
 
 template <class T> Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &node) const
@@ -330,8 +351,9 @@ template <class T> Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &
   EnsureNodeValues();
   Vector<T> ret(node->GetGame()->NumPlayers());
   auto players = node->GetGame()->GetPlayers();
+  const Array<T> &vals = m_cache.m_nodeValues[node->GetNumber()];
   std::transform(players.begin(), players.end(), ret.begin(),
-                 [this, node](GamePlayer player) { return m_cache.m_nodeValues[node][player]; });
+                 [&vals](const GamePlayer &player) { return vals[player->GetNumber()]; });
   return ret;
 }
 
@@ -341,7 +363,7 @@ const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player,
 {
   CheckVersion();
   EnsureNodeValues();
-  return m_cache.m_nodeValues.at(p_node).at(p_player);
+  return m_cache.m_nodeValues[p_node->GetNumber()][p_player->GetNumber()];
 }
 
 template <class T>
@@ -352,7 +374,7 @@ std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &p_infoset
   if (GetInfosetProb(p_infoset) == T{0}) {
     return std::nullopt;
   }
-  return m_cache.m_infosetValues[p_infoset];
+  return m_cache.m_infosetValues[m_infosetIndex.at(p_infoset)];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
@@ -374,7 +396,7 @@ template <class T> std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const Gam
   if (GetInfosetProb(act->GetInfoset()) == T{0}) {
     return std::nullopt;
   }
-  return m_cache.m_actionValues[act];
+  return m_cache.m_actionValues[m_actionIndex.at(act)];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
@@ -384,7 +406,7 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameAction &act) c
   if (GetInfosetProb(act->GetInfoset()) == T{0}) {
     return T{0};
   }
-  return m_cache.m_regret.at(act);
+  return m_cache.m_regret[m_actionIndex.at(act)];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_infoset) const
@@ -395,9 +417,9 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
     return T{0};
   }
   T br_payoff = maximize_function(p_infoset->GetActions(), [this](const auto &action) -> T {
-    return m_cache.m_actionValues.at(action);
+    return m_cache.m_actionValues[m_actionIndex.at(action)];
   });
-  return br_payoff - m_cache.m_infosetValues[p_infoset];
+  return br_payoff - m_cache.m_infosetValues[m_infosetIndex.at(p_infoset)];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
@@ -436,12 +458,13 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
   const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (auto member : infoset->GetMembers()) {
-    const GameNode child = member->GetChild(p_action);
+    const GameNode child = member->m_children.at(p_action->GetNumber() - 1);
 
     deriv += DiffRealizProb(member, p_oppAction) *
-             (m_cache.m_nodeValues[child][player] - m_cache.m_actionValues[p_action]);
-    deriv += m_cache.m_realizProbs[member] *
-             DiffNodeValue(member->GetChild(p_action), player, p_oppAction);
+             (m_cache.m_nodeValues[child->GetNumber()][player->GetNumber()] -
+              m_cache.m_actionValues[m_actionIndex.at(p_action)]);
+    deriv +=
+        m_cache.m_realizProbs[member->GetNumber()] * DiffNodeValue(child, player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());
@@ -481,11 +504,12 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
     // derivative wrt this path is zero.
     return static_cast<T>(0);
   }
-  if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
+  if (p_node->SameInfoset(p_oppAction->GetInfoset())) {
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
     // be the same.
-    return m_cache.m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+    return m_cache.m_nodeValues[p_node->m_children.at(p_oppAction->GetNumber() - 1)->GetNumber()]
+                               [p_player->GetNumber()];
   }
   return sum_function(p_node->GetActions(), [&](auto action_child) -> T {
     return DiffNodeValue(action_child.second, p_player, p_oppAction) *
@@ -499,45 +523,47 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
 
 template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
 {
-  m_cache.m_realizProbs.clear();
-  m_cache.m_infosetProbs.clear();
-
   const auto &game = m_support.GetGame();
-  m_cache.m_realizProbs[game->GetRoot()] = static_cast<T>(1);
+  m_cache.m_realizProbs = Array<T>(game->NumNodes());
+  m_cache.m_infosetProbs = Array<T>(m_infosetIndex.size());
+
+  m_cache.m_realizProbs[game->GetRoot()->GetNumber()] = static_cast<T>(1);
   for (const auto &node : game->GetNodes()) {
-    const T incomingProb = m_cache.m_realizProbs[node];
+    const T incomingProb = m_cache.m_realizProbs[node->GetNumber()];
     for (auto [action, child] : node->GetActions()) {
-      m_cache.m_realizProbs[child] = incomingProb * GetActionProb(action);
+      m_cache.m_realizProbs[child->GetNumber()] = incomingProb * GetActionProb(action);
     }
   }
 
   for (const auto &player : game->GetPlayersWithChance()) {
     for (const auto &infoset : player->GetInfosets()) {
-      m_cache.m_infosetProbs[infoset] =
-          sum_function(infoset->GetMembers(),
-                       [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+      m_cache.m_infosetProbs[m_infosetIndex.at(infoset)] =
+          sum_function(infoset->GetMembers(), [&](const auto &node) -> T {
+            return m_cache.m_realizProbs[node->GetNumber()];
+          });
     }
   }
   for (const auto &[infoset, node] : game->GetAbsentMindedReentries()) {
-    m_cache.m_infosetProbs[infoset] -= m_cache.m_realizProbs[node];
+    m_cache.m_infosetProbs[m_infosetIndex.at(infoset)] -= m_cache.m_realizProbs[node->GetNumber()];
   }
 }
 
 template <class T> void MixedBehaviorProfile<T>::ComputeBeliefs() const
 {
-  m_cache.m_beliefs.clear();
+  m_cache.m_beliefs = Array<T>(m_support.GetGame()->NumNodes());
   // Normalise each member's realization probability by the infoset's upper-frontier probability
   // (m_infosetProbs, computed in ComputeRealizationProbs), following Halpern and Pass (2021).
   // For an absent-minded infoset the frontier excludes the reentry members, so the member beliefs
   // may sum to above 1; for a non-absent-minded infoset the frontier is all members and this is
   // the standard Selten (1975) normalization.
   for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
-    const T infosetProb = m_cache.m_infosetProbs[infoset];
+    const T infosetProb = m_cache.m_infosetProbs[m_infosetIndex.at(infoset)];
     if (infosetProb == static_cast<T>(0)) {
       continue;
     }
     for (const auto &node : infoset->GetMembers()) {
-      m_cache.m_beliefs[node] = m_cache.m_realizProbs[node] / infosetProb;
+      m_cache.m_beliefs[node->GetNumber()] =
+          m_cache.m_realizProbs[node->GetNumber()] / infosetProb;
     }
   }
 }
@@ -545,42 +571,45 @@ template <class T> void MixedBehaviorProfile<T>::ComputeBeliefs() const
 template <class T> void MixedBehaviorProfile<T>::ComputeNodeValues() const
 {
   const auto &game = m_support.GetGame();
-  m_cache.m_nodeValues.clear();
+  m_cache.m_nodeValues = Array<Array<T>>(game->NumNodes());
 
   for (const auto &node : game->GetNodes(TraversalOrder::Postorder)) {
-    auto &vals = m_cache.m_nodeValues[node];
+    Array<T> vals(game->NumPlayers());
     for (const auto &player : game->GetPlayers()) {
-      vals[player] = static_cast<T>(0);
+      vals[player->GetNumber()] = static_cast<T>(0);
     }
     if (node->GetOutcome()) {
       const GameOutcome &outcome = node->GetOutcome();
       for (const auto &player : game->GetPlayers()) {
-        vals[player] += outcome->GetPayoff<T>(player);
+        vals[player->GetNumber()] += outcome->GetPayoff<T>(player);
       }
     }
     for (auto [action, child] : node->GetActions()) {
       const T p = GetActionProb(action);
+      const Array<T> &childVals = m_cache.m_nodeValues[child->GetNumber()];
       for (const auto &player : game->GetPlayers()) {
-        vals[player] += p * m_cache.m_nodeValues[child][player];
+        vals[player->GetNumber()] += p * childVals[player->GetNumber()];
       }
     }
+    m_cache.m_nodeValues[node->GetNumber()] = std::move(vals);
   }
 }
 
 template <class T> void MixedBehaviorProfile<T>::ComputeActionValues() const
 {
   const auto &game = m_support.GetGame();
-  m_cache.m_actionValues.clear();
+  m_cache.m_actionValues = Array<T>(m_actionIndex.size());
 
   for (const auto &infoset : game->GetInfosets()) {
     const auto &player = infoset->GetPlayer();
     for (const auto &node : infoset->GetMembers()) {
-      T belief = m_cache.m_beliefs[node];
+      T belief = m_cache.m_beliefs[node->GetNumber()];
       if (belief == static_cast<T>(0)) {
         continue;
       }
       for (auto [action, child] : node->GetActions()) {
-        m_cache.m_actionValues[action] += belief * m_cache.m_nodeValues[child][player];
+        m_cache.m_actionValues[m_actionIndex.at(action)] +=
+            belief * m_cache.m_nodeValues[child->GetNumber()][player->GetNumber()];
       }
     }
   }
@@ -588,19 +617,21 @@ template <class T> void MixedBehaviorProfile<T>::ComputeActionValues() const
 
 template <class T> void MixedBehaviorProfile<T>::ComputeActionRegrets() const
 {
+  m_cache.m_infosetValues = Array<T>(m_infosetIndex.size());
+  m_cache.m_regret = Array<T>(m_actionIndex.size());
+
   for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
-    m_cache.m_infosetValues[infoset] =
+    m_cache.m_infosetValues[m_infosetIndex.at(infoset)] =
         sum_function(infoset->GetActions(), [&](const auto &action) -> T {
-          return GetActionProb(action) * m_cache.m_actionValues[action];
+          return GetActionProb(action) * m_cache.m_actionValues[m_actionIndex.at(action)];
         });
 
-    auto actions = infoset->GetActions();
     const T brpayoff = maximize_function(infoset->GetActions(), [&](const auto &action) -> T {
-      return m_cache.m_actionValues[action];
+      return m_cache.m_actionValues[m_actionIndex.at(action)];
     });
     for (const auto &action : infoset->GetActions()) {
-      m_cache.m_regret[action] =
-          std::max(brpayoff - m_cache.m_actionValues[action], static_cast<T>(0));
+      m_cache.m_regret[m_actionIndex.at(action)] =
+          std::max(brpayoff - m_cache.m_actionValues[m_actionIndex.at(action)], static_cast<T>(0));
     }
   }
 }

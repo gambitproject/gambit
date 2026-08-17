@@ -45,54 +45,51 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, action: str | Action) -> Node:
-        """Returns the successor node which is reached after `action` is played.
-
-        `action` may be an ``Action`` at this node's infoset, or its label.
+    def __getitem__(self, action: typing.Any) -> Node:
+        """Returns the successor node which is reached after the action with the
+        label `action` is played.
 
         Raises
         ------
         KeyError
-            If `action` is a string and no action with that label exists at the node's
-            infoset, or if the node is terminal.
+            If no action with that label exists at the node's infoset, or if the
+            node is terminal.
         ValueError
-            If `action` is an empty or all-whitespace string, or is an ``Action``
-            from a different infoset.
+            If `action` is an empty or all-whitespace string.
         TypeError
-            If `action` is not a ``str`` or an ``Action``.
+            If `action` is not a ``str``.
 
         .. versionchanged:: 16.5.0
             Previously indexing by string searched the labels of the child nodes,
             rather than referring to actions.  This implements the more natural
             interpretation that strings refer to action labels.
 
-            Relatedly, the collection can now be indexed by an Action object.
-
         .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; index by the ``Action`` taken, or its label.
+            Integer indexing is no longer supported; index by the action's label.
             A label matching no action now raises ``KeyError``.
+
+        .. versionchanged:: 17.0.0
+            The collection can no longer be indexed by an ``Action`` object; only by
+            its label.
         """
         if isinstance(action, str):
             if not action.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
-            if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
-                raise KeyError(f"No action with label '{action}' at node")
-            for act in self.parent.deref().GetInfoset().deref().GetActions():
-                if act.deref().GetLabel().decode("utf-8") == cython.cast(str, action):
-                    return Node.wrap(self.parent.deref().GetChild(act))
-            raise KeyError(f"No action with label '{action}' at node")
-        if isinstance(action, Action):
             try:
-                return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
+                return Node.wrap(self.parent.deref().GetChild(action.encode("utf-8")))
             except IndexError:
-                raise ValueError("Action is from a different infoset than node") from None
+                raise KeyError(f"No action with label '{action}' at node") from None
+        if isinstance(action, Action):
+            raise TypeError(
+                "node children can no longer be indexed by an Action object; "
+                "index by its label instead."
+            )
         if isinstance(action, int):
             raise TypeError(
-                "node children cannot be indexed by position; index by the action taken "
-                "(an Action or its label), or iterate. "
-                "(Integer indexing was removed in 16.7.0.)"
+                "node children cannot be indexed by position; index by the action's "
+                "label, or iterate. (Integer indexing was removed in 16.7.0.)"
             )
-        raise TypeError(f"Index must be a str label or an Action, not {action.__class__.__name__}")
+        raise TypeError(f"Index must be a str label, not {action.__class__.__name__}")
 
 
 @cython.cclass
@@ -422,6 +419,33 @@ class Node:
             player at the time of access.
         """
         return NodePlayer.wrap(self.node)
+
+    @property
+    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
+        """Returns a mapping from action label to probability, for a node belonging to
+        a chance event.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If this node does not belong to a chance event.
+
+        .. versionadded:: 17.0.0
+        """
+        infoset = self.node.deref().GetInfoset()
+        if infoset == cython.cast(c_GameInfoset, NULL) or not infoset.deref().IsChanceInfoset():
+            raise UndefinedOperationError(
+                "action probabilities are only defined at chance events"
+            )
+        result = {}
+        for action in infoset.deref().GetActions():
+            label = action.deref().GetLabel().decode("utf-8")
+            py_string = cython.cast(string, infoset.deref().GetActionProb(action))
+            if "." in py_string.decode("ascii"):
+                result[label] = decimal.Decimal(py_string.decode("ascii"))
+            else:
+                result[label] = Rational(py_string.decode("ascii"))
+        return result
 
     @property
     def parent(self) -> Node | None:

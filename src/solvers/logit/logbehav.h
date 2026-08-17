@@ -53,14 +53,20 @@ template <class T> class LogBehavProfile {
 protected:
   Game m_game;
   Vector<T> m_probs, m_logProbs;
+  /// Dense over every action (this class has no restricted-support constructor, so
+  /// unlike MixedBehaviorProfile's m_profileIndex, this is never -1)
   std::map<GameAction, int> m_profileIndex;
+  unsigned int m_gameversion;
 
   // structures for storing cached data
   mutable bool m_cacheValid{false};
-  mutable std::map<GameNode, T> m_logRealizProbs;
-  mutable std::map<GameNode, T> m_beliefs;
-  mutable std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
-  mutable std::map<GameAction, T> m_actionValues;
+  /// Indexed by node->GetNumber() (dense over the whole game)
+  mutable Array<T> m_logRealizProbs;
+  mutable Array<T> m_beliefs;
+  /// Outer indexed by node->GetNumber(), inner by player->GetNumber()
+  mutable Array<Array<T>> m_nodeValues;
+  /// Indexed by m_profileIndex
+  mutable Array<T> m_actionValues;
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
@@ -68,6 +74,17 @@ protected:
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData() const;
   //@}
+
+  /// Check underlying game has not changed; raise exception if it has. Necessary for a
+  /// profile backed by fixed-size arrays: unlike a stale std::map, a stale array is
+  /// actively unsafe (out-of-bounds), not just wrong, once the game's structure has
+  /// changed since construction.
+  void CheckVersion() const
+  {
+    if (m_gameversion != m_game->GetVersion()) {
+      throw GameStructureChangedException();
+    }
+  }
 
 public:
   /// @name Lifecycle
@@ -85,22 +102,27 @@ public:
 
   void SetProb(const GameAction &p_action, const T &p_value)
   {
+    CheckVersion();
+    Invalidate();
     m_probs[m_profileIndex.at(p_action)] = p_value;
     m_logProbs[m_profileIndex.at(p_action)] = log(p_value);
   }
 
   const T &GetProb(const GameAction &p_action) const
   {
+    CheckVersion();
     return m_probs[m_profileIndex.at(p_action)];
   }
 
   const T &GetLogProb(const GameAction &p_action) const
   {
+    CheckVersion();
     return m_logProbs[m_profileIndex.at(p_action)];
   }
 
   void SetLogProb(int a, const T &p_value)
   {
+    CheckVersion();
     Invalidate();
     m_logProbs[a] = p_value;
     m_probs[a] = exp(p_value);

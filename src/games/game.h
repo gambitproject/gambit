@@ -32,6 +32,7 @@
 #include <random>
 #include <set>
 #include <stack>
+#include <stdexcept>
 
 #include "number.h"
 #include "gameobject.h"
@@ -391,8 +392,6 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-
-  bool Precedes(const GameNode &) const;
 };
 
 /// An information set in an extensive game
@@ -458,8 +457,6 @@ public:
 
   GameNode GetMember(int p_index) const;
   Members GetMembers() const;
-
-  bool Precedes(GameNode) const;
 
   std::set<GameAction> GetOwnPriorActions() const;
 
@@ -711,12 +708,20 @@ public:
   void SetLabel(const std::string &p_label);
 
   int GetNumber() const;
-  GameNode GetChild(const GameAction &p_action)
+  /// @brief Returns the child reached by playing the action with the given label.
+  ///
+  /// @throws std::out_of_range if this node has no infoset, or no action at its
+  ///         infoset has the label p_action.
+  GameNode GetChild(const std::string &p_action)
   {
-    if (p_action->GetInfoset().get() != m_infoset) {
-      throw MismatchException("Action is from a different information set than node");
+    if (m_infoset) {
+      for (const auto &action : m_infoset->m_actions) {
+        if (action->GetLabel() == p_action) {
+          return m_children.at(action->GetNumber() - 1);
+        }
+      }
     }
-    return m_children.at(p_action->GetNumber() - 1);
+    throw std::out_of_range("No action with the specified label at this node");
   }
   Children GetChildren() const
   {
@@ -727,6 +732,29 @@ public:
 
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
+  /// @brief Returns the label of this node's information set (empty for a terminal node).
+  const std::string &GetInfosetLabel() const
+  {
+    static const std::string s_empty;
+    return (m_infoset) ? m_infoset->GetLabel() : s_empty;
+  }
+  /// @brief Returns whether this node belongs to a chance information set (event).
+  bool IsChanceInfoset() const { return m_infoset && m_infoset->IsChanceInfoset(); }
+  /// @brief Returns the probability of an action at this node's (chance) information set.
+  ///
+  /// @throws UndefinedException if this node has no information set.
+  const Number &GetActionProb(const GameAction &p_action) const
+  {
+    if (!m_infoset) {
+      throw UndefinedException("GetActionProb() requires a node with an information set");
+    }
+    return m_infoset->GetActionProb(p_action);
+  }
+  /// @brief Returns whether this node belongs to p_infoset (which may be null).
+  bool SameInfoset(const GameInfoset &p_infoset) const
+  {
+    return m_infoset == p_infoset.get_shared().get();
+  }
   GameAction GetPriorAction() const; // returns null if root node
   GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }

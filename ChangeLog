@@ -1,3 +1,15 @@
+## [17.0.0-alpha.2] - unreleased
+
+### Added
+- `Node.action_probs` returns a mapping from action label to probability for a node at a
+  chance event.
+
+### Removed
+- `Action.precedes` and `Infoset.precedes` have been removed; the same check is a direct
+  composition of existing primitives on nodes.
+- `Action.prob` has been removed; use `Node.action_probs` instead.
+
+
 ## [17.0.0-alpha.1] - 2026-08-13
 
 ### Added
@@ -83,6 +95,7 @@
   stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
   `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
   now builds the equivalent `MakeEvent` call directly.  (#999)
+
 
 ## [16.7.0] - 2026-07-11
 

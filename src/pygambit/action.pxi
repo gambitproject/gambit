@@ -57,19 +57,6 @@ class Action:
         """
         return self.action.deref().GetNumber() - 1
 
-    def precedes(self, node: Node) -> bool:
-        """Returns whether `node` precedes this action in the
-        extensive game.
-
-        Raises
-        ------
-        MismatchError
-            If `node` is not in the same game as the action.
-        """
-        if self.infoset.game != node.game:
-            raise MismatchError("precedes() requires a node from the same game as the action")
-        return self.action.deref().Precedes(cython.cast(Node, node).node)
-
     @property
     def label(self) -> str:
         """The text label of the action.
@@ -89,29 +76,6 @@ class Action:
     def infoset(self) -> Infoset:
         """Get the information set to which the action belongs."""
         return Infoset.wrap(self.action.deref().GetInfoset())
-
-    @property
-    def prob(self) -> decimal.Decimal | Rational:
-        """
-        Get the probability a chance action is played.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the action does not belong to the chance player.
-        """
-        if not self.infoset.is_chance:
-            raise UndefinedOperationError(
-                "action probabilities are only defined at chance information sets"
-            )
-        py_string = cython.cast(
-            string,
-            self.action.deref().GetInfoset().deref().GetActionProb(self.action)
-        )
-        if "." in py_string.decode("ascii"):
-            return decimal.Decimal(py_string.decode("ascii"))
-        else:
-            return Rational(py_string.decode("ascii"))
 
     @property
     def plays(self) -> list[Node]:

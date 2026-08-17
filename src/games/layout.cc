@@ -44,23 +44,12 @@ void Layout::LayoutSubtree(const GameNode &p_node, int p_level, double &p_offset
     p_offset += 1;
     return;
   }
-  if (p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    const auto actions = p_node->GetInfoset()->GetActions();
-    for (const auto &action : p_node->GetInfoset()->GetActions()) {
-      LayoutSubtree(p_node->GetChild(action), p_level + 1, p_offset);
-    }
-    entry->m_offset = (m_nodeMap.at(p_node->GetChild(actions.front()))->m_offset +
-                       m_nodeMap.at(p_node->GetChild(actions.back()))->m_offset) /
-                      2;
+  for (const auto &child : p_node->GetChildren()) {
+    LayoutSubtree(child, p_level + 1, p_offset);
   }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      LayoutSubtree(child, p_level + 1, p_offset);
-    }
-    entry->m_offset = (m_nodeMap.at(p_node->GetChildren().front())->m_offset +
-                       m_nodeMap.at(p_node->GetChildren().back())->m_offset) /
-                      2;
-  }
+  entry->m_offset = (m_nodeMap.at(p_node->GetChildren().front())->m_offset +
+                     m_nodeMap.at(p_node->GetChildren().back())->m_offset) /
+                    2;
 }
 
 void Layout::LayoutTree(const Game &p_game)

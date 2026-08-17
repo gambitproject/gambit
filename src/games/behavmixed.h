@@ -41,18 +41,31 @@ protected:
   BehaviorSupportProfile m_support;
   /// The index into the action profile for a action (-1 if not in support)
   std::map<GameAction, int> m_profileIndex;
+  /// A dense index over every action of every real player's infosets, support or not
+  /// (unlike m_profileIndex, which only indexes actions in the support); used to index
+  /// the Cache's action-keyed arrays, which must hold a value for every action.
+  std::map<GameAction, int> m_actionIndex;
+  /// A dense index over every infoset (including chance events); used to index the
+  /// Cache's infoset-keyed arrays.
+  std::map<GameInfoset, int> m_infosetIndex;
   unsigned int m_gameversion;
 
   struct Cache {
     enum class Level { None, Realizations, Beliefs, NodeValues, ActionValues, Regrets };
 
     Level m_level{Level::None};
-    std::map<GameNode, T> m_realizProbs, m_beliefs;
-    std::map<GameInfoset, T> m_infosetProbs;
-    std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
-    std::map<GameInfoset, T> m_infosetValues;
-    std::map<GameAction, T> m_actionValues;
-    std::map<GameAction, T> m_regret;
+    /// Indexed by node->GetNumber() (dense over the whole game)
+    Array<T> m_realizProbs, m_beliefs;
+    /// Indexed by the profile's m_infosetIndex
+    Array<T> m_infosetProbs;
+    /// Outer indexed by node->GetNumber(), inner by player->GetNumber()
+    Array<Array<T>> m_nodeValues;
+    /// Indexed by the profile's m_infosetIndex
+    Array<T> m_infosetValues;
+    /// Indexed by the profile's m_actionIndex
+    Array<T> m_actionValues;
+    /// Indexed by the profile's m_actionIndex
+    Array<T> m_regret;
 
     Cache() = default;
     Cache(const Cache &) = default;
@@ -136,6 +149,11 @@ protected:
   }
 
   //@}
+
+  /// Builds m_actionIndex (dense over every action, support or not) and m_infosetIndex
+  /// (dense over every infoset, including chance events). Called by every constructor,
+  /// after m_support is set; unlike m_profileIndex, these don't depend on the support.
+  void BuildIndexes();
 
   /// @name Converting mixed strategies to behavior
   //@{
@@ -236,7 +254,8 @@ public:
   {
     CheckVersion();
     EnsureNodeValues();
-    return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][p_player];
+    return m_cache
+        .m_nodeValues[m_support.GetGame()->GetRoot()->GetNumber()][p_player->GetNumber()];
   }
   T GetLiapValue() const;
   T GetAgentLiapValue() const;

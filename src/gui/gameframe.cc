@@ -979,9 +979,8 @@ void GameFrame::OnEditReveal(wxCommandEvent &)
 {
   if (const auto players = RevealMove(this, m_doc->GetGame()); players) {
     try {
-      const auto &infoset = m_doc->GetSelectNode()->GetInfoset();
       for (const auto &player : *players) {
-        m_doc->DoRevealAction(infoset, player);
+        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), player);
       }
     }
     catch (std::exception &ex) {
@@ -1005,7 +1004,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
       }
 
       if (!m_doc->GetSelectNode()->IsTerminal() &&
-          dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
+          !m_doc->GetSelectNode()->SameInfoset(dialog.GetInfoset())) {
         if (dialog.GetInfoset() == nullptr) {
           m_doc->DoLeaveInfoset(m_doc->GetSelectNode());
         }
@@ -1022,28 +1021,28 @@ void GameFrame::OnEditNode(wxCommandEvent &)
 
 void GameFrame::OnEditMove(wxCommandEvent &)
 {
-  const GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
-  if (!infoset) {
+  const GameNode node = m_doc->GetSelectNode();
+  if (!node->GetInfoset()) {
     return;
   }
 
-  EditMoveDialog dialog(this, infoset);
+  EditMoveDialog dialog(this, node);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
+      m_doc->DoSetInfosetLabel(node->GetInfoset(), dialog.GetInfosetLabel());
 
-      if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-        m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+      if (!node->IsChanceInfoset() && dialog.GetPlayer() != node->GetPlayer()->GetNumber()) {
+        m_doc->DoSetPlayer(node->GetInfoset(), m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
       std::map<std::string, std::string> labels;
-      for (const auto &action : infoset->GetActions()) {
+      for (const auto &action : node->GetInfoset()->GetActions()) {
         labels[action->GetLabel()] =
             dialog.GetActionLabel(action->GetNumber()).ToStdString(wxConvUTF8);
       }
-      m_doc->DoRelabelActions(infoset, labels);
-      if (infoset->IsChanceInfoset()) {
-        m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
+      m_doc->DoRelabelActions(node->GetInfoset(), labels);
+      if (node->IsChanceInfoset()) {
+        m_doc->DoSetActionProbs(node->GetInfoset(), dialog.GetActionProbs());
       }
     }
     catch (std::exception &ex) {
