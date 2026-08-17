@@ -59,15 +59,17 @@ class MixedStrategy:
         return str({s.label: self[s.label] for s in self.player.strategies})
 
     def _repr_latex_(self) -> str:
-        if isinstance(self.profile, MixedStrategyProfileRational):
-            return (
-                r"$\left[" +
-                ",".join(self[strategy.label]._repr_latex_().replace("$", "")
-                         for strategy in self.player.strategies) +
-                r"\right]$"
-            )
-        else:
+        values = [self[strategy.label] for strategy in self.player.strategies]
+        if not values or not hasattr(values[0], "_repr_latex_"):
             return repr(self)
+        return (
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + strategy.label + "}:" + value._repr_latex_().replace("$", "")
+                for strategy, value in zip(self.player.strategies, values)
+            ) +
+            r"\right\}$"
+        )
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, list):
