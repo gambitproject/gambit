@@ -5,7 +5,7 @@
   composition of existing primitives on nodes.
 
 
- ## [17.0.0-alpha.1] - 2026-08-13
+## [17.0.0-alpha.1] - 2026-08-13
 
 ### Added
 - Added `Game.make_infoset`, forming a collection of personal decision nodes into a single

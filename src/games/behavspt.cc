@@ -75,7 +75,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
     support.insert(pos, p_action);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
       if (m_nonterminalReachable[node]) {
-        ActivateSubtree(node->GetChild(p_action));
+        ActivateSubtree(node->GetChild(p_action->GetLabel()));
       }
     }
   }
@@ -91,7 +91,7 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
     support.erase(pos);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
       if (m_nonterminalReachable[node]) {
-        DeactivateSubtree(node->GetChild(p_action));
+        DeactivateSubtree(node->GetChild(p_action->GetLabel()));
       }
     }
     return !support.empty();
@@ -118,7 +118,7 @@ void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)
     }
     else {
       for (const auto &action : GetActions(n->GetInfoset())) {
-        ActivateSubtree(n->GetChild(action));
+        ActivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
   }
@@ -133,12 +133,12 @@ void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
     }
     if (!n->GetPlayer()->IsChance()) {
       for (const auto &action : GetActions(n->GetInfoset())) {
-        DeactivateSubtree(n->GetChild(action));
+        DeactivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
     else {
       for (const auto &action : n->GetInfoset()->GetActions()) {
-        DeactivateSubtree(n->GetChild(action));
+        DeactivateSubtree(n->GetChild(action->GetLabel()));
       }
     }
   }
@@ -297,13 +297,13 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node,
     auto infoset = p_node->GetInfoset();
     p_reachable[infoset] = true;
     if (p_node->GetPlayer()->IsChance()) {
-      for (auto action : infoset->GetActions()) {
-        FindReachableInfosets(p_node->GetChild(action), p_reachable);
+      for (const auto &[action, child] : p_node->GetActions()) {
+        FindReachableInfosets(child, p_reachable);
       }
     }
     else {
       for (auto action : GetActions(infoset)) {
-        FindReachableInfosets(p_node->GetChild(action), p_reachable);
+        FindReachableInfosets(p_node->GetChild(action->GetLabel()), p_reachable);
       }
     }
   }

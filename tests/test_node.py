@@ -1250,7 +1250,7 @@ def test_node_plays():
 def test_node_children_action_label():
     """Label lookup returns the correct child.
 
-    The RHS reaches the child positionally (independent of ``__getitem__``); a label
+    The RHS reaches the child positionally, independent of ``__getitem__``; a label
     on both sides would make the assertion circular.
     """
     game = games.read_from_file("stripped_down_poker.efg")
@@ -1259,13 +1259,10 @@ def test_node_children_action_label():
     assert game.root.children["Queen"].children["Fold"] == list(root_children[1].children)[1]
 
 
-def test_node_children_action():
-    """Action lookup returns the correct child.
-
-    The RHS reaches the child positionally -- cf. `test_node_children_action_label()`.
-    """
+def test_node_children_rejects_action():
     game = games.read_from_file("stripped_down_poker.efg")
-    assert game.root.children[game.root.infoset.actions["King"]] == list(game.root.children)[0]
+    with pytest.raises(TypeError, match="Action object"):
+        _ = game.root.children[game.root.infoset.actions["King"]]
 
 
 def test_node_children_empty_label():
@@ -1291,12 +1288,6 @@ def test_node_children_rejects_int():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(TypeError, match="16.7.0"):
         _ = game.root.children[0]
-
-
-def test_node_children_other_infoset_action():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children["King"].infoset.actions["Bet"]]
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)

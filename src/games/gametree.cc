@@ -314,12 +314,12 @@ GameAction GameNodeRep::GetPriorAction() const
   if (!m_parent) {
     return nullptr;
   }
-  for (const auto &action : m_parent->m_infoset->m_actions) {
-    if (m_parent->GetChild(action).get() == this) {
-      return action;
-    }
+  const auto pos = std::find_if(m_parent->m_children.begin(), m_parent->m_children.end(),
+                                [this](const auto &child) { return child.get() == this; });
+  if (pos == m_parent->m_children.end()) {
+    return nullptr;
   }
-  return nullptr;
+  return m_parent->m_infoset->m_actions.at(pos - m_parent->m_children.begin());
 }
 
 GameAction GameNodeRep::GetOwnPriorAction() const
@@ -610,11 +610,11 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
       // into a single new information set.
       std::vector<GameNode> group;
       for (const auto &member : members) {
-        const bool follows_action =
-            std::any_of(p_atInfoset->m_members.begin(), p_atInfoset->m_members.end(),
-                        [&](const std::shared_ptr<GameNodeRep> &at_member) {
-                          return member->IsSuccessorOf(at_member->GetChild(action));
-                        });
+        const bool follows_action = std::any_of(
+            p_atInfoset->m_members.begin(), p_atInfoset->m_members.end(),
+            [&](const std::shared_ptr<GameNodeRep> &at_member) {
+              return member->IsSuccessorOf(at_member->m_children.at(action->GetNumber() - 1));
+            });
         if (follows_action) {
           group.emplace_back(member);
         }
@@ -1122,7 +1122,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
   else {
     auto *player = n->m_infoset->m_player;
     const auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
-    for (const auto &action : n->m_infoset->m_actions) {
+    for (const auto &[action, child] : n->GetActions()) {
       auto seq_it =
           std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
                        [&action](const auto seq) { return seq->m_action == action.get(); });
@@ -1137,7 +1137,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
         sequence = *seq_it;
       }
       p_currentSequences.SetSequence(sequence);
-      BuildSequences(n->GetChild(action), p_currentSequences);
+      BuildSequences(child, p_currentSequences);
     }
     p_currentSequences.SetSequence(tmp_sequence);
   }
@@ -1322,7 +1322,7 @@ const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
       else {
         std::tie(action, node) = std::get<AbsentMindedEdge>(current_edge);
         position.pop();
-        child = node->GetChild(action);
+        child = node->m_children.at(action->GetNumber() - 1);
       }
 
       if (!child->IsTerminal()) {
@@ -1699,7 +1699,7 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   std::vector<GameNode> plays;
 
   for (const auto &node : action->GetInfoset()->GetMembers()) {
-    std::vector<GameNode> child_plays = GetPlays(node->GetChild(action));
+    std::vector<GameNode> child_plays = GetPlays(node->m_children.at(action->GetNumber() - 1));
     plays.insert(plays.end(), child_plays.begin(), child_plays.end());
   }
   return plays;

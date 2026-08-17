@@ -236,7 +236,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         c_GameNode GetParent() except +
         Children GetChildren() except +
-        c_GameNode GetChild(c_GameAction) except +IndexError
+        c_GameNode GetChild(string) except +IndexError
         c_GameOutcome GetOutcome() except +
         c_GameNode GetPriorSibling() except +
         c_GameNode GetNextSibling() except +

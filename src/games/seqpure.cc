@@ -83,8 +83,8 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
+      for (const auto &[action, child] : n->GetActions()) {
+        frames.push({child,
                      frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
                      frame.progress});
       }
@@ -106,7 +106,7 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push({n->GetChild(next->GetAction()), frame.prob, std::move(progress)});
+    frames.push({n->GetChild(next->GetAction()->GetLabel()), frame.prob, std::move(progress)});
   }
 }
 
@@ -167,8 +167,8 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
+      for (const auto &[action, child] : n->GetActions()) {
+        frames.push({child,
                      frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
                      frame.cumulative, frame.progress});
       }
@@ -190,8 +190,8 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push(
-        {n->GetChild(next->GetAction()), frame.prob, frame.cumulative, std::move(progress)});
+    frames.push({n->GetChild(next->GetAction()->GetLabel()), frame.prob, frame.cumulative,
+                 std::move(progress)});
   }
   return payoff;
 }

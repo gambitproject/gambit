@@ -436,12 +436,11 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
   const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (auto member : infoset->GetMembers()) {
-    const GameNode child = member->GetChild(p_action);
+    const GameNode child = member->m_children.at(p_action->GetNumber() - 1);
 
     deriv += DiffRealizProb(member, p_oppAction) *
              (m_cache.m_nodeValues[child][player] - m_cache.m_actionValues[p_action]);
-    deriv += m_cache.m_realizProbs[member] *
-             DiffNodeValue(member->GetChild(p_action), player, p_oppAction);
+    deriv += m_cache.m_realizProbs[member] * DiffNodeValue(child, player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());
@@ -485,7 +484,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
     // be the same.
-    return m_cache.m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+    return m_cache.m_nodeValues[p_node->m_children.at(p_oppAction->GetNumber() - 1)][p_player];
   }
   return sum_function(p_node->GetActions(), [&](auto action_child) -> T {
     return DiffNodeValue(action_child.second, p_player, p_oppAction) *

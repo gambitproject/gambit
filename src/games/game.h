@@ -32,6 +32,7 @@
 #include <random>
 #include <set>
 #include <stack>
+#include <stdexcept>
 
 #include "number.h"
 #include "gameobject.h"
@@ -707,12 +708,20 @@ public:
   void SetLabel(const std::string &p_label);
 
   int GetNumber() const;
-  GameNode GetChild(const GameAction &p_action)
+  /// @brief Returns the child reached by playing the action with the given label.
+  ///
+  /// @throws std::out_of_range if this node has no infoset, or no action at its
+  ///         infoset has the label p_action.
+  GameNode GetChild(const std::string &p_action)
   {
-    if (p_action->GetInfoset().get() != m_infoset) {
-      throw MismatchException("Action is from a different information set than node");
+    if (m_infoset) {
+      for (const auto &action : m_infoset->m_actions) {
+        if (action->GetLabel() == p_action) {
+          return m_children.at(action->GetNumber() - 1);
+        }
+      }
     }
-    return m_children.at(p_action->GetNumber() - 1);
+    throw std::out_of_range("No action with the specified label at this node");
   }
   Children GetChildren() const
   {

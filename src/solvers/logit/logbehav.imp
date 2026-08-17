@@ -125,7 +125,7 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 
   T deriv = static_cast<T>(0);
   for (auto member : infoset->GetMembers()) {
-    const GameNode child = member->GetChild(p_action);
+    const GameNode child = member->GetChild(p_action->GetLabel());
     deriv += derivs[member] * m_nodeValues[child][player];
     deriv -= derivs[member] * GetPayoff(p_action);
     deriv += GetProb(p_oppAction) * m_beliefs[member] * DiffNodeValue(child, player, p_oppAction);
@@ -151,13 +151,12 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
     // be the same.
-    return m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+    return m_nodeValues[p_node->GetChild(p_oppAction->GetLabel())][p_player];
   }
   else {
     T deriv = T(0);
-    for (auto action : infoset->GetActions()) {
-      deriv +=
-          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+    for (const auto &[action, child] : p_node->GetActions()) {
+      deriv += DiffNodeValue(child, p_player, p_oppAction) * GetActionProb(action);
     }
     return deriv;
   }
