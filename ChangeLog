@@ -21,6 +21,9 @@
 - `repr(MixedAction)`/`repr(MixedStrategy)` now show a `{label: probability}` mapping instead of
   a bare list of probabilities, reflecting that these are dictionaries keyed by (enforced-unique)
   action/strategy label, not positional vectors. (#433)
+- `MixedStrategy.__eq__` now compares against a `Mapping` (label to probability) instead of a
+  bare `list`; comparing to a positional list of probabilities no longer works, since a
+  `MixedStrategy` is keyed by strategy label, not position. (#433)
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the

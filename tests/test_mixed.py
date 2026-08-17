@@ -181,7 +181,9 @@ def test_set_and_get_probabilities_by_player_label(
     profile_data = [gbt.Rational(p) for p in profile_data] if rational_flag else profile_data
     profile = game.mixed_strategy_profile(rational=rational_flag)
     profile[player_label] = profile_data
-    assert profile[player_label] == profile_data
+    player = game.players[player_label]
+    expected = dict(zip((s.label for s in player.strategies), profile_data, strict=True))
+    assert profile[player_label] == expected
 
 
 @pytest.mark.parametrize(
@@ -363,7 +365,9 @@ def test_profile_indexing_by_player_label_reference(
     profile = game.mixed_strategy_profile(rational=rational_flag)
     if rational_flag:
         strategy_data = [gbt.Rational(prob) for prob in strategy_data]
-    assert profile[player_label] == strategy_data
+    player = game.players[player_label]
+    expected = dict(zip((s.label for s in player.strategies), strategy_data, strict=True))
+    assert profile[player_label] == expected
 
 
 @pytest.mark.parametrize(

@@ -72,13 +72,13 @@ class MixedStrategy:
         )
 
     def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, list):
-            return [self[strategy.label] for strategy in self.player.strategies] == other
+        if isinstance(other, collections.abc.Mapping):
+            return {s.label: self[s.label] for s in self.player.strategies} == dict(other)
         if not isinstance(other, MixedStrategy) or self.player != other.player:
             return False
         return (
-            [self[strategy.label] for strategy in self.player.strategies] ==
-            [other[strategy.label] for strategy in other.player.strategies]
+            {s.label: self[s.label] for s in self.player.strategies} ==
+            {s.label: other[s.label] for s in other.player.strategies}
         )
 
     def __len__(self) -> int:
