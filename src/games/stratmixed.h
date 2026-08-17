@@ -121,8 +121,11 @@ public:
 template <class T> class MixedStrategyProfile {
   struct Cache {
     bool m_valid{false};
-    std::map<GamePlayer, T> m_payoffs;
-    std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
+    /// Indexed by player->GetNumber() (1-based, as with all of Gambit's Array/Vector types)
+    Array<T> m_payoffs;
+    /// Indexed by the profile's dense index for the strategy (see
+    /// MixedStrategyProfileRep::GetProfileIndex, also 1-based)
+    Array<T> m_strategyValues;
 
     void clear()
     {

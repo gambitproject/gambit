@@ -46,12 +46,19 @@ public:
 
 private:
   Game m_efg;
-  std::map<GameInfoset, std::vector<GameAction>> m_actions;
+  /// A dense index over every infoset (including chance events); used to index m_actions
+  /// and m_infosetReachable below.
+  std::map<GameInfoset, int> m_infosetIndex;
+  /// The live, editable support state: which actions are active at each infoset. Indexed
+  /// by m_infosetIndex; only real-player infosets' entries are ever populated/read.
+  Array<std::vector<GameAction>> m_actions;
   mutable Lazy<std::shared_ptr<SequenceMap>> m_sequences;
   mutable Lazy<std::shared_ptr<std::map<GameInfoset, bool>>> m_reachableInfosets;
 
-  std::map<GameInfoset, bool> m_infosetReachable;
-  std::map<GameNode, bool> m_nonterminalReachable;
+  /// Indexed by m_infosetIndex (chance and real infosets both populated)
+  Array<bool> m_infosetReachable;
+  /// Indexed by node->GetNumber() (dense over the whole game)
+  Array<bool> m_nonterminalReachable;
 
   bool HasReachableMembers(const GameInfoset &) const;
   void ActivateSubtree(const GameNode &);
@@ -73,13 +80,31 @@ public:
     {
     }
 
-    size_t size() const { return m_profile->m_actions.at(m_infoset).size(); }
-    bool empty() const { return m_profile->m_actions.at(m_infoset).empty(); }
-    GameAction front() const { return m_profile->m_actions.at(m_infoset).front(); }
-    GameAction back() const { return m_profile->m_actions.at(m_infoset).back(); }
+    size_t size() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].size();
+    }
+    bool empty() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].empty();
+    }
+    GameAction front() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].front();
+    }
+    GameAction back() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].back();
+    }
 
-    const_iterator begin() const { return m_profile->m_actions.at(m_infoset).begin(); }
-    const_iterator end() const { return m_profile->m_actions.at(m_infoset).end(); }
+    const_iterator begin() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].begin();
+    }
+    const_iterator end() const
+    {
+      return m_profile->m_actions[m_profile->m_infosetIndex.at(m_infoset)].end();
+    }
   };
 
   /// @name Lifecycle
@@ -109,12 +134,15 @@ public:
   /// Returns the set of actions in the support at the information set
   Support GetActions(const GameInfoset &p_infoset) const { return {this, p_infoset}; }
   /// Does the information set have at least one active action?
-  bool HasAction(const GameInfoset &p_infoset) const { return !m_actions.at(p_infoset).empty(); }
+  bool HasAction(const GameInfoset &p_infoset) const
+  {
+    return !m_actions[m_infosetIndex.at(p_infoset)].empty();
+  }
 
   /// Returns whether the action is in the support.
   bool Contains(const GameAction &p_action) const
   {
-    return contains(m_actions.at(p_action->GetInfoset()), p_action);
+    return contains(m_actions[m_infosetIndex.at(p_action->GetInfoset())], p_action);
   }
   //@}
 
@@ -129,7 +157,10 @@ public:
   /// @name Reachability of nodes and information sets
   //@{
   /// Can the information set be reached under this support?
-  bool IsReachable(const GameInfoset &p_infoset) const { return m_infosetReachable.at(p_infoset); }
+  bool IsReachable(const GameInfoset &p_infoset) const
+  {
+    return m_infosetReachable[m_infosetIndex.at(p_infoset)];
+  }
   //@}
 
   class Infosets {

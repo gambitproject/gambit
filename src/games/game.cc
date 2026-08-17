@@ -357,21 +357,22 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
     return;
   }
   Cache newCache;
+  newCache.m_payoffs = Array<T>(GetGame()->GetPlayers().size());
+  newCache.m_strategyValues = Array<T>(MixedProfileLength());
   for (const auto &player : m_rep->GetSupport().GetPlayers()) {
-    newCache.m_payoffs[player] = GetPayoff(player);
+    newCache.m_payoffs[player->GetNumber()] = GetPayoff(player);
     const auto &strategies = m_rep->GetSupport().GetStrategies(player);
     Vector<T> values(strategies.size());
     if (m_rep->GetPayoffDerivs(player->GetNumber(), values)) {
       auto value_it = values.begin();
       for (const auto &strategy : strategies) {
-        newCache.m_strategyValues[player][strategy] = *value_it;
+        newCache.m_strategyValues[m_rep->GetProfileIndex(strategy)] = *value_it;
         ++value_it;
-        ;
       }
     }
     else {
-      for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
-        newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
+      for (const auto &strategy : strategies) {
+        newCache.m_strategyValues[m_rep->GetProfileIndex(strategy)] = GetPayoff(strategy);
       }
     }
   }
@@ -385,10 +386,11 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
   ComputePayoffs();
 
   auto liapValue = static_cast<T>(0);
-  for (const auto &p : m_cache.m_payoffs) {
-    const auto &values = m_cache.m_strategyValues.at(p.first);
-    liapValue += sum_function(values, [&](const auto &v) {
-      return sqr(std::max(v.second - p.second, static_cast<T>(0)));
+  for (const auto &player : GetGame()->GetPlayers()) {
+    const T &payoff = m_cache.m_payoffs[player->GetNumber()];
+    liapValue += sum_function(m_rep->GetSupport().GetStrategies(player), [&](const auto &s) {
+      return sqr(std::max(m_cache.m_strategyValues[m_rep->GetProfileIndex(s)] - payoff,
+                          static_cast<T>(0)));
     });
   }
   return liapValue;
@@ -405,10 +407,11 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_st
   }
   T best_other_payoff = maximize_function(
       filter_if(player->GetStrategies(), [&](const auto &s) { return s != p_strategy; }),
-      [this, &player](const auto &strategy) -> T {
-        return m_cache.m_strategyValues.at(player).at(strategy);
+      [this](const auto &strategy) -> T {
+        return m_cache.m_strategyValues[m_rep->GetProfileIndex(strategy)];
       });
-  return std::max(best_other_payoff - m_cache.m_strategyValues.at(player).at(p_strategy), T{0});
+  return std::max(best_other_payoff - m_cache.m_strategyValues[m_rep->GetProfileIndex(p_strategy)],
+                  T{0});
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
@@ -419,10 +422,10 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_play
   if (strategies.size() == 0) {
     return T{0};
   }
-  auto br_payoff = maximize_function(strategies, [this, p_player](const auto &strategy) -> T {
-    return m_cache.m_strategyValues.at(p_player).at(strategy);
+  auto br_payoff = maximize_function(strategies, [this](const auto &strategy) -> T {
+    return m_cache.m_strategyValues[m_rep->GetProfileIndex(strategy)];
   });
-  return br_payoff - m_cache.m_payoffs.at(p_player);
+  return br_payoff - m_cache.m_payoffs[p_player->GetNumber()];
 }
 
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
