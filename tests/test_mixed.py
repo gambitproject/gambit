@@ -18,9 +18,18 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     """Set the action probabilities in a strategy profile called ```profile``` according to a
     list with probabilities in the order of ```profile.game.strategies```
     """
-    for strategy, p in zip(profile.game.strategies, probs, strict=True):
-        # assumes rationals given as strings
-        profile[strategy] = gbt.Rational(p) if rational_flag else p
+    # assumes rationals given as strings
+    convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
+    if len(probs) != len(profile.game.strategies):
+        raise ValueError("probs must have one entry per strategy in the game")
+    offset = 0
+    for player in profile.game.players:
+        k = len(player.strategies)
+        profile[player.label] = {
+            s.label: convert(p)
+            for s, p in zip(player.strategies, probs[offset:offset + k], strict=True)
+        }
+        offset += k
 
 
 @pytest.mark.parametrize(
@@ -53,9 +62,11 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     ],
 )
 def test_normalize_zero_value_error(game, profile_data, rational_flag):
-    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    """A profile with an all-zero distribution for some player can no longer even be
+    constructed: assignment now validates this, so normalize() no longer needs to.
+    """
     with pytest.raises(ValueError, match="zero"):
-        profile.normalize()
+        game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
 
 @pytest.mark.parametrize(
@@ -90,9 +101,11 @@ def test_normalize_zero_value_error(game, profile_data, rational_flag):
     ],
 )
 def test_normalize_neg_entry_value_error(game, profile_data, rational_flag):
-    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    """A profile with a negative weight for some player can no longer even be constructed:
+    assignment now validates this, so normalize() no longer needs to.
+    """
     with pytest.raises(ValueError, match="negative"):
-        profile.normalize()
+        game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
 
 @pytest.mark.parametrize(
@@ -143,17 +156,23 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", True, "7/9"),
         ###############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", False, 0.25),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", True, "1/4"),
     ],
 )
 def test_set_and_get_probability_by_strategy_label(
     game: gbt.Game, strategy_label: str, rational_flag: bool, prob: float | str
 ):
-    profile = game.mixed_strategy_profile(rational=rational_flag)
+    """A single strategy's probability can be set and read via a whole-player
+    distribution, keyed by strategy label.
+    """
     prob = gbt.Rational(prob) if rational_flag else prob
-    profile[strategy_label] = prob
-    assert profile[strategy_label] == prob
+    profile = game.mixed_strategy_profile(rational=rational_flag)
+    player = game.strategies[strategy_label].player
+    profile[player.label] = {
+        s.label: (prob if s.label == strategy_label else 0) for s in player.strategies
+    }
+    assert profile[player.label][strategy_label] == prob
 
 
 @pytest.mark.parametrize(
@@ -180,9 +199,9 @@ def test_set_and_get_probabilities_by_player_label(
 ):
     profile_data = [gbt.Rational(p) for p in profile_data] if rational_flag else profile_data
     profile = game.mixed_strategy_profile(rational=rational_flag)
-    profile[player_label] = profile_data
     player = game.players[player_label]
     expected = dict(zip((s.label for s in player.strategies), profile_data, strict=True))
+    profile[player_label] = expected
     assert profile[player_label] == expected
 
 
@@ -245,83 +264,26 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(
 
 
 @pytest.mark.parametrize(
-    "game,strategy_label,rational_flag,error,message",
+    "game,label,rational_flag",
     [
         ##############################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), "13", True, KeyError, "player or strategy"),
+        # stripped-down poker efg: not a label of anything in the game
+        (games.create_stripped_down_poker_efg(), "13", True),
+        (games.create_stripped_down_poker_efg(), "13", False),
         ##############################################################################
-        # coordination 4x4 nfg payoff version (default strategy labels created with duplicates)
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "1",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "2",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "3",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "4",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "5",
-            True,
-            KeyError,
-            "player or strategy",
-        ),
+        # coordination 4x4 nfg outcome version: a strategy label, not a player label
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", False),
     ],
 )
-def test_profile_indexing_by_invalid_strategy_label(
-    game: gbt.Game,
-    strategy_label: str,
-    rational_flag: bool,
-    error: ValueError | KeyError,
-    message: str | None,
+def test_profile_indexing_by_invalid_player_label(
+    game: gbt.Game, label: str, rational_flag: bool
 ):
-    """Check that we get a ValueError for an ambigious strategy label and a KeyError for one that
-    is neither a player or strategy label in the game
+    """MixedStrategyProfile.__getitem__ only resolves player labels; anything else, including a
+    strategy label, raises KeyError.
     """
-    with pytest.raises(error, match=message):
-        game.mixed_strategy_profile(rational=rational_flag)[strategy_label]
-
-
-@pytest.mark.parametrize(
-    "game,strategy_label,prob,rational_flag",
-    [
-        ############################################################################
-        # coordination 4x4 nfg outcome version with strategy labels
-        # Player 1
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
-        # Player 2
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", "1/4", True),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", 0.25, False),
-    ],
-)
-def test_profile_indexing_by_strategy_label_reference(
-    game: gbt.Game, strategy_label: str, prob: str | float, rational_flag: bool
-):
-    profile = game.mixed_strategy_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[strategy_label] == prob
+    with pytest.raises(KeyError):
+        game.mixed_strategy_profile(rational=rational_flag)[label]
 
 
 @pytest.mark.parametrize(
@@ -795,13 +757,6 @@ def test_strategy_value_reference(
         (
             games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
             [[1, 0], [0, 1], [0, 1]],
-            9,
-            ZERO,
-            True,
-        ),  # 3^2
-        (
-            games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
-            [[1, 1], [1, 0], [0, 0]],
             9,
             ZERO,
             True,
@@ -1367,7 +1322,8 @@ def test_linearity_payoff_property(
 
     profile_data = [
         [
-            alpha * profile1[strategy] + (1 - alpha) * profile2[strategy]
+            alpha * profile1[player.label][strategy.label]
+            + (1 - alpha) * profile2[player.label][strategy.label]
             for strategy in player.strategies
         ]
         for player in game.players
@@ -1463,7 +1419,7 @@ def test_payoff_and_strategy_value_consistency(
             abs(
                 sum(
                     [
-                        profile[player][strategy.label] * profile.strategy_value(strategy)
+                        profile[player.label][strategy.label] * profile.strategy_value(strategy)
                         for strategy in player.strategies
                     ]
                 )
@@ -1529,7 +1485,8 @@ def test_property_linearity_strategy_value(
 
     profile_data = [
         [
-            alpha * profile1[strategy] + (1 - alpha) * profile2[strategy]
+            alpha * profile1[player.label][strategy.label]
+            + (1 - alpha) * profile2[player.label][strategy.label]
             for strategy in player.strategies
         ]
         for player in game.players

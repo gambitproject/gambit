@@ -1098,8 +1098,9 @@ class Game:
                 raise ValueError(
                     f"Number of elements does not match number of strategies for {p}"
                 )
-            for (s, v) in zip(p.strategies, d, strict=True):
-                profile[s] = typefunc(v)
+            profile[p.label] = {
+                s.label: typefunc(v) for s, v in zip(p.strategies, d, strict=True)
+            }
         return profile
 
     def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
@@ -1175,15 +1176,13 @@ class Game:
         if denom is None:
             profile = self.mixed_strategy_profile()
             for player in self.players:
-                for strategy, prob in zip(
-                        player.strategies,
-                        scipy.stats.dirichlet(
-                            alpha=[1 for strategy in player.strategies],
-                            seed=gen
-                        ).rvs(size=1)[0],
-                        strict=True
-                        ):
-                    profile[strategy] = prob
+                weights = scipy.stats.dirichlet(
+                    alpha=[1 for strategy in player.strategies],
+                    seed=gen
+                ).rvs(size=1)[0]
+                profile[player.label] = dict(
+                    zip((s.label for s in player.strategies), weights, strict=True)
+                )
             return profile
         elif denom < 1:
             raise ValueError("random_strategy_profile(): denom must be positive")
@@ -1198,16 +1197,15 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for strategy, (hi, lo) in zip(
-                    player.strategies,
-                    zip(
-                        sample[1:],
-                        sample[:-1],
+                distribution = {
+                    strategy.label: Rational(hi - lo - 1, denom)
+                    for strategy, (hi, lo) in zip(
+                        player.strategies,
+                        zip(sample[1:], sample[:-1], strict=True),
                         strict=True
-                    ),
-                    strict=True
-                ):
-                    profile[strategy] = Rational(hi - lo - 1, denom)
+                    )
+                }
+                profile[player.label] = distribution
             return profile
 
     def _fill_behavior_profile(self,

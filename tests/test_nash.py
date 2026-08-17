@@ -1096,7 +1096,9 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
                 for strategy in player.strategies:
-                    assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+                    eq_prob = eq[player.label][strategy.label]
+                    exp_prob = expected[player.label][strategy.label]
+                    assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -1167,7 +1169,9 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
                 for strategy in player.strategies:
-                    assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+                    eq_prob = eq[player.label][strategy.label]
+                    exp_prob = expected[player.label][strategy.label]
+                    assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -2901,7 +2905,9 @@ def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
             exp_profile = game.mixed_strategy_profile(rational=True, data=exp["profile"])
             for player in game.players:
                 for s in player.strategies:
-                    assert abs(found.profile[s] - exp_profile[s]) <= test_case.prob_tol
+                    found_prob = found.profile[player.label][s.label]
+                    exp_prob = exp_profile[player.label][s.label]
+                    assert abs(found_prob - exp_prob) <= test_case.prob_tol
 
 
 ##################################################################################################

@@ -24,6 +24,24 @@
 - `MixedStrategy.__eq__` now compares against a `Mapping` (label to probability) instead of a
   bare `list`; comparing to a positional list of probabilities no longer works, since a
   `MixedStrategy` is keyed by strategy label, not position. (#433)
+- `MixedStrategyProfile.__getitem__` now only accepts a `str` player label, returning the
+  `MixedStrategy` for that player; indexing directly by a `Player` or `Strategy` object, or by a
+  bare (game-wide-unique) strategy label, is no longer supported. Access a strategy's probability
+  via `profile[player_label][strategy_label]` instead.
+- `MixedStrategy` is now an immutable snapshot of a player's strategy probabilities at the
+  moment it was retrieved from a `MixedStrategyProfile`, rather than a live view onto the
+  profile; it no longer reflects later changes to the profile, and can no longer be assigned
+  into (`MixedStrategy.__setitem__` is removed). Set a player's whole distribution via
+  `MixedStrategyProfile.__setitem__` instead.
+- `MixedStrategyProfile.copy()` now shares its underlying data with the original until either
+  profile is next assigned into (copy-on-write), rather than eagerly duplicating; this is not
+  observable from the profiles' behavior, only from how soon the duplication happens.
+- `MixedStrategyProfile.__setitem__` now only accepts a whole distribution for a player (a
+  `Mapping` from strategy label to a non-negative, not-all-zero weight); setting a single
+  strategy's probability directly is no longer supported. A weight may be given as any value
+  Gambit can interpret as a number (`int`, `float`, `str`, `Decimal`, or `Rational`), and weights
+  need not sum to one. Validation moved here from `normalize()`, which no longer needs to check
+  for negative or all-zero entries, since a `MixedStrategyProfile` can no longer hold them. (#763)
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the

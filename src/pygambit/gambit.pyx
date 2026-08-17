@@ -53,24 +53,30 @@ def rat_to_py(r: c_Rational):
 
 
 @cython.cfunc
-def _to_number(value: typing.Any) -> c_Number:
-    """Convert a value into a game Number representation."""
+def _to_number_string(value: typing.Any) -> str:
+    """Coerce a value (int, float, str, Decimal, or Rational) into a canonical string
+    representation of a number, following Gambit's usual numeric coercion rules.
+    """
     if isinstance(value, (int, Decimal, Rational)):
-        value = str(value)
-    elif "/" in str(value):
+        return str(value)
+    if "/" in str(value):
         try:
-            value = str(Rational(str(value)))
+            return str(Rational(str(value)))
         except ValueError:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
-    else:
-        # This slightly indirect way of converting deals best with
-        # rounding of floating point numbers - so calling code gets
-        # the value it expects when using a float
-        try:
-            value = str(Decimal(str(value)))
-        except decimal.InvalidOperation:
-            raise ValueError(f"Cannot convert '{value}' to a number") from None
-    return c_Number(value.encode("ascii"))
+    # This slightly indirect way of converting deals best with
+    # rounding of floating point numbers - so calling code gets
+    # the value it expects when using a float
+    try:
+        return str(Decimal(str(value)))
+    except decimal.InvalidOperation:
+        raise ValueError(f"Cannot convert '{value}' to a number") from None
+
+
+@cython.cfunc
+def _to_number(value: typing.Any) -> c_Number:
+    """Convert a value into a game Number representation."""
+    return c_Number(_to_number_string(value).encode("ascii"))
 
 
 @cython.cfunc

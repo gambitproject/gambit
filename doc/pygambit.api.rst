@@ -250,7 +250,6 @@ Probability distributions over strategies
    MixedStrategy
    MixedStrategy.__iter__
    MixedStrategy.__getitem__
-   MixedStrategy.__setitem__
 
 
 Probability distributions over behavior
