@@ -32,29 +32,29 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
   const int numNei = aggPtr->neighbors[Node].size();
 
   // assert(aggPtr->isPure[Node]||tasks.size()==0);
-  std::vector<agg::AggNumber> strat(numNei);
-  agg::AGG::config a(numNei, 0);
+  std::vector<double> strat(numNei);
+  agg::AGG::Config a(numNei, 0);
   // compute the full distrib
-  aggPtr->computeP(player1, act1);
+  aggPtr->computeP<double>(player1, act1);
 
   // store the full distrib in Pr[player1]
-  aggPtr->Pr[player1].swap(aggPtr->Pr[numPlayers - 1]);
+  aggPtr->m_state.Pr[player1].swap(aggPtr->m_state.Pr[numPlayers - 1]);
   for (i = 0; i < (int)tasks.size(); i++) {
     // assert(tasks[i]!=player1);
-    agg::aggdistrib &P = aggPtr->Pr[tasks[i]];
+    agg::ConfigDistribution<double> &P = aggPtr->m_state.Pr[tasks[i]];
     // P.clear();  // to get ready for division, we need clear()
-    P = aggPtr->Pr[player1];
+    P = aggPtr->m_state.Pr[player1];
 
     bool NullOnly = true;
     for (j = 0; j < numNei; ++j) {
       a[j]++;
-      auto pp = aggPtr->projectedStrat[Node][tasks[i]].find(a);
-      if (pp == aggPtr->projectedStrat[Node][tasks[i]].end()) {
+      auto pp = aggPtr->m_state.projectedStrat[Node][tasks[i]].find(a);
+      if (pp == aggPtr->m_state.projectedStrat[Node][tasks[i]].end()) {
         strat[j] = 0;
       }
       else {
         strat[j] = pp->second;
-        if (strat[j] > (agg::AggNumber)0) {
+        if (strat[j] > (double)0) {
           NullOnly = false;
         }
       }
@@ -65,7 +65,7 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
     cout << "dividing " << endl;
     P.print_in_order();
     cout << endl << "by [";
-    copy(strat.begin(), strat.end(), ostream_iterator<agg::AggNumber>(cout, " "));
+    copy(strat.begin(), strat.end(), ostream_iterator<double>(cout, " "));
     cout << "]\n";
 #endif
     if (!NullOnly) {
@@ -79,7 +79,8 @@ void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &t
 }
 
 void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::iterator start,
-                                    std::vector<int>::iterator endp, agg::aggdistrib &temp) const
+                                    std::vector<int>::iterator endp,
+                                    agg::ConfigDistribution<double> &temp) const
 {
 #ifdef AGGDEBUG
   cout << "calling computePartialP_bisect with player1=" << player1 << ", act1=" << act1
@@ -87,7 +88,7 @@ void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::ite
        << endl;
 #endif
   if (endp - start == 1) {
-    aggPtr->Pr[*start].reset();
+    aggPtr->m_state.Pr[*start].reset();
     return;
   }
   const int Node = aggPtr->actionSets[player1][act1];
@@ -102,42 +103,44 @@ void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::ite
   computePartialP_bisect(player1, act1, mid, endp, temp);
 
   temp.reset();
-  temp = aggPtr->projectedStrat[Node][*start];
+  temp = aggPtr->m_state.projectedStrat[Node][*start];
   if (mid - start > 1) {
-    temp.multiply(aggPtr->Pr[*start], numNei, aggPtr->projFunctions[Node]);
+    temp.multiply(aggPtr->m_state.Pr[*start], numNei, aggPtr->projFunctions[Node]);
   }
 
   if (mid - start == 1) {
-    // assert(aggPtr->Pr[*start].empty());
-    aggPtr->Pr[*start] = aggPtr->projectedStrat[Node][*mid];
+    // assert(aggPtr->m_state.Pr[*start].empty());
+    aggPtr->m_state.Pr[*start] = aggPtr->m_state.projectedStrat[Node][*mid];
     if (endp - mid > 1) {
-      aggPtr->Pr[*start].multiply(aggPtr->Pr[*mid], numNei, aggPtr->projFunctions[Node]);
+      aggPtr->m_state.Pr[*start].multiply(aggPtr->m_state.Pr[*mid], numNei,
+                                          aggPtr->projFunctions[Node]);
     }
   }
   else {
     for (ptr = start; ptr != mid; ++ptr) {
       player2 = *ptr;
-      aggPtr->Pr[player2].multiply(aggPtr->projectedStrat[Node][*mid], numNei,
-                                   aggPtr->projFunctions[Node]);
+      aggPtr->m_state.Pr[player2].multiply(aggPtr->m_state.projectedStrat[Node][*mid], numNei,
+                                           aggPtr->projFunctions[Node]);
       if (endp - mid > 1) {
-        aggPtr->Pr[player2].multiply(aggPtr->Pr[*mid], numNei, aggPtr->projFunctions[Node]);
+        aggPtr->m_state.Pr[player2].multiply(aggPtr->m_state.Pr[*mid], numNei,
+                                             aggPtr->projFunctions[Node]);
       }
     }
   }
 
   if (endp - mid == 1) {
-    // assert(aggPtr->Pr[*mid].empty());
-    aggPtr->Pr[*mid] = temp;
+    // assert(aggPtr->m_state.Pr[*mid].empty());
+    aggPtr->m_state.Pr[*mid] = temp;
   }
   else {
     for (ptr = mid; ptr != endp; ++ptr) {
       player2 = *ptr;
-      aggPtr->Pr[player2].multiply(temp, numNei, aggPtr->projFunctions[Node]);
+      aggPtr->m_state.Pr[player2].multiply(temp, numNei, aggPtr->projFunctions[Node]);
     }
   }
 }
 
-void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) const
+void aggame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   // compute jacobian
   // s: mixed strat
@@ -145,7 +148,7 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
 #ifdef AGGDEBUG
   cout << "calling payoffMatrix with stratety s=" << endl << s << endl;
 #endif
-  agg::AggNumber fuzzcount;
+  double fuzzcount;
   int rown, coln, rowi, coli, act1, act2, currNode, numNei;
   static std::vector<int>::iterator p;
   static std::vector<int> tasks, spares, nontasks;
@@ -243,40 +246,41 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
         computePartialP_PureNode(rown, act1, tasks);
       }
       else { // do bisection
-        computePartialP_bisect(rown, act1, tasks.begin(), tasks.end(), aggPtr->Pr[rown]);
+        computePartialP_bisect(rown, act1, tasks.begin(), tasks.end(), aggPtr->m_state.Pr[rown]);
 #ifdef AGGDEBUG
         cout << "after calling computePartialP_bisect:" << endl;
         for (int tt = 0; tt < tasks.size(); tt++) {
           cout << "for player " << tasks[tt] << endl;
-          cout << aggPtr->Pr[tasks[tt]] << endl;
+          cout << aggPtr->m_state.Pr[tasks[tt]] << endl;
         }
 #endif
         // now apply rown's action (act1), and the strategies of
         // players in nontasks
-        aggPtr->Pr[rown].reset();
-        aggPtr->Pr[rown].insert(make_pair(aggPtr->projection[currNode][rown][act1], 1.0));
+        aggPtr->m_state.Pr[rown].reset();
+        aggPtr->m_state.Pr[rown].insert(make_pair(aggPtr->projection[currNode][rown][act1], 1.0));
         for (p = nontasks.begin(); p != nontasks.end(); ++p) {
-          aggPtr->Pr[rown].multiply(aggPtr->projectedStrat[currNode][*p], numNei,
-                                    aggPtr->projFunctions[currNode]);
+          aggPtr->m_state.Pr[rown].multiply(aggPtr->m_state.projectedStrat[currNode][*p], numNei,
+                                            aggPtr->projFunctions[currNode]);
         }
 #ifdef AGGDEBUG
         cout << "the polynomial product of strats of player " << rown
              << " and players in the vector nontasks is:" << endl;
-        cout << aggPtr->Pr[rown] << endl;
+        cout << aggPtr->m_state.Pr[rown] << endl;
 #endif
         if (tasks.size() == 1) {
-          aggPtr->Pr[tasks[0]] = aggPtr->Pr[rown];
+          aggPtr->m_state.Pr[tasks[0]] = aggPtr->m_state.Pr[rown];
         }
         else {
           for (p = tasks.begin(); p != tasks.end(); ++p) {
-            if (aggPtr->Pr[*p].empty()) {
+            if (aggPtr->m_state.Pr[*p].empty()) {
               std::cerr << "AGG::payoffMatrix() ERROR for rown=" << rown << " act1=" << act1
                         << " *p=" << *p << ": the distribution should not be empty!" << std::endl;
 #ifdef AGGDEBUG
               std::cerr << "strategy profile is: " << s << std::endl;
 #endif
             }
-            aggPtr->Pr[*p].multiply(aggPtr->Pr[rown], numNei, aggPtr->projFunctions[currNode]);
+            aggPtr->m_state.Pr[*p].multiply(aggPtr->m_state.Pr[rown], numNei,
+                                            aggPtr->projFunctions[currNode]);
           } // end for(p=tasks.begin...
         }
 
@@ -285,22 +289,22 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
         // we store this distrib in Pr[rown][act1][rown]
         if (!spares.empty()) {
           // assert(tasks.size()>0);
-          aggPtr->Pr[rown].reset();
-          aggPtr->Pr[rown].multiply(aggPtr->Pr[tasks[0]],
-                                    aggPtr->projectedStrat[currNode][tasks[0]], numNei,
-                                    aggPtr->projFunctions[currNode]);
+          aggPtr->m_state.Pr[rown].reset();
+          aggPtr->m_state.Pr[rown].multiply(aggPtr->m_state.Pr[tasks[0]],
+                                            aggPtr->m_state.projectedStrat[currNode][tasks[0]],
+                                            numNei, aggPtr->projFunctions[currNode]);
         }
       } // end else
 #ifdef AGGDEBUG
       cout << "after computing parital distributions, the distributions are" << endl;
       for (int tt = 0; tt < numPlayers; tt++) {
         cout << "for player " << tt << endl;
-        cout << aggPtr->Pr[tt];
+        cout << aggPtr->m_state.Pr[tt];
         cout << endl;
       }
 #endif
       // compute entries
-      agg::AggNumber undisturbedPayoff;
+      double undisturbedPayoff;
       bool hasUndisturbed = false;
 
       if (!spares.empty()) { // for players in spares, we compute one undisturbed payoff
@@ -314,8 +318,8 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
       for (p = tasks.begin(); p != tasks.end(); ++p) {
         for (act2 = 0; act2 < aggPtr->actions[*p]; act2++) { // act2: col action
 
-          if (aggPtr->projectedStrat[currNode][*p].size() == 1 &&
-              aggPtr->projectedStrat[currNode][*p].begin()->first ==
+          if (aggPtr->m_state.projectedStrat[currNode][*p].size() == 1 &&
+              aggPtr->m_state.projectedStrat[currNode][*p].begin()->first ==
                   aggPtr->projection[currNode][*p][act2]) {
             computeUndisturbedPayoff(undisturbedPayoff, hasUndisturbed, rown, act1, *p);
             savePayoff(dest, rown, act1, *p, act2, undisturbedPayoff, aggPtr->cache);
@@ -327,8 +331,8 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
   }       // end for(rown
 }
 
-void aggame::computeUndisturbedPayoff(agg::AggNumber &undisturbedPayoff, bool &has, int player1,
-                                      int act1, int player2) const
+void aggame::computeUndisturbedPayoff(double &undisturbedPayoff, bool &has, int player1, int act1,
+                                      int player2) const
 {
   if (has) {
     return;
@@ -336,28 +340,26 @@ void aggame::computeUndisturbedPayoff(agg::AggNumber &undisturbedPayoff, bool &h
   const int Node = aggPtr->actionSets[player1][act1];
   const int numNei = aggPtr->neighbors[Node].size();
   if (player2 == player1) {
-    undisturbedPayoff = aggPtr->Pr[player2].inner_prod(aggPtr->payoffs[Node]);
+    undisturbedPayoff = aggPtr->m_state.Pr[player2].inner_prod(aggPtr->payoffs[Node]);
   }
   else {
-    // assert(aggPtr->projectedStrat[Node][player2].size()==1);
-    undisturbedPayoff =
-        aggPtr->Pr[player2].inner_prod(aggPtr->projectedStrat[Node][player2].begin()->first,
-                                       numNei, aggPtr->projFunctions[Node], aggPtr->payoffs[Node]);
+    // assert(aggPtr->m_state.projectedStrat[Node][player2].size()==1);
+    undisturbedPayoff = aggPtr->m_state.Pr[player2].inner_prod(
+        aggPtr->m_state.projectedStrat[Node][player2].begin()->first, numNei,
+        aggPtr->projFunctions[Node], aggPtr->payoffs[Node]);
   }
   has = true;
 }
 
-void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                        agg::AggNumber result, agg::trie_map<agg::AggNumber> &cache,
-                        bool partial) const
+void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2, double result,
+                        agg::trie_map<double> &cache, bool partial) const
 {
 
   const int Node = aggPtr->actionSets[player1][act1];
   const int numNei = aggPtr->neighbors[Node].size();
 
   if (!partial) {
-    std::pair<std::vector<int>, agg::AggNumber> pair1(aggPtr->projection[Node][player2][act2],
-                                                      result);
+    std::pair<std::vector<int>, double> pair1(aggPtr->projection[Node][player2][act2], result);
     pair1.first.reserve(numNei + 3);
     pair1.first.push_back(player1);
     pair1.first.push_back(act1);
@@ -367,8 +369,7 @@ void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int a
 
   if (aggPtr->node2Action[Node][player2] != -1 &&
       aggPtr->fullProjectedStrat[Node][player1].count(aggPtr->projection[Node][player2][act2])) {
-    std::pair<std::vector<int>, agg::AggNumber> pair2(aggPtr->projection[Node][player2][act2],
-                                                      result);
+    std::pair<std::vector<int>, double> pair2(aggPtr->projection[Node][player2][act2], result);
     pair2.first.reserve(numNei + 3);
     pair2.first.push_back(player2);
     pair2.first.push_back(aggPtr->node2Action[Node][player2]);
@@ -379,29 +380,29 @@ void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int a
 }
 
 void aggame::computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                           agg::trie_map<agg::AggNumber> &cache) const
+                           agg::trie_map<double> &cache) const
 {
   const int Node = aggPtr->actionSets[player1][act1];
   const int numNei = aggPtr->neighbors[Node].size();
 
-  std::pair<std::vector<int>, agg::AggNumber> insPair(aggPtr->projection[Node][player2][act2], 0);
+  std::pair<std::vector<int>, double> insPair(aggPtr->projection[Node][player2][act2], 0);
   insPair.first.reserve(numNei + 3);
   insPair.first.push_back(player1);
   insPair.first.push_back(act1);
   insPair.first.push_back(player2);
-  const std::pair<agg::trie_map<agg::AggNumber>::iterator, bool> r = cache.insert(insPair);
+  const std::pair<agg::trie_map<double>::iterator, bool> r = cache.insert(insPair);
   if (!r.second) {
     dest(act1 + firstAction(player1), act2 + firstAction(player2)) = r.first->second;
   }
   else {
     r.first->second =
-        aggPtr->Pr[player2].inner_prod(aggPtr->projection[Node][player2][act2], numNei,
-                                       aggPtr->projFunctions[Node], aggPtr->payoffs[Node]);
+        aggPtr->m_state.Pr[player2].inner_prod(aggPtr->projection[Node][player2][act2], numNei,
+                                               aggPtr->projFunctions[Node], aggPtr->payoffs[Node]);
     savePayoff(dest, player1, act1, player2, act2, r.first->second, cache, r.second);
   }
 }
 
-void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) const
+void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   const std::vector<double> sp(s.values(), s.values() + s.getm());
   // simple implementation using expected payoffs:
@@ -415,14 +416,13 @@ void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fu
         for (int cola = 0; cola < getNumKSymActions(colcls); ++cola) {
 
           dest(rowa + firstKSymAction(rowcls), cola + firstKSymAction(colcls)) =
-              (agg::AggNumber)multiplier *
-              aggPtr->getKSymMixedPayoff(sp, rowcls, rowa, colcls, cola);
+              (double)multiplier * aggPtr->getKSymMixedPayoff(sp, rowcls, rowa, colcls, cola);
         }
       }
     }
   }
 
-  agg::AggNumber fuzzcount;
+  double fuzzcount;
   for (int rown = 0; rown < getNumPlayerClasses(); ++rown) {
     fuzzcount = fuzz;
     for (int rowi = firstKSymAction(rown); rowi < lastKSymAction(rown); rowi++) {

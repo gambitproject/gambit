@@ -34,7 +34,7 @@ template <class T> class BAGGMixedStrategyProfileRep;
 
 namespace agg {
 
-using ProbDist = std::vector<AggNumber>;
+using ProbDist = std::vector<double>;
 
 class BAGG {
 public:
@@ -46,6 +46,7 @@ public:
   static std::shared_ptr<BAGG> makeBAGG(std::istream &in);
 
   BAGG(int N, int S, std::vector<int> &numTypes, std::vector<ProbDist> &TDist,
+       std::vector<std::vector<Number>> &exactTDist,
        std::vector<std::vector<std::vector<int>>> &typeActionSets,
        std::vector<std::vector<std::vector<int>>> &ta2a, std::shared_ptr<AGG> aggPtr);
 
@@ -62,32 +63,36 @@ public:
   int firstAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t]; }
   int lastAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t + 1]; }
 
-  AggNumber getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
-  AggNumber getMinPayoff() const { return aggPtr->getMinPayoff(); }
+  template <class V> V getMaxPayoff() const { return aggPtr->getMaxPayoff<V>(); }
+  template <class V> V getMinPayoff() const { return aggPtr->getMinPayoff<V>(); }
 
-  // exp. payoff under mixed strat profile
-  AggNumber getMixedPayoff(int player, StrategyProfile &s);
-  // exp payoff for player, conditioned on her receiving type tp.
-  AggNumber getMixedPayoff(int player, int tp, StrategyProfile &s);
+  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart;
+  // callers go through the per-type overload below.
+  double getMixedPayoff(int player, StrategyProfile<double> &s);
 
-  void getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s);
-  AggNumber getV(int player, int tp, int action, const StrategyProfile &s);
+  // exp payoff for player, conditioned on her receiving type tp, via the convolution algorithm.
+  template <class V> V getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const;
 
-  AggNumber getPurePayoff(int player, int tp, std::vector<int> &s);
-  AggNumber getPurePayoff(int player, std::vector<int> &s)
+  void getPayoffVector(std::vector<double> &dest, int player, int tp,
+                       const StrategyProfile<double> &s);
+  template <class V> V getV(int player, int tp, int action, const StrategyProfile<V> &s) const;
+
+  // payoff for player, conditioned on receiving type tp, under the pure profile s.
+  template <class V> V getPurePayoff(int player, int tp, const std::vector<int> &s) const;
+  double getPurePayoff(int player, std::vector<int> &s)
   {
-    AggNumber r = 0;
+    double r = 0;
     for (int i = 0; i < numTypes[player]; ++i) {
-      r += indepTypeDist[player][i] * getPurePayoff(player, i, s);
+      r += indepTypeDist[player][i] * getPurePayoff<double>(player, i, s);
     }
     return r;
   }
 
-  AggNumber getSymMixedPayoff(StrategyProfile &s);
+  double getSymMixedPayoff(StrategyProfile<double> &s);
 
-  AggNumber getSymMixedPayoff(int tp, StrategyProfile &s);
+  double getSymMixedPayoff(int tp, StrategyProfile<double> &s);
 
-  AggNumber getSymMixedPayoff(int tp, int act, StrategyProfile &s);
+  double getSymMixedPayoff(int tp, int act, StrategyProfile<double> &s);
 
   bool isSymmetric() const { return symmetric; }
 
@@ -96,6 +101,7 @@ private:
   int numActionNodes;
   std::vector<int> numTypes;
   std::vector<ProbDist> indepTypeDist;
+  std::vector<std::vector<Number>> exactIndepTypeDist;
 
   // for each player, each of her types, the set of actions
   std::vector<std::vector<std::vector<int>>> typeActionSets;
@@ -110,9 +116,10 @@ private:
 
   bool symmetric;
 
-  void getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player = -1, int tp = -1,
-                   int action = -1);
-  void getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s);
+  template <class V>
+  void getAGGStrat(StrategyProfile<V> &as, const StrategyProfile<V> &s, int player = -1,
+                   int tp = -1, int action = -1) const;
+  void getSymAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s);
 };
 
 std::ostream &operator<<(std::ostream &s, const BAGG &g);
