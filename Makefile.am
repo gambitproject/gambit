@@ -28,8 +28,6 @@ EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
-	src/labenski/README.txt \
-	src/labenski/doc/README-sheet.txt \
 	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/adddecimal.xpm \
 	src/gui/bitmaps/calc.xpm \
@@ -196,7 +194,6 @@ EXTRA_DIST = \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
 	contrib/games/sh3.nfg \
-	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
@@ -213,6 +210,7 @@ core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
+	src/core/cancel.h \
 	src/core/lazy.h \
 	src/core/vector.h \
 	src/core/segment.h \
@@ -449,24 +447,23 @@ gambit_simpdiv_SOURCES = \
 
 gambit_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/labenski/src/sheetatr.cpp \
-	src/labenski/src/sheet.cpp \
-	src/labenski/src/sheetedg.cpp \
-	src/labenski/src/sheetedt.cpp \
-	src/labenski/src/sheetren.cpp \
-	src/labenski/src/sheetsel.cpp \
-	src/labenski/src/sheetspt.cpp \
-	src/labenski/src/sheettbl.cpp \
-	src/labenski/include/wx/sheet/pairarr.h \
-	src/labenski/include/wx/sheet/sheetatr.h \
-	src/labenski/include/wx/sheet/sheetdef.h \
-	src/labenski/include/wx/sheet/sheetedg.h \
-	src/labenski/include/wx/sheet/sheetedt.h \
-	src/labenski/include/wx/sheet/sheet.h \
-	src/labenski/include/wx/sheet/sheetren.h \
-	src/labenski/include/wx/sheet/sheetsel.h \
-	src/labenski/include/wx/sheet/sheetspt.h \
-	src/labenski/include/wx/sheet/sheettbl.h \
+	${linalg_SOURCES} \
+	src/solvers/enummixed/clique.cc \
+	src/solvers/enummixed/clique.h \
+	src/solvers/enummixed/enummixed.cc \
+	src/solvers/enummixed/enummixed.h \
+	src/solvers/lcp/lcp.h \
+	src/solvers/lcp/efglcp.cc \
+	src/solvers/lcp/nfglcp.cc \
+	src/solvers/lp/lp.h \
+	src/solvers/lp/lp.cc \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+	src/solvers/logit/logit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.cc \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
@@ -498,6 +495,7 @@ gambit_SOURCES = \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
+	src/gui/nashspec.cc \
 	src/gui/nashspec.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
@@ -533,7 +531,7 @@ gambit_SOURCES = \
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
-gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -I$(top_srcdir)/src/labenski/include
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
@@ -569,7 +567,7 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"

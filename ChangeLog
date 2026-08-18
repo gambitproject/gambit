@@ -1,6 +1,35 @@
-## [17.0.0-alpha.1] - unreleased
+## [17.0.0-alpha.2] - unreleased
+
+### Added
+- Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
+
+### Fixed
+- `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
+  strategy with an empty label; it is now labeled `"1"`, as `Game.new_table` already labels
+  every other player's initial strategies.  (#1047)
+- Numerical data in action graph games is now read with exact precision, to match other game formats.  (#879)
+
+### Removed
+- Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
+  nonempty, unique labels.  (#1047)
+
+
+## [17.0.0-alpha.1] - 2026-08-13
+
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
+- Added `Game.make_event`, which forms a collection of nodes into a single event with a
+  specified probability distribution over its actions. (#1009)
+- Added `Game.append_event` and `Game.insert_event`, the chance-move counterparts of
+  `Game.append_move` and `Game.insert_move`: they add a brand-new chance move at a terminal
+  node or before an existing node respectively, requiring the probability distribution over
+  its actions to be specified up front, just as `Game.make_event` does.  (#999)
+- `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
+  information sets; the unreachable information sets are absent.  (#1002)
 
 ### Changed
+- Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
 - Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
   still not contain control characters, begin/end with whitespace, or contain two consecutive
   whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0
@@ -13,15 +42,35 @@
   the run.  (#998)
 - Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
   removes dependency on tinyxml.  (#897)
+- Reduced strategies of extensive games are now labelled by sequential per-player integers ("1", "2", ...)
+  in the deterministic order in which they are generated, matching the labelling of strategies in strategic games.
 - Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
   lazy generator algorithm rather than materialising all as a single list up front.
-- Introduced `Game.make_infoset`, which subsumes operations previously written as `Game.leave_infoset`,
-  `Game.set_infoset`, and `Game.set_player`.
-- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.  (#999)
-
-### Added
-- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
-  information set; the primitive operation for editing information structures.  (#999)
+- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.
+  The C++ `Game::Reveal` now enforces this too, since it is the single implementation shared by
+  `Game.reveal` and the GUI's reveal-action command (previously each had its own copy of the
+  algorithm, and only the Python one checked for absent-mindedness).  In the GUI, the Reveal menu
+  item (both the Edit menu and the node's context menu) is now disabled at an absent-minded
+  information set, rather than letting the action be attempted and rejected.  (#999)
+- The GUI's infoset editing actions (assigning a node to an infoset, leaving an infoset) now enforce
+  the same rules as `Game.make_infoset`, e.g. matching action labels rather than just a matching
+  count; assigning a terminal node to an infoset now raises rather than silently doing nothing.
+  (#999)
+- `Game.append_move` and `Game.insert_move` now require `player` to be a personal player;
+  previously passing the chance player would silently create a new chance move with an
+  unrequested uniform distribution, bypassing the validation that `Game.make_event` (and now
+  `Game.append_event`/`Game.insert_event`) otherwise enforce for chance moves.  In the GUI, the
+  "Insert Move" dialog and the chance-token drag-and-drop action still create a chance move
+  with a uniform default when creating a fresh move, but now do so through `Game::InsertEvent`;
+  collecting the actual distribution at creation time in the GUI is left as a separate piece
+  of UX work.  (#999)
+- `Game.reveal` now requires `player` to be a personal player; previously passing the chance
+  player was either a silent no-op or raised an uninformative `RuntimeError`, depending on the
+  game's structure, rather than a proper `UndefinedOperationError`.  (#999)
+- `Game.make_infoset` now accepts nodes belonging to a chance event, converting them to
+  personal decision nodes and discarding their probabilities; previously only personal decision
+  nodes were accepted.  This matches `Game.make_event`, which has always accepted personal
+  decision nodes and converted them to a chance event.  (#999)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -30,8 +79,26 @@
 ### Removed
 - `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the
   information set and the new player.  (#999)
+- `Game.set_infoset` has been removed; use `Game.make_infoset`, specifying the members of the
+  target information set together with the node to add.  (#999)
+- `Game.leave_infoset` has been removed; use `Game.make_infoset` with a single node, specifying
+  the current label if it should be retained.  (#999)
 - `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
   information sets and their members is now maintained automatically.  (#999)
+- Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces
+  nonempty, unique labels.  (#1026)
+- `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
+  probabilities as forming the nodes of the event with the required distribution.  (#1009)
+- The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
+  removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
+  only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
+  calls directly.  `Game::Reveal` is kept, as a composite operation genuinely useful in its own
+  right, but is now implemented once in C++ rather than duplicated in `pygambit` and the GUI.
+  (#999)
+- The C++ `Game` interface's `SetChanceProbs` method has been removed, along with the
+  stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
+  `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
+  now builds the equivalent `MakeEvent` call directly.  (#999)
 
 ## [16.7.0] - 2026-07-11
 

@@ -128,6 +128,7 @@ def test_strategic_game_add_player():
     new_player = game.add_player("Player 3")
     assert len(game.players) == 3
     assert len(new_player.strategies) == 1
+    assert next(iter(new_player.strategies)).label == "1"
 
 
 def test_extensive_game_add_player():
@@ -164,6 +165,64 @@ def test_strategic_game_delete_strategy():
     assert len(pl1.strategies) == 1
 
 
+def _tag_contingencies(game: gbt.Game) -> None:
+    """Gives every contingency's outcome a payoff vector that encodes the
+    strategy labels of the contingency, so a contingency's expected payoffs
+    can be recomputed from its strategies' labels after the game is mutated.
+    """
+    players = list(game.players)
+    for contingency in game.contingencies:
+        outcome = game[contingency]
+        strategies = [list(p.strategies)[i] for p, i in zip(players, contingency, strict=True)]
+        for pl_index, (player, strategy) in enumerate(zip(players, strategies, strict=True)):
+            outcome[player] = int(f"{pl_index}{strategy.label}")
+
+
+def test_strategic_game_delete_strategy_preserves_other_payoffs():
+    game = gbt.Game.new_table([4, 2, 2])
+    pl1, pl2, pl3 = game.players
+    _tag_contingencies(game)
+
+    # Record expected payoffs by label (a stable identity), for the
+    # strategies of pl1 that survive deleting its second strategy.
+    surviving = [s for s in pl1.strategies if s.label != "2"]
+    expected = {
+        (s1.label, s2.label, s3.label):
+            tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+        for s1 in surviving for s2 in pl2.strategies for s3 in pl3.strategies
+    }
+
+    game.delete_strategy(pl1.strategies["2"])
+
+    assert len(pl1.strategies) == 3
+    for s1 in pl1.strategies:
+        for s2 in pl2.strategies:
+            for s3 in pl3.strategies:
+                key = (s1.label, s2.label, s3.label)
+                actual = tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+                assert actual == expected[key]
+
+
+def test_strategic_game_delete_first_strategy_preserves_other_payoffs():
+    game = gbt.Game.new_table([3, 2])
+    pl1, pl2 = game.players
+    _tag_contingencies(game)
+
+    surviving = [s for s in pl1.strategies if s.label != "1"]
+    expected = {
+        (s1.label, s2.label): tuple(game[s1, s2][p] for p in (pl1, pl2))
+        for s1 in surviving for s2 in pl2.strategies
+    }
+
+    game.delete_strategy(pl1.strategies["1"])
+
+    assert len(pl1.strategies) == 2
+    for s1 in pl1.strategies:
+        for s2 in pl2.strategies:
+            key = (s1.label, s2.label)
+            assert tuple(game[s1, s2][p] for p in (pl1, pl2)) == expected[key]
+
+
 def test_strategic_game_delete_last_strategy():
     game = gbt.Game.new_table([1, 2])
     pl1 = next(iter(game.players))
@@ -180,7 +239,7 @@ def test_extensive_game_delete_strategy():
 def test_player_strategy_by_label():
     game = gbt.Game.new_table([2, 2])
     pl1 = next(iter(game.players))
-    next(iter(pl1.strategies)).label = "Cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "Cooperate"})
     assert pl1.strategies["Cooperate"].label == "Cooperate"
 
 
@@ -206,9 +265,10 @@ def test_add_strategy_requires_label():
 
 def test_strategy_label_empty_raises_valueerror():
     game = gbt.Game.new_table([2, 2])
-    strategy = next(iter(next(iter(game.players)).strategies))
+    pl1 = next(iter(game.players))
+    strategy = next(iter(pl1.strategies))
     with pytest.raises(ValueError):
-        strategy.label = ""
+        game.relabel_strategies(pl1, {strategy.label: ""})
 
 
 def test_strategy_label_duplicate_within_player_raises_valueerror():
@@ -216,7 +276,7 @@ def test_strategy_label_duplicate_within_player_raises_valueerror():
     pl1 = next(iter(game.players))
     s1, s2 = pl1.strategies
     with pytest.raises(ValueError):
-        s2.label = s1.label
+        game.relabel_strategies(pl1, {s2.label: s1.label})
 
 
 def test_player_strategy_bad_label():

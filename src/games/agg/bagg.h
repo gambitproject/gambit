@@ -66,9 +66,8 @@ public:
   template <class V> V getMaxPayoff() const { return aggPtr->getMaxPayoff<V>(); }
   template <class V> V getMinPayoff() const { return aggPtr->getMinPayoff<V>(); }
 
-  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart --
-  // unused outside this class; getPurePayoff and GameBAGGRep only ever go through the per-type
-  // overload below.
+  // exp. payoff under mixed strat profile, summed over player's types. No Rational counterpart;
+  // callers go through the per-type overload below.
   double getMixedPayoff(int player, StrategyProfile<double> &s);
 
   // exp payoff for player, conditioned on her receiving type tp, via the convolution algorithm.
@@ -80,16 +79,22 @@ public:
                        const StrategyProfile<double> &s);
   template <class V> V getV(int player, int tp, int action, const StrategyProfile<V> &s) const;
 
-  double getPurePayoff(int player, int tp, std::vector<int> &s);
+  // payoff for player, conditioned on receiving type tp, under the pure profile s. Unlike
+  // getMixedPayoff above, this does NOT go through the general convolution engine: a pure BAGG
+  // profile leaves only the OTHER players' realized types uncertain (each independent, per
+  // indepTypeDist/exactIndepTypeDist), not their actions, so the expectation is a small, finite
+  // sum over the Cartesian product of the other players' types (bounded by the product of their
+  // type counts, not their action counts), each term a pure AGG-level payoff via
+  // AGG::getPurePayoff<V>.
+  template <class V> V getPurePayoff(int player, int tp, const std::vector<int> &s) const;
   double getPurePayoff(int player, std::vector<int> &s)
   {
     double r = 0;
     for (int i = 0; i < numTypes[player]; ++i) {
-      r += indepTypeDist[player][i] * getPurePayoff(player, i, s);
+      r += indepTypeDist[player][i] * getPurePayoff<double>(player, i, s);
     }
     return r;
   }
-  Rational getExactPurePayoff(int player, int tp, const std::vector<int> &ps) const;
 
   double getSymMixedPayoff(StrategyProfile<double> &s);
 

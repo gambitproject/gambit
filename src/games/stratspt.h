@@ -82,12 +82,6 @@ public:
     return m_game == p_support.m_game &&
            m_strategyDigits.m_allowedDigits == p_support.m_strategyDigits.m_allowedDigits;
   }
-  /// Test for the inequality of two supports
-  bool operator!=(const StrategySupportProfile &p_support) const
-  {
-    return m_game != p_support.m_game ||
-           m_strategyDigits.m_allowedDigits != p_support.m_strategyDigits.m_allowedDigits;
-  }
   //@}
 
   /// @name General information

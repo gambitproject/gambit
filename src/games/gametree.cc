@@ -176,29 +176,6 @@ GameInfosetRep::~GameInfosetRep()
                 [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
 }
 
-void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-{
-  if (p_infoset->m_game != this || p_player->m_game != this) {
-    throw MismatchException();
-  }
-  if (p_infoset->GetPlayer()->IsChance() || p_player->IsChance()) {
-    throw UndefinedException();
-  }
-  if (p_infoset->GetPlayer() == p_player) {
-    return;
-  }
-
-  const auto oldPlayer = p_infoset->GetPlayer().get();
-  IncrementVersion();
-  oldPlayer->m_infosets.erase(std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(),
-                                        p_infoset.get_shared()));
-  p_infoset->m_player = p_player.get();
-  p_player->m_infosets.push_back(p_infoset);
-
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-}
-
 bool GameInfosetRep::Precedes(GameNode p_node) const
 {
   auto node = p_node.get();
@@ -244,6 +221,53 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   return action;
 }
 
+void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
+                                 const std::map<std::string, std::string> &p_labels)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
+  }
+  // Resolve each key to exactly one action at the information set.
+  //
+  // The ambiguous-match check below defends against a state that pygambit's own
+  // callers can no longer produce (append_move and add_action both guarantee
+  // unique, nonempty action labels, and file loading normalizes labels before
+  // returning a game), but this is a public entry point on the base Game
+  // interface, so a duplicate label reaching here from some other caller must
+  // still be rejected rather than silently resolved to an arbitrary action.
+  std::map<GameActionRep *, std::string> assignment;
+  std::set<const GameActionRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GameActionRep *match = nullptr;
+    for (const auto &action : p_infoset->m_actions) {
+      if (action->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Action label '" + old_label +
+                               "' is ambiguous at this information set");
+        }
+        match = action.get();
+      }
+    }
+    if (!match) {
+      throw ValueException("No action with label '" + old_label + "' at this information set");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  // Replacement labels must be legal, unique against untouched actions, and pairwise distinct
+  std::set<std::string> targets;
+  for (const auto &[action, new_label] : assignment) {
+    p_infoset->CheckActionLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Action label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[action, new_label] : assignment) {
+    action->m_label = new_label;
+  }
+}
+
 void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 {
   IncrementVersion();
@@ -255,33 +279,6 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
     p_infoset->m_player->m_infosets.erase(std::find(
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
   }
-  InvalidateTreeOrdering();
-}
-
-void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
-{
-  IncrementVersion();
-  for (const auto &action : p_atInfoset->m_actions) {
-    auto infosets = p_player->m_infosets;
-    for (const auto &infoset : infosets) {
-      auto members = infoset->m_members;
-      // This information set holds all members of information set
-      // which follow 'action'.
-      GameInfoset newiset = nullptr;
-      for (const auto &member : members) {
-        if (action->Precedes(member)) {
-          if (!newiset) {
-            newiset = LeaveInfoset(member);
-          }
-          else {
-            SetInfoset(member, newiset);
-          }
-        }
-      }
-    }
-  }
-
-  ClearComputedValues();
   InvalidateTreeOrdering();
 }
 
@@ -401,7 +398,7 @@ bool GameNodeRep::IsSubgameRoot() const
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  return tree_game->GetSubgameData().m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
+  return tree_game->GetSubgameData().m_subgameByRoot.contains(const_cast<GameNodeRep *>(this));
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -409,7 +406,7 @@ bool GameNodeRep::IsStrategyReachable() const
   auto tree_game = static_cast<GameTreeRep *>(m_game);
 
   // A node is reachable if it is NOT in the set of unreachable nodes.
-  return !contains(tree_game->GetUnreachableNodes(), const_cast<GameNodeRep *>(this));
+  return !tree_game->GetUnreachableNodes().contains(const_cast<GameNodeRep *>(this));
 }
 
 void GameTreeRep::DeleteParent(GameNode p_node)
@@ -566,9 +563,6 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
     if (node->IsTerminal()) {
       throw UndefinedException("All nodes must be decision nodes");
     }
-    if (node->m_infoset->IsChanceInfoset()) {
-      throw UndefinedException("All nodes must belong to a personal player, not chance");
-    }
     if (!selected.insert(node.get()).second) {
       throw ValueException("Each node may be referenced only once");
     }
@@ -593,7 +587,7 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
       if (infoset->GetLabel() == p_label &&
           std::all_of(infoset->m_members.begin(), infoset->m_members.end(),
                       [&selected](const std::shared_ptr<GameNodeRep> &m) {
-                        return contains(selected, m.get());
+                        return selected.contains(m.get());
                       })) {
         absorbed.insert(infoset.get());
       }
@@ -606,7 +600,7 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
                                                      p_player.get(), reference.size());
   auto dest = newInfoset->m_actions.begin();
   for (const auto &action : reference) {
-    (*dest)->SetLabel(action->GetLabel());
+    (*dest)->m_label = action->GetLabel();
     ++dest;
   }
   p_player->m_infosets.push_back(newInfoset);
@@ -621,77 +615,62 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
   return newInfoset;
 }
 
-void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
+void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
-  if (p_node->m_game != this || p_infoset->m_game != this) {
+  if (p_atInfoset->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
-  GameNodeRep *node = p_node.get();
-  if (!node->m_infoset || node->m_infoset == p_infoset.get()) {
-    return;
+  if (p_player->IsChance()) {
+    throw UndefinedException("Reveal() requires a personal player");
   }
-  if (p_infoset->m_actions.size() != node->m_children.size()) {
-    throw DimensionException();
+  if (IsAbsentMinded(p_atInfoset)) {
+    throw UndefinedException(
+        "Revealing the move at an absent-minded information set is not well-defined");
   }
-  IncrementVersion();
-  RemoveMember(node->m_infoset, node);
-  p_infoset->m_members.push_back(p_node);
-  node->m_infoset = p_infoset.get();
-
-  ClearComputedValues();
-  InvalidateInfosetOrdering();
+  for (const auto &action : p_atInfoset->m_actions) {
+    auto infosets = p_player->m_infosets;
+    for (const auto &infoset : infosets) {
+      auto members = infoset->m_members;
+      // Members of this information set which follow 'action' are grouped
+      // into a single new information set.
+      std::vector<GameNode> group;
+      for (const auto &member : members) {
+        if (action->Precedes(member)) {
+          group.emplace_back(member);
+        }
+      }
+      if (!group.empty()) {
+        MakeInfoset(group, p_player, "");
+      }
+    }
+  }
 }
 
-GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
-{
-  GameNodeRep *node = p_node.get();
-  if (node->m_game != this) {
-    throw MismatchException();
-  }
-  if (!node->m_infoset) {
-    return nullptr;
-  }
-
-  IncrementVersion();
-  auto *oldInfoset = node->m_infoset;
-  if (oldInfoset->m_members.size() == 1) {
-    return oldInfoset->shared_from_this();
-  }
-
-  GamePlayerRep *player = oldInfoset->m_player;
-  RemoveMember(oldInfoset, node);
-  auto newInfoset = std::make_shared<GameInfosetRep>(this, player->m_infosets.size() + 1, player,
-                                                     node->m_children.size());
-  player->m_infosets.push_back(newInfoset);
-  node->m_infoset = newInfoset.get();
-  node->m_infoset->m_members.push_back(p_node);
-  for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
-       old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
-    (*new_act)->SetLabel((*old_act)->GetLabel());
-  }
-  ClearComputedValues();
-  InvalidateInfosetOrdering();
-  return node->m_infoset->shared_from_this();
-}
-
-GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                    bool p_generateLabels)
+GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player,
+                                    const std::vector<std::string> &p_actions)
 {
   const GameNodeRep *node = p_node.get();
-  if (p_actions <= 0 || !node->m_children.empty()) {
+  if (p_actions.empty() || !node->m_children.empty()) {
     throw UndefinedException();
   }
   if (p_node->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
+  if (p_player->IsChance()) {
+    throw UndefinedException("The move must belong to a personal player, not chance");
+  }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
 
   IncrementVersion();
-  auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
-                                                     p_player.get(), p_actions);
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
   p_player->m_infosets.push_back(newInfoset);
-  if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
   }
   return AppendMove(p_node, newInfoset);
 }
@@ -720,8 +699,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                    bool p_generateLabels)
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
 {
   if (p_actions <= 0) {
     throw UndefinedException();
@@ -729,15 +707,107 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   if (p_player->m_game != this) {
     throw MismatchException();
   }
+  if (p_player->IsChance()) {
+    throw UndefinedException("The move must belong to a personal player, not chance");
+  }
 
   IncrementVersion();
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
-  if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
+  return InsertMove(p_node, newInfoset);
+}
+
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player,
+                                    const std::vector<std::string> &p_actions)
+{
+  if (p_actions.empty()) {
+    throw UndefinedException();
   }
+  if (p_player->m_game != this) {
+    throw MismatchException();
+  }
+  if (p_player->IsChance()) {
+    throw UndefinedException("The move must belong to a personal player, not chance");
+  }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
+
+  IncrementVersion();
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
+  p_player->m_infosets.push_back(newInfoset);
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
+  }
+  return InsertMove(p_node, newInfoset);
+}
+
+GameInfoset GameTreeRep::AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                     const std::vector<Number> &p_probs)
+{
+  const GameNodeRep *node = p_node.get();
+  if (p_actions.empty() || !node->m_children.empty()) {
+    throw UndefinedException();
+  }
+  if (p_node->m_game != this) {
+    throw MismatchException();
+  }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
+  if (p_actions.size() != p_probs.size()) {
+    throw DimensionException("The number of probabilities given must match the number of actions");
+  }
+  ValidateDistribution(p_probs);
+
+  IncrementVersion();
+  const GamePlayer chance = GetChance();
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, chance->m_infosets.size() + 1, chance.get(), static_cast<int>(p_actions.size()));
+  chance->m_infosets.push_back(newInfoset);
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
+  }
+  std::copy(p_probs.begin(), p_probs.end(), newInfoset->m_probs.begin());
+  return AppendMove(p_node, newInfoset);
+}
+
+GameInfoset GameTreeRep::InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                     const std::vector<Number> &p_probs)
+{
+  if (p_actions.empty()) {
+    throw UndefinedException();
+  }
+  if (p_node->m_game != this) {
+    throw MismatchException();
+  }
+  for (const auto &label : p_actions) {
+    CheckLabel(label);
+  }
+  if (p_actions.size() != p_probs.size()) {
+    throw DimensionException("The number of probabilities given must match the number of actions");
+  }
+  ValidateDistribution(p_probs);
+
+  IncrementVersion();
+  const GamePlayer chance = GetChance();
+  auto newInfoset = std::make_shared<GameInfosetRep>(
+      this, chance->m_infosets.size() + 1, chance.get(), static_cast<int>(p_actions.size()));
+  chance->m_infosets.push_back(newInfoset);
+  auto label_it = p_actions.begin();
+  for (const auto &action : newInfoset->m_actions) {
+    action->m_label = *label_it;
+    ++label_it;
+  }
+  std::copy(p_probs.begin(), p_probs.end(), newInfoset->m_probs.begin());
   return InsertMove(p_node, newInfoset);
 }
 
@@ -937,7 +1007,7 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
     throw MismatchException();
   }
   EnsureOwnPriorActions();
-  return contains(m_absentMindedInfosets, p_infoset.get());
+  return m_absentMindedInfosets.contains(p_infoset.get());
 }
 
 GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
@@ -1278,7 +1348,7 @@ const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
       if (!child->IsTerminal()) {
         // On a re-entry, a pure strategy replays the action chosen at the earlier visit,
         // so only that branch is reachable; prune the rest.
-        if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        if (path_choices.contains(child->m_infoset->shared_from_this())) {
           const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
           position.emplace(AbsentMindedEdge{replay_action, child});
 
@@ -1445,7 +1515,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
           return DFSCallbackResult::Continue;
         }
         GameNodeRep *node = p_node.get();
-        if (contains(m_roots, node)) {
+        if (m_roots.contains(node)) {
           auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
           if (!m_stack.empty()) {
             auto &parent_subgame = m_cache.at(m_stack.back());
@@ -1671,22 +1741,76 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 //                       GameTreeRep: Modification
 //------------------------------------------------------------------------
 
-Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Number> &p_probs)
+GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
+                                   const std::vector<Number> &p_probs, const std::string &p_label)
 {
-  if (p_infoset->m_game != this) {
-    throw MismatchException();
+  if (p_nodes.empty()) {
+    throw ValueException("At least one node must be specified");
   }
-  if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "Action probabilities can only be specified for chance information sets");
+  std::set<GameNodeRep *> selected;
+  for (const auto &node : p_nodes) {
+    if (node->m_game != this) {
+      throw MismatchException();
+    }
+    if (node->IsTerminal()) {
+      throw UndefinedException("All nodes must be nonterminal");
+    }
+    if (!selected.insert(node.get()).second) {
+      throw ValueException("Each node may be referenced only once");
+    }
   }
-  if (p_infoset->m_actions.size() != p_probs.size()) {
+  // The first member defines the action labels and their order of the new event.
+  const auto &reference = p_nodes.front()->m_infoset->m_actions;
+  for (const auto &node : p_nodes) {
+    const auto &actions = node->m_infoset->m_actions;
+    if (!std::equal(
+            actions.begin(), actions.end(), reference.begin(), reference.end(),
+            [](const std::shared_ptr<GameActionRep> &a, const std::shared_ptr<GameActionRep> &b) {
+              return a->GetLabel() == b->GetLabel();
+            })) {
+      throw ValueException(
+          "All nodes must have the same actions, with the same labels in the same order");
+    }
+  }
+  if (p_probs.size() != reference.size()) {
     throw DimensionException("The number of probabilities given must match the number of actions");
   }
   ValidateDistribution(p_probs);
+  const GamePlayer chance = GetChance();
+  // Destroy an event all of whose members are absorbed; its label can then be reused.
+  std::set<const GameInfosetRep *> absorbed;
+  if (!p_label.empty()) {
+    for (const auto &infoset : chance->m_infosets) {
+      if (infoset->GetLabel() == p_label &&
+          std::all_of(infoset->m_members.begin(), infoset->m_members.end(),
+                      [&selected](const std::shared_ptr<GameNodeRep> &m) {
+                        return contains(selected, m.get());
+                      })) {
+        absorbed.insert(infoset.get());
+      }
+    }
+  }
+  chance->CheckInfosetLabel(p_label, absorbed);
+
   IncrementVersion();
-  std::copy(p_probs.begin(), p_probs.end(), p_infoset->m_probs.begin());
-  return shared_from_this();
+  auto newEvent = std::make_shared<GameInfosetRep>(this, chance->m_infosets.size() + 1,
+                                                   chance.get(), reference.size());
+  auto dest = newEvent->m_actions.begin();
+  for (const auto &action : reference) {
+    (*dest)->m_label = action->m_label;
+    ++dest;
+  }
+  std::copy(p_probs.begin(), p_probs.end(), newEvent->m_probs.begin());
+  chance->m_infosets.push_back(newEvent);
+  for (const auto &node : p_nodes) {
+    RemoveMember(node->m_infoset, node.get());
+    newEvent->m_members.push_back(node);
+    node->m_infoset = newEvent.get();
+  }
+  newEvent->SetLabel(p_label);
+  ClearComputedValues();
+  InvalidateInfosetOrdering();
+  return newEvent;
 }
 
 Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
@@ -1695,8 +1819,7 @@ Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "Action probabilities can only be normalized for chance information sets");
+    throw UndefinedException("Action probabilities can only be normalized for events");
   }
   IncrementVersion();
   auto &probs = p_infoset->m_probs;

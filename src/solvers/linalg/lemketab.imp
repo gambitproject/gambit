@@ -174,12 +174,13 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
 // Executes one step of the Lemke-Howson algorithm
 //
 
-template <class T> int LemkeTableau<T>::SF_LCPPath(int dup)
+template <class T> int LemkeTableau<T>::SF_LCPPath(int dup, const CancelToken &p_cancel)
 {
   int enter, exit;
   enter = dup;
   // Central loop - pivot until another CBFS is found
   do {
+    p_cancel.Check();
     // Talk about optimism! This is dumb, but better than nothing (I guess):
     exit = SF_PivotIn(enter);
     if (exit == enter) {

@@ -57,7 +57,7 @@ Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
   }
   const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[p_player->GetNumber()];
   const int tp = p_player->GetNumber() - 1 - baggPtr->typeOffset[bp - 1];
-  return baggPtr->getExactPurePayoff(bp - 1, tp, s);
+  return baggPtr->getPurePayoff<Rational>(bp - 1, tp, s);
 }
 
 Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
@@ -71,7 +71,7 @@ Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_stra
   s[player - 1] = p_strategy->GetNumber() - 1;
   const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[player];
   const int tp = player - 1 - baggPtr->typeOffset[bp - 1];
-  return baggPtr->getExactPurePayoff(bp - 1, tp, s);
+  return baggPtr->getPurePayoff<Rational>(bp - 1, tp, s);
 }
 
 //========================================================================

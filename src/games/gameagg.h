@@ -92,14 +92,6 @@ public:
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
-  //@}
-
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
@@ -113,7 +105,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .agg format.
-Game ReadAggFile(std::istream &p_stream);
+[[nodiscard]] Game ReadAggFile(std::istream &p_stream);
 
 } // namespace Gambit
 
