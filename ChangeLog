@@ -1,5 +1,26 @@
 ## [17.0.0-alpha.2] - unreleased
 
+### Added
+- `MixedStrategyProfile.payoffs`, `.player_regrets`, `.strategy_values`, and
+  `.strategy_regrets` return the corresponding quantity for every player (and, for the
+  latter two, every strategy) at once, rather than one at a time.
+  `.payoffs`/`.player_regrets` return a `PayoffVector`/`PlayerRegretVector` (each a
+  `PlayerIndexedVector`, keyed by player label); `.strategy_values`/`.strategy_regrets`
+  return a `StrategyValuesVector`/`StrategyRegretsVector` (each a `PlayerIndexedVector` of
+  `StrategyValueVector`/`StrategyRegretVector`, keyed by player label then strategy
+  label). Each quantity is its own type — a `PayoffVector` and a `PlayerRegretVector`
+  never compare equal, even if they happen to hold the same numbers, though either
+  compares equal to a plain `Mapping` with the same contents. (#763)
+- `MixedStrategyProfile.set_strategy(player, distribution, sparse=False)` sets a player's whole
+  mixed strategy, like `profile[player] = distribution`, but can require `distribution` to give
+  a weight for every one of the player's strategies (the default) rather than treating strategies
+  it omits as having weight zero. (#763)
+
+### Fixed
+- `MixedStrategy.__eq__` raised `AttributeError` when comparing two `MixedStrategy` instances
+  directly (as opposed to a `MixedStrategy` and a plain `Mapping`), because it read a Cython
+  ``cdef``-declared attribute off `other` without first casting it to `MixedStrategy`.
+
 ### Changed
 - `MixedBehavior.__iter__` now yields `(Infoset, MixedAction)` pairs, one per information set
   belonging to the player, matching what `mixed_actions()` returned; previously it yielded
@@ -18,9 +39,16 @@
 - `MixedStrategyProfile.__iter__` now yields one `MixedStrategy` per player, matching what
   `mixed_strategies()` returned; previously it yielded `(Strategy, probability)` pairs flattened
   across every player's strategies, which discarded which player each strategy belonged to.
+  `len(MixedStrategyProfile)` is now the number of players, to match; previously it was the
+  total number of strategies across all players, inconsistent with the number of items
+  iterating the profile actually yields.
 - `repr(MixedAction)`/`repr(MixedStrategy)` now show a `{label: probability}` mapping instead of
   a bare list of probabilities, reflecting that these are dictionaries keyed by (enforced-unique)
   action/strategy label, not positional vectors. (#433)
+- `repr(MixedStrategyProfile)` now shows a `{player_label: MixedStrategy}` mapping instead of a
+  bare list of `MixedStrategy` values, matching the same `{label: value}` convention already used
+  by `repr(MixedStrategy)` and every vectorized computed quantity (`payoffs`, `strategy_values`,
+  etc.). (#433)
 - `MixedStrategy.__eq__` now compares against a `Mapping` (label to probability) instead of a
   bare `list`; comparing to a positional list of probabilities no longer works, since a
   `MixedStrategy` is keyed by strategy label, not position. (#433)
@@ -37,17 +65,27 @@
   profile is next assigned into (copy-on-write), rather than eagerly duplicating; this is not
   observable from the profiles' behavior, only from how soon the duplication happens.
 - `MixedStrategyProfile.__setitem__` now only accepts a whole distribution for a player (a
-  `Mapping` from strategy label to a non-negative, not-all-zero weight); setting a single
-  strategy's probability directly is no longer supported. A weight may be given as any value
-  Gambit can interpret as a number (`int`, `float`, `str`, `Decimal`, or `Rational`), and weights
-  need not sum to one. Validation moved here from `normalize()`, which no longer needs to check
-  for negative or all-zero entries, since a `MixedStrategyProfile` can no longer hold them. (#763)
+  `Mapping` from strategy label to a non-negative weight, keyed by strategy label); setting a
+  single strategy's probability directly is no longer supported. `distribution` need not specify
+  every strategy: strategies it omits are treated as having weight zero (use the new
+  `set_strategy` to make that an error instead). A weight may be given as any value Gambit can
+  interpret as a number (`int`, `float`, `str`, `Decimal`, or `Rational`), and given weights need
+  not sum to one. Validation moved here from `normalize()`, which no longer needs to check for
+  negative or all-zero entries, since a `MixedStrategyProfile` can no longer hold them. (#763)
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
 - `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating
   the `MixedStrategyProfile` directly.
+- `MixedStrategyProfile.payoff`, `.strategy_value`, `.strategy_regret`, and `.player_regret`
+  have been removed, superseded by `.payoffs`, `.strategy_values`, `.strategy_regrets`, and
+  `.player_regrets`; index the result for a single player/strategy (e.g.
+  `profile.payoffs[player_label]` instead of `profile.payoff(player_label)`). (#763)
+- `MixedStrategyProfile.strategy_value_deriv` has been removed; it had no internal usage,
+  and is a specific evaluation of the payoff Jacobian that is straightforward to reconstruct
+  directly: it equals the payoff obtained by substituting the two given pure strategies into
+  the profile (0 if both belong to the same player).
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

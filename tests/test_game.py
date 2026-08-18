@@ -173,7 +173,6 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
     game = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    strategy1, strategy2, *_ = game.strategies
     distribution = {s.label: 0 for s in player.strategies}
     next(iter(game.outcomes))[player] = 3
     for profile in profiles:
@@ -186,20 +185,20 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.payoff(player)
+            _ = profile.payoffs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.player_regret(player)
+            _ = profile.player_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_regret(strategy1)
+            _ = profile.strategy_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value(strategy1)
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value_deriv(strategy1, strategy2)
+            _ = profile.strategy_values
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__setitem__(player.label, distribution)
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.set_strategy(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__getitem__(player.label)
 
@@ -210,7 +209,6 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     player = next(iter(game.players))
     action_to_delete = game.root.infoset.actions["U1"]
     game.delete_action(action_to_delete)
-    strategy1, strategy2, *_ = game.strategies
     distribution = {s.label: 0 for s in player.strategies}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -224,20 +222,20 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.payoff(player)
+            _ = profile.payoffs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.player_regret(player)
+            _ = profile.player_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_regret(strategy1)
+            _ = profile.strategy_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value(strategy1)
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value_deriv(strategy1, strategy2)
+            _ = profile.strategy_values
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__setitem__(player.label, distribution)
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.set_strategy(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__getitem__(player.label)
 

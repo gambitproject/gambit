@@ -110,6 +110,73 @@ NodeReferenceSet = typing.Iterable[NodeReference]
 ProfileDType = float | Rational
 
 
+@cython.cclass
+class _LabeledVector:
+    """Shared implementation for a read-only mapping from a label to a computed value.
+
+    Not part of the public API; subclass this (see ``PlayerIndexedVector`` and
+    ``StrategyIndexedVector``) so that the concrete type of a computed quantity carries its
+    own meaning (e.g. a ``PayoffVector`` and a ``PlayerRegretVector`` never compare equal to
+    each other, even if they happen to hold the same numbers).
+    """
+    _values = cython.declare(dict)
+    _label_kind = "label"
+
+    def __init__(self, values: collections.abc.Mapping) -> None:
+        self._values = dict(values)
+
+    def __repr__(self) -> str:
+        return str(self._values)
+
+    def _repr_latex_(self) -> str:
+        values = list(self._values.values())
+        if not values or not hasattr(values[0], "_repr_latex_"):
+            return repr(self)
+        return (
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + label + "}:" + value._repr_latex_().replace("$", "")
+                for label, value in self._values.items()
+            ) +
+            r"\right\}$"
+        )
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if isinstance(other, collections.abc.Mapping):
+            return self._values == dict(other)
+        if type(other) is not type(self):
+            return False
+        return self._values == cython.cast(_LabeledVector, other)._values
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+    def __iter__(self) -> typing.Iterator[typing.Tuple[str, typing.Any], None, None]:
+        yield from self._values.items()
+
+    def __getitem__(self, label: str) -> typing.Any:
+        try:
+            return self._values[label]
+        except KeyError:
+            raise KeyError(f"no {self._label_kind} with label '{label}'") from None
+
+
+@cython.cclass
+class PlayerIndexedVector(_LabeledVector):
+    """A read-only mapping from player label to a computed value, one entry per player
+    in a game.
+    """
+    _label_kind = "player"
+
+
+@cython.cclass
+class StrategyIndexedVector(_LabeledVector):
+    """A read-only mapping from strategy label to a computed value, one entry per
+    strategy belonging to a single player.
+    """
+    _label_kind = "strategy"
+
+
 ######################
 # Includes
 ######################

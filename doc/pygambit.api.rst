@@ -225,6 +225,21 @@ Representation of strategic behavior
 .. currentmodule:: pygambit.gambit
 
 
+Computed quantities
+....................
+
+.. autosummary::
+   :toctree: api/
+
+   PlayerIndexedVector
+   PlayerIndexedVector.__iter__
+   PlayerIndexedVector.__getitem__
+
+   StrategyIndexedVector
+   StrategyIndexedVector.__iter__
+   StrategyIndexedVector.__getitem__
+
+
 Probability distributions over strategies
 .........................................
 
@@ -236,11 +251,11 @@ Probability distributions over strategies
    MixedStrategyProfile.__iter__
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
-   MixedStrategyProfile.payoff
-   MixedStrategyProfile.strategy_value
-   MixedStrategyProfile.strategy_regret
-   MixedStrategyProfile.player_regret
-   MixedStrategyProfile.strategy_value_deriv
+   MixedStrategyProfile.set_strategy
+   MixedStrategyProfile.payoffs
+   MixedStrategyProfile.strategy_values
+   MixedStrategyProfile.strategy_regrets
+   MixedStrategyProfile.player_regrets
    MixedStrategyProfile.max_regret
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
@@ -250,6 +265,13 @@ Probability distributions over strategies
    MixedStrategy
    MixedStrategy.__iter__
    MixedStrategy.__getitem__
+
+   PayoffVector
+   PlayerRegretVector
+   StrategyValueVector
+   StrategyRegretVector
+   StrategyValuesVector
+   StrategyRegretsVector
 
 
 Probability distributions over behavior

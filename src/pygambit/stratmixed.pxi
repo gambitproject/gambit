@@ -23,6 +23,42 @@ from cython.operator cimport dereference as deref
 
 
 @cython.cclass
+class PayoffVector(PlayerIndexedVector):
+    """The expected payoff to each player, one entry per player in a game."""
+
+
+@cython.cclass
+class PlayerRegretVector(PlayerIndexedVector):
+    """The regret of each player for playing their mixed strategy, one entry per player."""
+
+
+@cython.cclass
+class StrategyValueVector(StrategyIndexedVector):
+    """The expected payoff of playing each strategy, conditional on reaching it, for one
+    player's strategies.
+    """
+
+
+@cython.cclass
+class StrategyRegretVector(StrategyIndexedVector):
+    """The regret of playing each strategy, for one player's strategies."""
+
+
+@cython.cclass
+class StrategyValuesVector(PlayerIndexedVector):
+    """The expected payoff of playing each strategy, conditional on reaching it, grouped
+    by player; each value is a `StrategyValueVector` for that player's strategies.
+    """
+
+
+@cython.cclass
+class StrategyRegretsVector(PlayerIndexedVector):
+    """The regret of playing each strategy, grouped by player; each value is a
+    `StrategyRegretVector` for that player's strategies.
+    """
+
+
+@cython.cclass
 class MixedStrategy:
     """A probability distribution over a player's strategies.
 
@@ -78,7 +114,7 @@ class MixedStrategy:
             return self._values == dict(other)
         if not isinstance(other, MixedStrategy) or self.player != other.player:
             return False
-        return self._values == other._values
+        return self._values == cython.cast(MixedStrategy, other)._values
 
     def __len__(self) -> int:
         return len(self._values)
@@ -100,7 +136,7 @@ class MixedStrategy:
         yield from self._values.items()
 
     def __getitem__(self, strategy: str) -> ProfileDType:
-        """Returns the probability that the strategy with label `index` is played.
+        """Returns the probability that the strategy with label `strategy` is played.
 
         Parameters
         ----------
@@ -115,7 +151,7 @@ class MixedStrategy:
         Raises
         ------
         KeyError
-            If no strategy for this player has the label `index`.
+            If no strategy for this player has the label `strategy`.
         """
         try:
             return self._values[strategy]
@@ -127,12 +163,17 @@ class MixedStrategy:
 class MixedStrategyProfile:
     """Represents a mixed strategy profile over the strategies in a ``Game``.
 
-    A mixed strategy profile is a dict-like object, mapping each strategy in a game to
-    the corresponding probability with which that strategy is played.
+    A mixed strategy profile is a dict-like object, mapping each player in a game to
+    a `MixedStrategy` giving the probability distribution over that player's strategies.
 
     Mixed strategy profiles may represent probabilities as either exact (rational)
     numbers, or floating-point numbers.  These may not be combined in the same mixed
     strategy profile.
+
+    .. versionchanged:: 17.0.0
+        Indexing (`__getitem__`/`__setitem__`) is by player label only, operating on a
+        player's whole distribution at once; indexing directly by an individual strategy
+        is no longer supported.
 
     .. versionchanged:: 16.1.0
         Profiles are accessed as dict-like objects; indexing by integer player or strategy
@@ -150,14 +191,17 @@ class MixedStrategyProfile:
         raise ValueError("Cannot create a MixedStrategyProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str([self[player.label] for player in self.game.players])
+        return str({player.label: self[player.label] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
-            r"$\left[" +
-            ",".join([self[player.label]._repr_latex_().replace("$", "")
-                      for player in self.game.players]) +
-            r"\right]$"
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + player.label + "}:" +
+                self[player.label]._repr_latex_().replace("$", "")
+                for player in self.game.players
+            ) +
+            r"\right\}$"
         )
 
     @property
@@ -195,18 +239,24 @@ class MixedStrategyProfile:
         ------
         KeyError
             If no player in the game has the label `player`.
+        TypeError
+            If `player` is not a str.
         """
         self._check_validity()
         resolved_player = self.game._resolve_player(player, "__getitem__")
         values = {s.label: self._getprob_strategy(s) for s in resolved_player.strategies}
         return MixedStrategy.wrap(resolved_player, values)
 
-    def _setprob_player(self, player: Player, distribution: collections.abc.Mapping) -> None:
+    def _setprob_player(
+        self, player: Player, distribution: collections.abc.Mapping, sparse: bool
+    ) -> None:
         """Validates and sets the whole mixed strategy for player.
 
-        `distribution` must specify a non-negative weight for each of the player's
-        strategies, by label, and the weights must not all be zero. Weights need not sum
-        to one; see `normalize`.
+        Every key of `distribution` must be one of the player's strategy labels. If
+        `sparse` is True, strategies `distribution` omits are treated as having weight
+        zero; if False, `distribution` must specify a weight for every strategy. Weights
+        must be non-negative and not all zero. Weights need not sum to one; see
+        `normalize`.
         """
         if not isinstance(distribution, collections.abc.Mapping):
             raise TypeError(
@@ -214,12 +264,20 @@ class MixedStrategyProfile:
                 f"weight, not {distribution.__class__.__name__}"
             )
         labels = {s.label for s in player.strategies}
-        if set(distribution.keys()) != labels:
+        given = set(distribution.keys())
+        unknown = given - labels
+        if unknown:
+            raise ValueError(
+                f"not a strategy label for this player: {', '.join(sorted(unknown))}"
+            )
+        if not sparse and given != labels:
             raise ValueError(
                 "a distribution must specify exactly one weight for each of the "
-                "player's strategies, by label"
+                "player's strategies, by label, unless sparse=True"
             )
-        values = {label: self._to_prob(weight) for label, weight in distribution.items()}
+        zero = self._to_prob(0)
+        values = {label: zero for label in labels}
+        values.update({label: self._to_prob(weight) for label, weight in distribution.items()})
         if any(v < 0 for v in values.values()):
             raise ValueError("a mixed strategy's weights must be non-negative")
         if all(v == 0 for v in values.values()):
@@ -230,130 +288,141 @@ class MixedStrategyProfile:
     def __setitem__(self, player: str, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed strategy for the player with label `player`.
 
+        `distribution` need not specify a weight for every one of the player's
+        strategies: strategies it omits are treated as having weight zero. Use
+        `set_strategy` if you want that to be an error instead.
+
         Parameters
         ----------
         player : str
             The label of the player whose mixed strategy is to be set.
         distribution : Mapping[str, Any]
-            A non-negative, not-all-zero weight for each of the player's strategies, keyed
-            by strategy label. A weight may be any value Gambit can interpret as a number
-            (`int`, `float`, `str`, `Decimal`, or `Rational`); weights need not sum to one.
+            A non-negative weight for some or all of the player's strategies, keyed by
+            strategy label; strategies it omits are treated as having weight zero. A
+            weight may be any value Gambit can interpret as a number (`int`, `float`,
+            `str`, `Decimal`, or `Rational`). Weights need not sum to one, and at least
+            one must be nonzero.
 
         Raises
         ------
         KeyError
             If no player in the game has the label `player`.
+        TypeError
+            If `player` is not a str, or `distribution` is not a Mapping.
         ValueError
-            If `distribution` does not specify exactly one weight for each of the
-            player's strategies, if any weight is negative, or if the weights are all zero.
+            If any key of `distribution` is not one of the player's strategy labels, if
+            any weight cannot be interpreted as a number, if any weight is negative, or
+            if the weights are all zero.
+
+        See Also
+        --------
+        set_strategy
+            Equivalent, but can require a weight for every strategy instead of silently
+            defaulting omitted ones to zero.
         """
         self._check_validity()
         resolved_player = self.game._resolve_player(player, "__setitem__")
-        self._setprob_player(resolved_player, distribution)
+        self._setprob_player(resolved_player, distribution, sparse=True)
 
-    def payoff(self, player: PlayerReference) -> ProfileDType:
-        """Returns the expected payoff to a player if all players play
-        according to the profile.
+    def set_strategy(
+        self, player: str, distribution: collections.abc.Mapping, sparse: bool = False
+    ) -> None:
+        """Sets the mixed strategy for the player with label `player`.
 
-        Parameters
-        ----------
-        player : Player or str
-            The player to get the payoff for.  If a string is passed, the
-            player is determined by finding the player with that label, if any.
+        Equivalent to ``profile[player] = distribution``, except that by default every
+        one of the player's strategies must be given an explicit weight in
+        `distribution`. Use this instead of `__setitem__` when omitting a strategy
+        should be an error rather than silently defaulting its weight to zero.
 
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
-        """
-        self._check_validity()
-        return self._payoff(self.game._resolve_player(player, "payoff"))
-
-    def strategy_value(self, strategy: StrategyReference) -> ProfileDType:
-        """Returns the expected payoff to playing the strategy, if all other
-        players play according to the profile.
+        .. versionadded:: 17.0.0
 
         Parameters
         ----------
-        strategy : Strategy or str
-            The strategy to get the payoff for.  If a string is passed, the
-            strategy is determined by finding the strategy with that label, if any.
+        player : str
+            The label of the player whose mixed strategy is to be set.
+        distribution : Mapping[str, Any]
+            A non-negative weight for the player's strategies, keyed by strategy label.
+            A weight may be any value Gambit can interpret as a number (`int`, `float`,
+            `str`, `Decimal`, or `Rational`). Weights need not sum to one, and at least
+            one must be nonzero.
+        sparse : bool, default False
+            If False (the default), `distribution` must specify a weight for every one
+            of the player's strategies. If True, strategies it omits are treated as
+            having weight zero, the same as ``profile[player] = distribution``.
 
         Raises
         ------
-        MismatchError
-            If `strategy` is a `Strategy` from a different game.
         KeyError
-            If `strategy` is a string and no strategy in the game has that label.
+            If no player in the game has the label `player`.
+        TypeError
+            If `player` is not a str, or `distribution` is not a Mapping.
+        ValueError
+            If any key of `distribution` is not one of the player's strategy labels, if
+            `sparse` is False and `distribution` omits a strategy, if any weight cannot
+            be interpreted as a number, if any weight is negative, or if the weights are
+            all zero.
+
+        See Also
+        --------
+        __setitem__
         """
         self._check_validity()
-        return self._strategy_value(self.game._resolve_strategy(strategy, "strategy_value"))
+        resolved_player = self.game._resolve_player(player, "set_strategy")
+        self._setprob_player(resolved_player, distribution, sparse=sparse)
 
-    def strategy_regret(self, strategy: StrategyReference) -> ProfileDType:
-        """Returns the regret to playing `strategy`, if all other
-        players play according to the profile.
+    @property
+    def payoffs(self) -> PayoffVector:
+        """Returns the expected payoff to each player, if all players play according to
+        the profile.
+        """
+        self._check_validity()
+        return PayoffVector({p.label: self._payoff(p) for p in self.game.players})
 
-        The regret is defined as the difference between the payoff of the
-        best-response strategy and the payoff of `strategy`.  By convention, the
-        regret is always non-negative.
+    @property
+    def strategy_values(self) -> StrategyValuesVector:
+        """Returns the expected payoff of playing each strategy, conditional on reaching
+        it, if all other players play according to the profile, grouped by player.
+        """
+        self._check_validity()
+        return StrategyValuesVector({
+            p.label: StrategyValueVector({s.label: self._strategy_value(s) for s in p.strategies})
+            for p in self.game.players
+        })
+
+    @property
+    def strategy_regrets(self) -> StrategyRegretsVector:
+        """Returns the regret to playing each strategy, if all other players play
+        according to the profile, grouped by player.
 
         .. versionchanged:: 16.2.0
 
             Changed from `regret()` to disambiguate from other regret concepts.
 
-        Parameters
-        ----------
-        strategy : Strategy or str
-            The strategy to get the regret for.  If a string is passed, the
-            strategy is determined by finding the strategy with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `strategy` is a `Strategy` from a different game.
-        KeyError
-            If `strategy` is a string and no strategy in the game has that label.
-
         See Also
         --------
-        player_regret
+        player_regrets
         max_regret
         """
         self._check_validity()
-        return self._strategy_regret(self.game._resolve_strategy(strategy, "strategy_regret"))
+        return StrategyRegretsVector({
+            p.label: StrategyRegretVector(
+                {s.label: self._strategy_regret(s) for s in p.strategies}
+            )
+            for p in self.game.players
+        })
 
-    def player_regret(self, player: PlayerReference) -> ProfileDType:
-        """Returns the regret of `player` for playing their mixed strategy, if all other
-        players play according to the profile.
-
-        The regret is defined as the difference between the payoff of the
-        best-response strategy and the payoff of the player's mixed strategy.
-        By convention, the regret is always non-negative.
-
-        .. versionadded:: 16.2.0
-
-        Parameters
-        ----------
-        player : Player or str
-            The player to get the regret for.  If a string is passed, the
-            player is determined by finding the player with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
+    @property
+    def player_regrets(self) -> PlayerRegretVector:
+        """Returns the regret of each player for playing their mixed strategy, if all
+        other players play according to the profile.
 
         See Also
         --------
-        strategy_regret
+        strategy_regrets
         max_regret
         """
         self._check_validity()
-        return self._player_regret(self.game._resolve_player(player, "player_regret"))
+        return PlayerRegretVector({p.label: self._player_regret(p) for p in self.game.players})
 
     def max_regret(self) -> ProfileDType:
         """Returns the maximum regret of any player.
@@ -364,31 +433,12 @@ class MixedStrategyProfile:
 
         See Also
         --------
-        strategy_regret
-        player_regret
+        strategy_regrets
+        player_regrets
         liap_value
         """
         self._check_validity()
         return self._max_regret()
-
-    def strategy_value_deriv(self,
-                             strategy: StrategyReference,
-                             other: StrategyReference) -> ProfileDType:
-        """Returns the derivative of the payoff to playing `strategy`, with respect to the
-        probability that `other` is played.
-
-        Raises
-        ------
-        MismatchError
-            If `strategy` or `other` is a `Strategy` from a different game.
-        KeyError
-            If `strategy` or `other` is a string and no strategy in the game has that label.
-        """
-        self._check_validity()
-        return self._strategy_value_deriv(
-            self.game._resolve_strategy(strategy, "strategy_value_deriv", "strategy"),
-            self.game._resolve_strategy(strategy, "strategy_value_deriv", "other")
-        )
 
     def liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see :cite:p:`McK91`) of the strategy profile.
@@ -505,12 +555,6 @@ class MixedStrategyProfile:
         """Returns the maximum regret of any player."""
         raise NotImplementedError
 
-    def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> ProfileDType:
-        """Returns the derivative of the payoff to strategy with respect to the
-        probability that other is played.
-        """
-        raise NotImplementedError
-
     def _liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value of the profile."""
         raise NotImplementedError
@@ -548,7 +592,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
-        return deref(self.profile).MixedProfileLength()
+        return len(self.game.players)
 
     def _getprob_strategy(self, strategy: Strategy) -> float:
         return deref(self.profile).getitem_strategy(strategy.strategy)
@@ -587,11 +631,6 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     def _max_regret(self) -> float:
         return deref(self.profile).GetMaxRegret()
-
-    def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> float:
-        return deref(self.profile).GetPayoffDeriv(
-            strategy.player.number + 1, strategy.strategy, other.strategy
-        )
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -642,7 +681,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
-        return deref(self.profile).MixedProfileLength()
+        return len(self.game.players)
 
     def _getprob_strategy(self, strategy: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).getitem_strategy(strategy.strategy))
@@ -680,11 +719,6 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetMaxRegret())
-
-    def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoffDeriv(
-            strategy.player.number + 1, strategy.strategy, other.strategy
-        ))
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
