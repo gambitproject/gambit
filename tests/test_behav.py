@@ -451,7 +451,8 @@ def test_profile_indexing_by_player_and_infoset_reference(
     profile = game.mixed_behavior_profile(rational=rational_flag)
     infoset = game.players[player_label].infosets[infoset_label]
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
-    assert profile[infoset] == probs
+    expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
+    assert profile[infoset] == expected
 
 
 @pytest.mark.parametrize(
@@ -512,9 +513,11 @@ def test_profile_indexing_by_player_and_infoset_label_reference(
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     player = game.players[player_label]
+    infoset = player.infosets[infoset_label]
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
-    assert profile[player][infoset_label] == probs
-    assert profile[infoset_label] == probs
+    expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
+    assert profile[player][infoset_label] == expected
+    assert profile[infoset_label] == expected
 
 
 @pytest.mark.parametrize(
@@ -577,7 +580,12 @@ def test_profile_indexing_by_player_label_reference(
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if rational_flag:
         behav_data = [[gbt.Rational(prob) for prob in probs] for probs in behav_data]
-    assert profile[player_label] == behav_data
+    player = game.players[player_label]
+    expected = [
+        dict(zip((a.label for a in infoset.actions), probs, strict=True))
+        for infoset, probs in zip(player.infosets, behav_data, strict=True)
+    ]
+    assert profile[player_label] == expected
 
 
 @pytest.mark.parametrize(
@@ -721,7 +729,8 @@ def test_set_probabilities_infoset(
         probs = [gbt.Rational(p) for p in probs]
     infoset = game.players[player_label].infosets[infoset_label]
     profile[infoset] = probs
-    assert profile[infoset] == probs
+    expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
+    assert profile[infoset] == expected
 
 
 @pytest.mark.parametrize(
@@ -748,7 +757,9 @@ def test_set_probabilities_infoset_by_label(
     if rational_flag:
         probs = [gbt.Rational(p) for p in probs]
     profile[infoset_label] = probs
-    assert profile[infoset_label] == probs
+    infoset = game.infosets[infoset_label]
+    expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
+    assert profile[infoset_label] == expected
 
 
 @pytest.mark.parametrize(
@@ -773,7 +784,12 @@ def test_set_probabilities_player_by_label(
     if rational_flag:
         behav_data = [[gbt.Rational(prob) for prob in probs] for probs in behav_data]
     profile[player_label] = behav_data
-    assert profile[player_label] == behav_data
+    player = game.players[player_label]
+    expected = [
+        dict(zip((a.label for a in infoset.actions), probs, strict=True))
+        for infoset, probs in zip(player.infosets, behav_data, strict=True)
+    ]
+    assert profile[player_label] == expected
 
 
 @pytest.mark.parametrize(

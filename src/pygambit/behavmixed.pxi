@@ -59,24 +59,25 @@ class MixedAction:
         return str({action.label: self[action.label] for action in self.infoset.actions})
 
     def _repr_latex_(self) -> str:
-        if isinstance(self.profile, MixedBehaviorProfileRational):
-            return (
-                r"$\left[" +
-                ",".join(self[act.label]._repr_latex_().replace("$", "")
-                         for act in self.infoset.actions) +
-                r"\right]$"
-            )
-        return repr(self)
+        values = [self[action.label] for action in self.infoset.actions]
+        if not values or not hasattr(values[0], "_repr_latex_"):
+            return repr(self)
+        return (
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + action.label + "}:" + value._repr_latex_().replace("$", "")
+                for action, value in zip(self.infoset.actions, values, strict=True)
+            ) +
+            r"\right\}$"
+        )
 
     def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, list):
-            return [self[action.label] for action in self.infoset.actions] == other
+        values = {action.label: self[action.label] for action in self.infoset.actions}
+        if isinstance(other, collections.abc.Mapping):
+            return values == dict(other)
         if not isinstance(other, MixedAction) or self.infoset != other.infoset:
             return False
-        return (
-            [self[action.label] for action in self.infoset.actions] ==
-            [other[action.label] for action in other.infoset.actions]
-        )
+        return values == {action.label: other[action.label] for action in other.infoset.actions}
 
     def __len__(self) -> len:
         return len(self.infoset.actions)
@@ -346,14 +347,16 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str([self[player] for player in self.game.players])
+        return str({player.label: self[player] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
-            r"$\left[" +
-            ",".join([self[player]._repr_latex_().replace("$", "")
-                      for player in self.game.players])
-            + r"\right]$"
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + player.label + "}:" + self[player]._repr_latex_().replace("$", "")
+                for player in self.game.players
+            ) +
+            r"\right\}$"
         )
 
     @property
