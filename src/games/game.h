@@ -1383,6 +1383,11 @@ public:
   {
     throw UndefinedException();
   }
+  /// Declare the ordered list of strategies of a player.
+  virtual void SetStrategies(const GamePlayer &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   //@}
