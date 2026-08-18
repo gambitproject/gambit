@@ -13,11 +13,14 @@ ZERO = gbt.Rational(0)  # tolerance for rational assertions
 
 def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_flag: bool):
     """Set the action probabilities in a behavior profile called ```profile``` according to a
-    list with probabilities in the order of ```profile.game.actions```
+    list with probabilities in the order of ```profile.game.actions``` (grouped by information
+    set, matching how ```game.actions``` itself is ordered).
     """
-    for action, p in zip(profile.game.actions, probs, strict=True):
-        # assumes rationals given as strings
-        profile[action] = gbt.Rational(p) if rational_flag else p
+    convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
+    probs_iter = iter(probs)
+    for infoset in profile.game.infosets:
+        node = next(iter(infoset.members))
+        profile[node] = [convert(next(probs_iter)) for _ in infoset.actions]
 
 
 @pytest.mark.parametrize(
@@ -204,192 +207,10 @@ def test_profile_indexing_by_player_infoset_action_reference(
     rational_flag: bool,
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    action = game.players[player_label].infosets[infoset_label].actions[action_label]
+    infoset = game.players[player_label].infosets[infoset_label]
+    node = next(iter(infoset.members))
     prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[action] == prob
-
-
-@pytest.mark.parametrize(
-    "game,action_label,prob,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "U1", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D1", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U2", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D2", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U3", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D3", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U1", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D1", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "U2", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D2", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "U3", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D3", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "Call", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Call", "1/2", True),
-    ],
-)
-def test_profile_indexing_by_action_label_reference(
-    game: gbt.Game, action_label: str, prob: str | float, rational_flag: bool
-):
-    """Here we only use the action label, which are all valid"""
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[action_label] == prob
-
-
-@pytest.mark.parametrize(
-    "game,action_label,rational_flag,error",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "U4", True, KeyError),
-        (games.read_from_file("mixed_behavior_game.efg"), "U4", False, KeyError),
-        (games.create_stripped_down_poker_efg(), "Bet", True, ValueError),
-        (games.create_stripped_down_poker_efg(), "Bet", False, ValueError),
-        (games.create_stripped_down_poker_efg(), "Fold", True, ValueError),
-        (games.create_stripped_down_poker_efg(), "Fold", False, ValueError),
-        (games.create_stripped_down_poker_efg(), "BetFold", True, KeyError),
-        (games.create_stripped_down_poker_efg(), "BetFold", False, KeyError),
-        (games.create_stripped_down_poker_efg(), "MISSING", True, KeyError),
-        (games.create_stripped_down_poker_efg(), "MISSING", False, KeyError),
-    ],
-)
-def test_profile_indexing_by_invalid_action_label(
-    game: gbt.Game, action_label: str, rational_flag: bool, error: ValueError | KeyError
-):
-    """Test that we get a KeyError for a missing label, and a ValueError for an ambigiuous label"""
-    with pytest.raises(error):
-        game.mixed_behavior_profile(rational=rational_flag)[action_label]
-
-
-@pytest.mark.parametrize("rational_flag", [True, False])
-def test_profile_indexing_by_invalid_infoset_label(rational_flag: bool):
-    """Create a duplicate infoset label and check we get a ValueError for this ambiguous label,
-    and a KeyError for the now missing label that was overwritten
-    """
-    game = games.read_from_file("mixed_behavior_game.efg")
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile["Infoset 1:1"]
-    game.infosets["Infoset 1:1"].label = "Infoset 2:1"
-    with pytest.raises(ValueError, match="multiple"):
-        profile["Infoset 2:1"]
-    with pytest.raises(KeyError):
-        profile["Infoset 1:1"]
-
-
-@pytest.mark.parametrize(
-    "game,infoset_label,action_label,prob,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", "U1", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", "D1", 0.5, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", "U1", "1/2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", "D1", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "Alice has King", "Bet", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice has King", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice has Queen", "Bet", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice has Queen", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob's response", "Call", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob's response", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob's response", "Call", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "Bob's response", "Fold", "1/2", True),
-    ],
-)
-def test_profile_indexing_by_infoset_and_action_labels_reference(
-    game: gbt.Game, infoset_label: str, action_label: str, prob: str | float, rational_flag: bool
-):
-    """Here we use the infoset label and action label, with some examples where the action label
-    alone throws a ValueError (checked in a separate test)
-    """
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[infoset_label][action_label] == prob
-
-
-@pytest.mark.parametrize(
-    "game,player_label,infoset_label,action_label,prob,rational_flag",
-    [
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "Player 1",
-            "Infoset 1:1",
-            "U1",
-            0.5,
-            False,
-        ),
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "Player 1",
-            "Infoset 1:1",
-            "D1",
-            0.5,
-            False,
-        ),
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "Player 1",
-            "Infoset 1:1",
-            "U1",
-            "1/2",
-            True,
-        ),
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "Player 1",
-            "Infoset 1:1",
-            "D1",
-            "1/2",
-            True,
-        ),
-        (games.create_stripped_down_poker_efg(), "Alice", "Alice has King", "Bet", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "Alice has King", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "Alice has Queen", "Bet", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "Alice has Queen", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob", "Bob's response", "Call", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob", "Bob's response", "Fold", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "Bob", "Bob's response", "Call", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "Bob", "Bob's response", "Fold", "1/2", True),
-    ],
-)
-def test_profile_indexing_by_player_infoset_action_labels_reference(
-    game: gbt.Game,
-    player_label: str,
-    infoset_label: str,
-    action_label: str,
-    prob: str | float,
-    rational_flag: bool,
-):
-    """Here we use the infoset label and action label, with some examples where the action label
-    alone throws a ValueError (checked in a separate test)
-    """
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[player_label][infoset_label][action_label] == prob
-
-
-@pytest.mark.parametrize(
-    "game,infoset_label,action_label,rational_flag",
-    [
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "1:1",
-            "U2",
-            True,
-        ),  # U2 is at a different iset
-        (games.read_from_file("mixed_behavior_game.efg"), "1:1", "U2", False),
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "1:1",
-            "U4",
-            True,
-        ),  # U4 isn't in the game
-        (games.read_from_file("mixed_behavior_game.efg"), "1:1", "U4", False),
-        (games.create_stripped_down_poker_efg(), "Alice has King", "MEET", True),
-        (games.create_stripped_down_poker_efg(), "Alice has King", "MEET", False),
-    ],
-)
-def test_profile_indexing_by_invalid_infoset_or_action_label(
-    game: gbt.Game, infoset_label: str, action_label: str, rational_flag: bool
-):
-    with pytest.raises(KeyError):
-        game.mixed_behavior_profile(rational=rational_flag)[infoset_label][action_label]
+    assert profile[node][action_label] == prob
 
 
 @pytest.mark.parametrize(
@@ -452,7 +273,7 @@ def test_profile_indexing_by_player_and_infoset_reference(
     infoset = game.players[player_label].infosets[infoset_label]
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
     expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
-    assert profile[infoset] == expected
+    assert profile[next(iter(infoset.members))] == expected
 
 
 @pytest.mark.parametrize(
@@ -514,49 +335,31 @@ def test_profile_indexing_by_player_and_infoset_label_reference(
     profile = game.mixed_behavior_profile(rational=rational_flag)
     player = game.players[player_label]
     infoset = player.infosets[infoset_label]
+    node = next(iter(infoset.members))
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
     expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
-    assert profile[player][infoset_label] == expected
-    assert profile[infoset_label] == expected
+    assert profile[player_label][node] == expected
+    assert profile[node] == expected
 
 
 @pytest.mark.parametrize(
-    "game,player_label,infoset_label,rational_flag",
+    "game,player_label,other_player_label",
     [
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            "Player 1",
-            "1:1",
-            True,
-        ),  # correct: "Infoset 1:1"
-        (games.read_from_file("mixed_behavior_game.efg"), "Player 1", "1:1", False),
-        (games.create_stripped_down_poker_efg(), "Player 1", "(2,1)", True),  # wrong player
-        (games.create_stripped_down_poker_efg(), "Player 1", "(2,1)", False),
+        (games.read_from_file("mixed_behavior_game.efg"), "Player 1", "Player 2"),
+        (games.create_stripped_down_poker_efg(), "Alice", "Bob"),
     ],
 )
-def test_profile_indexing_by_player_and_invalid_infoset_label(
-    game: gbt.Game, player_label: str, infoset_label: str, rational_flag: bool
+def test_behavior_indexing_rejects_node_from_different_player(
+    game: gbt.Game, player_label: str, other_player_label: str
 ):
-    """Test that we get a KeyError and that "player" appears in the error message"""
-    with pytest.raises(KeyError, match="player"):
-        game.mixed_behavior_profile(rational=rational_flag)[player_label][infoset_label]
-
-
-@pytest.mark.parametrize(
-    "game,player_label,action_label,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "Player 1", "U2", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "Player 1", "U2", False),
-        (games.create_stripped_down_poker_efg(), "Player 1", "MEET", True),
-        (games.create_stripped_down_poker_efg(), "Player 1", "MEET", False),
-    ],
-)
-def test_profile_indexing_by_player_and_invalid_action_label(
-    game: gbt.Game, player_label: str, action_label: str, rational_flag: bool
-):
-    """Test that we get a KeyError and that "player" appears in the error message"""
-    with pytest.raises(KeyError, match="player"):
-        game.mixed_behavior_profile(rational=rational_flag)[player_label][action_label]
+    """MixedBehavior/MixedBehaviorProfile reject a Node whose information set belongs to a
+    different player than the one being indexed.
+    """
+    profile = game.mixed_behavior_profile()
+    other_infoset = next(iter(game.players[other_player_label].infosets))
+    other_node = next(iter(other_infoset.members))
+    with pytest.raises(gbt.MismatchError):
+        profile[player_label][other_node]
 
 
 @pytest.mark.parametrize(
@@ -623,37 +426,11 @@ def test_set_probabilities_action(
     """Test to set probabilities of actions by infoset and action label"""
     profile = game.mixed_behavior_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
-    action = game.infosets[infoset_label].actions[action_label]
-    profile[action] = prob
-    assert profile[action] == prob
-
-
-@pytest.mark.parametrize(
-    "game,label,prob,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "U1", 0.72, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D1", 0.28, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U2", 0.42, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D2", 0.58, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U3", 0.02, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "D3", 0.98, False),
-        (games.read_from_file("mixed_behavior_game.efg"), "U1", "2/9", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D1", "7/9", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "U2", "4/13", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D2", "9/13", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "U3", "1/98", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "D3", "97/98", True),
-        (games.create_stripped_down_poker_efg(), "Call", 0.3, False),
-        (games.create_stripped_down_poker_efg(), "Call", "3/10", True),
-    ],
-)
-def test_set_probabilities_action_by_label(
-    game: gbt.Game, label: str, prob: str | float, rational_flag: bool
-):
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    profile[label] = prob
-    assert profile[label] == prob
+    zero = gbt.Rational(0) if rational_flag else 0
+    infoset = game.infosets[infoset_label]
+    node = next(iter(infoset.members))
+    profile[node] = [prob if a.label == action_label else zero for a in infoset.actions]
+    assert profile[node][action_label] == prob
 
 
 @pytest.mark.parametrize(
@@ -728,9 +505,10 @@ def test_set_probabilities_infoset(
     if rational_flag:
         probs = [gbt.Rational(p) for p in probs]
     infoset = game.players[player_label].infosets[infoset_label]
-    profile[infoset] = probs
+    node = next(iter(infoset.members))
+    profile[node] = probs
     expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
-    assert profile[infoset] == expected
+    assert profile[node] == expected
 
 
 @pytest.mark.parametrize(
@@ -756,10 +534,11 @@ def test_set_probabilities_infoset_by_label(
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if rational_flag:
         probs = [gbt.Rational(p) for p in probs]
-    profile[infoset_label] = probs
     infoset = game.infosets[infoset_label]
+    node = next(iter(infoset.members))
+    profile[node] = probs
     expected = dict(zip((a.label for a in infoset.actions), probs, strict=True))
-    assert profile[infoset_label] == expected
+    assert profile[node] == expected
 
 
 @pytest.mark.parametrize(
@@ -2427,8 +2206,12 @@ def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
     for each player over his actions.
     """
     profile = game.mixed_behavior_profile(rational=rational_flag, data=data)
-    for action, prob in zip(game.actions, [k for i in data for j in i for k in j], strict=True):
-        assert profile[action] == (gbt.Rational(prob) if rational_flag else prob)
+    flattened = iter([k for i in data for j in i for k in j])
+    for infoset in game.infosets:
+        node = next(iter(infoset.members))
+        for action in infoset.actions:
+            prob = next(flattened)
+            assert profile[node][action.label] == (gbt.Rational(prob) if rational_flag else prob)
 
 
 @pytest.mark.parametrize(

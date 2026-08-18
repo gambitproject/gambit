@@ -183,27 +183,27 @@ class MixedBehavior:
         return self._player
 
     def __repr__(self) -> str:
-        return str([self.profile[infoset] for infoset in self.player.infosets])
+        return str([self[next(iter(infoset.members))] for infoset in self.player.infosets])
 
     def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedBehaviorProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self.profile[infoset]._repr_latex_().replace("$", "")
+                ",".join(self[next(iter(infoset.members))]._repr_latex_().replace("$", "")
                          for infoset in self.player.infosets) +
                 r"\right]$"
             )
         return repr(self)
 
     def __eq__(self, other: typing.Any) -> bool:
+        values = [self[next(iter(infoset.members))] for infoset in self.player.infosets]
         if isinstance(other, list):
-            return [self[infoset] for infoset in self.player.infosets] == other
+            return values == other
         if not isinstance(other, MixedBehavior) or self.player != other.player:
             return False
-        return (
-            [self[infoset] for infoset in self.player.infosets] ==
-            [other[infoset] for infoset in other.player.infosets]
-        )
+        return values == [
+            other[next(iter(infoset.members))] for infoset in other.player.infosets
+        ]
 
     def __len__(self) -> int:
         return len(self.player.infosets)
@@ -230,94 +230,49 @@ class MixedBehavior:
         for infoset in self.player.infosets:
             yield infoset, self[infoset]
 
-    def __getitem__(
-            self,
-            index: InfosetReference | ActionReference
-    ) -> MixedAction | ProfileDType:
-        """Access a component of the mixed behavior specified by `index`.
+    def __getitem__(self, index: Node) -> MixedAction:
+        """Returns the mixed action at the information set containing `index`.
 
         Parameters
         ----------
-        index : Infoset, Action, or str
-            The part of the mixed behavior to return:
-
-            * If `index` is an ``Infoset``, returns a ``MixedAction`` over the infoset's actions
-            * If `index` is an ``Action``, returns the probability the action is played
-            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
-              for an infoset with that label, and then for an action with that label.
+        index : Node
+            A node belonging to the information set to return.
 
         Raises
         ------
         MismatchError
-            If `infoset` not an ``Infoset`` for the mixed behavior's player, or `action`
-            is not an ``Action`` for the mixed behavior's player.
+            If `index` is a ``Node`` from a different game, or belongs to an
+            information set that isn't this player's.
+        ValueError
+            If `index` is a terminal node, which belongs to no information set.
         """
-        if isinstance(index, Infoset):
-            if index.player != self.player:
-                raise MismatchError("infoset must belong to this player")
-            return self.profile[index]
-        if isinstance(index, Action):
-            if index.player != self.player:
-                raise MismatchError("action must belong to this player")
-            return self.profile[index]
-        if isinstance(index, str):
-            try:
-                return self.profile[self.player.infosets[index]]
-            except KeyError:
-                pass
-            try:
-                return self.profile[self.player.actions[index]]
-            except KeyError:
-                raise KeyError(f"no infoset or action with label '{index}' for player") from None
-        raise TypeError(
-            f"behavior index must be Infoset, Action or str, not {index.__class__.__name__}"
-        )
+        infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
+        if infoset is not None and infoset.player != self.player:
+            raise MismatchError("node must belong to this player")
+        return self.profile[index]
 
-    def __setitem__(self,
-                    index: InfosetReference | ActionReference,
-                    value: typing.Any) -> None:
-        """Sets a component of the mixed behavior to `value`.
+    def __setitem__(self, index: Node, value: typing.Any) -> None:
+        """Sets the mixed action at the information set containing `index`.
 
         Parameters
         ----------
-        index : Infoset, Action, or str
-            The component of the mixed behavior to set:
-
-            * If `index` is an `Infoset`, sets the mixed action over that infoset's actions
-            * If `index` is an `Action`, sets the probability the action is played
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
-              for an infoset with that label, and then for an action with that label.
+        index : Node
+            A node belonging to the information set to set.
+        value
+            The distribution to assign over the information set's actions.
 
         Raises
         ------
         MismatchError
-            If `infoset` not an ``Infoset`` for the mixed behavior's player, or `action`
-            is not an ``Action`` for the mixed behavior's player.
+            If `index` is a ``Node`` from a different game, or belongs to an
+            information set that isn't this player's.
+        ValueError
+            If `index` is a terminal node, which belongs to no information set.
         """
-        if isinstance(index, Infoset):
-            if index.player != self.player:
-                raise MismatchError("infoset must belong to this player")
-            self.profile[index] = value
-            return
-        if isinstance(index, Action):
-            if index.player != self.player:
-                raise MismatchError("action must belong to this player")
-            self.profile[index] = value
-            return
-        if isinstance(index, str):
-            try:
-                self.profile[self.player.infosets[index]] = value
-                return
-            except KeyError:
-                pass
-            try:
-                self.profile[self.player.actions[index]] = value
-            except KeyError:
-                raise KeyError(f"no infoset or action with label '{index}' for player") from None
-            return
-        raise TypeError(
-            f"behavior index must be Infoset, Action or str, not {index.__class__.__name__}"
-        )
+        infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
+        if infoset is not None and infoset.player != self.player:
+            raise MismatchError("node must belong to this player")
+        self.profile[index] = value
 
 
 @cython.cclass
@@ -347,13 +302,14 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player.label: self[player] for player in self.game.players})
+        return str({player.label: self[player.label] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + player.label + "}:" + self[player]._repr_latex_().replace("$", "")
+                r"\text{" + player.label + "}:" +
+                self[player.label]._repr_latex_().replace("$", "")
                 for player in self.game.players
             ) +
             r"\right\}$"
@@ -381,59 +337,43 @@ class MixedBehaviorProfile:
         for player in self.game.players:
             yield self[player.label]
 
-    def __getitem__(
-            self,
-            index: PlayerReference | InfosetReference | ActionReference
-    ) -> MixedBehavior | MixedAction | ProfileDType:
-        """Access a component of the mixed behavior specified by `index`.
+    def __getitem__(self, index: typing.Any) -> MixedBehavior | MixedAction:
+        """Access a component of the mixed behavior profile specified by `index`.
 
         Parameters
         ----------
-        index : Player, Infoset, Action, or str
+        index : str or Node
             The part of the profile to return:
 
-            * If `index` is a ``Player``, returns a ``MixedBehavior`` over the player's infosets
-            * If `index` is an ``Infoset``, returns a ``MixedAction`` over the infoset's actions
-            * If `index` is an ``Action``, returns the probability the action is played
-            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
-              for a player with that label, then for an infoset with that label, and finally for an
-              action with that label.
+            * If `index` is a ``str``, returns a ``MixedBehavior`` over the player's
+              information sets. The player is determined by finding the player with
+              that label, if any.
+            * If `index` is a ``Node``, returns a ``MixedAction`` over the actions at
+              the node's information set.
 
         Raises
         ------
+        TypeError
+            If `index` is not a ``str`` or a ``Node``.
         MismatchError
-            If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from
-            a different game, or `action` is an ``Action`` from a different game.`
+            If `index` is a ``Node`` from a different game.
+        ValueError
+            If `index` is a terminal ``Node``, which belongs to no information set.
+        KeyError
+            If `index` is a ``str`` and no player in the game has that label.
         """
         self._check_validity()
-        if isinstance(index, Action):
-            if index.infoset.game != self.game:
-                raise MismatchError("action must belong to this game")
-            return self._getprob_action(index)
-        if isinstance(index, Infoset):
+        if isinstance(index, Node):
             if index.game != self.game:
-                raise MismatchError("infoset must belong to this game")
-            return MixedAction.wrap(self, index)
-        if isinstance(index, Player):
-            if index.game != self.game:
-                raise MismatchError("player must belong to this game")
-            return MixedBehavior.wrap(self, index)
+                raise MismatchError("node must belong to this game")
+            infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
+            if infoset is None:
+                raise ValueError("node is terminal, has no information set")
+            return MixedAction.wrap(self, infoset)
         if isinstance(index, str):
-            try:
-                return MixedBehavior.wrap(self, self.game._resolve_player(index, "__getitem__"))
-            except KeyError:
-                pass
-            try:
-                return MixedAction.wrap(self, self.game._resolve_infoset(index, "__getitem__"))
-            except KeyError:
-                pass
-            try:
-                return self._getprob_action(self.game._resolve_action(index, "__getitem__"))
-            except KeyError:
-                raise KeyError(f"no player, infoset, or action with label '{index}'")
+            return MixedBehavior.wrap(self, self.game._resolve_player(index, "__getitem__"))
         raise TypeError(
-            f"profile index must be Player, Infoset, Action, or str, "
-            f"not {index.__class__.__name__}"
+            f"profile index must be str or Node, not {index.__class__.__name__}"
         )
 
     def _setprob_infoset(self, infoset: Infoset, value: typing.Any) -> None:
@@ -453,66 +393,45 @@ class MixedBehaviorProfile:
         for s, v in zip(player.infosets, value):
             self._setprob_infoset(s, v)
 
-    def __setitem__(
-            self,
-            index: PlayerReference | InfosetReference | ActionReference,
-            value: typing.Any
-    ) -> None:
-        """Sets a probability, mixed agent strategy, or mixed behavior strategy to `value`.
+    def __setitem__(self, index: typing.Any, value: typing.Any) -> None:
+        """Sets a component of the mixed behavior profile specified by `index` to `value`.
 
         Parameters
         ----------
-        index : Player, Infoset, Action, or str
-            The part of the profile to return:
+        index : str or Node
+            The part of the profile to set:
 
-            * If `index` is a ``Player``, sets the ``MixedBehavior`` over the player's infosets
-            * If `index` is an ``Infoset``, sets the ``MixedAction`` over the infoset's actions
-            * If `index` is an ``Action``, sets the probability the action is played
-            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
-              for a player with that label, then for an infoset with that label, and finally for an
-              action with that label.
+            * If `index` is a ``str``, sets the ``MixedBehavior`` over the player's
+              information sets. The player is determined by finding the player with
+              that label, if any.
+            * If `index` is a ``Node``, sets the ``MixedAction`` over the actions at
+              the node's information set.
 
         Raises
         ------
+        TypeError
+            If `index` is not a ``str`` or a ``Node``.
         MismatchError
-            If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from a
-            different game, or `action` is an ``Action`` from a different game.`
+            If `index` is a ``Node`` from a different game.
+        ValueError
+            If `index` is a terminal ``Node``, which belongs to no information set.
+        KeyError
+            If `index` is a ``str`` and no player in the game has that label.
         """
         self._check_validity()
-        if isinstance(index, Action):
-            if index.infoset.game != self.game:
-                raise MismatchError("action must belong to this game")
-            self._setprob_action(index, value)
-            return
-        if isinstance(index, Infoset):
+        if isinstance(index, Node):
             if index.game != self.game:
-                raise MismatchError("infoset must belong to this game")
-            self._setprob_infoset(index, value)
-            return
-        if isinstance(index, Player):
-            if index.game != self.game:
-                raise MismatchError("player must belong to this game")
-            self._setprob_player(index, value)
+                raise MismatchError("node must belong to this game")
+            infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
+            if infoset is None:
+                raise ValueError("node is terminal, has no information set")
+            self._setprob_infoset(infoset, value)
             return
         if isinstance(index, str):
-            try:
-                self._setprob_player(self.game._resolve_player(index, "__getitem__"), value)
-                return
-            except KeyError:
-                pass
-            try:
-                self._setprob_infoset(self.game._resolve_infoset(index, "__getitem__"), value)
-                return
-            except KeyError:
-                pass
-            try:
-                self._setprob_action(self.game._resolve_action(index, "__getitem__"), value)
-            except KeyError:
-                raise KeyError(f"no player, infoset, or action with label '{index}'")
+            self._setprob_player(self.game._resolve_player(index, "__setitem__"), value)
             return
         raise TypeError(
-            f"profile index must be Player, Infoset, Action, or str, "
-            f"not {index.__class__.__name__}"
+            f"profile index must be str or Node, not {index.__class__.__name__}"
         )
 
     def is_defined_at(self, infoset: InfosetReference) -> bool:

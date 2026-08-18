@@ -232,7 +232,10 @@ def _estimate_strategy_empirical(
 def _estimate_behavior_empirical(
         data: libgbt.MixedBehaviorProfileDouble,
 ) -> LogitQREMixedBehaviorFitResult:
-    flattened_data = [data[a] for p in data.game.players for s in p.infosets for a in s.actions]
+    flattened_data = [
+        data[next(iter(s.members))][a.label]
+        for p in data.game.players for s in p.infosets for a in s.actions
+    ]
     normalized = data.normalize()
     regrets = [[-normalized.action_regret(a) for a in infoset.actions]
                for player in data.game.players for infoset in player.infosets]
@@ -242,9 +245,11 @@ def _estimate_behavior_empirical(
         bounds=((0.0, None),)
     )
     profile = data.game.mixed_behavior_profile()
-    for action, log_prob in zip(data.game.actions, _empirical_log_logit_probs(res.x[0], regrets),
-                                strict=True):
-        profile[action] = math.exp(log_prob)
+    log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
+    for player in data.game.players:
+        for infoset in player.infosets:
+            node = next(iter(infoset.members))
+            profile[node] = [math.exp(next(log_probs)) for _ in infoset.actions]
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )

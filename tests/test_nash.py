@@ -23,6 +23,14 @@ def d(*probs) -> tuple:
     return tuple(probs)
 
 
+def _action_prob(profile: gbt.MixedBehaviorProfile, action: gbt.Action):
+    """The probability profile assigns to action, addressed via a representative node
+    of its information set (MixedBehaviorProfile no longer indexes by Action directly).
+    """
+    node = next(iter(action.infoset.members))
+    return profile[node][action.label]
+
+
 @dataclasses.dataclass
 class EquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
@@ -2568,7 +2576,9 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for action in player.actions:
-                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
+                    assert abs(
+                        _action_prob(eq, action) - _action_prob(expected, action)
+                    ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -2616,7 +2626,7 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
     def are_the_same(game, found, candidate):
         for p in game.players:
             for a in p.actions:
-                if not abs(found[a] - candidate[a]) <= TOL:
+                if not abs(_action_prob(found, a) - _action_prob(candidate, a)) <= TOL:
                     return False
         return True
 
@@ -2780,7 +2790,9 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for action in player.actions:
-                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
+                    assert abs(
+                        _action_prob(eq, action) - _action_prob(expected, action)
+                    ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -2832,7 +2844,9 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for action in player.actions:
-                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
+                    assert abs(
+                        _action_prob(eq, action) - _action_prob(expected, action)
+                    ) <= test_case.prob_tol
 
 
 ##################################################################################################

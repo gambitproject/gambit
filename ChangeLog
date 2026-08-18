@@ -80,8 +80,15 @@
   `mixed_behaviors()` returned; previously it yielded `(Action, probability)` pairs flattened
   across every player's actions, which discarded which player each action belonged to. Mirrors
   the earlier `MixedStrategyProfile.__iter__` change.
-
-### Removed
+- `MixedBehaviorProfile`/`MixedBehavior.__getitem__`/`__setitem__` now only accept a `player: str`
+  label (returning/setting a `MixedBehavior`) or a `node: Node` (returning/setting the `MixedAction`
+  at that node's information set); indexing directly by an `Infoset`, `Action`, or a bare infoset/
+  action label string is no longer supported. Since information sets don't reliably have unique
+  persistent labels the way players/strategies/actions do, a `Node` belonging to the information
+  set is used as the stable anchor instead — any member node works, since it resolves the
+  information set fresh each time rather than caching a handle to it. `MixedAction`/`MixedBehavior`
+  themselves are unaffected: still index by `str` action label / `Node` respectively. A terminal
+  `Node` (belonging to no information set) raises `ValueError`.
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
 - `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating

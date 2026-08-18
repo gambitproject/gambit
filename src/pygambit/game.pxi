@@ -1226,8 +1226,7 @@ class Game:
                         f"Number of elements does not match number of "
                         f"actions for infoset {i} for {p}"
                     )
-                for (a, u) in zip(i.actions, v, strict=True):
-                    profile[a] = typefunc(u)
+                profile[next(iter(i.members))] = [typefunc(u) for u in v]
         return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
@@ -1306,13 +1305,10 @@ class Game:
         if denom is None:
             profile = self.mixed_behavior_profile()
             for infoset in self.infosets:
-                for action, prob in zip(
-                        infoset.actions,
-                        scipy.stats.dirichlet(alpha=[1 for action in infoset.actions],
-                                              seed=gen).rvs(size=1)[0],
-                        strict=True
-                ):
-                    profile[action] = prob
+                weights = scipy.stats.dirichlet(
+                    alpha=[1 for action in infoset.actions], seed=gen
+                ).rvs(size=1)[0]
+                profile[next(iter(infoset.members))] = list(weights)
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1327,15 +1323,11 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for action, (hi, lo) in zip(
-                    infoset.actions,
-                    zip(
-                        sample[1:], sample[:-1],
-                        strict=True
-                    ),
-                    strict=True
-                ):
-                    profile[action] = Rational(hi - lo - 1, denom)
+                distribution = [
+                    Rational(hi - lo - 1, denom)
+                    for hi, lo in zip(sample[1:], sample[:-1], strict=True)
+                ]
+                profile[next(iter(infoset.members))] = distribution
             return profile
 
     def strategy_support_profile(
