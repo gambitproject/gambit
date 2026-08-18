@@ -52,13 +52,15 @@ std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
-                          NullEnumPolyEventCallback<StrategySupportProfile>);
+                          NullEnumPolyEventCallback<StrategySupportProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &, int p_stopAfter, double p_maxregret,
                       BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =
-                          NullEnumPolyEventCallback<BehaviorSupportProfile>);
+                          NullEnumPolyEventCallback<BehaviorSupportProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

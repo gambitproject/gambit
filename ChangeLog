@@ -1,3 +1,26 @@
+## [17.0.0-alpha.2] - unreleased
+
+### Added
+- Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
+
+### Fixed
+- `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
+  strategy with an empty label; it is now labeled `"1"`, as `Game.new_table` already labels
+  every other player's initial strategies.  (#1047)
+- Numerical data in action graph games is now read with exact precision, to match other game formats.  (#879)
+- `enumpoly_solve` correctly handles failed perturbations at singular Jacobians (#591)
+- `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
+  possibility of equilibria being found in orders that differ across runs. (#1016)
+
+### Changed
+- All long-running calculations are now done in a thread in the GUI process, rather than calling the
+  command-line executables as external processes. (#990)
+
+### Removed
+- Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
+  nonempty, unique labels.  (#1047)
+
+
 ## [17.0.0-alpha.1] - 2026-08-13
 
 ### Added

@@ -194,7 +194,6 @@ EXTRA_DIST = \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
 	contrib/games/sh3.nfg \
-	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
@@ -465,6 +464,29 @@ gambit_SOURCES = \
 	src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc \
+	${gambit_nashsupport_SOURCES} \
+	src/solvers/enumpoly/indexproduct.h \
+	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/poly.cc \
+	src/solvers/enumpoly/poly.h \
+	src/solvers/enumpoly/polysystem.h \
+	src/solvers/enumpoly/polypartial.h \
+	src/solvers/enumpoly/polypartial.imp \
+	src/solvers/enumpoly/polysolver.cc \
+	src/solvers/enumpoly/polysolver.h \
+	src/solvers/enumpoly/efgpoly.cc \
+	src/solvers/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/enumpoly.h \
+	src/solvers/simpdiv/simpdiv.cc \
+	src/solvers/simpdiv/simpdiv.h \
+	src/solvers/liap/liap.h \
+	src/solvers/liap/efgliap.cc \
+	src/solvers/liap/nfgliap.cc \
+	${gtracer_SOURCES} \
+	src/solvers/gnm/gnm.h \
+	src/solvers/gnm/gnm.cc \
+	src/solvers/ipa/ipa.h \
+	src/solvers/ipa/ipa.cc \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \

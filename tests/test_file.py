@@ -56,6 +56,31 @@ def test_read_efg_repeated_infoset_duplicate_labels_consistent():
     assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
 
 
+_NFG_PAYOFF_BODY = '\n{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n1 2 3 4\n'
+
+
+def test_read_nfg_empty_strategy_labels_are_normalized():
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "" "" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["_1", "_2"]
+
+
+def test_read_nfg_duplicate_strategy_labels_are_normalized():
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "l" "l" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["l_1", "l_2"]
+
+
+def test_read_nfg_strategy_labels_swap_default_numbering():
+    """A player's strategy labels as parsed are the reverse of "1", "2", the default
+    numeric labels table construction assigns first; relabelling one at a time would
+    collide on the intermediate state, the hazard RelabelStrategies exists to avoid.
+    """
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "2" "1" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["2", "1"]
+
+
 def test_string_empty():
     with pytest.raises(ValueError) as excinfo:
         _parse_efg("")

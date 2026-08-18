@@ -21,17 +21,17 @@
 //
 
 #include <fstream>
+#include <memory>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/stdpaths.h>
-#include <wx/txtstrm.h>
-#include <wx/tokenzr.h>
+#include <wx/thread.h>
 
 #include <wx/grid.h>
 #include "dlefglogit.h"
+#include "solvers/logit/logit.h"
 
 namespace Gambit::GUI {
 
@@ -41,9 +41,9 @@ namespace Gambit::GUI {
 
 //!
 //! Data model for the logit correspondence display: one row per
-//! computed profile, received incrementally from the gambit-logit
-//! subprocess. Row growth is deliberately batched (see AddProfile) so
-//! the grid isn't resized/repainted on every single profile received.
+//! computed profile, received incrementally from the solver thread.
+//! Row growth is deliberately batched (see AddProfile) so the grid
+//! isn't resized/repainted on every single profile received.
 //!
 class LogitBehavTable final : public wxGridTableBase {
   GameDocument *m_doc;
@@ -70,7 +70,7 @@ public:
   wxString GetColLabelValue(int col) override;
   wxString GetCornerLabelValue() const override { return wxT("#"); }
 
-  void AddProfile(const wxString &p_text, bool p_forceShow);
+  void AddProfile(const LogitQREMixedBehaviorProfile &p_qre, bool p_forceShow);
 };
 
 wxString LogitBehavTable::GetColLabelValue(int col)
@@ -119,7 +119,7 @@ wxGridCellAttr *LogitBehavTable::GetAttr(int row, int col, wxGridCellAttr::wxAtt
   return attr;
 }
 
-void LogitBehavTable::AddProfile(const wxString &p_text, bool p_forceShow)
+void LogitBehavTable::AddProfile(const LogitQREMixedBehaviorProfile &p_qre, bool p_forceShow)
 {
   wxGrid *view = GetView();
 
@@ -132,20 +132,9 @@ void LogitBehavTable::AddProfile(const wxString &p_text, bool p_forceShow)
   }
 
   const auto profile = std::make_shared<MixedBehaviorProfile<double>>(m_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
-  const auto next = tok.GetNextToken();
-  if (next == "NE") {
-    return;
-  }
-  m_lambdas.push_back(std::stod(next.ToStdString()));
+  m_lambdas.push_back(p_qre.GetLambda());
   for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
-    try {
-      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
-    }
-    catch (std::out_of_range &) {
-      (*profile)[i] = 0.0;
-    }
+    (*profile)[i] = p_qre[i];
   }
   m_profiles.push_back(profile);
 
@@ -198,28 +187,80 @@ public:
     Bind(wxEVT_GRID_SELECT_CELL, &LogitBehavGrid::OnSelectCell, this);
   }
 
-  void AddProfile(const wxString &p_text, bool p_forceShow)
+  void AddProfile(const LogitQREMixedBehaviorProfile &p_qre, bool p_forceShow)
   {
-    m_gridTable->AddProfile(p_text, p_forceShow);
+    m_gridTable->AddProfile(p_qre, p_forceShow);
   }
 };
 
-constexpr int GBT_ID_TIMER = 1000;
-constexpr int GBT_ID_PROCESS = 1001;
+namespace {
 
-BEGIN_EVENT_TABLE(LogitBehavDialog, wxDialog)
-EVT_END_PROCESS(GBT_ID_PROCESS, LogitBehavDialog::OnEndProcess)
-EVT_IDLE(LogitBehavDialog::OnIdle)
-EVT_TIMER(GBT_ID_TIMER, LogitBehavDialog::OnTimer)
-EVT_BUTTON(wxID_SAVE, LogitBehavDialog::OnSave)
-END_EVENT_TABLE()
+wxDECLARE_EVENT(wxEVT_LOGIT_POINT, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_LOGIT_POINT, wxThreadEvent);
+
+wxDECLARE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
 
+} // namespace
+
+//
+// Traces the logit equilibrium correspondence directly, in-process, on a
+// worker thread, rather than shelling out to gambit-logit and parsing its
+// output. Posts each point on the branch back to the dialog as it is found.
+//
+class LogitBehavThreadRunner final : public wxThread {
+  wxEvtHandler *m_parent;
+  Game m_game;
+  CancelToken m_cancel;
+
+  void PostPoint(const LogitQREMixedBehaviorProfile &p_qre) const
+  {
+    auto *event = new wxThreadEvent(wxEVT_LOGIT_POINT);
+    event->SetPayload(p_qre);
+    wxQueueEvent(m_parent, event);
+  }
+
+  ExitCode Entry() override
+  {
+    int exitCode = 0;
+    try {
+      const LogitQREMixedBehaviorProfile start(m_game);
+      LogitBehaviorSolve(
+          start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullBehaviorCallback<double>,
+          [this](const LogitEvent<LogitQREMixedBehaviorProfile> &p_event) {
+            PostPoint(std::get<LogitPathEvent<LogitQREMixedBehaviorProfile>>(p_event).qre);
+          },
+          m_cancel);
+    }
+    catch (const ComputationCanceledException &) {
+      // Not an error -- LogitBehavDialog's m_stopRequested flag (already set
+      // before RequestCancel() was called) is what determines that the
+      // "finished" event below is reported as a stop rather than a failure.
+    }
+    catch (const std::exception &) {
+      exitCode = 1;
+    }
+
+    auto *evt = new wxThreadEvent(wxEVT_LOGIT_FINISHED);
+    evt->SetInt(exitCode);
+    wxQueueEvent(m_parent, evt);
+    return static_cast<wxThread::ExitCode>(0);
+  }
+
+public:
+  LogitBehavThreadRunner(wxEvtHandler *p_parent, Game p_game)
+    : wxThread(wxTHREAD_JOINABLE), m_parent(p_parent), m_game(std::move(p_game))
+  {
+  }
+
+  void RequestCancel() { m_cancel.RequestCancel(); }
+};
+
 LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_behavList(new LogitBehavGrid(this, m_doc)),
-    m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_behavList(new LogitBehavGrid(this, m_doc))
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -233,8 +274,7 @@ LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc)
   m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
-  Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(LogitBehavDialog::OnStop));
+  m_stopButton->Bind(wxEVT_BUTTON, &LogitBehavDialog::OnStop, this);
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -245,6 +285,8 @@ LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc)
   m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
   m_saveButton->Enable(false);
   buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, 5);
+  m_saveButton->Bind(wxEVT_BUTTON, &LogitBehavDialog::OnSave, this);
+
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
   buttonSizer->Add(m_okButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_okButton->Enable(false);
@@ -256,91 +298,66 @@ LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc)
   sizer->SetSizeHints(this);
   wxTopLevelWindowBase::Layout();
   CenterOnParent();
+
+  Bind(wxEVT_LOGIT_POINT, &LogitBehavDialog::OnRunnerPoint, this);
+  Bind(wxEVT_LOGIT_FINISHED, &LogitBehavDialog::OnRunnerFinished, this);
+  Bind(wxEVT_CLOSE_WINDOW, &LogitBehavDialog::OnClose, this);
+
   Start();
 }
 
+LogitBehavDialog::~LogitBehavDialog() = default;
+
 void LogitBehavDialog::Start()
 {
-  m_process = new wxProcess(this, GBT_ID_PROCESS);
-  m_process->Redirect();
+  // GameRep's lazy caches are not synchronized against concurrent first
+  // touch from two threads, so force the sequence-form derivation the
+  // worker will need on this (the main) thread before handing the game
+  // over. Constructing a profile forces EnsureInfosetOrdering() via the
+  // same public code path the worker's own starting profile will use.
+  const MixedBehaviorProfile<double> warmup(m_doc->GetGame());
+  m_doc->GetGame()->EnsureSequences();
 
-#ifdef __WXMAC__
-  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit"), wxEXEC_ASYNC,
-                    m_process);
-#else
-  m_pid = wxExecute(wxT("gambit-logit"), wxEXEC_ASYNC, m_process);
-#endif // __WXMAC__
-
-  std::ostringstream s;
-  m_doc->GetGame()->Write(s, "efg");
-  wxString str(wxString(s.str().c_str(), *wxConvCurrent));
-
-  // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If writing doesn't
-  // complete the whole way, we take a 100-millisecond siesta and try
-  // again.  (This seems to primarily be an issue with -- you guessed it --
-  // Windows!)
-  while (str.length() > 0) {
-    wxTextOutputStream os(*m_process->GetOutputStream());
-
-    // It appears that (at least with mingw) the string itself contains
-    // only '\n' for newlines.  If we don't SetMode here, these get
-    // converted to '\r\n' sequences, and so the number of characters
-    // LastWrite() returns does not match the number of characters in
-    // our string.  Setting this explicitly solves this problem.
-    os.SetMode(wxEOL_UNIX);
-    os.WriteString(str);
-    str.Remove(0, m_process->GetOutputStream()->LastWrite());
-    wxMilliSleep(100);
+  m_runner = std::make_unique<LogitBehavThreadRunner>(this, m_doc->GetGame());
+  if (m_runner->Run() != wxTHREAD_NO_ERROR) {
+    m_runner.reset();
+    m_statusText->SetLabel(wxT("Failed to launch computation."));
+    m_statusText->SetForegroundColour(*wxRED);
+    m_okButton->Enable(true);
   }
-  m_process->CloseOutput();
-
-  m_timer.Start(1000, false);
 }
 
-void LogitBehavDialog::OnIdle(wxIdleEvent &p_event)
+void LogitBehavDialog::OnRunnerPoint(wxThreadEvent &p_event)
 {
-  if (!m_process) {
-    return;
-  }
+  const auto &qre = p_event.GetPayload<LogitQREMixedBehaviorProfile>();
+  m_behavList->AddProfile(qre, false);
 
-  if (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-    m_behavList->AddProfile(msg, false);
-    m_output += msg;
-    m_output += wxT("\n");
-
-    p_event.RequestMore();
+  const int decimals = m_doc->GetStyle().NumDecimals();
+  wxString line(lexical_cast<std::string>(qre.GetLambda(), decimals).c_str(), *wxConvCurrent);
+  for (size_t i = 1; i <= qre.size(); i++) {
+    line +=
+        wxT(",") + wxString(lexical_cast<std::string>(qre[i], decimals).c_str(), *wxConvCurrent);
   }
-  else {
-    m_timer.Start(1000, false);
-  }
+  m_output += line + wxT("\n");
 }
 
-void LogitBehavDialog::OnTimer(wxTimerEvent &) { wxWakeUpIdle(); }
-
-void LogitBehavDialog::OnEndProcess(wxProcessEvent &p_event)
+void LogitBehavDialog::OnRunnerFinished(wxThreadEvent &p_event)
 {
   m_stopButton->Enable(false);
-  m_timer.Stop();
 
-  while (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    if (msg != wxT("")) {
-      m_behavList->AddProfile(msg, true);
-      m_output += msg;
-      m_output += wxT("\n");
-    }
+  if (m_runner) {
+    // Joinable thread: must be waited on before it can be safely destroyed.
+    // Entry() has already posted this event and is returning, so this
+    // should not block for any appreciable time.
+    m_runner->Wait();
+    m_runner.reset();
   }
 
-  if (p_event.GetExitCode() == 0) {
+  if (m_stopRequested) {
+    m_statusText->SetLabel(wxT("The computation has been stopped."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+  }
+  else if (p_event.GetInt() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));
     m_statusText->SetForegroundColour(wxColour(0, 192, 0));
   }
@@ -355,16 +372,30 @@ void LogitBehavDialog::OnEndProcess(wxProcessEvent &p_event)
 
 void LogitBehavDialog::OnStop(wxCommandEvent &)
 {
-  // Per the wxWidgets wiki, under Windows, programs that run
-  // without a console window don't respond to the more polite
-  // SIGTERM, so instead we must be rude and SIGKILL it.
+  m_stopRequested = true;
   m_stopButton->Enable(false);
+  if (m_runner) {
+    m_runner->RequestCancel();
+  }
+}
 
-#ifdef __WXMSW__
-  wxProcess::Kill(m_pid, wxSIGKILL);
-#else
-  wxProcess::Kill(m_pid, wxSIGTERM);
-#endif // __WXMSW__
+void LogitBehavDialog::OnClose(wxCloseEvent &p_event)
+{
+  if (!m_runner || !m_stopButton->IsEnabled()) {
+    p_event.Skip();
+    return;
+  }
+
+  m_stopRequested = true;
+  m_stopButton->Enable(false);
+  m_runner->RequestCancel();
+
+  if (p_event.CanVeto()) {
+    p_event.Veto();
+  }
+  else {
+    p_event.Skip();
+  }
 }
 
 void LogitBehavDialog::OnSave(wxCommandEvent &)
@@ -379,4 +410,4 @@ void LogitBehavDialog::OnSave(wxCommandEvent &)
   }
 }
 
-} // end namespace Gambit::GUI
+} // namespace Gambit::GUI

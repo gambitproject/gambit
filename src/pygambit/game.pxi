@@ -2372,9 +2372,8 @@ class Game:
 
         `labels` maps current action labels to their replacements.  The reassignment
         is simultaneous, so labels can be swapped directly, e.g. ``{"a": "b", "b": "a"}``.
-        Actions are not re-ordered: each relabelled action keeps its position and,
-        at a chance information set, its probability.  After the operation, the
-        labels at the information set must be nonempty and unique.
+        Actions are not re-ordered: each relabelled action keeps its position and, at an event,
+        its probability.  After the operation, the labels must be nonempty and unique.
 
         .. versionadded:: 17.0.0
 
@@ -2548,6 +2547,10 @@ class Game:
             In extensive games, the label cannot be ``"Chance"``, which is reserved for the
             chance player.
 
+        .. versionchanged:: 17.0.0
+            In a game with a strategic representation, the new player's sole strategy is
+            labeled ``"1"``.
+
         Parameters
         ----------
         label : str
@@ -2716,6 +2719,84 @@ class Game:
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
+
+    def relabel_strategies(self,
+                           player: Player | str,
+                           labels: typing.Mapping[str, str],
+                           strict: bool = True) -> None:
+        """Simultaneously reassign the labels of `player`'s strategies.
+
+        `labels` maps current strategy labels to their replacements.  The reassignment
+        is simultaneous, so labels can be swapped directly, e.g. ``{"1": "2", "2": "1"}``.
+        Strategies are not re-ordered: each relabelled strategy keeps its position.
+        After the operation, the player's strategy labels must be nonempty and unique.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : Player or str
+            The player whose strategies to relabel.  If a string is passed, the player
+            is determined by finding the player with that label, if any.
+        labels : Mapping[str, str]
+            A mapping from current strategy labels to replacement labels.  Entries
+            whose key equals their value are ignored.
+        strict : bool, default True
+            If `True`, every key of `labels` must be the label of a strategy of
+            `player`, and unknown keys raise ``KeyError``.  If `False`, unknown keys
+            are ignored.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        KeyError
+            If `player` is a string matching no player; or, when `strict` is `True`,
+            if a key of `labels` matches no strategy of `player`.
+        TypeError
+            If `labels` is not a mapping, or any key or value is not a string.
+        UndefinedOperationError
+            If the game has a tree representation, where strategies are derived from
+            the tree.
+        ValueError
+            If a key of `labels` matches more than one strategy of `player`; or if any
+            replacement label is empty, is not a valid label, or would result in a
+            duplicate label for the player.
+
+        See Also
+        --------
+        relabel_actions : Change the labels of actions at an information set.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError(
+                "Relabelling strategies is only applicable to games in strategic form"
+            )
+        resolved_player = cython.cast(Player, self._resolve_player(player, "relabel_strategies"))
+        if not hasattr(labels, "items"):
+            raise TypeError(
+                f"relabel_strategies(): labels must be a mapping, "
+                f"not {labels.__class__.__name__}"
+            )
+        current = [strategy.label for strategy in resolved_player.strategies]
+        c_labels = stdmap[string, string]()
+        for old, new in labels.items():
+            if not isinstance(old, str) or not isinstance(new, str):
+                raise TypeError("relabel_strategies(): labels must map str to str")
+            matches = current.count(old)
+            if matches > 1:
+                raise ValueError(
+                    f"relabel_strategies(): label '{old}' is ambiguous for this player"
+                )
+            if matches == 0:
+                if strict:
+                    raise KeyError(f"relabel_strategies(): no strategy with label '{old}'")
+                continue
+            if new == old:
+                continue
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
+        if c_labels.empty():
+            return
+        self.game.deref().RelabelStrategies(resolved_player.player, c_labels)
 
 
 @dataclasses.dataclass

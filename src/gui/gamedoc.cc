@@ -417,9 +417,6 @@ GamePlayer GameDocument::DoNewPlayer()
     number++;
   }
   const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
-  if (!m_game->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
-  }
   NotifyChanged(GameModificationType::GameForm);
   return player;
 }
@@ -452,7 +449,8 @@ void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 
 void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelStrategies(p_strategy->GetPlayer(),
+                            {{p_strategy->GetLabel(), p_label.ToStdString(wxConvUTF8)}});
   NotifyChanged(GameModificationType::GameLabels);
 }
 

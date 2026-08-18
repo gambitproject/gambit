@@ -30,7 +30,8 @@ using namespace Gambit::gametracer;
 namespace Gambit::Nash {
 
 std::list<MixedStrategyProfile<double>>
-IPAStrategySolve(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium)
+IPAStrategySolve(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium,
+                 const CancelToken &p_cancel)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (const auto &player : p_game->GetPlayers()) {
@@ -41,12 +42,12 @@ IPAStrategySolve(const Game &p_game, StrategyCallbackType<double> p_onEquilibriu
   for (auto player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
   }
-  return IPAStrategySolve(pert, p_onEquilibrium);
+  return IPAStrategySolve(pert, p_onEquilibrium, p_cancel);
 }
 
 std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                 StrategyCallbackType<double> p_onEquilibrium)
+                 StrategyCallbackType<double> p_onEquilibrium, const CancelToken &p_cancel)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -63,7 +64,8 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
 
   IPAResult result{cvector(A->getNumActions()), IPATerminationReason::MaxIterationsReached, 0};
   for (int restart = 0; restart < MAX_RESTARTS; restart++) {
-    result = IPA(*A, g, zh, ALPHA, EQERR);
+    p_cancel.Check();
+    result = IPA(*A, g, zh, ALPHA, EQERR, 100, false, p_cancel);
     if (result.reason == IPATerminationReason::Converged) {
       break;
     }

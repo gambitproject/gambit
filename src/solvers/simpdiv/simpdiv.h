@@ -67,7 +67,8 @@ std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
     const Rational &p_maxregret = Rational(1, 10000000), int p_gridResize = 2,
     int p_leashLength = 0,
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
-    SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback);
+    SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash
 
