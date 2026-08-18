@@ -86,8 +86,6 @@ Transforming game components
    Game.add_outcome
    Game.delete_outcome
    Game.set_outcome
-   Game.add_strategy
-   Game.delete_strategy
    Game.relabel_strategies
 
 
