@@ -917,6 +917,25 @@ ENUMPOLY_STRATEGY_CASES = [
         marks=pytest.mark.nash_enumpoly_strategy,
         id="test_enumpoly_strategy_3",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            # Could just use the strategic form from the catalog directly
+            # Currently like this to compare with use_strategic=False, which is "hanging"
+            # i.e., not even producing 1 eq in a reasonable amount of time
+            factory=functools.partial(
+                games.create_efg_corresponding_to_catalog_bimatrix_game,
+                "journals/dcg/vonstengel1999/6x6_game_with_75_eq",
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1, use_strategic=True),
+            expected=[
+                [d(0, 1, 0, 0, 0, 0), d(0, 0, 0, 0, 0, 1)],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_strategy_4",
+    ),
     # 3-player games
     # 2x2x2 strategic form game based on local max cut -- 2 pure and 1 mixed
     pytest.param(
@@ -934,7 +953,7 @@ ENUMPOLY_STRATEGY_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_4",
+        id="test_enumpoly_strategy_5",
     ),
     # A three-player game with a unique Nash equilibrium in irrational mixed strategies
     # (nau2004 sec4 catalog game)
@@ -953,7 +972,7 @@ ENUMPOLY_STRATEGY_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_5",
+        id="test_enumpoly_strategy_6",
     ),
     # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a
     # continuum of completely mixed Nash equilibria (nau2004 sec5 catalog game)
@@ -970,7 +989,7 @@ ENUMPOLY_STRATEGY_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_6",
+        id="test_enumpoly_strategy_7",
     ),
 ]
 
@@ -2895,7 +2914,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             expected=[
                 [[d("1/2", "1/2")], [d("2/5", "3/5"), d(0, 1), d(1, 0)]],
                 [[d("1/4", "3/4")], [d(0, 1), d(1, 0), d("1/3", "2/3")]],
-                [[d(1, 0)], [d(1, 0), d(1, 0), d(1, 0)]]
+                [[d(1, 0)], [d(1, 0), d(1, 0), d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2903,6 +2922,21 @@ ENUMPOLY_BEHAVIOR_CASES = [
         marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_10",
     ),
+    # 75 eq
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.create_efg_corresponding_to_catalog_bimatrix_game,
+    # "journals/dcg/vonstengel1999/6x6_game_with_75_eq"),
+    # solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1, use_strategic=True),
+    # expected=[
+    # [[d(0, 1, 0, 0, 0, 0)], [d(0, 0, 0, 0, 0, 1)]],
+    # ],
+    # regret_tol=TOL,
+    # prob_tol=TOL,
+    # ),
+    # marks=pytest.mark.nash_enumpoly_behavior,
+    # id="test_enumpoly_behavior_11",
+    # ),
     # 3-player games
     pytest.param(
         EquilibriumTestCase(
@@ -2915,7 +2949,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_11",
+        id="test_enumpoly_behavior_12",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2928,7 +2962,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_12",
+        id="test_enumpoly_behavior_13",
     ),
     # 3-player perfect info game to test behavior two off equilibrium path
     pytest.param(
@@ -2945,7 +2979,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_13",
+        id="test_enumpoly_behavior_14",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2963,7 +2997,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_14",
+        id="test_enumpoly_behavior_15",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2983,7 +3017,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_15",
+        id="test_enumpoly_behavior_16",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2999,7 +3033,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_16",
+        id="test_enumpoly_behavior_17",
     ),
     # 3-player game equivalent to a simultaneous-move 2x2x2 game (nine equilibria total,
     # including two totally-mixed ones); this previously required an unordered check due
@@ -3023,7 +3057,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_17",
+        id="test_enumpoly_behavior_18",
     ),
 ]
 
