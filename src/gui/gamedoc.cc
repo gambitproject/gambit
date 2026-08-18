@@ -476,7 +476,12 @@ void GameDocument::DoSetActions(GameInfoset p_infoset,
 {
   // Phase 1: structure (which actions exist, and in what order), resolved purely from
   // p_stableLabels -- untouched by any pending rename in p_labels.
-  m_game->SetActions(p_infoset, p_stableLabels, p_probs);
+  if (p_infoset->IsChanceInfoset()) {
+    m_game->SetEventActions(p_infoset, p_stableLabels, p_probs);
+  }
+  else {
+    m_game->SetMoveActions(p_infoset, p_stableLabels);
+  }
 
   // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
   // a deletion in phase 1 is available for reuse here.

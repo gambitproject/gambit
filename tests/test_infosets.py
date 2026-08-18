@@ -123,15 +123,15 @@ def test_make_infoset_strategic_game_raises():
         game.make_infoset([], "1")
 
 
-def test_set_actions_add_preserves_existing_action_handles():
+def test_set_move_actions_add_preserves_existing_action_handles():
     """New actions may be declared at any position; the existing Action objects
     survive in declared order."""
     game = games.read_from_file("basic_extensive_game.efg")
     actions = list(game.root.infoset.actions)
     labels = [action.label for action in actions]
-    game.set_actions(game.root.infoset, labels + ["end"])
+    game.set_move_actions(game.root.infoset, labels + ["end"])
     assert list(game.root.infoset.actions)[:-1] == actions
-    game.set_actions(game.root.infoset, ["front"] + labels + ["end"])
+    game.set_move_actions(game.root.infoset, ["front"] + labels + ["end"])
     assert list(game.root.infoset.actions)[1:-1] == actions
 
 

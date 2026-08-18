@@ -73,7 +73,8 @@ Transforming game information structure
    Game.make_infoset
    Game.make_event
    Game.relabel_actions
-   Game.set_actions
+   Game.set_move_actions
+   Game.set_event_actions
    Game.reveal
 
 

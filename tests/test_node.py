@@ -1148,19 +1148,19 @@ def test_len_after_append_infoset():
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
 
-def test_len_after_set_actions_add():
-    """Verify `len(game.nodes)` is correct after `set_actions` creates an action."""
+def test_len_after_set_move_actions_add():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` creates an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
     labels = [action.label for action in infoset_to_modify.actions]
-    game.set_actions(infoset_to_modify, labels + ["new"])
+    game.set_move_actions(infoset_to_modify, labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
 
-def test_len_after_set_actions_drop():
-    """Verify `len(game.nodes)` is correct after `set_actions` deletes an action."""
+def test_len_after_set_move_actions_drop():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
     action_to_drop = game.root.infoset.actions["L"]
@@ -1169,7 +1169,7 @@ def test_len_after_set_actions_drop():
         for member in action_to_drop.infoset.members
     )
     remaining = [a.label for a in game.root.infoset.actions if a.label != "L"]
-    game.set_actions(game.root.infoset, remaining, drop=True)
+    game.set_move_actions(game.root.infoset, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 

@@ -370,7 +370,9 @@ cdef extern from "games/game.h":
         c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
         void Reveal(c_GameInfoset, c_GamePlayer) except +
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
-        void SetActions(c_GameInfoset, stdvector[string], stdvector[c_Number]) except +ValueError
+        void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
+        void SetEventActions(c_GameInfoset, stdvector[string],
+                             stdvector[c_Number]) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
                                 string) except +ValueError

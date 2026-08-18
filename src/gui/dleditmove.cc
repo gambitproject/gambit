@@ -49,8 +49,9 @@ const wxColour kRenamedLabelColour(0, 51, 204); // renamed action: italic, stron
 // a source-control diff (added/renamed/deleted).
 //
 // Each row's *stable label* (its label before this dialog touched it, or a placeholder for a
-// newly added row) never changes; it's what `SetActions()` uses to match the row to its
-// underlying action regardless of what the user has typed into its *current* label text.
+// newly added row) never changes; it's what `SetMoveActions()`/`SetEventActions()` use to
+// match the row to its underlying action regardless of what the user has typed into its
+// *current* label text.
 // Deleting an existing row marks it deleted and disables it, with its delete button becoming
 // a restore button, rather than removing it outright -- a newly added row has nothing to
 // preserve, so deleting one of those does remove it.

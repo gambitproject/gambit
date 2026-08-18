@@ -201,27 +201,41 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
   }
 }
 
-void GameTreeRep::SetActions(const GameInfoset &p_infoset,
-                             const std::vector<std::string> &p_labels,
-                             const std::vector<Number> &p_probs)
+void GameTreeRep::SetMoveActions(const GameInfoset &p_infoset,
+                                 const std::vector<std::string> &p_labels)
 {
   if (p_infoset->m_game != this) {
     throw MismatchException();
   }
   if (p_infoset->IsChanceInfoset()) {
-    if (p_probs.empty()) {
-      throw UndefinedException(
-          "The actions of an event are set together with their probabilities");
-    }
-    if (p_labels.size() != p_probs.size()) {
-      throw DimensionException(
-          "The number of probabilities given must match the number of actions");
-    }
-    ValidateDistribution(p_probs);
+    throw UndefinedException("SetMoveActions() requires a personal player's information set; "
+                             "use SetEventActions() for an event");
   }
-  else if (!p_probs.empty()) {
-    throw UndefinedException("Probabilities can only be specified for the actions of an event");
+  DoSetActions(p_infoset, p_labels, {});
+}
+
+void GameTreeRep::SetEventActions(const GameInfoset &p_infoset,
+                                  const std::vector<std::string> &p_labels,
+                                  const std::vector<Number> &p_probs)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
   }
+  if (!p_infoset->IsChanceInfoset()) {
+    throw UndefinedException("SetEventActions() requires an event; use SetMoveActions() for a "
+                             "personal player's information set");
+  }
+  if (p_labels.size() != p_probs.size()) {
+    throw DimensionException("The number of probabilities given must match the number of actions");
+  }
+  ValidateDistribution(p_probs);
+  DoSetActions(p_infoset, p_labels, p_probs);
+}
+
+void GameTreeRep::DoSetActions(const GameInfoset &p_infoset,
+                               const std::vector<std::string> &p_labels,
+                               const std::vector<Number> &p_probs)
+{
   if (p_labels.empty()) {
     throw ValueException("At least one action must be specified");
   }

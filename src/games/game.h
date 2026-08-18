@@ -1314,10 +1314,15 @@ public:
   {
     throw UndefinedException();
   }
-  /// Declare an ordered action list of an information set;
-  /// at an event, the probability distribution over the actions is declared with them.
-  virtual void SetActions(const GameInfoset &, const std::vector<std::string> &,
-                          const std::vector<Number> & = {})
+  /// Declare the ordered action list of a personal player's move.
+  virtual void SetMoveActions(const GameInfoset &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of an event, together with the probability
+  /// distribution over its actions.
+  virtual void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                               const std::vector<Number> &)
   {
     throw UndefinedException();
   }
