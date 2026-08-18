@@ -23,6 +23,11 @@
 #ifndef LIBGAMBIT_NUMBER_H
 #define LIBGAMBIT_NUMBER_H
 
+#include <string>
+#include <ostream>
+#include "core/util.h"
+#include "core/rational.h"
+
 namespace Gambit {
 
 /// This class represents a numerical data value in a game.
@@ -84,6 +89,8 @@ public:
   explicit operator const double &() const { return m_double; }
   explicit operator const Rational &() const { return m_rational; }
   explicit operator const std::string &() const { return m_text; }
+
+  friend std::ostream &operator<<(std::ostream &s, const Number &n) { return s << n.m_text; }
 };
 
 } // namespace Gambit

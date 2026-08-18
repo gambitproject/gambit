@@ -1819,8 +1819,7 @@ Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException(
-        "Action probabilities can only be normalized for chance information sets");
+    throw UndefinedException("Action probabilities can only be normalized for events");
   }
   IncrementVersion();
   auto &probs = p_infoset->m_probs;

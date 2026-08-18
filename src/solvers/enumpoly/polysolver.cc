@@ -72,6 +72,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
       newpoint = NewtonStep(point);
     }
     catch (SingularMatrixException &) {
+      bool perturbed = false;
       for (int i = 1; i <= point.size(); i++) {
         Vector<double> perturbed_point(point);
         if (r.Side(i).UpperBound() > point[i]) {
@@ -82,10 +83,20 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
         }
         try {
           newpoint = point + (NewtonStep(perturbed_point) - perturbed_point);
+          perturbed = true;
           break;
         }
         catch (SingularMatrixException &) {
         }
+      }
+      if (!perturbed) {
+        // The Jacobian is singular at this point, and remains singular under every
+        // single-coordinate perturbation tried.  This is a local degeneracy of the
+        // search at this point/rectangle, not evidence that the system of equations
+        // for the support as a whole is degenerate -- so we treat it the same as any
+        // other failure to confirm a root here, leaving it to the caller to subdivide
+        // the rectangle further.
+        return false;
       }
     }
 

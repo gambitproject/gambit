@@ -497,6 +497,7 @@ GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
 {
   CheckPlayerLabel(p_label);
   auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label, 1);
+  player->m_strategies.front()->m_label = "1";
   IncrementVersion();
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
@@ -531,7 +532,7 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
   if (p_player->GetGame().get() != this) {
     throw MismatchException();
   }
-  p_player->CheckStrategyLabel(p_label);
+  p_player->CheckStrategyLabel(p_label, {});
   auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
                                                     p_player->m_strategies.size() + 1, p_label);
   IncrementVersion();
@@ -565,6 +566,43 @@ void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
   player->m_strategies.erase(deletedIt);
   RebuildTable(old_radices, player->GetNumber() - 1, deletedDigit);
   p_strategy->Invalidate();
+}
+
+void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
+                                     const std::map<std::string, std::string> &p_labels)
+{
+  if (p_player->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  std::map<GameStrategyRep *, std::string> assignment;
+  std::set<const GameStrategyRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GameStrategyRep *match = nullptr;
+    for (const auto &strategy : p_player->m_strategies) {
+      if (strategy->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Strategy label '" + old_label + "' is ambiguous for this player");
+        }
+        match = strategy.get();
+      }
+    }
+    if (!match) {
+      throw ValueException("No strategy with label '" + old_label + "' for this player");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  std::set<std::string> targets;
+  for (const auto &[strategy, new_label] : assignment) {
+    p_player->CheckStrategyLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Strategy label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[strategy, new_label] : assignment) {
+    strategy->m_label = new_label;
+  }
 }
 
 //------------------------------------------------------------------------

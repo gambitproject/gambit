@@ -128,6 +128,7 @@ def test_strategic_game_add_player():
     new_player = game.add_player("Player 3")
     assert len(game.players) == 3
     assert len(new_player.strategies) == 1
+    assert next(iter(new_player.strategies)).label == "1"
 
 
 def test_extensive_game_add_player():
@@ -238,7 +239,7 @@ def test_extensive_game_delete_strategy():
 def test_player_strategy_by_label():
     game = gbt.Game.new_table([2, 2])
     pl1 = next(iter(game.players))
-    next(iter(pl1.strategies)).label = "Cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "Cooperate"})
     assert pl1.strategies["Cooperate"].label == "Cooperate"
 
 
@@ -264,9 +265,10 @@ def test_add_strategy_requires_label():
 
 def test_strategy_label_empty_raises_valueerror():
     game = gbt.Game.new_table([2, 2])
-    strategy = next(iter(next(iter(game.players)).strategies))
+    pl1 = next(iter(game.players))
+    strategy = next(iter(pl1.strategies))
     with pytest.raises(ValueError):
-        strategy.label = ""
+        game.relabel_strategies(pl1, {strategy.label: ""})
 
 
 def test_strategy_label_duplicate_within_player_raises_valueerror():
@@ -274,7 +276,7 @@ def test_strategy_label_duplicate_within_player_raises_valueerror():
     pl1 = next(iter(game.players))
     s1, s2 = pl1.strategies
     with pytest.raises(ValueError):
-        s2.label = s1.label
+        game.relabel_strategies(pl1, {s2.label: s1.label})
 
 
 def test_player_strategy_bad_label():

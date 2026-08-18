@@ -194,7 +194,6 @@ EXTRA_DIST = \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
 	contrib/games/sh3.nfg \
-	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
