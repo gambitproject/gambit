@@ -306,12 +306,10 @@ Probability distributions over behavior
    MixedBehavior
    MixedBehavior.__iter__
    MixedBehavior.__getitem__
-   MixedBehavior.__setitem__
 
    MixedAction
    MixedAction.__iter__
    MixedAction.__getitem__
-   MixedAction.__setitem__
 
 
 Computation on supports

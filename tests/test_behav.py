@@ -571,6 +571,46 @@ def test_set_probabilities_player_by_label(
     assert profile[player_label] == expected
 
 
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_mixed_action_and_behavior_are_frozen_snapshots(rational_flag: bool):
+    """MixedAction/MixedBehavior are snapshots taken at retrieval time: they do not
+    reflect later mutations to the profile they came from.
+    """
+    game = games.read_from_file("mixed_behavior_game.efg")
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    node = next(iter(next(iter(game.players["Player 1"].infosets)).members))
+    action_before = profile[node]
+    behavior_before = profile["Player 1"]
+    profile[node] = [1, 0]
+    assert dict(action_before) == {"U1": 0.5, "D1": 0.5}
+    assert dict(behavior_before[node]) == {"U1": 0.5, "D1": 0.5}
+    assert dict(profile[node]) == {"U1": 1, "D1": 0}
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_behavior_copy_mutating_copy_does_not_affect_original(rational_flag: bool):
+    game = games.read_from_file("mixed_behavior_game.efg")
+    original = game.mixed_behavior_profile(rational=rational_flag)
+    node = next(iter(next(iter(game.players["Player 1"].infosets)).members))
+    original_before = dict(original[node])
+    copy = original.copy()
+    copy[node] = [1, 0]
+    assert dict(original[node]) == original_before
+    assert dict(copy[node]) == {"U1": 1, "D1": 0}
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_behavior_copy_mutating_original_does_not_affect_copy(rational_flag: bool):
+    game = games.read_from_file("mixed_behavior_game.efg")
+    original = game.mixed_behavior_profile(rational=rational_flag)
+    node = next(iter(next(iter(game.players["Player 1"].infosets)).members))
+    copy = original.copy()
+    copy_before = dict(copy[node])
+    original[node] = [1, 0]
+    assert dict(copy[node]) == copy_before
+    assert dict(original[node]) == {"U1": 1, "D1": 0}
+
+
 @pytest.mark.parametrize(
     "game,path,realiz_prob,rational_flag",
     [

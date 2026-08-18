@@ -89,6 +89,15 @@
   information set fresh each time rather than caching a handle to it. `MixedAction`/`MixedBehavior`
   themselves are unaffected: still index by `str` action label / `Node` respectively. A terminal
   `Node` (belonging to no information set) raises `ValueError`.
+- `MixedAction`/`MixedBehavior` are now immutable snapshots of a profile's state at the moment
+  they were retrieved, rather than live views onto the profile; they no longer reflect later
+  changes to the profile, and can no longer be assigned into (`MixedAction.__setitem__`/
+  `MixedBehavior.__setitem__` are removed). Set a distribution via
+  `MixedBehaviorProfile.__setitem__` instead. Mirrors the earlier `MixedStrategy` change.
+- `MixedBehaviorProfile.copy()` now shares its underlying data with the original until either
+  profile is next assigned into (copy-on-write), rather than eagerly duplicating; this is not
+  observable from the profiles' behavior, only from how soon the duplication happens. Mirrors the
+  earlier `MixedStrategyProfile.copy()` change.
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
 - `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating

@@ -27,28 +27,29 @@ from cython.operator cimport dereference as deref
 class MixedAction:
     """A probability distribution over a player's actions at an information set.
 
-    A ``MixedAction`` represents a component of a ``MixedBehaviorProfile``.  The
-    full profile is accessible via the `profile` attribute, and the information set
-    at which the ``MixedAction`` applies is accessible via `infoset`.
+    An immutable snapshot taken from a ``MixedBehaviorProfile`` at retrieval time: it
+    does not reflect later changes to the profile, and cannot itself be modified. The
+    information set is accessible via `infoset`.
+
+    .. versionchanged:: 17.0.0
+
+        No longer a live view onto the profile: holds its own copy of the probabilities,
+        and can no longer be assigned into. Set a distribution via
+        ``MixedBehaviorProfile.__setitem__`` instead.
     """
-    _profile = cython.declare(MixedBehaviorProfile)
     _infoset = cython.declare(Infoset)
+    _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a MixedAction outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(profile: MixedBehaviorProfile, infoset: Infoset) -> MixedAction:
+    def wrap(infoset: Infoset, values: dict) -> MixedAction:
         obj: MixedAction = MixedAction.__new__(MixedAction)
-        obj._profile = profile
         obj._infoset = infoset
+        obj._values = values
         return obj
-
-    @property
-    def profile(self) -> MixedBehaviorProfile:
-        """The full profile of which this is a part."""
-        return self._profile
 
     @property
     def infoset(self) -> Infoset:
@@ -56,31 +57,30 @@ class MixedAction:
         return self._infoset
 
     def __repr__(self) -> str:
-        return str({action.label: self[action.label] for action in self.infoset.actions})
+        return str(self._values)
 
     def _repr_latex_(self) -> str:
-        values = [self[action.label] for action in self.infoset.actions]
+        values = list(self._values.values())
         if not values or not hasattr(values[0], "_repr_latex_"):
             return repr(self)
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + action.label + "}:" + value._repr_latex_().replace("$", "")
-                for action, value in zip(self.infoset.actions, values, strict=True)
+                r"\text{" + label + "}:" + value._repr_latex_().replace("$", "")
+                for label, value in self._values.items()
             ) +
             r"\right\}$"
         )
 
     def __eq__(self, other: typing.Any) -> bool:
-        values = {action.label: self[action.label] for action in self.infoset.actions}
         if isinstance(other, collections.abc.Mapping):
-            return values == dict(other)
+            return self._values == dict(other)
         if not isinstance(other, MixedAction) or self.infoset != other.infoset:
             return False
-        return values == {action.label: other[action.label] for action in other.infoset.actions}
+        return self._values == cython.cast(MixedAction, other)._values
 
-    def __len__(self) -> len:
-        return len(self.infoset.actions)
+    def __len__(self) -> int:
+        return len(self._values)
 
     def __iter__(self) -> typing.Iterator[tuple[str, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to actions by the mixed action.
@@ -96,15 +96,14 @@ class MixedAction:
         probability : float or Rational
             The probability the mixed action assigns to the action being played
         """
-        for action in self.infoset.actions:
-            yield action.label, self[action.label]
+        yield from self._values.items()
 
-    def __getitem__(self, index: str) -> ProfileDType:
-        """Returns the probability that the action with label `index` is played.
+    def __getitem__(self, action: str) -> ProfileDType:
+        """Returns the probability that the action with label `action` is played.
 
         Parameters
         ----------
-        index : str
+        action : str
             The label of the action to look up.
 
         Returns
@@ -115,67 +114,41 @@ class MixedAction:
         Raises
         ------
         KeyError
-            If no action at this information set has the label `index`.
+            If no action at this information set has the label `action`.
         """
-        self.profile._check_validity()
-        if not isinstance(index, str):
-            raise TypeError(f"action index must be str, not {index.__class__.__name__}")
         try:
-            return self.profile._getprob_action(self.infoset.actions[index])
+            return self._values[action]
         except KeyError:
-            raise KeyError(f"no action with label '{index}' at infoset") from None
-
-    def __setitem__(self, index: str, value: typing.Any) -> None:
-        """Sets the probability that the action with label `index` is played.
-
-        Parameters
-        ----------
-        index : str
-            The label of the action to set.
-        value
-            Any value which can be converted to the data type of the ``MixedBehaviorProfile``.
-
-        Raises
-        ------
-        KeyError
-            If no action at this information set has the label `index`.
-        """
-        self.profile._check_validity()
-        if not isinstance(index, str):
-            raise TypeError(f"action index must be str, not {index.__class__.__name__}")
-        try:
-            self.profile._setprob_action(self.infoset.actions[index], value)
-        except KeyError:
-            raise KeyError(f"no action with label '{index}' at infoset") from None
+            raise KeyError(f"no action with label '{action}' at infoset") from None
 
 
 @cython.cclass
 class MixedBehavior:
     """A set of probability distributions describing a player's behavior.
 
-    A ``MixedBehavior`` represents the component of a ``MixedBehaviorProfile``
-    associated with a given ``Player``.  The  full profile is accessible via the `profile`
-    attribute, and the player for whom the  ``MixedBehavior`` applies is accessible
-    via `player`.
+    An immutable snapshot taken from a ``MixedBehaviorProfile`` at retrieval time: it
+    does not reflect later changes to the profile, and cannot itself be modified. The
+    player is accessible via `player`.
+
+    .. versionchanged:: 17.0.0
+
+        No longer a live view onto the profile: holds its own copy of the mixed actions,
+        and can no longer be assigned into. Set a player's whole behavior via
+        ``MixedBehaviorProfile.__setitem__`` instead.
     """
-    _profile = cython.declare(MixedBehaviorProfile)
     _player = cython.declare(Player)
+    _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a MixedBehavior outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(profile: MixedBehaviorProfile, player: Player) -> MixedBehavior:
+    def wrap(player: Player, values: dict) -> MixedBehavior:
         obj: MixedBehavior = MixedBehavior.__new__(MixedBehavior)
-        obj._profile = profile
         obj._player = player
+        obj._values = values
         return obj
-
-    @property
-    def profile(self) -> MixedBehaviorProfile:
-        """The full profile of which this is a part."""
-        return self._profile
 
     @property
     def player(self) -> Player:
@@ -183,30 +156,28 @@ class MixedBehavior:
         return self._player
 
     def __repr__(self) -> str:
-        return str([self[next(iter(infoset.members))] for infoset in self.player.infosets])
+        return str(list(self._values.values()))
 
     def _repr_latex_(self) -> str:
-        if isinstance(self.profile, MixedBehaviorProfileRational):
-            return (
-                r"$\left[" +
-                ",".join(self[next(iter(infoset.members))]._repr_latex_().replace("$", "")
-                         for infoset in self.player.infosets) +
-                r"\right]$"
-            )
-        return repr(self)
+        values = list(self._values.values())
+        if not values or not hasattr(values[0], "_repr_latex_"):
+            return repr(self)
+        return (
+            r"$\left[" +
+            ",".join(value._repr_latex_().replace("$", "") for value in values) +
+            r"\right]$"
+        )
 
     def __eq__(self, other: typing.Any) -> bool:
-        values = [self[next(iter(infoset.members))] for infoset in self.player.infosets]
+        values = list(self._values.values())
         if isinstance(other, list):
             return values == other
         if not isinstance(other, MixedBehavior) or self.player != other.player:
             return False
-        return values == [
-            other[next(iter(infoset.members))] for infoset in other.player.infosets
-        ]
+        return values == list(cython.cast(MixedBehavior, other)._values.values())
 
     def __len__(self) -> int:
-        return len(self.player.infosets)
+        return len(self._values)
 
     def __iter__(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
@@ -227,8 +198,7 @@ class MixedBehavior:
         action : MixedAction
             The player's mixed action specified at the information set
         """
-        for infoset in self.player.infosets:
-            yield infoset, self[infoset]
+        yield from self._values.items()
 
     def __getitem__(self, index: Node) -> MixedAction:
         """Returns the mixed action at the information set containing `index`.
@@ -247,32 +217,11 @@ class MixedBehavior:
             If `index` is a terminal node, which belongs to no information set.
         """
         infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-        if infoset is not None and infoset.player != self.player:
+        if infoset is None:
+            raise ValueError("node is terminal, has no information set")
+        if infoset.player != self.player:
             raise MismatchError("node must belong to this player")
-        return self.profile[index]
-
-    def __setitem__(self, index: Node, value: typing.Any) -> None:
-        """Sets the mixed action at the information set containing `index`.
-
-        Parameters
-        ----------
-        index : Node
-            A node belonging to the information set to set.
-        value
-            The distribution to assign over the information set's actions.
-
-        Raises
-        ------
-        MismatchError
-            If `index` is a ``Node`` from a different game, or belongs to an
-            information set that isn't this player's.
-        ValueError
-            If `index` is a terminal node, which belongs to no information set.
-        """
-        infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-        if infoset is not None and infoset.player != self.player:
-            raise MismatchError("node must belong to this player")
-        self.profile[index] = value
+        return self._values[infoset]
 
 
 @cython.cclass
@@ -369,11 +318,21 @@ class MixedBehaviorProfile:
             infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
             if infoset is None:
                 raise ValueError("node is terminal, has no information set")
-            return MixedAction.wrap(self, infoset)
+            return self._mixed_action_at(infoset)
         if isinstance(index, str):
-            return MixedBehavior.wrap(self, self.game._resolve_player(index, "__getitem__"))
+            resolved_player = self.game._resolve_player(index, "__getitem__")
+            values = {
+                infoset: self._mixed_action_at(infoset) for infoset in resolved_player.infosets
+            }
+            return MixedBehavior.wrap(resolved_player, values)
         raise TypeError(
             f"profile index must be str or Node, not {index.__class__.__name__}"
+        )
+
+    def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
+        """Returns a snapshot of the mixed action at infoset, as of now."""
+        return MixedAction.wrap(
+            infoset, {a.label: self._getprob_action(a) for a in infoset.actions}
         )
 
     def _setprob_infoset(self, infoset: Infoset, value: typing.Any) -> None:
@@ -817,7 +776,16 @@ class MixedBehaviorProfile:
         return self._normalize()
 
     def copy(self) -> MixedBehaviorProfile:
-        """Creates a copy of the behavior strategy profile."""
+        """Creates a copy of the behavior strategy profile.
+
+        .. versionchanged:: 17.0.0
+
+            The copy shares its underlying data with the original until one of them is
+            next assigned into, at which point the one being assigned into transparently
+            takes its own private copy first. Both profiles are fully independent from
+            each other's perspective; this only affects when the underlying duplication
+            happens, not whether it happens.
+        """
         self._check_validity()
         return self._copy()
 
@@ -848,7 +816,16 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _getprob_action(self, index: Action) -> float:
         return deref(self.profile).getaction(index.action)
 
+    @cython.cfunc
+    def _ensure_unshared(self) -> cython.void:
+        """Clones the underlying profile if it is shared with another wrapper, so that
+        the mutation about to happen is not observed by any other MixedBehaviorProfile.
+        """
+        if self.profile.use_count() != 1:
+            self.profile = make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
+
     def _setprob_action(self, index: Action, value) -> None:
+        self._ensure_unshared()
         setitem_mbpd_action(deref(self.profile), index.action, value)
 
     def _payoff(self, player: Player) -> float:
@@ -900,9 +877,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         )
 
     def _copy(self) -> MixedBehaviorProfileDouble:
-        return MixedBehaviorProfileDouble.wrap(
-            make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
-        )
+        # Copy-on-write: share the underlying profile; _ensure_unshared() clones it
+        # lazily, the first time either this copy or the original is next mutated.
+        return MixedBehaviorProfileDouble.wrap(self.profile)
 
     def _as_strategy(self) -> MixedStrategyProfileDouble:
         return MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfile[double]](
@@ -953,12 +930,21 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _getprob_action(self, index: Action) -> Rational:
         return rat_to_py(deref(self.profile).getaction(index.action))
 
+    @cython.cfunc
+    def _ensure_unshared(self) -> cython.void:
+        """Clones the underlying profile if it is shared with another wrapper, so that
+        the mutation about to happen is not observed by any other MixedBehaviorProfile.
+        """
+        if self.profile.use_count() != 1:
+            self.profile = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
+
     def _setprob_action(self, index: Action, value: typing.Any) -> None:
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError(
                 f"rational precision profile requires int or Fraction probability, "
                 f"not {value.__class__.__name__}"
             )
+        self._ensure_unshared()
         setitem_mbpr_action(deref(self.profile), index.action,
                             to_rational(str(value).encode("ascii")))
 
@@ -1011,9 +997,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         )
 
     def _copy(self) -> MixedBehaviorProfileRational:
-        return MixedBehaviorProfileRational.wrap(
-            make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
-        )
+        # Copy-on-write: share the underlying profile; _ensure_unshared() clones it
+        # lazily, the first time either this copy or the original is next mutated.
+        return MixedBehaviorProfileRational.wrap(self.profile)
 
     def _as_strategy(self) -> MixedStrategyProfileRational:
         return MixedStrategyProfileRational.wrap(make_shared[c_MixedStrategyProfile[c_Rational]](
