@@ -364,50 +364,22 @@ class MixedBehaviorProfile:
         """The game on which this mixed behavior profile is defined."""
         return self._game
 
-    def mixed_behaviors(self) -> typing.Iterator[tuple[Player, MixedBehavior], None, None]:
-        """Iterate over the mixed behaviors in the profile.
+    def __iter__(self) -> typing.Iterator[MixedBehavior, None, None]:
+        """Iterate over the mixed behaviors in the profile, one per player.
 
-        .. versionadded:: 16.2.0
+        .. versionchanged:: 17.0.0
+
+            Previously yielded `(Action, probability)` pairs flattened across every
+            player's actions; now yields the `MixedBehavior` for each player, matching
+            what `mixed_behaviors()` returned.
 
         Yields
         ------
-        player : Player
-            A player in the game
         behavior : MixedBehavior
             The player's mixed behavior specified in the profile
         """
         for player in self.game.players:
-            yield player, self[player]
-
-    def mixed_actions(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
-        """Iterate over the mixed actions specified by the profile.
-
-        .. versionadded:: 16.2.0
-
-        Yields
-        ------
-        infoset : Infoset
-            An information set in the game
-        action : MixedAction
-            The mixed action specified at the information set by the profile.
-        """
-        for infoset in self.game.infosets:
-            yield infoset, self[infoset]
-
-    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
-        """Iterate over the probabilities assigned to actions by the profile.
-
-        .. versionadded:: 16.2.0
-
-        Yields
-        ------
-        action : Action
-            An action in the game
-        probability : float or Rational
-            The probability the profile assigns to the action being played
-        """
-        for action in self.game.actions:
-            yield action, self[action]
+            yield self[player.label]
 
     def __getitem__(
             self,

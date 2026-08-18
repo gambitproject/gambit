@@ -282,8 +282,6 @@ Probability distributions over behavior
 
    MixedBehaviorProfile
    MixedBehaviorProfile.game
-   MixedBehaviorProfile.mixed_behaviors
-   MixedBehaviorProfile.mixed_actions
    MixedBehaviorProfile.__iter__
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__

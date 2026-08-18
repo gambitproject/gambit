@@ -72,12 +72,24 @@
   interpret as a number (`int`, `float`, `str`, `Decimal`, or `Rational`), and given weights need
   not sum to one. Validation moved here from `normalize()`, which no longer needs to check for
   negative or all-zero entries, since a `MixedStrategyProfile` can no longer hold them. (#763)
+- `MixedAction.__eq__` now compares against a `Mapping` instead of a bare `list`, matching the
+  same change to `MixedStrategy.__eq__`. (#433)
+- `repr(MixedBehaviorProfile)` now shows a `{player_label: MixedBehavior}` mapping instead of a
+  bare list, matching `repr(MixedStrategyProfile)`. (#433)
+- `MixedBehaviorProfile.__iter__` now yields one `MixedBehavior` per player, matching what
+  `mixed_behaviors()` returned; previously it yielded `(Action, probability)` pairs flattened
+  across every player's actions, which discarded which player each action belonged to. Mirrors
+  the earlier `MixedStrategyProfile.__iter__` change.
 
 ### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
 - `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating
   the `MixedStrategyProfile` directly.
+- `MixedBehaviorProfile.mixed_behaviors` and `.mixed_actions` have been removed; the former is
+  now redundant with iterating the `MixedBehaviorProfile` directly, and the latter has no
+  direct replacement at the profile level (iterate a player's `MixedBehavior` for
+  `(Infoset, MixedAction)` pairs at that player's information sets).
 - `MixedStrategyProfile.payoff`, `.strategy_value`, `.strategy_regret`, and `.player_regret`
   have been removed, superseded by `.payoffs`, `.strategy_values`, `.strategy_regrets`, and
   `.player_regrets`; index the result for a single player/strategy (e.g.

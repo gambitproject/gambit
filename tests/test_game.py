@@ -278,10 +278,7 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
-            next(profile.mixed_actions())
-        with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_behaviors())
+            next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
             profile.node_value(player, game.root)
         with pytest.raises(gbt.GameStructureChangedError):
