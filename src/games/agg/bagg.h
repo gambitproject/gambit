@@ -79,13 +79,8 @@ public:
                        const StrategyProfile<double> &s);
   template <class V> V getV(int player, int tp, int action, const StrategyProfile<V> &s) const;
 
-  // payoff for player, conditioned on receiving type tp, under the pure profile s. Unlike
-  // getMixedPayoff above, this does NOT go through the general convolution engine: a pure BAGG
-  // profile leaves only the OTHER players' realized types uncertain (each independent, per
-  // indepTypeDist/exactIndepTypeDist), not their actions, so the expectation is a small, finite
-  // sum over the Cartesian product of the other players' types (bounded by the product of their
-  // type counts, not their action counts), each term a pure AGG-level payoff via
-  // AGG::getPurePayoff<V>.
+  // payoff for player, conditioned on receiving type tp, under the pure profile s, via the
+  // degenerate mixed profile and the convolution algorithm (mirrors AGG::getPurePayoff<V>).
   template <class V> V getPurePayoff(int player, int tp, const std::vector<int> &s) const;
   double getPurePayoff(int player, std::vector<int> &s)
   {

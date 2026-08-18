@@ -49,7 +49,7 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
   std::vector<double> row(aggPtr->getNumActions());
   for (int rown = 0; rown < aggPtr->getNumPlayers(); ++rown) {
     for (int act1 = 0; act1 < aggPtr->getNumActions(rown); act1++) {
-      aggPtr->getPayoffJacobianRow<double>(rown, act1, sp, row);
+      aggPtr->getPayoffJacobianRow(rown, act1, sp, row);
       for (int coln = 0; coln < aggPtr->getNumPlayers(); ++coln) {
         if (coln == rown) {
           continue;

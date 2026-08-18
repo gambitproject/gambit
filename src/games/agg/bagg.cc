@@ -268,55 +268,19 @@ template double BAGG::getMixedPayoff<double>(int player, int tp,
 template Rational BAGG::getMixedPayoff<Rational>(int player, int tp,
                                                  const StrategyProfile<Rational> &s) const;
 
-// payoff of the pure profile ps, conditioned on player receiving type tp. Does NOT go through
-// the general mixed-payoff convolution engine (contrast AGG::getPurePayoff<V>'s own delegation
-// pattern elsewhere): a BAGG pure profile leaves only the OTHER players' realized types
-// uncertain (each independent, per indepTypeDist/exactIndepTypeDist), not their actions, so the
-// expectation is a small, finite sum over the Cartesian product of the other players' types
-// (bounded by the product of their type counts, not their action counts), each term a pure
-// AGG-level payoff via AGG::getPurePayoff<V>.
+// payoff of the pure profile ps, via the degenerate mixed profile and the convolution engine
+// (mirrors AGG::getPurePayoff<V>). Deliberately does NOT enumerate the Cartesian product of the
+// other players' types directly: that product grows with the number of OTHER PLAYERS, not just
+// their type counts, defeating the whole point of the action-graph representation (efficient
+// computation for many-player games via the graph structure). getMixedPayoff's convolution
+// algorithm computes the same expectation in time polynomial in the number of players.
 template <class V> V BAGG::getPurePayoff(int player, int tp, const std::vector<int> &ps) const
 {
-  std::vector<int> others;
-  others.reserve(numPlayers - 1);
-  for (int pl = 0; pl < numPlayers; ++pl) {
-    if (pl != player) {
-      others.push_back(pl);
-    }
+  StrategyProfile<V> s(strategyOffset[typeOffset[numPlayers]]);
+  for (int i = 0; i < typeOffset[numPlayers]; i++) {
+    s[strategyOffset[i] + ps[i]] = V(1);
   }
-
-  std::vector<int> sAGG(numPlayers);
-  sAGG[player] = typeAction2ActionIndex[player][tp][ps[typeOffset[player] + tp]];
-
-  std::vector<int> typeIndex(others.size(), 0);
-  V total(0);
-  while (true) {
-    V weight(1);
-    for (size_t k = 0; k < others.size(); ++k) {
-      const int pl = others[k];
-      const int t = typeIndex[k];
-      sAGG[pl] = typeAction2ActionIndex[pl][t][ps[typeOffset[pl] + t]];
-      if constexpr (std::is_same_v<V, Rational>) {
-        weight *= static_cast<Rational>(exactIndepTypeDist[pl][t]);
-      }
-      else {
-        weight *= indepTypeDist[pl][t];
-      }
-    }
-    total += weight * aggPtr->getPurePayoff<V>(player, sAGG);
-
-    size_t k = 0;
-    for (; k < others.size(); ++k) {
-      if (++typeIndex[k] < numTypes[others[k]]) {
-        break;
-      }
-      typeIndex[k] = 0;
-    }
-    if (k == others.size()) {
-      break;
-    }
-  }
-  return total;
+  return getMixedPayoff(player, tp, s);
 }
 template double BAGG::getPurePayoff<double>(int player, int tp, const std::vector<int> &ps) const;
 template Rational BAGG::getPurePayoff<Rational>(int player, int tp,

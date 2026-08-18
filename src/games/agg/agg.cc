@@ -525,11 +525,11 @@ namespace {
 // except i, for every i in [start,end); temp receives the convolution of factors[indices[k]]
 // for ALL k in [start,end) (the "full product" of this range), for the caller to combine with a
 // sibling range.
-template <class V>
 void computeAllButOne(const std::vector<int> &indices, size_t start, size_t end,
-                      const std::vector<ConfigDistribution<V>> &factors, int numNei,
-                      std::vector<projtype> &projFuncs, std::vector<ConfigDistribution<V>> &allBut,
-                      ConfigDistribution<V> &temp)
+                      const std::vector<ConfigDistribution<double>> &factors, int numNei,
+                      std::vector<projtype> &projFuncs,
+                      std::vector<ConfigDistribution<double>> &allBut,
+                      ConfigDistribution<double> &temp)
 {
   if (end - start == 1) {
     allBut[indices[start]].reset();
@@ -576,17 +576,16 @@ void computeAllButOne(const std::vector<int> &indices, size_t start, size_t end,
 
 } // namespace
 
-template <class V>
-void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<V> &s,
-                               StrategyProfile<V> &dest)
+void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<double> &s,
+                               StrategyProfile<double> &dest)
 {
   const int Node = actionSets[player1][act1];
   const int numNei = neighbors[Node].size();
 
   // base[player1] is pinned to the one-hot at act1 (fixed for the whole row); base[k] for
   // every other player k is k's actual projected mixed strategy at Node, computed fresh from s.
-  std::vector<ConfigDistribution<V>> base(numPlayers);
-  base[player1].insert(std::make_pair(projection[Node][player1][act1], V(1)));
+  std::vector<ConfigDistribution<double>> base(numPlayers);
+  base[player1].insert(std::make_pair(projection[Node][player1][act1], 1.0));
 
   std::vector<int> others;
   others.reserve(numPlayers - 1);
@@ -596,7 +595,7 @@ void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<V> &
     }
     others.push_back(k);
     for (int j = 0; j < actions[k]; ++j) {
-      if (s[j + firstAction(k)] > V(0)) {
+      if (s[j + firstAction(k)] > 0.0) {
         base[k] += std::make_pair(projection[Node][k][j], s[j + firstAction(k)]);
       }
     }
@@ -605,14 +604,14 @@ void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<V> &
     return; // only one player in the game; no off-diagonal entries to fill
   }
 
-  std::vector<ConfigDistribution<V>> allBut(numPlayers);
+  std::vector<ConfigDistribution<double>> allBut(numPlayers);
   if (others.size() == 1) {
     // With only one other player, "everyone except player1 and that player" is nobody, so the
     // induced distribution is just player1's own pinned action.
     allBut[others[0]] = base[player1];
   }
   else {
-    ConfigDistribution<V> temp;
+    ConfigDistribution<double> temp;
     computeAllButOne(others, size_t{0}, others.size(), base, numNei, projFunctions[Node], allBut,
                      temp);
     for (const int j : others) {
@@ -627,10 +626,6 @@ void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<V> &
     }
   }
 }
-
-template void AGG::getPayoffJacobianRow<double>(int player1, int act1,
-                                                const StrategyProfile<double> &s,
-                                                StrategyProfile<double> &dest);
 
 template double AGG::payoffInnerProd<double>(int node, const ConfigDistribution<double> &dist);
 template Rational AGG::payoffInnerProd<Rational>(int node,
@@ -1067,7 +1062,7 @@ template <class V> V AGG::getMaxPayoff() const
   assert(numActionNodes > 0);
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : exactPayoffs[i]) {
         result = max(result, static_cast<Rational>(it.second));
       }
@@ -1076,7 +1071,7 @@ template <class V> V AGG::getMaxPayoff() const
   }
   else {
     double result = payoffs[0].begin()->second;
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : payoffs[i]) {
         result = max(result, it.second);
       }
@@ -1090,7 +1085,7 @@ template <class V> V AGG::getMinPayoff() const
   assert(numActionNodes > 0);
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : exactPayoffs[i]) {
         result = min(result, static_cast<Rational>(it.second));
       }
@@ -1099,7 +1094,7 @@ template <class V> V AGG::getMinPayoff() const
   }
   else {
     double result = payoffs[0].begin()->second;
-    for (int i = 1; i < numActionNodes; i++) {
+    for (int i = 0; i < numActionNodes; i++) {
       for (const auto &it : payoffs[i]) {
         result = min(result, it.second);
       }

@@ -61,16 +61,26 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
         assert player.min_payoff == -10
 
     # pure-strategy payoff lookup (AGGPureStrategyProfileRep::GetPayoff) also reports the
-    # exact value, not a double-rounded approximation
-    profile = game.mixed_strategy_profile(rational=True)
+    # exact value, not a double-rounded approximation -- for both the fraction and the long
+    # decimal payoff
     p0, p1 = game.players
     s0 = list(p0.strategies)
     s1 = list(p1.strategies)
+
+    profile = game.mixed_strategy_profile(rational=True)
     profile[s0[0]] = gbt.Rational(1)
     profile[s0[1]] = gbt.Rational(0)
     profile[s1[0]] = gbt.Rational(0)
     profile[s1[1]] = gbt.Rational(1)
     assert profile.payoff(p0) == gbt.Rational(1, 3)
+
+    profile = game.mixed_strategy_profile(rational=True)
+    profile[s0[0]] = gbt.Rational(0)
+    profile[s0[1]] = gbt.Rational(1)
+    profile[s1[0]] = gbt.Rational(0)
+    profile[s1[1]] = gbt.Rational(1)
+    assert profile.payoff(p0) == gbt.Rational("0.123456789012345")
+    assert profile.payoff(p1) == gbt.Rational("0.123456789012345")
 
 
 def test_bagg_fraction_type_distribution_parsed_exactly():
