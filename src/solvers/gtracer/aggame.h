@@ -35,7 +35,7 @@ namespace Gambit::gametracer {
 class aggame : public gnmgame {
 public:
   explicit aggame(const Gambit::GameAGGRep &g)
-    : gnmgame(g.GetUnderlyingAGG()->actions), aggPtr(g.GetUnderlyingAGG())
+    : gnmgame(g.GetUnderlyingAGG()->getActionCounts()), aggPtr(g.GetUnderlyingAGG())
   {
   }
 
@@ -51,7 +51,7 @@ public:
   double getKSymMixedPayoff(int cls, cvector &s)
   {
     std::vector<double> sp(s.values(), s.values() + s.getm());
-    return (double)aggPtr->getKSymMixedPayoff(cls, sp);
+    return aggPtr->getKSymMixedPayoff(cls, sp);
   }
 
   void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
@@ -89,18 +89,6 @@ public:
 
 private:
   std::shared_ptr<Gambit::agg::AGG> aggPtr;
-
-  // helper functions for computing jacobian
-  void computePartialP_PureNode(int player, int act, std::vector<int> &tasks) const;
-  void computePartialP_bisect(int player, int act, std::vector<int>::iterator f,
-                              std::vector<int>::iterator l,
-                              Gambit::agg::ConfigDistribution<double> &temp) const;
-  void computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                     Gambit::agg::trie_map<double> &cache) const;
-  void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2, double result,
-                  Gambit::agg::trie_map<double> &cache, bool partial = false) const;
-  void computeUndisturbedPayoff(double &undisturbedPayoff, bool &has, int player1, int act1,
-                                int player2) const;
 };
 
 } // end namespace Gambit::gametracer

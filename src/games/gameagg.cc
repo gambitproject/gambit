@@ -215,6 +215,9 @@ MixedStrategyProfile<double> GameAGGRep::NewMixedStrategyProfile(double) const
 
 MixedStrategyProfile<Rational> GameAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
+  // AGG supports exact payoff computation on Rational profiles throughout, via the same
+  // convolution algorithm as the double engine (getMixedPayoff<Rational> et al.); see
+  // AGGMixedStrategyProfileRep<Rational>::GetPayoff.
   return MixedStrategyProfile<Rational>(std::make_unique<AGGMixedStrategyProfileRep<Rational>>(
       StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }

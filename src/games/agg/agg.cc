@@ -36,16 +36,15 @@ inline int select2nd(const pair<int, int> &x) { return x.second; }
 
 AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
-         vector<projtype> &projTypes, vector<vector<ConfigDistribution<double>>> &projS,
-         vector<vector<vector<Config>>> &proj, vector<vector<projtype>> &projF,
-         vector<vector<vector<int>>> &Po, vector<PayoffTable> &_payoffs,
-         vector<ExactPayoffTable> &_exactPayoffs)
+         vector<projtype> &projTypes, vector<vector<vector<Config>>> &proj,
+         vector<vector<projtype>> &projF, vector<vector<vector<int>>> &Po,
+         vector<PayoffTable> &_payoffs, vector<ExactPayoffTable> &_exactPayoffs)
   : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
     exactPayoffs(_exactPayoffs), projection(proj), m_state(numANodes, numPlayers),
-    m_exactState(numANodes, numPlayers), fullProjectedStrat(projS), projFunctions(projF),
-    Porder(Po), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
-    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
+    m_exactState(numANodes, numPlayers), projFunctions(projF), Porder(Po), isPure(numANodes, true),
+    node2Action(numANodes, vector<int>(numPlayers)), player2Class(numPlayers),
+    kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -293,8 +292,8 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       throw std::runtime_error("Unknown payoff type " + std::to_string(t));
     }
   }
-  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, projS, proj, projF, Po,
-                               pays, exactPays);
+  return std::make_shared<AGG>(n, size, S, P, ASets, neighb, projTypes, proj, projF, Po, pays,
+                               exactPays);
 }
 
 void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
@@ -392,8 +391,10 @@ void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<do
   transform(order.begin(), order.end(), p, select2nd);
 }
 
-// compute the induced distribution; only the working state (state<V>()) varies with V, the
-// action graph structure itself is shared.
+// compute the induced distribution. The action graph structure (projection, Porder,
+// projFunctions, actionSets, neighbors) is purely combinatorial -- built once from integer data,
+// independent of payoff/probability values -- so it's shared by both V; only the numeric working
+// state, reached via state<V>(), differs by V.
 template <class V> void AGG::computeP(int player, int act, int player2, int act2)
 {
   auto &s = state<V>();
@@ -516,6 +517,114 @@ V AGG::getJ(int player1, int act1, int player2, int act2, const StrategyProfile<
   doProjection(actionSets[player1][act1], s);
   computeP<V>(player1, act1, player2, act2);
   return payoffInnerProd<V>(actionSets[player1][act1], state<V>().Pr[numPlayers - 1]);
+}
+
+namespace {
+
+// Fills allBut[indices[i]] with the convolution of factors[indices[k]] for all k in [start,end)
+// except i, for every i in [start,end); temp receives the convolution of factors[indices[k]]
+// for ALL k in [start,end) (the "full product" of this range), for the caller to combine with a
+// sibling range.
+void computeAllButOne(const std::vector<int> &indices, size_t start, size_t end,
+                      const std::vector<ConfigDistribution<double>> &factors, int numNei,
+                      std::vector<projtype> &projFuncs,
+                      std::vector<ConfigDistribution<double>> &allBut,
+                      ConfigDistribution<double> &temp)
+{
+  if (end - start == 1) {
+    allBut[indices[start]].reset();
+    return;
+  }
+  const size_t mid = start + (end - start) / 2;
+
+  computeAllButOne(indices, start, mid, factors, numNei, projFuncs, allBut, temp);
+  computeAllButOne(indices, mid, end, factors, numNei, projFuncs, allBut, temp);
+
+  // temp := full product of [start, mid)
+  temp = factors[indices[start]];
+  if (mid - start > 1) {
+    temp.multiply(allBut[indices[start]], numNei, projFuncs);
+  }
+
+  // extend each i in [start, mid)'s "all but i, within [start,mid)" by the full product of
+  // [mid, end), giving "all but i, within [start,end)"
+  if (mid - start == 1) {
+    allBut[indices[start]] = factors[indices[mid]];
+    if (end - mid > 1) {
+      allBut[indices[start]].multiply(allBut[indices[mid]], numNei, projFuncs);
+    }
+  }
+  else {
+    for (size_t i = start; i < mid; ++i) {
+      allBut[indices[i]].multiply(factors[indices[mid]], numNei, projFuncs);
+      if (end - mid > 1) {
+        allBut[indices[i]].multiply(allBut[indices[mid]], numNei, projFuncs);
+      }
+    }
+  }
+
+  // symmetrically, extend each i in [mid, end) by the full product of [start, mid), i.e. temp
+  if (end - mid == 1) {
+    allBut[indices[mid]] = temp;
+  }
+  else {
+    for (size_t i = mid; i < end; ++i) {
+      allBut[indices[i]].multiply(temp, numNei, projFuncs);
+    }
+  }
+}
+
+} // namespace
+
+void AGG::getPayoffJacobianRow(int player1, int act1, const StrategyProfile<double> &s,
+                               StrategyProfile<double> &dest)
+{
+  const int Node = actionSets[player1][act1];
+  const int numNei = neighbors[Node].size();
+
+  // base[player1] is pinned to the one-hot at act1 (fixed for the whole row); base[k] for
+  // every other player k is k's actual projected mixed strategy at Node, computed fresh from s.
+  std::vector<ConfigDistribution<double>> base(numPlayers);
+  base[player1].insert(std::make_pair(projection[Node][player1][act1], 1.0));
+
+  std::vector<int> others;
+  others.reserve(numPlayers - 1);
+  for (int k = 0; k < numPlayers; ++k) {
+    if (k == player1) {
+      continue;
+    }
+    others.push_back(k);
+    for (int j = 0; j < actions[k]; ++j) {
+      if (s[j + firstAction(k)] > 0.0) {
+        base[k] += std::make_pair(projection[Node][k][j], s[j + firstAction(k)]);
+      }
+    }
+  }
+  if (others.empty()) {
+    return; // only one player in the game; no off-diagonal entries to fill
+  }
+
+  std::vector<ConfigDistribution<double>> allBut(numPlayers);
+  if (others.size() == 1) {
+    // With only one other player, "everyone except player1 and that player" is nobody, so the
+    // induced distribution is just player1's own pinned action.
+    allBut[others[0]] = base[player1];
+  }
+  else {
+    ConfigDistribution<double> temp;
+    computeAllButOne(others, size_t{0}, others.size(), base, numNei, projFunctions[Node], allBut,
+                     temp);
+    for (const int j : others) {
+      allBut[j].multiply(base[player1], numNei, projFunctions[Node]);
+    }
+  }
+
+  for (const int j : others) {
+    for (int act2 = 0; act2 < actions[j]; ++act2) {
+      dest[act2 + firstAction(j)] = allBut[j].inner_prod(projection[Node][j][act2], numNei,
+                                                         projFunctions[Node], payoffs[Node]);
+    }
+  }
 }
 
 template double AGG::payoffInnerProd<double>(int node, const ConfigDistribution<double> &dist);

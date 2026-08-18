@@ -287,6 +287,9 @@ MixedStrategyProfile<double> GameBAGGRep::NewMixedStrategyProfile(double) const
 
 MixedStrategyProfile<Rational> GameBAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
+  // BAGG supports exact payoff computation on Rational profiles throughout, via the same
+  // convolution algorithm as the double engine (getMixedPayoff<Rational> et al.); see
+  // BAGGMixedStrategyProfileRep<Rational>::GetPayoff.
   return MixedStrategyProfile<Rational>(std::make_unique<BAGGMixedStrategyProfileRep<Rational>>(
       StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }

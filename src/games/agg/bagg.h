@@ -71,13 +71,16 @@ public:
   double getMixedPayoff(int player, StrategyProfile<double> &s);
 
   // exp payoff for player, conditioned on her receiving type tp, via the convolution algorithm.
+  // V=double runs the floating-point engine; V=Rational runs the exact-arithmetic counterpart
+  // throughout -- see agg.h::getMixedPayoff for how the dispatch works.
   template <class V> V getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const;
 
   void getPayoffVector(std::vector<double> &dest, int player, int tp,
                        const StrategyProfile<double> &s);
   template <class V> V getV(int player, int tp, int action, const StrategyProfile<V> &s) const;
 
-  // payoff for player, conditioned on receiving type tp, under the pure profile s.
+  // payoff for player, conditioned on receiving type tp, under the pure profile s, via the
+  // degenerate mixed profile and the convolution algorithm (mirrors AGG::getPurePayoff<V>).
   template <class V> V getPurePayoff(int player, int tp, const std::vector<int> &s) const;
   double getPurePayoff(int player, std::vector<int> &s)
   {
