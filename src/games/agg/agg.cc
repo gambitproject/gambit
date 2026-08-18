@@ -250,7 +250,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
     vector<int> as = ASets[i];
     sort(as.begin(), as.end());
-    if (doneASets.count(as) == 0) {
+    if (!doneASets.contains(as)) {
       for (j = 0; j < size[i]; j++) {
         // apply i's strategy j
         Pr[0].reset();

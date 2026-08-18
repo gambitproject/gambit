@@ -32,151 +32,107 @@
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
 
-#include "wx/sheet/sheet.h"
+#include <wx/grid.h>
 #include "dlnfglogit.h"
 
 namespace Gambit::GUI {
 
-class LogitMixedList final : public wxSheet {
+//=========================================================================
+//                       class LogitMixedTable
+//=========================================================================
+
+//!
+//! Data model for the logit correspondence display: one row per
+//! computed profile, received incrementally from the gambit-logit
+//! subprocess. Row growth is deliberately batched (see AddProfile) so
+//! the grid isn't resized/repainted on every single profile received.
+//!
+class LogitMixedTable final : public wxGridTableBase {
   GameDocument *m_doc;
   Array<double> m_lambdas;
   Array<std::shared_ptr<MixedStrategyProfile<double>>> m_profiles;
-
-  // Overriding wxSheet members for data access
-  wxString GetCellValue(const wxSheetCoords &) override;
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
-
-  // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false) override { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCol(int, bool = false, bool = false) override { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
-  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
-  bool SelectAll(bool = false) override { return false; }
-
-  // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
+  int m_numCols{0};
+  int m_numRows{0};
 
 public:
-  LogitMixedList(wxWindow *p_parent, GameDocument *p_doc);
-  ~LogitMixedList() override = default;
+  explicit LogitMixedTable(GameDocument *p_doc) : m_doc(p_doc) {}
+
+  int GetNumberRows() override { return m_numRows; }
+  int GetNumberCols() override { return m_numCols; }
+  bool IsEmptyCell(int, int) override { return false; }
+  wxString GetValue(int row, int col) override;
+  void SetValue(int, int, const wxString &) override {}
+  wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind) override;
+
+  //!
+  //! wxGrid::SetColLabelValue/SetCornerLabelValue on the grid just forward
+  //! to the table's own (default no-op) methods of the same name, so
+  //! headers must be supplied by overriding the getters here instead.
+  //!
+  wxString GetColLabelValue(int col) override;
+  wxString GetCornerLabelValue() const override { return wxT("#"); }
 
   void AddProfile(const wxString &p_text, bool p_forceShow);
 };
 
-LogitMixedList::LogitMixedList(wxWindow *p_parent, GameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
+wxString LogitMixedTable::GetColLabelValue(int col)
 {
-  CreateGrid(0, 0);
-  SetRowLabelWidth(40);
-  SetColLabelHeight(25);
+  if (col == 0) {
+    return wxT("Lambda");
+  }
+
+  const GameStrategy strategy = m_doc->GetGame()->GetStrategy(col);
+  const GamePlayer player = strategy->GetPlayer();
+  wxString label;
+  label << player->GetNumber() << ": " << strategy->GetLabel();
+  return label;
 }
 
-wxString LogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
+wxString LogitMixedTable::GetValue(int row, int col)
 {
-  if (IsRowLabelCell(p_coords)) {
-    wxString label;
-    label << (p_coords.GetRow() + 1);
-    return label;
-  }
-
-  if (IsColLabelCell(p_coords)) {
-    if (p_coords.GetCol() == 0) {
-      return wxT("Lambda");
-    }
-
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
-    const GamePlayer player = strategy->GetPlayer();
-
-    wxString label;
-    label << player->GetNumber() << ": " << strategy->GetLabel();
-    return label;
-  }
-
-  if (IsCornerLabelCell(p_coords)) {
-    return wxT("#");
-  }
-
-  if (p_coords.GetCol() == 0) {
-    return {lexical_cast<std::string>(m_lambdas[p_coords.GetRow() + 1],
-                                      m_doc->GetStyle().NumDecimals())
-                .c_str(),
+  if (col == 0) {
+    return {lexical_cast<std::string>(m_lambdas[row + 1], m_doc->GetStyle().NumDecimals()).c_str(),
             *wxConvCurrent};
   }
 
-  const auto profile = m_profiles[p_coords.GetRow() + 1];
-  return {lexical_cast<std::string>((*profile)[p_coords.GetCol()], m_doc->GetStyle().NumDecimals())
-              .c_str(),
+  const auto profile = m_profiles[row + 1];
+  return {lexical_cast<std::string>((*profile)[col], m_doc->GetStyle().NumDecimals()).c_str(),
           *wxConvCurrent};
 }
 
-static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
+wxGridCellAttr *LogitMixedTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
 {
-  if (p_index == 0) {
-    return *wxBLACK;
-  }
+  auto *attr = new wxGridCellAttr();
+  attr->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+  attr->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+  attr->SetReadOnly(true);
 
-  const GameStrategy strategy = p_doc->GetGame()->GetStrategy(p_index);
-  return p_doc->GetStyle().GetPlayerColor(strategy->GetPlayer());
-}
-
-wxSheetCellAttr LogitMixedList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
-{
-  if (IsRowLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-
-  if (IsColLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
-    return attr;
-  }
-
-  if (IsCornerLabelCell(p_coords)) {
-    return GetSheetRefData()->m_defaultCornerLabelAttr;
-  }
-
-  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-  attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
-  attr.SetOrientation(wxHORIZONTAL);
-
-  if (p_coords.GetCol() > 0) {
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
+  if (col > 0) {
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(col);
     const GamePlayer player = strategy->GetPlayer();
 
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
-
-    if (player->GetNumber() % 2 == 0) {
-      attr.SetBackgroundColour(wxColour(250, 250, 250));
-    }
-    else {
-      attr.SetBackgroundColour(wxColour(225, 225, 225));
-    }
+    attr->SetTextColour(m_doc->GetStyle().GetPlayerColor(player));
+    attr->SetBackgroundColour(player->GetNumber() % 2 == 0 ? wxColour(250, 250, 250)
+                                                           : wxColour(225, 225, 225));
   }
   else {
-    attr.SetForegroundColour(*wxBLACK);
-    attr.SetBackgroundColour(wxColour(250, 250, 250));
+    attr->SetTextColour(*wxBLACK);
+    attr->SetBackgroundColour(wxColour(250, 250, 250));
   }
 
-  attr.SetReadOnly(true);
   return attr;
 }
 
-void LogitMixedList::AddProfile(const wxString &p_text, bool p_forceShow)
+void LogitMixedTable::AddProfile(const wxString &p_text, bool p_forceShow)
 {
-  if (GetNumberCols() == 0) {
-    AppendCols(m_doc->GetGame()->GetStrategies().size() + 1);
+  wxGrid *view = GetView();
+
+  if (m_numCols == 0) {
+    m_numCols = static_cast<int>(m_doc->GetGame()->GetStrategies().size()) + 1;
+    if (view) {
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, m_numCols);
+      view->ProcessTableMessage(msg);
+    }
   }
 
   auto profile = std::make_shared<MixedStrategyProfile<double>>(
@@ -202,14 +158,60 @@ void LogitMixedList::AddProfile(const wxString &p_text, bool p_forceShow)
 
   m_profiles.push_back(profile);
 
-  if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
-    AppendRows(m_profiles.size() - GetNumberRows());
-    MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));
+  if (p_forceShow || static_cast<int>(m_profiles.size()) - m_numRows > 20) {
+    const int newRows = static_cast<int>(m_profiles.size()) - m_numRows;
+    m_numRows = static_cast<int>(m_profiles.size());
+    if (view) {
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newRows);
+      view->ProcessTableMessage(msg);
+      view->MakeCellVisible(m_numRows - 1, 0);
+    }
   }
 
   // Lambda tends to get large, so this column usually needs resized
-  AutoSizeCol(0);
+  if (view) {
+    view->AutoSizeColumn(0);
+  }
 }
+
+//=========================================================================
+//                       class LogitMixedGrid
+//=========================================================================
+
+class LogitMixedGrid final : public wxGrid {
+  LogitMixedTable *m_gridTable;
+
+  //!
+  //! @name Overriding wxGrid behavior to disable selection & the cursor
+  //! highlight rectangle, matching the read-only, non-interactive table
+  //! this replaces.
+  //!
+  //@{
+  void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
+  void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
+  //@}
+
+public:
+  LogitMixedGrid(wxWindow *p_parent, GameDocument *p_doc)
+    : wxGrid(p_parent, wxID_ANY), m_gridTable(new LogitMixedTable(p_doc))
+  {
+    SetTable(m_gridTable, true);
+    EnableEditing(false);
+    SetRowLabelSize(40);
+    SetColLabelSize(25);
+
+    SetCellHighlightPenWidth(0);
+    SetCellHighlightROPenWidth(0);
+
+    Bind(wxEVT_GRID_RANGE_SELECTING, &LogitMixedGrid::OnRangeSelecting, this);
+    Bind(wxEVT_GRID_SELECT_CELL, &LogitMixedGrid::OnSelectCell, this);
+  }
+
+  void AddProfile(const wxString &p_text, bool p_forceShow)
+  {
+    m_gridTable->AddProfile(p_text, p_forceShow);
+  }
+};
 
 constexpr int GBT_ID_TIMER = 2000;
 constexpr int GBT_ID_PROCESS = 2001;
@@ -225,7 +227,7 @@ END_EVENT_TABLE()
 
 LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_mixedList(new LogitMixedList(this, m_doc)),
+    m_doc(p_doc), m_process(nullptr), m_mixedList(new LogitMixedGrid(this, m_doc)),
     m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);

@@ -361,7 +361,7 @@ void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
     do {
       const auto index = ++visited[label];
       candidate = label + "_" + std::to_string(index);
-    } while (used.count(candidate) > 0);
+    } while (used.contains(candidate));
     used.insert(candidate);
     p_set(element, candidate);
   }
@@ -373,6 +373,24 @@ template <class Container> void NormalizeLabelStrings(Container &p_labels)
   NormalizeLabels(
       p_labels, [](const std::string &s) { return s; },
       [](std::string &s, const std::string &v) { s = v; });
+}
+
+template <class Container>
+void RelabelWithoutCollision(Container &&p_container, const std::vector<std::string> &p_labels)
+{
+  const std::set<std::string> forbidden(p_labels.begin(), p_labels.end());
+  size_t scratchIndex = 0;
+  for (auto &&element : p_container) {
+    std::string candidate;
+    do {
+      candidate = "_gambit_reader_scratch_" + std::to_string(scratchIndex++);
+    } while (forbidden.contains(candidate));
+    element->SetLabel(candidate);
+  }
+  size_t index = 0;
+  for (auto &&element : p_container) {
+    element->SetLabel(p_labels[index++]);
+  }
 }
 
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
@@ -515,11 +533,25 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   nfg->SetTitle(p_data.m_title);
   nfg->SetDescription(p_data.m_comment);
 
+  std::vector<std::string> playerLabels;
   for (auto player : nfg->GetPlayers()) {
-    player->SetLabel(p_data.GetPlayer(player->GetNumber()));
+    playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
+  }
+  NormalizeLabelStrings(playerLabels);
+  RelabelWithoutCollision(nfg->GetPlayers(), playerLabels);
+
+  for (auto player : nfg->GetPlayers()) {
+    std::vector<std::string> strategyLabels;
     for (auto strategy : player->GetStrategies()) {
-      strategy->SetLabel(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
+      strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
+    NormalizeLabelStrings(strategyLabels);
+    std::map<std::string, std::string> labels;
+    size_t index = 0;
+    for (auto strategy : player->GetStrategies()) {
+      labels[strategy->GetLabel()] = strategyLabels[index++];
+    }
+    nfg->RelabelStrategies(player, labels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
@@ -624,7 +656,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
       p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
@@ -637,7 +669,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    if (!contains(p_treeData.m_outcomeRecords, outcomeId)) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
     p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
@@ -685,14 +717,21 @@ void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, con
                          ")");
   }
 
+  // The infoset's actual labels are normalized at creation (see ParseNode/ParsePersonalNode),
+  // so a later restatement of the same infoset must be normalized the same way before
+  // comparing, or a file that consistently repeats a duplicate/empty action label would be
+  // (incorrectly) rejected as inconsistent.
+  auto normalized_labels = p_labels;
+  NormalizeLabelStrings(normalized_labels);
+
   const auto &actions = p_infoset->GetActions();
-  if (actions.size() != p_labels.size()) {
+  if (actions.size() != normalized_labels.size()) {
     p_state.OnParseError("Infoset action count mismatch "
                          "(player " +
                          std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
                          ")");
   }
-  auto label_it = p_labels.begin();
+  auto label_it = normalized_labels.begin();
   for (auto action : actions) {
     if (action->GetLabel() != *label_it) {
       p_state.OnParseError("Infoset action labels do not match previous definition "
@@ -753,15 +792,13 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
+      auto normalized_labels = action_labels;
+      NormalizeLabelStrings(normalized_labels);
+      infoset = p_game->AppendEvent(
+          p_node, std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()),
+          std::vector<Number>(probs.begin(), probs.end()));
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
-      p_game->SetChanceProbs(infoset, probs);
     }
     else {
       CheckInfosetActions(p_state, 0, infosetId, infoset, label, action_labels);
@@ -810,17 +847,16 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, player, action_labels.size());
+      auto normalized_labels = action_labels;
+      NormalizeLabelStrings(normalized_labels);
+      infoset = p_game->AppendMove(
+          p_node, player,
+          std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()));
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }
@@ -873,18 +909,13 @@ void NormalizeGameLabels(const Game &p_game)
   const auto set_label = [](const auto &e, const std::string &s) { e->SetLabel(s); };
   NormalizeLabels(p_game->GetPlayers(), get_label, set_label);
   NormalizeLabels(p_game->GetOutcomes(), get_label, set_label);
-  if (p_game->IsTree()) {
-    for (const auto &player : p_game->GetPlayersWithChance()) {
-      for (const auto &infoset : player->GetInfosets()) {
-        NormalizeLabels(infoset->GetActions(), get_label, set_label);
-      }
-    }
-  }
-  else {
-    for (const auto &player : p_game->GetPlayers()) {
-      NormalizeLabels(player->GetStrategies(), get_label, set_label);
-    }
-  }
+  // Action labels are not normalized here: for tree games, ParseNode/ParsePersonalNode
+  // already normalize each infoset's actions individually, at creation, from the raw
+  // labels as parsed (see there for why the raw labels must be kept around too).
+  // Strategy labels are not normalized here either: every strategic-form construction
+  // path (BuildNfg via RelabelStrategies, and the "1".."N" numbering GameAGGRep/
+  // GameBAGGRep assign directly) already guarantees unique, nonempty labels per player
+  // by the time a game reaches here.
 }
 
 Game ReadEfgFile(std::istream &p_stream)

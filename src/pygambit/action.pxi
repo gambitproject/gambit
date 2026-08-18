@@ -72,25 +72,18 @@ class Action:
 
     @property
     def label(self) -> str:
-        """Get or set the text label of the action.
+        """The text label of the action.
 
         .. versionchanged:: 17.0.0
             A label may now be any well-formed UTF-8 text, not just ASCII; it must still
             contain no control characters, and must not begin/end with whitespace or have
             two consecutive whitespace characters.  "Whitespace" means any Unicode space
             separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
+
+            The label is now read-only, and must be nonempty and unique within its
+            information set; use `Game.relabel_actions` to change it.
         """
         return self.action.deref().GetLabel().decode("utf-8")
-
-    @label.setter
-    def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (act.label for act in self.infoset.actions):
-            warnings.warn("In a future version, actions must have unique labels "
-                          "within their information set",
-                          FutureWarning)
-        self.action.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def infoset(self) -> Infoset:
@@ -109,7 +102,7 @@ class Action:
         """
         if not self.infoset.is_chance:
             raise UndefinedOperationError(
-                "action probabilities are only defined at chance information sets"
+                "action probabilities are only defined at events"
             )
         py_string = cython.cast(
             string,

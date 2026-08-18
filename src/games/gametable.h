@@ -40,7 +40,8 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void RebuildTable(const std::vector<long> &old_radices);
+  void RebuildTable(const std::vector<long> &old_radices, long p_deletedPlayer = -1,
+                    long p_deletedDigit = -1);
   //@}
 
 public:
@@ -99,20 +100,13 @@ public:
   //@{
   GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
   void DeleteStrategy(const GameStrategy &p_strategy) override;
+  void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &) override;
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a file in .nfg outcome format
   void WriteNfgFile(std::ostream &) const override;
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
-  //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;

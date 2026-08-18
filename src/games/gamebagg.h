@@ -105,14 +105,6 @@ public:
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
   virtual void WriteBaggFile(std::ostream &) const;
   //@}
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
-  //@}
 };
 
 /// @brief Reads a game representation in .bagg format
@@ -120,7 +112,7 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .bagg format.
-Game ReadBaggFile(std::istream &in);
+[[nodiscard]] Game ReadBaggFile(std::istream &in);
 
 } // end namespace Gambit
 

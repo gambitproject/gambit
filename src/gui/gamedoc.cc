@@ -413,13 +413,10 @@ GamePlayer GameDocument::DoNewPlayer()
   }
 
   int number = m_game->NumPlayers() + 1;
-  while (contains(playerLabels, "Player " + lexical_cast<std::string>(number))) {
+  while (playerLabels.contains("Player " + lexical_cast<std::string>(number))) {
     number++;
   }
   const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
-  if (!m_game->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
-  }
   NotifyChanged(GameModificationType::GameForm);
   return player;
 }
@@ -437,7 +434,7 @@ void GameDocument::DoNewStrategy(GamePlayer p_player)
     strategyLabels.insert(strategy->GetLabel());
   }
   int number = p_player->GetStrategies().size() + 1;
-  while (contains(strategyLabels, std::to_string(number))) {
+  while (strategyLabels.contains(std::to_string(number))) {
     number++;
   }
   m_game->NewStrategy(p_player, std::to_string(number));
@@ -452,7 +449,8 @@ void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 
 void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelStrategies(p_strategy->GetPlayer(),
+                            {{p_strategy->GetLabel(), p_label.ToStdString(wxConvUTF8)}});
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -462,27 +460,44 @@ void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_la
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
+void GameDocument::DoRelabelActions(GameInfoset p_infoset,
+                                    const std::map<std::string, std::string> &p_labels)
 {
-  p_action->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelActions(p_infoset, p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
 {
-  m_game->SetChanceProbs(p_infoset, p_probs);
+  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  m_game->MakeEvent(members, std::vector<Number>(p_probs.begin(), p_probs.end()),
+                    p_infoset->GetLabel());
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  m_game->SetInfoset(p_node, p_infoset);
+  if (p_node->GetInfoset() == p_infoset) {
+    return;
+  }
+  std::vector<GameNode> nodes(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  nodes.push_back(p_node);
+  m_game->MakeInfoset(nodes, p_infoset->GetPlayer(), p_infoset->GetLabel());
   NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
-  m_game->LeaveInfoset(p_node);
+  const GameInfoset infoset = p_node->GetInfoset();
+  if (!infoset) {
+    return;
+  }
+  std::vector<GameNode> members(infoset->GetMembers().begin(), infoset->GetMembers().end());
+  if (members.size() == 1) {
+    // Already a singleton: a no-op that keeps the infoset's identity and label.
+    return;
+  }
+  m_game->MakeInfoset({p_node}, infoset->GetPlayer(), "");
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -497,8 +512,18 @@ void GameDocument::DoInsertAction(GameNode p_node)
   if (!p_node || !p_node->GetInfoset()) {
     return;
   }
-  const GameAction action = m_game->InsertAction(p_node->GetInfoset());
-  action->SetLabel(std::to_string(action->GetNumber()));
+  const GameInfoset infoset = p_node->GetInfoset();
+  const GameAction action = m_game->InsertAction(infoset);
+
+  std::set<std::string> actionLabels;
+  for (const auto &sibling : infoset->GetActions()) {
+    actionLabels.insert(sibling->GetLabel());
+  }
+  int number = action->GetNumber();
+  while (contains(actionLabels, std::to_string(number))) {
+    number++;
+  }
+  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -516,7 +541,19 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 
 void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  m_game->InsertMove(p_node, p_player, p_actions, true);
+  if (p_player->IsChance()) {
+    // A newly-inserted chance move defaults to a uniform distribution over its actions;
+    // the UX for specifying a distribution at creation time is a separate piece of work.
+    std::vector<std::string> actions;
+    for (unsigned int act = 1; act <= p_actions; act++) {
+      actions.push_back(std::to_string(act));
+    }
+    m_game->InsertEvent(p_node, actions,
+                        std::vector<Number>(p_actions, Number(Rational(1, p_actions))));
+  }
+  else {
+    m_game->InsertMove(p_node, p_player, p_actions);
+  }
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -555,20 +592,21 @@ void GameDocument::DoDeleteTree(GameNode p_node)
 
 void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
+  if (p_player->IsChance() || p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_infoset, p_player);
-    NotifyChanged(GameModificationType::GameForm);
+    return;
   }
+  if (p_infoset->GetPlayer() == p_player) {
+    return;
+  }
+  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  m_game->MakeInfoset(members, p_player, p_infoset->GetLabel());
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
-    // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_node->GetInfoset(), p_player);
-    NotifyChanged(GameModificationType::GameForm);
-  }
+  DoSetPlayer(p_node->GetInfoset(), p_player);
 }
 
 namespace {
@@ -580,7 +618,7 @@ std::string GenerateOutcomeLabel(const Game &p_game)
     outcomeLabels.insert(outcome->GetLabel());
   }
   int outc = p_game->GetOutcomes().size() + 1;
-  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
     outc++;
   }
   return "Outcome " + std::to_string(outc);
@@ -595,7 +633,7 @@ void GameDocument::DoNewOutcome(GameNode p_node)
     outcomeLabels.insert(outcome->GetLabel());
   }
   int outc = m_game->GetOutcomes().size() + 1;
-  while (contains(outcomeLabels, "Outcome " + std::to_string(outc))) {
+  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
     outc++;
   }
   m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));

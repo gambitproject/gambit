@@ -64,7 +64,7 @@ public:
   double GetMaxOffset() const { return m_maxOffset; }
 };
 
-inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
+[[nodiscard]] inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
 {
   auto layout = std::make_shared<Layout>(p_game);
   layout->LayoutTree(p_game);

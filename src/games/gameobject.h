@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GAMES_GAMEOBJECT_H
 #define GAMBIT_GAMES_GAMEOBJECT_H
 
+#include <compare>
 #include <memory>
 
 namespace Gambit {
@@ -128,13 +129,15 @@ public:
   bool operator==(const std::shared_ptr<T> &r) const { return (m_rep == r); }
   bool operator==(const std::shared_ptr<const T> &r) const { return (m_rep == r); }
   bool operator==(const std::nullptr_t &) const { return m_rep == nullptr; }
-  bool operator!=(const GameObjectPtr<T> &r) const { return (m_rep != r.m_rep); }
-  bool operator!=(const std::shared_ptr<T> &r) const { return (m_rep != r); }
-  bool operator!=(const std::shared_ptr<const T> &r) const { return (m_rep != r); }
-  bool operator!=(const std::nullptr_t &) const { return m_rep != nullptr; }
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
+  /// Without this, C++20 synthesizes <=> via operator bool() below, ordering by
+  /// null-vs-non-null instead of by m_rep (see gambitproject/gambit issue #1027).
+  std::strong_ordering operator<=>(const GameObjectPtr<T> &r) const noexcept
+  {
+    return m_rep <=> r.m_rep;
+  }
 
-  operator bool() const noexcept { return m_rep != nullptr; }
+  explicit operator bool() const noexcept { return m_rep != nullptr; }
   operator std::shared_ptr<T>() const { return m_rep; }
 };
 
@@ -169,11 +172,6 @@ public:
     {
       return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
              m_index == p_iter.m_index;
-    }
-    bool operator!=(const iterator &p_iter) const
-    {
-      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
-             m_index != p_iter.m_index;
     }
 
     iterator &operator++()
@@ -297,7 +295,6 @@ public:
       return m_outerIt == p_other.m_outerIt &&
              (m_outerIt == m_outerEnd || m_innerIt == p_other.m_innerIt);
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   };
 
   explicit NestedElementCollection(T owner) : m_owner(owner) {}

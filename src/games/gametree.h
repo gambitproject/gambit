@@ -165,25 +165,29 @@ public:
 
   /// @name Modification
   //@{
-  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                         bool p_generateLabels = false) override;
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                         const std::vector<std::string> &p_actions) override;
   GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                         bool p_generateLabels = false) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                         const std::vector<std::string> &p_actions) override;
   GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
+  GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                          const std::vector<Number> &p_probs) override;
+  GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                          const std::vector<Number> &p_probs) override;
   void CopyTree(GameNode dest, GameNode src) override;
   void MoveTree(GameNode dest, GameNode src) override;
   void DeleteParent(GameNode) override;
   void DeleteTree(GameNode) override;
-  void SetPlayer(GameInfoset, GamePlayer) override;
-  void Reveal(GameInfoset, GamePlayer) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
-  void SetInfoset(GameNode, GameInfoset) override;
-  GameInfoset LeaveInfoset(GameNode) override;
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
+  void Reveal(GameInfoset, GamePlayer) override;
+  GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                        const std::string &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
+  void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
   void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;

@@ -4,6 +4,7 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
 from libcpp.set cimport set as stdset
+from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
 
 
@@ -106,7 +107,6 @@ cdef extern from "games/game.h":
         int GetId() except +
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
         c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameSequenceRep "GameSequenceRep":
@@ -120,7 +120,6 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         cppclass Actions:
@@ -335,6 +334,7 @@ cdef extern from "games/game.h":
         c_GameStrategy GetStrategy(int) except +IndexError
         c_GameStrategy NewStrategy(c_GamePlayer, string) except +ValueError
         void DeleteStrategy(c_GameStrategy) except +
+        void RelabelStrategies(c_GamePlayer, stdmap[string, string]) except +ValueError
         int MixedProfileLength() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError
@@ -354,23 +354,27 @@ cdef extern from "games/game.h":
         bool IsPerfectRecall() except +
         bool IsAbsentMinded(c_GameInfoset) except +
 
-        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GameInfoset) except +ValueError
+        c_GameInfoset AppendEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
+        c_GameInfoset InsertEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
         void CopyTree(c_GameNode dest, c_GameNode src) except +ValueError
         void MoveTree(c_GameNode dest, c_GameNode src) except +ValueError
         void DeleteParent(c_GameNode) except +
         void DeleteTree(c_GameNode) except +
-        void SetPlayer(c_GameInfoset, c_GamePlayer) except +
-        void Reveal(c_GameInfoset, c_GamePlayer) except +
         c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
-        void SetInfoset(c_GameNode, c_GameInfoset) except +ValueError
-        c_GameInfoset LeaveInfoset(c_GameNode) except +
+        void Reveal(c_GameInfoset, c_GamePlayer) except +
         c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
         void DeleteAction(c_GameAction) except +ValueError
+        void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
-        c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
+        c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
+                                string) except +ValueError
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile

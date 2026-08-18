@@ -28,6 +28,59 @@ def test_read_efg_repeated_outcome_id_consistent():
     assert len(g.outcomes) == 1
 
 
+def test_read_efg_empty_action_labels_are_normalized():
+    g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "" "" } 0\n'
+                   't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [a.label for a in g.root.infoset.actions] == ["_1", "_2"]
+
+
+def test_read_efg_duplicate_action_labels_are_normalized():
+    g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "l" } 0\n'
+                   't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+
+
+def test_read_efg_repeated_infoset_duplicate_labels_consistent():
+    """A personal infoset spanning two nodes restates its (duplicate) action labels at
+    each node; both restatements must normalize the same way, or the second would be
+    (incorrectly) rejected as inconsistent with the first.
+    """
+    g = _parse_efg(
+        'EFG 2 R "t" { "A" "B" }\n""\n'
+        'p "" 1 1 "" { "l" "l" } 0\n'
+        'p "" 1 1 "" { "l" "l" } 0\n'
+        't "" 1 "" { 1, -1 }\n'
+        't "" 2 "" { 2, -2 }\n'
+        't "" 3 "" { 3, -3 }\n'
+    )
+    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+
+
+_NFG_PAYOFF_BODY = '\n{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n1 2 3 4\n'
+
+
+def test_read_nfg_empty_strategy_labels_are_normalized():
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "" "" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["_1", "_2"]
+
+
+def test_read_nfg_duplicate_strategy_labels_are_normalized():
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "l" "l" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["l_1", "l_2"]
+
+
+def test_read_nfg_strategy_labels_swap_default_numbering():
+    """A player's strategy labels as parsed are the reverse of "1", "2", the default
+    numeric labels table construction assigns first; relabelling one at a time would
+    collide on the intermediate state, the hazard RelabelStrategies exists to avoid.
+    """
+    g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "2" "1" }\n{ "x" "y" }\n}\n""\n' +
+                   _NFG_PAYOFF_BODY)
+    assert [s.label for s in g.players["A"].strategies] == ["2", "1"]
+
+
 def test_string_empty():
     with pytest.raises(ValueError) as excinfo:
         _parse_efg("")
@@ -153,6 +206,15 @@ def test_efg_label_malformed_utf8_rejected():
     bytes directly through a binary buffer, bypassing the encode step in read_game().
     """
     file_bytes = b'EFG 2 R "t" { "A\x80" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
+    with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid label"):
+        gbt.read_efg(f)
+
+
+def test_efg_action_label_malformed_utf8_rejected():
+    """Malformed UTF-8 in an action label is rejected the same way, via the format check
+    inside AppendMove/InsertMove rather than the (now-removed) Action.SetLabel.
+    """
+    file_bytes = b'EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l\x80" "r" } 0\n'
     with io.BytesIO(file_bytes) as f, pytest.raises(ValueError, match="Invalid label"):
         gbt.read_efg(f)
 

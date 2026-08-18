@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/renratio.cc
-// Implementation of wxSheet renderer for rational numbers
+// Implementation of wxGrid renderer/editor for rational numbers
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,17 +27,13 @@
 #include "renratio.h"
 #include "valnumber.h"
 
-#include "wx/sheet/sheet.h" // the wxSheet widget
-
 namespace Gambit::GUI {
 //----------------------------------------------------------------------------
-//                   class RationalRendererRefData
+//                   class RationalCellRenderer
 //----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(RationalRendererRefData, wxSheetCellRendererRefData)
-
-void RationalRendererRefData::SetTextColoursAndFont(wxSheet &grid, const wxSheetCellAttr &attr,
-                                                    wxDC &dc, bool isSelected)
+void RationalCellRenderer::SetTextColoursAndFont(wxGrid &grid, const wxGridCellAttr &attr,
+                                                 wxDC &dc, bool isSelected)
 {
   dc.SetBackgroundMode(wxTRANSPARENT);
 
@@ -48,7 +44,7 @@ void RationalRendererRefData::SetTextColoursAndFont(wxSheet &grid, const wxSheet
     }
     else {
       dc.SetTextBackground(attr.GetBackgroundColour());
-      dc.SetTextForeground(attr.GetForegroundColour());
+      dc.SetTextForeground(attr.GetTextColour());
     }
   }
   else {
@@ -85,8 +81,8 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
   return {width + 4, numHeight + denHeight};
 }
 
-wxSize RationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                              const wxString &text)
+wxSize RationalCellRenderer::DoGetBestSize(wxGrid &grid, const wxGridCellAttr &attr, wxDC &dc,
+                                           const wxString &text)
 {
   if (text.Find('/') != -1) {
     return GetFractionExtent(dc, text);
@@ -94,7 +90,8 @@ wxSize RationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAt
 
   wxArrayString lines;
   long w = 0, h = 0;
-  if (grid.StringToLines(text, lines) > 0) {
+  grid.StringToLines(text, lines);
+  if (!lines.empty()) {
     dc.SetFont(attr.GetFont());
     grid.GetTextBoxSize(dc, lines, &w, &h);
   }
@@ -102,22 +99,10 @@ wxSize RationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAt
   return {static_cast<int>(w), static_cast<int>(h)};
 }
 
-wxSize RationalRendererRefData::GetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                            const wxSheetCoords &coords)
+wxSize RationalCellRenderer::GetBestSize(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row,
+                                         int col)
 {
-  return DoGetBestSize(grid, attr, dc, grid.GetCellValue(coords));
-}
-
-void RationalRendererRefData::Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                   const wxRect &rectCell, const wxSheetCoords &coords,
-                                   bool isSelected)
-{
-  wxRect rect = rectCell;
-  rect.Inflate(-1);
-
-  // erase only this cells background, overflow cells should have been erased
-  wxSheetCellRendererRefData::Draw(grid, attr, dc, rectCell, coords, isSelected);
-  DoDraw(grid, attr, dc, rectCell, coords, isSelected);
+  return DoGetBestSize(grid, attr, dc, grid.GetTable()->GetValue(row, col));
 }
 
 static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
@@ -152,99 +137,61 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
                 point.x + (p_rect.width - width) / 2 + width + 2, point.y);
 }
 
-void RationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                     const wxRect &rectCell, const wxSheetCoords &coords,
-                                     bool isSelected)
+void RationalCellRenderer::Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc,
+                                const wxRect &rectCell, int row, int col, bool isSelected)
 {
+  // Erase the cell's background before drawing over it.
+  dc.SetBackgroundMode(wxSOLID);
+  dc.SetPen(*wxTRANSPARENT_PEN);
+  dc.SetBrush(wxBrush(isSelected ? grid.GetSelectionBackground() : attr.GetBackgroundColour()));
+  dc.DrawRectangle(rectCell);
+
   wxRect rect = rectCell;
   rect.Inflate(-1);
 
-  const int align = attr.GetAlignment();
+  const wxString value = grid.GetTable()->GetValue(row, col);
 
-  const wxString value = grid.GetCellValue(coords);
-  // int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
-  //  wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
-  // int cell_rows = cellSpan.m_row;
-  // int cell_cols = cellSpan.m_col;
+  SetTextColoursAndFont(grid, attr, dc, isSelected);
 
-  // bool is_grid_cell = wxSheet::IsGridCell(coords);
-  //  no overflow for row/col/corner labels
-  // int num_cols = grid.GetNumberCols();
-
-  // Draw the text
   if (value.Find('/') != -1) {
-    SetTextColoursAndFont(grid, attr, dc, isSelected);
     DrawFraction(dc, rect, value);
   }
   else {
-    SetTextColoursAndFont(grid, attr, dc, isSelected);
-    grid.DrawTextRectangle(dc, value, rect, align);
+    int hAlign, vAlign;
+    attr.GetAlignment(&hAlign, &vAlign);
+    grid.DrawTextRectangle(dc, value, rect, hAlign, vAlign);
   }
 }
 
 //----------------------------------------------------------------------------
-//                   class RationalEditorRefData
+//                   class RationalCellEditor
 //----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(RationalEditorRefData, wxSheetCellTextEditorRefData)
-
-void RationalEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler,
-                                         wxSheet *sheet)
+void RationalCellEditor::Create(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler)
 {
   // This implementation parallels the generic text editor, except adds centering of the text.
-  auto *textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                  wxTE_PROCESS_TAB | wxTE_CENTER | wxBORDER_NONE);
-  SetControl(textCtrl);
-  textCtrl->Bind(wxEVT_KILL_FOCUS, [sheet](wxFocusEvent &event) {
-    if (!sheet->IsTabTraversing()) {
-      sheet->CallAfter([sheet]() {
-        if (!sheet->IsTabTraversing() && sheet->IsCellEditControlShown()) {
-          sheet->DisableCellEditControl(true);
-          sheet->Refresh();
-        }
-      });
-    }
-    event.Skip();
-  });
-
-  // set max length allowed in the textctrl, if the parameter was set
-  if (m_maxChars != 0) {
-    textCtrl->SetMaxLength(m_maxChars);
-  }
-
-  wxSheetCellEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
-  GetTextCtrl()->SetValidator(NumberValidator(nullptr));
+  DoCreate(parent, id, evtHandler, wxTE_PROCESS_TAB | wxTE_CENTER | wxBORDER_NONE);
+  SetValidator(NumberValidator(nullptr));
 }
 
-bool RationalEditorRefData::Copy(const RationalEditorRefData &p_other)
+void RationalCellEditor::SetSize(const wxRect &rect)
 {
-  return wxSheetCellTextEditorRefData::Copy(p_other);
+  // Keep the full cell width (so a longer replacement value has room to
+  // grow into, rather than being shrink-wrapped to the starting value's
+  // rendered width), but the height must be the *exact* single-line
+  // height, not padded: a single-line wxTextCtrl does not itself center
+  // its text vertically when its own height exceeds one line, so any
+  // extra height here just reproduces the top-alignment problem one level
+  // in. Centering the (exactly one line tall) control within the taller
+  // cell via DoPositionEditor is what actually provides the vertical
+  // centering.
+  const wxSize size(rect.width, Text()->GetBestSize().GetHeight());
+  DoPositionEditor(size, rect, wxALIGN_CENTRE, wxALIGN_CENTRE_VERTICAL);
 }
 
-void RationalEditorRefData::StartingKey(wxKeyEvent &event)
+bool RationalCellEditor::IsAcceptedKey(wxKeyEvent &p_event)
 {
-  const int keycode = event.GetKeyCode();
-  char tmpbuf[2];
-  tmpbuf[0] = static_cast<char>(keycode);
-  tmpbuf[1] = '\0';
-  const wxString strbuf(tmpbuf, *wxConvCurrent);
-#if wxUSE_INTL
-  const bool is_decimal_point =
-      (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
-#else
-  bool is_decimal_point = (strbuf == _T("."));
-#endif
-  if (wxIsdigit(keycode) || keycode == '-' || is_decimal_point) {
-    wxSheetCellTextEditorRefData::StartingKey(event);
-    return;
-  }
-
-  event.Skip();
-}
-
-bool RationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
-{
-  if (wxSheetCellEditorRefData::IsAcceptedKey(p_event)) {
+  if (wxGridCellEditor::IsAcceptedKey(p_event)) {
     const int keycode = p_event.GetKeyCode();
     char tmpbuf[2];
     tmpbuf[0] = static_cast<char>(keycode);
@@ -264,4 +211,26 @@ bool RationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
 
   return false;
 }
+
+void RationalCellEditor::StartingKey(wxKeyEvent &event)
+{
+  const int keycode = event.GetKeyCode();
+  char tmpbuf[2];
+  tmpbuf[0] = static_cast<char>(keycode);
+  tmpbuf[1] = '\0';
+  const wxString strbuf(tmpbuf, *wxConvCurrent);
+#if wxUSE_INTL
+  const bool is_decimal_point =
+      (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
+#else
+  const bool is_decimal_point = (strbuf == _T("."));
+#endif
+  if (wxIsdigit(keycode) || keycode == '-' || is_decimal_point) {
+    wxGridCellTextEditor::StartingKey(event);
+    return;
+  }
+
+  event.Skip();
+}
+
 } // namespace Gambit::GUI

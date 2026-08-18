@@ -23,8 +23,6 @@
 #ifndef GAMBIT_GUI_NFGPANEL_H
 #define GAMBIT_GUI_NFGPANEL_H
 
-#include "wx/sheet/sheet.h" // for wxSheet
-
 class wxPrintout;
 
 namespace Gambit::GUI {
