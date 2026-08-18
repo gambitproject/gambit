@@ -546,7 +546,12 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
       strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
     NormalizeLabelStrings(strategyLabels);
-    RelabelWithoutCollision(player->GetStrategies(), strategyLabels);
+    std::map<std::string, std::string> labels;
+    size_t index = 0;
+    for (auto strategy : player->GetStrategies()) {
+      labels[strategy->GetLabel()] = strategyLabels[index++];
+    }
+    nfg->RelabelStrategies(player, labels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
@@ -907,11 +912,10 @@ void NormalizeGameLabels(const Game &p_game)
   // Action labels are not normalized here: for tree games, ParseNode/ParsePersonalNode
   // already normalize each infoset's actions individually, at creation, from the raw
   // labels as parsed (see there for why the raw labels must be kept around too).
-  if (!p_game->IsTree()) {
-    for (const auto &player : p_game->GetPlayers()) {
-      NormalizeLabels(player->GetStrategies(), get_label, set_label);
-    }
-  }
+  // Strategy labels are not normalized here either: every strategic-form construction
+  // path (BuildNfg via RelabelStrategies, and the "1".."N" numbering GameAGGRep/
+  // GameBAGGRep assign directly) already guarantees unique, nonempty labels per player
+  // by the time a game reaches here.
 }
 
 Game ReadEfgFile(std::istream &p_stream)
