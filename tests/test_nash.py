@@ -1416,7 +1416,7 @@ LCP_STRATEGY_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_11",
     ),
-    # Action graph game
+    # Action graph game, solved exactly (Rational arithmetic throughout).
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),

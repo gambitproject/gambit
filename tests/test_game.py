@@ -105,8 +105,8 @@ def test_game_get_outcome_by_index():
 def test_game_get_outcome_by_label():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    next(iter(pl1.strategies)).label = "defect"
-    next(iter(pl2.strategies)).label = "cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
     assert game["defect", "cooperate"] == next(iter(game.outcomes))
 
 
@@ -137,8 +137,8 @@ def test_game_get_outcome_index_out_of_range():
 def test_game_get_outcome_unmatched_label():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    next(iter(pl1.strategies)).label = "defect"
-    next(iter(pl2.strategies)).label = "cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
     with pytest.raises(IndexError):
         _ = game["defect", "defect"]
 
