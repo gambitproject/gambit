@@ -62,11 +62,9 @@ class StrategyRegretsVector(PlayerIndexedVector):
 class MixedStrategy:
     """A probability distribution over a player's strategies.
 
-    A ``MixedStrategy`` is an immutable snapshot of the component of a
-    ``MixedStrategyProfile`` associated with a given ``Player``, taken at the moment it
-    was retrieved from the profile.  It does not reflect any later changes to the
-    profile, and cannot itself be modified; the player for whom the ``MixedStrategy``
-    applies is accessible via `player`.
+    An immutable snapshot taken from a ``MixedStrategyProfile`` at retrieval time: it
+    does not reflect later changes to the profile, and cannot itself be modified. The
+    player is accessible via `player`.
 
     .. versionchanged:: 17.0.0
 

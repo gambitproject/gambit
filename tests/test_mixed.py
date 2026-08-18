@@ -205,7 +205,6 @@ def test_set_and_get_probabilities_by_player_label(
 
 
 def test_setitem_allows_sparse_distribution():
-    """__setitem__ treats strategies omitted from the distribution as having weight zero."""
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     profile[P1] = {"1": 1}
@@ -267,9 +266,7 @@ def test_setitem_and_set_strategy_reject_uncoercible_weight(sparse: bool):
 
 
 def test_setitem_sparse_rejects_negative_weight():
-    """Negative-weight validation still applies to a sparse (partial) distribution, not
-    just a fully-specified one.
-    """
+    """Negativity is checked even for weights given under a sparse distribution."""
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     with pytest.raises(ValueError, match="negative"):
@@ -278,9 +275,7 @@ def test_setitem_sparse_rejects_negative_weight():
 
 @pytest.mark.parametrize("sparse", [False, True])
 def test_indexing_rejects_player_object(sparse: bool):
-    """MixedStrategyProfile's indexing is label-keyed only: a Player object is rejected,
-    unlike Game._resolve_player (used elsewhere) which also accepts one.
-    """
+    """Unlike Game._resolve_player, MixedStrategyProfile's indexing is str-label only."""
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     player = game.players[P1]
@@ -294,9 +289,6 @@ def test_indexing_rejects_player_object(sparse: bool):
 
 @pytest.mark.parametrize("rational_flag", [False, True])
 def test_copy_mutating_copy_does_not_affect_original(rational_flag: bool):
-    """copy() shares its underlying data with the original until one of them is next
-    assigned into; mutating the copy must not be visible through the original.
-    """
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     original = game.mixed_strategy_profile(rational=rational_flag)
     original_before = dict(original[P1])
@@ -308,9 +300,6 @@ def test_copy_mutating_copy_does_not_affect_original(rational_flag: bool):
 
 @pytest.mark.parametrize("rational_flag", [False, True])
 def test_copy_mutating_original_does_not_affect_copy(rational_flag: bool):
-    """Symmetric to test_copy_mutating_copy_does_not_affect_original: mutating the
-    original after taking a copy must not be visible through the copy.
-    """
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     original = game.mixed_strategy_profile(rational=rational_flag)
     copy = original.copy()
@@ -1493,9 +1482,8 @@ def test_payoff_and_strategy_value_consistency(
     ],
 )
 def test_len_matches_iter_count(game: gbt.Game, rational_flag: bool):
-    """len(profile) is the number of items iterating the profile yields (one per
-    player), not the total number of strategies in the game; similarly for each
-    player's MixedStrategy against their own strategies.
+    """len() is the number of players (not the total strategy count across players),
+    and likewise for each player's MixedStrategy against their own strategies.
     """
     profile = game.mixed_strategy_profile(rational=rational_flag)
     assert len(profile) == len(game.players)
@@ -1507,12 +1495,7 @@ def test_len_matches_iter_count(game: gbt.Game, rational_flag: bool):
 
 
 def test_mixed_strategy_equality():
-    """MixedStrategy compares equal to a Mapping with the same contents, and to another
-    MixedStrategy snapshot for the same player with the same contents, but not to a
-    MixedStrategy for a different player, even where the numbers coincide.
-    """
-    # both players are uniform over 4 strategies here: numerically identical distributions,
-    # but distinct players
+    # both players are uniform over 4 strategies: numerically identical, but distinct players
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     p1_strategy = profile[P1]
@@ -1580,12 +1563,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, profile_data, rationa
 
 
 def test_repr_and_repr_latex_smoke():
-    """repr()/`_repr_latex_()` render as a `{label: value}` mapping, nested one level for
-    per-player quantities (the profile itself, and strategy_values/strategy_regrets).
-    `PayoffVector`/`player_regrets` are flat (one value per player, no nesting). This is a
-    smoke test against silent formatting regressions, not a claim that this exact string
-    is part of the public API.
-    """
+    """Smoke test against silent formatting regressions, not a public API guarantee."""
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile(rational=True)
 
