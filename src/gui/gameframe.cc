@@ -1008,7 +1008,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
 
 void GameFrame::OnEditMove(wxCommandEvent &)
 {
-  const GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
+  GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset) {
     return;
   }
@@ -1020,6 +1020,10 @@ void GameFrame::OnEditMove(wxCommandEvent &)
 
       if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+        // DoSetPlayer reforms the members into a brand-new information set (via
+        // MakeInfoset), invalidating this handle; the node itself is still valid, so
+        // re-fetch the information set through it.
+        infoset = m_doc->GetSelectNode()->GetInfoset();
       }
 
       std::vector<std::string> stableLabels, labels;
