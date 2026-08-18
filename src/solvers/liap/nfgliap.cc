@@ -136,7 +136,8 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                   StrategyCallbackType<double> p_onEquilibrium,
-                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent)
+                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent,
+                  const CancelToken &p_cancel)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -155,6 +156,7 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   minimizer.Set(F, p.GetProbVector(), fval, gradient, .001, .00001);
 
   for (int iter = 1; iter <= p_maxitsN; iter++) {
+    p_cancel.Check();
     Vector<double> point(p.GetProbVector());
     if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;

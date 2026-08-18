@@ -12,6 +12,10 @@
 - `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
   possibility of equilibria being found in orders that differ across runs. (#1016)
 
+### Changed
+- All long-running calculations are now done in a thread in the GUI process, rather than calling the
+  command-line executables as external processes. (#990)
+
 ### Removed
 - Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
   nonempty, unique labels.  (#1047)

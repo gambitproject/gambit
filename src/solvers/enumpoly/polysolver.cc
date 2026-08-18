@@ -189,21 +189,24 @@ Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> 
 }
 
 std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<double> &r,
-                                                            const int max_roots)
+                                                            const int max_roots,
+                                                            const CancelToken &p_cancel)
 {
   std::list<Vector<double>> roots;
   if (NumEquations() == 0) {
     roots.emplace_back();
   }
   else {
-    FindRoots(roots, r, max_roots);
+    FindRoots(roots, r, max_roots, p_cancel);
   }
   return roots;
 }
 
 void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
-                                       const Rectangle<double> &r, const size_t max_roots) const
+                                       const Rectangle<double> &r, const size_t max_roots,
+                                       const CancelToken &p_cancel) const
 {
+  p_cancel.Check();
   if (SystemHasNoRootsIn(r)) {
     return;
   }
@@ -227,7 +230,7 @@ void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
     return;
   }
   for (const auto &cell : r.Orthants()) {
-    FindRoots(rootlist, cell, max_roots);
+    FindRoots(rootlist, cell, max_roots, p_cancel);
     if (rootlist.size() >= max_roots) {
       return;
     }
