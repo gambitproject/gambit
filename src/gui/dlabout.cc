@@ -32,7 +32,7 @@
 #include <wx/hyperlink.h>
 #include <wx/sizer.h>
 
-#include "gambit.h"
+#include "games.h"
 #include "dlabout.h"
 #include "bitmaps/gambitbig.xpm"
 

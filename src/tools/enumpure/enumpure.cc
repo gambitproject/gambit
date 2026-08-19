@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/enumpure/enumpure.h"
 

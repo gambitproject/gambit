@@ -8,7 +8,7 @@ from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
 
 
-cdef extern from "gambit.h":
+cdef extern from "games.h":
     # We don't wrap anything from the basic header, but it ensures
     # it gets included in the output
     pass

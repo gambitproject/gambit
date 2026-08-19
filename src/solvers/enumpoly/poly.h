@@ -20,13 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLY_H
-#define POLY_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_POLY_H
+#define GAMBIT_SOLVERS_ENUMPOLY_POLY_H
 
 #include <algorithm>
 #include <compare>
+#include <memory>
 
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit {
 
@@ -399,4 +400,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // POLY_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_POLY_H

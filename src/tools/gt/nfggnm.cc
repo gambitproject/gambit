@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/gnm/gnm.h"
 

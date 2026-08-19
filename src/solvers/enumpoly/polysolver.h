@@ -20,11 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLYSOLVER_H
-#define POLYSOLVER_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_POLYSOLVER_H
+#define GAMBIT_SOLVERS_ENUMPOLY_POLYSOLVER_H
 
 #include "core/cancel.h"
-#include "gambit.h"
+#include "core/core.h"
 #include "rectangle.h"
 #include "polysystem.h"
 #include "polypartial.h"
@@ -103,4 +103,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // POLYSOLVER_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_POLYSOLVER_H

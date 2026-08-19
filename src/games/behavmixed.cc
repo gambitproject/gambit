@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/behav.cc
+// FILE: src/games/behavmixed.cc
 // Instantiation of behavior profile classes.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "behavmixed.h"
 
 namespace Gambit {

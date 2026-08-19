@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/efgensup.cc
+// FILE: src/solvers/nashsupport/efgsupport.cc
 // Enumerate undominated subsupports
 //
 // This program is free software; you can redistribute it and/or modify

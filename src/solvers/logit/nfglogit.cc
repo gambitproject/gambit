@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/logit/nfglogit.cc
+// FILE: src/solvers/logit/nfglogit.cc
 // Computation of quantal response equilibrium correspondence for
 // normal form games.
 //
@@ -23,7 +23,7 @@
 
 #include <cmath>
 
-#include "gambit.h"
+#include "games.h"
 #include "logit.h"
 #include "path.h"
 

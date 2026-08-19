@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametable.h
+// FILE: src/games/gametable.h
 // Declaration of strategic game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMETABLE_H
-#define GAMETABLE_H
+#ifndef GAMBIT_GAMES_GAMETABLE_H
+#define GAMBIT_GAMES_GAMETABLE_H
 
 #include "gameexpl.h"
 
@@ -119,4 +119,4 @@ public:
 
 } // namespace Gambit
 
-#endif // GAMETABLE_H
+#endif // GAMBIT_GAMES_GAMETABLE_H

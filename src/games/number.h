@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/number.h
+// FILE: src/games/number.h
 // A simple class for storing numerical data in a game
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_NUMBER_H
-#define LIBGAMBIT_NUMBER_H
+#ifndef GAMBIT_GAMES_NUMBER_H
+#define GAMBIT_GAMES_NUMBER_H
 
 #include <string>
 #include <ostream>
@@ -95,4 +95,4 @@ public:
 
 } // namespace Gambit
 
-#endif // LIBGAMBIT_NUMBER_H
+#endif // GAMBIT_GAMES_NUMBER_H

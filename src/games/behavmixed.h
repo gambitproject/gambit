@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/behav.h
+// FILE: src/games/behavmixed.h
 // Behavior strategy profile classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_BEHAV_H
-#define LIBGAMBIT_BEHAV_H
+#ifndef GAMBIT_GAMES_BEHAVMIXED_H
+#define GAMBIT_GAMES_BEHAVMIXED_H
 
 #include <random>
 #include <vector>
 
 #include "game.h"
+#include "behavspt.h"
 #include "seqmixed.h"
 
 namespace Gambit {
@@ -408,4 +409,4 @@ NewRandomBehaviorProfiles(const Game &p_game, int count, int denom)
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_BEHAV_H
+#endif // GAMBIT_GAMES_BEHAVMIXED_H

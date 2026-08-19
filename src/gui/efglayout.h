@@ -23,7 +23,6 @@
 #ifndef GAMBIT_GUI_EFGLAYOUT_H
 #define GAMBIT_GUI_EFGLAYOUT_H
 
-#include "gambit.h"
 #include "gamedoc.h"
 
 #include "games/layout.h"

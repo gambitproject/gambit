@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLYPARTIAL_H
-#define POLYPARTIAL_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_POLYPARTIAL_H
+#define GAMBIT_SOLVERS_ENUMPOLY_POLYPARTIAL_H
 
-#include "gambit.h"
+#include <list>
+
+#include "core/core.h"
 #include "rectangle.h"
 #include "polysystem.h"
 
@@ -104,4 +106,4 @@ public:
 
 } // namespace Gambit
 
-#endif // POLYPARTIAL_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_POLYPARTIAL_H

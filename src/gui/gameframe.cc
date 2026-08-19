@@ -36,7 +36,7 @@
 #include <wx/splitter.h>
 #include <wx/artprov.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "app.h" // for wxGetApp()
 #include "gameframe.h"

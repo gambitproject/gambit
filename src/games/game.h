@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.h
+// FILE: src/games/game.h
 // Declaration of base class for representing games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_GAME_H
-#define LIBGAMBIT_GAME_H
+#ifndef GAMBIT_GAMES_GAME_H
+#define GAMBIT_GAMES_GAME_H
 
 #include <algorithm>
 #include <compare>
@@ -33,6 +33,7 @@
 #include <set>
 #include <stack>
 
+#include "core/array.h"
 #include "number.h"
 #include "gameobject.h"
 
@@ -1774,4 +1775,4 @@ std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &gener
 
 } // namespace Gambit
 
-#endif // LIBGAMBIT_GAME_H
+#endif // GAMBIT_GAMES_GAME_H

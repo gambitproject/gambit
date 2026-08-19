@@ -29,7 +29,7 @@
 #include <wx/dnd.h>
 #include <wx/popupwin.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "efgdisplay.h"
 #include "menuconst.h"

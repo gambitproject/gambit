@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/nash/ipa.h
+// FILE: src/solvers/ipa/ipa.h
 // Compute Nash equilibria via iterated polymatrix approximation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_IPA_H
-#define GAMBIT_NASH_IPA_H
+#ifndef GAMBIT_SOLVERS_IPA_IPA_H
+#define GAMBIT_SOLVERS_IPA_IPA_H
 
 #include <variant>
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 #include "solvers/gtracer/gtracer.h"
 
 namespace Gambit::Nash {
@@ -66,4 +66,4 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
 
 } // namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_IPA_H
+#endif // GAMBIT_SOLVERS_IPA_IPA_H
