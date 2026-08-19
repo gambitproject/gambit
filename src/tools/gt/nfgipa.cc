@@ -69,6 +69,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate randomly\n";
   std::cerr << "                   (mutually exclusive with -s)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   perturbation vectors (default is to seed from system\n";
+  std::cerr << "                   entropy); requires -n\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -83,6 +86,7 @@ int main(int argc, char *argv[])
   bool quiet = false, verbose = false, numVectorsSet = false;
   int numDecimals = 6, numVectors = 1;
   std::string startFile;
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -90,7 +94,7 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:vVqh", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:R:vVqh", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -107,6 +111,9 @@ int main(int argc, char *argv[])
     case 'n':
       numVectors = atoi(optarg);
       numVectorsSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 's':
       startFile = optarg;
@@ -135,6 +142,10 @@ int main(int argc, char *argv[])
     std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
     return 1;
   }
+  if (seed && !numVectorsSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
 
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
@@ -160,7 +171,7 @@ int main(int argc, char *argv[])
     }
     else {
       // Generate the desired number of points randomly
-      std::default_random_engine engine;
+      auto engine = MakeRandomEngine(seed);
       perts = NewRandomStrategyProfiles(game, numVectors, engine);
     }
 

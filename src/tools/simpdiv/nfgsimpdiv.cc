@@ -117,6 +117,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
   std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   starting points (default is to seed from system entropy);\n";
+  std::cerr << "                   requires -n\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "                   (mutually exclusive with -r)\n";
   std::cerr << "  -d DECIMALS      show profiles as floating point with DECIMALS digits\n";
@@ -138,6 +141,7 @@ int main(int argc, char *argv[])
   int randDenom = 1, gridResize = 2, stopAfter = 1, decimals = 0;
   bool verbose = false, quiet = false;
   Rational maxregret(1, 10000000);
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -145,7 +149,8 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:q", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:R:q", long_options, &long_opt_index)) !=
+         -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -163,6 +168,9 @@ int main(int argc, char *argv[])
     case 'n':
       stopAfter = atoi(optarg);
       numTriesSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 'm':
       maxregret = lexical_cast<Rational>(std::string(optarg));
@@ -204,6 +212,10 @@ int main(int argc, char *argv[])
     std::cerr << "Error: The -n option requires -r.\n";
     return 1;
   }
+  if (seed && !numTriesSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
 
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
@@ -226,7 +238,7 @@ int main(int argc, char *argv[])
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
-      std::default_random_engine engine;
+      auto engine = MakeRandomEngine(seed);
       starts = NewRandomStrategyProfiles(game, stopAfter, randDenom, engine);
     }
     else {

@@ -23,9 +23,23 @@
 #ifndef TOOLS_UTIL_H
 #define TOOLS_UTIL_H
 
+#include <optional>
+#include <random>
 #include "gambit.h"
 
 namespace Gambit {
+
+/// @brief Constructs a random engine for generating starting points for command-line tools.
+///        If p_seed is given, the engine is seeded deterministically with it, so that the run
+///        can be reproduced; otherwise, the engine is seeded from system entropy.
+inline std::default_random_engine MakeRandomEngine(std::optional<unsigned long> p_seed)
+{
+  if (p_seed) {
+    return std::default_random_engine(*p_seed);
+  }
+  std::random_device rd;
+  return std::default_random_engine(rd());
+}
 
 template <class T> class MixedProfileRenderer {
 public:
