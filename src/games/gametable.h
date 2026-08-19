@@ -42,9 +42,8 @@ private:
   //@{
   /// Rebuild the outcome table after the strategies of p_player have changed.
   /// p_oldToNew maps old strategy indices to new index, or to -1 if the strategy was removed.
-  /// With p_player < 0, all indices are unchanged and only the table's dimensions are updated.
-  void RebuildTable(const std::vector<long> &old_radices, long p_player = -1,
-                    const std::vector<long> &p_oldToNew = {});
+  void RebuildTable(const std::vector<long> &old_radices, long p_player,
+                    const std::vector<long> &p_oldToNew);
   //@}
 
 public:
@@ -101,8 +100,6 @@ public:
 
   /// @name Strategies
   //@{
-  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
-  void DeleteStrategy(const GameStrategy &p_strategy) override;
   void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &) override;
   void SetStrategies(const GamePlayer &, const std::vector<std::string> &) override;
   //@}

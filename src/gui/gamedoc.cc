@@ -429,21 +429,34 @@ void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label
 
 void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
+  std::vector<std::string> labels;
   std::set<std::string> strategyLabels;
   for (const auto &strategy : p_player->GetStrategies()) {
+    labels.push_back(strategy->GetLabel());
     strategyLabels.insert(strategy->GetLabel());
   }
   int number = p_player->GetStrategies().size() + 1;
   while (strategyLabels.contains(std::to_string(number))) {
     number++;
   }
-  m_game->NewStrategy(p_player, std::to_string(number));
+  labels.push_back(std::to_string(number));
+  m_game->SetStrategies(p_player, labels);
   NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 {
-  m_game->DeleteStrategy(p_strategy);
+  const GamePlayer player = p_strategy->GetPlayer();
+  if (player->GetStrategies().size() == 1) {
+    return;
+  }
+  std::vector<std::string> labels;
+  for (const auto &strategy : player->GetStrategies()) {
+    if (strategy != p_strategy) {
+      labels.push_back(strategy->GetLabel());
+    }
+  }
+  m_game->SetStrategies(player, labels);
   NotifyChanged(GameModificationType::GameForm);
 }
 

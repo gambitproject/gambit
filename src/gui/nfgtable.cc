@@ -1626,7 +1626,12 @@ void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
 
-  m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
+  try {
+    m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TableWidget::DeleteColHeaderStrategy(int headerRow, int headerCol)
@@ -1634,7 +1639,12 @@ void TableWidget::DeleteColHeaderStrategy(int headerRow, int headerCol)
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
 
-  m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
+  try {
+    m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TableWidget::SetPayoffCellValue(int row, int col, const wxString &value)

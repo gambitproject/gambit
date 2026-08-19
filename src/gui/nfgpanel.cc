@@ -193,7 +193,12 @@ void TablePlayerPanel::OnChar(wxKeyEvent &p_event)
 void TablePlayerPanel::OnNewStrategy(wxCommandEvent &)
 {
   m_doc->PostPendingChanges();
-  m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
+  try {
+    m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
 }
 
 void TablePlayerPanel::OnSetColor(wxCommandEvent &)

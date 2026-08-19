@@ -527,54 +527,6 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 //                        GameTableRep: Strategies
 //------------------------------------------------------------------------
 
-GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
-{
-  if (p_player->GetGame().get() != this) {
-    throw MismatchException();
-  }
-  p_player->CheckStrategyLabel(p_label, {});
-  auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
-                                                    p_player->m_strategies.size() + 1, p_label);
-  IncrementVersion();
-  std::vector<long> old_radices;
-  for (const auto &player : m_players) {
-    old_radices.push_back(player->m_strategies.size());
-  }
-  p_player->m_strategies.push_back(strategy);
-  RebuildTable(old_radices);
-  return p_player->m_strategies.back();
-}
-
-void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
-{
-  const auto player = p_strategy->GetPlayer().get();
-  if (player->m_game != this) {
-    throw MismatchException();
-  }
-  if (player->GetStrategies().size() == 1) {
-    return;
-  }
-
-  IncrementVersion();
-  std::vector<long> old_radices;
-  for (const auto &pl : m_players) {
-    old_radices.push_back(pl->m_strategies.size());
-  }
-  const auto deletedIt = std::find(player->m_strategies.begin(), player->m_strategies.end(),
-                                   std::shared_ptr<GameStrategyRep>(p_strategy));
-  const long deletedDigit = deletedIt - player->m_strategies.begin();
-  std::vector<long> old_to_new(player->m_strategies.size(), -1);
-  long newDigit = 0;
-  for (size_t i = 0; i < old_to_new.size(); ++i) {
-    if (static_cast<long>(i) != deletedDigit) {
-      old_to_new[i] = newDigit++;
-    }
-  }
-  player->m_strategies.erase(deletedIt);
-  RebuildTable(old_radices, player->GetNumber() - 1, old_to_new);
-  p_strategy->Invalidate();
-}
-
 void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
                                      const std::map<std::string, std::string> &p_labels)
 {
@@ -711,7 +663,7 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  See the declaration
-/// in gametable.h for the meaning of p_deletedPlayer/p_deletedDigit.
+/// in gametable.h for the meaning of p_player/p_oldToNew.
 void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_player,
                                 const std::vector<long> &p_oldToNew)
 {
