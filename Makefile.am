@@ -365,6 +365,8 @@ gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
 	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/lufactor.cc \
+	src/solvers/enumpoly/lufactor.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \
@@ -467,6 +469,8 @@ gambit_SOURCES = \
 	${gambit_nashsupport_SOURCES} \
 	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/lufactor.cc \
+	src/solvers/enumpoly/lufactor.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \

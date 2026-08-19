@@ -22,6 +22,7 @@
 
 #include "polysolver.h"
 #include "indexproduct.h"
+#include "lufactor.h"
 
 namespace Gambit {
 
@@ -149,7 +150,7 @@ double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
 bool PolynomialSystemSolver::HasNoOtherRootsIn(const Rectangle<double> &r,
                                                const Vector<double> &p) const
 {
-  auto M = m_derivatives.SquareDerivativeMatrix(p).Inverse();
+  auto M = LUFactorization(m_derivatives.SquareDerivativeMatrix(p)).Inverse();
   auto system2 = m_normalizedSystem.Translate(p).TransformCoords(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
   return (std::accumulate(system2.begin(), system2.end(), 0.0,
@@ -162,30 +163,21 @@ Vector<double> PolynomialSystemSolver::NewtonStep(const Vector<double> &point) c
 {
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
-  auto transpose = deriv.Transpose();
-  auto sqmat = Matrix<double>(deriv * transpose);
-  if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
-    throw SingularMatrixException();
-  }
-  return point - (transpose * sqmat.Inverse()) * evals;
+  return point - LUFactorization(deriv).Solve(evals);
 }
 
 Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> &point) const
 {
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
-  auto transpose = deriv.Transpose();
-  auto sqmat = Matrix<double>(deriv * transpose);
-  if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
-    throw SingularMatrixException();
-  }
-  auto step = -(transpose * sqmat.Inverse()) * evals;
+  const Vector<double> delta = LUFactorization(deriv).Solve(evals);
 
-  while (m_derivatives.ValuesOfRootPolys(point + step, NumEquations()).NormSquared() >
+  double scale = 1.0;
+  while (m_derivatives.ValuesOfRootPolys(point - delta * scale, NumEquations()).NormSquared() >
          evals.NormSquared()) {
-    step /= 2;
+    scale /= 2;
   }
-  return point + step;
+  return point - delta * scale;
 }
 
 std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<double> &r,

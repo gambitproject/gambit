@@ -662,7 +662,7 @@ def enumpoly_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
         stop_after: int | None = None,
-        maxregret: float = 1.0e-4,
+        maxregret: float = 1.0e-8,
         max_rectangles: int = 20_000,
         phcpack_path: pathlib.Path | str | None = None
 ) -> NashComputationResult:
@@ -683,7 +683,7 @@ def enumpoly_solve(
         Maximum number of equilibria to compute.  If not specified, examines
         all support profiles of the game.
 
-    maxregret : float, default 1e-4
+    maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game

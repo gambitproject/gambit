@@ -53,7 +53,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
-  std::cerr << "                   payoffs in the game\n";
+  std::cerr << "                   payoffs in the game (default is 1e-8)\n";
   std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
   std::cerr << "                   (default is to search in all supports)\n";
   std::cerr << "  -r RECTANGLES    maximum number of rectangles to examine when searching\n";
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
   bool quiet = false;
   bool useStrategic = false;
-  double maxregret = 1.0e-4;
+  double maxregret = 1.0e-8;
   int stopAfter = 0;
   size_t maxRectangles = Nash::kDefaultEnumPolyMaxRectangles;
 

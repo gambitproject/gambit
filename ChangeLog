@@ -13,6 +13,7 @@
 - `enumpoly_solve` correctly handles failed perturbations at singular Jacobians (#591)
 - `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
   possibility of equilibria being found in orders that differ across runs. (#1016)
+- Improved the numerical stability of `enumpoly_solve` handling less-well-conditioned systems.  (#1055)
 
 ### Changed
 - All long-running calculations are now done in a thread in the GUI process, rather than calling the
