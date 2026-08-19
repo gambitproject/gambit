@@ -480,12 +480,32 @@ void GameDocument::DoRelabelActions(GameInfoset p_infoset,
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
+void GameDocument::DoSetActions(GameInfoset p_infoset,
+                                const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
-  m_game->MakeEvent(members, std::vector<Number>(p_probs.begin(), p_probs.end()),
-                    p_infoset->GetLabel());
-  NotifyChanged(GameModificationType::GamePayoffs);
+  // Phase 1: structure (which actions exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  if (p_infoset->IsChanceInfoset()) {
+    m_game->SetEventActions(p_infoset, p_stableLabels, p_probs);
+  }
+  else {
+    m_game->SetMoveActions(p_infoset, p_stableLabels);
+  }
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelActions(p_infoset, relabels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
@@ -517,26 +537,6 @@ void GameDocument::DoLeaveInfoset(GameNode p_node)
 void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   m_game->Reveal(p_infoset, p_player);
-  NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoInsertAction(GameNode p_node)
-{
-  if (!p_node || !p_node->GetInfoset()) {
-    return;
-  }
-  const GameInfoset infoset = p_node->GetInfoset();
-  const GameAction action = m_game->InsertAction(infoset);
-
-  std::set<std::string> actionLabels;
-  for (const auto &sibling : infoset->GetActions()) {
-    actionLabels.insert(sibling->GetLabel());
-  }
-  int number = action->GetNumber();
-  while (contains(actionLabels, std::to_string(number))) {
-    number++;
-  }
-  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
   NotifyChanged(GameModificationType::GameForm);
 }
 

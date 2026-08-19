@@ -210,7 +210,7 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
 }
 
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
-              unsigned int maxiter, bool p_verbose)
+              unsigned int maxiter, bool p_verbose, const CancelToken &p_cancel)
 {
   const int N = A.getNumPlayers(),
             M = A.getNumActions(); // For easy reference
@@ -241,6 +241,7 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
   so = sh;
 
   for (unsigned int iter = 1; iter <= maxiter; iter++) {
+    p_cancel.Check();
     A.payoffMatrix(DG, sh, 0.0);
     DG /= (double)(N - 1); // find the Jacobian of the approximating bimatrix game
 

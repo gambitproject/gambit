@@ -200,7 +200,6 @@ EVT_MENU(wxID_PRINT, GameFrame::OnFilePrint)
 EVT_MENU(wxID_EXIT, GameFrame::OnFileExit)
 EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
 EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, GameFrame::OnEditInsertMove)
-EVT_MENU(GBT_MENU_EDIT_INSERT_ACTION, GameFrame::OnEditInsertAction)
 EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, GameFrame::OnEditDeleteTree)
 EVT_MENU(GBT_MENU_EDIT_DELETE_PARENT, GameFrame::OnEditDeleteParent)
 EVT_MENU(GBT_MENU_EDIT_REMOVE_OUTCOME, GameFrame::OnEditRemoveOutcome)
@@ -324,7 +323,6 @@ void GameFrame::OnUpdate()
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL,
                   selectNode && selectNode->GetInfoset() &&
                       !m_doc->GetGame()->IsAbsentMinded(selectNode->GetInfoset()));
@@ -458,8 +456,6 @@ void GameFrame::MakeMenus()
 
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), _("Insert a move"));
-  editMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
-                   _("Insert an action at the current move"));
   editMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), _("Reveal choice at node"));
   editMenu->AppendSeparator();
 
@@ -933,16 +929,6 @@ void GameFrame::OnEditInsertMove(wxCommandEvent &)
   }
 }
 
-void GameFrame::OnEditInsertAction(wxCommandEvent &)
-{
-  try {
-    m_doc->DoInsertAction(m_doc->GetSelectNode());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
 void GameFrame::OnEditDeleteTree(wxCommandEvent &)
 {
   try {
@@ -1022,7 +1008,7 @@ void GameFrame::OnEditNode(wxCommandEvent &)
 
 void GameFrame::OnEditMove(wxCommandEvent &)
 {
-  const GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
+  GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset) {
     return;
   }
@@ -1034,17 +1020,25 @@ void GameFrame::OnEditMove(wxCommandEvent &)
 
       if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
+        // DoSetPlayer reforms the members into a brand-new information set (via
+        // MakeInfoset), invalidating this handle; the node itself is still valid, so
+        // re-fetch the information set through it.
+        infoset = m_doc->GetSelectNode()->GetInfoset();
       }
 
-      std::map<std::string, std::string> labels;
-      for (const auto &action : infoset->GetActions()) {
-        labels[action->GetLabel()] =
-            dialog.GetActionLabel(action->GetNumber()).ToStdString(wxConvUTF8);
+      std::vector<std::string> stableLabels, labels;
+      std::vector<Number> probs;
+      for (int i = 0; i < dialog.NumActions(); i++) {
+        if (dialog.IsDeleted(i)) {
+          continue;
+        }
+        stableLabels.push_back(dialog.GetStableLabel(i));
+        labels.push_back(dialog.GetActionLabel(i).ToStdString(wxConvUTF8));
+        if (infoset->IsChanceInfoset()) {
+          probs.push_back(dialog.GetActionProb(i));
+        }
       }
-      m_doc->DoRelabelActions(infoset, labels);
-      if (infoset->IsChanceInfoset()) {
-        m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
-      }
+      m_doc->DoSetActions(infoset, stableLabels, labels, probs);
     }
     catch (std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();

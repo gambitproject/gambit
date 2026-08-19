@@ -116,53 +116,164 @@ def test_action_precedes_nonnode(game: gbt.Game):
         action.precedes(game)
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_personal(game: gbt.Game):
-    node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
-    action_count = len(node.infoset.actions)
-    game.delete_action(next(iter(node.infoset.actions)))
-    assert len(node.infoset.actions) == action_count - 1
+def test_set_move_actions_drop_shrinks_actions_and_children():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    node = next(iter(infoset.members))
+    action_count = len(infoset.actions)
+    remaining = [action.label for action in infoset.actions][1:]
+    game.set_move_actions(infoset, remaining, drop=True)
+    assert len(infoset.actions) == action_count - 1
     assert len(node.children) == action_count - 1
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_last(game: gbt.Game):
+def test_set_move_actions_cannot_remove_the_only_action():
+    game = games.create_stripped_down_poker_efg()
     infoset = game.players["Alice"].infosets["Alice has King"]
-    while len(infoset.actions) > 1:
-        game.delete_action(next(iter(infoset.actions)))
+    last = next(iter(infoset.actions)).label
+    game.set_move_actions(infoset, [last], drop=True)
+    assert [action.label for action in infoset.actions] == [last]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(infoset.actions)))
+        game.set_move_actions(infoset, [], drop=True)
 
 
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
-        games.create_stripped_down_poker_efg(),
-        games.read_from_file("chance_root_5_moves_no_nonterm_player_nodes.efg"),
-    ],
-)
-def test_action_delete_chance(game: gbt.Game):
-    """Test the renormalization of action probabilities when an action is deleted at a chance
-    node
-    """
-    chance_infoset = next(iter(game.players.chance.infosets))
-    while len(chance_infoset.actions) > 1:
-        old_probs = [a.prob for a in chance_infoset.actions]
-        game.delete_action(next(iter(chance_infoset.actions)))
-        new_probs = [a.prob for a in chance_infoset.actions]
-        assert sum(new_probs) == 1
-        if sum(old_probs[1:]) == 0:
-            for p in new_probs:
-                assert p == 1 / len(new_probs)
-        else:
-            for p1, p2 in zip(old_probs[1:], new_probs, strict=True):
-                if p1 == 0:
-                    assert p2 == 0
-                else:
-                    assert p2 == p1 / (1 - old_probs[0])
+def test_set_move_actions_reorder_carries_subtrees():
+    """Reordering three actions as a cycle moves every action to a new position.
+    Each action carries its whole subtree with it, at every member of the information set."""
+    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    game.append_move(game.root, "Bob", ["x", "y"])
+    game.append_move(list(game.root.children), "Alice", ["a", "b", "c"])
+    game.append_move([game.root.children["x"].children["a"],
+                      game.root.children["y"].children["b"]], "Bob", ["l", "r"])
+    infoset = game.root.children["x"].infoset
+    members = list(infoset.members)
+    children_before = [{label: member.children[label] for label in ("a", "b", "c")}
+                       for member in members]
+    plays_before = {action.label: set(action.plays) for action in infoset.actions}
+    game.set_move_actions(infoset, ["c", "a", "b"])
+    assert [action.label for action in infoset.actions] == ["c", "a", "b"]
+    for member, children in zip(members, children_before, strict=True):
+        assert list(member.children) == [children["c"], children["a"], children["b"]]
+    assert {action.label: set(action.plays) for action in infoset.actions} == plays_before
+
+
+def test_set_move_actions_add_drop_and_reorder_together():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    nodes_before = len(game.nodes)
+    game.set_move_actions(infoset, ["Raise", "Fold"], drop=True)
+    assert [action.label for action in infoset.actions] == ["Raise", "Fold"]
+    # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
+    assert len(game.nodes) == nodes_before - 3 + 1
+    assert len(game.players["Bob"].infosets["Bob's response"].members) == 1
+
+
+def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_move_actions(infoset, ["Bet"])
+    with pytest.raises(ValueError):
+        game.set_move_actions(infoset, ["Bet", "Fold", "Raise"], add=False)
+    assert game.to_efg() == before
+
+
+def test_set_move_actions_raises_at_an_event():
+    """`set_move_actions` is only for a personal player's move; `set_event_actions` is the
+    corresponding operation for an event."""
+    game = games.create_stripped_down_poker_efg()
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(chance_infoset.actions)))
+        game.set_move_actions(game.root.infoset, ["King", "Queen"])
+
+
+@pytest.mark.parametrize("bad_labels", [["Bet", "Bet"], ["Bet", ""], ["Bet", " x"]])
+def test_set_move_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
+    """Duplicate, empty, and invalid labels in `actions` are rejected in C++,
+    after the Python guards pass; the game must be unmodified by the failure."""
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_move_actions(infoset, bad_labels, drop=True)
+    assert game.to_efg() == before
+
+
+def test_set_move_actions_absent_minded_drop_and_add():
+    """Dropping an action whose subtree contains another member of the same information
+    set deletes that member with the subtree."""
+    game = gbt.Game.new_tree(players=["Alice"])
+    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_infoset(game.root.children["a"], game.root.infoset)
+    game.set_move_actions(game.root.infoset, ["b", "c"], drop=True)
+    assert [action.label for action in game.root.infoset.actions] == ["b", "c"]
+    assert len(game.root.infoset.members) == 1
+    assert len(game.nodes) == 3
+
+
+def test_set_event_actions_reorder_carries_probabilities():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    game.set_event_actions(event, {"King": "3/4", "Queen": "1/4"})
+    game.set_event_actions(event, {"Queen": "1/4", "King": "3/4"})
+    assert [(a.label, a.prob) for a in event.actions] == [("Queen", gbt.Rational(1, 4)),
+                                                          ("King", gbt.Rational(3, 4))]
+
+
+def test_set_event_actions_add_with_probs_mapping():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    nodes_before = len(game.nodes)
+    game.set_event_actions(event, {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
+    assert [(a.label, a.prob) for a in event.actions] == [("Jack", gbt.Rational(1, 2)),
+                                                          ("King", gbt.Rational(1, 4)),
+                                                          ("Queen", gbt.Rational(1, 4))]
+    assert len(game.nodes) == nodes_before + 1
+
+
+def test_set_event_actions_drop_with_probs_mapping():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    game.set_event_actions(event, {"King": 1}, drop=True)
+    assert [(a.label, a.prob) for a in event.actions] == [("King", 1)]
+
+
+def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
+    game = games.create_stripped_down_poker_efg()
+    event = game.root.infoset
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_event_actions(event, {"King": 1})
+    with pytest.raises(ValueError):
+        game.set_event_actions(event, {"King": "1/2", "Queen": "1/4", "Jack": "1/4"}, add=False)
+    assert game.to_efg() == before
+
+
+def test_set_event_actions_raises_at_a_move():
+    """`set_event_actions` is only for an event; `set_move_actions` is the corresponding
+    operation for a personal player's move."""
+    game = games.create_stripped_down_poker_efg()
+    infoset = game.players["Alice"].infosets["Alice has King"]
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_event_actions(infoset, {"Bet": 1})
+
+
+def test_set_event_actions_rejects_non_mapping_probs():
+    """`probs` must be a mapping: with no separate list of actions, there's nothing for a
+    plain sequence of probabilities to be paired with positionally."""
+    game = games.create_stripped_down_poker_efg()
+    before = game.to_efg()
+    with pytest.raises(TypeError):
+        game.set_event_actions(game.root.infoset, ["3/4", "1/4"])
+    assert game.to_efg() == before
+
+
+def test_set_event_actions_bad_distribution_raises_valueerror():
+    game = games.create_stripped_down_poker_efg()
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_event_actions(game.root.infoset, {"King": "3/4", "Queen": "3/4"})
+    assert game.to_efg() == before
 
 
 def test_action_plays():

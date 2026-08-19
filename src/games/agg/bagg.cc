@@ -269,7 +269,11 @@ template Rational BAGG::getMixedPayoff<Rational>(int player, int tp,
                                                  const StrategyProfile<Rational> &s) const;
 
 // payoff of the pure profile ps, via the degenerate mixed profile and the convolution engine
-// (mirrors AGG::getPurePayoff<V>).
+// (mirrors AGG::getPurePayoff<V>). Deliberately does NOT enumerate the Cartesian product of the
+// other players' types directly: that product grows with the number of OTHER PLAYERS, not just
+// their type counts, defeating the whole point of the action-graph representation (efficient
+// computation for many-player games via the graph structure). getMixedPayoff's convolution
+// algorithm computes the same expectation in time polynomial in the number of players.
 template <class V> V BAGG::getPurePayoff(int player, int tp, const std::vector<int> &ps) const
 {
   StrategyProfile<V> s(strategyOffset[typeOffset[numPlayers]]);

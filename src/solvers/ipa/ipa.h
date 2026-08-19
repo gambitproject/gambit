@@ -29,11 +29,13 @@ namespace Gambit::Nash {
 
 std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const Game &p_game,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>);
+                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>);
+                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

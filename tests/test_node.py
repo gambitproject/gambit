@@ -1148,35 +1148,28 @@ def test_len_after_append_infoset():
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
 
-def test_len_after_add_action():
-    """Verify `len(game.nodes)` is correct after `add_action`."""
+def test_len_after_set_move_actions_add():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` creates an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
-
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
-
-    game.add_action(infoset_to_modify)
-
+    labels = [action.label for action in infoset_to_modify.actions]
+    game.set_move_actions(infoset_to_modify, labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
 
-def test_len_after_delete_action():
-    """Verify `len(game.nodes)` is correct after `delete_action`."""
+def test_len_after_set_move_actions_drop():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
-
-    action_to_delete = game.root.infoset.actions["L"]
-
-    # Deleting an action removes the subtree reached by that action at each
-    # member node of its information set.
+    action_to_drop = game.root.infoset.actions["L"]
     nodes_to_delete = sum(
-        _count_subtree_nodes(member.children[action_to_delete.label], True)
-        for member in action_to_delete.infoset.members
+        _count_subtree_nodes(member.children[action_to_drop.label], True)
+        for member in action_to_drop.infoset.members
     )
-
-    game.delete_action(action_to_delete)
-
+    remaining = [a.label for a in game.root.infoset.actions if a.label != "L"]
+    game.set_move_actions(game.root.infoset, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 

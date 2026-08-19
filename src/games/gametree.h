@@ -68,8 +68,6 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
-  /// Normalize the probability distribution of actions at a chance node
-  Game NormalizeChanceProbs(GameInfosetRep *);
   //@}
 
   /// @name Managing the representation
@@ -185,9 +183,10 @@ public:
   void Reveal(GameInfoset, GamePlayer) override;
   GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
                         const std::string &) override;
-  GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
-  void DeleteAction(GameAction) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
+  void SetMoveActions(const GameInfoset &, const std::vector<std::string> &) override;
+  void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                       const std::vector<Number> &) override;
   void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
@@ -210,6 +209,12 @@ private:
   void EnsureOwnPriorActions() const;
   const std::set<GameNodeRep *> &GetUnreachableNodes() const;
   const SubgameData &GetSubgameData() const;
+  /// Shared implementation of SetMoveActions/SetEventActions: declares the ordered action
+  /// list of p_infoset, matching by label, and (for an event) the probability distribution
+  /// over them. Callers are responsible for validating p_probs and that p_infoset is of the
+  /// right kind (personal move or event) before calling this.
+  void DoSetActions(const GameInfoset &, const std::vector<std::string> &,
+                    const std::vector<Number> &);
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

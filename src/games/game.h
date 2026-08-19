@@ -1308,14 +1308,21 @@ public:
   /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
   /// so that any two nodes reached via different actions at p_infoset are distinguished.
   virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
-  virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
-  {
-    throw UndefinedException();
-  }
-  virtual void DeleteAction(GameAction) { throw UndefinedException(); }
   /// Simultaneously reassign action labels at an information set.
   /// Keys of p_labels are current action labels; values are their replacements.
   virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of a personal player's move.
+  virtual void SetMoveActions(const GameInfoset &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of an event, together with the probability
+  /// distribution over its actions.
+  virtual void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                               const std::vector<Number> &)
   {
     throw UndefinedException();
   }
