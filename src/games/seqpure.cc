@@ -22,7 +22,7 @@
 
 #include <stack>
 
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit {
 

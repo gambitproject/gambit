@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/agg.cc
+// FILE: src/games/agg/agg.cc
 // Implementation of Action Graph Game representation
 //
 // This program is free software; you can redistribute it and/or modify

@@ -203,7 +203,6 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/README.rst \
 	$(CATALOG_FILES)
 
 core_SOURCES = \
@@ -224,23 +223,8 @@ core_SOURCES = \
 	src/core/function.cc \
 	src/core/function.h
 
-agg_SOURCES = \
-	src/games/gameagg.cc \
-	src/games/gameagg.h \
-	src/games/gamebagg.cc \
-	src/games/gamebagg.h \
-	src/games/agg/gray.h \
-	src/games/agg/agg.cc \
-    src/games/agg/agg.h \
-	src/games/agg/bagg.cc \
-	src/games/agg/bagg.h \
-	src/games/agg/proj_func.h \
-	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp \
-    src/games/agg/trie_map.cc
-
 game_SOURCES = \
-	src/gambit.h \
+	src/games.h \
 	src/games/ndarray.h \
 	src/games/number.h \
 	src/games/gameobject.h \
@@ -272,8 +256,19 @@ game_SOURCES = \
 	src/games/writer.h \
 	src/games/layout.cc \
     src/games/layout.h \
-	${agg_SOURCES} \
-	src/games/nash.h
+	src/games/gameagg.cc \
+	src/games/gameagg.h \
+	src/games/gamebagg.cc \
+	src/games/gamebagg.h \
+	src/games/agg/gray.h \
+	src/games/agg/agg.cc \
+    src/games/agg/agg.h \
+	src/games/agg/bagg.cc \
+	src/games/agg/bagg.h \
+	src/games/agg/proj_func.h \
+	src/games/agg/trie_map.h \
+    src/games/agg/trie_map.imp \
+    src/games/agg/trie_map.cc
 
 linalg_SOURCES = \
 	src/solvers/linalg/btableau.h \
@@ -311,6 +306,65 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
+nashsupport_SOURCES = \
+	src/solvers/nashsupport/efgsupport.cc \
+	src/solvers/nashsupport/nfgsupport.cc \
+	src/solvers/nashsupport/nashsupport.h
+
+bimatrix_SOURCES = \
+	${linalg_SOURCES} \
+	src/solvers/lp/lp.cc \
+	src/solvers/lp/lp.h \
+	src/solvers/lcp/efglcp.cc \
+	src/solvers/lcp/nfglcp.cc \
+	src/solvers/lcp/lcp.h \
+	src/solvers/enummixed/clique.cc \
+	src/solvers/enummixed/clique.h \
+	src/solvers/enummixed/enummixed.cc \
+	src/solvers/enummixed/enummixed.h
+
+gtracerlib_SOURCES = \
+	${gtracer_SOURCES} \
+	src/solvers/gnm/gnm.cc \
+	src/solvers/gnm/gnm.h \
+	src/solvers/ipa/ipa.cc \
+	src/solvers/ipa/ipa.h
+
+liap_SOURCES = \
+	src/solvers/liap/efgliap.cc \
+	src/solvers/liap/nfgliap.cc \
+	src/solvers/liap/liap.h
+
+logit_SOURCES = \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+    src/solvers/logit/logit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.cc
+
+simpdiv_SOURCES = \
+	src/solvers/simpdiv/simpdiv.cc \
+	src/solvers/simpdiv/simpdiv.h
+
+enumpoly_SOURCES = \
+	${nashsupport_SOURCES} \
+	src/solvers/enumpoly/indexproduct.h \
+	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/poly.cc \
+	src/solvers/enumpoly/poly.h \
+	src/solvers/enumpoly/polysystem.h \
+    src/solvers/enumpoly/polypartial.h \
+    src/solvers/enumpoly/polypartial.imp \
+	src/solvers/enumpoly/polysolver.cc \
+	src/solvers/enumpoly/polysolver.h \
+	src/solvers/enumpoly/efgpoly.cc \
+	src/solvers/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/enumpoly.h
+
+noinst_HEADERS = src/gambit.h src/solvers.h src/solvers/nash.h
+
 if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++
 endif
@@ -340,153 +394,82 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\"
 
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
+## Convenience libraries
+##
+## Every command-line tool and the GUI link against these instead of each
+## recompiling the same core/games/solver sources from scratch.
+
+noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
+	libliap.a liblogit.a libsimpdiv.a libenumpoly.a
+
+libcore_a_SOURCES = ${core_SOURCES}
+libgames_a_SOURCES = ${game_SOURCES}
+libbimatrix_a_SOURCES = ${bimatrix_SOURCES}
+libgtracer_a_SOURCES = ${gtracerlib_SOURCES}
+libliap_a_SOURCES = ${liap_SOURCES}
+liblogit_a_SOURCES = ${logit_SOURCES}
+libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
+libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
+
 ## Command-line tools
 
 gambit_convert_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/tools/convert/convert.cc
+gambit_convert_LDADD = libgames.a libcore.a
 
 gambit_enummixed_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/enummixed/clique.cc \
-	src/solvers/enummixed/clique.h \
-	src/solvers/enummixed/enummixed.cc \
-	src/solvers/enummixed/enummixed.h \
 	src/tools/util.h \
 	src/tools/enummixed/enummixed.cc
-
-gambit_nashsupport_SOURCES = \
-	src/solvers/nashsupport/efgsupport.cc \
-	src/solvers/nashsupport/nfgsupport.cc \
-	src/solvers/nashsupport/nashsupport.h
+gambit_enummixed_LDADD = libbimatrix.a libgames.a libcore.a
 
 gambit_enumpoly_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
-	src/solvers/enumpoly/indexproduct.h \
-	src/solvers/enumpoly/rectangle.h \
-	src/solvers/enumpoly/poly.cc \
-	src/solvers/enumpoly/poly.h \
-	src/solvers/enumpoly/polysystem.h \
-    src/solvers/enumpoly/polypartial.h \
-    src/solvers/enumpoly/polypartial.imp \
-	src/solvers/enumpoly/polysolver.cc \
-	src/solvers/enumpoly/polysolver.h \
-	src/solvers/enumpoly/efgpoly.cc \
-	src/solvers/enumpoly/nfgpoly.cc \
-	src/solvers/enumpoly/enumpoly.h \
 	src/tools/util.h \
 	src/tools/enumpoly/enumpoly.cc
+gambit_enumpoly_LDADD = libenumpoly.a libgames.a libcore.a
 
 gambit_enumpure_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/enumpure/enumpure.h \
 	src/tools/util.h \
 	src/tools/enumpure/enumpure.cc
+gambit_enumpure_LDADD = libgames.a libcore.a
 
 gambit_gnm_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${gtracer_SOURCES} \
-	src/solvers/gnm/gnm.cc \
-	src/solvers/gnm/gnm.h \
 	src/tools/gt/nfggt.cc \
 	src/tools/gt/nfggnm.cc
+gambit_gnm_LDADD = libgtracer.a libgames.a libcore.a
 
 gambit_ipa_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${gtracer_SOURCES} \
-	src/solvers/ipa/ipa.cc \
-	src/solvers/ipa/ipa.h \
 	src/tools/gt/nfggt.cc \
 	src/tools/util.h \
 	src/tools/gt/nfgipa.cc
+gambit_ipa_LDADD = libgtracer.a libgames.a libcore.a
 
 gambit_lcp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/lcp/efglcp.cc \
-	src/solvers/lcp/nfglcp.cc \
-	src/solvers/lcp/lcp.h \
 	src/tools/util.h \
 	src/tools/lcp/lcp.cc
+gambit_lcp_LDADD = libbimatrix.a libgames.a libcore.a
 
 gambit_liap_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/liap/efgliap.cc \
-	src/solvers/liap/nfgliap.cc \
-	src/solvers/liap/liap.h \
 	src/tools/util.h \
 	src/tools/liap/liap.cc
+gambit_liap_LDADD = libliap.a libgames.a libcore.a
 
 gambit_logit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.imp \
-	src/solvers/logit/path.cc \
-	src/solvers/logit/path.h \
-    src/solvers/logit/logit.h \
-	src/solvers/logit/efglogit.cc \
-	src/solvers/logit/nfglogit.cc \
 	src/tools/util.h \
 	src/tools/logit/logit.cc
+gambit_logit_LDADD = liblogit.a libgames.a libcore.a
 
 gambit_lp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/lp/lp.cc \
-	src/solvers/lp/lp.h \
 	src/tools/util.h \
 	src/tools/lp/lp.cc
+gambit_lp_LDADD = libbimatrix.a libgames.a libcore.a
 
 gambit_simpdiv_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/simpdiv/simpdiv.cc \
-	src/solvers/simpdiv/simpdiv.h \
 	src/tools/util.h \
 	src/tools/simpdiv/nfgsimpdiv.cc
+gambit_simpdiv_LDADD = libsimpdiv.a libgames.a libcore.a
 
 gambit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/enummixed/clique.cc \
-	src/solvers/enummixed/clique.h \
-	src/solvers/enummixed/enummixed.cc \
-	src/solvers/enummixed/enummixed.h \
-	src/solvers/lcp/lcp.h \
-	src/solvers/lcp/efglcp.cc \
-	src/solvers/lcp/nfglcp.cc \
-	src/solvers/lp/lp.h \
-	src/solvers/lp/lp.cc \
-	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.imp \
-	src/solvers/logit/path.cc \
-	src/solvers/logit/path.h \
-	src/solvers/logit/logit.h \
-	src/solvers/logit/efglogit.cc \
-	src/solvers/logit/nfglogit.cc \
-	${gambit_nashsupport_SOURCES} \
-	src/solvers/enumpoly/indexproduct.h \
-	src/solvers/enumpoly/rectangle.h \
-	src/solvers/enumpoly/poly.cc \
-	src/solvers/enumpoly/poly.h \
-	src/solvers/enumpoly/polysystem.h \
-	src/solvers/enumpoly/polypartial.h \
-	src/solvers/enumpoly/polypartial.imp \
-	src/solvers/enumpoly/polysolver.cc \
-	src/solvers/enumpoly/polysolver.h \
-	src/solvers/enumpoly/efgpoly.cc \
-	src/solvers/enumpoly/nfgpoly.cc \
-	src/solvers/enumpoly/enumpoly.h \
-	src/solvers/simpdiv/simpdiv.cc \
-	src/solvers/simpdiv/simpdiv.h \
-	src/solvers/liap/liap.h \
-	src/solvers/liap/efgliap.cc \
-	src/solvers/liap/nfgliap.cc \
-	${gtracer_SOURCES} \
-	src/solvers/gnm/gnm.h \
-	src/solvers/gnm/gnm.cc \
-	src/solvers/ipa/ipa.h \
-	src/solvers/ipa/ipa.cc \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
@@ -556,12 +539,14 @@ gambit_SOURCES = \
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
 gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
-if IS_WIN32
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
-else
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS)
-endif
+gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
+	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
+if IS_WIN32
+gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
+else
+gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
+endif
 
 osx-bundle:
 	make all

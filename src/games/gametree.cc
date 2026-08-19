@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametree.cc
+// FILE: src/games/gametree.cc
 // Implementation of extensive game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include <unordered_set>
 #include <variant>
 
-#include "gambit.h"
+#include "games.h"
 #include "gametree.h"
 #include "writer.h"
 

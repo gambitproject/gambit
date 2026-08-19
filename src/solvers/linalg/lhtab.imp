@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lhtab.imp
+// FILE: src/solvers/linalg/lhtab.imp
 // Tableau class for Lemke-Howson algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include "lhtab.h"
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit::linalg {
 

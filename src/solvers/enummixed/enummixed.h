@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/nash/enummixed.h
+// FILE: src/solvers/enummixed/enummixed.h
 // Enumerate all mixed strategy equilibria of two-player games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_ENUMMIXED_H
-#define GAMBIT_NASH_ENUMMIXED_H
+#ifndef GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H
+#define GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
@@ -78,4 +78,4 @@ EnumMixedStrategySolve(const Game &p_game,
 
 } // end namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_ENUMMIXED_H
+#endif // GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H

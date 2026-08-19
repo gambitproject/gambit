@@ -24,7 +24,7 @@
 #include <fstream>
 #include <getopt.h>
 #include <type_traits>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/enumpoly/enumpoly.h"
 
 using namespace Gambit;

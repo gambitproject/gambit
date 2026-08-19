@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/ipa/ipa.cc
+// FILE: src/solvers/ipa/ipa.cc
 // Compute Nash equilibria via iterated polymatrix approximation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include <algorithm>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/gtracer/gtracer.h"
 

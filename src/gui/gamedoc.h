@@ -25,7 +25,8 @@
 
 #include <map>
 
-#include "gambit.h"
+#include "games/behavspt.h"
+#include "games/stratspt.h"
 #include "style.h"
 #include "analysis.h"
 

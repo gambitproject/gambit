@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/liap/efgliap.h
+// FILE: src/solvers/liap/liap.h
 // Compute Nash equilibria by minimizing Liapunov function on extensive game
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_LIAP_H
-#define GAMBIT_NASH_LIAP_H
+#ifndef GAMBIT_SOLVERS_LIAP_LIAP_H
+#define GAMBIT_SOLVERS_LIAP_LIAP_H
 
 #include <variant>
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
@@ -61,4 +61,4 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
 
 } // namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_LIAP_H
+#endif // GAMBIT_SOLVERS_LIAP_LIAP_H

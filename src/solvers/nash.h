@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/nash.h
+// FILE: src/solvers/nash.h
 // Framework for computing (sub)sets of Nash equilibria.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_NASH_H
-#define LIBGAMBIT_NASH_H
+#ifndef GAMBIT_SOLVERS_NASH_H
+#define GAMBIT_SOLVERS_NASH_H
 
 #include <functional>
+#include <list>
+
 #include "core/cancel.h"
-#include "gambit.h"
+#include "games/stratmixed.h"
+#include "games/behavmixed.h"
 
 namespace Gambit::Nash {
 
@@ -54,4 +57,4 @@ ToMixedBehaviorProfile(const std::list<MixedStrategyProfile<T>> &p_list)
 
 } // namespace Gambit::Nash
 
-#endif // LIBGAMBIT_NASH_H
+#endif // GAMBIT_SOLVERS_NASH_H

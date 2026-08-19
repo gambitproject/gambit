@@ -24,7 +24,7 @@
 #include <fstream>
 #include <type_traits>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/liap/liap.h"
 

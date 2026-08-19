@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: library/src/gtracer/aggame.cc
+// FILE: src/solvers/gtracer/aggame.cc
 // Implement GNM-specific routines for action graph games
 //
 // This program is free software; you can redistribute it and/or modify

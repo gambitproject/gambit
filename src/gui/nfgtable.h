@@ -25,6 +25,8 @@
 
 #include <wx/grid.h>
 
+#include "games/stratpure.h"
+
 namespace Gambit::GUI {
 class GameDocument;
 class NfgPanel;

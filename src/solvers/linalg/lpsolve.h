@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/lpsolve.h
+// FILE: src/solvers/linalg/lpsolve.h
 // Interface to LP solvers
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LPSOLVE_H
-#define LPSOLVE_H
+#ifndef GAMBIT_SOLVERS_LINALG_LPSOLVE_H
+#define GAMBIT_SOLVERS_LINALG_LPSOLVE_H
 
 #include "core/cancel.h"
-#include "gambit.h"
+#include "core/core.h"
 #include "lptab.h"
 
 namespace Gambit::linalg {
@@ -75,4 +75,4 @@ public:
 
 } // end namespace Gambit::linalg
 
-#endif // LPSOLVE_H
+#endif // GAMBIT_SOLVERS_LINALG_LPSOLVE_H

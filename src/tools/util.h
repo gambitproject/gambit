@@ -25,7 +25,8 @@
 
 #include <optional>
 #include <random>
-#include "gambit.h"
+#include "games/stratmixed.h"
+#include "games/behavmixed.h"
 
 namespace Gambit {
 
