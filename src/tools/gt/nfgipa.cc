@@ -23,12 +23,29 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
+#include <type_traits>
 #include "gambit.h"
 #include "tools/util.h"
 #include "solvers/ipa/ipa.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
+
+namespace {
+
+void RenderIPAEvent(const IPAEvent &p_event,
+                    const std::shared_ptr<MixedProfileRenderer<double>> &p_renderer)
+{
+  std::visit(
+      [p_renderer]<typename Event>(const Event &event) {
+        if constexpr (std::is_same_v<Event, IPAStepEvent>) {
+          p_renderer->Render(event.profile, "iter-" + lexical_cast<std::string>(event.iteration));
+        }
+      },
+      p_event);
+}
+
+} // namespace
 
 extern std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
                                                                            std::istream &p_stream);
@@ -54,6 +71,7 @@ void PrintHelp(char *progname)
   std::cerr << "                   (ignored if -s is given)\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
   exit(0);
 }
@@ -61,21 +79,26 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false;
+  bool quiet = false, verbose = false;
   int numDecimals = 6, numVectors = 1;
   std::string startFile;
 
   int long_opt_index = 0;
-  option long_options[] = {
-      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
+  option long_options[] = {{"help", 0, nullptr, 'h'},
+                           {"version", 0, nullptr, 'v'},
+                           {"verbose", 0, nullptr, 'V'},
+                           {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:vqh", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:vVqh", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
       exit(0);
     case 'q':
       quiet = true;
+      break;
+    case 'V':
+      verbose = true;
       break;
     case 'd':
       numDecimals = atoi(optarg);
@@ -135,9 +158,16 @@ int main(int argc, char *argv[])
     }
 
     for (auto pert : perts) {
-      IPAStrategySolve(pert, [renderer](const MixedStrategyProfile<double> &p_profile) {
-        renderer->Render(p_profile);
-      });
+      IPAStrategySolve(
+          pert,
+          [renderer](const MixedStrategyProfile<double> &p_profile) {
+            renderer->Render(p_profile);
+          },
+          [renderer, verbose](const IPAEvent &p_event) {
+            if (verbose) {
+              RenderIPAEvent(p_event, renderer);
+            }
+          });
     }
     return 0;
   }

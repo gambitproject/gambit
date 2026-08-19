@@ -118,10 +118,12 @@ struct IPAResult {
 /// @param fuzz    the cutoff accuracy for an equilibrium after which the algorithm
 ///                stops refining it
 /// @param maxiter the maximum number of iterations to attempt
-/// @param verbose whether to print intermediate information on the progress of the
-///                algorithm
+/// @param p_onStep a callback function executed at the end of each iteration, with the
+///                 iteration number, the current approximate strategy, and the current
+///                 z- and s-differences (the same quantities used to test for convergence)
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
-              unsigned int maxiter = 100, bool p_verbose = false,
+              unsigned int maxiter,
+              std::function<void(int, const cvector &, double, double)> p_onStep,
               const CancelToken &p_cancel = CancelToken());
 
 /// @brief Build a Gametracer representation based on a Gambit game

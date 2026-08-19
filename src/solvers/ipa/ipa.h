@@ -23,18 +23,45 @@
 #ifndef GAMBIT_NASH_IPA_H
 #define GAMBIT_NASH_IPA_H
 
+#include <variant>
+
 #include "games/nash.h"
+#include "solvers/gtracer/gtracer.h"
 
 namespace Gambit::Nash {
+
+/// @brief Reports the state of the approximating strategy profile at the end of an
+///        iteration of IPA
+struct IPAStepEvent {
+  const MixedStrategyProfile<double> &profile;
+  int iteration;
+  double zDiff;
+  double sDiff;
+};
+
+/// @brief Reports why a call to IPA's iteration terminated, once at the end of the call.
+///        Because IPA may internally restart the iteration from where it left off if it
+///        has not yet converged, this may be raised more than once in the course of solving.
+struct IPATerminationEvent {
+  gametracer::IPATerminationReason reason;
+  std::string message;
+};
+
+using IPAEvent = std::variant<IPAStepEvent, IPATerminationEvent>;
+using IPAEventCallbackType = std::function<void(const IPAEvent &)>;
+
+inline void NullIPAEventCallback(const IPAEvent &) {}
 
 std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const Game &p_game,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 IPAEventCallbackType p_onEvent = NullIPAEventCallback,
                  const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                 IPAEventCallbackType p_onEvent = NullIPAEventCallback,
                  const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
