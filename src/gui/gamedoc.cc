@@ -427,44 +427,26 @@ void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoNewStrategy(GamePlayer p_player)
+void GameDocument::DoSetStrategies(GamePlayer p_player,
+                                   const std::vector<std::string> &p_stableLabels,
+                                   const std::vector<std::string> &p_labels)
 {
-  std::vector<std::string> labels;
-  std::set<std::string> strategyLabels;
-  for (const auto &strategy : p_player->GetStrategies()) {
-    labels.push_back(strategy->GetLabel());
-    strategyLabels.insert(strategy->GetLabel());
-  }
-  int number = p_player->GetStrategies().size() + 1;
-  while (strategyLabels.contains(std::to_string(number))) {
-    number++;
-  }
-  labels.push_back(std::to_string(number));
-  m_game->SetStrategies(p_player, labels);
-  NotifyChanged(GameModificationType::GameForm);
-}
+  // Phase 1: structure (which strategies exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetStrategies(p_player, p_stableLabels);
 
-void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
-{
-  const GamePlayer player = p_strategy->GetPlayer();
-  if (player->GetStrategies().size() == 1) {
-    return;
-  }
-  std::vector<std::string> labels;
-  for (const auto &strategy : player->GetStrategies()) {
-    if (strategy != p_strategy) {
-      labels.push_back(strategy->GetLabel());
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
     }
   }
-  m_game->SetStrategies(player, labels);
+  if (!relabels.empty()) {
+    m_game->RelabelStrategies(p_player, relabels);
+  }
   NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
-{
-  m_game->RelabelStrategies(p_strategy->GetPlayer(),
-                            {{p_strategy->GetLabel(), p_label.ToStdString(wxConvUTF8)}});
-  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)

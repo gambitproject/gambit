@@ -33,11 +33,11 @@
 
 #include "renratio.h" // special renderer/editor for rational numbers
 #include "editlabel.h"
-#include "labelcell.h"
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
 #include "nfgtable.h"
+#include "dleditstrategies.h"
 #include "dlexcept.h"
 
 namespace Gambit::GUI {
@@ -187,30 +187,23 @@ class RowPlayerTable final : public wxGridTableBase {
   int m_numRows{0};
   int m_numCols{0};
   RowHeaderCellRenderer *m_renderer;
-  LabelCellEditor *m_editor;
 
 public:
   explicit RowPlayerTable(TableWidget *p_table)
-    : m_table(p_table), m_renderer(new RowHeaderCellRenderer(p_table)),
-      m_editor(new LabelCellEditor())
+    : m_table(p_table), m_renderer(new RowHeaderCellRenderer(p_table))
   {
     // Freshly-constructed wxGridCellWorker-derived objects start unreferenced;
     // this is our own table's stake, matched by DecRef() in the destructor.
-    // Each SetRenderer()/SetEditor() call below additionally consumes one
-    // reference per call (that's the ownership contract of those setters),
-    // so GetAttr() takes a fresh IncRef() immediately before each one -- the
-    // instance itself is reused across all cells and all calls, which is
-    // required: wxGrid expects the *same* editor/renderer object identity
-    // back on repeated queries for a given cell's active editor.
+    // Each SetRenderer() call below additionally consumes one reference per
+    // call (that's the ownership contract of that setter), so GetAttr() takes
+    // a fresh IncRef() immediately before each one -- the instance itself is
+    // reused across all cells and all calls, which is required: wxGrid
+    // expects the *same* renderer object identity back on repeated queries
+    // for a given cell.
     m_renderer->IncRef();
-    m_editor->IncRef();
   }
 
-  ~RowPlayerTable() override
-  {
-    m_renderer->DecRef();
-    m_editor->DecRef();
-  }
+  ~RowPlayerTable() override { m_renderer->DecRef(); }
 
   int GetNumberRows() override { return m_numRows; }
   int GetNumberCols() override { return m_numCols; }
@@ -234,20 +227,12 @@ wxString RowPlayerTable::GetValue(int row, int col)
   return wxString::FromUTF8(m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel());
 }
 
-void RowPlayerTable::SetValue(int row, int col, const wxString &value)
+void RowPlayerTable::SetValue(int, int, const wxString &)
 {
-  const wxString label = LabelTextCtrl::Normalize(value, true);
-
-  if (label.empty()) {
-    wxBell();
-    return;
-  }
-
-  const wxString result = m_table->RenameRowHeaderStrategy(col, row, label);
-  if (!result.empty() && GetView()) {
-    wxWindow *win = GetView();
-    win->CallAfter([win, result] { ExceptionDialog(win, result.ToStdString()).ShowModal(); });
-  }
+  // Row header cells are read-only: editing a player's strategies goes entirely through
+  // TableWidget::EditStrategies(), triggered on left-click rather than through wxGrid's own
+  // cell-editing machinery. This override exists only to satisfy the pure virtual
+  // wxGridTableBase interface.
 }
 
 wxGridCellAttr *RowPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
@@ -260,16 +245,13 @@ wxGridCellAttr *RowPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttr
   // since the "neighbour" past a span boundary is a different strategy's
   // header cell, not empty space.
   attr->SetOverflow(false);
+  attr->SetReadOnly(true);
 
   if (m_table->GetRowHeaderColCount() > 0) {
     attr->SetTextColour(m_table->GetPlayerColor(m_table->GetRowHeaderPlayer(col)));
-    m_editor->IncRef();
-    attr->SetEditor(m_editor);
-    attr->SetReadOnly(m_table->IsReadOnly());
   }
   else {
     attr->SetTextColour(*wxBLACK);
-    attr->SetReadOnly(true);
   }
 
   // GetAttr() constructs a fresh attr on every call, so the span has to be
@@ -352,7 +334,6 @@ class RowPlayerGrid final : public TableGridBase {
   RowPlayerTable *m_gridTable;
 
   void OnCellLeftClick(wxGridEvent &) override;
-  void OnCellRightClick(wxGridEvent &);
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                           const wxPoint &p_pos);
@@ -381,8 +362,6 @@ RowPlayerGrid::RowPlayerGrid(TableWidget *p_parent)
   // and OS drag events over the cell area is the internal grid window, not
   // the outer wxGrid object, so the drop target has to be registered there.
   GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
-
-  Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &RowPlayerGrid::OnCellRightClick, this);
 }
 
 namespace {
@@ -463,39 +442,25 @@ void ShowStrategyPopup(wxGrid *p_grid, int p_row, int p_col, const GameStrategy 
 
 void RowPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
-  if (!m_table->IsReadOnly() || m_table->GetRowHeaderColCount() == 0) {
+  if (m_table->GetRowHeaderColCount() == 0) {
     TableGridBase::OnCellLeftClick(p_event);
     return;
   }
 
-  const int row = p_event.GetRow();
   const int col = p_event.GetCol();
   const int player = m_table->GetRowHeaderPlayer(col);
-  const int strategy = m_table->GetRowHeaderStrategy(col, row);
-  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-  if (!GetStrategyTooltip(gameStrategy).empty()) {
-    ShowStrategyPopup(this, row, col, gameStrategy);
-  }
-}
 
-void RowPlayerGrid::OnCellRightClick(wxGridEvent &p_event)
-{
-  if (m_table->GetRowHeaderColCount() == 0 || m_table->IsReadOnly()) {
-    p_event.Skip();
+  if (m_table->IsReadOnly()) {
+    const int row = p_event.GetRow();
+    const int strategy = m_table->GetRowHeaderStrategy(col, row);
+    const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+    if (!GetStrategyTooltip(gameStrategy).empty()) {
+      ShowStrategyPopup(this, row, col, gameStrategy);
+    }
     return;
   }
 
-  const int row = p_event.GetRow();
-  const int col = p_event.GetCol();
-
-  wxMenu menu;
-  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
-  deleteItem->Enable(m_table->CanDeleteRowHeaderStrategy(col, row));
-  menu.Bind(
-      wxEVT_MENU,
-      [this, row, col](wxCommandEvent &) { m_table->DeleteRowHeaderStrategy(col, row); },
-      wxID_DELETE);
-  PopupMenu(&menu, p_event.GetPosition());
+  m_table->EditStrategies(player);
 }
 
 bool RowPlayerGrid::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
@@ -611,22 +576,15 @@ class ColPlayerTable final : public wxGridTableBase {
   int m_numRows{0};
   int m_numCols{0};
   ColHeaderCellRenderer *m_renderer;
-  LabelCellEditor *m_editor;
 
 public:
   explicit ColPlayerTable(TableWidget *p_table)
-    : m_table(p_table), m_renderer(new ColHeaderCellRenderer(p_table)),
-      m_editor(new LabelCellEditor())
+    : m_table(p_table), m_renderer(new ColHeaderCellRenderer(p_table))
   {
     m_renderer->IncRef();
-    m_editor->IncRef();
   }
 
-  ~ColPlayerTable() override
-  {
-    m_renderer->DecRef();
-    m_editor->DecRef();
-  }
+  ~ColPlayerTable() override { m_renderer->DecRef(); }
 
   int GetNumberRows() override { return m_numRows; }
   int GetNumberCols() override { return m_numCols; }
@@ -649,20 +607,12 @@ wxString ColPlayerTable::GetValue(int row, int col)
   return wxString::FromUTF8(m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel());
 }
 
-void ColPlayerTable::SetValue(int row, int col, const wxString &value)
+void ColPlayerTable::SetValue(int, int, const wxString &)
 {
-  const wxString label = LabelTextCtrl::Normalize(value, true);
-
-  if (label.empty()) {
-    wxBell();
-    return;
-  }
-
-  const wxString result = m_table->RenameColHeaderStrategy(row, col, label);
-  if (!result.empty() && GetView()) {
-    wxWindow *win = GetView();
-    win->CallAfter([win, result] { ExceptionDialog(win, result.ToStdString()).ShowModal(); });
-  }
+  // Column header cells are read-only: editing a player's strategies goes entirely through
+  // TableWidget::EditStrategies(), triggered on left-click rather than through wxGrid's own
+  // cell-editing machinery. This override exists only to satisfy the pure virtual
+  // wxGridTableBase interface.
 }
 
 wxGridCellAttr *ColPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
@@ -675,16 +625,13 @@ wxGridCellAttr *ColPlayerTable::GetAttr(int row, int col, wxGridCellAttr::wxAttr
   // since the "neighbour" past a span boundary is a different strategy's
   // header cell, not empty space.
   attr->SetOverflow(false);
+  attr->SetReadOnly(true);
 
   if (m_table->GetColHeaderRowCount() > 0) {
     attr->SetTextColour(m_table->GetPlayerColor(m_table->GetColHeaderPlayer(row)));
-    m_editor->IncRef();
-    attr->SetEditor(m_editor);
-    attr->SetReadOnly(m_table->IsReadOnly());
   }
   else {
     attr->SetTextColour(*wxBLACK);
-    attr->SetReadOnly(true);
   }
 
   // See the equivalent comment in RowPlayerTable::GetAttr: span has to be
@@ -763,7 +710,6 @@ class ColPlayerGrid final : public TableGridBase {
   ColPlayerTable *m_gridTable;
 
   void OnCellLeftClick(wxGridEvent &) override;
-  void OnCellRightClick(wxGridEvent &);
 
   bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
                           const wxPoint &p_pos);
@@ -791,45 +737,29 @@ ColPlayerGrid::ColPlayerGrid(TableWidget *p_parent)
   // and OS drag events over the cell area is the internal grid window, not
   // the outer wxGrid object, so the drop target has to be registered there.
   GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
-
-  Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &ColPlayerGrid::OnCellRightClick, this);
 }
 
 void ColPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
-  if (!m_table->IsReadOnly() || m_table->GetColHeaderRowCount() == 0) {
+  if (m_table->GetColHeaderRowCount() == 0) {
     TableGridBase::OnCellLeftClick(p_event);
     return;
   }
 
   const int row = p_event.GetRow();
-  const int col = p_event.GetCol();
   const int player = m_table->GetColHeaderPlayer(row);
-  const int strategy = m_table->GetColHeaderStrategy(row, col);
-  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-  if (!GetStrategyTooltip(gameStrategy).empty()) {
-    ShowStrategyPopup(this, row, col, gameStrategy);
-  }
-}
 
-void ColPlayerGrid::OnCellRightClick(wxGridEvent &p_event)
-{
-  if (m_table->GetColHeaderRowCount() == 0 || m_table->IsReadOnly()) {
-    p_event.Skip();
+  if (m_table->IsReadOnly()) {
+    const int col = p_event.GetCol();
+    const int strategy = m_table->GetColHeaderStrategy(row, col);
+    const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+    if (!GetStrategyTooltip(gameStrategy).empty()) {
+      ShowStrategyPopup(this, row, col, gameStrategy);
+    }
     return;
   }
 
-  const int row = p_event.GetRow();
-  const int col = p_event.GetCol();
-
-  wxMenu menu;
-  wxMenuItem *deleteItem = menu.Append(wxID_DELETE, _("Delete strategy"));
-  deleteItem->Enable(m_table->CanDeleteColHeaderStrategy(row, col));
-  menu.Bind(
-      wxEVT_MENU,
-      [this, row, col](wxCommandEvent &) { m_table->DeleteColHeaderStrategy(row, col); },
-      wxID_DELETE);
-  PopupMenu(&menu, p_event.GetPosition());
+  m_table->EditStrategies(player);
 }
 
 bool ColPlayerGrid::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
@@ -1593,54 +1523,25 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   DrawGridToDC(m_payoffGrid, p_dc);
 }
 
-wxString TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
+void TableWidget::EditStrategies(int player)
 {
-  const int player = GetRowHeaderPlayer(headerCol);
-  const int strat = GetRowHeaderStrategy(headerCol, headerRow);
+  const GamePlayer gamePlayer = m_doc->GetGame()->GetPlayer(player);
+  EditStrategiesDialog dialog(this, gamePlayer);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  std::vector<std::string> stableLabels, labels;
+  for (int i = 0; i < dialog.NumStrategies(); i++) {
+    if (dialog.IsDeleted(i)) {
+      continue;
+    }
+    stableLabels.push_back(dialog.GetStableLabel(i));
+    labels.push_back(dialog.GetStrategyLabel(i).ToStdString(wxConvUTF8));
+  }
 
   try {
-    m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
-  }
-  catch (std::exception &ex) {
-    return wxString::FromUTF8(ex.what());
-  }
-  return "";
-}
-
-wxString TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
-{
-  const int player = GetColHeaderPlayer(headerRow);
-  const int strat = GetColHeaderStrategy(headerRow, headerCol);
-
-  try {
-    m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
-  }
-  catch (std::exception &ex) {
-    return wxString::FromUTF8(ex.what());
-  }
-  return "";
-}
-
-void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
-{
-  const int player = GetRowHeaderPlayer(headerCol);
-  const int strat = GetRowHeaderStrategy(headerCol, headerRow);
-
-  try {
-    m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
-void TableWidget::DeleteColHeaderStrategy(int headerRow, int headerCol)
-{
-  const int player = GetColHeaderPlayer(headerRow);
-  const int strat = GetColHeaderStrategy(headerRow, headerCol);
-
-  try {
-    m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
+    m_doc->DoSetStrategies(gamePlayer, stableLabels, labels);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
@@ -1685,18 +1586,6 @@ GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) 
 {
   auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
-}
-
-bool TableWidget::CanDeleteRowHeaderStrategy(int headerCol, int) const
-{
-  const int player = GetRowHeaderPlayer(headerCol);
-  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
-}
-
-bool TableWidget::CanDeleteColHeaderStrategy(int headerRow, int) const
-{
-  const int player = GetColHeaderPlayer(headerRow);
-  return GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player)).size() > 1;
 }
 
 } // namespace Gambit::GUI

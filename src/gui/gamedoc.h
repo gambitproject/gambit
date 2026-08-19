@@ -297,9 +297,18 @@ public:
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
   GamePlayer DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
-  void DoNewStrategy(GamePlayer p_player);
-  void DoDeleteStrategy(GameStrategy p_strategy);
-  void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
+  /// Declare the strategies of `p_player` in a single operation, covering any combination
+  /// of adding, deleting, reordering, and relabeling strategies.
+  ///
+  /// `p_stableLabels` identifies each strategy as it was before this edit (an existing
+  /// strategy's current label, or a placeholder for one newly created); `p_labels` is what
+  /// that same strategy, by position, is to be labeled after the edit.  Structure (which
+  /// strategies exist, and in what order) is resolved first, purely from `p_stableLabels`;
+  /// labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order
+  /// means a rename that reuses a label freed up by a simultaneous deletion never collides
+  /// with the not-yet-renamed original.
+  void DoSetStrategies(GamePlayer p_player, const std::vector<std::string> &p_stableLabels,
+                       const std::vector<std::string> &p_labels);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
   void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
   /// Declare the actions of `p_infoset` in a single operation, covering any combination

@@ -495,14 +495,14 @@ gambit_SOURCES = \
 	src/gui/editlabel.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
-	src/gui/labelcell.cc \
-	src/gui/labelcell.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
 	src/gui/dleditmove.cc \
 	src/gui/dleditmove.h \
 	src/gui/dleditnode.cc \
 	src/gui/dleditnode.h \
+	src/gui/dleditstrategies.cc \
+	src/gui/dleditstrategies.h \
 	src/gui/dlefglayout.cc \
 	src/gui/dlefglayout.h \
 	src/gui/dlefglegend.cc \
