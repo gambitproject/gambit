@@ -39,17 +39,31 @@ template <class Support> struct EnumPolySingularSupportEvent {
   const Support &support;
 };
 
+/// Reported when the search for roots on a support exhausted its rectangle
+/// budget before completing.  Distinct from EnumPolySingularSupportEvent:
+/// this can happen even when the equilibria being sought are regular.
+template <class Support> struct EnumPolyBudgetExceededSupportEvent {
+  const Support &support;
+};
+
 template <class Support>
 using EnumPolyEvent =
-    std::variant<EnumPolyCandidateSupportEvent<Support>, EnumPolySingularSupportEvent<Support>>;
+    std::variant<EnumPolyCandidateSupportEvent<Support>, EnumPolySingularSupportEvent<Support>,
+                 EnumPolyBudgetExceededSupportEvent<Support>>;
 
 template <class Support>
 using EnumPolyEventCallbackType = std::function<void(const EnumPolyEvent<Support> &)>;
 
 template <class Support> void NullEnumPolyEventCallback(const EnumPolyEvent<Support> &) {}
 
+/// Default budget on the number of rectangles examined per support before
+/// giving up.  Ordinary supports need only a handful, leaving ample headroom
+/// for difficult-but-tractable ones while bounding the worst case.
+constexpr size_t kDefaultEnumPolyMaxRectangles = 20'000;
+
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
+                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
                           NullEnumPolyEventCallback<StrategySupportProfile>,
@@ -57,6 +71,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
 
 std::list<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &, int p_stopAfter, double p_maxregret,
+                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =
                           NullEnumPolyEventCallback<BehaviorSupportProfile>,
