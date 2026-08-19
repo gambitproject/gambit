@@ -123,25 +123,16 @@ def test_make_infoset_strategic_game_raises():
         game.make_infoset([], "1")
 
 
-def test_infoset_add_action_end():
+def test_set_move_actions_add_preserves_existing_action_handles():
+    """New actions may be declared at any position; the existing Action objects
+    survive in declared order."""
     game = games.read_from_file("basic_extensive_game.efg")
     actions = list(game.root.infoset.actions)
-    game.add_action(game.root.infoset)
+    labels = [action.label for action in actions]
+    game.set_move_actions(game.root.infoset, labels + ["end"])
     assert list(game.root.infoset.actions)[:-1] == actions
-
-
-def test_infoset_add_action_before():
-    game = games.read_from_file("basic_extensive_game.efg")
-    actions = list(game.root.infoset.actions)
-    game.add_action(game.root.infoset, actions[0])
-    assert list(game.root.infoset.actions)[1:] == actions
-
-
-def test_infoset_add_action_error():
-    game = games.read_from_file("basic_extensive_game.efg")
-    _, p2, *_ = game.players
-    with pytest.raises(gbt.MismatchError):
-        game.add_action(game.root.infoset, next(iter(p2.infosets)).actions["U2"])
+    game.set_move_actions(game.root.infoset, ["front"] + labels + ["end"])
+    assert list(game.root.infoset.actions)[1:-1] == actions
 
 
 def test_infoset_plays():

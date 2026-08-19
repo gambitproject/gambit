@@ -74,39 +74,85 @@ that a move can be added for a new, as-yet-undefined player, a move
 can be added directly into an existing information set, and a move can
 be immediately given more than two actions.
 
-A single action can also be added to an existing move without
-drag-and-drop, by clicking on any node belonging to the move and
-selecting :menuselection:`Edit --> Insert action`.  The new action is
-given an automatically generated numeric label, which can be changed
-afterward as described below in :ref:`editing-moves`.
+A single action can also be added to, or removed from, an existing
+move without drag-and-drop, using the :guilabel:`Edit move` dialog
+described next.
 
 
 .. _editing-moves:
 
-Editing move properties
-------------------------
+Editing moves
+-------------
 
 The properties of an existing move -- the label of its information
-set, the player to which it belongs, and the labels of its actions --
-can be changed by clicking on any node belonging to the move and
+set, the player to which it belongs, and the actions available at it
+-- can be changed by clicking on any node belonging to the move and
 selecting :menuselection:`Edit --> Move`. This displays the
-:guilabel:`Move properties` dialog, which lists a text field for the
+:guilabel:`Edit move` dialog, which lists a text field for the
 information set's label, a dropdown for the player to which the move
-belongs, and one text field per action, prefilled with the action's
-current label. For moves belonging to the chance player, a probability
-field is shown alongside each action instead of the player dropdown.
+belongs, and a row for each action, showing its label and, for moves
+belonging to the chance player, its probability.
 
-Action labels must be nonempty, and unique among the actions at the
-move; the information set's label, if not left blank, must similarly
-be unique among the information sets belonging to the same player. Any
-field that currently violates one of these rules is highlighted, and a
-description of the problem is shown below the list of actions; the
-:guilabel:`OK` button is disabled until all fields are valid. Because
-the labels of all the actions at the move are reassigned
-simultaneously when :guilabel:`OK` is clicked, two actions can have
-their labels swapped directly, for instance by relabeling
-:guilabel:`Left` to :guilabel:`Right` and :guilabel:`Right` to
-:guilabel:`Left` at the same time.
+Adding, removing, and reordering actions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Clicking :guilabel:`+`, below the list of actions, adds a new action
+with an automatically generated numeric label, which can be relabeled
+like any other action. Each action's row has a :guilabel:`✕` button
+to remove it, and :guilabel:`↑`/:guilabel:`↓` buttons to move it
+earlier or later among the other actions at the move.
+
+Removing an action does not immediately discard the subtree it leads
+to. Instead, the row is shown disabled, with its label struck
+through, and its :guilabel:`✕` button is replaced by a
+:guilabel:`↺` (restore) button, so that what is about to be
+destroyed remains visible -- and reversible -- until the dialog is
+confirmed. Clicking :guilabel:`↺` returns the action, and its
+subtree, exactly as they were. Nothing is actually deleted until
+:guilabel:`OK` is clicked; clicking :guilabel:`Cancel` leaves the move
+entirely unchanged. At least one action must remain at the move: the
+last remaining action cannot be removed.
+
+Renaming versus reordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Typing a new label into an action's row, and moving that row to a
+different position with the :guilabel:`↑`/:guilabel:`↓`
+buttons, are two distinct operations. They can be combined, but
+neither substitutes for the other:
+
++ Changing the text in a row renames that action, wherever it ends up
+  in the list. The subtree it leads to goes with it: renaming an
+  action never changes what happens after it is taken.
++ Moving a row up or down changes the order in which actions are
+  offered at the move. Each action keeps its own subtree as it moves:
+  reordering an action never changes what it is called.
+
+Because these are separate operations, two actions can have their
+labels swapped in place -- for instance, relabeling :guilabel:`Left`
+to :guilabel:`Right` and :guilabel:`Right` to :guilabel:`Left` at the
+same time, since all the relabeling at a move happens simultaneously
+when :guilabel:`OK` is clicked -- without touching the subtrees that
+follow them. This is different from using the
+:guilabel:`↑`/:guilabel:`↓` buttons to swap the *positions*
+of :guilabel:`Left` and :guilabel:`Right`, which exchanges their
+subtrees while leaving each action's own label attached to it.
+
+To help keep track of which is which while editing, an action whose
+label has been changed from what it started as is shown in italic
+blue text, and shows the original label in a tooltip on hover; a
+newly added action is shown in bold green text.
+
+Action labels must be nonempty, and unique among the actions
+currently kept at the move (a removed action's label is not
+considered); the information set's label, if not left blank, must
+similarly be unique among the information sets belonging to the same
+player. Any field that currently violates one of these rules is
+highlighted, and a description of the problem is shown below the list
+of actions; the :guilabel:`OK` button is disabled until all fields
+are valid. For moves belonging to the chance player, the
+probabilities of the actions kept at the move must also be
+nonnegative numbers summing to exactly one.
 
 
 .. _copying-trees:

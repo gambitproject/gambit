@@ -34,6 +34,11 @@
   its actions to be specified up front, just as `Game.make_event` does.  (#999)
 - `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
   information sets; the unreachable information sets are absent.  (#1002)
+- Added `Game.set_move_actions` and `Game.set_event_actions`, declaring the ordered action list
+  of a move or an event (respectively) in a single operation: a label matching a current action
+  keeps its subtree, an unmatched current label is dropped (with confirmation), and an unmatched
+  new label creates a fresh action; listing the current labels in a new order reorders the
+  actions and their subtrees together.  (#1040)
 
 ### Changed
 - Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
@@ -78,6 +83,9 @@
   personal decision nodes and discarding their probabilities; previously only personal decision
   nodes were accepted.  This matches `Game.make_event`, which has always accepted personal
   decision nodes and converted them to a chance event.  (#999)
+- The GUI's "Move properties" dialog is renamed "Edit move", and now supports adding, deleting,
+  and reordering the actions at a move directly. The standalone "Insert action" menu command is
+  removed, superseded by the dialog.  (#1040)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -96,6 +104,8 @@
   nonempty, unique labels.  (#1026)
 - `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
   probabilities as forming the nodes of the event with the required distribution.  (#1009)
+- `Game.add_action` and `Game.delete_action` have been removed; use `Game.set_move_actions`
+  or `Game.set_event_actions`.  (#1040)
 - The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
   removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
   only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
@@ -106,6 +116,11 @@
   stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
   `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
   now builds the equivalent `MakeEvent` call directly.  (#999)
+- The C++ `Game` interface's `InsertAction`, `DeleteAction`, and `NormalizeChanceProbs` methods
+  have been removed; they were subsumed by `SetMoveActions`/`SetEventActions`, and by this point
+  were used only in support of `pygambit`'s `add_action`/`delete_action` and the GUI's "Insert
+  action" command, which now build the equivalent `SetMoveActions`/`SetEventActions` call
+  directly.  (#1040)
 
 ## [16.7.0] - 2026-07-11
 

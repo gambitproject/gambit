@@ -117,40 +117,6 @@ bool GameActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
-void GameTreeRep::DeleteAction(GameAction p_action)
-{
-  auto action = p_action.get();
-  auto *infoset = action->m_infoset;
-  if (infoset->m_game != this) {
-    throw MismatchException();
-  }
-  if (infoset->m_actions.size() == 1) {
-    throw UndefinedException();
-  }
-
-  IncrementVersion();
-  auto where =
-      std::find(infoset->m_actions.begin(), infoset->m_actions.end(), p_action.get_shared());
-  auto offset = where - infoset->m_actions.begin();
-  (*where)->Invalidate();
-  infoset->m_actions.erase(where);
-  if (infoset->m_player->IsChance()) {
-    infoset->m_probs.erase(std::next(infoset->m_probs.begin(), offset));
-    NormalizeChanceProbs(infoset);
-  }
-  infoset->RenumberActions();
-
-  for (auto member : infoset->m_members) {
-    auto it = std::next(member->m_children.begin(), offset);
-    DeleteTree(*it);
-    m_numNodes--;
-    (*it)->Invalidate();
-    member->m_children.erase(it);
-  }
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-}
-
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
 
 //========================================================================
@@ -186,39 +152,6 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
     node = node->m_parent;
   }
   return false;
-}
-
-GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
-{
-  if (p_action && p_action->GetInfoset() != p_infoset) {
-    throw MismatchException();
-  }
-  if (p_infoset->m_game != this) {
-    throw MismatchException();
-  }
-
-  IncrementVersion();
-  auto where = (p_action) ? std::find(p_infoset->m_actions.begin(), p_infoset->m_actions.end(),
-                                      p_action.get_shared())
-                          : p_infoset->m_actions.end();
-  auto offset = where - p_infoset->m_actions.begin();
-
-  auto action = std::make_shared<GameActionRep>(offset + 1, "", p_infoset.get());
-  p_infoset->m_actions.insert(where, action);
-  if (p_infoset->m_player->IsChance()) {
-    p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), offset), Number());
-  }
-  p_infoset->RenumberActions();
-  for (const auto &member : p_infoset->m_members) {
-    member->m_children.insert(std::next(member->m_children.cbegin(), offset),
-                              std::make_shared<GameNodeRep>(this, member.get()));
-  }
-
-  m_numNodes += p_infoset->m_members.size();
-  // m_numNonterminalNodes stays unchanged when an action is appended to an information set
-  ClearComputedValues();
-  InvalidateTreeOrdering();
-  return action;
 }
 
 void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
@@ -266,6 +199,125 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
   for (const auto &[action, new_label] : assignment) {
     action->m_label = new_label;
   }
+}
+
+void GameTreeRep::SetMoveActions(const GameInfoset &p_infoset,
+                                 const std::vector<std::string> &p_labels)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
+  }
+  if (p_infoset->IsChanceInfoset()) {
+    throw UndefinedException("SetMoveActions() requires a personal player's information set; "
+                             "use SetEventActions() for an event");
+  }
+  DoSetActions(p_infoset, p_labels, {});
+}
+
+void GameTreeRep::SetEventActions(const GameInfoset &p_infoset,
+                                  const std::vector<std::string> &p_labels,
+                                  const std::vector<Number> &p_probs)
+{
+  if (p_infoset->m_game != this) {
+    throw MismatchException();
+  }
+  if (!p_infoset->IsChanceInfoset()) {
+    throw UndefinedException("SetEventActions() requires an event; use SetMoveActions() for a "
+                             "personal player's information set");
+  }
+  if (p_labels.size() != p_probs.size()) {
+    throw DimensionException("The number of probabilities given must match the number of actions");
+  }
+  ValidateDistribution(p_probs);
+  DoSetActions(p_infoset, p_labels, p_probs);
+}
+
+void GameTreeRep::DoSetActions(const GameInfoset &p_infoset,
+                               const std::vector<std::string> &p_labels,
+                               const std::vector<Number> &p_probs)
+{
+  if (p_labels.empty()) {
+    throw ValueException("At least one action must be specified");
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (label.empty()) {
+      throw ValueException("Action label must not be empty");
+    }
+    CheckLabel(label);
+    if (!declared.insert(label).second) {
+      throw ValueException("Action label '" + label + "' appears more than once");
+    }
+  }
+
+  std::map<std::string, int> current;
+  for (const auto &action : p_infoset->m_actions) {
+    if (!current.emplace(action->GetLabel(), action->GetNumber() - 1).second) {
+      throw ValueException("Action label '" + action->GetLabel() +
+                           "' is ambiguous at this information set");
+    }
+  }
+  std::vector<int> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+  std::vector<int> dropped;
+  for (const auto &action : p_infoset->m_actions) {
+    if (declared.count(action->GetLabel()) == 0) {
+      dropped.push_back(action->GetNumber() - 1);
+    }
+  }
+
+  IncrementVersion();
+
+  const auto members = p_infoset->m_members;
+  for (const auto &member : members) {
+    if (!member->IsValid()) {
+      continue;
+    }
+    std::vector<std::shared_ptr<GameNodeRep>> newChildren;
+    newChildren.reserve(p_labels.size());
+    for (const int src : source) {
+      if (src >= 0) {
+        newChildren.push_back(member->m_children.at(src));
+      }
+      else {
+        newChildren.push_back(std::make_shared<GameNodeRep>(this, member.get()));
+        m_numNodes++;
+      }
+    }
+    for (const int idx : dropped) {
+      const auto child = member->m_children.at(idx);
+      DeleteTree(child);
+      m_numNodes--;
+      child->Invalidate();
+    }
+    member->m_children = std::move(newChildren);
+  }
+
+  std::vector<std::shared_ptr<GameActionRep>> newActions;
+  newActions.reserve(p_labels.size());
+  for (size_t i = 0; i < p_labels.size(); i++) {
+    if (source[i] >= 0) {
+      newActions.push_back(p_infoset->m_actions[source[i]]);
+    }
+    else {
+      newActions.push_back(
+          std::make_shared<GameActionRep>(static_cast<int>(i) + 1, p_labels[i], p_infoset.get()));
+    }
+  }
+  for (const int idx : dropped) {
+    p_infoset->m_actions.at(idx)->Invalidate();
+  }
+  p_infoset->m_actions = std::move(newActions);
+  p_infoset->RenumberActions();
+  if (p_infoset->IsChanceInfoset()) {
+    p_infoset->m_probs = p_probs;
+  }
+  ClearComputedValues();
+  InvalidateTreeOrdering();
 }
 
 void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
@@ -1811,30 +1863,6 @@ GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
   ClearComputedValues();
   InvalidateInfosetOrdering();
   return newEvent;
-}
-
-Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
-{
-  if (p_infoset->m_game != this) {
-    throw MismatchException();
-  }
-  if (!p_infoset->IsChanceInfoset()) {
-    throw UndefinedException("Action probabilities can only be normalized for events");
-  }
-  IncrementVersion();
-  auto &probs = p_infoset->m_probs;
-  auto sum = std::accumulate(
-      probs.begin(), probs.end(), Rational(0),
-      [](const Rational &s, const Number &n) { return s + static_cast<Rational>(n); });
-  if (sum == Rational(0)) {
-    // all remaining moves have prob zero; split prob 1 equally among them
-    std::fill(probs.begin(), probs.end(), Rational(1, probs.size()));
-  }
-  else {
-    std::transform(probs.begin(), probs.end(), probs.begin(),
-                   [&sum](const Number &n) { return static_cast<Rational>(n) / sum; });
-  }
-  return shared_from_this();
 }
 
 //------------------------------------------------------------------------
