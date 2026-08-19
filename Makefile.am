@@ -509,10 +509,13 @@ gambit_SOURCES = \
 	src/gui/dlnfglogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
+	src/gui/efgdragdrop.cc \
 	src/gui/efglayout.cc \
 	src/gui/efglayout.h \
+	src/gui/efgnodemenu.cc \
 	src/gui/efgpanel.cc \
 	src/gui/efgpanel.h \
+	src/gui/efgtooltip.cc \
 	src/gui/efgprofile.cc \
 	src/gui/efgprofile.h \
 	src/gui/gamedoc.cc \

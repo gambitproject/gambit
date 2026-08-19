@@ -164,12 +164,11 @@ is proportional to the probability with which the action is played.
             :align: right
             :target: _images/beliefs.png
 
-Clicking on any node in the tree displays additional information about
-the profile at that node.
-The player panel displays
-information relevant to the selected node, including the payoff to all players
-conditional on reaching the node, as well as information about Alice's
-beliefs at the node.
+Hovering the mouse pointer over any node in the tree briefly displays
+additional information about the profile at that node, in a small window
+next to the node, including each player's expected payoff from that point
+in the game onward, as well as information about Alice's beliefs at the
+node.
 
 The computed profiles can also be viewed in the reduced strategic
 game. Clicking on the strategic game icon changes the view to the

@@ -87,7 +87,7 @@ wxString SafeGenerate(const LabelGenerator &p_generator, const GameNode &p_node)
 // (if not the root node)
 //
 void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
-                          const GameNode &p_selection, bool p_noHints) const
+                          bool p_noHints) const
 {
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
   const NodeTokenStyle tokenStyle = GetTokenForNode(m_doc->GetStyle(), p_entry->m_node);
@@ -95,8 +95,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   // For every style but "line", this is exactly the shape drawn below --
   // computed once by ComputeTokenGeometry, not recomputed here, so drawing
   // and hit-testing (NodeEntry::NodeHitTest) can never silently disagree.
-  // "Line" has no real width of its own, so its selection ring keeps its own
-  // (differently-sized) padding rather than reusing the hit-test region.
   const wxRect &token = p_entry->m_geometry.token;
 
   if (p_entry->m_node->GetParent()) {
@@ -104,22 +102,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
-  const bool selected = (p_selection == p_entry->m_node);
-  constexpr int selectionPadding = 6;
-
-  if (selected) {
-    p_dc.SetPen(*wxTRANSPARENT_PEN);
-    p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
-
-    if (isLine) {
-      p_dc.DrawRoundedRectangle(
-          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
-          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
-    }
-    else {
-      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
-    }
-  }
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
@@ -154,20 +136,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     // Default: draw circles
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawEllipse(token);
-  }
-
-  if (selected) {
-    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
-
-    if (isLine) {
-      p_dc.DrawRoundedRectangle(
-          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
-          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
-    }
-    else {
-      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
-    }
   }
 
   int textWidth, textHeight;
@@ -544,34 +512,6 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
   return {};
 }
 
-GameNode TreeLayout::PriorSameLevel(const GameNode &p_node) const
-{
-  if (auto entry = GetNodeEntry(p_node)) {
-    auto e = std::next(std::find(m_nodeList.rbegin(), m_nodeList.rend(), entry));
-    while (e != m_nodeList.rend()) {
-      if ((*e)->GetLevel() == entry->GetLevel()) {
-        return (*e)->GetNode();
-      }
-      --e;
-    }
-  }
-  return nullptr;
-}
-
-GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
-{
-  if (auto entry = GetNodeEntry(p_node)) {
-    auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
-    while (e != m_nodeList.end()) {
-      if ((*e)->GetLevel() == entry->GetLevel()) {
-        return (*e)->GetNode();
-      }
-      ++e;
-    }
-  }
-  return nullptr;
-}
-
 std::shared_ptr<NodeEntry>
 TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
@@ -712,7 +652,7 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     auto parentEntry = entry->GetParent();
 
     if (entry->GetChildNumber() == 1) {
-      DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, parentEntry, p_noHints);
 
       if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
         const int nextY = nextMember->GetY();
@@ -758,7 +698,7 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     }
 
     if (entry->GetNode()->IsTerminal()) {
-      DrawNode(p_dc, entry, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, entry, p_noHints);
     }
   }
 }

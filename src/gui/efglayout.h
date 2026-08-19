@@ -113,6 +113,7 @@ public:
 
   const wxRect &GetOutcomeExtent() const { return m_geometry.outcome; }
   const wxRect &GetPayoffExtent(int pl) const { return m_geometry.payoffs[pl]; }
+  const wxRect &GetTokenExtent() const { return m_geometry.token; }
 };
 
 /// What was hit by a point query against the rendered tree, and which node it
@@ -169,8 +170,7 @@ class TreeLayout final : public GameView {
   // Overriding GameView members
   void OnUpdate() override {}
 
-  void DrawNode(wxDC &, const std::shared_ptr<NodeEntry> &, const GameNode &selection,
-                bool p_noHints) const;
+  void DrawNode(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
   void DrawIncomingBranch(wxDC &, const std::shared_ptr<NodeEntry> &) const;
   void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
@@ -179,9 +179,6 @@ class TreeLayout final : public GameView {
 public:
   explicit TreeLayout(GameDocument *p_doc) : GameView(p_doc) {}
   ~TreeLayout() override = default;
-
-  GameNode PriorSameLevel(const GameNode &) const;
-  GameNode NextSameLevel(const GameNode &) const;
 
   void Layout(const Game &);
   void GenerateLabels() const;

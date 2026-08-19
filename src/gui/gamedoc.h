@@ -223,7 +223,6 @@ class GameDocument {
   wxString m_filename;
 
   TreeRenderConfig m_style;
-  GameNode m_selectNode;
   bool m_gameModified, m_workspaceModified;
 
   AnalysisWorkspace m_workspace;
@@ -275,9 +274,6 @@ public:
   bool DoNextDominanceLevel();
   void DoPreviousDominanceLevel();
   void DoTopDominanceLevel();
-
-  GameNode GetSelectNode() const { return m_selectNode; }
-  void SetSelectNode(GameNode);
 
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges();
@@ -343,7 +339,6 @@ public:
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
-  void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAnalysisOutputChanged();
