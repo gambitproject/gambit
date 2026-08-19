@@ -66,6 +66,9 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of starting points to generate randomly\n";
   std::cerr << "                   (mutually exclusive with -s)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   starting points (default is to seed from system entropy);\n";
+  std::cerr << "                   requires -n\n";
   std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 1000)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
@@ -139,6 +142,7 @@ int main(int argc, char *argv[])
   int numDecimals = 6;
   double maxregret = 1.0e-4;
   std::string startFile;
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -146,7 +150,7 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvA", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:i:s:m:R:hqVvA", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -157,6 +161,9 @@ int main(int argc, char *argv[])
     case 'n':
       numTries = atoi(optarg);
       numTriesSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 'm':
       maxregret = atof(optarg);
@@ -200,6 +207,10 @@ int main(int argc, char *argv[])
     std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
     return 1;
   }
+  if (seed && !numTriesSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
 
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
@@ -224,7 +235,7 @@ int main(int argc, char *argv[])
       }
       else {
         // Generate the desired number of points randomly
-        std::default_random_engine engine;
+        auto engine = MakeRandomEngine(seed);
         starts = NewRandomStrategyProfiles(game, numTries, engine);
       }
 
@@ -250,7 +261,7 @@ int main(int argc, char *argv[])
       }
       else {
         // Generate the desired number of points randomly
-        std::default_random_engine engine;
+        auto engine = MakeRandomEngine(seed);
         starts = NewRandomBehaviorProfiles(game, numTries, engine);
       }
 

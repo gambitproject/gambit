@@ -35,6 +35,14 @@ options to specify additional starting points for the algorithm.
    Randomly generate COUNT starting points. Only
    applicable if option :option:`gambit-simpdiv -r` is also specified.
 
+.. cmdoption:: -R
+
+   Seeds the random number generator used to generate starting points
+   with the specified value, so that the sequence of points generated
+   by :option:`-r`/:option:`-n` can be reproduced across runs.  If not
+   specified, the generator is seeded from system entropy.  Requires
+   :option:`-n`.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.

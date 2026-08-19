@@ -52,6 +52,13 @@ See the :ref:`algorithm description <liap>` for full details.
    Specify the number of starting points to randomly generate.
    Mutually exclusive with :option:`-s`.
 
+.. cmdoption:: -R
+
+   Seeds the random number generator used to generate starting points
+   with the specified value, so that the sequence of points generated
+   by :option:`-n` can be reproduced across runs.  If not specified,
+   the generator is seeded from system entropy.  Requires :option:`-n`.
+
 .. cmdoption:: -i
 
    .. versionadded:: 16.1.1
