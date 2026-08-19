@@ -47,6 +47,7 @@ options to specify additional starting points for the algorithm.
    parameter is specified, starting points for the procedure are
    generated randomly using the uniform distribution over strategy
    profiles with probabilities having denominator DENOM.
+   Mutually exclusive with :option:`-s`.
 
 .. cmdoption:: -s
 
@@ -54,6 +55,7 @@ options to specify additional starting points for the algorithm.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
+   Mutually exclusive with :option:`-r`.
 
 .. cmdoption:: -m
 

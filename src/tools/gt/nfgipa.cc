@@ -67,9 +67,10 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -n COUNT         number of perturbation vectors to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
@@ -79,7 +80,7 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, verbose = false;
+  bool quiet = false, verbose = false, numVectorsSet = false;
   int numDecimals = 6, numVectors = 1;
   std::string startFile;
 
@@ -105,6 +106,7 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       numVectors = atoi(optarg);
+      numVectorsSet = true;
       break;
     case 's':
       startFile = optarg;
@@ -127,6 +129,11 @@ int main(int argc, char *argv[])
 
   if (!quiet) {
     PrintBanner(std::cerr);
+  }
+
+  if (numVectorsSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
+    return 1;
   }
 
   std::istream *input_stream = &std::cin;

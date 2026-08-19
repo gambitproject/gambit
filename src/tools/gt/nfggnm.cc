@@ -74,9 +74,10 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -n COUNT         number of perturbation vectors to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -m LAMBDA        lambda to end tracing (must be negative, default "
             << std::to_string(GNM_LAMBDA_END_DEFAULT) << ")\n";
   std::cerr << "  -f FREQ          frequency to run local Newton method (default "
@@ -94,7 +95,7 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, verbose = false;
+  bool quiet = false, verbose = false, numVectorsSet = false;
   int numDecimals = 6, numVectors = 1;
   double lambdaEnd = GNM_LAMBDA_END_DEFAULT;
   int localNewtonInterval = GNM_LOCAL_NEWTON_INTERVAL_DEFAULT;
@@ -125,6 +126,7 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       numVectors = atoi(optarg);
+      numVectorsSet = true;
       break;
     case 's':
       startFile = optarg;
@@ -175,6 +177,10 @@ int main(int argc, char *argv[])
   }
   if (steps <= 0) {
     std::cerr << "Error: Value for -c (steps in support cell) must be at least 1\n";
+    return 1;
+  }
+  if (numVectorsSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
     return 1;
   }
 

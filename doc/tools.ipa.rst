@@ -26,6 +26,7 @@ equilibria being found.
 .. cmdoption:: -n
 
    Randomly generate the specified number of perturbation vectors.
+   Mutually exclusive with :option:`-s`.
 
 .. cmdoption:: -q
 
@@ -37,6 +38,7 @@ equilibria being found.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
+   Mutually exclusive with :option:`-n`.
 
 .. cmdoption:: -V, --verbose
 

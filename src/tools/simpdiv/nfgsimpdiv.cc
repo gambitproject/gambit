@@ -115,8 +115,10 @@ void PrintHelp(char *progname)
   std::cerr << "  -g MULT          granularity of grid refinement at each step (default is 2)\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "                   (mutually exclusive with -r)\n";
   std::cerr << "  -d DECIMALS      show profiles as floating point with DECIMALS digits\n";
   std::cerr << "                   (default is to display rational numbers)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
@@ -132,7 +134,7 @@ int main(int argc, char *argv[])
 {
   opterr = 0;
   std::string startFile;
-  bool useRandom = false;
+  bool useRandom = false, numTriesSet = false;
   int randDenom = 1, gridResize = 2, stopAfter = 1, decimals = 0;
   bool verbose = false, quiet = false;
   Rational maxregret(1, 10000000);
@@ -160,6 +162,7 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       stopAfter = atoi(optarg);
+      numTriesSet = true;
       break;
     case 'm':
       maxregret = lexical_cast<Rational>(std::string(optarg));
@@ -191,6 +194,15 @@ int main(int argc, char *argv[])
 
   if (!quiet) {
     PrintBanner(std::cerr);
+  }
+
+  if (useRandom && !startFile.empty()) {
+    std::cerr << "Error: The -r and -s options are mutually exclusive.\n";
+    return 1;
+  }
+  if (numTriesSet && !useRandom) {
+    std::cerr << "Error: The -n option requires -r.\n";
+    return 1;
   }
 
   std::istream *input_stream = &std::cin;

@@ -64,12 +64,13 @@ void PrintHelp(char *progname)
   std::cerr << "  -A               compute agent form equilibria for extensive games\n";
   std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of starting points to generate\n";
-  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -n COUNT         number of starting points to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 1000)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "                   (default is to only show equilibria)\n";
@@ -132,7 +133,7 @@ std::vector<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_gam
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, solveAgent = false, verbose = false;
+  bool quiet = false, solveAgent = false, verbose = false, numTriesSet = false;
   int numTries = 10;
   int maxitsN = 1000;
   int numDecimals = 6;
@@ -155,6 +156,7 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       numTries = atoi(optarg);
+      numTriesSet = true;
       break;
     case 'm':
       maxregret = atof(optarg);
@@ -192,6 +194,11 @@ int main(int argc, char *argv[])
 
   if (!quiet) {
     PrintBanner(std::cerr);
+  }
+
+  if (numTriesSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
+    return 1;
   }
 
   std::istream *input_stream = &std::cin;
