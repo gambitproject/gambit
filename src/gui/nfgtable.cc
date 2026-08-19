@@ -1010,8 +1010,16 @@ public:
 wxString PayoffTable::GetValue(int row, int col)
 {
   const PureStrategyProfile profile = m_table->GetPayoffProfile(row, col);
-  auto player = m_table->GetPayoffPlayer(col);
-  return wxString::FromUTF8(lexical_cast<std::string>(profile->GetPayoff(player)));
+  const auto player = m_table->GetPayoffPlayer(col);
+  try {
+    if (const auto outcome = profile->GetOutcome()) {
+      return wxString::FromUTF8(outcome->GetPayoff<std::string>(player));
+    }
+    return wxString::FromUTF8("0");
+  }
+  catch (const UndefinedException &) {
+    return wxString::FromUTF8(lexical_cast<std::string>(profile->GetPayoff(player)));
+  }
 }
 
 void PayoffTable::SetValue(int row, int col, const wxString &value)

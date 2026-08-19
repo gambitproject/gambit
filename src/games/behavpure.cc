@@ -73,6 +73,29 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
 template double PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 
+GameOutcome PureBehaviorProfile::GetOutcome(const GameNode &p_start) const
+{
+  GameOutcome outcome;
+  GameNode node = p_start;
+  while (true) {
+    if (node->GetOutcome()) {
+      if (outcome) {
+        // More than one outcome-bearing node along this path; the combined
+        // payoff cannot be attributed to a single outcome's preserved text.
+        throw UndefinedException();
+      }
+      outcome = node->GetOutcome();
+    }
+    if (node->IsTerminal()) {
+      return outcome;
+    }
+    if (node->GetInfoset()->IsChanceInfoset()) {
+      throw UndefinedException();
+    }
+    node = node->GetChild(m_profile.at(node->GetInfoset()));
+  }
+}
+
 MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
