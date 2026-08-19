@@ -291,7 +291,7 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
 
 } // namespace
 
-NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
+NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -432,10 +432,10 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
   const bool useBehavior = computation.representation == NashRepresentation::Behavior;
   std::shared_ptr<AnalysisOutput> output;
   if (UsesRationalOutput(computation.method)) {
-    output = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useBehavior);
+    output = std::make_shared<AnalysisProfileList<Rational>>(m_doc.get(), useBehavior);
   }
   else {
-    output = std::make_shared<AnalysisProfileList<double>>(m_doc, useBehavior);
+    output = std::make_shared<AnalysisProfileList<double>>(m_doc.get(), useBehavior);
   }
 
   wxString count;

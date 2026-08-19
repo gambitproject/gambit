@@ -40,7 +40,7 @@ namespace Gambit::GUI {
 
 class OutcomeEditorPopup : public wxPopupTransientWindow {
 public:
-  OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc);
+  OutcomeEditorPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
 
   void BeginEdit(const GameNode &p_node, int p_initialPlayer = 0);
   bool Commit();
@@ -67,7 +67,7 @@ private:
   void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
 
   EfgDisplay *m_owner;
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
   GameNode m_node;
 
@@ -84,7 +84,8 @@ private:
   bool m_restoringAfterFailedCommit{false};
 };
 
-OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
+OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner,
+                                       const std::shared_ptr<GameDocument> &p_doc)
   : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc),
     m_contentPanel(nullptr), m_labelCtrl(nullptr), m_errorText(nullptr)
 {
@@ -445,7 +446,7 @@ static wxBitmap MakeOutcomeBitmap()
 
 class PlayerDropTarget : public wxTextDropTarget {
   EfgDisplay *m_owner;
-  GameDocument *m_model;
+  std::shared_ptr<GameDocument> m_model;
 
   bool OnDropPlayer(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
   bool OnDropOutcome(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
@@ -573,7 +574,7 @@ END_EVENT_TABLE()
 //                EfgDisplay: Constructor and destructor
 //----------------------------------------------------------------------
 
-EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
+EfgDisplay::EfgDisplay(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100),
     m_outcomeEditor(new OutcomeEditorPopup(this, p_doc))
 {

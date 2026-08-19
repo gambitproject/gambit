@@ -76,7 +76,7 @@ void TreePlayerIcon::OnLeftClick(wxMouseEvent &)
 
 class TreePlayerPanel : public wxPanel {
 private:
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   int m_player;
   EditableLabelText *m_playerLabel;
   wxStaticText *m_payoff, *m_nodeValue, *m_nodeProb;
@@ -95,7 +95,7 @@ private:
   //@}
 
 public:
-  TreePlayerPanel(wxWindow *, GameDocument *, int p_player);
+  TreePlayerPanel(wxWindow *, const std::shared_ptr<GameDocument> &, int p_player);
 
   void OnUpdate();
   void PostPendingChanges();
@@ -107,7 +107,8 @@ BEGIN_EVENT_TABLE(TreePlayerPanel, wxPanel)
 EVT_CHAR(TreePlayerPanel::OnChar)
 END_EVENT_TABLE()
 
-TreePlayerPanel::TreePlayerPanel(wxWindow *p_parent, GameDocument *p_doc, int p_player)
+TreePlayerPanel::TreePlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
+                                 int p_player)
   : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_player(p_player)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -367,10 +368,11 @@ private:
   //@}
 
 public:
-  gbtTreeChancePanel(wxWindow *, GameDocument *);
+  gbtTreeChancePanel(wxWindow *, const std::shared_ptr<GameDocument> &);
 };
 
-gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent, GameDocument *p_doc)
+gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent,
+                                       const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -442,10 +444,11 @@ private:
   //@}
 
 public:
-  gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_doc);
+  gbtTreePlayerToolbar(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 };
 
-gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_doc)
+gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
+                                           const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), GameView(p_doc),
     m_chancePanel(new gbtTreeChancePanel(this, m_doc))
 {
@@ -499,7 +502,7 @@ EVT_MENU(GBT_MENU_VIEW_ZOOM100, EfgPanel::OnViewZoom100)
 EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, EfgPanel::OnViewZoomFit)
 END_EVENT_TABLE()
 
-EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
+EfgPanel::EfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_treeWindow(new EfgDisplay(this, m_doc)),
     m_playerToolbar(new gbtTreePlayerToolbar(this, m_doc))
 {

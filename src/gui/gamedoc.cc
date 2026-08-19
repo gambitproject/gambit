@@ -215,32 +215,44 @@ GameDocument::GameDocument(Game p_game)
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadWorkspace(const wxString &p_filename)
+GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 {
   std::ifstream input(p_filename.mb_str());
   if (!input) {
-    return false;
+    return {LoadResult::OpenFailed, nullptr};
   }
 
-  LegacyWorkspaceFile workspace;
+  // First, see whether this is a Gambit workspace (.gbt) file.
   try {
-    workspace = Gambit::ReadLegacyWorkspace(input);
-  }
-  catch (const std::runtime_error &) {
-    return false;
-  }
-  try {
+    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
     std::istringstream game_text(workspace.game);
-    m_game = ReadGame(game_text);
+    auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
+    if (doc->m_workspace.Load(workspace.analyses)) {
+      doc->m_style.Load(workspace);
+      doc->SetFilename(p_filename);
+      return {LoadResult::Success, doc};
+    }
   }
-  catch (...) {
-    return false;
+  catch (const std::exception &) {
+    // Not a recognized (or not fully valid) workspace file; fall through to
+    // try it as a bare game file instead.
   }
-  if (!m_workspace.Load(workspace.analyses)) {
-    return false;
+
+  // Not a (valid) workspace -- try reading it as a bare .efg/.nfg file.
+  input.clear();
+  input.seekg(0);
+  try {
+    const Game game = ReadGame(input);
+    if (game->IsAgg()) {
+      return {LoadResult::UnsupportedRepresentation, nullptr};
+    }
+    auto doc = std::make_shared<GameDocument>(game);
+    doc->SetFilename(p_filename);
+    return {LoadResult::Success, doc};
   }
-  m_style.Load(workspace);
-  return true;
+  catch (const InvalidFileException &) {
+    return {LoadResult::ParseFailed, nullptr};
+  }
 }
 
 void GameDocument::SaveWorkspace(std::ostream &p_file) const

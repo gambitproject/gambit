@@ -74,12 +74,12 @@ class ProfileListPanel final : public wxPanel, public GameView {
   void OnUpdate() override {}
 
 public:
-  ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc);
+  ProfileListPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
+ProfileListPanel::ProfileListPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -127,12 +127,12 @@ class AnalysisNotebook final : public wxPanel, public GameView {
   void OnUpdate() override;
 
 public:
-  AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc);
+  AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc)
+AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_profiles(new ProfileListPanel(this, p_doc))
 {
   m_choices = new wxChoice(this, wxID_ANY);
@@ -230,7 +230,7 @@ END_EVENT_TABLE()
 //               GameFrame: Constructor and destructor
 //---------------------------------------------------------------------
 
-GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
+GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize), GameView(p_doc)
 {
   const wxRect area = wxGetClientDisplayRect();
@@ -1225,7 +1225,7 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
   }
 }
 
-extern void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+extern void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                                   const std::shared_ptr<AnalysisOutput> &p_command);
 
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
@@ -1271,7 +1271,7 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
   }
 }
 
-extern void LogitStrategic(wxWindow *, GameDocument *);
+extern void LogitStrategic(wxWindow *, const std::shared_ptr<GameDocument> &);
 
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {
@@ -1314,7 +1314,7 @@ struct CloseWarningText {
   wxString secondary;
 };
 
-CloseWarningText CloseWarningMessage(GameDocument *p_doc)
+CloseWarningText CloseWarningMessage(const std::shared_ptr<GameDocument> &p_doc)
 {
   const bool gameModified = p_doc->IsGameModified();
   const bool workspaceModified = p_doc->IsWorkspaceModified();

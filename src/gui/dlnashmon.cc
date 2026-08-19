@@ -302,7 +302,7 @@ public:
 };
 
 class NashMonitorDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::unique_ptr<class ExternalProcessRunner> m_runner;
   std::unique_ptr<class SolverThreadRunner> m_threadRunner;
   wxWindow *m_profileList;
@@ -354,11 +354,12 @@ class NashMonitorDialog final : public wxDialog {
   }
 
 public:
-  NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+  NashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                     const std::shared_ptr<AnalysisOutput> &p_command);
 };
 
-NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
+                                     const std::shared_ptr<GameDocument> &p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_output(p_command)
@@ -547,7 +548,7 @@ void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
 
 namespace Gambit::GUI {
 
-void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                            const std::shared_ptr<AnalysisOutput> &p_command)
 {
   NashMonitorDialog dialog(p_parent, p_doc, p_command);

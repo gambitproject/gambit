@@ -33,7 +33,8 @@ namespace Gambit::GUI {
 //                   class GamePropertiesDialog
 //========================================================================
 
-GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_doc)
+GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
+                                           const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);

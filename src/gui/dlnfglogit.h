@@ -30,7 +30,7 @@ class LogitMixedGrid;
 class LogitMixedThreadRunner;
 
 class LogitMixedDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::unique_ptr<LogitMixedThreadRunner> m_runner;
   LogitMixedGrid *m_mixedList;
   wxStaticText *m_statusText;
@@ -47,11 +47,11 @@ class LogitMixedDialog final : public wxDialog {
   void Start();
 
 public:
-  LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc);
+  LogitMixedDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~LogitMixedDialog() override;
 };
 
-void LogitStrategic(wxWindow *p_parent, GameDocument *p_doc);
+void LogitStrategic(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
 } // namespace Gambit::GUI
 

@@ -178,7 +178,7 @@ class TreeLayout final : public GameView {
   void BuildNodeList(const Game &);
 
 public:
-  explicit TreeLayout(GameDocument *p_doc) : GameView(p_doc) {}
+  explicit TreeLayout(const std::shared_ptr<GameDocument> &p_doc) : GameView(p_doc) {}
   ~TreeLayout() override = default;
 
   GameNode PriorSameLevel(const GameNode &) const;

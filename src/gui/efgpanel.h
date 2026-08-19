@@ -46,7 +46,7 @@ class EfgPanel final : public wxPanel, public GameView {
   //@}
 
 public:
-  EfgPanel(wxWindow *p_parent, GameDocument *p_doc);
+  EfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~EfgPanel() override = default;
 
   /// @name Exporting/printing graphics

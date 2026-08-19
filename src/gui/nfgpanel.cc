@@ -71,7 +71,7 @@ void TablePlayerIcon::OnLeftClick(wxMouseEvent &)
 }
 
 class TablePlayerPanel final : public wxPanel {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   int m_player;
   EditableLabelText *m_playerLabel;
   wxStaticText *m_payoff;
@@ -91,7 +91,7 @@ class TablePlayerPanel final : public wxPanel {
   //@}
 
 public:
-  TablePlayerPanel(wxWindow *, NfgPanel *, GameDocument *, int p_player);
+  TablePlayerPanel(wxWindow *, NfgPanel *, const std::shared_ptr<GameDocument> &, int p_player);
 
   void OnUpdate();
   void PostPendingChanges();
@@ -103,8 +103,8 @@ BEGIN_EVENT_TABLE(TablePlayerPanel, wxPanel)
 EVT_CHAR(TablePlayerPanel::OnChar)
 END_EVENT_TABLE()
 
-TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel, GameDocument *p_doc,
-                                   int p_player)
+TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel,
+                                   const std::shared_ptr<GameDocument> &p_doc, int p_player)
   : wxPanel(p_parent, wxID_ANY),
     /* m_nfgPanel(p_nfgPanel),*/ m_doc(p_doc), m_player(p_player)
 {
@@ -262,7 +262,7 @@ class TablePlayerToolbar final : public wxPanel, public GameView {
   Array<TablePlayerPanel *> m_playerPanels;
 
 public:
-  TablePlayerToolbar(NfgPanel *p_parent, GameDocument *p_doc);
+  TablePlayerToolbar(NfgPanel *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   /// @name Implementation of GameView members
   //@{
@@ -271,7 +271,8 @@ public:
   //@}
 };
 
-TablePlayerToolbar::TablePlayerToolbar(NfgPanel *p_parent, GameDocument *p_doc)
+TablePlayerToolbar::TablePlayerToolbar(NfgPanel *p_parent,
+                                       const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), GameView(p_doc),
     m_nfgPanel(p_parent)
 {
@@ -332,7 +333,7 @@ private:
   void OnLastLevel(wxCommandEvent &);
 
 public:
-  StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
+  StrategyDominanceToolbar(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~StrategyDominanceToolbar() override = default;
 };
 
@@ -341,7 +342,8 @@ public:
 #include "bitmaps/tobegin.xpm"
 #include "bitmaps/toend.xpm"
 
-StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
+StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
+                                                   const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -439,7 +441,8 @@ BEGIN_EVENT_TABLE(NfgPanel, wxPanel)
 EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgPanel::OnToolsDominance)
 END_EVENT_TABLE()
 
-NfgPanel::NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance)
+NfgPanel::NfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
+                   bool p_showDominance)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc),
     m_dominanceToolbar(new StrategyDominanceToolbar(this, m_doc)),
     m_playerToolbar(new TablePlayerToolbar(this, m_doc)),

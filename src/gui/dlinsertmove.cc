@@ -32,7 +32,7 @@ namespace Gambit::GUI {
 //                   InsertMoveDialog: Member functions
 //=========================================================================
 
-InsertMoveDialog::InsertMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
+InsertMoveDialog::InsertMoveDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
 {
   m_playerItem = new wxChoice(this, wxID_ANY);

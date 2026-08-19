@@ -25,12 +25,12 @@
 
 namespace Gambit::GUI {
 class GamePropertiesDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   wxTextCtrl *m_title, *m_comment;
 
 public:
   // Lifecycle
-  GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_doc);
+  GamePropertiesDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetTitle() const override { return m_title->GetValue(); }
