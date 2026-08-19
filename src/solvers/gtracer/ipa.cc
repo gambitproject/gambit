@@ -210,7 +210,9 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
 }
 
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
-              unsigned int maxiter, bool p_verbose, const CancelToken &p_cancel)
+              unsigned int maxiter,
+              std::function<void(int, const cvector &, double, double)> p_onStep,
+              const CancelToken &p_cancel)
 {
   const int N = A.getNumPlayers(),
             M = A.getNumActions(); // For easy reference
@@ -329,10 +331,7 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
     ym1 -= zh;
     ym2 = s;
     ym2 -= sh;
-    if (p_verbose) {
-      std::cerr << "iter " << iter << "\tz diff " << ym1.norm() << "\ts diff " << ym2.norm()
-                << std::endl;
-    }
+    p_onStep(static_cast<int>(iter), s, ym1.norm(), ym2.norm());
     if (!std::isfinite(ym1.norm()) || !std::isfinite(ym2.norm())) {
       return {s,
               IPATerminationReason::NonfiniteStrategy,

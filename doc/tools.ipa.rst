@@ -38,6 +38,15 @@ equilibria being found.
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
 
+.. cmdoption:: -V, --verbose
+
+   Show intermediate output of the algorithm.  If this option is
+   not specified, only the equilibria found are reported.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
+
 
 Computing an equilibrium of
 the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
