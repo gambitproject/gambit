@@ -2,6 +2,8 @@
 
 ### Added
 - Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
+- Added `Game.set_strategies`, which declares the ordered list of a player's strategies in a game in strategic form,
+  matching by label.  (#1056)
 - `gambit-ipa` now supports verbose output via the `-V` flag, reporting on intermediate progress. (#501)
 - Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
   random starting point generation. (#448)
@@ -21,12 +23,22 @@
   command-line executables as external processes. (#990)
 - When displaying a strategic form, the graphical interface preserves decimal payoffs when those are
   what are specified in the game, whenever possible.  (#867)
+- The GUI's strategic game table gained an "Edit strategies" dialog, opened by clicking any of a
+  player's strategy labels, supporting adding, deleting, reordering, and renaming that player's
+  strategies in one operation. The "+" toolbar icon for adding a strategy, and the strategy
+  label's right-click "Delete strategy" menu, are removed, superseded by the dialog. (#1056)
 
 ### Removed
 - Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
   nonempty, unique labels.  (#1047)
-- Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
-  nonempty, unique labels.  (#1058)
+- `Game.add_strategy` and `Game.delete_strategy` have been removed; use `Game.set_strategies`,
+  specifying the labels of the strategies the player is to have.  (#1056)
+- The C++ `Game` interface's `NewStrategy` and `DeleteStrategy` methods have been removed; they
+  were subsumed by `SetStrategies`, and by this point were used only in support of `pygambit`'s
+  `add_strategy`/`delete_strategy` and the GUI's strategy add/delete controls, which now build the
+  equivalent `SetStrategies` call directly.  (#1056)
+  - Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
+    nonempty, unique labels.  (#1058)
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

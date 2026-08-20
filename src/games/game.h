@@ -1382,16 +1382,14 @@ public:
     }
     return *std::next(strategies.begin(), p_index - 1);
   }
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
-  {
-    throw UndefinedException();
-  }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
   /// Simultaneously reassign strategy labels for a player: keys are current labels.
   /// Keys of p_labels are current action labels; values are their replacements.
   virtual void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered list of strategies of a player.
+  virtual void SetStrategies(const GamePlayer &, const std::vector<std::string> &)
   {
     throw UndefinedException();
   }

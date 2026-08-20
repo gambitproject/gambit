@@ -61,12 +61,6 @@ void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
   if (p_event.GetCol() == -1) {
     m_doc->DoSelectProfile(p_event.GetRow() + 1);
   }
-  else {
-    // Clicking on an action column sets the selected node to the first
-    // member of that information set.
-    const GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
-    m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
-  }
 
   ClearSelection();
 }

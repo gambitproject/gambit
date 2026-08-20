@@ -27,21 +27,23 @@ strategic players in the game.
 Adding moves
 ------------
 
-There are two options for adding moves to a tree: drag-and-drop
-and the :guilabel:`Insert move` dialog.
+There are two options for adding moves to a tree, both reached by
+right-clicking the node where the move should go: a quick per-player
+submenu, and the more flexible :guilabel:`Insert move` dialog.
 
-#. Moves can be added to the
-   tree using a drag-and-drop idiom. From the player list window, drag
-   the player icon located to the left of the player who will have the
-   move to any terminal node in the game tree. The tree will be extended
-   with a new move for that player, with two actions at the new move.
-   Adding a move for the chance player is done the same way, except the
-   dice icon appearing to the left of the chance player in the player
-   list window is used instead of the player icon. For the chance player,
-   the two actions created will each be given a probability weight of
-   one-half. If the desired move has more than two actions, additional
-   actions can be added by dragging the same player's icon to the move
-   node; this will add one action to the move each time this is done.
+#. Right-clicking any terminal node in the tree and choosing
+   :guilabel:`Insert move for` opens a submenu listing every player
+   (each shown with its assigned colour), plus the chance player. Choosing
+   a player extends the tree with a new move for that player at the node,
+   with two actions. Choosing the chance player adds a chance move instead,
+   with its two actions each given a probability weight of one-half.
+
+   The player who moves at an *existing* move can be changed the same
+   way: right-clicking a nonterminal node offers the same submenu,
+   labeled :guilabel:`Assign this move to`, listing the other players
+   to which the move can be reassigned. A move cannot currently be
+   changed between the chance player and a personal player this way --
+   nor can it be, at present, using any other method in the interface.
 
 .. image:: screens/insertmove.*
            :width: 33%
@@ -49,8 +51,8 @@ and the :guilabel:`Insert move` dialog.
            :align: right
            :target: _images/insertmove.png
 
-2. Click on any terminal node in
-   the tree, and select :menuselection:`Edit --> Insert move`
+2. Right-click any terminal node in
+   the tree, and choose :guilabel:`Insert move`
    to display the :guilabel:`insert move` dialog.
    The dialog is intended to read like a sentence:
 
@@ -66,17 +68,16 @@ and the :guilabel:`Insert move` dialog.
      Otherwise, it is set automatically to the number of actions at
      the selected information set.
 
-The two methods can be useful in different contexts.
-The drag-and-drop approach
-is a bit quicker to use, especially when creating trees that have few
-actions at each move. The dialog approach is a bit more flexible, in
-that a move can be added for a new, as-yet-undefined player, a move
-can be added directly into an existing information set, and a move can
-be immediately given more than two actions.
+Both are reached with a right-click, and can be useful in different
+contexts. The per-player submenu is a bit quicker to use, especially
+when creating trees that have few actions at each move. The dialog
+approach is a bit more flexible, in that a move can be added for a new,
+as-yet-undefined player, a move can be added directly into an existing
+information set, and a move can be immediately given more than two
+actions.
 
 A single action can also be added to, or removed from, an existing
-move without drag-and-drop, using the :guilabel:`Edit move` dialog
-described next.
+move using the :guilabel:`Edit move` dialog described next.
 
 
 .. _editing-moves:
@@ -86,8 +87,8 @@ Editing moves
 
 The properties of an existing move -- the label of its information
 set, the player to which it belongs, and the actions available at it
--- can be changed by clicking on any node belonging to the move and
-selecting :menuselection:`Edit --> Move`. This displays the
+-- can be changed by right-clicking on any node belonging to the move
+and choosing :guilabel:`Edit move`. This displays the
 :guilabel:`Edit move` dialog, which lists a text field for the
 information set's label, a dropdown for the player to which the move
 belongs, and a row for each action, showing its label and, for moves
@@ -165,25 +166,30 @@ the tree. It is often efficient to create the structure once, and then
 copy it as needed elsewhere.
 
 Gambit provides a convenient idiom for this. Clicking on any
-nonterminal node and dragging to another node results in a context-aware
-popup menu.  Depending on the destination node, this menu offers
-the option of copying the subtree rooted at the original node, moving
-it entirely, or placing the destination node in the same information set
-as the source node.
+nonterminal node and dragging it to another node results in a
+context-aware popup menu. While dragging, the node under the pointer is
+outlined in green if dropping there is possible, or in red if not.
+Depending on the destination node, this menu offers the option of
+copying the subtree rooted at the original node, moving it entirely, or
+placing the destination node in the same information set as the source
+node. Moving a subtree onto one of its own descendants is never
+offered (though shown, disabled), since the destination would cease to
+exist partway through the move; copying onto a descendant remains
+available, since the copy is made before anything is removed.
 
 
 Removing parts of a game tree
 -----------------------------
 
 Two deletion operations are supported on extensive games. To delete
-the entire subtree rooted at a node, click on that node and select
-:menuselection:`Edit --> Delete subtree`.
+the entire subtree rooted at a node, right-click that node and choose
+:guilabel:`Delete subtree`.
 
-To delete an individual move from the game, click on one of the direct
-children of that node, and select
-:menuselection:`Edit --> Delete parent`. This operation
+To delete an individual move from the game, right-click one of the
+direct children of that node, and choose
+:guilabel:`Delete parent`. This operation
 deletes the parent node, as well as all the children of the parent
-other than the selected node. The selected child node now takes the
+other than the clicked node. The clicked child node now takes the
 place of the parent node in the tree.
 
 
@@ -196,13 +202,12 @@ Gambit provides several methods to help manage the information
 structure in an extensive game.
 
 When building a tree, new moves can be placed in a given information
-set using the :ref:`Insert move dialog <adding-moves>`.
-Additionally, new moves can be
-created using the drag-and-drop idiom by holding down the :kbd:`Shift`
-key and dragging a node in the tree. During the drag operation, the
-cursor changes to the move icon . Dropping the move icon on another
-node places the target node in the same information set as the node
-where the drag operation began.
+set using the :ref:`Insert move dialog <adding-moves>`. Additionally, a
+node can be placed in the same information set as another using the
+drag-and-drop idiom described in :ref:`copying-trees`: dragging one
+node onto another and choosing :guilabel:`Put node in same information
+set` (or, when dropping on a terminal node, :guilabel:`Insert move
+using same information set`) from the popup menu.
 
 .. image::  screens/editnode.*
             :width: 33%
@@ -211,7 +216,8 @@ where the drag operation began.
             :target:  _images/editnode.png
 
 The information set to which a node belongs can also be set by
-selecting :menuselection:`Edit --> Node`.  This displays the
+right-clicking the node and choosing :guilabel:`Node properties`
+(or by double-clicking the node). This displays the
 :guilabel:`node properties` dialog.
 The :guilabel:`Information set` dropdown defaults
 to the current information set to which the node belongs, and contains
@@ -231,12 +237,12 @@ corresponding nodes in the original subtree. In many cases, though,
 these trees differ in the information available to some or all of the
 players. To help speed the process of adjusting information sets in
 bulk, Gambit offers a "reveal" operation, which breaks information
-sets based on the action taken at a particular node. Click on a node
-at which the action taken is to be made known subsequently to other
-players, and select :menuselection:`Edit --> Reveal`.  This displays a
+sets based on the action taken at a particular node. Right-click the
+node at which the action taken is to be made known subsequently to
+other players, and choose :guilabel:`Reveal`.  This displays a
 dialog listing the players in the game. Check the boxes next to the
 players who observe the outcome of the move at the node, and click
-:guilabel:`OK`.  The information sets at nodes below the selected one
+:guilabel:`OK`.  The information sets at nodes below the clicked one
 are adjusted based on the action selected at this node.
 
 .. note::
@@ -263,14 +269,15 @@ zero for all players, and pops up an editing panel for that outcome.
 For nodes with existing outcomes, clicking on any of the displayed
 payoffs pops up an editing panel for that outcome.
 
-Outcomes may also be moved or copied using drag-and-drop.
-Left-clicking and dragging an outcome to another node pops up a
-context-aware menu which allows the outcome to be moved or copied, or
-to create a new outcome with the same payoffs as the original one at
-the new node.
+Outcomes may also be moved, or shared between nodes, using drag-and-drop.
+Left-clicking and dragging an outcome to another node (highlighted, as with
+moving and copying subtrees, in green or red as a valid or invalid drop
+target) pops up a context-aware menu which allows the outcome to be moved to
+the new node, or for the new node to use the same outcome as the original --
+so that editing the payoffs at either node updates both.
 
-To remove an outcome from a node, click on the node, and
-select :menuselection:`Edit --> Remove outcome`.
+To remove an outcome from a node, right-click the node, and
+choose :guilabel:`Remove outcome`.
 
 
 
@@ -471,5 +478,7 @@ system different from the system on which it was saved, Gambit tries
 to match the font style as closely as possible when the original font
 is not available.
 
-The color-coding for each player can be changed by clicking on the
-color icon to the left of the corresponding player.
+The color-coding for each player (and for chance) can be changed on the
+:guilabel:`Players` page of the :guilabel:`Game properties` dialog
+(:menuselection:`Edit --> Game`), by clicking the color swatch next to the
+player's name.
