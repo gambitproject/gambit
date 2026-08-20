@@ -196,7 +196,6 @@ cdef extern from "games/game.h":
         int IsChance() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
@@ -319,6 +318,7 @@ cdef extern from "games/game.h":
         Players GetPlayers() except +
         c_GamePlayer GetChance() except +
         c_GamePlayer NewPlayer(string) except +ValueError
+        void RelabelPlayers(stdmap[string, string]) except +ValueError
 
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError

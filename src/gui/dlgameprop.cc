@@ -136,8 +136,8 @@ PlayerLabelPanel::PlayerLabelPanel(wxWindow *p_parent, GameDocument *p_doc,
                    wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
     if (player->IsChance()) {
-      // Chance's label is reserved and can't be changed (GamePlayerRep::SetLabel throws on
-      // IsChance()) -- just display it.
+      // Chance's label is reserved and can't be changed (GameRep::RelabelPlayers rejects it
+      // as a key) -- just display it.
       gridSizer->Add(new wxStaticText(this, wxID_STATIC, wxString::FromUTF8(player->GetLabel())),
                      1, wxALIGN_CENTER_VERTICAL);
     }

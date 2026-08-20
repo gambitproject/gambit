@@ -293,7 +293,8 @@ public:
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
   GamePlayer DoNewPlayer();
-  void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
+  /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
+  void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
   /// Declare the strategies of `p_player` in a single operation, covering any combination
   /// of adding, deleting, reordering, and relabeling strategies.
   ///
@@ -357,10 +358,12 @@ inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
 {
   const Game nfg = NewTable(p_dim);
   nfg->SetTitle("Untitled Strategic Game");
+  std::map<std::string, std::string> labels;
   int pl = 1;
-  for (auto player : nfg->GetPlayers()) {
-    player->SetLabel("Player " + std::to_string(pl++));
+  for (const auto &player : nfg->GetPlayers()) {
+    labels[player->GetLabel()] = "Player " + std::to_string(pl++);
   }
+  nfg->RelabelPlayers(labels);
   return new GameDocument(nfg);
 }
 

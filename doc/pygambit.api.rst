@@ -85,6 +85,7 @@ Transforming game components
    :toctree: api/
 
    Game.add_player
+   Game.relabel_players
    Game.add_outcome
    Game.delete_outcome
    Game.set_outcome

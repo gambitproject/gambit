@@ -14,7 +14,7 @@ def test_player_count():
 def test_player_label(label):
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    player.label = label
+    game.relabel_players({player.label: label})
     assert player.label == label
 
 
@@ -23,7 +23,7 @@ def test_player_label_invalid_raises_valueerror(label):
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = label
+        game.relabel_players({player.label: label})
 
 
 @pytest.mark.parametrize("label", games.UNICODE_LABELS)
@@ -31,7 +31,7 @@ def test_player_label_unicode_accepted(label):
     """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    player.label = label
+    game.relabel_players({player.label: label})
     assert player.label == label
 
 
@@ -77,7 +77,7 @@ def test_chance_player_label_cannot_be_changed():
     """The chance player's label is reserved ("Chance") and cannot be changed."""
     game = gbt.Game.new_tree()
     with pytest.raises(ValueError):
-        game.players.chance.label = "Nature"
+        game.relabel_players({game.players.chance.label: "Nature"})
 
 
 def test_regular_player_cannot_be_relabeled_to_chance():
@@ -85,14 +85,13 @@ def test_regular_player_cannot_be_relabeled_to_chance():
     game.add_player("Alice")
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = "Chance"
+        game.relabel_players({player.label: "Chance"})
 
 
 def test_player_index_by_string():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    pl1.label = "Alphonse"
-    pl2.label = "Gaston"
+    game.relabel_players({pl1.label: "Alphonse", pl2.label: "Gaston"})
     assert game.players["Alphonse"].label == "Alphonse"
     assert game.players["Gaston"].label == "Gaston"
 
@@ -113,14 +112,63 @@ def test_set_empty_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = ""
+        game.relabel_players({player.label: ""})
 
 
 def test_set_duplicate_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     pl1, pl2, *_ = game.players
     with pytest.raises(ValueError):
-        pl1.label = pl2.label
+        game.relabel_players({pl1.label: pl2.label})
+
+
+def test_relabel_players_swap():
+    game = gbt.Game.new_table([2, 2])
+    a, b = (player.label for player in game.players)
+    game.relabel_players({a: b, b: a})
+    assert [player.label for player in game.players] == [b, a]
+
+
+def test_relabel_players_swap_tree():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.relabel_players({"Alice": "Bob", "Bob": "Alice"})
+    assert [player.label for player in game.players] == ["Bob", "Alice"]
+
+
+def test_relabel_players_duplicate_raises_valueerror():
+    game = gbt.Game.new_table([2, 2, 2])
+    a, b, _ = (player.label for player in game.players)
+    with pytest.raises(ValueError):
+        game.relabel_players({a: b})
+    with pytest.raises(ValueError):
+        game.relabel_players({a: "X", b: "X"})
+
+
+@pytest.mark.parametrize("bad", ["", " x"])
+def test_relabel_players_bad_label_raises_and_leaves_game_unchanged(bad: str):
+    game = gbt.Game.new_table([2, 2])
+    a, b = (player.label for player in game.players)
+    with pytest.raises(ValueError):
+        game.relabel_players({a: "X", b: bad})
+    assert [player.label for player in game.players] == [a, b]
+
+
+def test_relabel_players_unknown_label_strictness():
+    game = gbt.Game.new_table([2, 2])
+    a = next(iter(game.players)).label
+    with pytest.raises(KeyError):
+        game.relabel_players({"no-such-player": "X"})
+    game.relabel_players({"no-such-player": "X", a: "Y"}, strict=False)
+    assert next(iter(game.players)).label == "Y"
+
+
+def test_relabel_players_chance_key_raises_even_when_not_strict():
+    """The chance player's label is reserved; a key equal to it is an error."""
+    game = gbt.Game.new_tree(["Alice"])
+    with pytest.raises(ValueError):
+        game.relabel_players({"Chance": "Nature"})
+    with pytest.raises(ValueError):
+        game.relabel_players({"Chance": "Nature"}, strict=False)
 
 
 def test_strategic_game_add_player():
