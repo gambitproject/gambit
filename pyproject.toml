@@ -86,6 +86,12 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[tool.ruff.lint.per-file-ignores]
+# The SageMath tutorials run on the SageMath Jupyter kernel, which injects Sage's
+# globals (NormalFormGame, matrix, QQ, plot, ...) into every cell, so ruff cannot
+# see where those names come from.
+"doc/tutorials/interoperability_tutorials/sagemath_*.ipynb" = ["F821"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"

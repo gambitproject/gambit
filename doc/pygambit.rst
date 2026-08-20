@@ -57,6 +57,8 @@ These tutorials assume you have read the new user tutorials and are familiar wit
 
    tutorials/interoperability_tutorials/openspiel
    tutorials/interoperability_tutorials/gamut
+   tutorials/interoperability_tutorials/sagemath_normal_form
+   tutorials/interoperability_tutorials/sagemath_extensive_form
 
 API documentation
 ----------------
