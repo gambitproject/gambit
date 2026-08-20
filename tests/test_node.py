@@ -755,7 +755,7 @@ def test_node_move_across_games():
 def test_append_move_creates_single_infoset_list_of_nodes():
     """Test that appending a list of nodes creates a single infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     nodes = [game.root.children["2"].children["1"],
              game.root.children["1"].children["1"],
              game.root.children["1"].children["2"]]
@@ -766,7 +766,7 @@ def test_append_move_creates_single_infoset_list_of_nodes():
 def test_append_move_same_infoset_list_of_nodes():
     """Test that nodes from a list of nodes are resolved in the same infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F"])
@@ -778,7 +778,7 @@ def test_append_move_actions_list_of_nodes():
     have the same actions.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
@@ -788,7 +788,7 @@ def test_append_move_actions_list_of_nodes():
 def test_append_move_actions_list_of_node_labels():
     """Test that nodes from a list of node labels are resolved correctly."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     node1.label = "0"
@@ -806,7 +806,7 @@ def test_append_move_actions_list_of_mixed_node_references():
     are resolved correctly.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
 
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
@@ -824,7 +824,7 @@ def test_append_move_labels_list_of_nodes():
     have the same labels per action.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
@@ -838,7 +838,7 @@ def test_append_move_node_list_with_non_terminal_node():
     of nodes that has a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_move(
             [game.root.children["2"], game.root.children["1"].children["2"]],
@@ -852,7 +852,7 @@ def test_append_move_node_list_with_duplicate_node_references():
     nodes with non-unique node references.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     node = game.root.children["1"].children["2"]
     node.label = "00"
     with pytest.raises(ValueError):
@@ -868,7 +868,7 @@ def test_append_move_node_list_is_empty():
     empty list of nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     with pytest.raises(ValueError):
         game.append_move([], "Player 3", ["B", "F"])
 
@@ -878,7 +878,7 @@ def test_append_infoset_node_list_with_non_terminal_node():
     a list of nodes that has a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(gbt.UndefinedOperationError):
@@ -893,7 +893,7 @@ def test_append_infoset_node_list_with_duplicate_node():
     with non-unique elements.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
@@ -910,7 +910,7 @@ def test_append_infoset_node_list_is_empty():
     empty list of nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players([player.label for player in game.players] + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(ValueError):

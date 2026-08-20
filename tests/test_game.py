@@ -162,7 +162,8 @@ def test_game_get_outcome_with_bad_strategies():
 
 def test_game_dereference_invalid():
     game = gbt.Game.new_tree()
-    player = game.add_player("One")
+    game.set_players(["One"])
+    player = game.players["One"]
     strategy = next(iter(player.strategies))
     game.append_move(game.root, player, ["a", "b"])
     with pytest.raises(RuntimeError):

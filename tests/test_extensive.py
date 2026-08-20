@@ -52,10 +52,9 @@ def test_game_title_accepts_text_invalid_for_a_label(text: str):
 
 
 @pytest.mark.parametrize("players", [["Alice"], ["Oscar", "Felix"]])
-def test_game_add_players_label(players: list):
+def test_game_set_players_label(players: list):
     game = gbt.Game.new_tree()
-    for player in players:
-        game.add_player(player)
+    game.set_players(players)
     for player, label in zip(game.players, players, strict=True):
         assert player.label == label
 
