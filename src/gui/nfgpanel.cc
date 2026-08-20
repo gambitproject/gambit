@@ -36,7 +36,6 @@
 #include "edittext.h"
 
 #include "bitmaps/color.xpm"
-#include "bitmaps/newrow.xpm"
 #include "bitmaps/person.xpm"
 
 namespace Gambit::GUI {
@@ -78,8 +77,6 @@ class TablePlayerPanel final : public wxPanel {
 
   /// @name Event handlers
   //@{
-  /// The add strategy icon is clicked
-  void OnNewStrategy(wxCommandEvent &);
   /// The set color icon is clicked
   void OnSetColor(wxCommandEvent &);
   /// Start the editing of the player label
@@ -114,16 +111,6 @@ TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel, Gam
 
   wxStaticBitmap *playerIcon = new TablePlayerIcon(this, m_player);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
-
-  if (!m_doc->GetGame()->IsTree()) {
-    auto *addStrategyIcon = new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
-                                               wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-    addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
-
-    labelSizer->Add(addStrategyIcon, 0, wxALL | wxALIGN_CENTER, 0);
-    Connect(addStrategyIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(TablePlayerPanel::OnNewStrategy));
-  }
 
   auto *setColorIcon = new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm), wxDefaultPosition,
                                           wxDefaultSize, wxNO_BORDER);
@@ -188,12 +175,6 @@ void TablePlayerPanel::OnChar(wxKeyEvent &p_event)
   else {
     p_event.Skip();
   }
-}
-
-void TablePlayerPanel::OnNewStrategy(wxCommandEvent &)
-{
-  m_doc->PostPendingChanges();
-  m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
 }
 
 void TablePlayerPanel::OnSetColor(wxCommandEvent &)

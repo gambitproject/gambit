@@ -2654,72 +2654,6 @@ class Game:
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
         self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
-    def add_strategy(self, player: Player | str, label: str) -> Strategy:
-        """Add a new strategy to the set of strategies for `player`.
-
-        .. versionchanged:: 16.7.0
-            A label is now required and must be nonempty and unique among the
-            player's strategies.
-
-        Parameters
-        ----------
-        player : Player or str
-            The player to create the new strategy for
-        label : str
-            The label for the new strategy.  Must be nonempty and not already in use
-            by another of the player's strategies.
-
-        Returns
-        -------
-        Strategy
-            The newly-created strategy
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a `Player` from a different game.
-        UndefinedOperationError
-            If called on a game which has an extensive representation.
-        ValueError
-            If `label` is empty or is already the label of another of the player's strategies.
-        """
-        if self.is_tree:
-            raise UndefinedOperationError(
-                "Adding strategies is only applicable to games in strategic form"
-            )
-        resolved_player = cython.cast(Player,
-                                      self._resolve_player(player, "add_strategy"))
-        return Strategy.wrap(
-            self.game.deref().NewStrategy(resolved_player.player, label.encode("utf-8"))
-        )
-
-    def delete_strategy(self, strategy: Strategy | str) -> None:
-        """Delete `strategy` from the game.
-
-        Parameters
-        ----------
-        strategy : Strategy or str
-            The strategy to delete
-
-        Raises
-        ------
-        MismatchError
-            If `strategy` is a `strategy` from a different game.
-        UndefinedOperationError
-            If called on a game which has an extensive representation, or if `strategy` is the
-            only strategy for its player.
-        """
-        if self.is_tree:
-            raise UndefinedOperationError(
-                "Deleting strategies is only applicable to games in strategic form"
-            )
-        resolved_strategy = cython.cast(
-            Strategy, self._resolve_strategy(strategy, "delete_strategy")
-        )
-        if len(resolved_strategy.player.strategies) == 1:
-            raise UndefinedOperationError("Cannot delete the only strategy for a player")
-        self.game.deref().DeleteStrategy(resolved_strategy.strategy)
-
     def relabel_strategies(self,
                            player: Player | str,
                            labels: typing.Mapping[str, str],
@@ -2797,6 +2731,93 @@ class Game:
         if c_labels.empty():
             return
         self.game.deref().RelabelStrategies(resolved_player.player, c_labels)
+
+    def set_strategies(self,
+                       player: Player | str,
+                       strategies: list[str],
+                       drop: bool = False,
+                       add: bool = True) -> None:
+        """Set the strategies of `player` to be `strategies`, matching by label.
+
+        - An entry of `strategies` matching the label of a current strategy refers to
+        that strategy, keeping the outcomes at its contingencies;
+        - An entry matching no current strategy creates a new strategy there,
+        with no outcome at any of its contingencies;
+        - A current strategy whose label is not in `strategies` is deleted,
+        along with the outcomes at its contingencies.
+        - Listing the current labels in a new order reorders the strategies,
+        permuting the payoff table to match.
+
+        The defaults permit creation and forbid deletion.
+
+        .. versionadded:: 17.0.0
+            Subsumes and replaces `Game.add_strategy` and `Game.delete_strategy`.
+
+        Parameters
+        ----------
+        player : Player or str
+            The player whose strategies to set.
+        strategies : list of str
+            The labels of the strategies the player is to have, in order.  Must be
+            nonempty and without duplicates; each label must be a valid, nonempty label.
+        drop : bool, default False
+            Deleting strategies is destructive, so it must be explicitly confirmed:
+            if any current strategy is missing from `strategies` and `drop` is
+            `False`, the operation raises without modifying the game.
+        add : bool, default True
+            If `False`, entries of `strategies` matching no current strategy raise.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        KeyError
+            If `player` is a string matching no player.
+        TypeError
+            If `strategies` is a string, or not an iterable of strings.
+        UndefinedOperationError
+            If the game has a tree representation, where the strategies are derived
+            from the tree; or if `strategies` is empty.
+        ValueError
+            If a label in `strategies` is repeated, empty, or invalid.
+
+        See Also
+        --------
+        relabel_strategies : Change the labels of strategies, keeping the table unchanged.
+        set_actions : The analogous operation on the actions of an information set.
+        """
+        if self.is_tree:
+            raise UndefinedOperationError(
+                "Setting strategies is only applicable to games in strategic form"
+            )
+        resolved_player = cython.cast(Player, self._resolve_player(player, "set_strategies"))
+        if isinstance(strategies, str) or not hasattr(strategies, "__iter__"):
+            raise TypeError("set_strategies(): strategies must be an iterable of str")
+        labels = list(strategies)
+        for label in labels:
+            if not isinstance(label, str):
+                raise TypeError("set_strategies(): strategies must be an iterable of str")
+        if not labels:
+            raise UndefinedOperationError("set_strategies(): `strategies` must be a nonempty list")
+        current = [strategy.label for strategy in resolved_player.strategies]
+        if len(set(current)) != len(current):
+            raise ValueError(
+                "set_strategies(): the player has duplicate strategy labels, "
+                "so matching by label is not well-defined"
+            )
+        added = [label for label in labels if label not in current]
+        if added and not add:
+            raise ValueError(f"set_strategies(): would create new strategies {added}")
+        missing = [label for label in current if label not in labels]
+        if missing and not drop:
+            raise ValueError(
+                f"set_strategies(): would delete strategies {missing} and the outcomes "
+                f"at their contingencies; pass drop=True to confirm"
+            )
+        c_labels = stdvector[string]()
+        for label in labels:
+            c_labels.push_back(label.encode("utf-8"))
+        self.game.deref().SetStrategies(resolved_player.player, c_labels)
 
 
 @dataclasses.dataclass

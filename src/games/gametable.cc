@@ -503,6 +503,7 @@ GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
   }
+  IndexStrategies();
   return player;
 }
 
@@ -526,47 +527,6 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 //------------------------------------------------------------------------
 //                        GameTableRep: Strategies
 //------------------------------------------------------------------------
-
-GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
-{
-  if (p_player->GetGame().get() != this) {
-    throw MismatchException();
-  }
-  p_player->CheckStrategyLabel(p_label, {});
-  auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
-                                                    p_player->m_strategies.size() + 1, p_label);
-  IncrementVersion();
-  std::vector<long> old_radices;
-  for (const auto &player : m_players) {
-    old_radices.push_back(player->m_strategies.size());
-  }
-  p_player->m_strategies.push_back(strategy);
-  RebuildTable(old_radices);
-  return p_player->m_strategies.back();
-}
-
-void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
-{
-  const auto player = p_strategy->GetPlayer().get();
-  if (player->m_game != this) {
-    throw MismatchException();
-  }
-  if (player->GetStrategies().size() == 1) {
-    return;
-  }
-
-  IncrementVersion();
-  std::vector<long> old_radices;
-  for (const auto &pl : m_players) {
-    old_radices.push_back(pl->m_strategies.size());
-  }
-  const auto deletedIt = std::find(player->m_strategies.begin(), player->m_strategies.end(),
-                                   std::shared_ptr<GameStrategyRep>(p_strategy));
-  const long deletedDigit = deletedIt - player->m_strategies.begin();
-  player->m_strategies.erase(deletedIt);
-  RebuildTable(old_radices, player->GetNumber() - 1, deletedDigit);
-  p_strategy->Invalidate();
-}
 
 void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
                                      const std::map<std::string, std::string> &p_labels)
@@ -605,6 +565,71 @@ void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
   }
 }
 
+void GameTableRep::SetStrategies(const GamePlayer &p_player,
+                                 const std::vector<std::string> &p_labels)
+{
+  if (p_player->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  if (p_labels.empty()) {
+    throw ValueException("At least one strategy must be specified");
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (label.empty()) {
+      throw ValueException("Strategy label must not be empty");
+    }
+    CheckLabel(label);
+    if (!declared.insert(label).second) {
+      throw ValueException("Strategy label '" + label + "' appears more than once");
+    }
+  }
+  // Match declared labels against current strategies.
+  std::map<std::string, long> current;
+  for (const auto &strategy : p_player->m_strategies) {
+    if (!current.emplace(strategy->GetLabel(), strategy->GetNumber() - 1).second) {
+      throw ValueException("Strategy label '" + strategy->GetLabel() +
+                           "' is ambiguous for this player");
+    }
+  }
+  std::vector<long> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+  std::vector<long> old_to_new(p_player->m_strategies.size(), -1);
+  for (size_t i = 0; i < source.size(); ++i) {
+    if (source[i] >= 0) {
+      old_to_new[source[i]] = static_cast<long>(i);
+    }
+  }
+  std::vector<long> old_radices;
+  for (const auto &player : m_players) {
+    old_radices.push_back(player->m_strategies.size());
+  }
+
+  IncrementVersion();
+  std::vector<std::shared_ptr<GameStrategyRep>> newStrategies;
+  newStrategies.reserve(p_labels.size());
+  for (size_t i = 0; i < p_labels.size(); ++i) {
+    if (source[i] >= 0) {
+      newStrategies.push_back(p_player->m_strategies[source[i]]);
+    }
+    else {
+      newStrategies.push_back(
+          std::make_shared<GameStrategyRep>(p_player.get(), static_cast<int>(i) + 1, p_labels[i]));
+    }
+  }
+  for (const auto &strategy : p_player->m_strategies) {
+    if (declared.count(strategy->GetLabel()) == 0) {
+      strategy->Invalidate();
+    }
+  }
+  p_player->m_strategies = std::move(newStrategies);
+  RebuildTable(old_radices, p_player->GetNumber() - 1, old_to_new);
+}
+
 //------------------------------------------------------------------------
 //                   GameTableRep: Factory functions
 //------------------------------------------------------------------------
@@ -639,9 +664,9 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  See the declaration
-/// in gametable.h for the meaning of p_deletedPlayer/p_deletedDigit.
-void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_deletedPlayer,
-                                long p_deletedDigit)
+/// in gametable.h for the meaning of p_player/p_oldToNew.
+void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_player,
+                                const std::vector<long> &p_oldToNew)
 {
   std::vector<long> old_strides(old_radices.size());
   long stride = 1;
@@ -663,21 +688,23 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_del
     if (m_results[old_index] == nullptr) {
       continue;
     }
-    if (p_deletedPlayer >= 0 &&
-        (old_index / old_strides[p_deletedPlayer]) % old_radices[p_deletedPlayer] ==
-            p_deletedDigit) {
-      // This contingency used the strategy that was deleted.
-      continue;
-    }
     long new_index = 0;
+    bool dropped = false;
     for (size_t i = 0; i < m_players.size(); ++i) {
       long digit = (old_index / old_strides[i]) % old_radices[i];
-      if (static_cast<long>(i) == p_deletedPlayer && digit > p_deletedDigit) {
-        --digit;
+      if (static_cast<long>(i) == p_player) {
+        digit = p_oldToNew[digit];
+        if (digit < 0) {
+          // This contingency used a strategy that was removed.
+          dropped = true;
+          break;
+        }
       }
       new_index += digit * new_strides[i];
     }
-    newResults[new_index] = m_results[old_index];
+    if (!dropped) {
+      newResults[new_index] = m_results[old_index];
+    }
   }
   m_results.swap(newResults);
   IndexStrategies();

@@ -408,16 +408,12 @@ public:
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
-  wxString RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
-  wxString RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
-
-  bool CanDeleteRowHeaderStrategy(int headerCol, int headerRow) const;
-  bool CanDeleteColHeaderStrategy(int headerRow, int headerCol) const;
-  void DeleteRowHeaderStrategy(int headerCol, int headerRow);
-  void DeleteColHeaderStrategy(int headerRow, int headerCol);
 
   void SetPayoffCellValue(int row, int col, const wxString &value);
   //@}
+
+  /// Opens the "Edit strategies" dialog for `player`, committing any changes made.
+  void EditStrategies(int player);
 };
 } // namespace Gambit::GUI
 #endif // GAMBIT_GUI_NFGTABLE_H
