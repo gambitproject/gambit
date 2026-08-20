@@ -707,8 +707,9 @@ class Game:
         arrays = list(payoffs.values())
         shape = arrays[0].shape
         g = Game.new_table(shape)
-        for (player, label) in zip(g.players, payoffs, strict=True):
-            player.label = label
+        g.relabel_players(
+            {player.label: label for player, label in zip(g.players, payoffs, strict=True)}
+        )
         for profile in itertools.product(*(range(s) for s in shape)):
             for array, player in zip(arrays, g.players, strict=True):
                 g[profile][player] = array[profile]
@@ -2797,6 +2798,75 @@ class Game:
         if c_labels.empty():
             return
         self.game.deref().RelabelStrategies(resolved_player.player, c_labels)
+
+    def relabel_players(self,
+                        labels: typing.Mapping[str, str],
+                        strict: bool = True) -> None:
+        """Simultaneously reassign the labels of the game's players.
+
+        `labels` maps current player labels to their replacements.  The reassignment
+        is simultaneous, so labels can be swapped directly. Players are not re-ordered: each
+        relabelled player keeps its position.
+
+        The chance player is not part of the operation: its label is reserved, and a
+        key of `labels` equal to it raises ``ValueError`` even when `strict` is `False`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        labels : Mapping[str, str]
+            A mapping from current player labels to replacement labels.
+            Entries whose key equals their value are ignored.
+        strict : bool, default True
+            If `True`, every key of `labels` must be the label of a player of the game,
+            and unknown keys raise ``KeyError``.  If `False`, unknown keys are ignored.
+
+        Raises
+        ------
+        KeyError
+            When `strict` is `True`, if a key of `labels` matches no player of the game.
+        TypeError
+            If `labels` is not a mapping, or any key or value is not a string.
+        ValueError
+            If a key of `labels` matches more than one player; if a key of `labels`
+            is the label of the chance player; or if any replacement label is empty,
+            is not a valid label, would result in a duplicate label, or (in an
+            extensive game) is the reserved label of the chance player.
+
+        See Also
+        --------
+        relabel_actions : Change the labels of actions at an information set.
+        relabel_strategies : Change the labels of a player's strategies.
+        """
+        if not hasattr(labels, "items"):
+            raise TypeError(
+                f"relabel_players(): labels must be a mapping, "
+                f"not {labels.__class__.__name__}"
+            )
+        current = [player.label for player in self.players]
+        chance_label = self.players.chance.label if self.is_tree else None
+        c_labels = stdmap[string, string]()
+        for old, new in labels.items():
+            if not isinstance(old, str) or not isinstance(new, str):
+                raise TypeError("relabel_players(): labels must map str to str")
+            if old == chance_label:
+                raise ValueError("relabel_players(): the chance player's label is reserved")
+            matches = current.count(old)
+            if matches > 1:
+                raise ValueError(
+                    f"relabel_players(): label '{old}' is ambiguous in this game"
+                )
+            if matches == 0:
+                if strict:
+                    raise KeyError(f"relabel_players(): no player with label '{old}'")
+                continue
+            if new == old:
+                continue
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
+        if c_labels.empty():
+            return
+        self.game.deref().RelabelPlayers(c_labels)
 
 
 @dataclasses.dataclass
