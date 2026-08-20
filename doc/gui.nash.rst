@@ -173,7 +173,11 @@ node.
 The computed profiles can also be viewed in the reduced strategic
 game. Clicking on the strategic game icon changes the view to the
 reduced strategic form of the game, and shows the equilibrium profiles
-converted to mixed strategies in the strategic game.
+converted to mixed strategies in the strategic game. Hovering the mouse
+pointer over a strategy's row or column label there shows the analogous
+information for that strategy: its probability under the current
+profile, its payoff if played against the others' current play, and its
+player's overall payoff under the current profile.
 
 
 
