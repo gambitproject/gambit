@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/enummixed.cc
+// FILE: src/solvers/enummixed/enummixed.cc
 // Compute Nash equilibria via Mangasarian's algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/linalg/vertenum.imp"
 #include "solvers/enummixed/enummixed.h"
 #include "clique.h"

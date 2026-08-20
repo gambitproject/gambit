@@ -43,6 +43,10 @@ enum MenuItems {
   GBT_MENU_EDIT_NODE = 1420,
   GBT_MENU_EDIT_MOVE = 1421,
 
+  // Reserves a block of IDs for the "set player" submenu on the node
+  // context menu, one per player (plus chance); see EfgDisplay::UpdateSetPlayerMenu.
+  GBT_MENU_EDIT_SET_PLAYER_BASE = 1430,
+
   GBT_MENU_EDIT_NEWPLAYER = 1500,
 
   GBT_MENU_VIEW_PROFILES = 1850,

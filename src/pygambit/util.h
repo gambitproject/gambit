@@ -29,10 +29,12 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "gambit.h"
+#include "games/game.h"
+#include "games/writer.h"
+#include "games/stratspt.h"
 #include "games/gameagg.h"
 #include "games/gamebagg.h"
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 using namespace std;
 using namespace Gambit;

@@ -14,7 +14,7 @@ def test_player_count():
 def test_player_label(label):
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    player.label = label
+    game.relabel_players({player.label: label})
     assert player.label == label
 
 
@@ -23,7 +23,7 @@ def test_player_label_invalid_raises_valueerror(label):
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = label
+        game.relabel_players({player.label: label})
 
 
 @pytest.mark.parametrize("label", games.UNICODE_LABELS)
@@ -31,7 +31,7 @@ def test_player_label_unicode_accepted(label):
     """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.Game.new_table([2, 2])
     player = next(iter(game.players))
-    player.label = label
+    game.relabel_players({player.label: label})
     assert player.label == label
 
 
@@ -77,7 +77,7 @@ def test_chance_player_label_cannot_be_changed():
     """The chance player's label is reserved ("Chance") and cannot be changed."""
     game = gbt.Game.new_tree()
     with pytest.raises(ValueError):
-        game.players.chance.label = "Nature"
+        game.relabel_players({game.players.chance.label: "Nature"})
 
 
 def test_regular_player_cannot_be_relabeled_to_chance():
@@ -85,14 +85,13 @@ def test_regular_player_cannot_be_relabeled_to_chance():
     game.add_player("Alice")
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = "Chance"
+        game.relabel_players({player.label: "Chance"})
 
 
 def test_player_index_by_string():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    pl1.label = "Alphonse"
-    pl2.label = "Gaston"
+    game.relabel_players({pl1.label: "Alphonse", pl2.label: "Gaston"})
     assert game.players["Alphonse"].label == "Alphonse"
     assert game.players["Gaston"].label == "Gaston"
 
@@ -113,14 +112,63 @@ def test_set_empty_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     player = next(iter(game.players))
     with pytest.raises(ValueError):
-        player.label = ""
+        game.relabel_players({player.label: ""})
 
 
 def test_set_duplicate_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     pl1, pl2, *_ = game.players
     with pytest.raises(ValueError):
-        pl1.label = pl2.label
+        game.relabel_players({pl1.label: pl2.label})
+
+
+def test_relabel_players_swap():
+    game = gbt.Game.new_table([2, 2])
+    a, b = (player.label for player in game.players)
+    game.relabel_players({a: b, b: a})
+    assert [player.label for player in game.players] == [b, a]
+
+
+def test_relabel_players_swap_tree():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.relabel_players({"Alice": "Bob", "Bob": "Alice"})
+    assert [player.label for player in game.players] == ["Bob", "Alice"]
+
+
+def test_relabel_players_duplicate_raises_valueerror():
+    game = gbt.Game.new_table([2, 2, 2])
+    a, b, _ = (player.label for player in game.players)
+    with pytest.raises(ValueError):
+        game.relabel_players({a: b})
+    with pytest.raises(ValueError):
+        game.relabel_players({a: "X", b: "X"})
+
+
+@pytest.mark.parametrize("bad", ["", " x"])
+def test_relabel_players_bad_label_raises_and_leaves_game_unchanged(bad: str):
+    game = gbt.Game.new_table([2, 2])
+    a, b = (player.label for player in game.players)
+    with pytest.raises(ValueError):
+        game.relabel_players({a: "X", b: bad})
+    assert [player.label for player in game.players] == [a, b]
+
+
+def test_relabel_players_unknown_label_strictness():
+    game = gbt.Game.new_table([2, 2])
+    a = next(iter(game.players)).label
+    with pytest.raises(KeyError):
+        game.relabel_players({"no-such-player": "X"})
+    game.relabel_players({"no-such-player": "X", a: "Y"}, strict=False)
+    assert next(iter(game.players)).label == "Y"
+
+
+def test_relabel_players_chance_key_raises_even_when_not_strict():
+    """The chance player's label is reserved; a key equal to it is an error."""
+    game = gbt.Game.new_tree(["Alice"])
+    with pytest.raises(ValueError):
+        game.relabel_players({"Chance": "Nature"})
+    with pytest.raises(ValueError):
+        game.relabel_players({"Chance": "Nature"}, strict=False)
 
 
 def test_strategic_game_add_player():
@@ -140,29 +188,21 @@ def test_extensive_game_add_player():
     assert len(pl1.strategies) == 1
 
 
-def test_strategic_game_add_strategy():
+def test_strategic_game_set_strategies_add():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    game.add_strategy(pl1, "new strategy")
+    game.set_strategies(pl1, [s.label for s in pl1.strategies] + ["new strategy"])
     assert len(pl1.strategies) == 3
     # This second add also ensures that we are testing the case where there
     # are null outcomes in the table
-    game.add_strategy(pl2, "new strategy")
+    game.set_strategies(pl2, [s.label for s in pl2.strategies] + ["new strategy"])
     assert len(pl2.strategies) == 3
 
 
-def test_extensive_game_add_strategy():
+def test_extensive_game_set_strategies():
     game = gbt.Game.new_tree(["Alice"])
-    assert len(game.players["Alice"].strategies) == 1
     with pytest.raises(gbt.UndefinedOperationError):
-        game.add_strategy(game.players["Alice"], "new strategy")
-
-
-def test_strategic_game_delete_strategy():
-    game = gbt.Game.new_table([2, 2])
-    pl1 = next(iter(game.players))
-    game.delete_strategy(next(iter(pl1.strategies)))
-    assert len(pl1.strategies) == 1
+        game.set_strategies(game.players["Alice"], ["new strategy"])
 
 
 def _tag_contingencies(game: gbt.Game) -> None:
@@ -178,23 +218,24 @@ def _tag_contingencies(game: gbt.Game) -> None:
             outcome[player] = int(f"{pl_index}{strategy.label}")
 
 
-def test_strategic_game_delete_strategy_preserves_other_payoffs():
+def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
     game = gbt.Game.new_table([4, 2, 2])
     pl1, pl2, pl3 = game.players
     _tag_contingencies(game)
 
     # Record expected payoffs by label (a stable identity), for the
-    # strategies of pl1 that survive deleting its second strategy.
-    surviving = [s for s in pl1.strategies if s.label != "2"]
+    # strategies of pl1 that survive dropping its second strategy.
+    surviving = [s.label for s in pl1.strategies if s.label != "2"]
     expected = {
         (s1.label, s2.label, s3.label):
             tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
-        for s1 in surviving for s2 in pl2.strategies for s3 in pl3.strategies
+        for s1 in pl1.strategies if s1.label in surviving
+        for s2 in pl2.strategies for s3 in pl3.strategies
     }
 
-    game.delete_strategy(pl1.strategies["2"])
+    game.set_strategies(pl1, surviving, drop=True)
 
-    assert len(pl1.strategies) == 3
+    assert [s.label for s in pl1.strategies] == surviving
     for s1 in pl1.strategies:
         for s2 in pl2.strategies:
             for s3 in pl3.strategies:
@@ -203,37 +244,32 @@ def test_strategic_game_delete_strategy_preserves_other_payoffs():
                 assert actual == expected[key]
 
 
-def test_strategic_game_delete_first_strategy_preserves_other_payoffs():
+def test_strategic_game_set_strategies_drop_first_preserves_other_payoffs():
     game = gbt.Game.new_table([3, 2])
     pl1, pl2 = game.players
     _tag_contingencies(game)
 
-    surviving = [s for s in pl1.strategies if s.label != "1"]
+    surviving = [s.label for s in pl1.strategies if s.label != "1"]
     expected = {
         (s1.label, s2.label): tuple(game[s1, s2][p] for p in (pl1, pl2))
-        for s1 in surviving for s2 in pl2.strategies
+        for s1 in pl1.strategies if s1.label in surviving
+        for s2 in pl2.strategies
     }
 
-    game.delete_strategy(pl1.strategies["1"])
+    game.set_strategies(pl1, surviving, drop=True)
 
-    assert len(pl1.strategies) == 2
+    assert [s.label for s in pl1.strategies] == surviving
     for s1 in pl1.strategies:
         for s2 in pl2.strategies:
             key = (s1.label, s2.label)
             assert tuple(game[s1, s2][p] for p in (pl1, pl2)) == expected[key]
 
 
-def test_strategic_game_delete_last_strategy():
+def test_strategic_game_set_strategies_empty():
     game = gbt.Game.new_table([1, 2])
     pl1 = next(iter(game.players))
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_strategy(next(iter(pl1.strategies)))
-
-
-def test_extensive_game_delete_strategy():
-    game = gbt.Game.new_tree(["Alice"])
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_strategy(next(iter(game.players["Alice"].strategies)))
+        game.set_strategies(pl1, [], drop=True)
 
 
 def test_player_strategy_by_label():
@@ -244,23 +280,28 @@ def test_player_strategy_by_label():
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_add_strategy_label_valid(label):
+def test_set_strategies_label_valid(label):
     game = gbt.Game.new_table([2, 2])
-    strategy = game.add_strategy(next(iter(game.players)), label)
-    assert strategy.label == label
+    pl1 = next(iter(game.players))
+    game.set_strategies(pl1, [s.label for s in pl1.strategies] + [label])
+    assert [s.label for s in pl1.strategies][-1] == label
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
-def test_add_strategy_label_invalid_raises_valueerror(label):
+def test_set_strategies_label_invalid_raises_valueerror(label):
     game = gbt.Game.new_table([2, 2])
+    pl1 = next(iter(game.players))
     with pytest.raises(ValueError):
-        game.add_strategy(next(iter(game.players)), label)
+        game.set_strategies(pl1, [s.label for s in pl1.strategies] + [label])
 
 
-def test_add_strategy_requires_label():
+def test_set_strategies_requires_iterable_of_str():
     game = gbt.Game.new_table([2, 2])
+    pl1 = next(iter(game.players))
     with pytest.raises(TypeError):
-        game.add_strategy(next(iter(game.players)))
+        game.set_strategies(pl1, "12")
+    with pytest.raises(TypeError):
+        game.set_strategies(pl1, [1, 2])
 
 
 def test_strategy_label_empty_raises_valueerror():
@@ -374,7 +415,7 @@ def test_player_get_min_payoff_null_outcome():
     pl1, pl2 = game.players
     assert pl1.min_payoff == 1
     assert pl2.min_payoff == 2
-    game.add_strategy(pl1, "new strategy")
+    game.set_strategies(pl1, [s.label for s in pl1.strategies] + ["new strategy"])
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
     for player in game.players:
@@ -400,27 +441,26 @@ def test_player_get_max_payoff_null_outcome():
     pl1, pl2 = game.players
     assert pl1.max_payoff == -1
     assert pl2.max_payoff == -2
-    game.add_strategy(pl1, "new strategy")
+    game.set_strategies(pl1, [s.label for s in pl1.strategies] + ["new strategy"])
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
     for player in game.players:
         assert player.max_payoff == 0
 
 
-def test_add_strategy_duplicate_label_raises_and_leaves_game_unchanged():
+def test_set_strategies_duplicate_label_raises_and_leaves_game_unchanged():
     game = gbt.Game.new_table([2, 2])
     pl = next(iter(game.players))
-    existing = next(iter(pl.strategies)).label
-    count_before = len(pl.strategies)
+    labels = [s.label for s in pl.strategies]
     with pytest.raises(ValueError):
-        game.add_strategy(pl, existing)
-    assert len(pl.strategies) == count_before
+        game.set_strategies(pl, labels + [labels[0]])
+    assert [s.label for s in pl.strategies] == labels
 
 
-def test_add_strategy_empty_label_raises_and_leaves_game_unchanged():
+def test_set_strategies_empty_label_raises_and_leaves_game_unchanged():
     game = gbt.Game.new_table([2, 2])
     pl = next(iter(game.players))
-    count_before = len(pl.strategies)
+    labels = [s.label for s in pl.strategies]
     with pytest.raises(ValueError):
-        game.add_strategy(pl, "")
-    assert len(pl.strategies) == count_before
+        game.set_strategies(pl, labels + [""])
+    assert [s.label for s in pl.strategies] == labels

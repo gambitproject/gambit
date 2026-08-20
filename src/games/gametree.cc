@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametree.cc
+// FILE: src/games/gametree.cc
 // Implementation of extensive game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include <unordered_set>
 #include <variant>
 
-#include "gambit.h"
+#include "games.h"
 #include "gametree.h"
 #include "writer.h"
 
@@ -1921,9 +1921,25 @@ protected:
     return std::make_shared<TreePureStrategyProfileRep>(*this);
   }
 
+  /// Build the behavior profile induced by this pure strategy profile
+  PureBehaviorProfile GetBehaviorProfile() const
+  {
+    PureBehaviorProfile behav(m_game);
+    for (const auto &player : m_game->GetPlayers()) {
+      for (const auto &infoset : player->GetInfosets()) {
+        try {
+          behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav.at(infoset.get())));
+        }
+        catch (std::out_of_range &) {
+        }
+      }
+    }
+    return behav;
+  }
+
 public:
   TreePureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
-  GameOutcome GetOutcome() const override { throw UndefinedException(); }
+  GameOutcome GetOutcome() const override;
   void SetOutcome(GameOutcome p_outcome) override { throw UndefinedException(); }
   Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
@@ -1944,19 +1960,14 @@ PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 //       TreePureStrategyProfileRep: Data access and manipulation
 //------------------------------------------------------------------------
 
+GameOutcome TreePureStrategyProfileRep::GetOutcome() const
+{
+  return GetBehaviorProfile().GetOutcome();
+}
+
 Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  PureBehaviorProfile behav(m_game);
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      try {
-        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav.at(infoset.get())));
-      }
-      catch (std::out_of_range &) {
-      }
-    }
-  }
-  return behav.GetPayoff<Rational>(p_player);
+  return GetBehaviorProfile().GetPayoff<Rational>(p_player);
 }
 
 Rational TreePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const

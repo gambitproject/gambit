@@ -23,7 +23,7 @@
 #include <iostream>
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameexpl.h"
 
 namespace Gambit {

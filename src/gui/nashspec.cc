@@ -105,7 +105,7 @@ std::optional<SolverFunction> IPANashSpec::MakeSolver(NashRepresentation) const
       Nash::IPAStrategySolve(
           pert,
           [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
-          p_cancel);
+          Nash::NullIPAEventCallback, p_cancel);
     }
   };
 }

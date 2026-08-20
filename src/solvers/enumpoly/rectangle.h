@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef RECTANGLE_H
-#define RECTANGLE_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H
+#define GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H
 
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit {
 
@@ -178,4 +178,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // RECTANGLE_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H

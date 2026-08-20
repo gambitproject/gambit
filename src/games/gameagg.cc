@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gameagg.cc
+// FILE: src/games/gameagg.cc
 // Implementation of action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameagg.h"
 
 namespace Gambit {

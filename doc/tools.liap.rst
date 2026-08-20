@@ -49,8 +49,15 @@ See the :ref:`algorithm description <liap>` for full details.
 
 .. cmdoption:: -n
 
-   Specify the number of starting points to randomly generate.  Ignored
-   if `-s` is given.
+   Specify the number of starting points to randomly generate.
+   Mutually exclusive with :option:`-s`.
+
+.. cmdoption:: -R
+
+   Seeds the random number generator used to generate starting points
+   with the specified value, so that the sequence of points generated
+   by :option:`-n` can be reproduced across runs.  If not specified,
+   the generator is seeded from system entropy.  Requires :option:`-n`.
 
 .. cmdoption:: -i
 
@@ -79,6 +86,7 @@ See the :ref:`algorithm description <liap>` for full details.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
+   Mutually exclusive with :option:`-n`.
 
 .. cmdoption:: -v
 

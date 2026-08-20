@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.cc
+// FILE: src/games/game.cc
 // Implementation of extensive form game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include <numeric>
 #include <random>
 
-#include "gambit.h"
+#include "games.h"
 #include "writer.h"
 
 // The references to the tree representations violate the logic
@@ -231,6 +231,48 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
                   false, false)
            << std::endl;
   };
+}
+
+//------------------------------------------------------------------------
+//                           GameRep: Players
+//------------------------------------------------------------------------
+
+void GameRep::RelabelPlayers(const std::map<std::string, std::string> &p_labels)
+{
+  // Resolve each key to exactly one (personal) player of the game.
+  std::map<GamePlayerRep *, std::string> assignment;
+  std::set<const GamePlayerRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GamePlayerRep *match = nullptr;
+    for (const auto &player : m_players) {
+      if (player->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Player label '" + old_label + "' is ambiguous in this game");
+        }
+        match = player.get();
+      }
+    }
+    if (!match) {
+      if (IsTree() && old_label == GetChance()->GetLabel()) {
+        throw ValueException("The chance player's label cannot be changed");
+      }
+      throw ValueException("No player with label '" + old_label + "' in this game");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  // Replacement labels must be legal, unique against untouched players, and pairwise distinct
+  std::set<std::string> targets;
+  for (const auto &[player, new_label] : assignment) {
+    CheckPlayerLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Player label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[player, new_label] : assignment) {
+    player->m_label = new_label;
+  }
 }
 
 //========================================================================

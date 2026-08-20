@@ -25,9 +25,55 @@
 
 #include <wx/grid.h>
 
+#include "games/stratpure.h"
+
+// Forward-declared rather than requiring <wx/print.h>: TableWidget::GetPrintout() only
+// ever needs the pointer type here, and not every .cc file including this header (e.g.
+// nfgheadergrid.cc) has a reason to pull in the printing headers itself.
+class wxPrintout;
+
 namespace Gambit::GUI {
 class GameDocument;
 class NfgPanel;
+
+//!
+//! This class handles some common overriding of wxGrid behavior common to the grids used
+//! in the strategic game display (nfgtable.cc's TableGridBase, nfgheadergrid.cc's
+//! RowPlayerGrid/ColPlayerGrid, nfgpayoffgrid.cc's PayoffGrid) -- shared here, rather than
+//! file-local to one of them, since it's a base class used across all three .cc files.
+//!
+class TableGridBase : public wxGrid {
+  //!
+  //! @name Suppressing the built-in selection highlight & cursor rectangle
+  //!
+  //@{
+  void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
+  void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
+  //@}
+
+protected:
+  /// Shows the editor on one click; overridden by the header grids to edit strategies
+  /// instead (or do nothing, if the strategic form is read-only).
+  virtual void OnCellLeftClick(wxGridEvent &p_event)
+  {
+    SetGridCursor(p_event.GetRow(), p_event.GetCol());
+    EnableCellEditControl();
+    p_event.Skip(false);
+  }
+
+public:
+  explicit TableGridBase(wxWindow *p_parent, wxWindowID p_id = wxID_ANY) : wxGrid(p_parent, p_id)
+  {
+    SetCellHighlightPenWidth(0);
+    SetCellHighlightROPenWidth(0);
+    SetRowLabelSize(0);
+    SetColLabelSize(0);
+
+    Bind(wxEVT_GRID_RANGE_SELECTING, &TableGridBase::OnRangeSelecting, this);
+    Bind(wxEVT_GRID_SELECT_CELL, &TableGridBase::OnSelectCell, this);
+    Bind(wxEVT_GRID_CELL_LEFT_CLICK, &TableGridBase::OnCellLeftClick, this);
+  }
+};
 
 class StrategicTableLayout {
   GameDocument *m_doc;
@@ -273,6 +319,22 @@ class TableWidget final : public wxPanel {
   void UpdateLabelPanels();
   //@}
 
+  /// @name Constructing/updating the row/col/payoff grids
+  //@{
+  /// Constructs m_payoffGrid (defined in nfgpayoffgrid.cc, alongside PayoffGrid) and
+  /// m_rowGrid/m_colGrid (defined in nfgheadergrid.cc, alongside RowPlayerGrid/
+  /// ColPlayerGrid) -- called from the constructor body rather than its initializer
+  /// list, since those grid classes' complete types aren't visible here.
+  void InitPayoffGrid();
+  void InitHeaderGrids();
+  /// These call down to PayoffGrid::OnUpdate()/RowPlayerGrid::OnUpdate()/
+  /// ColPlayerGrid::OnUpdate() (via a dynamic_cast back to the concrete type), for the
+  /// same reason InitPayoffGrid()/InitHeaderGrids() above exist.
+  void UpdatePayoffGrid();
+  void UpdateRowGrid();
+  void UpdateColGrid();
+  //@}
+
   int GetRowPaneWidth() const;
   int GetColPaneHeight() const;
   void UpdateLabelPanelSizes();
@@ -392,6 +454,7 @@ public:
   bool IsReadOnly() const;
   wxColour GetPlayerColor(int player) const;
   const StrategySupportProfile &GetSupport() const { return m_doc->GetNfgSupport(); }
+  GameDocument *GetDocument() const { return m_doc; }
 
   bool IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const;
   bool IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const;
@@ -406,16 +469,12 @@ public:
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
-  wxString RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
-  wxString RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
-
-  bool CanDeleteRowHeaderStrategy(int headerCol, int headerRow) const;
-  bool CanDeleteColHeaderStrategy(int headerRow, int headerCol) const;
-  void DeleteRowHeaderStrategy(int headerCol, int headerRow);
-  void DeleteColHeaderStrategy(int headerRow, int headerCol);
 
   void SetPayoffCellValue(int row, int col, const wxString &value);
   //@}
+
+  /// Opens the "Edit strategies" dialog for `player`, committing any changes made.
+  void EditStrategies(int player);
 };
 } // namespace Gambit::GUI
 #endif // GAMBIT_GUI_NFGTABLE_H

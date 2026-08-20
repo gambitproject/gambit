@@ -26,6 +26,7 @@
 #include <memory>
 
 #include "game.h"
+#include "stratspt.h"
 
 namespace Gambit {
 

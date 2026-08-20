@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lemketab.h
+// FILE: src/solvers/linalg/lemketab.h
 // Declaration of Lemke tableau class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LINALG_LEMKETAB_H
-#define GAMBIT_LINALG_LEMKETAB_H
+#ifndef GAMBIT_SOLVERS_LINALG_LEMKETAB_H
+#define GAMBIT_SOLVERS_LINALG_LEMKETAB_H
 
 #include "core/cancel.h"
 #include "tableau.h"
@@ -53,4 +53,4 @@ public:
 
 } // end namespace Gambit::linalg
 
-#endif // GAMBIT_LINALG_LEMKETAB_H
+#endif // GAMBIT_SOLVERS_LINALG_LEMKETAB_H

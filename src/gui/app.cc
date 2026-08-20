@@ -30,7 +30,7 @@
 #include <wx/display.h>
 #include <wx/image.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "app.h"
 #include "gameframe.h"

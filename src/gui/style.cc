@@ -322,4 +322,15 @@ void TreeRenderConfig::Load(const LegacyWorkspaceFile &p_workspace)
     m_numDecimals = *p_workspace.decimals;
   }
 }
+
+wxBitmap MakeColorSwatch(const wxColour &p_color, int p_size)
+{
+  wxBitmap bitmap(p_size, p_size);
+  wxMemoryDC dc(bitmap);
+  dc.SetBackground(wxBrush(p_color));
+  dc.Clear();
+  dc.SelectObject(wxNullBitmap);
+  return bitmap;
+}
+
 } // namespace Gambit::GUI

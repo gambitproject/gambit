@@ -20,13 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef SOLVERS_LOGIT_H
-#define SOLVERS_LOGIT_H
+#ifndef GAMBIT_SOLVERS_LOGIT_LOGIT_H
+#define GAMBIT_SOLVERS_LOGIT_LOGIT_H
 
 #include <functional>
 #include <variant>
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 namespace Gambit {
 
@@ -137,4 +137,4 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
 
 } // namespace Gambit
 
-#endif // SOLVERS_LOGIT_H
+#endif // GAMBIT_SOLVERS_LOGIT_LOGIT_H

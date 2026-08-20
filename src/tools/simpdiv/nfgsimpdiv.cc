@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/simpdiv/simpdiv.h"
 
@@ -115,8 +115,13 @@ void PrintHelp(char *progname)
   std::cerr << "  -g MULT          granularity of grid refinement at each step (default is 2)\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   starting points (default is to seed from system entropy);\n";
+  std::cerr << "                   requires -n\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "                   (mutually exclusive with -r)\n";
   std::cerr << "  -d DECIMALS      show profiles as floating point with DECIMALS digits\n";
   std::cerr << "                   (default is to display rational numbers)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
@@ -132,10 +137,11 @@ int main(int argc, char *argv[])
 {
   opterr = 0;
   std::string startFile;
-  bool useRandom = false;
+  bool useRandom = false, numTriesSet = false;
   int randDenom = 1, gridResize = 2, stopAfter = 1, decimals = 0;
   bool verbose = false, quiet = false;
   Rational maxregret(1, 10000000);
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -143,7 +149,8 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:q", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:R:q", long_options, &long_opt_index)) !=
+         -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -160,6 +167,10 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       stopAfter = atoi(optarg);
+      numTriesSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 'm':
       maxregret = lexical_cast<Rational>(std::string(optarg));
@@ -193,6 +204,19 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  if (useRandom && !startFile.empty()) {
+    std::cerr << "Error: The -r and -s options are mutually exclusive.\n";
+    return 1;
+  }
+  if (numTriesSet && !useRandom) {
+    std::cerr << "Error: The -n option requires -r.\n";
+    return 1;
+  }
+  if (seed && !numTriesSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
+
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
@@ -214,7 +238,7 @@ int main(int argc, char *argv[])
       starts = ReadProfiles(game, startPoints);
     }
     else if (useRandom) {
-      std::default_random_engine engine;
+      auto engine = MakeRandomEngine(seed);
       starts = NewRandomStrategyProfiles(game, stopAfter, randDenom, engine);
     }
     else {

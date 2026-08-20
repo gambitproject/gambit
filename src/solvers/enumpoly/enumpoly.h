@@ -26,7 +26,7 @@
 
 #include <variant>
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 #include "solvers/nashsupport/nashsupport.h"
 
 namespace Gambit::Nash {

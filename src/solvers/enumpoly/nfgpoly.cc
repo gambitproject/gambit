@@ -23,6 +23,7 @@
 
 #include <numeric>
 
+#include "games/stratpure.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "polysystem.h"
