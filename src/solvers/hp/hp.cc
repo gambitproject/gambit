@@ -49,7 +49,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
     const double t = point[1];
 
     // Path tracer reaches tol
-    if (t >= t_target && t - t_target < tol) {
+    if (system.ExtractEquilibrium(point).GetMaxRegret() <= tol && t >= t_target - tol) {
       return true;
     }
 
@@ -86,7 +86,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
       },
       x, direction, tracking_index, termination_condition, NullCallbackFunction,
       criterion_function);
-  if (!result.status) {
+  if (!result.status && system.ExtractEquilibrium(x).GetMaxRegret() > tol) {
     return {};
   }
 
