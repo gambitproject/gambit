@@ -18,6 +18,8 @@
 ### Changed
 - All long-running calculations are now done in a thread in the GUI process, rather than calling the
   command-line executables as external processes. (#990)
+- When displaying a strategic form, the graphical interface preserves decimal payoffs when those are
+  what are specified in the game, whenever possible.  (#867)
 
 ### Removed
 - Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
