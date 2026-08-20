@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/file.cc
+// FILE: src/games/file.cc
 // Parser for reading game savefiles
 //
 // This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 #include <set>
 #include <algorithm>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameagg.h"
 
 namespace {

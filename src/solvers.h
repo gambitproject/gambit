@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gambit.h
-// Top-level include file for all of Gambit
+// FILE: src/solvers.h
+// Top-level include file for Gambit's equilibrium-computation algorithms
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,10 +20,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_H
-#define GAMBIT_H
+#ifndef GAMBIT_SOLVERS_H
+#define GAMBIT_SOLVERS_H
 
 #include "games.h"
-#include "solvers.h"
 
-#endif // GAMBIT_H
+#include "solvers/enumpure/enumpure.h"
+#include "solvers/enummixed/enummixed.h"
+#include "solvers/lcp/lcp.h"
+#include "solvers/lp/lp.h"
+#include "solvers/liap/liap.h"
+#include "solvers/simpdiv/simpdiv.h"
+#include "solvers/gnm/gnm.h"
+#include "solvers/ipa/ipa.h"
+#include "solvers/nashsupport/nashsupport.h"
+#include "solvers/enumpoly/enumpoly.h"
+#include "solvers/logit/logit.h"
+
+#endif // GAMBIT_SOLVERS_H

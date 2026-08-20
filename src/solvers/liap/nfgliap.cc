@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/liap/nfgliap.cc
+// FILE: src/solvers/liap/nfgliap.cc
 // Compute Nash equilibria by minimizing Liapunov function
 //
 // This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "core/function.h"
 #include "liap.h"
 

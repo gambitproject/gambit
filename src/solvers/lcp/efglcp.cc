@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/efglcp.cc
+// FILE: src/solvers/lcp/efglcp.cc
 // Implementation of algorithm to solve extensive forms using linear
 // complementarity program from sequence form
 //
@@ -21,7 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/linalg/lemketab.h"
 #include "solvers/lcp/lcp.h"
 

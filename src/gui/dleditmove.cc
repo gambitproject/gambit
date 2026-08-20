@@ -32,7 +32,7 @@
 #include <memory>
 #include <set>
 
-#include "gambit.h"
+#include "games.h"
 #include "dleditmove.h"
 #include "valnumber.h"
 #include "editlabel.h"

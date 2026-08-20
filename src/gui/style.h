@@ -25,7 +25,7 @@
 
 #include <functional>
 
-#include "gambit.h"
+#include "games/game.h"
 #include "games/workspace.h"
 
 class wxFont;

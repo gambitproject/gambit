@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.cc
+// FILE: src/games/game.cc
 // Implementation of extensive form game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include <numeric>
 #include <random>
 
-#include "gambit.h"
+#include "games.h"
 #include "writer.h"
 
 // The references to the tree representations violate the logic

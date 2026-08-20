@@ -24,7 +24,7 @@
 #include <fstream>
 #include <set>
 
-#include "gambit.h"
+#include "games.h"
 #include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()

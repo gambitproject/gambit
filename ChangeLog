@@ -4,6 +4,9 @@
 - Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
 - Added `Game.set_strategies`, which declares the ordered list of a player's strategies in a game in strategic form,
   matching by label.  (#1056)
+- `gambit-ipa` now supports verbose output via the `-V` flag, reporting on intermediate progress. (#501)
+- Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
+  random starting point generation. (#448)
 
 ### Fixed
 - `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
@@ -17,6 +20,8 @@
 ### Changed
 - All long-running calculations are now done in a thread in the GUI process, rather than calling the
   command-line executables as external processes. (#990)
+- When displaying a strategic form, the graphical interface preserves decimal payoffs when those are
+  what are specified in the game, whenever possible.  (#867)
 - The GUI's strategic game table gained an "Edit strategies" dialog, opened by clicking any of a
   player's strategy labels, supporting adding, deleting, reordering, and renaming that player's
   strategies in one operation. The "+" toolbar icon for adding a strategy, and the strategy

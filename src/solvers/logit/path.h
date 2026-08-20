@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/logit/path.h
+// FILE: src/solvers/logit/path.h
 // Interface to generic smooth path-following algorithm.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef PATH_H
-#define PATH_H
+#ifndef GAMBIT_SOLVERS_LOGIT_PATH_H
+#define GAMBIT_SOLVERS_LOGIT_PATH_H
 
 #include <functional>
 #include "core/cancel.h"
@@ -96,4 +96,4 @@ private:
 
 } // end namespace Gambit
 
-#endif // PATH_H
+#endif // GAMBIT_SOLVERS_LOGIT_PATH_H

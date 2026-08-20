@@ -30,6 +30,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <cmath>
 #include <compare>
+#include <string>
+
+#include "util.h"
 
 #include "integer.h"
 

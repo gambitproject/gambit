@@ -24,7 +24,7 @@
 #include <fstream>
 #include <getopt.h>
 
-#include "gambit.h"
+#include "games.h"
 #include "games/writer.h"
 
 using namespace Gambit;

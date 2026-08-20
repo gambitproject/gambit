@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/nfglcp.cc
+// FILE: src/solvers/lcp/nfglcp.cc
 // Compute Nash equilibria via Lemke-Howson algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/linalg/lhtab.h"
 #include "solvers/lcp/lcp.h"
 

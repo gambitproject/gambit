@@ -6,7 +6,7 @@
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "welcome.h"
 #include "app.h"

@@ -41,3 +41,29 @@ This hybrid architecture aims to maintain some flexibility for future developmen
 2.  Likewise, the graphical interface layer is kept cleanly separate from the core.
     Graphical-based interfaces (different libraries, languages,
     browser-based interfaces) can be developed without touching the core code.
+
+Header organization
+--------------------
+
+Each of the three core directories is exposed through a top-level umbrella header:
+
+* ``src/games.h`` covers game representation, equilibrium profile types, and file I/O
+  (that is, all of ``src/core`` and ``src/games``).
+* ``src/solvers.h`` includes ``games.h`` plus the single public header for every solver
+  algorithm (for example ``src/solvers/lcp/lcp.h``).
+* ``src/gambit.h`` is the "everything" umbrella: ``games.h`` followed by ``solvers.h``.
+
+Solver headers depend on the representation types, never the reverse, so
+``solvers.h`` sits above ``games.h`` rather than being folded into it.
+
+Within ``src/core``, ``src/games``, and ``src/solvers``, every header should be
+self-contained: it should ``#include`` whatever it directly uses, rather than relying
+on some other header -- in particular, one of the umbrella headers -- having already
+brought a dependency into scope by the time it is reached. A header that implements
+algorithm internals (for example the linear algebra in ``src/solvers/linalg`` or the
+polynomial-system machinery in ``src/solvers/enumpoly``) should depend only on
+``src/core``, not on the game representation, unless it genuinely needs it.
+
+This discipline will allow ``src/core``, ``src/games``, and ``src/solvers``
+to be built and installed as a standalone C++ library, should we decide to offer
+that in future.

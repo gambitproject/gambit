@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/tableau.h
+// FILE: src/solvers/linalg/tableau.h
 // Interface to tableau class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef TABLEAU_H
-#define TABLEAU_H
+#ifndef GAMBIT_SOLVERS_LINALG_TABLEAU_H
+#define GAMBIT_SOLVERS_LINALG_TABLEAU_H
 
 #include "btableau.h"
 #include "ludecomp.h"
@@ -109,4 +109,4 @@ public:
 
 } // end namespace Gambit::linalg
 
-#endif // TABLEAU_H
+#endif // GAMBIT_SOLVERS_LINALG_TABLEAU_H

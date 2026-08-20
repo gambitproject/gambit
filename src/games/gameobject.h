@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.h
+// FILE: src/games/gameobject.h
 // Declaration of base class for representing games
 //
 // This program is free software; you can redistribute it and/or modify

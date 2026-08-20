@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/GrayComposition.h
+// FILE: src/games/agg/gray.h
 // Interface file for GrayComposition
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_AGG_GRAY_H
-#define GAMBIT_AGG_GRAY_H
+#ifndef GAMBIT_GAMES_AGG_GRAY_H
+#define GAMBIT_GAMES_AGG_GRAY_H
 
 #include <vector>
 
@@ -112,4 +112,4 @@ private:
 
 } // end namespace Gambit::agg
 
-#endif // GAMBIT_AGG_GRAY_H
+#endif // GAMBIT_GAMES_AGG_GRAY_H

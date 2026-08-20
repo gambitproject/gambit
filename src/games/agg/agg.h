@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/agg.h
+// FILE: src/games/agg/agg.h
 // Interface of Action Graph Game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_AGG_AGG_H
-#define GAMBIT_AGG_AGG_H
+#ifndef GAMBIT_GAMES_AGG_AGG_H
+#define GAMBIT_GAMES_AGG_AGG_H
 
 #include <iostream>
 #include <map>
@@ -381,4 +381,4 @@ private:
 
 } // namespace Gambit::agg
 
-#endif // GAMBIT_AGG_AGG_H
+#endif // GAMBIT_GAMES_AGG_AGG_H

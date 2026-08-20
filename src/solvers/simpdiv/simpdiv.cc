@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/simpdiv/simpdiv.cc
+// FILE: src/solvers/simpdiv/simpdiv.cc
 // Compute Nash equilibria via simplicial subdivision on the normal form
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include <numeric>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/simpdiv/simpdiv.h"
 
 namespace Gambit::Nash {
