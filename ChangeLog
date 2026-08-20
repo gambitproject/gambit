@@ -5,6 +5,7 @@
 - `gambit-ipa` now supports verbose output via the `-V` flag, reporting on intermediate progress. (#501)
 - Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
   random starting point generation. (#448)
+- Added `Game.relabel_players`, which simultaneously reassigns the labels of the game's players.  (#1058)
 
 ### Fixed
 - `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
@@ -24,6 +25,8 @@
 ### Removed
 - Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
   nonempty, unique labels.  (#1047)
+- Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
+  nonempty, unique labels.  (#1058)
 
 
 ## [17.0.0-alpha.1] - 2026-08-13
