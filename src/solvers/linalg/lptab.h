@@ -63,8 +63,8 @@ private:
 
   void SolveDual();
 
-  /// Same unit-column convention as ComputeRelativeCost, but selects the
-  /// vector entries themselves rather than a single cost
+  // Same unit-column convention as ComputeRelativeCost, but selects the
+  // vector entries themselves rather than a single cost
   void BasisSelect(const Vector<T> &unitv, const Vector<T> &rowv, Vector<T> &colv) const;
 };
 

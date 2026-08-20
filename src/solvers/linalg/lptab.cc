@@ -20,9 +20,393 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lptab.imp"
+#include "lptab.h"
 
 namespace Gambit::linalg {
+
+template <class T>
+LPTableau<T>::LPTableau(const Matrix<T> &A, const Vector<T> &b)
+  : Tableau<T>(A, b), m_dual(A.MinRow(), A.MaxRow()), m_unitCost(A.MinRow(), A.MaxRow()),
+    m_cost(A.MinCol(), A.MaxCol())
+{
+}
+
+template <class T>
+LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b)
+  : Tableau<T>(A, art, b), m_dual(A.MinRow(), A.MaxRow()), m_unitCost(A.MinRow(), A.MaxRow()),
+    m_cost(A.MinCol(), A.MaxCol() + art.size())
+{
+}
+
+//
+// Cost information
+//
+
+template <> void LPTableau<Rational>::SetCost(const Vector<Rational> &c)
+{
+  if (m_cost.front_index() == c.front_index() && m_cost.back_index() == c.back_index()) {
+    m_cost = c;
+    m_cost *= Rational(Tableau<Rational>::GetTotalDenominator());
+    for (int i = m_unitCost.front_index(); i <= m_unitCost.back_index(); i++) {
+      m_unitCost[i] = Rational(0);
+    }
+    Refactor();
+    SolveDual();
+    return;
+  }
+  for (int i = c.front_index(); i <= m_cost.back_index(); i++) {
+    m_cost[i] = c[i] * Rational(Tableau<Rational>::GetTotalDenominator());
+  }
+  for (int i = m_unitCost.front_index(); i <= m_unitCost.back_index(); i++) {
+    m_unitCost[i] = c[m_cost.size() + i - m_unitCost.front_index() + 1];
+  }
+  Refactor();
+  SolveDual();
+}
+
+template <> void LPTableau<double>::SetCost(const Vector<double> &c)
+{
+  if (m_cost.front_index() == c.front_index() && m_cost.back_index() == c.back_index()) {
+    m_cost = c;
+    m_unitCost = 0.0;
+    Refactor();
+    SolveDual();
+    return;
+  }
+  if (c.front_index() != m_cost.front_index()) {
+    throw DimensionException();
+  }
+  if (c.back_index() != static_cast<int>(m_cost.back_index() + m_unitCost.size())) {
+    throw DimensionException();
+  }
+  for (int i = c.front_index(); i <= m_cost.back_index(); i++) {
+    m_cost[i] = c[i];
+  }
+  for (int i = m_unitCost.front_index(); i <= m_unitCost.back_index(); i++) {
+    m_unitCost[i] = c[m_cost.size() + i - m_unitCost.front_index() + 1];
+  }
+  Refactor();
+  SolveDual();
+}
+
+template <> double LPTableau<double>::ComputeTotalCost() const
+{
+  Vector<double> tmpcol(MinRow(), MaxRow());
+  BasisSelect(m_unitCost, m_cost, tmpcol);
+  return tmpcol * m_solution;
+}
+
+template <> Rational LPTableau<Rational>::ComputeTotalCost() const
+{
+  Vector<Rational> tmpcol(MinRow(), MaxRow());
+  Vector<Rational> sol(MinRow(), MaxRow());
+  BasisSelect(m_unitCost, m_cost, tmpcol);
+  GetBasisVector(sol);
+  for (int i = tmpcol.front_index(); i <= tmpcol.back_index(); i++) {
+    if (GetLabel(i) > 0) {
+      tmpcol[i] /= (Rational)Tableau<Rational>::GetTotalDenominator();
+    }
+  }
+
+  return tmpcol * sol;
+}
+
+template <class T> T LPTableau<T>::ComputeRelativeCost(int col) const
+{
+  Vector<T> tmpcol(this->MinRow(), this->MaxRow());
+  if (col < 0) {
+    return m_unitCost[-col] - m_dual[-col];
+  }
+  else {
+    this->GetColumn(col, (Vector<T> &)tmpcol);
+    return m_cost[col] - m_dual * tmpcol;
+  }
+}
+
+template <class T> void LPTableau<T>::SolveDual()
+{
+  Vector<T> tmpcol1(this->MinRow(), this->MaxRow());
+  BasisSelect(m_unitCost, m_cost, tmpcol1);
+  this->SolveT(tmpcol1, m_dual);
+}
+
+template <class T> void LPTableau<T>::Refactor()
+{
+  Tableau<T>::Refactor();
+  SolveDual();
+}
+
+template <class T> void LPTableau<T>::SetConst(const Vector<T> &bnew)
+{
+  Tableau<T>::SetConst(bnew);
+  SolveDual();
+}
+
+template <class T> void LPTableau<T>::Pivot(int outrow, int col)
+{
+  Tableau<T>::Pivot(outrow, col);
+  SolveDual();
+}
+
+template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
+{
+  std::list<Array<int>> pivot_list;
+
+  Vector<T> tmpcol(this->MinRow(), this->MaxRow());
+  bool flag;
+  int k, enter;
+  T ratio, a_ij, a_ik, b_i, b_k, c_j, c_k, c_jo, x;
+  Vector<T> tmpdual(this->MinRow(), this->MaxRow());
+
+  Vector<T> solution(tmpcol);
+  this->GetBasisVector(solution);
+
+  for (int j = -this->MaxRow(); j <= this->MaxCol(); j++) {
+    if (j && !this->IsMember(j)) {
+      this->SolveColumn(j, tmpcol);
+      // find all i where prior tableau is primal feasible
+      Array<int> best_set;
+      for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
+        if (this->IsGtZero(tmpcol[i])) {
+          best_set.push_back(i);
+        }
+      }
+      if (!best_set.empty()) {
+        ratio = solution[best_set[1]] / tmpcol[best_set[1]];
+        // find max ratio
+        for (size_t i = 2; i <= best_set.size(); i++) {
+          x = solution[best_set[i]] / tmpcol[best_set[i]];
+          if (this->IsGtZero(x - ratio)) {
+            ratio = x;
+          }
+        }
+        // eliminate nonmaximizers
+        for (int i = best_set.size(); i >= 1; i--) {
+          x = solution[best_set[i]] / tmpcol[best_set[i]];
+          if (this->IsLtZero(x - ratio)) {
+            best_set.erase_at(i);
+          }
+        }
+
+        // check that j would be the row to exit in prior tableau
+
+        // first check that prior pivot entry > 0
+        for (int i = best_set.size(); i >= 1; i--) {
+          a_ij = T{1} / tmpcol[best_set[i]];
+          if (this->IsLeZero(a_ij)) {
+            best_set.erase_at(i);
+          }
+          else {
+            // next check that prior pivot entry attains max ratio
+            b_i = solution[best_set[i]] / tmpcol[best_set[i]];
+            ratio = b_i / a_ij;
+
+            flag = false;
+            for (k = tmpcol.front_index(); k <= tmpcol.back_index() && !flag; k++) {
+              if (k != best_set[i]) {
+                a_ik = -a_ij * tmpcol[k];
+                b_k = solution[k] - b_i * tmpcol[k];
+                if (this->IsGtZero(a_ik) && this->IsGtZero(b_k / a_ik - ratio)) {
+                  best_set.erase_at(i);
+                  flag = true;
+                }
+                else if (this->IsGtZero(a_ik) && this->IsEqZero(b_k / a_ik - ratio) &&
+                         this->GetLabel(k) < j) {
+                  best_set.erase_at(i);
+                  flag = true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // check that i would be the column to enter in prior tableau
+      for (int i = best_set.size(); i >= 1; i--) {
+        enter = this->GetLabel(best_set[i]);
+        tmpcol = T{0};
+        tmpcol[best_set[i]] = T{1};
+        this->SolveT(tmpcol, tmpdual);
+        this->GetColumn(j, tmpcol);
+        a_ij = tmpdual * tmpcol;
+        c_j = ComputeRelativeCost(j);
+        if (this->IsEqZero(a_ij)) {
+          best_set.erase_at(i);
+        }
+        else {
+          ratio = c_j / a_ij;
+          if (enter < 0) {
+            a_ik = tmpdual[-enter];
+          }
+          else {
+            this->GetColumn(enter, tmpcol);
+            a_ik = tmpdual * tmpcol;
+          }
+          c_k = ComputeRelativeCost(enter);
+          c_jo = c_k - a_ik * ratio;
+          if (this->IsGeZero(c_jo)) {
+            best_set.erase_at(i);
+          }
+          else {
+            flag = false;
+            for (k = -this->m_b.back_index(); k < enter && !flag; k++) {
+              if (k != 0) {
+                if (k < 0) {
+                  a_ik = tmpdual[-k];
+                }
+                else {
+                  this->GetColumn(k, tmpcol);
+                  a_ik = tmpdual * tmpcol;
+                }
+                c_k = ComputeRelativeCost(k);
+                c_jo = c_k - a_ik * ratio;
+
+                if (this->IsLtZero(c_jo)) {
+                  best_set.erase_at(i);
+                  flag = true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      for (const auto &idx : best_set) {
+        Array<int> pivot(2);
+        pivot[1] = idx;
+        pivot[2] = j;
+        pivot_list.push_back(pivot);
+      }
+    }
+  }
+  return pivot_list;
+}
+
+template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
+{
+  // first check that pivot preserves dual feasibility
+  Vector<T> tmpcol(this->MinRow(), this->MaxRow());
+  Vector<T> tmpdual(this->MinRow(), this->MaxRow());
+  tmpcol = T{0};
+  tmpcol[i] = T{1};
+  this->SolveT(tmpcol, tmpdual);
+
+  Vector<T> solution(tmpcol);
+  this->GetBasisVector(solution);
+
+  T a_ij, a_ik, c_j, c_k, ratio;
+  this->GetColumn(j, tmpcol);
+
+  a_ij = tmpdual * tmpcol;
+  c_j = ComputeRelativeCost(j);
+  if (this->IsGeZero(a_ij)) {
+    return false;
+  }
+  ratio = c_j / a_ij;
+
+  for (int k = -this->m_b.back_index(); k <= m_cost.back_index(); k++) {
+    if (k != 0) {
+      if (k < 0) {
+        a_ik = tmpdual[-k];
+      }
+      else {
+        this->GetColumn(k, tmpcol);
+        a_ik = tmpdual * tmpcol;
+      }
+      c_k = ComputeRelativeCost(k);
+
+      if (this->IsLtZero(a_ik) && this->IsGtZero(c_k / a_ik - ratio)) {
+        return false;
+      }
+    }
+  }
+
+  // check that i would be the column to enter in prior tableau
+
+  const int enter = this->GetLabel(i);
+  if (enter < 0) {
+    a_ik = tmpdual[-enter];
+  }
+  else {
+    this->GetColumn(enter, tmpcol);
+    a_ik = tmpdual * tmpcol;
+  }
+  a_ik = a_ik / a_ij;
+  c_k = ComputeRelativeCost(enter);
+  c_k -= a_ik * c_j;
+
+  if (this->IsGeZero(a_ik)) {
+    return false;
+  }
+  ratio = c_k / a_ik;
+
+  for (int k = -this->m_b.back_index(); k <= m_cost.back_index(); k++) {
+    if (k != 0) {
+      if (k < 0) {
+        a_ik = tmpdual[-k];
+      }
+      else {
+        this->GetColumn(k, tmpcol);
+        a_ik = tmpdual * tmpcol;
+      }
+      a_ik = a_ik / a_ij;
+      c_k = ComputeRelativeCost(k);
+      c_k -= a_ik * c_j;
+
+      if (this->IsLtZero(a_ik) && this->IsGtZero(c_k / a_ik - ratio)) {
+        return false;
+      }
+      if (k < enter && this->IsLtZero(a_ik) && this->IsEqZero(c_k / a_ik - ratio)) {
+        return false;
+      }
+    }
+  }
+
+  // check that j would be the row to exit in prior tableau
+  this->SolveColumn(j, tmpcol);
+
+  T b_k, b_i;
+  b_i = solution[i] / tmpcol[i];
+  if (this->IsLeZero(b_i)) {
+    return false;
+  }
+
+  for (int k = this->m_b.front_index(); k <= this->m_b.back_index(); k++) {
+    if (k != i) {
+      b_k = solution[k] - b_i * tmpcol[k];
+      if (this->IsGtZero(b_k) && this->GetLabel(k) < j) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+template <class T> BFS<T> LPTableau<T>::GetDualBFS() const
+{
+  BFS<T> cbfs;
+
+  for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
+    if (!this->IsMember(-i)) {
+      cbfs.insert(-i, m_dual[i]);
+    }
+  }
+  return cbfs;
+}
+
+template <class T>
+void LPTableau<T>::BasisSelect(const Vector<T> &unitv, const Vector<T> &rowv,
+                               Vector<T> &colv) const
+{
+  for (int i = this->m_basis.GetFirst(); i <= this->m_basis.GetLast(); i++) {
+    if (this->m_basis.GetLabel(i) < 0) {
+      colv[i] = unitv[-this->m_basis.GetLabel(i)];
+    }
+    else {
+      colv[i] = rowv[this->m_basis.GetLabel(i)];
+    }
+  }
+}
 
 template class LPTableau<double>;
 template class LPTableau<Rational>;

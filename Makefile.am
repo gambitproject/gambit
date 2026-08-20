@@ -273,23 +273,18 @@ game_SOURCES = \
 linalg_SOURCES = \
 	src/solvers/linalg/lpsolve.cc \
 	src/solvers/linalg/lpsolve.h \
-	src/solvers/linalg/lpsolve.imp \
 	src/solvers/linalg/lptab.cc \
 	src/solvers/linalg/lptab.h \
-	src/solvers/linalg/lptab.imp \
 	src/solvers/linalg/ludecomp.cc \
 	src/solvers/linalg/ludecomp.h \
-	src/solvers/linalg/ludecomp.imp \
 	src/solvers/linalg/tableau.h \
 	src/solvers/linalg/tableau.cc \
 	src/solvers/linalg/lemketab.cc \
 	src/solvers/linalg/lemketab.h \
-	src/solvers/linalg/lemketab.imp \
 	src/solvers/linalg/lhtab.cc \
 	src/solvers/linalg/lhtab.h \
-	src/solvers/linalg/lhtab.imp \
-	src/solvers/linalg/vertenum.h \
-	src/solvers/linalg/vertenum.imp
+	src/solvers/linalg/vertenum.cc \
+	src/solvers/linalg/vertenum.h
 
 gtracer_SOURCES = \
 	src/solvers/gtracer/cmatrix.h \

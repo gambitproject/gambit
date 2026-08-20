@@ -24,6 +24,7 @@
 #define GAMBIT_SOLVERS_LINALG_LUDECOMP_H
 
 #include <list>
+#include <memory>
 
 #include "core/core.h"
 
@@ -39,26 +40,20 @@ public:
     BadPivot() : std::runtime_error("Bad pivot in LUDecomposition") {}
     ~BadPivot() noexcept override = default;
   };
-  class BadCount final : public std::runtime_error {
-  public:
-    BadCount() : std::runtime_error("Bad reference count in LUDecomposition") {}
-    ~BadCount() noexcept override = default;
-  };
 
   /// @name Constructors and destructor
   //@{
   LUDecomposition(const LUDecomposition<T> &) = delete;
 
-  /// Copy constructor. Copying will fail an assertion if you try to update or
-  /// delete the original before the copy has been deleted, refactored, or set
-  /// to something else.
-  LUDecomposition(const LUDecomposition<T> &, Tableau<T> &);
+  /// Copy constructor. The copy shares `a`'s factorization state as of the
+  /// time of copying; subsequent updates to either are independent.
+  LUDecomposition(const LUDecomposition<T> &a, Tableau<T> &t);
 
   /// Decompose given matrix
   explicit LUDecomposition(Tableau<T> &, int rfac = 0);
 
   /// Destructor
-  ~LUDecomposition();
+  ~LUDecomposition() = default;
 
   /// Don't use the equals operator, use the Copy function instead
   LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
@@ -93,21 +88,30 @@ private:
     Vector<T> etadata;
   };
 
+  // Immutable node in a persistently-shared eta chain: forking is an O(1)
+  // shared_ptr copy of the tail, and appending never disturbs it.
+  struct EtaNode {
+    EtaMatrix eta;
+    std::shared_ptr<const EtaNode> prev;
+  };
+
+  // FactorBasis()'s output: expensive to compute, shared across copies.
+  struct BaseFactorization {
+    std::list<EtaMatrix> upperEtas;
+    std::vector<std::pair<int, EtaMatrix>> lowerFactors;
+  };
+
   Tableau<T> &m_tableau;
   Basis &m_basis;
 
-  std::list<EtaMatrix> m_upperEtas;
-  std::list<EtaMatrix> m_updateEtas;
-  std::vector<std::pair<int, EtaMatrix>> m_lowerFactors;
+  std::shared_ptr<const BaseFactorization> m_base;
+  std::shared_ptr<const EtaNode> m_updateTail;
 
   int m_refactorInterval;
   int m_iterationsSinceRefactor;
   int m_totalOperations;
 
-  const LUDecomposition<T> *m_parent;
-  mutable int m_copyCount;
-
-  void FactorBasis();
+  BaseFactorization FactorBasis();
 
   void GaussElem(Matrix<T> &, int, int);
 

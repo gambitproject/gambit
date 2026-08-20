@@ -199,8 +199,8 @@ template <class T>
 void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals,
              Array<T> &p_primal, Array<T> &p_dual, const CancelToken &p_cancel = CancelToken())
 {
-  const linalg::LPSolve<T> LP(A, b, c, nequals, p_cancel);
-  const auto &cbfs = LP.OptimumBFS();
+  const auto result = linalg::SolveLP(A, b, c, nequals, p_cancel);
+  const auto &cbfs = result.bfs;
 
   for (size_t i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
