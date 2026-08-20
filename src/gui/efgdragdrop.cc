@@ -35,21 +35,6 @@ namespace Gambit::GUI {
 
 #include "bitmaps/move.xpm"
 
-// The cursor shown while dragging a node to move/copy a subtree, or to put it in the
-// same information set as another. wx's cursor-bundle parameters to wxDropSource are
-// honored on Windows/GTK, but as of wxWidgets 3.3, its macOS/Cocoa backend ignores them
-// entirely and always shows a fixed placeholder drag image instead (see
-// src/osx/cocoa/dnd.mm's wxDropSource::DoDragDrop, which draws a hardcoded white square
-// with a "TODO: proper drag image for data" comment) -- so this has no visible effect on
-// macOS. It's supplied anyway for the platforms that do respect it, and the drag-over
-// highlight (DrawDragOverHighlight) compensates on macOS by giving feedback drawn on the
-// canvas itself, independent of the native drag image.
-static wxCursor MoveCursor()
-{
-  static const wxCursor cursor(wxBitmap(move_xpm), 12, 12);
-  return cursor;
-}
-
 //--------------------------------------------------------------------------
 //                      class TreeDropTarget
 //--------------------------------------------------------------------------
@@ -370,8 +355,17 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       // the actual drop still resolves its source node independently, by decoding the
       // dragged text -- see TreeDropTarget::OnDropTreeNode.
       m_draggedNode = hit.node;
-      const wxCursor moveCursor = MoveCursor();
-      wxDropSource source(textData, this, moveCursor, moveCursor);
+      // wxDropSource's cursor-bundle parameters are wxIcon on GTK/MSW but wxCursor on
+      // macOS/Cocoa -- wxDROP_ICON(move) (needing move_xpm in scope, from the #include
+      // above) is wx's own portable macro for this, expanding to the right type per
+      // port. On macOS specifically, this ends up with no visible effect regardless: as
+      // of wxWidgets 3.3, its DoDragDrop ignores the cursor argument entirely and always
+      // shows a fixed placeholder drag image instead (see src/osx/cocoa/dnd.mm's
+      // wxDropSource::DoDragDrop, which draws a hardcoded white square with a "TODO:
+      // proper drag image for data" comment) -- the drag-over highlight
+      // (DrawDragOverHighlight) compensates there by giving feedback drawn on the canvas
+      // itself, independent of the native drag image.
+      wxDropSource source(textData, this, wxDROP_ICON(move), wxDROP_ICON(move));
       source.DoDragDrop(wxDrag_DefaultMove);
       m_draggedNode = nullptr;
       SetDragOverNode(nullptr, false);
