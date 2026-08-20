@@ -84,8 +84,7 @@ def test_outcome_index_invalid_type(game: gbt.Game):
 def test_outcome_payoff_by_player_label():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = list(game.players)
-    pl1.label = "joe"
-    pl2.label = "dan"
+    game.relabel_players({pl1.label: "joe", pl2.label: "dan"})
     out1, out2, *_ = list(game.outcomes)
     out1["joe"] = 1
     out1["dan"] = 2
