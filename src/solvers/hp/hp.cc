@@ -45,7 +45,7 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   bool has_crossed = false;
 
   auto termination_condition = [t_target, &last_t, &has_crossed,
-                                tol](const Vector<double> &point) {
+                                tol, system](const Vector<double> &point) {
     const double t = point[1];
 
     // Path tracer reaches tol
