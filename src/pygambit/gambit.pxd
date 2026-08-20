@@ -319,6 +319,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetChance() except +
         c_GamePlayer NewPlayer(string) except +ValueError
         void RelabelPlayers(stdmap[string, string]) except +ValueError
+        void SetPlayers(stdvector[string]) except +ValueError
 
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError

@@ -562,8 +562,8 @@ class Game:
         """
         g = Game.wrap(NewTree())
         g.title = title
-        for player in (players or []):
-            g.game.deref().NewPlayer(str(player).encode("utf-8"))
+        if players:
+            g.set_players([str(player) for player in players])
         return g
 
     @classmethod
@@ -2536,36 +2536,94 @@ class Game:
             )
         self.game.deref().Reveal(resolved_infoset.infoset, resolved_player.player)
 
-    def add_player(self, label: str) -> Player:
-        """Add a new player to the game.
+    def set_players(self,
+                    players: list[str],
+                    drop: bool = False,
+                    add: bool = True) -> None:
+        """Set the players of the game to be `players`, matching by label.
 
-        .. versionchanged:: 16.7.0
-            A label is now required and must be nonempty and unique among the game's players.
-            In extensive games, the label cannot be ``"Chance"``, which is reserved for the
-            chance player.
+        An entry of `players` matching the label of a current player refers to that
+        player, which keeps its moves or strategies and its payoffs at every outcome;
+        an entry matching no current player creates a new player there, with no
+        decisions in an extensive game, or a single strategy labeled ``"1"`` in a
+        strategic game.  A current player whose label is not in `players` is deleted.
+        Listing the current labels in a new order reorders the players.
 
-        .. versionchanged:: 17.0.0
-            In a game with a strategic representation, the new player's sole strategy is
-            labeled ``"1"``.
+        A player can only be deleted if it has no decisions in the game (in an
+        extensive game) or exactly one strategy (in a strategic game); otherwise the
+        operation raises.
+
+        The defaults permit creation and forbid deletion: adding a player -- inserting
+        its label into the current list -- is the common, non-destructive edit, while
+        deletion discards the player's payoffs at every outcome, so it must be
+        confirmed.
+
+        .. versionadded:: 17.0.0
+            Subsumes and replaces `Game.add_player`.
 
         Parameters
         ----------
-        label : str
-            The label for the new player.  Must be nonempty and not the same as the label
-            of an existing player in the game.
-
-        Returns
-        -------
-        Player
-            A reference to the newly-created player.
+        players : list of str
+            The labels of the players the game is to have, in order.  Must be nonempty
+            and without duplicates; each label must be a valid, nonempty label, and in
+            an extensive game must not be the reserved chance player label.
+        drop : bool, default False
+            Deleting players is destructive, so it must be explicitly confirmed: if any
+            current player is missing from `players` and `drop` is `False`, the
+            operation raises without modifying the game.
+        add : bool, default True
+            If `False`, entries of `players` matching no current player raise.
 
         Raises
         ------
+        TypeError
+            If `players` is a string, or not an iterable of strings.
+        UndefinedOperationError
+            If `players` is empty; or if a player to be deleted has decisions in the
+            game, or more than one strategy.
         ValueError
-            If `label` is empty, is already the label of another player, or (in an
-            extensive game) is ``"Chance"``, the reserved label of the chance player.
+            If a label in `players` is repeated, empty, is not a valid label, or (in an
+            extensive game) is the reserved label of the chance player.
         """
-        return Player.wrap(self.game.deref().NewPlayer(label.encode("utf-8")))
+        if isinstance(players, str) or not hasattr(players, "__iter__"):
+            raise TypeError("set_players(): players must be an iterable of str")
+        labels = list(players)
+        for label in labels:
+            if not isinstance(label, str):
+                raise TypeError("set_players(): players must be an iterable of str")
+        if not labels:
+            raise UndefinedOperationError("set_players(): `players` must be a nonempty list")
+        current = [player.label for player in self.players]
+        if len(set(current)) != len(current):
+            raise ValueError(
+                "set_players(): the game has duplicate player labels, "
+                "so matching by label is not well-defined"
+            )
+        added = [label for label in labels if label not in current]
+        if added and not add:
+            raise ValueError(f"set_players(): would create new players {added}")
+        missing = [label for label in current if label not in labels]
+        if missing and not drop:
+            raise ValueError(
+                f"set_players(): would delete players {missing} and their payoffs at "
+                f"every outcome; pass drop=True to confirm"
+            )
+        for label in missing:
+            resolved = self.players[label]
+            if self.is_tree and len(resolved.infosets) > 0:
+                raise UndefinedOperationError(
+                    f"set_players(): player '{label}' has decisions in the game "
+                    f"and cannot be deleted"
+                )
+            if not self.is_tree and len(resolved.strategies) != 1:
+                raise UndefinedOperationError(
+                    f"set_players(): player '{label}' has more than one strategy "
+                    f"and cannot be deleted"
+                )
+        c_labels = stdvector[string]()
+        for label in labels:
+            c_labels.push_back(label.encode("utf-8"))
+        self.game.deref().SetPlayers(c_labels)
 
     def add_outcome(self,
                     label: str,
