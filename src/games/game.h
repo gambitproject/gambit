@@ -625,7 +625,6 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -1624,17 +1623,6 @@ inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
-inline void GamePlayerRep::SetLabel(const std::string &p_label)
-{
-  if (IsChance()) {
-    throw ValueException("The chance player's label cannot be changed");
-  }
-  if (p_label == m_label) {
-    return;
-  }
-  GetGame()->CheckPlayerLabel(p_label);
-  m_label = p_label;
-}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->EnsureStrategies();

@@ -414,9 +414,9 @@ GamePlayer GameDocument::DoNewPlayer()
   return player;
 }
 
-void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
+void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_labels)
 {
-  p_player->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelPlayers(p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 

@@ -882,14 +882,24 @@ void GameFrame::OnEditGame(wxCommandEvent &)
       m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
 
       TreeRenderConfig style = m_doc->GetStyle();
+      std::map<std::string, std::string> labels;
       for (int i = 0; i < dialog.NumRows(); i++) {
         const GamePlayer player = dialog.GetPlayer(i);
         if (player->IsChance()) {
           style.SetChanceColor(dialog.GetPlayerColor(i));
           continue; // chance's label is reserved and can't be changed
         }
-        m_doc->DoSetPlayerLabel(player, dialog.GetPlayerLabel(i));
+        const std::string newLabel = dialog.GetPlayerLabel(i).ToStdString(wxConvUTF8);
+        if (newLabel != player->GetLabel()) {
+          labels[player->GetLabel()] = newLabel;
+        }
         style.SetPlayerColor(player->GetNumber(), dialog.GetPlayerColor(i));
+      }
+      // Relabeling all players in one call, rather than one at a time, lets two players'
+      // labels be swapped directly without tripping the duplicate-label check on an
+      // intermediate state that a per-player rename would pass through.
+      if (!labels.empty()) {
+        m_doc->DoRelabelPlayers(labels);
       }
       m_doc->SetStyle(style);
     }
