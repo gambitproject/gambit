@@ -630,6 +630,100 @@ void GameTableRep::SetStrategies(const GamePlayer &p_player,
   RebuildTable(old_radices, p_player->GetNumber() - 1, old_to_new);
 }
 
+void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
+{
+  if (p_labels.empty()) {
+    throw ValueException("At least one player must be specified");
+  }
+  std::map<std::string, long> current;
+  for (const auto &player : m_players) {
+    if (!current.emplace(player->GetLabel(), player->GetNumber() - 1).second) {
+      throw ValueException("Player label '" + player->GetLabel() + "' is ambiguous in this game");
+    }
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (!declared.insert(label).second) {
+      throw ValueException("Player label '" + label + "' appears more than once");
+    }
+    if (current.count(label) == 0) {
+      CheckPlayerLabel(label);
+    }
+  }
+  std::vector<long> old_radices;
+  old_radices.reserve(m_players.size());
+  for (const auto &player : m_players) {
+    if (declared.count(player->GetLabel()) == 0 && player->m_strategies.size() != 1) {
+      throw UndefinedException("A player with more than one strategy cannot be deleted");
+    }
+    old_radices.push_back(player->m_strategies.size());
+  }
+  std::vector<long> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+
+  IncrementVersion();
+  std::vector<std::shared_ptr<GamePlayerRep>> newPlayers;
+  newPlayers.reserve(p_labels.size());
+  for (size_t j = 0; j < p_labels.size(); ++j) {
+    if (source[j] >= 0) {
+      newPlayers.push_back(m_players[source[j]]);
+      continue;
+    }
+    auto player = std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j], 1);
+    player->m_strategies.front()->m_label = "1";
+    for (const auto &outcome : m_outcomes) {
+      outcome->m_payoffs[player.get()] = Number();
+    }
+    newPlayers.push_back(player);
+  }
+  for (const auto &player : m_players) {
+    if (declared.count(player->GetLabel()) == 0) {
+      for (const auto &outcome : m_outcomes) {
+        outcome->m_payoffs.erase(player.get());
+      }
+      player->Invalidate();
+    }
+  }
+  m_players = std::move(newPlayers);
+  for (size_t j = 0; j < m_players.size(); ++j) {
+    m_players[j]->m_number = static_cast<int>(j) + 1;
+  }
+  // Permute the outcome table into the new player order.
+  std::vector<long> old_strides(old_radices.size());
+  long stride = 1;
+  for (size_t i = 0; i < old_radices.size(); ++i) {
+    old_strides[i] = stride;
+    stride *= old_radices[i];
+  }
+  const long old_size = stride;
+  std::vector<long> new_strides(m_players.size());
+  long new_size = 1;
+  for (size_t j = 0; j < m_players.size(); ++j) {
+    new_strides[j] = new_size;
+    new_size *= m_players[j]->m_strategies.size();
+  }
+  std::vector<GameOutcomeRep *> newResults(new_size, nullptr);
+  for (long old_index = 0; old_index < old_size; ++old_index) {
+    if (m_results[old_index] == nullptr) {
+      continue;
+    }
+    long new_index = 0;
+    for (size_t j = 0; j < m_players.size(); ++j) {
+      if (source[j] >= 0) {
+        new_index +=
+            ((old_index / old_strides[source[j]]) % old_radices[source[j]]) * new_strides[j];
+      }
+    }
+    newResults[new_index] = m_results[old_index];
+  }
+  m_results.swap(newResults);
+  IndexStrategies();
+}
+
 //------------------------------------------------------------------------
 //                   GameTableRep: Factory functions
 //------------------------------------------------------------------------

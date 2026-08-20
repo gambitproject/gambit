@@ -125,6 +125,7 @@ public:
   GamePlayer GetChance() const override { return m_chance->shared_from_this(); }
   /// Creates a new player in the game, with no moves
   GamePlayer NewPlayer(const std::string &p_label) override;
+  void SetPlayers(const std::vector<std::string> &) override;
   //@}
 
   /// @name Nodes

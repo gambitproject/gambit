@@ -1360,6 +1360,8 @@ public:
   virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
   /// Reassign player labels. Keys of p_labels are current labels; values are their replacements.
   void RelabelPlayers(const std::map<std::string, std::string> &p_labels);
+  /// Declare the ordered list of players of the game.
+  virtual void SetPlayers(const std::vector<std::string> &) { throw UndefinedException(); }
   //@}
 
   /// @name Dimensions of the game
