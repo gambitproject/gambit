@@ -204,8 +204,7 @@ bool AnalysisWorkspace::Load(const std::vector<LegacyWorkspaceFile::Analysis> &p
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_workspaceModified(false),
-    m_workspace(this)
+  : m_game(p_game), m_gameModified(false), m_workspaceModified(false), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
 
@@ -355,12 +354,6 @@ void GameDocument::DoPreviousDominanceLevel()
 void GameDocument::DoTopDominanceLevel()
 {
   m_workspace.TopDominanceLevel();
-  UpdateViews();
-}
-
-void GameDocument::SetSelectNode(GameNode p_node)
-{
-  m_selectNode = p_node;
   UpdateViews();
 }
 
@@ -709,17 +702,6 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
     return;
   }
   m_game->SetOutcome(p_node, nullptr);
-  NotifyChanged(GameModificationType::GamePayoffs);
-}
-
-void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
-{
-  const GameOutcome outcome = m_game->NewOutcome(GenerateOutcomeLabel(m_game));
-  outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
-  for (const auto &player : m_game->GetPlayers()) {
-    outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
-  }
-  m_game->SetOutcome(p_node, outcome);
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 

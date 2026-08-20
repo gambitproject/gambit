@@ -32,7 +32,6 @@ class EfgDisplay;
 
 class EfgPanel final : public wxPanel, public GameView {
   EfgDisplay *m_treeWindow;
-  wxWindow *m_playerToolbar;
 
   // Overriding GameView members
   void OnUpdate() override {}

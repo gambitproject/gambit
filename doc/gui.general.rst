@@ -10,17 +10,25 @@ General layout of the main window
             :align: right
             :target: _images/overview.png
 
-The frame presenting a game consists of two principal panels. The main
-panel, to the right, displays the game graphically; in this case,
-showing the game tree of a simple one-card poker game. To the left is
-the player panel, which lists the players in the game; here, Fred and
-Alice are the players. Note that where applicable, information is
-color-coded to match the colors assigned to the players: Fred's moves
-and payoffs are all presented in red, and Alice's in blue. The color
-assigned to a player can be changed by clicking on the color icon
-located to the left of the player's name on the player panel. Player
-names are edited by clicking on the player's name, and editing the
-name in the text control that appears.
+The frame presenting a game consists of a single main panel, which displays
+the game graphically; in this case, showing the game tree of a simple
+one-card poker game. Note that where applicable, information is color-coded
+to match the colors assigned to the players: Fred's moves and payoffs are
+presented in red, and Alice's in blue. Player names and colors are set on
+the :guilabel:`Players` page of the :guilabel:`Game properties` dialog
+(:menuselection:`Edit --> Game`): each player is listed with a text field
+for its name and a color swatch beside it, which opens a color picker when
+clicked. A new player is added to the game using
+:menuselection:`Edit --> Add player`; the Players page itself does not yet
+support adding, removing, or reordering players.
+
+Hovering the mouse pointer over a node in the tree briefly displays a small
+window showing, for each player, that player's expected payoff from that
+point in the game onward, under the currently-selected profile. For a node
+that is not a terminal node, this window also shows the probability of
+reaching that node and its information set, the information set's value to
+the player who moves there, and that player's belief about being at this
+particular node within the information set.
 
 Two additional panels are available. Selecting
 :menuselection:`Tools --> Dominance` toggles
