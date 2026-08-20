@@ -25,8 +25,20 @@ import pygambit as gbt
 UNICODE_LABELS = ["é", "naïve", "日本語", "😀"]
 VALID_LABELS = ["x", "a b", "a b", "a b c", *UNICODE_LABELS]
 INVALID_LABELS = [
-    " x", "x ", " ", "a  b", "a\tb", "a\nb", "a\x01b", "a\x7fb", "ab",
-    " x", "x ", " ", "a  b", "a b",
+    " x",
+    "x ",
+    " ",
+    "a  b",
+    "a\tb",
+    "a\nb",
+    "a\x01b",
+    "a\x7fb",
+    "ab",
+    " x",
+    "x ",
+    " ",
+    "a  b",
+    "a b",
 ]
 
 
@@ -43,7 +55,7 @@ def read_from_file(fn: str) -> gbt.Game:
         raise ValueError(f"Unknown file extension in {fn}")
 
 
-def create_efg_corresponding_to_bimatrix_game(
+def create_efg_corresponding_to_bimatrix_game_arrays(
     A: np.ndarray, B: np.ndarray, title: str
 ) -> gbt.Game:
     """
@@ -61,9 +73,20 @@ def create_efg_corresponding_to_bimatrix_game(
     for i, j in itertools.product(range(m), range(n)):
         g.set_outcome(
             g.root.children[str(i)].children[str(j)],
-            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]])
+            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]]),
         )
     return g
+
+
+def create_efg_corresponding_to_bimatrix_game(g: gbt.Game) -> gbt.Game:
+    """
+    There is no direct pygambit method to create an EFG from a stategic-form game.
+    Here we create an EFG corresponding to a bimatrix pygambit.Game.
+    Player 1 moves first.
+    """
+    assert len(g.players) == 2
+    A, B = g.to_arrays()
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, g.title)
 
 
 ################################################################################################
@@ -85,7 +108,7 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
 
     A = np.eye(2)
     B = -A
-    g = create_efg_corresponding_to_bimatrix_game(A, B, title)
+    g = create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
     if variant == "missing term outcome":
         g.delete_outcome(g.root.children["0"].children["1"].outcome)
@@ -406,24 +429,16 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(
-        g.root.children["Trust"].children["Honor"],
-        g.add_outcome("Trustworthy", [1, 1])
-        )
+    g.set_outcome(g.root.children["Trust"].children["Honor"], g.add_outcome("Trustworthy", [1, 1]))
     if unique_NE_variant:
         g.set_outcome(
-            g.root.children["Trust"].children["Abuse"],
-            g.add_outcome("Untrustworthy", ["1/2", 2])
+            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", ["1/2", 2])
         )
     else:
         g.set_outcome(
-            g.root.children["Trust"].children["Abuse"],
-            g.add_outcome("Untrustworthy", [-1, 2])
+            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", [-1, 2])
         )
-    g.set_outcome(
-        g.root.children["Not trust"],
-        g.add_outcome("Opt-out", [0, 0])
-        )
+    g.set_outcome(g.root.children["Not trust"], g.add_outcome("Opt-out", [0, 0]))
     return g
 
 
@@ -431,7 +446,7 @@ def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A
     title = f"{n}x{n} coordination game, {2**n - 1} equilibria"
-    return create_efg_corresponding_to_bimatrix_game(A, B, title)
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
 
 def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
@@ -456,7 +471,7 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     A = np.array(A)
     B = np.array(B)
     title = "6x6 Long Lemke-Howson Paths, unique eq"
-    return create_efg_corresponding_to_bimatrix_game(A, B, title)
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
 
 class EfgFamilyForReducedStrategicFormTests(ABC):
@@ -686,9 +701,11 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
                 left = n.children["L"]
-                g.make_infoset(list(left.infoset.members) + [n.children["R"]],
-                               left.infoset.player.label,
-                               left.infoset.label or None)
+                g.make_infoset(
+                    list(left.infoset.members) + [n.children["R"]],
+                    left.infoset.player.label,
+                    left.infoset.label or None,
+                )
         return g
 
     def reduced_strategic_form(self):

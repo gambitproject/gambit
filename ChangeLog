@@ -8,6 +8,8 @@
 - Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
   random starting point generation. (#448)
 - Added `Game.relabel_players`, which simultaneously reassigns the labels of the game's players.  (#1058)
+- Added `max_rectangles` to `enumpoly_solve` (and `-r` to `gambit-enumpoly`), bounding the number
+  of cells examined when searching for equilibria on a single support. (#1055)
 
 ### Fixed
 - `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
@@ -17,6 +19,7 @@
 - `enumpoly_solve` correctly handles failed perturbations at singular Jacobians (#591)
 - `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
   possibility of equilibria being found in orders that differ across runs. (#1016)
+- Improved the numerical stability of `enumpoly_solve` handling less-well-conditioned systems.  (#1055)
 
 ### Changed
 - All long-running calculations are now done in a thread in the GUI process, rather than calling the

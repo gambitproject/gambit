@@ -352,6 +352,8 @@ enumpoly_SOURCES = \
 	${nashsupport_SOURCES} \
 	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/lufactor.cc \
+	src/solvers/enumpoly/lufactor.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \
