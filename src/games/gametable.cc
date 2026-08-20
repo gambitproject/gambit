@@ -503,6 +503,7 @@ GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
   }
+  IndexStrategies();
   return player;
 }
 
