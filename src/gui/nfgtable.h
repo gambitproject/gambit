@@ -76,7 +76,7 @@ public:
 };
 
 class StrategicTableLayout {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::vector<int> m_rowPlayers;
   std::vector<int> m_colPlayers;
 
@@ -93,7 +93,7 @@ class StrategicTableLayout {
   }
 
 public:
-  explicit StrategicTableLayout(GameDocument *doc) : m_doc(doc)
+  explicit StrategicTableLayout(const std::shared_ptr<GameDocument> &doc) : m_doc(doc)
   {
     if (m_doc->GetGame()->NumPlayers() >= 1) {
       m_rowPlayers.push_back(1);
@@ -106,7 +106,7 @@ public:
     }
   }
 
-  GameDocument *GetDocument() const { return m_doc; }
+  std::shared_ptr<GameDocument> GetDocument() const { return m_doc; }
 
   /// Returns the number of players assigned to the rows
   int NumRowPlayers() const { return m_rowPlayers.size(); }
@@ -283,7 +283,7 @@ public:
 //! the display of row and column labels
 //!
 class TableWidget final : public wxPanel {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   NfgPanel *m_nfgPanel;
   wxGrid *m_payoffGrid, *m_rowGrid, *m_colGrid;
 
@@ -341,7 +341,7 @@ class TableWidget final : public wxPanel {
   void SyncScrollFromPayoff();
 
 public:
-  TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc);
+  TableWidget(NfgPanel *p_parent, wxWindowID p_id, const std::shared_ptr<GameDocument> &p_doc);
 
   /// @name Coordination of grids
   //@{
@@ -454,7 +454,7 @@ public:
   bool IsReadOnly() const;
   wxColour GetPlayerColor(int player) const;
   const StrategySupportProfile &GetSupport() const { return m_doc->GetNfgSupport(); }
-  GameDocument *GetDocument() const { return m_doc; }
+  std::shared_ptr<GameDocument> GetDocument() const { return m_doc; }
 
   bool IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const;
   bool IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const;

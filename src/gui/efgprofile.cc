@@ -32,7 +32,8 @@ namespace Gambit::GUI {
 //              class BehaviorProfileList: Member functions
 //-------------------------------------------------------------------------
 
-MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc)
+MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent,
+                                                   const std::shared_ptr<GameDocument> &p_doc)
   : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
@@ -77,7 +78,7 @@ void MixedBehaviorProfileList::OnSelectCell(wxGridEvent &p_event)
   ClearSelection();
 }
 
-static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
+static wxColour GetPlayerColor(const std::shared_ptr<GameDocument> &p_doc, int p_index)
 {
   const GameAction action = p_doc->GetAction(p_index + 1);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());

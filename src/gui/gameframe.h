@@ -99,7 +99,7 @@ class GameFrame final : public wxFrame, public GameView {
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  GameFrame(wxWindow *p_parent, GameDocument *p_doc);
+  GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~GameFrame() override;
 
   DECLARE_EVENT_TABLE()

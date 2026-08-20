@@ -36,7 +36,7 @@ namespace Gambit::GUI {
 
 class OutcomeEditorPopup : public wxPopupTransientWindow {
 public:
-  OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc);
+  OutcomeEditorPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
 
   void BeginEdit(const GameNode &p_node, int p_initialPlayer = 0);
   bool Commit();
@@ -63,7 +63,7 @@ private:
   void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
 
   EfgDisplay *m_owner;
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
   GameNode m_node;
 
@@ -80,7 +80,8 @@ private:
   bool m_restoringAfterFailedCommit{false};
 };
 
-OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner, GameDocument *p_doc)
+OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner,
+                                       const std::shared_ptr<GameDocument> &p_doc)
   : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc),
     m_contentPanel(nullptr), m_labelCtrl(nullptr), m_errorText(nullptr)
 {
@@ -423,7 +424,7 @@ void OutcomeEditorPopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
 // left-hand player panel.
 class NodeInfoPopup : public wxPopupTransientWindow {
 public:
-  NodeInfoPopup(EfgDisplay *p_owner, GameDocument *p_doc);
+  NodeInfoPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
 
   void ShowForNode(const GameNode &p_node);
 
@@ -432,7 +433,7 @@ private:
   void PositionPopup();
 
   EfgDisplay *m_owner;
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
   GameNode m_node;
 
@@ -452,7 +453,7 @@ private:
   wxStaticText *m_beliefText;
 };
 
-NodeInfoPopup::NodeInfoPopup(EfgDisplay *p_owner, GameDocument *p_doc)
+NodeInfoPopup::NodeInfoPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc)
   : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc)
 {
   SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));

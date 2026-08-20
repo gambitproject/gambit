@@ -75,7 +75,7 @@ public:
   };
 
 private:
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::vector<Row> m_rows;
   wxColour m_defaultBg;
   std::function<void()> m_onChanged;
@@ -87,7 +87,7 @@ private:
   wxBitmapButton *MakeColorButton(int p_index);
 
 public:
-  PlayerLabelPanel(wxWindow *p_parent, GameDocument *p_doc,
+  PlayerLabelPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                    const std::function<void()> &p_onChanged);
 
   int NumRows() const { return static_cast<int>(m_rows.size()); }
@@ -106,7 +106,7 @@ public:
   wxString ValidateLabels();
 };
 
-PlayerLabelPanel::PlayerLabelPanel(wxWindow *p_parent, GameDocument *p_doc,
+PlayerLabelPanel::PlayerLabelPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                                    const std::function<void()> &p_onChanged)
   : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_onChanged(p_onChanged)
 {
@@ -247,7 +247,8 @@ wxString PlayerLabelPanel::ValidateLabels()
 //                   class GamePropertiesDialog
 //========================================================================
 
-GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_doc)
+GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
+                                           const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc)

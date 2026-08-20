@@ -35,7 +35,7 @@ class NfgPanel final : public wxPanel, public GameView {
   void OnToolsDominance(wxCommandEvent &);
 
 public:
-  NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance);
+  NfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc, bool p_showDominance);
   ~NfgPanel() override = default;
 
   bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }

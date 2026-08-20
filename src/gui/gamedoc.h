@@ -214,9 +214,6 @@ class GameDocument {
   void RemoveView(GameView *p_view)
   {
     m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
-    if (m_views.empty()) {
-      delete this;
-    }
   }
 
   Game m_game;
@@ -232,15 +229,23 @@ class GameDocument {
 
 public:
   explicit GameDocument(Game p_game);
+  GameDocument(const GameDocument &) = delete;
+  GameDocument &operator=(const GameDocument &) = delete;
   ~GameDocument();
 
   //!
   //! @name Reading and writing savefiles
   //!
   //@{
-  /// Load workspace from the specified file (which should be a .gbt file)
-  /// Returns true if successful, false if error
-  bool LoadWorkspace(const wxString &p_filename);
+  enum class LoadResult { Success, OpenFailed, ParseFailed, UnsupportedRepresentation };
+  struct LoadOutcome {
+    LoadResult result;
+    std::shared_ptr<GameDocument> document; ///< non-null iff result == LoadResult::Success
+  };
+  /// Attempt to construct a document by reading `p_filename`, trying it first as a
+  /// Gambit workspace (.gbt) and then as a bare game (.efg/.nfg) file.
+  static LoadOutcome Load(const wxString &p_filename);
+
   void SaveWorkspace(std::ostream &) const;
   //@}
 
@@ -345,16 +350,16 @@ public:
   void DoAnalysisOutputChanged();
 };
 
-inline GameDocument *NewTreeDocument()
+inline std::shared_ptr<GameDocument> NewTreeDocument()
 {
   const Game efg = NewTree();
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer("Player 1");
   efg->NewPlayer("Player 2");
-  return new GameDocument(efg);
+  return std::make_shared<GameDocument>(efg);
 }
 
-inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
+inline std::shared_ptr<GameDocument> NewTableDocument(const std::vector<int> &p_dim)
 {
   const Game nfg = NewTable(p_dim);
   nfg->SetTitle("Untitled Strategic Game");
@@ -364,15 +369,18 @@ inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
     labels[player->GetLabel()] = "Player " + std::to_string(pl++);
   }
   nfg->RelabelPlayers(labels);
-  return new GameDocument(nfg);
+  return std::make_shared<GameDocument>(nfg);
 }
 
 class GameView {
 protected:
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
 public:
-  explicit GameView(GameDocument *p_doc) : m_doc(p_doc) { m_doc->AddView(this); }
+  explicit GameView(const std::shared_ptr<GameDocument> &p_doc) : m_doc(p_doc)
+  {
+    m_doc->AddView(this);
+  }
   virtual ~GameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;
@@ -380,7 +388,7 @@ public:
   /// Post any pending changes in the viewer to the document
   virtual void PostPendingChanges() {}
 
-  GameDocument *GetDocument() const { return m_doc; }
+  std::shared_ptr<GameDocument> GetDocument() const { return m_doc; }
 };
 
 } // namespace Gambit::GUI

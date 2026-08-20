@@ -46,14 +46,14 @@ namespace Gambit::GUI {
 //! isn't resized/repainted on every single profile received.
 //!
 class LogitMixedTable final : public wxGridTableBase {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   Array<double> m_lambdas;
   Array<std::shared_ptr<MixedStrategyProfile<double>>> m_profiles;
   int m_numCols{0};
   int m_numRows{0};
 
 public:
-  explicit LogitMixedTable(GameDocument *p_doc) : m_doc(p_doc) {}
+  explicit LogitMixedTable(const std::shared_ptr<GameDocument> &p_doc) : m_doc(p_doc) {}
 
   int GetNumberRows() override { return m_numRows; }
   int GetNumberCols() override { return m_numCols; }
@@ -175,7 +175,7 @@ class LogitMixedGrid final : public wxGrid {
   //@}
 
 public:
-  LogitMixedGrid(wxWindow *p_parent, GameDocument *p_doc)
+  LogitMixedGrid(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
     : wxGrid(p_parent, wxID_ANY), m_gridTable(new LogitMixedTable(p_doc))
   {
     SetTable(m_gridTable, true);
@@ -261,7 +261,7 @@ public:
   void RequestCancel() { m_cancel.RequestCancel(); }
 };
 
-LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
+LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_mixedList(new LogitMixedGrid(this, m_doc))
 {
@@ -412,7 +412,7 @@ void LogitMixedDialog::OnSave(wxCommandEvent &)
   }
 }
 
-void LogitStrategic(wxWindow *p_parent, GameDocument *p_doc)
+void LogitStrategic(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
 {
   LogitMixedDialog(p_parent, p_doc).ShowModal();
 }

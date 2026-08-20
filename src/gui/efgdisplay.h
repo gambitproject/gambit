@@ -125,7 +125,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void ZoomByFactor(double p_factor, const wxPoint &p_clientPoint);
 
 public:
-  EfgDisplay(wxWindow *p_parent, GameDocument *p_doc);
+  EfgDisplay(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   void OnDraw(wxDC &dc) override;
   void OnDraw(wxDC &, double);

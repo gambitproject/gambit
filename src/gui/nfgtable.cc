@@ -93,7 +93,8 @@ bool TableWidget::IsColHeaderStrategyDominated(int headerRow, int headerCol, boo
   return support.IsDominated(GetStrategyByPlayerAndIndex(player, strat), strict);
 }
 
-TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc)
+TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id,
+                         const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent), m_payoffGrid(nullptr),
     m_rowGrid(nullptr), m_colGrid(nullptr), m_layout(std::make_shared<StrategicTableLayout>(p_doc))
 {

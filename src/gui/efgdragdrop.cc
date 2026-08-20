@@ -41,7 +41,7 @@ namespace Gambit::GUI {
 
 class TreeDropTarget : public wxTextDropTarget {
   EfgDisplay *m_owner;
-  GameDocument *m_model;
+  std::shared_ptr<GameDocument> m_model;
 
   bool OnDropOutcome(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
   bool OnDropTreeNode(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);

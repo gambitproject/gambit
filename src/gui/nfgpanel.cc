@@ -53,7 +53,7 @@ private:
   void OnLastLevel(wxCommandEvent &);
 
 public:
-  StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
+  StrategyDominanceToolbar(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~StrategyDominanceToolbar() override = default;
 };
 
@@ -62,7 +62,8 @@ public:
 #include "bitmaps/tobegin.xpm"
 #include "bitmaps/toend.xpm"
 
-StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
+StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
+                                                   const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -160,7 +161,8 @@ BEGIN_EVENT_TABLE(NfgPanel, wxPanel)
 EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgPanel::OnToolsDominance)
 END_EVENT_TABLE()
 
-NfgPanel::NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance)
+NfgPanel::NfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
+                   bool p_showDominance)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc),
     m_dominanceToolbar(new StrategyDominanceToolbar(this, m_doc)),
     m_tableWidget(new TableWidget(this, wxID_ANY, m_doc))

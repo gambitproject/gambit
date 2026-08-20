@@ -30,7 +30,7 @@ class LogitBehavGrid;
 class LogitBehavThreadRunner;
 
 class LogitBehavDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::unique_ptr<LogitBehavThreadRunner> m_runner;
   LogitBehavGrid *m_behavList;
   wxStaticText *m_statusText;
@@ -47,7 +47,7 @@ class LogitBehavDialog final : public wxDialog {
   void Start();
 
 public:
-  LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc);
+  LogitBehavDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~LogitBehavDialog() override;
 };
 

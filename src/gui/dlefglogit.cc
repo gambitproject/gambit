@@ -46,14 +46,14 @@ namespace Gambit::GUI {
 //! isn't resized/repainted on every single profile received.
 //!
 class LogitBehavTable final : public wxGridTableBase {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   Array<double> m_lambdas;
   Array<std::shared_ptr<MixedBehaviorProfile<double>>> m_profiles;
   int m_numCols{0};
   int m_numRows{0};
 
 public:
-  explicit LogitBehavTable(GameDocument *p_doc) : m_doc(p_doc) {}
+  explicit LogitBehavTable(const std::shared_ptr<GameDocument> &p_doc) : m_doc(p_doc) {}
 
   int GetNumberRows() override { return m_numRows; }
   int GetNumberCols() override { return m_numCols; }
@@ -172,7 +172,7 @@ class LogitBehavGrid final : public wxGrid {
   //@}
 
 public:
-  LogitBehavGrid(wxWindow *p_parent, GameDocument *p_doc)
+  LogitBehavGrid(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
     : wxGrid(p_parent, wxID_ANY), m_gridTable(new LogitBehavTable(p_doc))
   {
     SetTable(m_gridTable, true);
@@ -258,7 +258,7 @@ public:
   void RequestCancel() { m_cancel.RequestCancel(); }
 };
 
-LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc)
+LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_behavList(new LogitBehavGrid(this, m_doc))
 {

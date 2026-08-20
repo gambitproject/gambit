@@ -47,7 +47,7 @@ EVT_MENU(GBT_MENU_VIEW_ZOOM100, EfgPanel::OnViewZoom100)
 EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, EfgPanel::OnViewZoomFit)
 END_EVENT_TABLE()
 
-EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
+EfgPanel::EfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_treeWindow(new EfgDisplay(this, m_doc))
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);

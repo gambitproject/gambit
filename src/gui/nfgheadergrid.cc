@@ -271,7 +271,7 @@ int GetGlobalStrategyIndex(const GameStrategy &p_strategy)
   return index + p_strategy->GetNumber();
 }
 
-bool HasStrategyInfo(GameDocument *p_doc, const GameStrategy &p_strategy)
+bool HasStrategyInfo(const std::shared_ptr<GameDocument> &p_doc, const GameStrategy &p_strategy)
 {
   return !GetStrategyDescription(p_strategy).empty() ||
          p_doc->GetWorkspace().GetCurrentProfile() > 0;
@@ -291,7 +291,7 @@ public:
     BuildControls();
   }
 
-  void ShowForStrategy(GameDocument *p_doc, const GameStrategy &p_strategy,
+  void ShowForStrategy(const std::shared_ptr<GameDocument> &p_doc, const GameStrategy &p_strategy,
                        const wxPoint &p_anchor)
   {
     const wxString label = wxString::FromUTF8(p_strategy->GetLabel());
@@ -488,7 +488,7 @@ void RowPlayerGrid::OnHoverTimer(wxTimerEvent &)
   const int player = m_table->GetRowHeaderPlayer(m_hoverCol);
   const int strategy = m_table->GetRowHeaderStrategy(m_hoverCol, m_hoverRow);
   const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-  GameDocument *doc = m_table->GetDocument();
+  const std::shared_ptr<GameDocument> doc = m_table->GetDocument();
   if (!HasStrategyInfo(doc, gameStrategy)) {
     return;
   }
@@ -862,7 +862,7 @@ void ColPlayerGrid::OnHoverTimer(wxTimerEvent &)
   const int player = m_table->GetColHeaderPlayer(m_hoverRow);
   const int strategy = m_table->GetColHeaderStrategy(m_hoverRow, m_hoverCol);
   const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-  GameDocument *doc = m_table->GetDocument();
+  const std::shared_ptr<GameDocument> doc = m_table->GetDocument();
   if (!HasStrategyInfo(doc, gameStrategy)) {
     return;
   }

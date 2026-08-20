@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/gambit.cc
+// FILE: src/gui/app.cc
 // Implementation of main wxApp class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-
-#include <fstream>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -181,47 +179,34 @@ public:
 
 AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
 {
-  std::ifstream infile(p_filename.mb_str());
-  if (!infile.good()) {
+  const auto [result, doc] = GameDocument::Load(p_filename);
+
+  switch (result) {
+  case GameDocument::LoadResult::OpenFailed:
     FileErrorDialog(p_parent, _("Unable to open file"),
                     _("Gambit could not open this file for reading."), p_filename)
         .ShowModal();
     return AppLoadResult::OpenFailed;
-  }
 
-  auto *doc = new GameDocument(NewTree());
-  if (doc->LoadWorkspace(p_filename)) {
-    doc->SetFilename(p_filename);
-    m_fileHistory.AddFileToHistory(p_filename);
-    m_fileHistory.Save(*wxConfigBase::Get());
-    (void)new GameFrame(nullptr, doc);
-    return AppLoadResult::Success;
-  }
-  delete doc;
-
-  try {
-    const Game game = ReadGame(infile);
-    if (game->IsAgg()) {
-      FileErrorDialog(p_parent, _("Unsupported game representation"),
-                      _("Action graph games are not currently supported by the "
-                        "graphical interface."),
-                      p_filename)
-          .ShowModal();
-      return AppLoadResult::UnsupportedRepresentation;
-    }
-
-    m_fileHistory.AddFileToHistory(p_filename);
-    m_fileHistory.Save(*wxConfigBase::Get());
-    doc = new GameDocument(game);
-    doc->SetFilename(p_filename);
-    (void)new GameFrame(nullptr, doc);
-    return AppLoadResult::Success;
-  }
-  catch (InvalidFileException &) {
+  case GameDocument::LoadResult::ParseFailed:
     FileErrorDialog(p_parent, _("Unable to read file"),
                     _("File is not in a format Gambit recognizes."), p_filename)
         .ShowModal();
     return AppLoadResult::ParseFailed;
+
+  case GameDocument::LoadResult::UnsupportedRepresentation:
+    FileErrorDialog(p_parent, _("Unsupported game representation"),
+                    _("Action graph games are not currently supported by the "
+                      "graphical interface."),
+                    p_filename)
+        .ShowModal();
+    return AppLoadResult::UnsupportedRepresentation;
+
+  case GameDocument::LoadResult::Success:
+    m_fileHistory.AddFileToHistory(p_filename);
+    m_fileHistory.Save(*wxConfigBase::Get());
+    (void)new GameFrame(nullptr, doc);
+    return AppLoadResult::Success;
   }
 }
 

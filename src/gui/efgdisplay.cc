@@ -62,7 +62,7 @@ END_EVENT_TABLE()
 //                EfgDisplay: Constructor and destructor
 //----------------------------------------------------------------------
 
-EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
+EfgDisplay::EfgDisplay(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100)
 {
   wxWindow::SetBackgroundColour(wxColour(250, 250, 250));
