@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/enumpure/enumpure.h"
 
@@ -48,10 +48,11 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -S               report equilibria in strategies even for extensive games\n";
   std::cerr << "  -A               compute agent form equilibria\n";
+  std::cerr << "  -D               print detailed information about equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'D':
       printDetail = true;
       break;

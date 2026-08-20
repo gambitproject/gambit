@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.h
+// FILE: src/games/game.h
 // Declaration of base class for representing games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,15 +20,20 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_GAME_H
-#define LIBGAMBIT_GAME_H
+#ifndef GAMBIT_GAMES_GAME_H
+#define GAMBIT_GAMES_GAME_H
 
+#include <algorithm>
+#include <compare>
 #include <list>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
 #include <set>
 #include <stack>
-#include <queue>
-#include <memory>
 
+#include "core/array.h"
 #include "number.h"
 #include "gameobject.h"
 
@@ -387,11 +392,6 @@ public:
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label)
-  {
-    CheckLabel(p_label);
-    m_label = p_label;
-  }
 
   bool Precedes(const GameNode &) const;
 };
@@ -437,6 +437,10 @@ public:
   bool IsChanceInfoset() const;
 
   void SetLabel(const std::string &p_label);
+  /// Validate that p_label is a nonempty, valid label for an action of this
+  /// information set, unique among its actions disregarding any in p_ignore.
+  void CheckActionLabel(const std::string &p_label,
+                        const std::set<const GameActionRep *> &p_ignore) const;
   const std::string &GetLabel() const { return m_label; }
 
   /// @name Actions
@@ -518,8 +522,6 @@ public:
   //@{
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
-  /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -559,9 +561,12 @@ public:
   GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
-  bool operator<(const GameSequenceRep &other) const
+  std::strong_ordering operator<=>(const GameSequenceRep &other) const
   {
-    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
+    if (const auto cmp = m_player <=> other.m_player; cmp != 0) {
+      return cmp;
+    }
+    return m_action <=> other.m_action;
   }
   bool operator==(const GameSequenceRep &other) const
   {
@@ -620,7 +625,6 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -642,8 +646,10 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
-  /// Validate that p_label is a nonempty, valid, unique label for a strategy of this player.
-  void CheckStrategyLabel(const std::string &p_label) const;
+  /// Validate that p_label is a valid label for a strategy of this player,
+  /// disregarding any strategies in p_ignore.
+  void CheckStrategyLabel(const std::string &p_label,
+                          const std::set<const GameStrategyRep *> &p_ignore) const;
   //@}
 
   /// @name Sequences
@@ -790,8 +796,6 @@ public:
     return m_child_it == p_other.m_child_it;
   }
 
-  /// Compares two iterators for inequality.
-  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
   //@}
 
   GameNode GetOwner() const;
@@ -825,19 +829,33 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
-inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+inline void ValidateDistribution(std::vector<Number>::const_iterator p_begin,
+                                 std::vector<Number>::const_iterator p_end,
+                                 const bool p_normalized)
 {
-  if (std::any_of(p_probs.begin(), p_probs.end(),
+  if (std::any_of(p_begin, p_end,
                   [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
     throw ValueException("Probabilities must be non-negative numbers");
   }
   if (!p_normalized) {
     return;
   }
-  if (sum_function(p_probs, [](const Number &n) { return static_cast<Rational>(n); }) !=
-      Rational(1)) {
+  if (std::accumulate(p_begin, p_end, Rational(0), [](const Rational &s, const Number &n) {
+        return s + static_cast<Rational>(n);
+      }) != Rational(1)) {
     throw ValueException("Probabilities must sum to exactly one");
   }
+}
+
+inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
+}
+
+inline void ValidateDistribution(const std::vector<Number> &p_probs,
+                                 const bool p_normalized = true)
+{
+  ValidateDistribution(p_probs.begin(), p_probs.end(), p_normalized);
 }
 
 class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
@@ -917,7 +935,9 @@ protected:
   void IncrementVersion() { m_version++; }
   void IndexStrategies() const;
   /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
-  void CheckPlayerLabel(const std::string &p_label) const;
+  /// ignoring the labels of the players in p_ignore.
+  void CheckPlayerLabel(const std::string &p_label,
+                        const std::set<const GamePlayerRep *> &p_ignore = {}) const;
   /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
   void CheckOutcomeLabel(const std::string &p_label) const;
   //@}
@@ -1131,7 +1151,6 @@ public:
       {
         return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
@@ -1239,12 +1258,9 @@ public:
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
 
-  virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
-  {
-    throw UndefinedException();
-  }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Append a move for p_player at p_node, with actions labeled per p_actions.
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
@@ -1252,12 +1268,31 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                                 bool p_generateLabels = false)
+  /// Insert a move for p_player prior to p_node, with p_actions actions bearing
+  /// automatically generated, sequentially numbered labels.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a move for p_player prior to p_node, with actions labeled per p_actions.
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                                 const std::vector<std::string> &p_actions)
   {
     throw UndefinedException();
   }
   virtual GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset)
+  {
+    throw UndefinedException();
+  }
+  /// Add a chance move for p_actions, with distribution p_probs, at terminal p_node.
+  virtual GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
+  {
+    throw UndefinedException();
+  }
+  /// Insert a chance move for p_actions, with distribution p_probs, prior to p_node.
+  virtual GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                                  const std::vector<Number> &p_probs)
   {
     throw UndefinedException();
   }
@@ -1267,19 +1302,32 @@ public:
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame(GameNode) const { throw UndefinedException(); }
   virtual void MoveTree(GameNode dest, GameNode src) { throw UndefinedException(); }
-  virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
-  virtual void SetInfoset(GameNode, GameInfoset) { throw UndefinedException(); }
-  virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
   virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                                   const std::string &)
   {
     throw UndefinedException();
   }
-  virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
+  /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
+  /// so that any two nodes reached via different actions at p_infoset are distinguished.
+  virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
+  /// Simultaneously reassign action labels at an information set.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
   {
     throw UndefinedException();
   }
-  virtual void DeleteAction(GameAction) { throw UndefinedException(); }
+  /// Declare the ordered action list of a personal player's move.
+  virtual void SetMoveActions(const GameInfoset &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of an event, together with the probability
+  /// distribution over its actions.
+  virtual void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                               const std::vector<Number> &)
+  {
+    throw UndefinedException();
+  }
   virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
@@ -1310,6 +1358,8 @@ public:
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
+  /// Reassign player labels. Keys of p_labels are current labels; values are their replacements.
+  void RelabelPlayers(const std::map<std::string, std::string> &p_labels);
   //@}
 
   /// @name Dimensions of the game
@@ -1331,13 +1381,17 @@ public:
     }
     return *std::next(strategies.begin(), p_index - 1);
   }
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  /// Simultaneously reassign strategy labels for a player: keys are current labels.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &)
   {
     throw UndefinedException();
   }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Declare the ordered list of strategies of a player.
+  virtual void SetStrategies(const GamePlayer &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   //@}
@@ -1408,8 +1462,14 @@ public:
 
   /// @name Modification
   //@{
-  /// Set the probability distribution of actions at a chance node
-  virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
+  /// Form the collection of nodes into a single event carrying the given
+  /// probability distribution over its actions.  The nodes need not currently be
+  /// chance nodes; personal decision nodes are converted.
+  virtual GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                                const std::string &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// Ensure the reduced-form strategies have been derived and indexed
@@ -1472,23 +1532,17 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
-inline void GameStrategyRep::SetLabel(const std::string &p_label)
-{
-  if (p_label == m_label) {
-    return;
-  }
-  GetPlayer()->CheckStrategyLabel(p_label);
-  m_label = p_label;
-}
 
-inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
+inline void
+GamePlayerRep::CheckStrategyLabel(const std::string &p_label,
+                                  const std::set<const GameStrategyRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Strategy label must not be empty");
   }
   CheckLabel(p_label);
   for (const auto &strategy : m_strategies) {
-    if (strategy->GetLabel() == p_label) {
+    if (p_ignore.count(strategy.get()) == 0 && strategy->GetLabel() == p_label) {
       throw ValueException("Strategy label must be unique for the player");
     }
   }
@@ -1504,7 +1558,7 @@ GamePlayerRep::CheckInfosetLabel(const std::string &p_label,
     return;
   }
   for (const auto &infoset : m_infosets) {
-    if (p_ignore.count(infoset.get()) == 0 && infoset->GetLabel() == p_label) {
+    if (!p_ignore.contains(infoset.get()) && infoset->GetLabel() == p_label) {
       throw ValueException("Infoset label must be unique for the player");
     }
   }
@@ -1517,6 +1571,19 @@ inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline void GameInfosetRep::CheckActionLabel(const std::string &p_label,
+                                             const std::set<const GameActionRep *> &p_ignore) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Action label must not be empty");
+  }
+  CheckLabel(p_label);
+  for (const auto &action : m_actions) {
+    if (p_ignore.count(action.get()) == 0 && action->GetLabel() == p_label) {
+      throw ValueException("Action label must be unique within the information set");
+    }
+  }
+}
 inline void GameInfosetRep::SetLabel(const std::string &p_label)
 {
   if (p_label == m_label) {
@@ -1525,7 +1592,8 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
 }
-inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
+inline void GameRep::CheckPlayerLabel(const std::string &p_label,
+                                      const std::set<const GamePlayerRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Player label must not be empty");
@@ -1535,7 +1603,7 @@ inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
     throw ValueException("Player label must not be the reserved chance player label");
   }
   for (const auto &player : m_players) {
-    if (player->GetLabel() == p_label) {
+    if (p_ignore.count(player.get()) == 0 && player->GetLabel() == p_label) {
       throw ValueException("Player label must be unique within the game");
     }
   }
@@ -1555,17 +1623,6 @@ inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
-inline void GamePlayerRep::SetLabel(const std::string &p_label)
-{
-  if (IsChance()) {
-    throw ValueException("The chance player's label cannot be changed");
-  }
-  if (p_label == m_label) {
-    return;
-  }
-  GetGame()->CheckPlayerLabel(p_label);
-  m_label = p_label;
-}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->EnsureStrategies();
@@ -1651,9 +1708,9 @@ inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this();
 //=======================================================================
 
 /// Factory function to create new game tree
-Game NewTree();
+[[nodiscard]] Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+[[nodiscard]] Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///
@@ -1662,7 +1719,7 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadEfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
@@ -1670,7 +1727,7 @@ Game ReadEfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+[[nodiscard]] Game ReadNfgFile(std::istream &p_stream);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
@@ -1678,12 +1735,12 @@ Game ReadNfgFile(std::istream &p_stream);
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+[[nodiscard]] Game ReadGbtFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+[[nodiscard]] Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator
@@ -1691,7 +1748,7 @@ template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
   // NOLINTBEGIN(misc-const-correctness)
-  std::uniform_int_distribution dist(1, p_denom + static_cast<int>(p_dim) - 1);
+  std::uniform_int_distribution<int> dist(1, p_denom + static_cast<int>(p_dim) - 1);
   // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {
@@ -1709,4 +1766,4 @@ std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &gener
 
 } // namespace Gambit
 
-#endif // LIBGAMBIT_GAME_H
+#endif // GAMBIT_GAMES_GAME_H

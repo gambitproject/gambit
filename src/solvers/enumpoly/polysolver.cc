@@ -22,6 +22,7 @@
 
 #include "polysolver.h"
 #include "indexproduct.h"
+#include "lufactor.h"
 
 namespace Gambit {
 
@@ -72,6 +73,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
       newpoint = NewtonStep(point);
     }
     catch (SingularMatrixException &) {
+      bool perturbed = false;
       for (int i = 1; i <= point.size(); i++) {
         Vector<double> perturbed_point(point);
         if (r.Side(i).UpperBound() > point[i]) {
@@ -82,10 +84,20 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
         }
         try {
           newpoint = point + (NewtonStep(perturbed_point) - perturbed_point);
+          perturbed = true;
           break;
         }
         catch (SingularMatrixException &) {
         }
+      }
+      if (!perturbed) {
+        // The Jacobian is singular at this point, and remains singular under every
+        // single-coordinate perturbation tried.  This is a local degeneracy of the
+        // search at this point/rectangle, not evidence that the system of equations
+        // for the support as a whole is degenerate -- so we treat it the same as any
+        // other failure to confirm a root here, leaving it to the caller to subdivide
+        // the rectangle further.
+        return false;
       }
     }
 
@@ -138,7 +150,7 @@ double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
 bool PolynomialSystemSolver::HasNoOtherRootsIn(const Rectangle<double> &r,
                                                const Vector<double> &p) const
 {
-  auto M = m_derivatives.SquareDerivativeMatrix(p).Inverse();
+  auto M = LUFactorization(m_derivatives.SquareDerivativeMatrix(p)).Inverse();
   auto system2 = m_normalizedSystem.Translate(p).TransformCoords(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
   return (std::accumulate(system2.begin(), system2.end(), 0.0,
@@ -151,48 +163,52 @@ Vector<double> PolynomialSystemSolver::NewtonStep(const Vector<double> &point) c
 {
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
-  auto transpose = deriv.Transpose();
-  auto sqmat = Matrix<double>(deriv * transpose);
-  if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
-    throw SingularMatrixException();
-  }
-  return point - (transpose * sqmat.Inverse()) * evals;
+  return point - LUFactorization(deriv).Solve(evals);
 }
 
 Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> &point) const
 {
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
-  auto transpose = deriv.Transpose();
-  auto sqmat = Matrix<double>(deriv * transpose);
-  if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
-    throw SingularMatrixException();
-  }
-  auto step = -(transpose * sqmat.Inverse()) * evals;
+  const Vector<double> delta = LUFactorization(deriv).Solve(evals);
 
-  while (m_derivatives.ValuesOfRootPolys(point + step, NumEquations()).NormSquared() >
+  double scale = 1.0;
+  while (m_derivatives.ValuesOfRootPolys(point - delta * scale, NumEquations()).NormSquared() >
          evals.NormSquared()) {
-    step /= 2;
+    scale /= 2;
   }
-  return point + step;
+  return point - delta * scale;
 }
 
 std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<double> &r,
-                                                            const int max_roots)
+                                                            const int max_roots,
+                                                            const size_t max_rectangles,
+                                                            bool &p_budgetExceeded,
+                                                            const CancelToken &p_cancel)
 {
+  p_budgetExceeded = false;
   std::list<Vector<double>> roots;
   if (NumEquations() == 0) {
     roots.emplace_back();
   }
   else {
-    FindRoots(roots, r, max_roots);
+    size_t budget = max_rectangles;
+    FindRoots(roots, r, max_roots, budget, p_budgetExceeded, p_cancel);
   }
   return roots;
 }
 
 void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
-                                       const Rectangle<double> &r, const size_t max_roots) const
+                                       const Rectangle<double> &r, const size_t max_roots,
+                                       size_t &p_budget, bool &p_budgetExceeded,
+                                       const CancelToken &p_cancel) const
 {
+  p_cancel.Check();
+  if (p_budget == 0) {
+    p_budgetExceeded = true;
+    return;
+  }
+  --p_budget;
   if (SystemHasNoRootsIn(r)) {
     return;
   }
@@ -216,8 +232,8 @@ void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
     return;
   }
   for (const auto &cell : r.Orthants()) {
-    FindRoots(rootlist, cell, max_roots);
-    if (rootlist.size() >= max_roots) {
+    FindRoots(rootlist, cell, max_roots, p_budget, p_budgetExceeded, p_cancel);
+    if (rootlist.size() >= max_roots || p_budgetExceeded) {
       return;
     }
   }

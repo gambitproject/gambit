@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/nash/enumpure.h
+// FILE: src/solvers/enumpure/enumpure.h
 // Enumerate pure-strategy equilibrium profiles of games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_ENUMPURE_H
-#define GAMBIT_NASH_ENUMPURE_H
+#ifndef GAMBIT_SOLVERS_ENUMPURE_ENUMPURE_H
+#define GAMBIT_SOLVERS_ENUMPURE_ENUMPURE_H
 
-#include "games/nash.h"
+#include "games/stratpure.h"
+#include "games/behavpure.h"
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
@@ -46,7 +48,8 @@ inline bool IsNash(const PureStrategyProfile &p_profile)
 ///
 inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
     const Game &p_game,
-    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
+    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
+    const CancelToken &p_cancel = CancelToken())
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -54,6 +57,7 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
   }
   std::list<MixedStrategyProfile<Rational>> solutions;
   for (const auto &profile : StrategyContingencies(p_game)) {
+    p_cancel.Check();
     if (IsNash(profile)) {
       solutions.push_back(profile->ToMixedStrategyProfile());
       p_onEquilibrium(solutions.back());
@@ -103,4 +107,4 @@ EnumPureAgentSolve(const Game &p_game,
 
 } // end namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_ENUMPURE_H
+#endif // GAMBIT_SOLVERS_ENUMPURE_ENUMPURE_H

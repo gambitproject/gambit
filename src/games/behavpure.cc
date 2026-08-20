@@ -20,7 +20,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include <ranges>
+
+#include "games.h"
 
 namespace Gambit {
 
@@ -71,6 +73,29 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
 template double PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 
+GameOutcome PureBehaviorProfile::GetOutcome(const GameNode &p_start) const
+{
+  GameOutcome outcome;
+  GameNode node = p_start;
+  while (true) {
+    if (node->GetOutcome()) {
+      if (outcome) {
+        // More than one outcome-bearing node along this path; the combined
+        // payoff cannot be attributed to a single outcome's preserved text.
+        throw UndefinedException();
+      }
+      outcome = node->GetOutcome();
+    }
+    if (node->IsTerminal()) {
+      return outcome;
+    }
+    if (node->GetInfoset()->IsChanceInfoset()) {
+      throw UndefinedException();
+    }
+    node = node->GetChild(m_profile.at(node->GetInfoset()));
+  }
+}
+
 MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
@@ -115,15 +140,14 @@ BehaviorContingencies::iterator::iterator(BehaviorContingencies *p_cont, bool p_
 
 BehaviorContingencies::iterator &BehaviorContingencies::iterator::operator++()
 {
-  for (auto infoset = m_cont->m_reachableInfosets.crbegin();
-       infoset != m_cont->m_reachableInfosets.crend(); ++infoset) {
-    ++m_currentBehav[*infoset];
-    if (m_currentBehav.at(*infoset) != m_cont->m_support.GetActions(*infoset).end()) {
-      m_profile.SetAction(*m_currentBehav[*infoset]);
+  for (const auto &infoset : std::ranges::reverse_view(m_cont->m_reachableInfosets)) {
+    ++m_currentBehav[infoset];
+    if (m_currentBehav.at(infoset) != m_cont->m_support.GetActions(infoset).end()) {
+      m_profile.SetAction(*m_currentBehav[infoset]);
       return *this;
     }
-    m_currentBehav[*infoset] = m_cont->m_support.GetActions(*infoset).begin();
-    m_profile.SetAction(*m_currentBehav[*infoset]);
+    m_currentBehav[infoset] = m_cont->m_support.GetActions(infoset).begin();
+    m_profile.SetAction(*m_currentBehav[infoset]);
   }
   m_atEnd = true;
   return *this;

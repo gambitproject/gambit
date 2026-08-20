@@ -25,7 +25,7 @@
 
 #include <functional>
 
-#include "gambit.h"
+#include "games/game.h"
 #include "games/workspace.h"
 
 class wxFont;
@@ -203,6 +203,10 @@ public:
   void Save(LegacyWorkspaceFile &p_workspace) const;
   void Load(const LegacyWorkspaceFile &p_workspace);
 };
+
+/// Builds a small solid-color square bitmap, e.g. for use as a player-color swatch
+/// on a menu item or button.
+wxBitmap MakeColorSwatch(const wxColour &p_color, int p_size = 16);
 
 } // namespace Gambit::GUI
 

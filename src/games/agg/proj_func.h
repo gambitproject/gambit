@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/proj_func.h
+// FILE: src/games/agg/proj_func.h
 // Pre-defined functions for contribution-independent function nodes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_AGG_PROJFUNC_H
-#define GAMBIT_AGG_PROJFUNC_H
+#ifndef GAMBIT_GAMES_AGG_PROJ_FUNC_H
+#define GAMBIT_GAMES_AGG_PROJ_FUNC_H
 
 #include <iostream>
 #include <iterator>
@@ -86,11 +86,6 @@ struct proj_func {
   bool operator==(const proj_func &v) const
   {
     return Type == v.Type && Default == v.Default && weights == v.weights;
-  }
-
-  bool operator!=(const proj_func &v) const
-  {
-    return Type != v.Type || Default != v.Default || weights != v.weights;
   }
 
   virtual int operator()(int x, int y) const = 0;
@@ -300,4 +295,4 @@ inline projtype make_proj_func(TypeEnum type, std::istream &in, int S, int P)
 
 } // end namespace Gambit::agg
 
-#endif // GAMBIT_AGG_PROJFUNC_H
+#endif // GAMBIT_GAMES_AGG_PROJ_FUNC_H

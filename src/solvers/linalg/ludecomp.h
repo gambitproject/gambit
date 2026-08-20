@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/ludecomp.h
+// FILE: src/solvers/linalg/ludecomp.h
 // Interface to LU decomposition classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LUDECOMP_H
-#define LUDECOMP_H
+#ifndef GAMBIT_SOLVERS_LINALG_LUDECOMP_H
+#define GAMBIT_SOLVERS_LINALG_LUDECOMP_H
 
-#include "gambit.h"
+#include <list>
+
+#include "core/core.h"
 
 namespace Gambit::linalg {
 
@@ -129,4 +131,4 @@ private:
 
 } // end namespace Gambit::linalg
 
-#endif // LUDECOMP_H
+#endif // GAMBIT_SOLVERS_LINALG_LUDECOMP_H

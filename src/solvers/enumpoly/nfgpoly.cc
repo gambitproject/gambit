@@ -23,6 +23,7 @@
 
 #include <numeric>
 
+#include "games/stratpure.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "polysystem.h"
@@ -102,7 +103,8 @@ namespace Gambit::Nash {
 
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_singular,
-                             int p_stopAfter)
+                             bool &p_budgetExceeded, int p_stopAfter, size_t p_maxRectangles,
+                             const CancelToken &p_cancel)
 {
   auto space = std::make_shared<VariableSpace>(support.MixedProfileLength() -
                                                support.GetGame()->NumPlayers());
@@ -118,7 +120,8 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   std::list<Vector<double>> roots;
   try {
     roots = solver.FindRoots({bottoms, tops},
-                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max());
+                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max(),
+                             p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
     is_singular = true;
@@ -140,8 +143,9 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
-                      StrategyCallbackType<double> p_onEquilibrium,
-                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent)
+                      size_t p_maxRectangles, StrategyCallbackType<double> p_onEquilibrium,
+                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent,
+                      const CancelToken &p_cancel)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -157,10 +161,13 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   PossibleNashStrategySupports possible_supports(p_game);
 
   for (auto support : possible_supports) {
+    p_cancel.Check();
     p_onEvent(EnumPolyCandidateSupportEvent<StrategySupportProfile>{support});
     bool is_singular;
+    bool budget_exceeded;
     for (auto solution : EnumPolyStrategySupportSolve(
-             support, is_singular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
+             support, is_singular, budget_exceeded,
+             std::max(p_stopAfter - static_cast<int>(ret.size()), 0), p_maxRectangles, p_cancel)) {
       const MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
@@ -170,6 +177,9 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
 
     if (is_singular) {
       p_onEvent(EnumPolySingularSupportEvent<StrategySupportProfile>{support});
+    }
+    if (budget_exceeded) {
+      p_onEvent(EnumPolyBudgetExceededSupportEvent<StrategySupportProfile>{support});
     }
     if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gameexpl.h
+// FILE: src/games/gameexpl.h
 // Declaration of base class for explicit game representations
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMEEXPL_H
-#define GAMEEXPL_H
+#ifndef GAMBIT_GAMES_GAMEEXPL_H
+#define GAMBIT_GAMES_GAMEEXPL_H
 
 #include "game.h"
 
@@ -52,4 +52,4 @@ public:
 
 } // namespace Gambit
 
-#endif // GAMEEXPL_H
+#endif // GAMBIT_GAMES_GAMEEXPL_H

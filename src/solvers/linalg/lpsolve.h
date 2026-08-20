@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/lpsolve.h
+// FILE: src/solvers/linalg/lpsolve.h
 // Interface to LP solvers
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LPSOLVE_H
-#define LPSOLVE_H
+#ifndef GAMBIT_SOLVERS_LINALG_LPSOLVE_H
+#define GAMBIT_SOLVERS_LINALG_LPSOLVE_H
 
-#include "gambit.h"
+#include "core/cancel.h"
+#include "core/core.h"
 #include "lptab.h"
 
 namespace Gambit::linalg {
@@ -50,6 +51,7 @@ private:
   Array<T> ub, lb;
   Vector<T> xx, cost;
   Vector<T> y, x, d;
+  CancelToken m_cancel;
 
   void Solve(int phase = 0);
   int Enter();
@@ -61,7 +63,8 @@ private:
 
 public:
   LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
-          int nequals); // nequals = number of equalities (last nequals rows)
+          int nequals, // nequals = number of equalities (last nequals rows)
+          const CancelToken &p_cancel = CancelToken());
   ~LPSolve() = default;
 
   T OptimumCost() const { return total_cost; }
@@ -76,4 +79,4 @@ public:
 
 } // end namespace Gambit::linalg
 
-#endif // LPSOLVE_H
+#endif // GAMBIT_SOLVERS_LINALG_LPSOLVE_H

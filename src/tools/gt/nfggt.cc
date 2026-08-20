@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 
 using namespace Gambit;
 
@@ -30,15 +30,17 @@ std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &
   std::vector<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
+    if (p_stream.peek() == EOF) {
+      break;
+    }
+    p_stream >> p[1];
+    for (size_t i = 2; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
+      char comma;
+      p_stream >> comma;
       p_stream >> p[i];
-      if (i < p.MixedProfileLength()) {
-        char comma;
-        p_stream >> comma;
-      }
     }
     // Read in the rest of the line and discard
     std::string foo;

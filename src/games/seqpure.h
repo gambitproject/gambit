@@ -52,7 +52,6 @@ public:
   {
     return m_profile == p_other.m_profile;
   }
-  bool operator!=(const PureSequenceProfile &p_other) const { return !(*this == p_other); }
 
   /// @name Data access and manipulation
   //@{
@@ -124,7 +123,6 @@ public:
     {
       return (m_end == it.m_end && m_sequences == it.m_sequences && m_indices == it.m_indices);
     }
-    bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
   iterator begin() const { return {m_efg, m_sequences}; }

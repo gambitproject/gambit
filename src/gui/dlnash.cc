@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <concepts>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -82,11 +83,10 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return EnumMixedNashSpec{};
   }
   if (p_method == s_enumpoly) {
-    auto spec = EnumPolyNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.stopAfter = 1;
+      return EnumPolyNashSpec{.stopAfter = 1};
     }
-    return spec;
+    return EnumPolyNashSpec{};
   }
   if (p_method == s_gnm) {
     return GNMNashSpec{};
@@ -107,38 +107,35 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
     return LogitNashSpec{};
   }
   if (p_method == s_simpdiv) {
-    auto spec = SimpdivNashSpec{};
     if (p_target == NashEquilibriumTarget::One) {
-      spec.startingPoints = 1;
+      return SimpdivNashSpec{.startingPoints = 1};
     }
-    return spec;
+    return SimpdivNashSpec{};
   }
   throw std::logic_error("Unknown Nash equilibrium method");
 }
 
+template <class M>
+concept StrategicMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
+    std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
+
+template <class M>
+concept RationalOutputMethod =
+    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
+    std::same_as<M, LPNashSpec> || std::same_as<M, LCPNashSpec>;
+
 bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, GNMNashSpec> ||
-               std::is_same_v<Method, IPANashSpec> || std::is_same_v<Method, LiapNashSpec> ||
-               std::is_same_v<Method, SimpdivNashSpec>;
-      },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return StrategicMethod<Method>; },
+                    p_method);
 }
 
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
-  return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
-        return std::is_same_v<Method, EnumPureNashSpec> ||
-               std::is_same_v<Method, EnumMixedNashSpec> || std::is_same_v<Method, LPNashSpec> ||
-               std::is_same_v<Method, LCPNashSpec>;
-      },
-      p_method);
+  return std::visit([]<typename Method>(const Method &) { return RationalOutputMethod<Method>; },
+                    p_method);
 }
 
 wxString ExternalCommand(const NashComputationSpec &p_spec)
@@ -152,13 +149,12 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
       p_spec.representation == NashRepresentation::Strategic ? wxT(" -S") : wxString{};
 
   return std::visit(
-      [&](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      [&]<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return prefix + wxT("enumpure") + strategic;
         }
         else if constexpr (std::is_same_v<Method, EnumMixedNashSpec>) {
-          return prefix + wxT("enummixed") + strategic;
+          return prefix + wxT("enummixed");
         }
         else if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           return prefix +
@@ -167,14 +163,13 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                  strategic;
         }
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
-          return prefix +
-                 wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
-                                  method.perturbations, method.lambdaEnd, method.steps,
-                                  method.localNewtonInterval, method.localNewtonMaxIterations) +
-                 strategic;
+          return prefix + wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
+                                           method.perturbations, method.lambdaEnd, method.steps,
+                                           method.localNewtonInterval,
+                                           method.localNewtonMaxIterations);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
-          return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations) + strategic;
+          return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations);
         }
         else if constexpr (std::is_same_v<Method, LPNashSpec>) {
           return prefix + wxT("lp") + strategic;
@@ -184,10 +179,9 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                  strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
-          return prefix +
-                 wxString::Format("liap -d 10 -n %d -i %d -m %.17g", method.startingPoints,
-                                  method.maxIterations, method.maxRegret) +
-                 strategic;
+          return prefix + wxString::Format("liap -d 10 -n %d -i %d -m %.17g",
+                                           method.startingPoints, method.maxIterations,
+                                           method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, LogitNashSpec>) {
           return prefix +
@@ -201,7 +195,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix +
                  wxString::Format("simpdiv -d 10 -n %d -r %d -g %d -m ", method.startingPoints,
                                   method.randomDenominator, method.gridResize) +
-                 wxString(regret.str()) + strategic;
+                 wxString(regret.str());
         }
       },
       p_spec.method);
@@ -210,8 +204,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
 wxString MethodDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return wxT("in pure strategies");
         }
@@ -249,8 +242,7 @@ wxString MethodDescription(const NashMethodSpec &p_method)
 wxString ParameterDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      [](const auto &method) {
-        using Method = std::decay_t<decltype(method)>;
+      []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           if (method.stopAfter == 1) {
             return wxString::Format(" (stop after one equilibrium; maximum regret %.4g)",
@@ -299,7 +291,7 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
 
 } // namespace
 
-NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
+NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -440,10 +432,10 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
   const bool useBehavior = computation.representation == NashRepresentation::Behavior;
   std::shared_ptr<AnalysisOutput> output;
   if (UsesRationalOutput(computation.method)) {
-    output = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useBehavior);
+    output = std::make_shared<AnalysisProfileList<Rational>>(m_doc.get(), useBehavior);
   }
   else {
-    output = std::make_shared<AnalysisProfileList<double>>(m_doc, useBehavior);
+    output = std::make_shared<AnalysisProfileList<double>>(m_doc.get(), useBehavior);
   }
 
   wxString count;

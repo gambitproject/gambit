@@ -292,6 +292,225 @@ ENUMMIXED_RATIONAL_CASES = [
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enumixed_rational_5",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                gbt.catalog.load, "journals/dcg/vonstengel1999/6x6_game_with_75_eq"
+            ),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d("20/23", "3/23", 0, 0, 0, 0), d("4/19", "15/19", 0, 0, 0, 0)],
+                [d("45/52", "7/52", 0, 0, 0, 0), d(0, "14/17", "3/17", 0, 0, 0)],
+                [d("25/29", "4/29", 0, 0, 0, 0), d(0, 0, "5/9", "4/9", 0, 0)],
+                [d("55/64", "9/64", 0, 0, 0, 0), d(0, 0, 0, "3/58", "55/58", 0)],
+                [d("6/7", "1/7", 0, 0, 0, 0), d(0, 0, 0, 0, "6/7", "1/7")],
+                [
+                    d("300/443", "108/443", "30/443", "5/443", 0, 0),
+                    d("30/97", "25/97", "15/97", "27/97", 0, 0),
+                ],
+                [
+                    d("1540/2297", "567/2297", "162/2297", "28/2297", 0, 0),
+                    d("70/347", "70/347", 0, "42/347", "165/347", 0),
+                ],
+                [
+                    d("1232/1853", "462/1853", "135/1853", "24/1853", 0, 0),
+                    d("7/199", "21/398", 0, 0, "297/398", "33/199"),
+                ],
+                [
+                    d("1584/2425", "616/2425", "189/2425", "36/2425", 0, 0),
+                    d(0, "7/841", "42/841", 0, "594/841", "198/841"),
+                ],
+                [
+                    d("275/427", "110/427", "5/61", "1/61", 0, 0),
+                    d(0, 0, "5/61", "1/61", "275/427", "110/427"),
+                ],
+                [
+                    d("5775/9871", "2640/9871", "1050/9871", "336/9871", "70/9871", 0),
+                    d("70/9871", 0, "1050/9871", "336/9871", "5775/9871", "2640/9871"),
+                ],
+                [
+                    d("132/245", "66/245", "6/49", "12/245", "4/245", "1/245"),
+                    d("4/245", "1/245", "6/49", "12/245", "132/245", "66/245"),
+                ],
+                [
+                    d("420/571", "126/571", "70/1713", 0, 0, "5/1713"),
+                    d("112/367", "84/367", "63/367", "108/367", 0, 0),
+                ],
+                [
+                    d("154/211", "189/844", "9/211", 0, 0, "3/844"),
+                    d("35/188", "63/376", 0, "45/376", "99/188", 0),
+                ],
+                [
+                    d("1232/1699", "385/1699", "75/1699", 0, 0, "7/1699"),
+                    d("140/4663", "189/4663", 0, 0, "3564/4663", "770/4663"),
+                ],
+                [
+                    d("4752/6649", "1540/6649", "315/6649", 0, 0, "42/6649"),
+                    d(0, "42/6649", "315/6649", 0, "4752/6649", "1540/6649"),
+                ],
+                [
+                    d("594/841", "198/841", "42/841", 0, 0, "7/841"),
+                    d(0, 0, "189/2425", "36/2425", "1584/2425", "616/2425"),
+                ],
+                [
+                    d("525/626", "48/313", 0, 0, "5/626", 0),
+                    d("56/227", 0, "75/227", "96/227", 0, 0),
+                ],
+                [
+                    d("1925/2306", "180/1153", 0, 0, "21/2306", 0),
+                    d("42/475", 0, 0, "48/475", "77/95", 0),
+                ],
+                [
+                    d("385/463", "220/1389", 0, 0, "14/1389", 0),
+                    d("14/1389", 0, 0, 0, "385/463", "220/1389"),
+                ],
+                [
+                    d("105/131", "21/131", 0, 0, "5/262", "5/262"),
+                    d("112/377", "70/377", "75/377", "120/377", 0, 0),
+                ],
+                [
+                    d("770/971", "315/1942", 0, 0, "21/971", "45/1942"),
+                    d("84/515", "63/515", 0, "12/103", "308/515", 0),
+                ],
+                [
+                    d("11/14", "55/336", 0, 0, "1/42", "3/112"),
+                    d("1/42", "3/112", 0, 0, "11/14", "55/336"),
+                ],
+                [
+                    d("3564/4663", "770/4663", 0, 0, "140/4663", "189/4663"),
+                    d(0, "7/1699", "75/1699", 0, "1232/1699", "385/1699"),
+                ],
+                [
+                    d("297/398", "33/199", 0, 0, "7/199", "21/398"),
+                    d(0, 0, "135/1853", "24/1853", "1232/1853", "462/1853"),
+                ],
+                [d("28/29", 0, 0, "1/29", 0, 0), d("7/32", "25/32", 0, 0, 0, 0)],
+                [d("24/25", 0, 0, "1/25", 0, 0), d(0, "25/31", "6/31", 0, 0, 0)],
+                [d("150/157", 0, 0, "7/157", 0, 0), d(0, 0, "9/16", "7/16", 0, 0)],
+                [d("275/289", 0, 0, "14/289", 0, 0), d(0, 0, 0, "14/289", "275/289", 0)],
+                [d("55/58", 0, 0, "3/58", 0, 0), d(0, 0, 0, 0, "55/64", "9/64")],
+                [
+                    d("525/626", 0, 0, "28/313", "45/626", 0),
+                    d("63/265", 0, "18/53", "112/265", 0, 0),
+                ],
+                [
+                    d("275/334", 0, 0, "16/167", "27/334", 0),
+                    d("27/334", 0, 0, "16/167", "275/334", 0),
+                ],
+                [
+                    d("77/95", 0, 0, "48/475", "42/475", 0),
+                    d("21/2306", 0, 0, 0, "1925/2306", "180/1153"),
+                ],
+                [
+                    d("21/32", 0, 0, "7/64", "9/64", "3/32"),
+                    d("126/431", "75/431", "90/431", "140/431", 0, 0),
+                ],
+                [
+                    d("385/617", 0, 0, "70/617", "189/1234", "135/1234"),
+                    d("189/1234", "135/1234", 0, "70/617", "385/617", 0),
+                ],
+                [
+                    d("308/515", 0, 0, "12/103", "84/515", "63/515"),
+                    d("21/971", "45/1942", 0, 0, "770/971", "315/1942"),
+                ],
+                [
+                    d("99/188", 0, 0, "45/376", "35/188", "63/376"),
+                    d(0, "3/844", "9/211", 0, "154/211", "189/844"),
+                ],
+                [
+                    d("165/347", 0, 0, "42/347", "70/347", "70/347"),
+                    d(0, 0, "162/2297", "28/2297", "1540/2297", "567/2297"),
+                ],
+                [d(0, 1, 0, 0, 0, 0), d(0, 0, 0, 0, 0, 1)],
+                [d(0, 0, "3/5", "2/5", 0, 0), d("3/13", "10/13", 0, 0, 0, 0)],
+                [d(0, 0, "7/12", "5/12", 0, 0), d(0, "25/32", "7/32", 0, 0, 0)],
+                [d(0, 0, "4/7", "3/7", 0, 0), d(0, 0, "4/7", "3/7", 0, 0)],
+                [d(0, 0, "9/16", "7/16", 0, 0), d(0, 0, 0, "7/157", "150/157", 0)],
+                [d(0, 0, "5/9", "4/9", 0, 0), d(0, 0, 0, 0, "25/29", "4/29")],
+                [
+                    d(0, "792/1541", "560/1541", "189/1541", 0, 0),
+                    d(0, 0, "560/1541", "189/1541", 0, "792/1541"),
+                ],
+                [
+                    d(0, "616/1171", "420/1171", "135/1171", 0, 0),
+                    d(0, "175/1049", "280/1049", 0, 0, "594/1049"),
+                ],
+                [
+                    d(0, "77/142", "25/71", "15/142", 0, 0),
+                    d("80/321", "175/321", 0, 0, 0, "22/107"),
+                ],
+                [
+                    d(0, 0, "70/199", "84/199", "45/199", 0),
+                    d("45/199", 0, "70/199", "84/199", 0, 0),
+                ],
+                [
+                    d(0, 0, "18/53", "112/265", "63/265", 0),
+                    d("45/626", 0, 0, "28/313", "525/626", 0),
+                ],
+                [
+                    d(0, 0, "75/227", "96/227", "56/227", 0),
+                    d("5/626", 0, 0, 0, "525/626", "48/313"),
+                ],
+                [
+                    d(0, "396/995", "70/199", "189/995", "12/199", 0),
+                    d("12/199", 0, "70/199", "189/995", 0, "396/995"),
+                ],
+                [d(0, 0, "2/9", "1/3", "2/7", "10/63"), d("2/7", "10/63", "2/9", "1/3", 0, 0)],
+                [
+                    d(0, 0, "90/431", "140/431", "126/431", "75/431"),
+                    d("9/64", "3/32", 0, "7/64", "21/32", 0),
+                ],
+                [
+                    d(0, 0, "75/377", "120/377", "112/377", "70/377"),
+                    d("5/262", "5/262", 0, 0, "105/131", "21/131"),
+                ],
+                [
+                    d(0, 0, "63/367", "108/367", "112/367", "84/367"),
+                    d(0, "5/1713", "70/1713", 0, "420/571", "126/571"),
+                ],
+                [
+                    d(0, 0, "15/97", "27/97", "30/97", "25/97"),
+                    d(0, 0, "30/443", "5/443", "300/443", "108/443"),
+                ],
+                [
+                    d(0, "231/731", "700/2193", "315/1462", "80/731", "175/4386"),
+                    d("80/731", "175/4386", "700/2193", "315/1462", 0, "231/731"),
+                ],
+                [d(0, 0, "1/3", 0, 0, "2/3"), d("1/4", "3/4", 0, 0, 0, 0)],
+                [d(0, 0, "7/27", 0, 0, "20/27"), d(0, "20/27", "7/27", 0, 0, 0)],
+                [d(0, 0, "7/32", 0, 0, "25/32"), d(0, 0, "7/12", "5/12", 0, 0)],
+                [d(0, 0, "6/31", 0, 0, "25/31"), d(0, 0, 0, "1/25", "24/25", 0)],
+                [d(0, 0, "3/17", 0, 0, "14/17"), d(0, 0, 0, 0, "45/52", "7/52")],
+                [
+                    d(0, "594/1049", "280/1049", 0, 0, "175/1049"),
+                    d(0, 0, "420/1171", "135/1171", 0, "616/1171"),
+                ],
+                [d(0, "22/37", "10/37", 0, 0, "5/37"), d(0, "5/37", "10/37", 0, 0, "22/37")],
+                [
+                    d(0, "77/122", "50/183", 0, 0, "35/366"),
+                    d("160/629", "315/629", 0, 0, 0, "154/629"),
+                ],
+                [d(0, 0, 0, 0, 1, 0), d(1, 0, 0, 0, 0, 0)],
+                [d(0, "11/15", 0, 0, "4/15", 0), d("4/15", 0, 0, 0, 0, "11/15")],
+                [d(0, 0, 0, 0, "2/7", "5/7"), d("2/7", "5/7", 0, 0, 0, 0)],
+                [d(0, 0, 0, 0, "1/4", "3/4"), d(0, "2/3", "1/3", 0, 0, 0)],
+                [d(0, 0, 0, 0, "3/13", "10/13"), d(0, 0, "3/5", "2/5", 0, 0)],
+                [d(0, 0, 0, 0, "7/32", "25/32"), d(0, 0, 0, "1/29", "28/29", 0)],
+                [d(0, 0, 0, 0, "4/19", "15/19"), d(0, 0, 0, 0, "20/23", "3/23")],
+                [
+                    d(0, "22/107", 0, 0, "80/321", "175/321"),
+                    d(0, 0, "25/71", "15/142", 0, "77/142"),
+                ],
+                [
+                    d(0, "154/629", 0, 0, "160/629", "315/629"),
+                    d(0, "35/366", "50/183", 0, 0, "77/122"),
+                ],
+                [d(0, "77/246", 0, 0, "32/123", "35/82"), d("32/123", "35/82", 0, 0, 0, "77/246")],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_rational_6",
+    ),
 ]
 
 
@@ -408,10 +627,324 @@ ENUMMIXED_DOUBLE_CASES = [
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enummixed_double_8",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                gbt.catalog.load, "journals/dcg/vonstengel1999/6x6_game_with_75_eq"
+            ),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d("20/23", "3/23", 0, 0, 0, 0), d("4/19", "15/19", 0, 0, 0, 0)],
+                [d("45/52", "7/52", 0, 0, 0, 0), d(0, "14/17", "3/17", 0, 0, 0)],
+                [d("25/29", "4/29", 0, 0, 0, 0), d(0, 0, "5/9", "4/9", 0, 0)],
+                [d("55/64", "9/64", 0, 0, 0, 0), d(0, 0, 0, "3/58", "55/58", 0)],
+                [d("6/7", "1/7", 0, 0, 0, 0), d(0, 0, 0, 0, "6/7", "1/7")],
+                [
+                    d("300/443", "108/443", "30/443", "5/443", 0, 0),
+                    d("30/97", "25/97", "15/97", "27/97", 0, 0),
+                ],
+                [
+                    d("1540/2297", "567/2297", "162/2297", "28/2297", 0, 0),
+                    d("70/347", "70/347", 0, "42/347", "165/347", 0),
+                ],
+                [
+                    d("1232/1853", "462/1853", "135/1853", "24/1853", 0, 0),
+                    d("7/199", "21/398", 0, 0, "297/398", "33/199"),
+                ],
+                [
+                    d("1584/2425", "616/2425", "189/2425", "36/2425", 0, 0),
+                    d(0, "7/841", "42/841", 0, "594/841", "198/841"),
+                ],
+                [
+                    d("275/427", "110/427", "5/61", "1/61", 0, 0),
+                    d(0, 0, "5/61", "1/61", "275/427", "110/427"),
+                ],
+                [
+                    d("5775/9871", "2640/9871", "1050/9871", "336/9871", "70/9871", 0),
+                    d("70/9871", 0, "1050/9871", "336/9871", "5775/9871", "2640/9871"),
+                ],
+                [
+                    d("132/245", "66/245", "6/49", "12/245", "4/245", "1/245"),
+                    d("4/245", "1/245", "6/49", "12/245", "132/245", "66/245"),
+                ],
+                [
+                    d("420/571", "126/571", "70/1713", 0, 0, "5/1713"),
+                    d("112/367", "84/367", "63/367", "108/367", 0, 0),
+                ],
+                [
+                    d("154/211", "189/844", "9/211", 0, 0, "3/844"),
+                    d("35/188", "63/376", 0, "45/376", "99/188", 0),
+                ],
+                [
+                    d("1232/1699", "385/1699", "75/1699", 0, 0, "7/1699"),
+                    d("140/4663", "189/4663", 0, 0, "3564/4663", "770/4663"),
+                ],
+                [
+                    d("4752/6649", "1540/6649", "315/6649", 0, 0, "42/6649"),
+                    d(0, "42/6649", "315/6649", 0, "4752/6649", "1540/6649"),
+                ],
+                [
+                    d("594/841", "198/841", "42/841", 0, 0, "7/841"),
+                    d(0, 0, "189/2425", "36/2425", "1584/2425", "616/2425"),
+                ],
+                [
+                    d("525/626", "48/313", 0, 0, "5/626", 0),
+                    d("56/227", 0, "75/227", "96/227", 0, 0),
+                ],
+                [
+                    d("1925/2306", "180/1153", 0, 0, "21/2306", 0),
+                    d("42/475", 0, 0, "48/475", "77/95", 0),
+                ],
+                [
+                    d("385/463", "220/1389", 0, 0, "14/1389", 0),
+                    d("14/1389", 0, 0, 0, "385/463", "220/1389"),
+                ],
+                [
+                    d("105/131", "21/131", 0, 0, "5/262", "5/262"),
+                    d("112/377", "70/377", "75/377", "120/377", 0, 0),
+                ],
+                [
+                    d("770/971", "315/1942", 0, 0, "21/971", "45/1942"),
+                    d("84/515", "63/515", 0, "12/103", "308/515", 0),
+                ],
+                [
+                    d("11/14", "55/336", 0, 0, "1/42", "3/112"),
+                    d("1/42", "3/112", 0, 0, "11/14", "55/336"),
+                ],
+                [
+                    d("3564/4663", "770/4663", 0, 0, "140/4663", "189/4663"),
+                    d(0, "7/1699", "75/1699", 0, "1232/1699", "385/1699"),
+                ],
+                [
+                    d("297/398", "33/199", 0, 0, "7/199", "21/398"),
+                    d(0, 0, "135/1853", "24/1853", "1232/1853", "462/1853"),
+                ],
+                [d("28/29", 0, 0, "1/29", 0, 0), d("7/32", "25/32", 0, 0, 0, 0)],
+                [d("24/25", 0, 0, "1/25", 0, 0), d(0, "25/31", "6/31", 0, 0, 0)],
+                [d("150/157", 0, 0, "7/157", 0, 0), d(0, 0, "9/16", "7/16", 0, 0)],
+                [d("275/289", 0, 0, "14/289", 0, 0), d(0, 0, 0, "14/289", "275/289", 0)],
+                [d("55/58", 0, 0, "3/58", 0, 0), d(0, 0, 0, 0, "55/64", "9/64")],
+                [
+                    d("525/626", 0, 0, "28/313", "45/626", 0),
+                    d("63/265", 0, "18/53", "112/265", 0, 0),
+                ],
+                [
+                    d("275/334", 0, 0, "16/167", "27/334", 0),
+                    d("27/334", 0, 0, "16/167", "275/334", 0),
+                ],
+                [
+                    d("77/95", 0, 0, "48/475", "42/475", 0),
+                    d("21/2306", 0, 0, 0, "1925/2306", "180/1153"),
+                ],
+                [
+                    d("21/32", 0, 0, "7/64", "9/64", "3/32"),
+                    d("126/431", "75/431", "90/431", "140/431", 0, 0),
+                ],
+                [
+                    d("385/617", 0, 0, "70/617", "189/1234", "135/1234"),
+                    d("189/1234", "135/1234", 0, "70/617", "385/617", 0),
+                ],
+                [
+                    d("308/515", 0, 0, "12/103", "84/515", "63/515"),
+                    d("21/971", "45/1942", 0, 0, "770/971", "315/1942"),
+                ],
+                [
+                    d("99/188", 0, 0, "45/376", "35/188", "63/376"),
+                    d(0, "3/844", "9/211", 0, "154/211", "189/844"),
+                ],
+                [
+                    d("165/347", 0, 0, "42/347", "70/347", "70/347"),
+                    d(0, 0, "162/2297", "28/2297", "1540/2297", "567/2297"),
+                ],
+                [d(0, 1, 0, 0, 0, 0), d(0, 0, 0, 0, 0, 1)],
+                [d(0, 0, "3/5", "2/5", 0, 0), d("3/13", "10/13", 0, 0, 0, 0)],
+                [d(0, 0, "7/12", "5/12", 0, 0), d(0, "25/32", "7/32", 0, 0, 0)],
+                [d(0, 0, "4/7", "3/7", 0, 0), d(0, 0, "4/7", "3/7", 0, 0)],
+                [d(0, 0, "9/16", "7/16", 0, 0), d(0, 0, 0, "7/157", "150/157", 0)],
+                [d(0, 0, "5/9", "4/9", 0, 0), d(0, 0, 0, 0, "25/29", "4/29")],
+                [
+                    d(0, "792/1541", "560/1541", "189/1541", 0, 0),
+                    d(0, 0, "560/1541", "189/1541", 0, "792/1541"),
+                ],
+                [
+                    d(0, "616/1171", "420/1171", "135/1171", 0, 0),
+                    d(0, "175/1049", "280/1049", 0, 0, "594/1049"),
+                ],
+                [
+                    d(0, "77/142", "25/71", "15/142", 0, 0),
+                    d("80/321", "175/321", 0, 0, 0, "22/107"),
+                ],
+                [
+                    d(0, 0, "70/199", "84/199", "45/199", 0),
+                    d("45/199", 0, "70/199", "84/199", 0, 0),
+                ],
+                [
+                    d(0, 0, "18/53", "112/265", "63/265", 0),
+                    d("45/626", 0, 0, "28/313", "525/626", 0),
+                ],
+                [
+                    d(0, 0, "75/227", "96/227", "56/227", 0),
+                    d("5/626", 0, 0, 0, "525/626", "48/313"),
+                ],
+                [
+                    d(0, "396/995", "70/199", "189/995", "12/199", 0),
+                    d("12/199", 0, "70/199", "189/995", 0, "396/995"),
+                ],
+                [d(0, 0, "2/9", "1/3", "2/7", "10/63"), d("2/7", "10/63", "2/9", "1/3", 0, 0)],
+                [
+                    d(0, 0, "90/431", "140/431", "126/431", "75/431"),
+                    d("9/64", "3/32", 0, "7/64", "21/32", 0),
+                ],
+                [
+                    d(0, 0, "75/377", "120/377", "112/377", "70/377"),
+                    d("5/262", "5/262", 0, 0, "105/131", "21/131"),
+                ],
+                [
+                    d(0, 0, "63/367", "108/367", "112/367", "84/367"),
+                    d(0, "5/1713", "70/1713", 0, "420/571", "126/571"),
+                ],
+                [
+                    d(0, 0, "15/97", "27/97", "30/97", "25/97"),
+                    d(0, 0, "30/443", "5/443", "300/443", "108/443"),
+                ],
+                [
+                    d(0, "231/731", "700/2193", "315/1462", "80/731", "175/4386"),
+                    d("80/731", "175/4386", "700/2193", "315/1462", 0, "231/731"),
+                ],
+                [d(0, 0, "1/3", 0, 0, "2/3"), d("1/4", "3/4", 0, 0, 0, 0)],
+                [d(0, 0, "7/27", 0, 0, "20/27"), d(0, "20/27", "7/27", 0, 0, 0)],
+                [d(0, 0, "7/32", 0, 0, "25/32"), d(0, 0, "7/12", "5/12", 0, 0)],
+                [d(0, 0, "6/31", 0, 0, "25/31"), d(0, 0, 0, "1/25", "24/25", 0)],
+                [d(0, 0, "3/17", 0, 0, "14/17"), d(0, 0, 0, 0, "45/52", "7/52")],
+                [
+                    d(0, "594/1049", "280/1049", 0, 0, "175/1049"),
+                    d(0, 0, "420/1171", "135/1171", 0, "616/1171"),
+                ],
+                [d(0, "22/37", "10/37", 0, 0, "5/37"), d(0, "5/37", "10/37", 0, 0, "22/37")],
+                [
+                    d(0, "77/122", "50/183", 0, 0, "35/366"),
+                    d("160/629", "315/629", 0, 0, 0, "154/629"),
+                ],
+                [d(0, 0, 0, 0, 1, 0), d(1, 0, 0, 0, 0, 0)],
+                [d(0, "11/15", 0, 0, "4/15", 0), d("4/15", 0, 0, 0, 0, "11/15")],
+                [d(0, 0, 0, 0, "2/7", "5/7"), d("2/7", "5/7", 0, 0, 0, 0)],
+                [d(0, 0, 0, 0, "1/4", "3/4"), d(0, "2/3", "1/3", 0, 0, 0)],
+                [d(0, 0, 0, 0, "3/13", "10/13"), d(0, 0, "3/5", "2/5", 0, 0)],
+                [d(0, 0, 0, 0, "7/32", "25/32"), d(0, 0, 0, "1/29", "28/29", 0)],
+                [d(0, 0, 0, 0, "4/19", "15/19"), d(0, 0, 0, 0, "20/23", "3/23")],
+                [
+                    d(0, "22/107", 0, 0, "80/321", "175/321"),
+                    d(0, 0, "25/71", "15/142", 0, "77/142"),
+                ],
+                [
+                    d(0, "154/629", 0, 0, "160/629", "315/629"),
+                    d(0, "35/366", "50/183", 0, 0, "77/122"),
+                ],
+                [d(0, "77/246", 0, 0, "32/123", "35/82"), d("32/123", "35/82", 0, 0, 0, "77/246")],
+            ],
+            prob_tol=TOL_LARGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_9",
+    ),
 ]
 
 
 ENUMPOLY_STRATEGY_CASES = [
+    # 2-player games
+    # 3x3 coordination game with 3 pure and 4 mixed equilibria
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1), d(0, 0, 1)],
+                [d("1/2", "1/2", 0), d("1/2", "1/2", 0)],
+                [d("1/2", 0, "1/2"), d("1/2", 0, "1/2")],
+                [d(0, "1/2", "1/2"), d(0, "1/2", "1/2")],
+                [d("1/3", "1/3", "1/3"), d("1/3", "1/3", "1/3")],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_1",
+    ),
+    # 4x4 coordination game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
+            expected=[
+                [d(1, 0, 0, 0), d(1, 0, 0, 0)],
+                [d(0, 1, 0, 0), d(0, 1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1, 0)],
+                [d(0, 0, 0, 1), d(0, 0, 0, 1)],
+                [d("1/2", "1/2", 0, 0), d("1/2", "1/2", 0, 0)],
+                [d("1/2", 0, "1/2", 0), d("1/2", 0, "1/2", 0)],
+                [d("1/2", 0, 0, "1/2"), d("1/2", 0, 0, "1/2")],
+                [d(0, "1/2", "1/2", 0), d(0, "1/2", "1/2", 0)],
+                [d(0, "1/2", 0, "1/2"), d(0, "1/2", 0, "1/2")],
+                [d(0, 0, "1/2", "1/2"), d(0, 0, "1/2", "1/2")],
+                [d("1/3", "1/3", "1/3", 0), d("1/3", "1/3", "1/3", 0)],
+                [d("1/3", "1/3", 0, "1/3"), d("1/3", "1/3", 0, "1/3")],
+                [d("1/3", 0, "1/3", "1/3"), d("1/3", 0, "1/3", "1/3")],
+                [d(0, "1/3", "1/3", "1/3"), d(0, "1/3", "1/3", "1/3")],
+                [d("1/4", "1/4", "1/4", "1/4"), d("1/4", "1/4", "1/4", "1/4")],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_2",
+    ),
+    # Figure 10.5 efg from Game Theory Basics
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "books/vonstengel2022/fig10.5"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
+            expected=[
+                [d(1, 0), d(1, 0, 0, 0)],
+                [d("1/2", "1/2"), d(0, "2/5", "3/5", 0)],
+                [d("1/4", "3/4"), d(0, 0, "1/3", "2/3")],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_3",
+    ),
+    # 6x6 bimatrix game with 75 equilibria
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                gbt.catalog.load, "journals/dcg/vonstengel1999/6x6_game_with_75_eq"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=10),
+            expected=[
+                [d(0, 1, 0, 0, 0, 0), d(0, 0, 0, 0, 0, 1)],
+                [d(0, 0, 0, 0, 1, 0), d(1, 0, 0, 0, 0, 0)],
+                [d("20/23", "3/23", 0, 0, 0, 0), d("4/19", "15/19", 0, 0, 0, 0)],
+                [d("45/52", "7/52", 0, 0, 0, 0), d(0, "14/17", "3/17", 0, 0, 0)],
+                [d("25/29", "4/29", 0, 0, 0, 0), d(0, 0, "5/9", "4/9", 0, 0)],
+                [d("55/64", "9/64", 0, 0, 0, 0), d(0, 0, 0, "3/58", "55/58", 0)],
+                [d("6/7", "1/7", 0, 0, 0, 0), d(0, 0, 0, 0, "6/7", "1/7")],
+                [d("28/29", 0, 0, "1/29", 0, 0), d("7/32", "25/32", 0, 0, 0, 0)],
+                [d("24/25", 0, 0, "1/25", 0, 0), d(0, "25/31", "6/31", 0, 0, 0)],
+                [d("150/157", 0, 0, "7/157", 0, 0), d(0, 0, "9/16", "7/16", 0, 0)],
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_enumpoly_strategy,
+        id="test_enumpoly_strategy_4",
+    ),
+    #################################
+    # 3-player games
+    #################################
     # 2x2x2 strategic form game based on local max cut -- 2 pure and 1 mixed
     pytest.param(
         EquilibriumTestCase(
@@ -428,27 +961,7 @@ ENUMPOLY_STRATEGY_CASES = [
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_1",
-    ),
-    # coordination game with 3 pure and 4 mixed equilibria
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None, use_strategic=True),
-            expected=[
-                    [d(1, 0, 0), d(1, 0, 0)],
-                    [d(0, 1, 0), d(0, 1, 0)],
-                    [d(0, 0, 1), d(0, 0, 1)],
-                    [d("1/2", "1/2", 0), d("1/2", "1/2", 0)],
-                    [d("1/2", 0, "1/2"), d("1/2", 0, "1/2")],
-                    [d(0, "1/2", "1/2"), d(0, "1/2", "1/2")],
-                    [d("1/3", "1/3", "1/3"), d("1/3", "1/3", "1/3")],
-            ],
-            prob_tol=TOL,
-            regret_tol=TOL,
-        ),
-        marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_2",
+        id="test_enumpoly_strategy_5",
     ),
     # A three-player game with a unique Nash equilibrium in irrational mixed strategies
     # (nau2004 sec4 catalog game)
@@ -457,17 +970,17 @@ ENUMPOLY_STRATEGY_CASES = [
             factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec4"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                    [
-                        d(0.6192325794725537, 0.3807674205274463),
-                        d(0.4798042226776053, 0.5201957773223946),
-                        d(0.3788253360656313, 0.6211746639343687)
-                    ],
+                [
+                    d(0.6192325794725537, 0.3807674205274463),
+                    d(0.4798042226776053, 0.5201957773223946),
+                    d(0.3788253360656313, 0.6211746639343687),
+                ],
             ],
             prob_tol=TOL,
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_3",
+        id="test_enumpoly_strategy_6",
     ),
     # A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a
     # continuum of completely mixed Nash equilibria (nau2004 sec5 catalog game)
@@ -476,15 +989,15 @@ ENUMPOLY_STRATEGY_CASES = [
             factory=functools.partial(gbt.catalog.load, "journals/ijgt/nau2004/sec5"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                    [d(1, 0), d(0, 1), d(1, 0)],
-                    [d(0, 1), d(1, 0), d(1, 0)],
-                    [d(0, 1), d(0, 1), d(0, 1)],
+                [d(1, 0), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1), d(0, 1)],
             ],
             prob_tol=TOL,
             regret_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_strategy,
-        id="test_enumpoly_strategy_4",
+        id="test_enumpoly_strategy_7",
     ),
 ]
 
@@ -737,6 +1250,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_rational_9",
     ),
+    # 4x4 coordination game
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
@@ -899,6 +1413,7 @@ LCP_STRATEGY_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_9",
     ),
+    # 4x4 coordination game
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
@@ -928,7 +1443,7 @@ LCP_STRATEGY_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_11",
     ),
-    # Action graph game
+    # Action graph game, solved exactly (Rational arithmetic throughout).
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),
@@ -2244,9 +2759,6 @@ LCP_BEHAVIOR_DOUBLE_CASES = [
 
 
 ENUMPOLY_BEHAVIOR_CASES = [
-    # #############################################################
-    # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
-    # #############################################################
     # 2-player zero-sum games
     pytest.param(
         EquilibriumTestCase(
@@ -2259,7 +2771,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_0",
+        id="test_enumpoly_behavior_1",
     ),
     # 2-player non-zero-sum games
     pytest.param(
@@ -2273,7 +2785,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_1a",
+        id="test_enumpoly_behavior_2",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2286,7 +2798,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_1b",
+        id="test_enumpoly_behavior_3",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2299,7 +2811,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_2",
+        id="test_enumpoly_behavior_4",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2314,7 +2826,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_3",
+        id="test_enumpoly_behavior_5",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2332,7 +2844,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_4",
+        id="test_enumpoly_behavior_6",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2352,9 +2864,9 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_5",
+        id="test_enumpoly_behavior_7",
     ),
-    # 3-player games
+    # 3x3 coordination game
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
@@ -2372,8 +2884,78 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_6",
+        id="test_enumpoly_behavior_8",
     ),
+    # 4x4 coordination game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d("1/4", "1/4", "1/4", "1/4")], [d("1/4", "1/4", "1/4", "1/4")]],
+                [[d("1/3", "1/3", "1/3", 0)], [d("1/3", "1/3", "1/3", 0)]],
+                [[d("1/3", "1/3", 0, "1/3")], [d("1/3", "1/3", 0, "1/3")]],
+                [[d("1/2", "1/2", 0, 0)], [d("1/2", "1/2", 0, 0)]],
+                [[d("1/3", 0, "1/3", "1/3")], [d("1/3", 0, "1/3", "1/3")]],
+                [[d("1/2", 0, "1/2", 0)], [d("1/2", 0, "1/2", 0)]],
+                [[d("1/2", 0, 0, "1/2")], [d("1/2", 0, 0, "1/2")]],
+                [[d(1, 0, 0, 0)], [d(1, 0, 0, 0)]],
+                [[d(0, "1/3", "1/3", "1/3")], [d(0, "1/3", "1/3", "1/3")]],
+                [[d(0, "1/2", "1/2", 0)], [d(0, "1/2", "1/2", 0)]],
+                [[d(0, "1/2", 0, "1/2")], [d(0, "1/2", 0, "1/2")]],
+                [[d(0, 1, 0, 0)], [d(0, 1, 0, 0)]],
+                [[d(0, 0, "1/2", "1/2")], [d(0, 0, "1/2", "1/2")]],
+                [[d(0, 0, 1, 0)], [d(0, 0, 1, 0)]],
+                [[d(0, 0, 0, 1)], [d(0, 0, 0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_9",
+    ),
+    # Figure 10.5 efg from Game Theory Basics
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(gbt.catalog.load, "books/vonstengel2022/fig10.5"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d("1/2", "1/2")], [d("2/5", "3/5"), d(0, 1), d(1, 0)]],
+                [[d("1/4", "3/4")], [d(0, 1), d(1, 0), d("1/3", "2/3")]],
+                [[d(1, 0)], [d(1, 0), d(1, 0), d(1, 0)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_10",
+    ),
+    # 6x6 bimatrix game with 75 equilibria -- runs slow so only do first 2 equilibria
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_efg_corresponding_to_bimatrix_game,
+                gbt.catalog.load("journals/dcg/vonstengel1999/6x6_game_with_75_eq"),
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            expected=[
+                [
+                    [d("132/245", "66/245", "6/49", "12/245", "4/245", "1/245")],
+                    [d("4/245", "1/245", "6/49", "12/245", "132/245", "66/245")],
+                ],
+                [
+                    [d("5775/9871", "2640/9871", "1050/9871", "336/9871", "70/9871", 0)],
+                    [d("70/9871", 0, "1050/9871", "336/9871", "5775/9871", "2640/9871")],
+                ],
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_11",
+    ),
+    ########################################################################
+    # 3-player games
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "3_player.efg"),
@@ -2385,7 +2967,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_7",
+        id="test_enumpoly_behavior_12",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2398,21 +2980,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_8",
-    ),
-    # 4-player game
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
-            expected=[
-                [[d("1/4", "1/4", "1/4", "1/4")], [d("1/4", "1/4", "1/4", "1/4")]],
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_9",
+        id="test_enumpoly_behavior_13",
     ),
     # 3-player perfect info game to test behavior two off equilibrium path
     pytest.param(
@@ -2429,7 +2997,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_10",
+        id="test_enumpoly_behavior_14",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2447,7 +3015,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_11",
+        id="test_enumpoly_behavior_15",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2467,7 +3035,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_12",
+        id="test_enumpoly_behavior_16",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2483,20 +3051,33 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_13",
+        id="test_enumpoly_behavior_17",
+    ),
+    # 3-player game equivalent to a simultaneous-move 2x2x2 game (nine equilibria total,
+    # including two totally-mixed ones); this previously required an unordered check due
+    # to run-to-run variation in the order equilibria were found (see #589)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d("1/2", "1/2")], [d("2/5", "3/5")], [d("1/4", "3/4")]],
+                [[d("2/5", "3/5")], [d("1/2", "1/2")], [d("1/3", "2/3")]],
+                [[d("1/2", "1/2")], [d("1/2", "1/2")], [d(1, 0)]],
+                [[d("1/3", "2/3")], [d(1, 0)], [d("1/4", "3/4")]],
+                [[d(1, 0)], [d(1, 0)], [d(1, 0)]],
+                [[d(1, 0)], [d(0, 1)], [d(0, 1)]],
+                [[d(0, 1)], [d("1/4", "3/4")], [d("1/3", "2/3")]],
+                [[d(0, 1)], [d(1, 0)], [d(0, 1)]],
+                [[d(0, 1)], [d(0, 1)], [d(1, 0)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_18",
     ),
 ]
-# ##############################################################################
-# 3-player game
-# (
-# games.read_from_file("mixed_behavior_game.efg"),
-# [
-# [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-# [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-# ],
-# 2,  # 9 in total found by enumpoly (see unordered test)
-# ),
-# ##############################################################################
 
 
 LOGIT_BEHAVIOR_CASES = [
@@ -2565,75 +3146,6 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for action in player.actions:
                     assert abs(eq[action] - expected[action]) <= test_case.prob_tol
-
-
-##################################################################################################
-# BEHVAIOR SOLVER -- UNORDERED
-##################################################################################################
-
-ENUMPOLY_BEHAVIOR_UNORDERED_CASES = [
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=9),
-            expected=[
-                [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-                [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-                [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
-                [[["1/3", "2/3"]], [[1, 0]], [["1/4", "3/4"]]],
-                [[[1, 0]], [[1, 0]], [[1, 0]]],
-                [[[1, 0]], [[0, 1]], [[0, 1]]],
-                [[[0, 1]], [["1/4", "3/4"]], [["1/3", "2/3"]]],
-                [[[0, 1]], [[1, 0]], [[0, 1]]],
-                [[[0, 1]], [[0, 1]], [[1, 0]]],
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_unordered_1",
-    ),
-]
-
-
-@pytest.mark.nash
-@pytest.mark.parametrize("test_case", ENUMPOLY_BEHAVIOR_UNORDERED_CASES, ids=lambda c: c.label)
-def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests) -> None:
-    """Test calls of Nash solvers in EFGs in mixed behaviors -- UNORDERED
-
-    Subtests:
-    - Agent max regret no more than `test_case.regret_tol`
-    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
-    - Equilibria that are output are distinct and all appear in the expected set
-      Equilibria are deemed to match if the maximum difference in probabilities is no more
-      than `test_case.prob_tol`
-    """
-
-    def are_the_same(game, found, candidate):
-        for p in game.players:
-            for a in p.actions:
-                if not abs(found[a] - candidate[a]) <= TOL:
-                    return False
-        return True
-
-    game = test_case.factory()
-    result = test_case.solver(game)
-    with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, eq in enumerate(result.equilibria):
-        with subtests.test(eq=i, check="agent_max_regret"):
-            assert eq.max_regret() <= test_case.regret_tol
-        with subtests.test(eq=i, check="max_regret"):
-            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
-        with subtests.test(eq=i, check="strategy_profile"):
-            found = False
-            for exp in test_case.expected[:]:
-                expected = game.mixed_behavior_profile(rational=True, data=exp)
-                if are_the_same(game, eq, expected):
-                    test_case.expected.remove(exp)
-                    found = True
-                    break
-            assert found
 
 
 ##################################################################################################

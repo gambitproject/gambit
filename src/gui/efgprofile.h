@@ -42,7 +42,7 @@ class MixedBehaviorProfileList final : public wxGrid, public GameView {
   void OnUpdate() override;
 
 public:
-  MixedBehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  MixedBehaviorProfileList(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~MixedBehaviorProfileList() override;
 };
 } // namespace Gambit::GUI

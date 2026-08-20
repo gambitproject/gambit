@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/efglcp.cc
+// FILE: src/solvers/lcp/efglcp.cc
 // Implementation of algorithm to solve extensive forms using linear
 // complementarity program from sequence form
 //
@@ -21,7 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/linalg/lemketab.h"
 #include "solvers/lcp/lcp.h"
 
@@ -179,7 +179,8 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
 //
 template <class T>
 std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
-                                                    BehaviorCallbackType<T> p_onEquilibrium)
+                                                    BehaviorCallbackType<T> p_onEquilibrium,
+                                                    const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -193,7 +194,7 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   linalg::LemkeTableau<T> tab(ConstructMatrix<T>(columns), ConstructVector<T>(columns));
 
   tab.Pivot(columns.rootIndex1, 0);
-  tab.SF_LCPPath(columns.rootIndex1);
+  tab.SF_LCPPath(columns.rootIndex1, p_cancel);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
   tab.GetBasisVector(sol);
 
@@ -206,9 +207,9 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   return equilibria;
 }
 
-template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &,
-                                                                  BehaviorCallbackType<double>);
+template std::list<MixedBehaviorProfile<double>>
+LcpBehaviorSolve(const Game &, BehaviorCallbackType<double>, const CancelToken &);
 template std::list<MixedBehaviorProfile<Rational>>
-LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>);
+LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>, const CancelToken &);
 
 } // end namespace Gambit::Nash

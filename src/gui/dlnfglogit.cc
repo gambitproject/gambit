@@ -22,211 +22,248 @@
 
 #include <fstream>
 #include <memory>
-#include <sstream>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/stdpaths.h>
-#include <wx/txtstrm.h>
-#include <wx/tokenzr.h>
+#include <wx/thread.h>
 
-#include "wx/sheet/sheet.h"
+#include <wx/grid.h>
 #include "dlnfglogit.h"
+#include "solvers/logit/logit.h"
 
 namespace Gambit::GUI {
 
-class LogitMixedList final : public wxSheet {
-  GameDocument *m_doc;
+//=========================================================================
+//                       class LogitMixedTable
+//=========================================================================
+
+//!
+//! Data model for the logit correspondence display: one row per
+//! computed profile, received incrementally from the solver thread.
+//! Row growth is deliberately batched (see AddProfile) so the grid
+//! isn't resized/repainted on every single profile received.
+//!
+class LogitMixedTable final : public wxGridTableBase {
+  std::shared_ptr<GameDocument> m_doc;
   Array<double> m_lambdas;
   Array<std::shared_ptr<MixedStrategyProfile<double>>> m_profiles;
-
-  // Overriding wxSheet members for data access
-  wxString GetCellValue(const wxSheetCoords &) override;
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
-
-  // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false) override { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCol(int, bool = false, bool = false) override { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
-  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
-  bool SelectAll(bool = false) override { return false; }
-
-  // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
+  int m_numCols{0};
+  int m_numRows{0};
 
 public:
-  LogitMixedList(wxWindow *p_parent, GameDocument *p_doc);
-  ~LogitMixedList() override = default;
+  explicit LogitMixedTable(const std::shared_ptr<GameDocument> &p_doc) : m_doc(p_doc) {}
 
-  void AddProfile(const wxString &p_text, bool p_forceShow);
+  int GetNumberRows() override { return m_numRows; }
+  int GetNumberCols() override { return m_numCols; }
+  bool IsEmptyCell(int, int) override { return false; }
+  wxString GetValue(int row, int col) override;
+  void SetValue(int, int, const wxString &) override {}
+  wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind) override;
+
+  //!
+  //! wxGrid::SetColLabelValue/SetCornerLabelValue on the grid just forward
+  //! to the table's own (default no-op) methods of the same name, so
+  //! headers must be supplied by overriding the getters here instead.
+  //!
+  wxString GetColLabelValue(int col) override;
+  wxString GetCornerLabelValue() const override { return wxT("#"); }
+
+  void AddProfile(const LogitQREMixedStrategyProfile &p_qre, bool p_forceShow);
 };
 
-LogitMixedList::LogitMixedList(wxWindow *p_parent, GameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
+wxString LogitMixedTable::GetColLabelValue(int col)
 {
-  CreateGrid(0, 0);
-  SetRowLabelWidth(40);
-  SetColLabelHeight(25);
+  if (col == 0) {
+    return wxT("Lambda");
+  }
+
+  const GameStrategy strategy = m_doc->GetGame()->GetStrategy(col);
+  const GamePlayer player = strategy->GetPlayer();
+  wxString label;
+  label << player->GetNumber() << ": " << strategy->GetLabel();
+  return label;
 }
 
-wxString LogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
+wxString LogitMixedTable::GetValue(int row, int col)
 {
-  if (IsRowLabelCell(p_coords)) {
-    wxString label;
-    label << (p_coords.GetRow() + 1);
-    return label;
-  }
-
-  if (IsColLabelCell(p_coords)) {
-    if (p_coords.GetCol() == 0) {
-      return wxT("Lambda");
-    }
-
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
-    const GamePlayer player = strategy->GetPlayer();
-
-    wxString label;
-    label << player->GetNumber() << ": " << strategy->GetLabel();
-    return label;
-  }
-
-  if (IsCornerLabelCell(p_coords)) {
-    return wxT("#");
-  }
-
-  if (p_coords.GetCol() == 0) {
-    return {lexical_cast<std::string>(m_lambdas[p_coords.GetRow() + 1],
-                                      m_doc->GetStyle().NumDecimals())
-                .c_str(),
+  if (col == 0) {
+    return {lexical_cast<std::string>(m_lambdas[row + 1], m_doc->GetStyle().NumDecimals()).c_str(),
             *wxConvCurrent};
   }
 
-  const auto profile = m_profiles[p_coords.GetRow() + 1];
-  return {lexical_cast<std::string>((*profile)[p_coords.GetCol()], m_doc->GetStyle().NumDecimals())
-              .c_str(),
+  const auto profile = m_profiles[row + 1];
+  return {lexical_cast<std::string>((*profile)[col], m_doc->GetStyle().NumDecimals()).c_str(),
           *wxConvCurrent};
 }
 
-static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
+wxGridCellAttr *LogitMixedTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
 {
-  if (p_index == 0) {
-    return *wxBLACK;
-  }
+  auto *attr = new wxGridCellAttr();
+  attr->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+  attr->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+  attr->SetReadOnly(true);
 
-  const GameStrategy strategy = p_doc->GetGame()->GetStrategy(p_index);
-  return p_doc->GetStyle().GetPlayerColor(strategy->GetPlayer());
-}
-
-wxSheetCellAttr LogitMixedList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
-{
-  if (IsRowLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-
-  if (IsColLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
-    return attr;
-  }
-
-  if (IsCornerLabelCell(p_coords)) {
-    return GetSheetRefData()->m_defaultCornerLabelAttr;
-  }
-
-  wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-  attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
-  attr.SetOrientation(wxHORIZONTAL);
-
-  if (p_coords.GetCol() > 0) {
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
+  if (col > 0) {
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(col);
     const GamePlayer player = strategy->GetPlayer();
 
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
-
-    if (player->GetNumber() % 2 == 0) {
-      attr.SetBackgroundColour(wxColour(250, 250, 250));
-    }
-    else {
-      attr.SetBackgroundColour(wxColour(225, 225, 225));
-    }
+    attr->SetTextColour(m_doc->GetStyle().GetPlayerColor(player));
+    attr->SetBackgroundColour(player->GetNumber() % 2 == 0 ? wxColour(250, 250, 250)
+                                                           : wxColour(225, 225, 225));
   }
   else {
-    attr.SetForegroundColour(*wxBLACK);
-    attr.SetBackgroundColour(wxColour(250, 250, 250));
+    attr->SetTextColour(*wxBLACK);
+    attr->SetBackgroundColour(wxColour(250, 250, 250));
   }
 
-  attr.SetReadOnly(true);
   return attr;
 }
 
-void LogitMixedList::AddProfile(const wxString &p_text, bool p_forceShow)
+void LogitMixedTable::AddProfile(const LogitQREMixedStrategyProfile &p_qre, bool p_forceShow)
 {
-  if (GetNumberCols() == 0) {
-    AppendCols(m_doc->GetGame()->GetStrategies().size() + 1);
+  wxGrid *view = GetView();
+
+  if (m_numCols == 0) {
+    m_numCols = static_cast<int>(m_doc->GetGame()->GetStrategies().size()) + 1;
+    if (view) {
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, m_numCols);
+      view->ProcessTableMessage(msg);
+    }
   }
 
   auto profile = std::make_shared<MixedStrategyProfile<double>>(
       m_doc->GetGame()->NewMixedStrategyProfile(0.0));
-
-  wxStringTokenizer tok(p_text, wxT(","));
-  const auto next = tok.GetNextToken();
-
-  if (next == "NE") {
-    return;
-  }
-
-  m_lambdas.push_back(std::stod(next.ToStdString()));
-
+  m_lambdas.push_back(p_qre.GetLambda());
   for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
-    try {
-      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
-    }
-    catch (std::out_of_range &) {
-      (*profile)[i] = 0.0;
-    }
+    (*profile)[i] = p_qre[i];
   }
-
   m_profiles.push_back(profile);
 
-  if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
-    AppendRows(m_profiles.size() - GetNumberRows());
-    MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));
+  if (p_forceShow || static_cast<int>(m_profiles.size()) - m_numRows > 20) {
+    const int newRows = static_cast<int>(m_profiles.size()) - m_numRows;
+    m_numRows = static_cast<int>(m_profiles.size());
+    if (view) {
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newRows);
+      view->ProcessTableMessage(msg);
+      view->MakeCellVisible(m_numRows - 1, 0);
+    }
   }
 
   // Lambda tends to get large, so this column usually needs resized
-  AutoSizeCol(0);
+  if (view) {
+    view->AutoSizeColumn(0);
+  }
 }
 
-constexpr int GBT_ID_TIMER = 2000;
-constexpr int GBT_ID_PROCESS = 2001;
+//=========================================================================
+//                       class LogitMixedGrid
+//=========================================================================
 
-BEGIN_EVENT_TABLE(LogitMixedDialog, wxDialog)
-EVT_END_PROCESS(GBT_ID_PROCESS, LogitMixedDialog::OnEndProcess)
-EVT_IDLE(LogitMixedDialog::OnIdle)
-EVT_TIMER(GBT_ID_TIMER, LogitMixedDialog::OnTimer)
-EVT_BUTTON(wxID_SAVE, LogitMixedDialog::OnSave)
-END_EVENT_TABLE()
+class LogitMixedGrid final : public wxGrid {
+  LogitMixedTable *m_gridTable;
+
+  //!
+  //! @name Overriding wxGrid behavior to disable selection & the cursor
+  //! highlight rectangle, matching the read-only, non-interactive table
+  //! this replaces.
+  //!
+  //@{
+  void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
+  void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
+  //@}
+
+public:
+  LogitMixedGrid(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
+    : wxGrid(p_parent, wxID_ANY), m_gridTable(new LogitMixedTable(p_doc))
+  {
+    SetTable(m_gridTable, true);
+    EnableEditing(false);
+    SetRowLabelSize(40);
+    SetColLabelSize(25);
+
+    SetCellHighlightPenWidth(0);
+    SetCellHighlightROPenWidth(0);
+
+    Bind(wxEVT_GRID_RANGE_SELECTING, &LogitMixedGrid::OnRangeSelecting, this);
+    Bind(wxEVT_GRID_SELECT_CELL, &LogitMixedGrid::OnSelectCell, this);
+  }
+
+  void AddProfile(const LogitQREMixedStrategyProfile &p_qre, bool p_forceShow)
+  {
+    m_gridTable->AddProfile(p_qre, p_forceShow);
+  }
+};
+
+namespace {
+
+wxDECLARE_EVENT(wxEVT_LOGIT_POINT, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_LOGIT_POINT, wxThreadEvent);
+
+wxDECLARE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
 
-LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
+} // namespace
+
+//
+// Traces the logit equilibrium correspondence directly, in-process, on a
+// worker thread, rather than shelling out to gambit-logit and parsing its
+// output. Posts each point on the branch back to the dialog as it is found.
+//
+class LogitMixedThreadRunner final : public wxThread {
+  wxEvtHandler *m_parent;
+  Game m_game;
+  CancelToken m_cancel;
+
+  void PostPoint(const LogitQREMixedStrategyProfile &p_qre) const
+  {
+    auto *event = new wxThreadEvent(wxEVT_LOGIT_POINT);
+    event->SetPayload(p_qre);
+    wxQueueEvent(m_parent, event);
+  }
+
+  ExitCode Entry() override
+  {
+    int exitCode = 0;
+    try {
+      const LogitQREMixedStrategyProfile start(m_game);
+      LogitStrategySolve(
+          start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullStrategyCallback<double>,
+          [this](const LogitEvent<LogitQREMixedStrategyProfile> &p_event) {
+            PostPoint(std::get<LogitPathEvent<LogitQREMixedStrategyProfile>>(p_event).qre);
+          },
+          m_cancel);
+    }
+    catch (const ComputationCanceledException &) {
+      // Not an error -- LogitMixedDialog's m_stopRequested flag (already set
+      // before RequestCancel() was called) is what determines that the
+      // "finished" event below is reported as a stop rather than a failure.
+    }
+    catch (const std::exception &) {
+      exitCode = 1;
+    }
+
+    auto *evt = new wxThreadEvent(wxEVT_LOGIT_FINISHED);
+    evt->SetInt(exitCode);
+    wxQueueEvent(m_parent, evt);
+    return static_cast<wxThread::ExitCode>(0);
+  }
+
+public:
+  LogitMixedThreadRunner(wxEvtHandler *p_parent, Game p_game)
+    : wxThread(wxTHREAD_JOINABLE), m_parent(p_parent), m_game(std::move(p_game))
+  {
+  }
+
+  void RequestCancel() { m_cancel.RequestCancel(); }
+};
+
+LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_mixedList(new LogitMixedList(this, m_doc)),
-    m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_mixedList(new LogitMixedGrid(this, m_doc))
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -240,8 +277,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
-  Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(LogitMixedDialog::OnStop));
+  m_stopButton->Bind(wxEVT_BUTTON, &LogitMixedDialog::OnStop, this);
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -253,6 +289,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
   m_saveButton->Enable(false);
   buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, 5);
+  m_saveButton->Bind(wxEVT_BUTTON, &LogitMixedDialog::OnSave, this);
 
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
   buttonSizer->Add(m_okButton, 0, wxALL | wxALIGN_CENTER, 5);
@@ -266,95 +303,63 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   wxTopLevelWindowBase::Layout();
   CenterOnParent();
 
+  Bind(wxEVT_LOGIT_POINT, &LogitMixedDialog::OnRunnerPoint, this);
+  Bind(wxEVT_LOGIT_FINISHED, &LogitMixedDialog::OnRunnerFinished, this);
+  Bind(wxEVT_CLOSE_WINDOW, &LogitMixedDialog::OnClose, this);
+
   Start();
 }
+
+LogitMixedDialog::~LogitMixedDialog() = default;
 
 void LogitMixedDialog::Start()
 {
   m_doc->BuildNfg();
+  // GameRep's lazy caches are not synchronized against concurrent first
+  // touch from two threads, so force the strategy derivation the worker
+  // will need on this (the main) thread before handing the game over.
+  m_doc->GetGame()->GetStrategies();
 
-  m_process = new wxProcess(this, GBT_ID_PROCESS);
-  m_process->Redirect();
-
-#ifdef __WXMAC__
-  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit -S"), wxEXEC_ASYNC,
-                    m_process);
-#else
-  m_pid = wxExecute(wxT("gambit-logit -S"), wxEXEC_ASYNC, m_process);
-#endif // __WXMAC__
-
-  std::ostringstream s;
-  m_doc->GetGame()->Write(s, "nfg");
-  wxString str(wxString(s.str().c_str(), *wxConvCurrent));
-
-  // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If writing doesn't
-  // complete the whole way, we take a 100-millisecond siesta and try
-  // again.  (This seems to primarily be an issue with -- you guessed it --
-  // Windows!)
-  while (str.length() > 0) {
-    wxTextOutputStream os(*m_process->GetOutputStream());
-
-    // It appears that (at least with mingw) the string itself contains
-    // only '\n' for newlines.  If we don't SetMode here, these get
-    // converted to '\r\n' sequences, and so the number of characters
-    // LastWrite() returns does not match the number of characters in
-    // our string.  Setting this explicitly solves this problem.
-    os.SetMode(wxEOL_UNIX);
-    os.WriteString(str);
-    str.Remove(0, m_process->GetOutputStream()->LastWrite());
-    wxMilliSleep(100);
+  m_runner = std::make_unique<LogitMixedThreadRunner>(this, m_doc->GetGame());
+  if (m_runner->Run() != wxTHREAD_NO_ERROR) {
+    m_runner.reset();
+    m_statusText->SetLabel(wxT("Failed to launch computation."));
+    m_statusText->SetForegroundColour(*wxRED);
+    m_okButton->Enable(true);
   }
-
-  m_process->CloseOutput();
-
-  m_timer.Start(1000, false);
 }
 
-void LogitMixedDialog::OnIdle(wxIdleEvent &p_event)
+void LogitMixedDialog::OnRunnerPoint(wxThreadEvent &p_event)
 {
-  if (!m_process) {
-    return;
+  const auto &qre = p_event.GetPayload<LogitQREMixedStrategyProfile>();
+  m_mixedList->AddProfile(qre, false);
+
+  const int decimals = m_doc->GetStyle().NumDecimals();
+  wxString line(lexical_cast<std::string>(qre.GetLambda(), decimals).c_str(), *wxConvCurrent);
+  for (size_t i = 1; i <= qre.size(); i++) {
+    line +=
+        wxT(",") + wxString(lexical_cast<std::string>(qre[i], decimals).c_str(), *wxConvCurrent);
   }
-
-  if (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    m_mixedList->AddProfile(msg, false);
-    m_output += msg;
-    m_output += wxT("\n");
-
-    p_event.RequestMore();
-  }
-  else {
-    m_timer.Start(1000, false);
-  }
+  m_output += line + wxT("\n");
 }
 
-void LogitMixedDialog::OnTimer(wxTimerEvent &) { wxWakeUpIdle(); }
-
-void LogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
+void LogitMixedDialog::OnRunnerFinished(wxThreadEvent &p_event)
 {
   m_stopButton->Enable(false);
-  m_timer.Stop();
 
-  while (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    if (msg != wxT("")) {
-      m_mixedList->AddProfile(msg, true);
-      m_output += msg;
-      m_output += wxT("\n");
-    }
+  if (m_runner) {
+    // Joinable thread: must be waited on before it can be safely destroyed.
+    // Entry() has already posted this event and is returning, so this
+    // should not block for any appreciable time.
+    m_runner->Wait();
+    m_runner.reset();
   }
 
-  if (p_event.GetExitCode() == 0) {
+  if (m_stopRequested) {
+    m_statusText->SetLabel(wxT("The computation has been stopped."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+  }
+  else if (p_event.GetInt() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));
     m_statusText->SetForegroundColour(wxColour(0, 192, 0));
   }
@@ -369,16 +374,30 @@ void LogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
 
 void LogitMixedDialog::OnStop(wxCommandEvent &)
 {
-  // Per the wxWidgets wiki, under Windows, programs that run
-  // without a console window don't respond to the more polite
-  // SIGTERM, so instead we must be rude and SIGKILL it.
+  m_stopRequested = true;
   m_stopButton->Enable(false);
+  if (m_runner) {
+    m_runner->RequestCancel();
+  }
+}
 
-#ifdef __WXMSW__
-  wxProcess::Kill(m_pid, wxSIGKILL);
-#else
-  wxProcess::Kill(m_pid, wxSIGTERM);
-#endif // __WXMSW__
+void LogitMixedDialog::OnClose(wxCloseEvent &p_event)
+{
+  if (!m_runner || !m_stopButton->IsEnabled()) {
+    p_event.Skip();
+    return;
+  }
+
+  m_stopRequested = true;
+  m_stopButton->Enable(false);
+  m_runner->RequestCancel();
+
+  if (p_event.CanVeto()) {
+    p_event.Veto();
+  }
+  else {
+    p_event.Skip();
+  }
 }
 
 void LogitMixedDialog::OnSave(wxCommandEvent &)
@@ -393,7 +412,7 @@ void LogitMixedDialog::OnSave(wxCommandEvent &)
   }
 }
 
-void LogitStrategic(wxWindow *p_parent, GameDocument *p_doc)
+void LogitStrategic(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
 {
   LogitMixedDialog(p_parent, p_doc).ShowModal();
 }

@@ -23,23 +23,19 @@
 #ifndef GAMBIT_GUI_NFGPANEL_H
 #define GAMBIT_GUI_NFGPANEL_H
 
-#include "wx/sheet/sheet.h" // for wxSheet
-
 class wxPrintout;
 
 namespace Gambit::GUI {
 class TableWidget;
-class TablePlayerToolbar;
 
 class NfgPanel final : public wxPanel, public GameView {
   wxWindow *m_dominanceToolbar;
-  TablePlayerToolbar *m_playerToolbar;
   TableWidget *m_tableWidget;
 
   void OnToolsDominance(wxCommandEvent &);
 
 public:
-  NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance);
+  NfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc, bool p_showDominance);
   ~NfgPanel() override = default;
 
   bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }

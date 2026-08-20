@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/efglp.h
+// FILE: src/solvers/lp/lp.h
 // Compute Nash equilibria via linear programming
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,23 +20,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LP_LP_H
-#define LP_LP_H
+#ifndef GAMBIT_SOLVERS_LP_LP_H
+#define GAMBIT_SOLVERS_LP_LP_H
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
 template <class T>
 std::list<MixedStrategyProfile<T>>
 LpStrategySolve(const Game &p_game,
-                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
+                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                const CancelToken &p_cancel = CancelToken());
 
 template <class T>
 std::list<MixedBehaviorProfile<T>>
 LpBehaviorSolve(const Game &p_game,
-                BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
+                BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
+                const CancelToken &p_cancel = CancelToken());
 
 }; // namespace Gambit::Nash
 
-#endif // LP_LP_H
+#endif // GAMBIT_SOLVERS_LP_LP_H

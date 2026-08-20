@@ -24,7 +24,7 @@
 #include <fstream>
 #include <type_traits>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/liap/liap.h"
 
@@ -35,8 +35,7 @@ template <class Renderer, class Profile>
 void RenderLiapEvent(const Renderer &p_renderer, const LiapEvent<Profile> &p_event)
 {
   std::visit(
-      [&](const auto &event) {
-        using EventType = std::decay_t<decltype(event)>;
+      [&]<typename EventType>(const EventType &event) {
         if constexpr (std::is_same_v<EventType, LiapStartEvent<Profile>>) {
           p_renderer->Render(event.profile, "start");
         }
@@ -62,19 +61,24 @@ void PrintHelp(char *progname)
   std::cerr << "With no options, attempts to compute one equilibrium starting at centroid.\n";
 
   std::cerr << "Options:\n";
-  std::cerr << "  -A               compute agent form equilibria\n";
+  std::cerr << "  -A               compute agent form equilibria for extensive games\n";
   std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of starting points to generate\n";
+  std::cerr << "  -n COUNT         number of starting points to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   starting points (default is to seed from system entropy);\n";
+  std::cerr << "                   requires -n\n";
   std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 1000)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "                   (default is to only show equilibria)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 std::vector<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game,
@@ -83,15 +87,17 @@ std::vector<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_gam
   std::vector<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
+    if (p_stream.peek() == EOF) {
+      break;
+    }
+    p_stream >> p[1];
+    for (size_t i = 2; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
+      char comma;
+      p_stream >> comma;
       p_stream >> p[i];
-      if (i < p.MixedProfileLength()) {
-        char comma;
-        p_stream >> comma;
-      }
     }
     // Read in the rest of the line and discard
     std::string foo;
@@ -107,15 +113,17 @@ std::vector<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_gam
   std::vector<MixedBehaviorProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
-    for (size_t i = 1; i <= p.BehaviorProfileLength(); i++) {
+    if (p_stream.peek() == EOF) {
+      break;
+    }
+    p_stream >> p[1];
+    for (size_t i = 2; i <= p.BehaviorProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
+      char comma;
+      p_stream >> comma;
       p_stream >> p[i];
-      if (i < p.BehaviorProfileLength()) {
-        char comma;
-        p_stream >> comma;
-      }
     }
     // Read in the rest of the line and discard
     std::string foo;
@@ -128,12 +136,13 @@ std::vector<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_gam
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, reportStrategic = false, solveAgent = false, verbose = false;
-  const int numTries = 10;
+  bool quiet = false, solveAgent = false, verbose = false, numTriesSet = false;
+  int numTries = 10;
   int maxitsN = 1000;
   int numDecimals = 6;
   double maxregret = 1.0e-4;
   std::string startFile;
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -141,13 +150,20 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvAS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:i:s:m:R:hqVvA", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       numDecimals = atoi(optarg);
+      break;
+    case 'n':
+      numTries = atoi(optarg);
+      numTriesSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 'm':
       maxregret = atof(optarg);
@@ -160,9 +176,6 @@ int main(int argc, char *argv[])
       break;
     case 'h':
       PrintHelp(argv[0]);
-      break;
-    case 'S':
-      reportStrategic = true;
       break;
     case 'A':
       solveAgent = true;
@@ -190,6 +203,15 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  if (numTriesSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
+    return 1;
+  }
+  if (seed && !numTriesSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
+
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
@@ -213,7 +235,7 @@ int main(int argc, char *argv[])
       }
       else {
         // Generate the desired number of points randomly
-        std::default_random_engine engine;
+        auto engine = MakeRandomEngine(seed);
         starts = NewRandomStrategyProfiles(game, numTries, engine);
       }
 
@@ -239,7 +261,7 @@ int main(int argc, char *argv[])
       }
       else {
         // Generate the desired number of points randomly
-        std::default_random_engine engine;
+        auto engine = MakeRandomEngine(seed);
         starts = NewRandomBehaviorProfiles(game, numTries, engine);
       }
 

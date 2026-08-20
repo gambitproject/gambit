@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/tableau.h
+// FILE: src/solvers/linalg/tableau.h
 // Interface to tableau class and shared tableau infrastructure
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef TABLEAU_H
-#define TABLEAU_H
+#ifndef GAMBIT_SOLVERS_LINALG_TABLEAU_H
+#define GAMBIT_SOLVERS_LINALG_TABLEAU_H
 
-#include "gambit.h"
+#include <set>
+
+#include "core/core.h"
 #include "ludecomp.h"
 
 namespace Gambit::linalg {
@@ -36,25 +38,20 @@ public:
   ~BFS() = default;
   //@}
 
-  /// Two BFS's are equal if their bases are equal
-  bool operator==(const BFS &M) const
+  /// Returns the set of basic indices (positive for structural variables, negative for
+  /// slacks).
+  std::set<int> Keys() const
   {
-    if (m_map.size() != M.m_map.size()) {
-      return false;
+    std::set<int> keys;
+    for (const auto &[key, value] : m_map) {
+      keys.insert(key);
     }
-
-    for (auto iter = m_map.begin(); iter != m_map.end(); iter++) {
-      if (M.m_map.count((*iter).first) == 0) {
-        return false;
-      }
-    }
-    return true;
+    return keys;
   }
-  bool operator!=(const BFS &M) const { return !(*this == M); }
 
   /// @name Map-like operations
   //@{
-  int count(int key) const { return (m_map.count(key) > 0); }
+  int count(int key) const { return m_map.contains(key); }
 
   void insert(int key, const T &value)
   {
@@ -64,7 +61,7 @@ public:
 
   const T &operator[](int key) const
   {
-    if (m_map.count(key) == 1) {
+    if (m_map.contains(key)) {
       return const_cast<std::map<int, T> &>(m_map)[key];
     }
     else {
@@ -391,4 +388,4 @@ private:
 
 } // end namespace Gambit::linalg
 
-#endif // TABLEAU_H
+#endif // GAMBIT_SOLVERS_LINALG_TABLEAU_H

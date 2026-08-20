@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/logit/nfglogit.cc
+// FILE: src/solvers/logit/nfglogit.cc
 // Computation of quantal response equilibrium correspondence for
 // normal form games.
 //
@@ -23,7 +23,7 @@
 
 #include <cmath>
 
-#include "gambit.h"
+#include "games.h"
 #include "logit.h"
 #include "path.h"
 
@@ -347,11 +347,10 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 
 } // namespace
 
-std::list<LogitQREMixedStrategyProfile>
-LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
-                   Nash::StrategyCallbackType<double> p_onEquilibrium,
-                   LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
+    const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
+    double p_firstStep, double p_maxAccel, Nash::StrategyCallbackType<double> p_onEquilibrium,
+    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent, const CancelToken &p_cancel)
 {
   if (p_start.size() == 0) {
     return {p_start};
@@ -380,7 +379,8 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
       [p_start, p_regret](const Vector<double> &p_point) {
         return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
       },
-      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
+      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
+      NullCriterionFunction, NullCriterionBracketFunction, p_cancel);
   const auto &profiles = callback.GetProfiles();
   p_onEquilibrium(profiles.back().GetProfile());
   return profiles;

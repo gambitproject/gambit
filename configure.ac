@@ -49,13 +49,14 @@ choke me
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_RANLIB
 dnl LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
 
-dnl Check for C++17 support
-AX_CXX_COMPILE_STDCXX(17)
+dnl Require C++20 explicitly.
+AX_CXX_COMPILE_STDCXX(20, [noext], [mandatory])
 
 if test x$with_gui = xtrue; then
   dnl------------------------
@@ -147,6 +148,51 @@ AC_SUBST(REZFLAGS)
 
 GAMBIT_VERSION=`cat build_support/GAMBIT_VERSION`
 AC_SUBST(GAMBIT_VERSION)
+
+dnl WiX requires the Product/@Version attribute to be a purely numeric
+dnl "major.minor.build[.revision]" string, which a SemVer prerelease tag
+dnl (e.g. "17.0.0-alpha.1") is not.  Windows Installer's ProductVersion is
+dnl actually major.minor.build (not major.minor.micro): it only looks at
+dnl the first THREE fields, and silently ignores any fourth, so the build
+dnl field is where prerelease ordering has to live.
+dnl
+dnl This matches the alpha/beta/rc nomenclature used by the rest of the
+dnl release tooling (see "Making a new release" in
+dnl doc/developer.contributing.rst).  The build field is carved into
+dnl bands, each with far more headroom than a release cycle needs:
+dnl   alpha.N -> 0     + N
+dnl   beta.N  -> 10000 + N
+dnl   rc.N    -> 20000 + N
+dnl   (final) -> 60000 + N
+dnl N is the prerelease number (e.g. the "1" in "alpha.1"), with the
+dnl GAMBIT_VERSION patch component folded in as a *100 offset within each
+dnl band -- a no-op today since Gambit's patch component has always been
+dnl 0, but it keeps e.g. a hypothetical "17.0.1-alpha.1" ordered above
+dnl "17.0.0" without revisiting this scheme.
+GAMBIT_MSI_BASE=${GAMBIT_VERSION%%-*}
+GAMBIT_MSI_PRERELEASE=${GAMBIT_VERSION#$GAMBIT_MSI_BASE}
+
+save_IFS=$IFS
+IFS=.
+set -- $GAMBIT_MSI_BASE
+IFS=$save_IFS
+GAMBIT_MSI_MAJOR=$1
+GAMBIT_MSI_MINOR=$2
+GAMBIT_MSI_PATCH=$3
+
+case $GAMBIT_MSI_PRERELEASE in
+  -alpha.*) GAMBIT_MSI_STAGE=0;     GAMBIT_MSI_PRENUM=${GAMBIT_MSI_PRERELEASE#-alpha.} ;;
+  -beta.*)  GAMBIT_MSI_STAGE=10000; GAMBIT_MSI_PRENUM=${GAMBIT_MSI_PRERELEASE#-beta.} ;;
+  -rc.*)    GAMBIT_MSI_STAGE=20000; GAMBIT_MSI_PRENUM=${GAMBIT_MSI_PRERELEASE#-rc.} ;;
+  '')       GAMBIT_MSI_STAGE=60000; GAMBIT_MSI_PRENUM=0 ;;
+  *)        GAMBIT_MSI_STAGE=0;     GAMBIT_MSI_PRENUM=0 ;;
+esac
+test "$GAMBIT_MSI_STAGE" -lt 60000 && test "$GAMBIT_MSI_PRENUM" -gt 99 && GAMBIT_MSI_PRENUM=99
+
+GAMBIT_MSI_BUILD=`expr $GAMBIT_MSI_STAGE + $GAMBIT_MSI_PATCH \* 100 + $GAMBIT_MSI_PRENUM`
+GAMBIT_MSI_VERSION="$GAMBIT_MSI_MAJOR.$GAMBIT_MSI_MINOR.$GAMBIT_MSI_BUILD"
+AC_SUBST(GAMBIT_MSI_VERSION)
+AC_SUBST(GAMBIT_MSI_MAJOR)
 
 AC_CONFIG_FILES([Makefile build_support/osx/Info.plist build_support/msw/gambit.wxs])
 AC_OUTPUT

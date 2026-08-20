@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/logit/logit.h"
 
 using namespace Gambit;
@@ -45,6 +45,7 @@ void PrintHelp(char *progname)
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
+  std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -s STEP          initial stepsize (default is .03)\n";
   std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
@@ -57,7 +58,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -e               print only the terminal equilibrium\n";
   std::cerr << "                   (default is to print the entire branch)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 //
@@ -66,14 +67,16 @@ void PrintHelp(char *progname)
 bool ReadProfile(std::istream &p_stream, MixedStrategyProfile<double> &p_profile)
 {
   for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    if (p_stream.eof() || p_stream.bad()) {
+    p_stream >> p_profile[i];
+    if (!p_stream) {
       return false;
     }
-
-    p_stream >> p_profile[i];
     if (i < p_profile.MixedProfileLength()) {
       char comma;
       p_stream >> comma;
+      if (!p_stream) {
+        return false;
+      }
     }
   }
   // Read in the rest of the line and discard
@@ -122,12 +125,11 @@ int main(int argc, char *argv[])
   option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:s:a:m:vqehSL:p:l:", long_options, &long_opt_index)) !=
-         -1) {
+  while ((c = getopt_long(argc, argv, "d:s:a:m:vqehSL:l:", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'q':
       quiet = true;
       break;
@@ -198,7 +200,9 @@ int main(int argc, char *argv[])
     if (!mleFile.empty() && (!game->IsTree() || useStrategic)) {
       MixedStrategyProfile<double> frequencies(game->NewMixedStrategyProfile(0.0));
       std::ifstream mleData(mleFile.c_str());
-      ReadProfile(mleData, frequencies);
+      if (!ReadProfile(mleData, frequencies)) {
+        throw std::runtime_error("Error reading strategy frequencies from '" + mleFile + "'.");
+      }
 
       auto printer = [fullGraph,
                       decimals](const LogitEvent<LogitQREMixedStrategyProfile> &p_event) {

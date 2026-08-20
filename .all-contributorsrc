@@ -7,6 +7,43 @@
   "commitType": "docs",
   "commitConvention": "angular",
   "contributorsPerLine": 7,
+  "types": {
+    "research": {
+      "symbol": "🔬",
+      "description": "Research",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "maintenance": {
+      "symbol": "🚧",
+      "description": "Maintenance",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "ideas": {
+      "symbol": "🤔",
+      "description": "Ideas, Planning, & Feedback",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "tutorial": {
+      "symbol": "✅",
+      "description": "Tutorials",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "infra": {
+      "symbol": "🚇",
+      "description": "Infrastructure (Hosting, Build-Tools, etc)",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "question": {
+      "symbol": "💬",
+      "description": "Answering Questions",
+      "link": "https://github.com/<%= contributor.login %>"
+    },
+    "userTesting": {
+      "symbol": "📓",
+      "description": "User Testing",
+      "link": "https://github.com/<%= contributor.login %>"
+    }
+  },
   "contributors": [
     {
       "login": "tturocy",
@@ -42,7 +79,8 @@
       "contributions": [
         "code",
         "doc",
-        "tutorial"
+        "tutorial",
+        "infra"
       ]
     },
     {
@@ -83,6 +121,53 @@
         "code",
         "research"
       ]
+    },
+    {
+      "login": "albertjiang",
+      "name": "Albert Xin Jiang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1160227?v=4",
+      "profile": "https://github.com/albertjiang",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "skunath",
+      "name": "S Kunath",
+      "avatar_url": "https://avatars.githubusercontent.com/u/144108?v=4",
+      "profile": "https://github.com/skunath",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "andrioni",
+      "name": "Alessandro Andrioni",
+      "avatar_url": "https://avatars.githubusercontent.com/u/159177?v=4",
+      "profile": "https://github.com/andrioni",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "EwoutH",
+      "name": "Ewout ter Hoeven",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15776622?v=4",
+      "profile": "https://github.com/EwoutH",
+      "contributions": [
+        "infra",
+        "code"
+      ]
+    },
+    {
+      "login": "ameliekleber",
+      "name": "ameliekleber",
+      "avatar_url": "https://avatars.githubusercontent.com/u/83069628?v=4",
+      "profile": "https://github.com/ameliekleber",
+      "contributions": [
+        "test"
+      ]
     }
-  ]
+  ],
+  "repoType": "github"
 }

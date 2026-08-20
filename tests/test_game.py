@@ -105,8 +105,8 @@ def test_game_get_outcome_by_index():
 def test_game_get_outcome_by_label():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    next(iter(pl1.strategies)).label = "defect"
-    next(iter(pl2.strategies)).label = "cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
     assert game["defect", "cooperate"] == next(iter(game.outcomes))
 
 
@@ -137,8 +137,8 @@ def test_game_get_outcome_index_out_of_range():
 def test_game_get_outcome_unmatched_label():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    next(iter(pl1.strategies)).label = "defect"
-    next(iter(pl2.strategies)).label = "cooperate"
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
     with pytest.raises(IndexError):
         _ = game["defect", "defect"]
 
@@ -210,8 +210,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    action_to_delete = game.root.infoset.actions["U1"]
-    game.delete_action(action_to_delete)
+    game.set_move_actions(game.root.infoset, ["D1"], drop=True)
     strategy1, strategy2, *_ = game.strategies
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -250,8 +249,7 @@ def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    action_to_delete = game.root.infoset.actions["U1"]
-    game.delete_action(action_to_delete)
+    game.set_move_actions(game.root.infoset, ["D1"], drop=True)
     action = next(iter(game.actions))
     infoset = next(iter(game.infosets))
     infoset_action = next(iter(infoset.actions))

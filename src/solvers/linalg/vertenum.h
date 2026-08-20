@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/vertenum.h
+// FILE: src/solvers/linalg/vertenum.h
 // Interface to vertex enumerator
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LINALG_VERTENUM_H
-#define GAMBIT_LINALG_VERTENUM_H
+#ifndef GAMBIT_SOLVERS_LINALG_VERTENUM_H
+#define GAMBIT_SOLVERS_LINALG_VERTENUM_H
 
-#include "gambit.h"
+#include <list>
+
+#include "core/cancel.h"
+#include "core/core.h"
 #include "lptab.h"
 
 namespace Gambit::linalg {
@@ -51,13 +54,15 @@ private:
   Vector<T> btemp;
   Array<BFS<T>> m_list, m_duallist;
   Array<long> visits, branches;
+  CancelToken m_cancel;
 
   void Deeper();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 
 public:
-  VertexEnumerator(const Matrix<T> &, const Vector<T> &);
+  VertexEnumerator(const Matrix<T> &, const Vector<T> &,
+                   const CancelToken &p_cancel = CancelToken());
   // explicit VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() = default;
 
@@ -68,4 +73,4 @@ public:
 
 } // namespace Gambit::linalg
 
-#endif // GAMBIT_LINALG_VERTENUM_H
+#endif // GAMBIT_SOLVERS_LINALG_VERTENUM_H

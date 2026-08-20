@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametable.cc
+// FILE: src/games/gametable.cc
 // Implementation of strategic game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include "gambit.h"
+#include "games.h"
 #include "gametable.h"
 #include "writer.h"
 
@@ -191,8 +191,6 @@ public:
     }
 
     bool operator==(const iterator &other) const { return m_done == other.m_done; }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
     void recompute_from(size_t j0)
@@ -499,11 +497,13 @@ GamePlayer GameTableRep::NewPlayer(const std::string &p_label)
 {
   CheckPlayerLabel(p_label);
   auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label, 1);
+  player->m_strategies.front()->m_label = "1";
   IncrementVersion();
   m_players.push_back(player);
   for (const auto &outcome : m_outcomes) {
     outcome->m_payoffs[player.get()] = Number();
   }
+  IndexStrategies();
   return player;
 }
 
@@ -528,43 +528,106 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 //                        GameTableRep: Strategies
 //------------------------------------------------------------------------
 
-GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
+                                     const std::map<std::string, std::string> &p_labels)
 {
   if (p_player->GetGame().get() != this) {
     throw MismatchException();
   }
-  p_player->CheckStrategyLabel(p_label);
-  auto strategy = std::make_shared<GameStrategyRep>(p_player.get(),
-                                                    p_player->m_strategies.size() + 1, p_label);
-  IncrementVersion();
+  std::map<GameStrategyRep *, std::string> assignment;
+  std::set<const GameStrategyRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GameStrategyRep *match = nullptr;
+    for (const auto &strategy : p_player->m_strategies) {
+      if (strategy->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Strategy label '" + old_label + "' is ambiguous for this player");
+        }
+        match = strategy.get();
+      }
+    }
+    if (!match) {
+      throw ValueException("No strategy with label '" + old_label + "' for this player");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  std::set<std::string> targets;
+  for (const auto &[strategy, new_label] : assignment) {
+    p_player->CheckStrategyLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Strategy label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[strategy, new_label] : assignment) {
+    strategy->m_label = new_label;
+  }
+}
+
+void GameTableRep::SetStrategies(const GamePlayer &p_player,
+                                 const std::vector<std::string> &p_labels)
+{
+  if (p_player->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  if (p_labels.empty()) {
+    throw ValueException("At least one strategy must be specified");
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (label.empty()) {
+      throw ValueException("Strategy label must not be empty");
+    }
+    CheckLabel(label);
+    if (!declared.insert(label).second) {
+      throw ValueException("Strategy label '" + label + "' appears more than once");
+    }
+  }
+  // Match declared labels against current strategies.
+  std::map<std::string, long> current;
+  for (const auto &strategy : p_player->m_strategies) {
+    if (!current.emplace(strategy->GetLabel(), strategy->GetNumber() - 1).second) {
+      throw ValueException("Strategy label '" + strategy->GetLabel() +
+                           "' is ambiguous for this player");
+    }
+  }
+  std::vector<long> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+  std::vector<long> old_to_new(p_player->m_strategies.size(), -1);
+  for (size_t i = 0; i < source.size(); ++i) {
+    if (source[i] >= 0) {
+      old_to_new[source[i]] = static_cast<long>(i);
+    }
+  }
   std::vector<long> old_radices;
   for (const auto &player : m_players) {
     old_radices.push_back(player->m_strategies.size());
   }
-  p_player->m_strategies.push_back(strategy);
-  RebuildTable(old_radices);
-  return p_player->m_strategies.back();
-}
-
-void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
-{
-  const auto player = p_strategy->GetPlayer().get();
-  if (player->m_game != this) {
-    throw MismatchException();
-  }
-  if (player->GetStrategies().size() == 1) {
-    return;
-  }
 
   IncrementVersion();
-  player->m_strategies.erase(std::find(player->m_strategies.begin(), player->m_strategies.end(),
-                                       std::shared_ptr<GameStrategyRep>(p_strategy)));
-  std::for_each(
-      player->m_strategies.begin(), player->m_strategies.end(),
-      [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable { s->m_number = st++; });
-  // Note that we do not reindex strategies, and so we do not need to re-build the
-  // table of outcomes.
-  p_strategy->Invalidate();
+  std::vector<std::shared_ptr<GameStrategyRep>> newStrategies;
+  newStrategies.reserve(p_labels.size());
+  for (size_t i = 0; i < p_labels.size(); ++i) {
+    if (source[i] >= 0) {
+      newStrategies.push_back(p_player->m_strategies[source[i]]);
+    }
+    else {
+      newStrategies.push_back(
+          std::make_shared<GameStrategyRep>(p_player.get(), static_cast<int>(i) + 1, p_labels[i]));
+    }
+  }
+  for (const auto &strategy : p_player->m_strategies) {
+    if (declared.count(strategy->GetLabel()) == 0) {
+      strategy->Invalidate();
+    }
+  }
+  p_player->m_strategies = std::move(newStrategies);
+  RebuildTable(old_radices, p_player->GetNumber() - 1, old_to_new);
 }
 
 //------------------------------------------------------------------------
@@ -600,9 +663,10 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 //------------------------------------------------------------------------
 
 /// This rebuilds a new table of outcomes after the game has been
-/// redimensioned (change in the number of strategies).  Strategies
-/// numbered -1 are identified as the new strategies.
-void GameTableRep::RebuildTable(const std::vector<long> &old_radices)
+/// redimensioned (change in the number of strategies).  See the declaration
+/// in gametable.h for the meaning of p_player/p_oldToNew.
+void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_player,
+                                const std::vector<long> &p_oldToNew)
 {
   std::vector<long> old_strides(old_radices.size());
   long stride = 1;
@@ -625,11 +689,22 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices)
       continue;
     }
     long new_index = 0;
+    bool dropped = false;
     for (size_t i = 0; i < m_players.size(); ++i) {
-      const long digit = (old_index / old_strides[i]) % old_radices[i];
+      long digit = (old_index / old_strides[i]) % old_radices[i];
+      if (static_cast<long>(i) == p_player) {
+        digit = p_oldToNew[digit];
+        if (digit < 0) {
+          // This contingency used a strategy that was removed.
+          dropped = true;
+          break;
+        }
+      }
       new_index += digit * new_strides[i];
     }
-    newResults[new_index] = m_results[old_index];
+    if (!dropped) {
+      newResults[new_index] = m_results[old_index];
+    }
   }
   m_results.swap(newResults);
   IndexStrategies();

@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef RECTANGLE_H
-#define RECTANGLE_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H
+#define GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H
 
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit {
 
@@ -45,10 +45,6 @@ public:
   bool operator==(const Interval<T> &p_rhs) const
   {
     return lower_bd == p_rhs.lower_bd && upper_bd == p_rhs.upper_bd;
-  }
-  bool operator!=(const Interval<T> &p_rhs) const
-  {
-    return lower_bd != p_rhs.lower_bd || upper_bd != p_rhs.upper_bd;
   }
 
   const T &LowerBound() const { return lower_bd; }
@@ -120,7 +116,6 @@ public:
       {
         return (m_orthants == it.m_orthants) && (m_index == it.m_index);
       }
-      bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
     Orthants(const Rectangle<T> &p_rect) : m_rect(p_rect) {}
@@ -140,7 +135,6 @@ public:
 
   Rectangle<T> &operator=(const Rectangle<T> &) = delete;
   bool operator==(const Rectangle<T> &y) const { return sides == y.sides; }
-  bool operator!=(const Rectangle<T> &y) const { return sides != y.sides; }
 
   int Dmnsn() const { return sides.size(); }
   Orthants Orthants() const { return {*this}; }
@@ -184,4 +178,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // RECTANGLE_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_RECTANGLE_H

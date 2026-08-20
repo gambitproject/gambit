@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/behavspt.h
+// FILE: src/games/behavspt.h
 // Interface to supports for extensive forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_BEHAVSPT_H
-#define LIBGAMBIT_BEHAVSPT_H
+#ifndef GAMBIT_GAMES_BEHAVSPT_H
+#define GAMBIT_GAMES_BEHAVSPT_H
 
 #include <list>
 #include <map>
@@ -97,10 +97,6 @@ public:
   {
     return m_actions == p_support.m_actions;
   }
-  bool operator!=(const BehaviorSupportProfile &p_support) const
-  {
-    return m_actions != p_support.m_actions;
-  }
 
   /// @name General information
   //@{
@@ -160,12 +156,20 @@ public:
 
   public:
     class iterator {
+      // Sequences are visited grouped by player, in the game's canonical player order
+      // (GameRep::Players), rather than in SequenceMap's own key order.  SequenceMap is
+      // keyed by GamePlayer, whose ordering is based on object addresses; iterating the
+      // map directly would therefore make the visitation order (and hence, downstream,
+      // any polynomial variable numbering derived from it) depend on heap layout, which
+      // can differ from run to run.
       const std::shared_ptr<SequenceMap> m_sequences;
-      SequenceMap::const_iterator m_currentPlayer;
+      GameRep::Players m_players;
+      GameRep::Players::iterator m_currentPlayer;
       std::vector<GameSequence>::const_iterator m_currentSequence;
 
     public:
-      iterator(const std::shared_ptr<SequenceMap> p_sequences, bool p_end);
+      iterator(const std::shared_ptr<SequenceMap> p_sequences, const GameRep::Players &p_players,
+               bool p_end);
 
       GameSequence operator*() const { return *m_currentSequence; }
       GameSequence operator->() const { return *m_currentSequence; }
@@ -173,7 +177,6 @@ public:
       iterator &operator++();
 
       bool operator==(const iterator &it) const;
-      bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
     Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
@@ -215,4 +218,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_BEHAVSPT_H
+#endif // GAMBIT_GAMES_BEHAVSPT_H

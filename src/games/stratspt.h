@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/stratspt.h
+// FILE: src/games/stratspt.h
 // Interface to strategy classes for normal forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_STRATSPT_H
-#define LIBGAMBIT_STRATSPT_H
+#ifndef GAMBIT_GAMES_STRATSPT_H
+#define GAMBIT_GAMES_STRATSPT_H
 
-#include "gambit.h"
+#include <map>
+
+#include "game.h"
 
 namespace Gambit {
 
@@ -81,12 +83,6 @@ public:
   {
     return m_game == p_support.m_game &&
            m_strategyDigits.m_allowedDigits == p_support.m_strategyDigits.m_allowedDigits;
-  }
-  /// Test for the inequality of two supports
-  bool operator!=(const StrategySupportProfile &p_support) const
-  {
-    return m_game != p_support.m_game ||
-           m_strategyDigits.m_allowedDigits != p_support.m_strategyDigits.m_allowedDigits;
   }
   //@}
 
@@ -178,4 +174,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_STRATSPT_H
+#endif // GAMBIT_GAMES_STRATSPT_H

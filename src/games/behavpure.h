@@ -62,6 +62,13 @@ public:
   /// Get the payoff to the player, conditional on reaching a node
   template <class T> T GetPayoff(const GameNode &, const GamePlayer &) const;
 
+  /// Get the outcome that results from the profile, provided this can be
+  /// determined without resolving a chance move and without combining more
+  /// than one outcome along the induced path; throws UndefinedException otherwise.
+  GameOutcome GetOutcome() const { return GetOutcome(m_efg->GetRoot()); }
+  /// Get the outcome that results from the profile, conditional on reaching a node
+  GameOutcome GetOutcome(const GameNode &) const;
+
   /// Convert to a mixed behavior representation
   MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;
   //@}
@@ -114,7 +121,6 @@ public:
       }
       return (m_profile == p_other.m_profile);
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
 
     PureBehaviorProfile &operator*() { return m_profile; }
     const PureBehaviorProfile &operator*() const { return m_profile; }

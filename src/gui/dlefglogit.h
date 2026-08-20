@@ -23,34 +23,32 @@
 #ifndef GAMBIT_GUI_DLEFGLOGIT_H
 #define GAMBIT_GUI_DLEFGLOGIT_H
 
-#include <wx/process.h>
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
-class LogitBehavList;
+class LogitBehavGrid;
+class LogitBehavThreadRunner;
 
 class LogitBehavDialog final : public wxDialog {
-  GameDocument *m_doc;
-  int m_pid{0};
-  wxProcess *m_process;
-  LogitBehavList *m_behavList;
+  std::shared_ptr<GameDocument> m_doc;
+  std::unique_ptr<LogitBehavThreadRunner> m_runner;
+  LogitBehavGrid *m_behavList;
   wxStaticText *m_statusText;
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
-  wxTimer m_timer;
   wxString m_output;
+  bool m_stopRequested{false};
 
   void OnStop(wxCommandEvent &);
-  void OnTimer(wxTimerEvent &);
-  void OnIdle(wxIdleEvent &);
-  void OnEndProcess(wxProcessEvent &);
+  void OnClose(wxCloseEvent &);
+  void OnRunnerPoint(wxThreadEvent &);
+  void OnRunnerFinished(wxThreadEvent &);
   void OnSave(wxCommandEvent &);
 
   void Start();
 
 public:
-  LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc);
-
-  DECLARE_EVENT_TABLE()
+  LogitBehavDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
+  ~LogitBehavDialog() override;
 };
 
 } // namespace Gambit::GUI

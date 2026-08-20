@@ -24,7 +24,7 @@
 #include <fstream>
 #include <getopt.h>
 
-#include "gambit.h"
+#include "games.h"
 #include "games/writer.h"
 
 using namespace Gambit;
@@ -51,11 +51,12 @@ void PrintHelp(char *progname)
   std::cerr << "  -r PLAYER        the player to show on rows (default is 1)\n";
   std::cerr << "  -h               print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
 {
+  opterr = 0;
   int c;
   int rowPlayer = 1, colPlayer = 2;
   bool quiet = false;

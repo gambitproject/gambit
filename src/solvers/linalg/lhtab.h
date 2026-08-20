@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lhtab.h
+// FILE: src/solvers/linalg/lhtab.h
 // Tableau class for Lemke-Howson algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LINALG_LHTAB_H
-#define GAMBIT_LINALG_LHTAB_H
+#ifndef GAMBIT_SOLVERS_LINALG_LHTAB_H
+#define GAMBIT_SOLVERS_LINALG_LHTAB_H
 
+#include "core/cancel.h"
 #include "lemketab.h"
 
 namespace Gambit::linalg {
@@ -80,7 +81,7 @@ public:
   int ExitIndex(int i);
 
   /// Follow a path of ACBFS's from one CBFS to another
-  int LemkePath(int dup);
+  int LemkePath(int dup, const CancelToken &p_cancel = CancelToken());
   //@}
 
 private:
@@ -91,4 +92,4 @@ private:
 
 } // end namespace Gambit::linalg
 
-#endif // GAMBIT_LINALG_LHTAB_H
+#endif // GAMBIT_SOLVERS_LINALG_LHTAB_H

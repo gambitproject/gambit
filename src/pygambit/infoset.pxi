@@ -126,7 +126,13 @@ class InfosetActions:
 
 @cython.cclass
 class Infoset:
-    """An information set in a ``Game``."""
+    """An information set in a ``Game``.
+
+    An information set belonging to a personal player is a decision: the point at
+    which that player chooses an action, and so the object of potential optimisation.
+    An information set belonging to the chance player is instead called an event: its
+    probability distribution over actions is exogenously specified, not chosen.
+    """
     infoset = cython.declare(c_GameInfoset)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -187,7 +193,9 @@ class Infoset:
 
     @property
     def is_chance(self) -> bool:
-        """Whether the information set belongs to the chance player."""
+        """Whether the information set belongs to the chance player, i.e. is an event
+        rather than a decision.
+        """
         return self.infoset.deref().IsChanceInfoset()
 
     @property

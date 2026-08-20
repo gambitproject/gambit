@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: library/include/gambit/gtracer/aggame.h
+// FILE: src/solvers/gtracer/aggame.h
 // Interface to GNM-specific routines for action graph games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_AGGAME_H
-#define GAMBIT_GTRACER_AGGAME_H
+#ifndef GAMBIT_SOLVERS_GTRACER_AGGAME_H
+#define GAMBIT_SOLVERS_GTRACER_AGGAME_H
 
 #include "cmatrix.h"
 #include "gnmgame.h"
 #include "games/agg/agg.h"
-#include "gambit.h"
 #include "games/gameagg.h"
 
 namespace Gambit::gametracer {
@@ -35,7 +34,7 @@ namespace Gambit::gametracer {
 class aggame : public gnmgame {
 public:
   explicit aggame(const Gambit::GameAGGRep &g)
-    : gnmgame(g.GetUnderlyingAGG()->actions), aggPtr(g.GetUnderlyingAGG())
+    : gnmgame(g.GetUnderlyingAGG()->getActionCounts()), aggPtr(g.GetUnderlyingAGG())
   {
   }
 
@@ -44,14 +43,14 @@ public:
 
   double getMixedPayoff(int player, const cvector &s) const override
   {
-    std::vector<double> sp(s.values(), s.values() + s.getm());
-    return (double)aggPtr->getMixedPayoff(player, sp);
+    const std::vector<double> sp(s.values(), s.values() + s.getm());
+    return aggPtr->getMixedPayoff(player, sp);
   }
 
   double getKSymMixedPayoff(int cls, cvector &s)
   {
     std::vector<double> sp(s.values(), s.values() + s.getm());
-    return (double)aggPtr->getKSymMixedPayoff(cls, sp);
+    return aggPtr->getKSymMixedPayoff(cls, sp);
   }
 
   void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
@@ -73,7 +72,7 @@ public:
   }
   double getPurePayoff(int player, const std::vector<int> &s) const override
   {
-    return aggPtr->getPurePayoff(player, s);
+    return aggPtr->getPurePayoff<double>(player, s);
   }
 
   void setPurePayoff(int player, const std::vector<int> &s, double value) override
@@ -89,21 +88,8 @@ public:
 
 private:
   std::shared_ptr<Gambit::agg::AGG> aggPtr;
-
-  // helper functions for computing jacobian
-  void computePartialP_PureNode(int player, int act, std::vector<int> &tasks) const;
-  void computePartialP_bisect(int player, int act, std::vector<int>::iterator f,
-                              std::vector<int>::iterator l, Gambit::agg::aggdistrib &temp) const;
-  void computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                     Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache) const;
-  void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
-                  Gambit::agg::AggNumber result,
-                  Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache,
-                  bool partial = false) const;
-  void computeUndisturbedPayoff(Gambit::agg::AggNumber &undisturbedPayoff, bool &has, int player1,
-                                int act1, int player2) const;
 };
 
 } // end namespace Gambit::gametracer
 
-#endif // GAMBIT_GTRACER_AGGAME_H
+#endif // GAMBIT_SOLVERS_GTRACER_AGGAME_H

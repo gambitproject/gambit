@@ -81,6 +81,17 @@ Subsequent analysis of unreached information sets can yield alternative
 profiles that specify different choices at unreached information sets
 while still satisfying the Nash equilibrium conditions.
 
+The subdivision process for a given support is guaranteed to terminate, because
+subdivision stops once a cell shrinks below a minimum size.  However, this bound
+is on the *depth* of subdivision, not on the *number* of cells examined to reach
+that depth.  As protection against pathological cases, the number of cells
+examined per support is capped (via ``max_rectangles`` in
+:py:func:`pygambit.nash.enumpoly_solve`, or :option:`gambit-enumpoly -r` for
+:program:`gambit-enumpoly`); if this limit is reached before the search of a
+support is complete, that support may be reported with incomplete equilibria,
+and (in verbose mode) is identified with the label "budget-exceeded" -- see
+:ref:`gambit-enumpoly <gambit-enumpoly>` for details.
+
 .. _lp:
 
 lp

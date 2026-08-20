@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef INDEXPRODUCT_H
-#define INDEXPRODUCT_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_INDEXPRODUCT_H
+#define GAMBIT_SOLVERS_ENUMPOLY_INDEXPRODUCT_H
 
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit {
 
@@ -56,7 +56,6 @@ public:
       }
       return m_end || m_current == p_other.m_current;
     }
-    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     iterator &operator++()
     {
       auto [cur, up] = std::mismatch(m_current.begin(), m_current.end(), m_set->m_upper.begin());
@@ -86,4 +85,4 @@ public:
 
 } // namespace Gambit
 
-#endif // INDEXPRODUCT_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_INDEXPRODUCT_H

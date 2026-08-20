@@ -24,6 +24,12 @@ See the :ref:`algorithm description <liap>` for full details.
    agent Nash equilibria.  The default is now to compute using the strategic
    form even for extensive games.
 
+.. versionchanged:: 16.7.0
+
+   The `-S` switch has been removed.  Since the introduction of `-A` in
+   16.5.0, the default (without `-A`) was already to compute using the
+   strategic form for extensive games, making `-S` redundant.
+
 
 .. program:: gambit-liap
 
@@ -44,6 +50,14 @@ See the :ref:`algorithm description <liap>` for full details.
 .. cmdoption:: -n
 
    Specify the number of starting points to randomly generate.
+   Mutually exclusive with :option:`-s`.
+
+.. cmdoption:: -R
+
+   Seeds the random number generator used to generate starting points
+   with the specified value, so that the sequence of points generated
+   by :option:`-n` can be reproduced across runs.  If not specified,
+   the generator is seeded from system entropy.  Requires :option:`-n`.
 
 .. cmdoption:: -i
 
@@ -72,13 +86,7 @@ See the :ref:`algorithm description <liap>` for full details.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
-
-.. cmdoption:: -S
-
-   By default, the program uses behavior strategies for extensive
-   games; this switch instructs the program to use reduced strategic game
-   strategies for extensive games. (This has no effect for strategic
-   games, since a strategic game is its own reduced strategic game.)
+   Mutually exclusive with :option:`-n`.
 
 .. cmdoption:: -v
 
@@ -89,7 +97,7 @@ See the :ref:`algorithm description <liap>` for full details.
 
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-liap -S catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-liap catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by minimizing the Lyapunov function
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

@@ -24,15 +24,16 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/thread.h>
 #include <wx/txtstrm.h>
 #include <wx/process.h>
 #include <wx/tokenzr.h>
 #include <cstring>
 #include <optional>
 #include <variant>
-#include "wx/sheet/sheet.h"
 
 #include "gamedoc.h"
+#include "nashspec.h"
 
 #include "efgprofile.h"
 #include "nfgprofile.h"
@@ -49,9 +50,6 @@ wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
-
-using ComputedProfile = std::variant<MixedStrategyProfile<double>, MixedStrategyProfile<Rational>,
-                                     MixedBehaviorProfile<double>, MixedBehaviorProfile<Rational>>;
 
 template <class T>
 void AddProfile(AnalysisOutput &p_output, const MixedStrategyProfile<T> &p_profile)
@@ -252,9 +250,61 @@ public:
   }
 };
 
+//
+// Runs a solver directly, in-process, on a worker thread, rather than
+// shelling out to a gambit-<method> executable. Knows nothing about any
+// particular method -- it just calls whatever SolverFunction it was given
+// (see NashComputationSpec::MakeSolver()), which is where the knowledge of
+// which methods are instrumented, and how to call each one, actually lives.
+class SolverThreadRunner final : public wxThread {
+  wxEvtHandler *m_parent;
+  Game m_game;
+  SolverFunction m_solver;
+  CancelToken m_cancel;
+
+  void PostProfile(const ComputedProfile &p_profile) const
+  {
+    auto *event = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_PROFILE);
+    event->SetPayload(p_profile);
+    wxQueueEvent(m_parent, event);
+  }
+
+  ExitCode Entry() override
+  {
+    int exitCode = 0;
+    try {
+      m_solver(
+          m_game, [this](const ComputedProfile &p) { PostProfile(p); }, m_cancel);
+    }
+    catch (const ComputationCanceledException &) {
+      // Not an error -- NashMonitorDialog's m_stopRequested flag (already
+      // set before RequestCancel() was called) is what determines that the
+      // "finished" event below is reported as a stop rather than a failure.
+    }
+    catch (const std::exception &) {
+      exitCode = 1;
+    }
+
+    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
+    evt->SetInt(exitCode);
+    wxQueueEvent(m_parent, evt);
+    return static_cast<wxThread::ExitCode>(0);
+  }
+
+public:
+  SolverThreadRunner(wxEvtHandler *p_parent, Game p_game, SolverFunction p_solver)
+    : wxThread(wxTHREAD_JOINABLE), m_parent(p_parent), m_game(std::move(p_game)),
+      m_solver(std::move(p_solver))
+  {
+  }
+
+  void RequestCancel() { m_cancel.RequestCancel(); }
+};
+
 class NashMonitorDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   std::unique_ptr<class ExternalProcessRunner> m_runner;
+  std::unique_ptr<class SolverThreadRunner> m_threadRunner;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
@@ -304,11 +354,12 @@ class NashMonitorDialog final : public wxDialog {
   }
 
 public:
-  NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+  NashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                     const std::shared_ptr<AnalysisOutput> &p_command);
 };
 
-NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
+                                     const std::shared_ptr<GameDocument> &p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_output(p_command)
@@ -365,6 +416,38 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
 
   m_doc->DoAddEquilibriumOutput(p_command);
 
+  const auto &spec = p_command->GetComputationSpec();
+  if (auto solver = spec ? spec->MakeSolver() : std::nullopt) {
+    // Force whichever of the game's lazily-built caches this computation
+    // will need to be built on this (the main) thread before handing the
+    // game to the worker thread -- GameRep's lazy caches are not
+    // synchronized against concurrent first touch from two threads. Only
+    // warm what's actually needed for the representation in play: forcing
+    // GetStrategies()'s reduced-strategy derivation for a behavior-form
+    // solve would needlessly do (potentially expensive) extra work on the
+    // main thread that the computation itself never uses.
+    if (spec->representation == NashRepresentation::Behavior) {
+      // EnsureInfosetOrdering() itself is protected; constructing a
+      // profile forces it via the same public code path the worker's own
+      // starting profile will use.
+      MixedBehaviorProfile<double> warmup(m_doc->GetGame());
+      m_doc->GetGame()->EnsureSequences();
+    }
+    else {
+      m_doc->GetGame()->GetStrategies();
+    }
+
+    m_threadRunner =
+        std::make_unique<SolverThreadRunner>(this, m_doc->GetGame(), std::move(*solver));
+    if (m_threadRunner->Run() != wxTHREAD_NO_ERROR) {
+      m_threadRunner.reset();
+      SetStatusFinishedAbnormally("Failed to launch solver thread.");
+      return;
+    }
+    SetStatusRunning();
+    return;
+  }
+
   std::ostringstream s;
   if (p_command->IsBehavior()) {
     m_doc->GetGame()->Write(s, "efg");
@@ -405,6 +488,14 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
 {
   m_stopButton->Enable(false);
 
+  if (m_threadRunner) {
+    // Joinable thread: must be waited on before it can be safely destroyed.
+    // Entry() has already posted this event and is returning, so this
+    // should not block for any appreciable time.
+    m_threadRunner->Wait();
+    m_threadRunner.reset();
+  }
+
   if (m_stopRequested) {
     SetStatusStopped();
   }
@@ -421,19 +512,29 @@ void NashMonitorDialog::OnStop(wxCommandEvent &)
 {
   m_stopRequested = true;
   SetStatusStopping();
-  m_runner->Stop();
+  if (m_threadRunner) {
+    m_threadRunner->RequestCancel();
+  }
+  else {
+    m_runner->Stop();
+  }
 }
 
 void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
 {
-  if (!m_runner || !m_stopButton->IsEnabled()) {
+  if ((!m_runner && !m_threadRunner) || !m_stopButton->IsEnabled()) {
     p_event.Skip();
     return;
   }
 
   m_stopRequested = true;
   SetStatusStopping();
-  m_runner->Stop();
+  if (m_threadRunner) {
+    m_threadRunner->RequestCancel();
+  }
+  else {
+    m_runner->Stop();
+  }
 
   if (p_event.CanVeto()) {
     p_event.Veto();
@@ -447,7 +548,7 @@ void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
 
 namespace Gambit::GUI {
 
-void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                            const std::shared_ptr<AnalysisOutput> &p_command)
 {
   NashMonitorDialog dialog(p_parent, p_doc, p_command);

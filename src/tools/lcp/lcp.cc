@@ -24,7 +24,7 @@
 #include <fstream>
 #include <memory>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/lcp/lcp.h"
 
@@ -43,25 +43,30 @@ void PrintHelp(char *progname)
   PrintBanner(std::cerr);
   std::cerr << "Usage: " << progname << " [OPTIONS] [file]\n";
   std::cerr << "If file is not specified, attempts to read game from standard input.\n";
-  std::cerr << "With no options, reports all Nash equilibria found.\n\n";
+  std::cerr << "For an extensive game, computes one equilibrium via the sequence form.\n";
+  std::cerr << "For a strategic game (or with -S), with no options, reports all\n";
+  std::cerr << "accessible Nash equilibria.\n\n";
 
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
-  std::cerr << "                   (default is to find all accessible equilbria)\n";
+  std::cerr << "                   (strategic games only; default is to find all\n";
+  std::cerr << "                   accessible equilibria)\n";
   std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
-  std::cerr << "                   (only if number of equilibria sought is not 1)\n";
+  std::cerr << "                   (strategic games only; only if number of\n";
+  std::cerr << "                   equilibria sought is not 1)\n";
   std::cerr << "  -D               print detailed information about equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
-  exit(1);
+  exit(0);
 }
 
 int main(int argc, char *argv[])
 {
+  opterr = 0;
   int c;
   bool useFloat = false, useStrategic = false, quiet = false;
   bool printDetail = false;
@@ -74,7 +79,7 @@ int main(int argc, char *argv[])
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);

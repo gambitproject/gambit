@@ -23,37 +23,35 @@
 #ifndef GAMBIT_GUI_DLNFGLOGIT_H
 #define GAMBIT_GUI_DLNFGLOGIT_H
 
-#include <wx/process.h>
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
-class LogitMixedList;
+class LogitMixedGrid;
+class LogitMixedThreadRunner;
 
 class LogitMixedDialog final : public wxDialog {
-  GameDocument *m_doc;
-  int m_pid{0};
-  wxProcess *m_process;
-  LogitMixedList *m_mixedList;
+  std::shared_ptr<GameDocument> m_doc;
+  std::unique_ptr<LogitMixedThreadRunner> m_runner;
+  LogitMixedGrid *m_mixedList;
   wxStaticText *m_statusText;
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
-  wxTimer m_timer;
   wxString m_output;
+  bool m_stopRequested{false};
 
   void OnStop(wxCommandEvent &);
-  void OnTimer(wxTimerEvent &);
-  void OnIdle(wxIdleEvent &);
-  void OnEndProcess(wxProcessEvent &);
+  void OnClose(wxCloseEvent &);
+  void OnRunnerPoint(wxThreadEvent &);
+  void OnRunnerFinished(wxThreadEvent &);
   void OnSave(wxCommandEvent &);
 
   void Start();
 
 public:
-  LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc);
-
-  DECLARE_EVENT_TABLE()
+  LogitMixedDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
+  ~LogitMixedDialog() override;
 };
 
-void LogitStrategic(wxWindow *p_parent, GameDocument *p_doc);
+void LogitStrategic(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
 } // namespace Gambit::GUI
 

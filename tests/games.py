@@ -25,8 +25,20 @@ import pygambit as gbt
 UNICODE_LABELS = ["é", "naïve", "日本語", "😀"]
 VALID_LABELS = ["x", "a b", "a b", "a b c", *UNICODE_LABELS]
 INVALID_LABELS = [
-    " x", "x ", " ", "a  b", "a\tb", "a\nb", "a\x01b", "a\x7fb", "ab",
-    " x", "x ", " ", "a  b", "a b",
+    " x",
+    "x ",
+    " ",
+    "a  b",
+    "a\tb",
+    "a\nb",
+    "a\x01b",
+    "a\x7fb",
+    "ab",
+    " x",
+    "x ",
+    " ",
+    "a  b",
+    "a b",
 ]
 
 
@@ -43,7 +55,7 @@ def read_from_file(fn: str) -> gbt.Game:
         raise ValueError(f"Unknown file extension in {fn}")
 
 
-def create_efg_corresponding_to_bimatrix_game(
+def create_efg_corresponding_to_bimatrix_game_arrays(
     A: np.ndarray, B: np.ndarray, title: str
 ) -> gbt.Game:
     """
@@ -61,9 +73,20 @@ def create_efg_corresponding_to_bimatrix_game(
     for i, j in itertools.product(range(m), range(n)):
         g.set_outcome(
             g.root.children[str(i)].children[str(j)],
-            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]])
+            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]]),
         )
     return g
+
+
+def create_efg_corresponding_to_bimatrix_game(g: gbt.Game) -> gbt.Game:
+    """
+    There is no direct pygambit method to create an EFG from a stategic-form game.
+    Here we create an EFG corresponding to a bimatrix pygambit.Game.
+    Player 1 moves first.
+    """
+    assert len(g.players) == 2
+    A, B = g.to_arrays()
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, g.title)
 
 
 ################################################################################################
@@ -85,7 +108,7 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
 
     A = np.eye(2)
     B = -A
-    g = create_efg_corresponding_to_bimatrix_game(A, B, title)
+    g = create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
     if variant == "missing term outcome":
         g.delete_outcome(g.root.children["0"].children["1"].outcome)
@@ -118,7 +141,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
                                             poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
-    g.append_move(g.root, g.players.chance, deals)
+    g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
 
     ante_outcome = g.add_outcome("Ante", [-1, -1])
     g.set_outcome(g.root, ante_outcome)
@@ -161,8 +184,7 @@ def _create_kuhn_poker_efg_without_outcomes():
         player_idx = 0 if player == "Alice" else 1
         return [d for d in deals if d[player_idx] == card]
 
-    g.append_move(g.root, g.players.chance, deals)
-    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)] * 6)
+    g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
         term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
@@ -407,24 +429,16 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(
-        g.root.children["Trust"].children["Honor"],
-        g.add_outcome("Trustworthy", [1, 1])
-        )
+    g.set_outcome(g.root.children["Trust"].children["Honor"], g.add_outcome("Trustworthy", [1, 1]))
     if unique_NE_variant:
         g.set_outcome(
-            g.root.children["Trust"].children["Abuse"],
-            g.add_outcome("Untrustworthy", ["1/2", 2])
+            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", ["1/2", 2])
         )
     else:
         g.set_outcome(
-            g.root.children["Trust"].children["Abuse"],
-            g.add_outcome("Untrustworthy", [-1, 2])
+            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", [-1, 2])
         )
-    g.set_outcome(
-        g.root.children["Not trust"],
-        g.add_outcome("Opt-out", [0, 0])
-        )
+    g.set_outcome(g.root.children["Not trust"], g.add_outcome("Opt-out", [0, 0]))
     return g
 
 
@@ -432,7 +446,7 @@ def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A
     title = f"{n}x{n} coordination game, {2**n - 1} equilibria"
-    return create_efg_corresponding_to_bimatrix_game(A, B, title)
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
 
 def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
@@ -457,7 +471,7 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     A = np.array(A)
     B = np.array(B)
     title = "6x6 Long Lemke-Howson Paths, unique eq"
-    return create_efg_corresponding_to_bimatrix_game(A, B, title)
+    return create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
 
 class EfgFamilyForReducedStrategicFormTests(ABC):
@@ -496,9 +510,28 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
 
         return (
             game.gbt_game(),
-            game.reduced_strategies(),
+            [[str(i) for i in range(1, len(r) + 1)] for r in game.reduced_strategies()],
             game.reduced_strategic_form(),
         )
+
+    @classmethod
+    def get_map_test_data(cls, **params):
+        """
+        given the provided parameters, return a tuple with:
+            - the game as a gbt.Game object
+            - the expected infoset-to-action map of each reduced strategy, per player:
+              the pre-17.0 signature split per information set ("*" = no action
+              prescribed), or the empty tuple for the single trivial strategy of a
+              player who has no information sets
+        the tuple is used directly in test_reduced_strategy_maps in test_extensive.py
+        """
+        game = cls(params)
+        gbt_game = game.gbt_game()
+        maps = [
+            [tuple(sig) if len(player.infosets) > 0 else () for sig in sigs]
+            for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
+        ]
+        return (gbt_game, maps)
 
 
 class Centipede(EfgFamilyForReducedStrategicFormTests):
@@ -667,7 +700,12 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.create_binary_tree(g, g.root, 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
-                g.set_infoset(n.children["R"], n.children["L"].infoset)
+                left = n.children["L"]
+                g.make_infoset(
+                    list(left.infoset.members) + [n.children["R"]],
+                    left.infoset.player.label,
+                    left.infoset.label or None,
+                )
         return g
 
     def reduced_strategic_form(self):

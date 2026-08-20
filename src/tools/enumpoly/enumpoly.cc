@@ -20,11 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
 #include <type_traits>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/enumpoly/enumpoly.h"
 
 using namespace Gambit;
@@ -52,14 +53,18 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
-  std::cerr << "                   payoffs in the game\n";
+  std::cerr << "                   payoffs in the game (default is 1e-8)\n";
   std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
   std::cerr << "                   (default is to search in all supports)\n";
+  std::cerr << "  -r RECTANGLES    maximum number of rectangles to examine when searching\n";
+  std::cerr << "                   for roots on a single support, before giving up on that\n";
+  std::cerr << "                   support (default " << Nash::kDefaultEnumPolyMaxRectangles
+            << ")\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows supports investigated)\n";
-  std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is only to show equilibria)\n";
-  exit(1);
+  std::cerr << "  -v, --version    print version information\n";
+  exit(0);
 }
 
 void PrintProfile(std::ostream &p_stream, const std::string &p_label,
@@ -121,13 +126,15 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
 template <class Support> void PrintEnumPolyEvent(const EnumPolyEvent<Support> &p_event)
 {
   std::visit(
-      [](const auto &event) {
-        using Event = std::decay_t<decltype(event)>;
+      []<typename Event>(const Event &event) {
         if constexpr (std::is_same_v<Event, EnumPolyCandidateSupportEvent<Support>>) {
           PrintSupport(std::cout, "candidate", event.support);
         }
         else if constexpr (std::is_same_v<Event, EnumPolySingularSupportEvent<Support>>) {
           PrintSupport(std::cout, "singular", event.support);
+        }
+        else if constexpr (std::is_same_v<Event, EnumPolyBudgetExceededSupportEvent<Support>>) {
+          PrintSupport(std::cout, "budget-exceeded", event.support);
         }
       },
       p_event);
@@ -139,8 +146,9 @@ int main(int argc, char *argv[])
 
   bool quiet = false;
   bool useStrategic = false;
-  double maxregret = 1.0e-4;
+  double maxregret = 1.0e-8;
   int stopAfter = 0;
+  size_t maxRectangles = Nash::kDefaultEnumPolyMaxRectangles;
 
   int long_opt_index = 0;
   option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -148,11 +156,11 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:hSm:e:qvV", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:hSm:e:r:qvV", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
-      exit(1);
+      exit(0);
     case 'd':
       g_numDecimals = atoi(optarg);
       break;
@@ -167,6 +175,9 @@ int main(int argc, char *argv[])
       break;
     case 'e':
       stopAfter = atoi(optarg);
+      break;
+    case 'r':
+      maxRectangles = std::strtoull(optarg, nullptr, 10);
       break;
     case 'q':
       quiet = true;
@@ -213,13 +224,13 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       EnumPolyStrategySolve(
-          game, stopAfter, maxregret,
+          game, stopAfter, maxregret, maxRectangles,
           [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const EnumPolyEvent<StrategySupportProfile> &event) { PrintEnumPolyEvent(event); });
     }
     else {
       EnumPolyBehaviorSolve(
-          game, stopAfter, maxregret,
+          game, stopAfter, maxregret, maxRectangles,
           [](const MixedBehaviorProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const EnumPolyEvent<BehaviorSupportProfile> &event) { PrintEnumPolyEvent(event); });
     }

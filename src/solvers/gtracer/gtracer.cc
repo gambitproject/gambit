@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/gtracer.cc
+// FILE: src/solvers/gtracer/gtracer.cc
 // Top-level include file for Gametracer embedding in Gambit
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -24,7 +24,7 @@
 
 #include <algorithm>
 #include "gtracer.h"
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit::gametracer {
 

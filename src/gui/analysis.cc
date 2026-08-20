@@ -25,7 +25,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/tokenzr.h>
-#include "gambit.h"
+#include "games.h"
 #include "games/workspace.h"
 
 #include "analysis.h"

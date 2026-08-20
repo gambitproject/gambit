@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/simpdiv/simpdiv.cc
+// FILE: src/solvers/simpdiv/simpdiv.cc
 // Compute Nash equilibria via simplicial subdivision on the normal form
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include <numeric>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/simpdiv/simpdiv.h"
 
 namespace Gambit::Nash {
@@ -32,9 +32,11 @@ public:
       int p_gridResize = 2, int p_leashLength = 0,
       const Rational &p_maxregret = Rational(1, 1000000),
       StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
-      SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback)
+      SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback,
+      const CancelToken &p_cancel = CancelToken())
     : m_gridResize(p_gridResize), m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
-      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium), m_onEvent(p_onEvent)
+      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium), m_onEvent(p_onEvent),
+      m_cancel(p_cancel)
   {
   }
   ~NashSimpdivStrategySolver() = default;
@@ -48,6 +50,7 @@ private:
   Rational m_maxregret;
   StrategyCallbackType<Rational> m_onEquilibrium;
   SimpdivEventCallbackType m_onEvent;
+  CancelToken m_cancel;
 
   class State;
 
@@ -127,6 +130,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   }
 
 step1:
+  m_cancel.Check();
   maxz = state.getlabel(y, ylabel, besty);
   j = ylabel[1];
   h = ylabel[2];
@@ -525,37 +529,30 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   return sol;
 }
 
-///
-/// Compute an equilibrium using the default starting point.
-///
-/// This computes the equilibrium reached from the starting point profile
-/// in which all players put probability one on their first strategy.
-/// This is a not-unreasonable default in that it starts with a very
-/// coarse grid and, if the game has an equilibrium in pure strategies,
-/// or in mixed strategies with small denominators, it will find it quickly.
-/// Starting with a strategy profile with a smaller denominator can lead
-/// to a long initial search before reaching a candidate neighborhood
-/// for an equilibrium.
-///
 std::list<MixedStrategyProfile<Rational>>
 NashSimpdivStrategySolver::Solve(const Game &p_game) const
+{
+  return Solve(SimpdivDefaultStart(p_game));
+}
+
+MixedStrategyProfile<Rational> SimpdivDefaultStart(const Game &p_game)
 {
   MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
   start = Rational(0);
   for (const auto &player : p_game->GetPlayers()) {
     start[player->GetStrategies().front()] = Rational(1);
   }
-  return Solve(start);
+  return start;
 }
 
 std::list<MixedStrategyProfile<Rational>>
 SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
                      int p_gridResize, int p_leashLength,
                      StrategyCallbackType<Rational> p_onEquilibrium,
-                     SimpdivEventCallbackType p_onEvent)
+                     SimpdivEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium,
-                                   p_onEvent)
+                                   p_onEvent, p_cancel)
       .Solve(p_start);
 }
 

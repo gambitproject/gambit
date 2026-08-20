@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/behavspt.cc
+// FILE: src/games/behavspt.cc
 // Implementation of supports for extensive forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit {
 
@@ -223,39 +223,39 @@ size_t BehaviorSupportProfile::Sequences::size() const
 
 BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::begin() const
 {
-  return {m_support->GetSequenceMap(), false};
+  return {m_support->GetSequenceMap(), m_support->GetPlayers(), false};
 }
 BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::end() const
 {
-  return {m_support->GetSequenceMap(), true};
+  return {m_support->GetSequenceMap(), m_support->GetPlayers(), true};
 }
 
 BehaviorSupportProfile::Sequences::iterator::iterator(
-    const std::shared_ptr<SequenceMap> p_sequences, bool p_end)
-  : m_sequences(p_sequences)
+    const std::shared_ptr<SequenceMap> p_sequences, const GameRep::Players &p_players, bool p_end)
+  : m_sequences(p_sequences), m_players(p_players)
 {
   if (p_end) {
-    m_currentPlayer = m_sequences->cend();
+    m_currentPlayer = m_players.end();
   }
   else {
-    m_currentPlayer = m_sequences->cbegin();
-    m_currentSequence = m_currentPlayer->second.cbegin();
+    m_currentPlayer = m_players.begin();
+    m_currentSequence = m_sequences->at(*m_currentPlayer).cbegin();
   }
 }
 
 BehaviorSupportProfile::Sequences::iterator &
 BehaviorSupportProfile::Sequences::iterator::operator++()
 {
-  if (m_currentPlayer == m_sequences->cend()) {
+  if (m_currentPlayer == m_players.end()) {
     return *this;
   }
   m_currentSequence++;
-  if (m_currentSequence != m_currentPlayer->second.cend()) {
+  if (m_currentSequence != m_sequences->at(*m_currentPlayer).cend()) {
     return *this;
   }
-  m_currentPlayer++;
-  if (m_currentPlayer != m_sequences->cend()) {
-    m_currentSequence = m_currentPlayer->second.cbegin();
+  ++m_currentPlayer;
+  if (m_currentPlayer != m_players.end()) {
+    m_currentSequence = m_sequences->at(*m_currentPlayer).cbegin();
   }
   return *this;
 }
@@ -265,7 +265,7 @@ bool BehaviorSupportProfile::Sequences::iterator::operator==(const iterator &it)
   if (m_sequences != it.m_sequences || m_currentPlayer != it.m_currentPlayer) {
     return false;
   }
-  if (m_currentPlayer == m_sequences->end()) {
+  if (m_currentPlayer == m_players.end()) {
     return true;
   }
   return (m_currentSequence == it.m_currentSequence);
