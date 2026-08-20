@@ -27,7 +27,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
-#include "gambit.h"
+#include "games.h"
 #include "gamedoc.h"
 
 namespace {

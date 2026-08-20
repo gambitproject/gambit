@@ -27,7 +27,7 @@
 #include <variant>
 
 #include "core/cancel.h"
-#include "games/nash.h"
+#include "solvers/nash.h"
 #include "core/rational.h"
 
 namespace Gambit::GUI {

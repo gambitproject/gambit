@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametree.h
+// FILE: src/games/gametree.h
 // Declaration of extensive game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMETREE_H
-#define GAMETREE_H
+#ifndef GAMBIT_GAMES_GAMETREE_H
+#define GAMBIT_GAMES_GAMETREE_H
 
 #include "core/lazy.h"
 #include "gameexpl.h"
@@ -240,4 +240,4 @@ private:
 
 } // namespace Gambit
 
-#endif // GAMETREE_H
+#endif // GAMBIT_GAMES_GAMETREE_H

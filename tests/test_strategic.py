@@ -125,3 +125,46 @@ def test_relabel_strategies_tree_game_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(gbt.UndefinedOperationError):
         game.relabel_strategies(game.players["Alice"], {"11": "XY"})
+
+
+def _payoffs_by_label(game: gbt.Game) -> dict:
+    one, two = game.players
+    return {(s.label, t.label): (game[s, t][one], game[s, t][two])
+            for s in one.strategies for t in two.strategies}
+
+
+def test_set_strategies_reorder_carries_outcomes():
+    """Reordering permutes the payoff table: each contingency keeps the outcome
+    it had, identified by the labels of its strategies."""
+    game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
+    player, _ = game.players
+    a, b = (s.label for s in player.strategies)
+    kept = list(player.strategies)
+    before = _payoffs_by_label(game)
+    game.set_strategies(player, [b, a])
+    assert [s.label for s in player.strategies] == [b, a]
+    assert list(player.strategies) == list(reversed(kept))
+    assert _payoffs_by_label(game) == before
+
+
+def test_set_strategies_add_drop_and_reorder_together():
+    """A single call can create, delete, and reorder; the surviving strategy keeps
+    the outcomes at its contingencies."""
+    game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
+    player, other = game.players
+    a, b = (s.label for s in player.strategies)
+    kept = {t.label: game[a, t.label][player] for t in other.strategies}
+    game.set_strategies(player, ["X", a], drop=True)
+    assert [s.label for s in player.strategies] == ["X", a]
+    assert {t.label: game[a, t.label][player] for t in other.strategies} == kept
+
+
+def test_set_strategies_unconfirmed_drop_and_disabled_add_raise():
+    game = gbt.Game.new_table([2, 2])
+    player, _ = game.players
+    a, b = (s.label for s in player.strategies)
+    with pytest.raises(ValueError):
+        game.set_strategies(player, [a])
+    with pytest.raises(ValueError):
+        game.set_strategies(player, [a, b, "X"], add=False)
+    assert [s.label for s in player.strategies] == [a, b]

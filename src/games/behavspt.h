@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/behavspt.h
+// FILE: src/games/behavspt.h
 // Interface to supports for extensive forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_BEHAVSPT_H
-#define LIBGAMBIT_BEHAVSPT_H
+#ifndef GAMBIT_GAMES_BEHAVSPT_H
+#define GAMBIT_GAMES_BEHAVSPT_H
 
 #include <list>
 #include <map>
@@ -218,4 +218,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_BEHAVSPT_H
+#endif // GAMBIT_GAMES_BEHAVSPT_H

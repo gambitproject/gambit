@@ -180,16 +180,18 @@ def _enumpoly_strategy_solve(
         game: Game,
         stop_after: int,
         maxregret: float,
+        max_rectangles: int,
 ) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(EnumPolyStrategySolve(game.game, stop_after, maxregret))
+    return _convert_mspd(EnumPolyStrategySolve(game.game, stop_after, maxregret, max_rectangles))
 
 
 def _enumpoly_behavior_solve(
         game: Game,
         stop_after: int,
         maxregret: float,
+        max_rectangles: int,
 ) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(EnumPolyBehaviorSolve(game.game, stop_after, maxregret))
+    return _convert_mbpd(EnumPolyBehaviorSolve(game.game, stop_after, maxregret, max_rectangles))
 
 
 def _logit_strategy_solve(

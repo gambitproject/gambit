@@ -23,6 +23,15 @@ share the listed support.  However, the converse is not true:
 not all supports labeled as "singular" will necessarily be the
 support of some set of equilibria.
 
+Independently of degeneracy, the search on a single support can require
+examining an impractically large number of subdivided cells before it
+can either confirm or rule out an equilibrium.  To bound the time spent
+on any one support, the number of cells examined is capped (see
+:option:`gambit-enumpoly -r`).  When this limit is reached, the search for that support
+is abandoned, any equilibria already confirmed on it are still reported,
+and (in verbose mode) the support is identified with the label
+"budget-exceeded,".
+
 .. program:: gambit-enumpoly
 
 .. cmdoption:: -d
@@ -54,6 +63,14 @@ support of some set of equilibria.
 
    By default, the program will search all support profiles.
    This switch instructs the program to terminate when EQA equilibria have been found.
+
+.. cmdoption:: -r RECTANGLES
+
+   .. versionadded:: 17.0.0
+
+   Specify the maximum number of cells to examine when searching for equilibria
+   on a single support, before giving up on that support (default 20000).  See
+   the :ref:`algorithm description <enumpoly>` for why this is necessary.
 
 .. cmdoption:: -q
 

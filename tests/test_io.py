@@ -160,8 +160,7 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 def test_write_html():
     game = gbt.Game.new_table([2, 2])
     alice, bob = game.players
-    alice.label = "Alice"
-    bob.label = "Bob"
+    game.relabel_players({alice.label: "Alice", bob.label: "Bob"})
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
     assert "Alice" in serialized_game
@@ -171,8 +170,7 @@ def test_write_html():
 def test_write_latex():
     game = gbt.Game.new_table([2, 2], title="Game title")
     alice, bob = game.players
-    alice.label = "Alice"
-    bob.label = "Bob"
+    game.relabel_players({alice.label: "Alice", bob.label: "Bob"})
     serialized_game = game.to_latex()
     assert "\\begin{game}" in serialized_game
     assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game

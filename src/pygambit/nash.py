@@ -662,7 +662,8 @@ def enumpoly_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
         stop_after: int | None = None,
-        maxregret: float = 1.0e-4,
+        maxregret: float = 1.0e-8,
+        max_rectangles: int = 20_000,
         phcpack_path: pathlib.Path | str | None = None
 ) -> NashComputationResult:
     """:ref:`Compute Nash equilibria by enumerating all support profiles
@@ -682,10 +683,17 @@ def enumpoly_solve(
         Maximum number of equilibria to compute.  If not specified, examines
         all support profiles of the game.
 
-    maxregret : float, default 1e-4
+    maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
+
+    max_rectangles : int, default 20000
+        The maximum number of rectangles to examine when searching for equilibria on a
+        single support, before giving up on that support.  See the
+        :ref:`algorithm description <enumpoly>` for why this is necessary.
+
+        .. versionadded:: 17.0.0
 
     phcpack_path : str or pathlib.Path, optional
         If specified, use PHCpack to solve the systems of equations.
@@ -712,6 +720,11 @@ def enumpoly_solve(
         raise ValueError(
             f"enumpoly_solve(): maxregret must be a positive number; got {maxregret}"
         )
+    if max_rectangles <= 0:
+        raise ValueError(
+            f"enumpoly_solve(): "
+            f"max_rectangles argument must be a positive number; got {max_rectangles}"
+        )
     if phcpack_path is not None:
         if game.is_tree and not use_strategic:
             raise ValueError(
@@ -730,15 +743,16 @@ def enumpoly_solve(
         )
 
     if not game.is_tree or use_strategic:
-        equilibria = libgbt._enumpoly_strategy_solve(game, stop_after, maxregret)
+        equilibria = libgbt._enumpoly_strategy_solve(game, stop_after, maxregret, max_rectangles)
     else:
-        equilibria = libgbt._enumpoly_behavior_solve(game, stop_after, maxregret)
+        equilibria = libgbt._enumpoly_behavior_solve(game, stop_after, maxregret, max_rectangles)
     return NashComputationResult(
         game=game,
         method="enumpoly",
         rational=False,
         use_strategic=not game.is_tree or use_strategic,
-        parameters={"stop_after": stop_after, "maxregret": maxregret},
+        parameters={"stop_after": stop_after, "maxregret": maxregret,
+                    "max_rectangles": max_rectangles},
         equilibria=equilibria,
     )
 

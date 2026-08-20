@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: library/include/gambit/gtracer/aggame.h
+// FILE: src/solvers/gtracer/aggame.h
 // Interface to GNM-specific routines for action graph games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_AGGAME_H
-#define GAMBIT_GTRACER_AGGAME_H
+#ifndef GAMBIT_SOLVERS_GTRACER_AGGAME_H
+#define GAMBIT_SOLVERS_GTRACER_AGGAME_H
 
 #include "cmatrix.h"
 #include "gnmgame.h"
 #include "games/agg/agg.h"
-#include "gambit.h"
 #include "games/gameagg.h"
 
 namespace Gambit::gametracer {
@@ -93,4 +92,4 @@ private:
 
 } // end namespace Gambit::gametracer
 
-#endif // GAMBIT_GTRACER_AGGAME_H
+#endif // GAMBIT_SOLVERS_GTRACER_AGGAME_H

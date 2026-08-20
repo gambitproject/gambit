@@ -24,9 +24,16 @@
 #define GAMBIT_GUI_DLGAMEPROP_H
 
 namespace Gambit::GUI {
+
+class PlayerLabelPanel;
+
 class GamePropertiesDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
   wxTextCtrl *m_title, *m_comment;
+  PlayerLabelPanel *m_playerPanel;
+  wxStaticText *m_errorText;
+
+  void UpdateValidation();
 
 public:
   // Lifecycle
@@ -35,6 +42,15 @@ public:
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetTitle() const override { return m_title->GetValue(); }
   wxString GetDescription() const { return m_comment->GetValue(); }
+
+  // Player (and chance) labels and colors, as edited on the Players page. Row 0
+  // is chance; the rest are the game's personal players. Both labels and
+  // colors are staged only within the dialog and are not applied to the
+  // document until ShowModal() returns wxID_OK and the caller commits them.
+  int NumRows() const;
+  GamePlayer GetPlayer(int p_index) const;
+  wxString GetPlayerLabel(int p_index) const;
+  wxColour GetPlayerColor(int p_index) const;
 };
 
 } // namespace Gambit::GUI

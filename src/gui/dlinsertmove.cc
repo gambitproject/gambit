@@ -24,7 +24,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include "gambit.h"
+#include "games.h"
 #include "dlinsertmove.h"
 
 namespace Gambit::GUI {

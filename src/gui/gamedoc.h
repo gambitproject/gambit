@@ -25,7 +25,8 @@
 
 #include <map>
 
-#include "gambit.h"
+#include "games/behavspt.h"
+#include "games/stratspt.h"
 #include "style.h"
 #include "analysis.h"
 
@@ -219,7 +220,6 @@ class GameDocument {
   wxString m_filename;
 
   TreeRenderConfig m_style;
-  GameNode m_selectNode;
   bool m_gameModified, m_workspaceModified;
 
   AnalysisWorkspace m_workspace;
@@ -280,9 +280,6 @@ public:
   void DoPreviousDominanceLevel();
   void DoTopDominanceLevel();
 
-  GameNode GetSelectNode() const { return m_selectNode; }
-  void SetSelectNode(GameNode);
-
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges();
 
@@ -301,10 +298,20 @@ public:
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
   GamePlayer DoNewPlayer();
-  void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
-  void DoNewStrategy(GamePlayer p_player);
-  void DoDeleteStrategy(GameStrategy p_strategy);
-  void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
+  /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
+  void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
+  /// Declare the strategies of `p_player` in a single operation, covering any combination
+  /// of adding, deleting, reordering, and relabeling strategies.
+  ///
+  /// `p_stableLabels` identifies each strategy as it was before this edit (an existing
+  /// strategy's current label, or a placeholder for one newly created); `p_labels` is what
+  /// that same strategy, by position, is to be labeled after the edit.  Structure (which
+  /// strategies exist, and in what order) is resolved first, purely from `p_stableLabels`;
+  /// labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order
+  /// means a rename that reuses a label freed up by a simultaneous deletion never collides
+  /// with the not-yet-renamed original.
+  void DoSetStrategies(GamePlayer p_player, const std::vector<std::string> &p_stableLabels,
+                       const std::vector<std::string> &p_labels);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
   void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
   /// Declare the actions of `p_infoset` in a single operation, covering any combination
@@ -338,7 +345,6 @@ public:
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
-  void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAnalysisOutputChanged();
@@ -357,10 +363,12 @@ inline std::shared_ptr<GameDocument> NewTableDocument(const std::vector<int> &p_
 {
   const Game nfg = NewTable(p_dim);
   nfg->SetTitle("Untitled Strategic Game");
+  std::map<std::string, std::string> labels;
   int pl = 1;
-  for (auto player : nfg->GetPlayers()) {
-    player->SetLabel("Player " + std::to_string(pl++));
+  for (const auto &player : nfg->GetPlayers()) {
+    labels[player->GetLabel()] = "Player " + std::to_string(pl++);
   }
+  nfg->RelabelPlayers(labels);
   return std::make_shared<GameDocument>(nfg);
 }
 

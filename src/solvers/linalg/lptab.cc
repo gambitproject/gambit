@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/lptab.cc
+// FILE: src/solvers/linalg/lptab.cc
 // Instantiation of LP tableau
 //
 // This program is free software; you can redistribute it and/or modify

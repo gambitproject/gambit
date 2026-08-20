@@ -24,7 +24,7 @@
 #include <fstream>
 #include <memory>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/lcp/lcp.h"
 

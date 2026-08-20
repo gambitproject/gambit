@@ -248,19 +248,18 @@ class Player:
 
     @property
     def label(self) -> str:
-        """Gets or sets the text label of the player.
+        """The text label of the player.
 
         .. versionchanged:: 17.0.0
             A label may now be any well-formed UTF-8 text, not just ASCII; it must still
             contain no control characters, and must not begin/end with whitespace or have
             two consecutive whitespace characters.  "Whitespace" means any Unicode space
             separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
+
+            The label is now read-only, and must be nonempty and unique among the game's
+            players; use `Game.relabel_players` to change it.
         """
         return self.player.deref().GetLabel().decode("utf-8")
-
-    @label.setter
-    def label(self, value: str) -> None:
-        self.player.deref().SetLabel(value.encode("utf-8"))
 
     @property
     def number(self) -> int:

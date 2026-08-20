@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/logit/logit.h"
 
 using namespace Gambit;

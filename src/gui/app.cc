@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/gambit.cc
+// FILE: src/gui/app.cc
 // Implementation of main wxApp class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 #include <wx/display.h>
 #include <wx/image.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "app.h"
 #include "gameframe.h"

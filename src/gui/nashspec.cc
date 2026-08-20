@@ -65,7 +65,7 @@ EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
     return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
                   const CancelToken &p_cancel) {
       Nash::EnumPolyBehaviorSolve(
-          p_game, spec.stopAfter, spec.maxRegret,
+          p_game, spec.stopAfter, spec.maxRegret, Nash::kDefaultEnumPolyMaxRectangles,
           [&p_callback](const MixedBehaviorProfile<double> &p) { p_callback(ComputedProfile(p)); },
           Nash::NullEnumPolyEventCallback<BehaviorSupportProfile>, p_cancel);
     };
@@ -73,7 +73,7 @@ EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
                 const CancelToken &p_cancel) {
     Nash::EnumPolyStrategySolve(
-        p_game, spec.stopAfter, spec.maxRegret,
+        p_game, spec.stopAfter, spec.maxRegret, Nash::kDefaultEnumPolyMaxRectangles,
         [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
         Nash::NullEnumPolyEventCallback<StrategySupportProfile>, p_cancel);
   };
@@ -105,7 +105,7 @@ std::optional<SolverFunction> IPANashSpec::MakeSolver(NashRepresentation) const
       Nash::IPAStrategySolve(
           pert,
           [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
-          p_cancel);
+          Nash::NullIPAEventCallback, p_cancel);
     }
   };
 }

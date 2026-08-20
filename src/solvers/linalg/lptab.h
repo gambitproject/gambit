@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/lptab.h
+// FILE: src/solvers/linalg/lptab.h
 // Interface to LP tableaus
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LPTAB_H
-#define LPTAB_H
+#ifndef GAMBIT_SOLVERS_LINALG_LPTAB_H
+#define GAMBIT_SOLVERS_LINALG_LPTAB_H
+
+#include <list>
 
 #include "tableau.h"
 
@@ -61,4 +63,4 @@ public:
 
 } // end namespace Gambit::linalg
 
-#endif // LPTAB_H
+#endif // GAMBIT_SOLVERS_LINALG_LPTAB_H

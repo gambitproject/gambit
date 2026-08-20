@@ -25,7 +25,7 @@
 
 #include <numeric>
 
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit {
 

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/gnm/gnm.cc
+// FILE: src/solvers/gnm/gnm.cc
 // Compute Nash equilibria via the global Newton method
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include <numeric>
-#include "gambit.h"
+#include "games.h"
 #include "solvers/gnm/gnm.h"
 #include "solvers/gtracer/gtracer.h"
 

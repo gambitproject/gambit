@@ -35,6 +35,14 @@ options to specify additional starting points for the algorithm.
    Randomly generate COUNT starting points. Only
    applicable if option :option:`gambit-simpdiv -r` is also specified.
 
+.. cmdoption:: -R
+
+   Seeds the random number generator used to generate starting points
+   with the specified value, so that the sequence of points generated
+   by :option:`-r`/:option:`-n` can be reproduced across runs.  If not
+   specified, the generator is seeded from system entropy.  Requires
+   :option:`-n`.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.
@@ -47,6 +55,7 @@ options to specify additional starting points for the algorithm.
    parameter is specified, starting points for the procedure are
    generated randomly using the uniform distribution over strategy
    profiles with probabilities having denominator DENOM.
+   Mutually exclusive with :option:`-s`.
 
 .. cmdoption:: -s
 
@@ -54,6 +63,7 @@ options to specify additional starting points for the algorithm.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
+   Mutually exclusive with :option:`-r`.
 
 .. cmdoption:: -m
 

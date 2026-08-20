@@ -23,9 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif                   // WX_PRECOMP
-#include <wx/dnd.h>      // for drag-and-drop features
-#include <wx/colordlg.h> // for picking player colors
+#endif // WX_PRECOMP
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
@@ -33,286 +31,8 @@
 #include "dlexcept.h"
 #include "nfgtable.h"
 #include "menuconst.h"
-#include "edittext.h"
-
-#include "bitmaps/color.xpm"
-#include "bitmaps/newrow.xpm"
-#include "bitmaps/person.xpm"
 
 namespace Gambit::GUI {
-class TablePlayerIcon final : public wxStaticBitmap {
-  int m_player;
-
-  // Event handlers
-  void OnLeftClick(wxMouseEvent &);
-
-public:
-  TablePlayerIcon(wxWindow *p_parent, int p_player);
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(TablePlayerIcon, wxStaticBitmap)
-EVT_LEFT_DOWN(TablePlayerIcon::OnLeftClick)
-END_EVENT_TABLE()
-
-TablePlayerIcon::TablePlayerIcon(wxWindow *p_parent, int p_player)
-  : wxStaticBitmap(p_parent, wxID_ANY, wxBitmap(person_xpm)), m_player(p_player)
-{
-}
-
-void TablePlayerIcon::OnLeftClick(wxMouseEvent &)
-{
-  wxString label;
-  label << "P" << m_player;
-  wxTextDataObject textData(label);
-  wxDropSource source(textData, this);
-  source.DoDragDrop(wxDrag_DefaultMove);
-}
-
-class TablePlayerPanel final : public wxPanel {
-  std::shared_ptr<GameDocument> m_doc;
-  int m_player;
-  EditableLabelText *m_playerLabel;
-  wxStaticText *m_payoff;
-
-  /// @name Event handlers
-  //@{
-  /// The add strategy icon is clicked
-  void OnNewStrategy(wxCommandEvent &);
-  /// The set color icon is clicked
-  void OnSetColor(wxCommandEvent &);
-  /// Start the editing of the player label
-  void OnEditPlayerLabel(wxCommandEvent &);
-  /// End the editing of the player label after enter is pressed
-  void OnAcceptPlayerLabel(wxCommandEvent &);
-  /// Process a keypress event
-  void OnChar(wxKeyEvent &);
-  //@}
-
-public:
-  TablePlayerPanel(wxWindow *, NfgPanel *, const std::shared_ptr<GameDocument> &, int p_player);
-
-  void OnUpdate();
-  void PostPendingChanges();
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(TablePlayerPanel, wxPanel)
-EVT_CHAR(TablePlayerPanel::OnChar)
-END_EVENT_TABLE()
-
-TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel,
-                                   const std::shared_ptr<GameDocument> &p_doc, int p_player)
-  : wxPanel(p_parent, wxID_ANY),
-    /* m_nfgPanel(p_nfgPanel),*/ m_doc(p_doc), m_player(p_player)
-{
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
-  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-
-  wxStaticBitmap *playerIcon = new TablePlayerIcon(this, m_player);
-  labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
-
-  if (!m_doc->GetGame()->IsTree()) {
-    auto *addStrategyIcon = new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
-                                               wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-    addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
-
-    labelSizer->Add(addStrategyIcon, 0, wxALL | wxALIGN_CENTER, 0);
-    Connect(addStrategyIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(TablePlayerPanel::OnNewStrategy));
-  }
-
-  auto *setColorIcon = new wxBitmapButton(this, wxID_ANY, wxBitmap(color_xpm), wxDefaultPosition,
-                                          wxDefaultSize, wxNO_BORDER);
-  setColorIcon->SetToolTip(_("Change the color for this player"));
-
-  labelSizer->Add(setColorIcon, 0, wxALL | wxALIGN_CENTER, 0);
-  Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(TablePlayerPanel::OnSetColor));
-
-  m_playerLabel =
-      new EditableLabelText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(125, -1));
-  m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 5);
-  Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(TablePlayerPanel::OnEditPlayerLabel));
-  Connect(m_playerLabel->GetId(), wxEVT_COMMAND_TEXT_ENTER,
-          wxCommandEventHandler(TablePlayerPanel::OnAcceptPlayerLabel));
-
-  topSizer->Add(labelSizer, 0, wxALL, 0);
-
-  m_payoff = new wxStaticText(this, wxID_STATIC, wxT("Payoff:"), wxDefaultPosition, wxDefaultSize,
-                              wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  m_payoff->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-  topSizer->Add(m_payoff, 0, wxALL | wxEXPAND, 0);
-  topSizer->Show(m_payoff, false);
-
-  SetSizer(topSizer);
-  topSizer->SetSizeHints(this);
-  topSizer->Fit(this);
-  wxWindowBase::Layout();
-  OnUpdate();
-}
-
-void TablePlayerPanel::OnUpdate()
-{
-  const wxColour color = m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player));
-
-  m_playerLabel->SetForegroundColour(color);
-  m_playerLabel->SetValue(wxString::FromUTF8(m_doc->GetGame()->GetPlayer(m_player)->GetLabel()));
-
-  if (m_doc->GetWorkspace().GetCurrentProfile() > 0) {
-    m_payoff->SetForegroundColour(color);
-
-    const std::string pay = m_doc->GetWorkspace().GetProfiles().GetPayoff(m_player);
-    m_payoff->SetLabel(wxT("Payoff: ") + wxString::FromUTF8(pay));
-    GetSizer()->Show(m_payoff, true);
-  }
-  else {
-    GetSizer()->Show(m_payoff, false);
-  }
-
-  GetSizer()->Layout();
-  GetSizer()->SetSizeHints(this);
-  GetSizer()->Fit(this);
-}
-
-void TablePlayerPanel::OnChar(wxKeyEvent &p_event)
-{
-  if (p_event.GetKeyCode() == WXK_ESCAPE) {
-    m_playerLabel->EndEdit(false);
-  }
-  else {
-    p_event.Skip();
-  }
-}
-
-void TablePlayerPanel::OnNewStrategy(wxCommandEvent &)
-{
-  m_doc->PostPendingChanges();
-  m_doc->DoNewStrategy(m_doc->GetGame()->GetPlayer(m_player));
-}
-
-void TablePlayerPanel::OnSetColor(wxCommandEvent &)
-{
-  wxColourData data;
-  data.SetColour(m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player)));
-  wxColourDialog dialog(this, &data);
-  wxString label;
-  label << _("Choose color for player ") << m_player;
-  dialog.SetTitle(label);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    const wxColour color = dialog.GetColourData().GetColour();
-    TreeRenderConfig style = m_doc->GetStyle();
-    style.SetPlayerColor(m_player, color);
-    m_doc->SetStyle(style);
-  }
-}
-
-void TablePlayerPanel::OnEditPlayerLabel(wxCommandEvent &)
-{
-  m_doc->PostPendingChanges();
-  m_playerLabel->BeginEdit();
-}
-
-void TablePlayerPanel::OnAcceptPlayerLabel(wxCommandEvent &)
-{
-  const wxString label = LabelTextCtrl::Normalize(m_playerLabel->GetValue(), true);
-
-  if (label.empty()) {
-    wxBell();
-    m_playerLabel->BeginEdit();
-    return;
-  }
-
-  try {
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), label);
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-  m_playerLabel->SetValue(m_doc->GetGame()->GetPlayer(m_player)->GetLabel());
-}
-
-void TablePlayerPanel::PostPendingChanges()
-{
-  if (!m_playerLabel->IsEditing()) {
-    return;
-  }
-  m_playerLabel->EndEdit(true);
-  try {
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), m_playerLabel->GetValue());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-    m_playerLabel->SetValue(wxString::FromUTF8(m_doc->GetGame()->GetPlayer(m_player)->GetLabel()));
-  }
-}
-
-//=====================================================================
-//                  class TablePlayerToolbar
-//=====================================================================
-
-class TablePlayerToolbar final : public wxPanel, public GameView {
-  NfgPanel *m_nfgPanel;
-  Array<TablePlayerPanel *> m_playerPanels;
-
-public:
-  TablePlayerToolbar(NfgPanel *p_parent, const std::shared_ptr<GameDocument> &p_doc);
-
-  /// @name Implementation of GameView members
-  //@{
-  void OnUpdate() override;
-  void PostPendingChanges() override;
-  //@}
-};
-
-TablePlayerToolbar::TablePlayerToolbar(NfgPanel *p_parent,
-                                       const std::shared_ptr<GameDocument> &p_doc)
-  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), GameView(p_doc),
-    m_nfgPanel(p_parent)
-{
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
-  for (size_t pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    m_playerPanels.push_back(new TablePlayerPanel(this, p_parent, m_doc, pl));
-    topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
-  }
-
-  SetSizer(topSizer);
-  wxWindowBase::Layout();
-}
-
-void TablePlayerToolbar::OnUpdate()
-{
-  while (m_playerPanels.size() < m_doc->GetGame()->NumPlayers()) {
-    auto *panel = new TablePlayerPanel(this, m_nfgPanel, m_doc, m_playerPanels.size() + 1);
-    m_playerPanels.push_back(panel);
-    GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
-  }
-
-  while (m_playerPanels.size() > m_doc->GetGame()->NumPlayers()) {
-    TablePlayerPanel *panel = m_playerPanels.back();
-    GetSizer()->Detach(panel);
-    panel->Destroy();
-    m_playerPanels.pop_back();
-  }
-
-  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
-                std::mem_fn(&TablePlayerPanel::OnUpdate));
-  GetSizer()->Layout();
-}
-
-void TablePlayerToolbar::PostPendingChanges()
-{
-  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
-                std::mem_fn(&TablePlayerPanel::PostPendingChanges));
-}
-
 //=====================================================================
 //               class StrategyDominanceToolbar
 //=====================================================================
@@ -445,17 +165,12 @@ NfgPanel::NfgPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_do
                    bool p_showDominance)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc),
     m_dominanceToolbar(new StrategyDominanceToolbar(this, m_doc)),
-    m_playerToolbar(new TablePlayerToolbar(this, m_doc)),
     m_tableWidget(new TableWidget(this, wxID_ANY, m_doc))
 {
-  auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
-  playerSizer->Add(m_tableWidget, 1, wxEXPAND, 0);
-
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);
   topSizer->Show(m_dominanceToolbar, p_showDominance);
-  topSizer->Add(playerSizer, 1, wxEXPAND, 0);
+  topSizer->Add(m_tableWidget, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   wxWindowBase::Layout();
   OnUpdate();
@@ -478,7 +193,6 @@ void NfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 
 void NfgPanel::OnUpdate()
 {
-  m_playerToolbar->OnUpdate();
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();
 }
