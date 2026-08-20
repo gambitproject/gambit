@@ -523,8 +523,10 @@ gambit_SOURCES = \
 	src/gui/gameframe.cc \
 	src/gui/gameframe.h \
 	src/gui/menuconst.h \
+	src/gui/nfgheadergrid.cc \
 	src/gui/nfgpanel.cc \
 	src/gui/nfgpanel.h \
+	src/gui/nfgpayoffgrid.cc \
 	src/gui/nfgprofile.cc \
 	src/gui/nfgprofile.h \
 	src/gui/nfgtable.cc \
