@@ -936,7 +936,9 @@ protected:
   void IncrementVersion() { m_version++; }
   void IndexStrategies() const;
   /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
-  void CheckPlayerLabel(const std::string &p_label) const;
+  /// ignoring the labels of the players in p_ignore.
+  void CheckPlayerLabel(const std::string &p_label,
+                        const std::set<const GamePlayerRep *> &p_ignore = {}) const;
   /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
   void CheckOutcomeLabel(const std::string &p_label) const;
   //@}
@@ -1357,6 +1359,8 @@ public:
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
+  /// Reassign player labels. Keys of p_labels are current labels; values are their replacements.
+  void RelabelPlayers(const std::map<std::string, std::string> &p_labels);
   //@}
 
   /// @name Dimensions of the game
@@ -1591,7 +1595,8 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
 }
-inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
+inline void GameRep::CheckPlayerLabel(const std::string &p_label,
+                                      const std::set<const GamePlayerRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Player label must not be empty");
@@ -1601,7 +1606,7 @@ inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
     throw ValueException("Player label must not be the reserved chance player label");
   }
   for (const auto &player : m_players) {
-    if (player->GetLabel() == p_label) {
+    if (p_ignore.count(player.get()) == 0 && player->GetLabel() == p_label) {
       throw ValueException("Player label must be unique within the game");
     }
   }
