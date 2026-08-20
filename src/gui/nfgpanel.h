@@ -27,11 +27,9 @@ class wxPrintout;
 
 namespace Gambit::GUI {
 class TableWidget;
-class TablePlayerToolbar;
 
 class NfgPanel final : public wxPanel, public GameView {
   wxWindow *m_dominanceToolbar;
-  TablePlayerToolbar *m_playerToolbar;
   TableWidget *m_tableWidget;
 
   void OnToolsDominance(wxCommandEvent &);

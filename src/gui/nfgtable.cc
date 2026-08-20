@@ -20,11 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <map>
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif                // WX_PRECOMP
-#include <wx/dnd.h>   // for drag-and-drop support
 #include <wx/print.h> // for printing support
 #include <wx/dcsvg.h> // for SVG output
 #include <wx/popupwin.h>
@@ -80,33 +81,6 @@ public:
     Bind(wxEVT_GRID_RANGE_SELECTING, &TableGridBase::OnRangeSelecting, this);
     Bind(wxEVT_GRID_SELECT_CELL, &TableGridBase::OnSelectCell, this);
     Bind(wxEVT_GRID_CELL_LEFT_CLICK, &TableGridBase::OnCellLeftClick, this);
-  }
-
-  /// @name Drop target interaction
-  //@{
-  /// Called when the drop target receives text.
-  virtual bool DropText(wxCoord, wxCoord, const wxString &) { return false; }
-  //@}
-};
-
-//=========================================================================
-//                class TableWidgetDropTarget
-//=========================================================================
-
-//!
-//! This simple class serves as a drop target for players; it simply
-//! communicates the location and text of the drop to its owner for
-//! further processing
-//!
-class TableWidgetDropTarget : public wxTextDropTarget {
-  TableGridBase *m_owner;
-
-public:
-  explicit TableWidgetDropTarget(TableGridBase *p_owner) : m_owner(p_owner) {}
-
-  bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
-  {
-    return m_owner->DropText(x, y, p_text);
   }
 };
 
@@ -329,25 +303,186 @@ void RowPlayerTable::OnUpdate()
 //                       class RowPlayerGrid
 //=========================================================================
 
+namespace {
+wxString GetStrategyDescription(const GameStrategy &p_strategy)
+{
+  if (!p_strategy->GetGame()->IsTree()) {
+    return {};
+  }
+
+  wxString description;
+  for (const auto &infoset : p_strategy->GetPlayer()->GetInfosets()) {
+    const auto action = p_strategy->GetAction(infoset);
+    if (!action) {
+      continue;
+    }
+
+    if (!description.empty()) {
+      description << wxT("\n");
+    }
+    description << wxString::Format(_("Information set %d"), infoset->GetNumber());
+    if (!infoset->GetLabel().empty()) {
+      description << wxT(" (") << wxString(infoset->GetLabel().c_str(), *wxConvCurrent)
+                  << wxT(")");
+    }
+    description << wxT(": ");
+    if (action->GetLabel().empty()) {
+      description << wxString::Format(_("action %d"), action->GetNumber());
+    }
+    else {
+      description << wxString(action->GetLabel().c_str(), *wxConvCurrent);
+    }
+  }
+  return description;
+}
+
+// The strategy's index in the flattened, game-wide numbering used by
+// AnalysisOutput::GetStrategyProb/GetStrategyValue (players in Game::GetPlayers() order,
+// each contributing their own strategies in order) -- distinct from
+// GameStrategy::GetNumber(), which is only the index within its own player.
+int GetGlobalStrategyIndex(const GameStrategy &p_strategy)
+{
+  int index = 0;
+  for (const auto &player : p_strategy->GetGame()->GetPlayers()) {
+    if (player == p_strategy->GetPlayer()) {
+      break;
+    }
+    index += static_cast<int>(player->GetStrategies().size());
+  }
+  return index + p_strategy->GetNumber();
+}
+
+bool HasStrategyInfo(GameDocument *p_doc, const GameStrategy &p_strategy)
+{
+  return !GetStrategyDescription(p_strategy).empty() ||
+         p_doc->GetWorkspace().GetCurrentProfile() > 0;
+}
+
+// A hover tooltip for a row/col header's strategy cell: the strategy's tree-derived
+// description (if the nfg is derived from a tree), and -- when a profile is selected --
+// its probability and expected payoff under the current profile (the classic "value of
+// this pure strategy against the others' current play" readout used to check best
+// responses), plus its player's own overall current-profile payoff for context. Built
+// once and re-populated on each hover, mirroring NodeInfoPopup in efgtooltip.cc.
+class StrategyInfoPopup final : public wxPopupTransientWindow {
+public:
+  explicit StrategyInfoPopup(wxWindow *p_parent) : wxPopupTransientWindow(p_parent, wxBORDER_NONE)
+  {
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
+    BuildControls();
+  }
+
+  void ShowForStrategy(GameDocument *p_doc, const GameStrategy &p_strategy,
+                       const wxPoint &p_anchor)
+  {
+    const wxString label = wxString::FromUTF8(p_strategy->GetLabel());
+    m_heading->SetLabel(wxString::Format(_("Strategy %s"), label));
+
+    const wxString description = GetStrategyDescription(p_strategy);
+    m_description->SetLabel(description);
+    m_contentPanel->GetSizer()->Show(m_description, !description.empty(), true);
+
+    const bool hasProfile = p_doc->GetWorkspace().GetCurrentProfile() > 0;
+    if (hasProfile) {
+      const AnalysisOutput &profiles = p_doc->GetWorkspace().GetProfiles();
+      const int index = GetGlobalStrategyIndex(p_strategy);
+      const GamePlayer player = p_strategy->GetPlayer();
+      const wxColour color = p_doc->GetStyle().GetPlayerColor(player);
+
+      wxString playerLabel = wxString::FromUTF8(player->GetLabel());
+      if (playerLabel.empty()) {
+        playerLabel = wxString::Format(_("Player %d"), player->GetNumber());
+      }
+
+      m_probText->SetForegroundColour(color);
+      m_probText->SetLabel(_("Pr(played): ") +
+                           wxString::FromUTF8(profiles.GetStrategyProb(index)));
+      m_valueText->SetForegroundColour(color);
+      m_valueText->SetLabel(_("Payoff if played: ") +
+                            wxString::FromUTF8(profiles.GetStrategyValue(index)));
+      m_payoffText->SetForegroundColour(color);
+      m_payoffText->SetLabel(playerLabel + _(" payoff: ") +
+                             wxString::FromUTF8(profiles.GetPayoff(player->GetNumber())));
+    }
+    m_contentPanel->GetSizer()->Show(m_profileSizer, hasProfile, true);
+
+    m_contentPanel->GetSizer()->Layout();
+    Fit();
+    Position(p_anchor, wxSize(FromDIP(8), FromDIP(8)));
+    Popup();
+  }
+
+private:
+  void BuildControls()
+  {
+    auto *popupSizer = new wxBoxSizer(wxVERTICAL);
+
+    m_contentPanel = new wxPanel(this);
+    m_contentPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
+    auto *outerSizer = new wxBoxSizer(wxVERTICAL);
+
+    m_heading = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+    wxFont headingFont = m_heading->GetFont();
+    headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+    headingFont.SetPointSize(headingFont.GetPointSize() + 1);
+    m_heading->SetFont(headingFont);
+    outerSizer->Add(m_heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+
+    m_description = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+    m_description->Wrap(FromDIP(420));
+    outerSizer->Add(m_description, 0, wxALL, FromDIP(12));
+
+    m_profileSizer = new wxBoxSizer(wxVERTICAL);
+    m_probText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+    m_profileSizer->Add(m_probText, 0, wxTOP, FromDIP(2));
+    m_valueText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+    m_profileSizer->Add(m_valueText, 0, wxTOP, FromDIP(2));
+    m_payoffText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+    m_profileSizer->Add(m_payoffText, 0, wxTOP, FromDIP(2));
+    outerSizer->Add(m_profileSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+
+    m_contentPanel->SetSizer(outerSizer);
+    popupSizer->Add(m_contentPanel, 1, wxEXPAND | wxALL, FromDIP(1));
+    SetSizerAndFit(popupSizer);
+  }
+
+  wxPanel *m_contentPanel;
+  wxStaticText *m_heading;
+  wxStaticText *m_description;
+  wxBoxSizer *m_profileSizer;
+  wxStaticText *m_probText;
+  wxStaticText *m_valueText;
+  wxStaticText *m_payoffText;
+};
+
+} // namespace
+
 class RowPlayerGrid final : public TableGridBase {
   TableWidget *m_table;
   RowPlayerTable *m_gridTable;
+  StrategyInfoPopup *m_infoPopup;
+  wxTimer m_hoverTimer;
+  int m_hoverRow{-1}, m_hoverCol{-1};
 
   void OnCellLeftClick(wxGridEvent &) override;
+  void OnCellRightClick(wxGridEvent &);
+  void OnMotion(wxMouseEvent &);
+  void OnLeaveWindow(wxMouseEvent &);
+  void OnHoverTimer(wxTimerEvent &);
+  void DismissInfo();
 
-  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
-                          const wxPoint &p_pos);
+  void ShowPlacementMenu(int p_col, const wxPoint &p_pos);
 
 public:
   explicit RowPlayerGrid(TableWidget *p_parent);
 
   void OnUpdate() { m_gridTable->OnUpdate(); }
-
-  bool DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text) override;
 };
 
 RowPlayerGrid::RowPlayerGrid(TableWidget *p_parent)
-  : TableGridBase(p_parent, wxID_ANY), m_table(p_parent), m_gridTable(new RowPlayerTable(p_parent))
+  : TableGridBase(p_parent, wxID_ANY), m_table(p_parent),
+    m_gridTable(new RowPlayerTable(p_parent)), m_infoPopup(new StrategyInfoPopup(this))
 {
   SetTable(m_gridTable, true);
   SetGridLineColour(*wxBLACK);
@@ -358,174 +493,170 @@ RowPlayerGrid::RowPlayerGrid(TableWidget *p_parent)
   // must only ever move in response to the payoff grid's scroll sync.
   Bind(wxEVT_MOUSEWHEEL, [](wxMouseEvent &) {});
 
-  // wxGrid is a composite widget -- the actual window that receives mouse
-  // and OS drag events over the cell area is the internal grid window, not
-  // the outer wxGrid object, so the drop target has to be registered there.
-  GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
+  Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &RowPlayerGrid::OnCellRightClick, this);
+  // wxGrid is a composite widget -- plain (non-command) mouse events like these are
+  // delivered to the internal grid window, not this outer wxGrid object, so they have to
+  // be bound there instead. wxEVT_GRID_CELL_*_CLICK don't have this problem: those are
+  // wxGridEvents, which wxGrid itself generates and dispatches to the outer object.
+  GetGridWindow()->Bind(wxEVT_MOTION, &RowPlayerGrid::OnMotion, this);
+  GetGridWindow()->Bind(wxEVT_LEAVE_WINDOW, &RowPlayerGrid::OnLeaveWindow, this);
+  m_hoverTimer.SetOwner(this);
+  Bind(wxEVT_TIMER, &RowPlayerGrid::OnHoverTimer, this);
 }
-
-namespace {
-wxString GetStrategyTooltip(const GameStrategy &p_strategy)
-{
-  if (!p_strategy->GetGame()->IsTree()) {
-    return {};
-  }
-
-  wxString tooltip;
-  for (const auto &infoset : p_strategy->GetPlayer()->GetInfosets()) {
-    const auto action = p_strategy->GetAction(infoset);
-    if (!action) {
-      continue;
-    }
-
-    if (!tooltip.empty()) {
-      tooltip << wxT("\n");
-    }
-    tooltip << wxString::Format(_("Information set %d"), infoset->GetNumber());
-    if (!infoset->GetLabel().empty()) {
-      tooltip << wxT(" (") << wxString(infoset->GetLabel().c_str(), *wxConvCurrent) << wxT(")");
-    }
-    tooltip << wxT(": ");
-    if (action->GetLabel().empty()) {
-      tooltip << wxString::Format(_("action %d"), action->GetNumber());
-    }
-    else {
-      tooltip << wxString(action->GetLabel().c_str(), *wxConvCurrent);
-    }
-  }
-  return tooltip;
-}
-
-class StrategyDescriptionPopup final : public wxPopupTransientWindow {
-public:
-  StrategyDescriptionPopup(wxWindow *p_parent, const GameStrategy &p_strategy)
-    : wxPopupTransientWindow(p_parent, wxBORDER_NONE)
-  {
-    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
-
-    auto *content = new wxPanel(this);
-    content->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-
-    auto *contentSizer = new wxBoxSizer(wxVERTICAL);
-    const wxString label(p_strategy->GetLabel().c_str(), *wxConvCurrent);
-    auto *heading = new wxStaticText(content, wxID_ANY, wxString::Format(_("Strategy %s"), label));
-    wxFont headingFont = heading->GetFont();
-    headingFont.SetWeight(wxFONTWEIGHT_BOLD);
-    headingFont.SetPointSize(headingFont.GetPointSize() + 1);
-    heading->SetFont(headingFont);
-    contentSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
-
-    auto *description = new wxStaticText(content, wxID_ANY, GetStrategyTooltip(p_strategy));
-    description->Wrap(FromDIP(420));
-    contentSizer->Add(description, 0, wxALL, FromDIP(12));
-    content->SetSizer(contentSizer);
-
-    auto *popupSizer = new wxBoxSizer(wxVERTICAL);
-    popupSizer->Add(content, 1, wxEXPAND | wxALL, FromDIP(1));
-    SetSizerAndFit(popupSizer);
-  }
-
-protected:
-  void OnDismiss() override { Destroy(); }
-};
-
-void ShowStrategyPopup(wxGrid *p_grid, int p_row, int p_col, const GameStrategy &p_strategy)
-{
-  auto *popup = new StrategyDescriptionPopup(p_grid, p_strategy);
-  const wxRect cellRect = p_grid->CellToRect(p_row, p_col);
-  const wxPoint anchor = p_grid->GetGridWindow()->ClientToScreen(cellRect.GetBottomLeft());
-  popup->Position(anchor, wxSize(popup->FromDIP(8), popup->FromDIP(8)));
-  popup->Popup();
-}
-
-} // namespace
 
 void RowPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
+  DismissInfo();
+
   if (m_table->GetRowHeaderColCount() == 0) {
     TableGridBase::OnCellLeftClick(p_event);
     return;
   }
 
-  const int col = p_event.GetCol();
-  const int player = m_table->GetRowHeaderPlayer(col);
-
   if (m_table->IsReadOnly()) {
-    const int row = p_event.GetRow();
-    const int strategy = m_table->GetRowHeaderStrategy(col, row);
-    const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-    if (!GetStrategyTooltip(gameStrategy).empty()) {
-      ShowStrategyPopup(this, row, col, gameStrategy);
-    }
     return;
   }
 
-  m_table->EditStrategies(player);
+  m_table->EditStrategies(m_table->GetRowHeaderPlayer(p_event.GetCol()));
 }
 
-bool RowPlayerGrid::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
-                                       const wxPoint &p_pos)
+void RowPlayerGrid::OnCellRightClick(wxGridEvent &p_event)
 {
-  if (m_table->IsRowPlayerPlacementNoOp(p_index, p_player)) {
-    return true;
-  }
+  DismissInfo();
+  ShowPlacementMenu(p_event.GetCol(), p_event.GetPosition());
+}
 
-  const int placePlayerId = wxWindow::NewControlId();
+void RowPlayerGrid::OnMotion(wxMouseEvent &p_event)
+{
+  if (m_table->GetRowHeaderColCount() > 0) {
+    const wxGridCellCoords coords = XYToCell(p_event.GetPosition());
+    if (coords.GetRow() != m_hoverRow || coords.GetCol() != m_hoverCol) {
+      DismissInfo();
+      m_hoverRow = coords.GetRow();
+      m_hoverCol = coords.GetCol();
+      if (m_hoverRow >= 0 && m_hoverCol >= 0) {
+        m_hoverTimer.StartOnce(400);
+      }
+    }
+  }
+  p_event.Skip();
+}
+
+void RowPlayerGrid::OnLeaveWindow(wxMouseEvent &p_event)
+{
+  DismissInfo();
+  p_event.Skip();
+}
+
+void RowPlayerGrid::DismissInfo()
+{
+  m_hoverTimer.Stop();
+  m_hoverRow = m_hoverCol = -1;
+  if (m_infoPopup->IsShown()) {
+    m_infoPopup->Dismiss();
+  }
+}
+
+void RowPlayerGrid::OnHoverTimer(wxTimerEvent &)
+{
+  if (m_hoverRow < 0 || m_hoverCol < 0) {
+    return;
+  }
+  const int player = m_table->GetRowHeaderPlayer(m_hoverCol);
+  const int strategy = m_table->GetRowHeaderStrategy(m_hoverCol, m_hoverRow);
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  GameDocument *doc = m_table->GetDocument();
+  if (!HasStrategyInfo(doc, gameStrategy)) {
+    return;
+  }
+  const wxRect cellRect = CellToRect(m_hoverRow, m_hoverCol);
+  const wxPoint anchor = GetGridWindow()->ClientToScreen(cellRect.GetBottomLeft());
+  m_infoPopup->ShowForStrategy(doc, gameStrategy, anchor);
+}
+
+// Right-clicking a row-header cell offers to place any player at this position (before
+// or after the player currently occupying it), replacing what used to be a drag of a
+// player icon from the (now-removed) left-hand player panel -- that never worked very
+// well, and didn't survive the panel's removal anyway. When there are no row players yet,
+// the only choice is which player to use as the (single) row player.
+void RowPlayerGrid::ShowPlacementMenu(int p_col, const wxPoint &p_pos)
+{
+  const bool hasRowPlayers = m_table->GetRowHeaderColCount() > 0;
+  const int beforeIndex = hasRowPlayers ? p_col + 1 : 1;
+  const int afterIndex = beforeIndex + 1;
 
   wxMenu menu;
-  menu.Append(placePlayerId, p_label);
+  wxMenu *beforeMenu = hasRowPlayers ? new wxMenu : nullptr;
+  wxMenu *afterMenu = hasRowPlayers ? new wxMenu : nullptr;
+  wxMenu *useMenu = hasRowPlayers ? nullptr : new wxMenu;
+  std::map<int, std::pair<int, int>> placements; // menu id -> (index, player)
+
+  for (const auto &player : m_table->GetDocument()->GetGame()->GetPlayers()) {
+    wxString label = wxString::FromUTF8(player->GetLabel());
+    if (label.empty()) {
+      label = wxString::Format(_("Player %d"), player->GetNumber());
+    }
+    const wxBitmap swatch = MakeColorSwatch(m_table->GetPlayerColor(player->GetNumber()));
+
+    if (!hasRowPlayers) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(useMenu, id, label);
+      item->SetBitmap(swatch);
+      useMenu->Append(item);
+      placements[id] = {1, player->GetNumber()};
+      continue;
+    }
+
+    if (!m_table->IsRowPlayerPlacementNoOp(beforeIndex, player->GetNumber())) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(beforeMenu, id, label);
+      item->SetBitmap(swatch);
+      beforeMenu->Append(item);
+      placements[id] = {beforeIndex, player->GetNumber()};
+    }
+    if (!m_table->IsRowPlayerPlacementNoOp(afterIndex, player->GetNumber())) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(afterMenu, id, label);
+      item->SetBitmap(swatch);
+      afterMenu->Append(item);
+      placements[id] = {afterIndex, player->GetNumber()};
+    }
+  }
+
+  if (hasRowPlayers) {
+    if (beforeMenu->GetMenuItemCount() > 0) {
+      menu.AppendSubMenu(beforeMenu, _("Place player before"));
+    }
+    else {
+      delete beforeMenu;
+    }
+    if (afterMenu->GetMenuItemCount() > 0) {
+      menu.AppendSubMenu(afterMenu, _("Place player after"));
+    }
+    else {
+      delete afterMenu;
+    }
+  }
+  else {
+    menu.AppendSubMenu(useMenu, _("Use as row player"));
+  }
+
+  if (menu.GetMenuItemCount() == 0) {
+    return;
+  }
 
   const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
-  if (selection != placePlayerId) {
-    return false;
+  const auto it = placements.find(selection);
+  if (it == placements.end()) {
+    return;
   }
 
   try {
-    m_table->SetRowPlayer(p_index, p_player);
-    return true;
+    m_table->SetRowPlayer(it->second.first, it->second.second);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }
-
-  return false;
-}
-
-bool RowPlayerGrid::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
-{
-  if (p_text.empty() || p_text[0] != 'P') {
-    return false;
-  }
-
-  long player;
-  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
-    return false;
-  }
-
-  if (m_table->NumRowPlayers() == 0) {
-    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as row player"),
-                              wxPoint(p_x, p_y));
-  }
-
-  for (int col = 0; col < GetNumberCols(); col++) {
-    const wxRect rect = CellToRect(0, col);
-    const int existingPlayer = m_table->GetRowHeaderPlayer(col);
-    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
-
-    if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
-      return ShowPlayerDropMenu(col + 1, static_cast<int>(player),
-                                wxString::Format(_("Place before %s"), playerLabel),
-                                wxPoint(p_x, p_y));
-    }
-
-    if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
-      return ShowPlayerDropMenu(col + 2, static_cast<int>(player),
-                                wxString::Format(_("Place after %s"), playerLabel),
-                                wxPoint(p_x, p_y));
-    }
-  }
-
-  return false;
 }
 
 //=========================================================================
@@ -708,22 +839,28 @@ void ColPlayerTable::OnUpdate()
 class ColPlayerGrid final : public TableGridBase {
   TableWidget *m_table;
   ColPlayerTable *m_gridTable;
+  StrategyInfoPopup *m_infoPopup;
+  wxTimer m_hoverTimer;
+  int m_hoverRow{-1}, m_hoverCol{-1};
 
   void OnCellLeftClick(wxGridEvent &) override;
+  void OnCellRightClick(wxGridEvent &);
+  void OnMotion(wxMouseEvent &);
+  void OnLeaveWindow(wxMouseEvent &);
+  void OnHoverTimer(wxTimerEvent &);
+  void DismissInfo();
 
-  bool ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
-                          const wxPoint &p_pos);
+  void ShowPlacementMenu(int p_row, const wxPoint &p_pos);
 
 public:
   explicit ColPlayerGrid(TableWidget *p_parent);
 
   void OnUpdate() { m_gridTable->OnUpdate(); }
-
-  bool DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text) override;
 };
 
 ColPlayerGrid::ColPlayerGrid(TableWidget *p_parent)
-  : TableGridBase(p_parent, wxID_ANY), m_table(p_parent), m_gridTable(new ColPlayerTable(p_parent))
+  : TableGridBase(p_parent, wxID_ANY), m_table(p_parent),
+    m_gridTable(new ColPlayerTable(p_parent)), m_infoPopup(new StrategyInfoPopup(this))
 {
   SetTable(m_gridTable, true);
   SetGridLineColour(*wxBLACK);
@@ -733,98 +870,163 @@ ColPlayerGrid::ColPlayerGrid(TableWidget *p_parent)
   // See the equivalent comment in RowPlayerGrid's constructor.
   Bind(wxEVT_MOUSEWHEEL, [](wxMouseEvent &) {});
 
-  // wxGrid is a composite widget -- the actual window that receives mouse
-  // and OS drag events over the cell area is the internal grid window, not
-  // the outer wxGrid object, so the drop target has to be registered there.
-  GetGridWindow()->SetDropTarget(new TableWidgetDropTarget(this));
+  Bind(wxEVT_GRID_CELL_RIGHT_CLICK, &ColPlayerGrid::OnCellRightClick, this);
+  // See the equivalent comment in RowPlayerGrid's constructor.
+  GetGridWindow()->Bind(wxEVT_MOTION, &ColPlayerGrid::OnMotion, this);
+  GetGridWindow()->Bind(wxEVT_LEAVE_WINDOW, &ColPlayerGrid::OnLeaveWindow, this);
+  m_hoverTimer.SetOwner(this);
+  Bind(wxEVT_TIMER, &ColPlayerGrid::OnHoverTimer, this);
 }
 
 void ColPlayerGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
+  DismissInfo();
+
   if (m_table->GetColHeaderRowCount() == 0) {
     TableGridBase::OnCellLeftClick(p_event);
     return;
   }
 
-  const int row = p_event.GetRow();
-  const int player = m_table->GetColHeaderPlayer(row);
-
   if (m_table->IsReadOnly()) {
-    const int col = p_event.GetCol();
-    const int strategy = m_table->GetColHeaderStrategy(row, col);
-    const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
-    if (!GetStrategyTooltip(gameStrategy).empty()) {
-      ShowStrategyPopup(this, row, col, gameStrategy);
-    }
     return;
   }
 
-  m_table->EditStrategies(player);
+  m_table->EditStrategies(m_table->GetColHeaderPlayer(p_event.GetRow()));
 }
 
-bool ColPlayerGrid::ShowPlayerDropMenu(int p_index, int p_player, const wxString &p_label,
-                                       const wxPoint &p_pos)
+void ColPlayerGrid::OnCellRightClick(wxGridEvent &p_event)
 {
-  if (m_table->IsColPlayerPlacementNoOp(p_index, p_player)) {
-    return true;
-  }
+  DismissInfo();
+  ShowPlacementMenu(p_event.GetRow(), p_event.GetPosition());
+}
 
-  const int placePlayerId = wxWindow::NewControlId();
+void ColPlayerGrid::OnMotion(wxMouseEvent &p_event)
+{
+  if (m_table->GetColHeaderRowCount() > 0) {
+    const wxGridCellCoords coords = XYToCell(p_event.GetPosition());
+    if (coords.GetRow() != m_hoverRow || coords.GetCol() != m_hoverCol) {
+      DismissInfo();
+      m_hoverRow = coords.GetRow();
+      m_hoverCol = coords.GetCol();
+      if (m_hoverRow >= 0 && m_hoverCol >= 0) {
+        m_hoverTimer.StartOnce(400);
+      }
+    }
+  }
+  p_event.Skip();
+}
+
+void ColPlayerGrid::OnLeaveWindow(wxMouseEvent &p_event)
+{
+  DismissInfo();
+  p_event.Skip();
+}
+
+void ColPlayerGrid::DismissInfo()
+{
+  m_hoverTimer.Stop();
+  m_hoverRow = m_hoverCol = -1;
+  if (m_infoPopup->IsShown()) {
+    m_infoPopup->Dismiss();
+  }
+}
+
+void ColPlayerGrid::OnHoverTimer(wxTimerEvent &)
+{
+  if (m_hoverRow < 0 || m_hoverCol < 0) {
+    return;
+  }
+  const int player = m_table->GetColHeaderPlayer(m_hoverRow);
+  const int strategy = m_table->GetColHeaderStrategy(m_hoverRow, m_hoverCol);
+  const auto gameStrategy = m_table->GetStrategyByPlayerAndIndex(player, strategy);
+  GameDocument *doc = m_table->GetDocument();
+  if (!HasStrategyInfo(doc, gameStrategy)) {
+    return;
+  }
+  const wxRect cellRect = CellToRect(m_hoverRow, m_hoverCol);
+  const wxPoint anchor = GetGridWindow()->ClientToScreen(cellRect.GetBottomLeft());
+  m_infoPopup->ShowForStrategy(doc, gameStrategy, anchor);
+}
+
+// See the equivalent comment on RowPlayerGrid::ShowPlacementMenu.
+void ColPlayerGrid::ShowPlacementMenu(int p_row, const wxPoint &p_pos)
+{
+  const bool hasColPlayers = m_table->GetColHeaderRowCount() > 0;
+  const int beforeIndex = hasColPlayers ? p_row + 1 : 1;
+  const int afterIndex = beforeIndex + 1;
 
   wxMenu menu;
-  menu.Append(placePlayerId, p_label);
+  wxMenu *beforeMenu = hasColPlayers ? new wxMenu : nullptr;
+  wxMenu *afterMenu = hasColPlayers ? new wxMenu : nullptr;
+  wxMenu *useMenu = hasColPlayers ? nullptr : new wxMenu;
+  std::map<int, std::pair<int, int>> placements; // menu id -> (index, player)
+
+  for (const auto &player : m_table->GetDocument()->GetGame()->GetPlayers()) {
+    wxString label = wxString::FromUTF8(player->GetLabel());
+    if (label.empty()) {
+      label = wxString::Format(_("Player %d"), player->GetNumber());
+    }
+    const wxBitmap swatch = MakeColorSwatch(m_table->GetPlayerColor(player->GetNumber()));
+
+    if (!hasColPlayers) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(useMenu, id, label);
+      item->SetBitmap(swatch);
+      useMenu->Append(item);
+      placements[id] = {1, player->GetNumber()};
+      continue;
+    }
+
+    if (!m_table->IsColPlayerPlacementNoOp(beforeIndex, player->GetNumber())) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(beforeMenu, id, label);
+      item->SetBitmap(swatch);
+      beforeMenu->Append(item);
+      placements[id] = {beforeIndex, player->GetNumber()};
+    }
+    if (!m_table->IsColPlayerPlacementNoOp(afterIndex, player->GetNumber())) {
+      const int id = wxWindow::NewControlId();
+      auto *item = new wxMenuItem(afterMenu, id, label);
+      item->SetBitmap(swatch);
+      afterMenu->Append(item);
+      placements[id] = {afterIndex, player->GetNumber()};
+    }
+  }
+
+  if (hasColPlayers) {
+    if (beforeMenu->GetMenuItemCount() > 0) {
+      menu.AppendSubMenu(beforeMenu, _("Place player before"));
+    }
+    else {
+      delete beforeMenu;
+    }
+    if (afterMenu->GetMenuItemCount() > 0) {
+      menu.AppendSubMenu(afterMenu, _("Place player after"));
+    }
+    else {
+      delete afterMenu;
+    }
+  }
+  else {
+    menu.AppendSubMenu(useMenu, _("Use as column player"));
+  }
+
+  if (menu.GetMenuItemCount() == 0) {
+    return;
+  }
 
   const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
-  if (selection != placePlayerId) {
-    return false;
+  const auto it = placements.find(selection);
+  if (it == placements.end()) {
+    return;
   }
 
   try {
-    m_table->SetColPlayer(p_index, p_player);
-    return true;
+    m_table->SetColPlayer(it->second.first, it->second.second);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }
-
-  return false;
-}
-
-bool ColPlayerGrid::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
-{
-  if (p_text.empty() || p_text[0] != 'P') {
-    return false;
-  }
-
-  long player;
-  if (!p_text.Right(p_text.Length() - 1).ToLong(&player)) {
-    return false;
-  }
-
-  if (m_table->NumColPlayers() == 0) {
-    return ShowPlayerDropMenu(1, static_cast<int>(player), _("Use as column player"),
-                              wxPoint(p_x, p_y));
-  }
-
-  for (int row = 0; row < GetNumberRows(); row++) {
-    const wxRect rect = CellToRect(row, 0);
-    const int existingPlayer = m_table->GetColHeaderPlayer(row);
-    const wxString playerLabel = wxString::Format(_("Player %d"), existingPlayer);
-
-    if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
-      return ShowPlayerDropMenu(row + 1, static_cast<int>(player),
-                                wxString::Format(_("Place before %s"), playerLabel),
-                                wxPoint(p_x, p_y));
-    }
-
-    if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
-      return ShowPlayerDropMenu(row + 2, static_cast<int>(player),
-                                wxString::Format(_("Place after %s"), playerLabel),
-                                wxPoint(p_x, p_y));
-    }
-  }
-
-  return false;
 }
 
 //=========================================================================

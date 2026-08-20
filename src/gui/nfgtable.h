@@ -394,6 +394,7 @@ public:
   bool IsReadOnly() const;
   wxColour GetPlayerColor(int player) const;
   const StrategySupportProfile &GetSupport() const { return m_doc->GetNfgSupport(); }
+  GameDocument *GetDocument() const { return m_doc; }
 
   bool IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const;
   bool IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const;
