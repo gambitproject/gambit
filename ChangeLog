@@ -39,6 +39,7 @@
 - Added `Game.relabel_players`, which simultaneously reassigns the labels of the game's players.  (#1058)
 - Added `max_rectangles` to `enumpoly_solve` (and `-r` to `gambit-enumpoly`), bounding the number
   of cells examined when searching for equilibria on a single support. (#1055)
+- Added `Game.set_players`, which declares the ordered list of the game's players, matching by label. (#1059)
 
 ### Fixed
 - `MixedStrategy.__eq__` raised `AttributeError` when comparing two `MixedStrategy` instances
@@ -184,6 +185,8 @@
   equivalent `SetStrategies` call directly.  (#1056)
   - Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
     nonempty, unique labels.  (#1058)
+  - `Game.add_player` has been removed; use `Game.set_players`, specifying the labels
+    of the players.  (#1059)
 
 
 ## [17.0.0-alpha.1] - 2026-08-13
