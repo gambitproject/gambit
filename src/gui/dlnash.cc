@@ -157,12 +157,12 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("enummixed");
         }
         else if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
-          return prefix +
-                 wxString::Format(
-                     "enumpoly -d 10 -e %d -m %.17g",
-                     method.stopAfter.has_value() ? static_cast<int>(method.stopAfter.value()) : 0,
-                     method.maxRegret) +
-                 strategic;
+          wxString command = wxString::Format("enumpoly -d 10 -m %.17g", method.maxRegret);
+          if (method.stopAfter.has_value()) {
+            command += wxString::Format(" -e %llu",
+                                        static_cast<unsigned long long>(method.stopAfter.value()));
+          }
+          return prefix + command + strategic;
         }
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
           return prefix + wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
@@ -177,12 +177,12 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("lp") + strategic;
         }
         else if constexpr (std::is_same_v<Method, LCPNashSpec>) {
-          return prefix +
-                 wxString::Format(
-                     "lcp -e %d -r %d",
-                     method.stopAfter.has_value() ? static_cast<int>(method.stopAfter.value()) : 0,
-                     method.maxDepth) +
-                 strategic;
+          wxString command = wxString::Format("lcp -r %d", method.maxDepth);
+          if (method.stopAfter.has_value()) {
+            command += wxString::Format(" -e %llu",
+                                        static_cast<unsigned long long>(method.stopAfter.value()));
+          }
+          return prefix + command + strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
           return prefix + wxString::Format("liap -d 10 -n %d -i %d -m %.17g",

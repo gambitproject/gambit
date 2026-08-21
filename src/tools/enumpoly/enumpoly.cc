@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <cmath>
+#include <charconv>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -176,15 +176,16 @@ int main(int argc, char *argv[])
       maxregret = atof(optarg);
       break;
     case 'e': {
-      char *endptr;
-      double val = std::strtod(optarg, &endptr);
-      if (*endptr != '\0' || val <= 0 || val != std::floor(val) ||
-          val > static_cast<double>(std::numeric_limits<size_t>::max())) {
+      size_t parsed;
+      const auto *begin = optarg;
+      const auto *end = optarg + std::char_traits<char>::length(optarg);
+      const auto result = std::from_chars(begin, end, parsed);
+      if (result.ec != std::errc{} || result.ptr != end || parsed == 0) {
         std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
                   << std::endl;
         exit(1);
       }
-      stopAfter = static_cast<size_t>(val);
+      stopAfter = parsed;
       break;
     }
     case 'r':
