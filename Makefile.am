@@ -28,49 +28,27 @@ EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
-	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/calc.xpm \
-	src/gui/bitmaps/close.xpm \
-	src/gui/bitmaps/color.xpm \
-	src/gui/bitmaps/datasrc.xpm \
-	src/gui/bitmaps/dice.xpm \
 	src/gui/bitmaps/efg.ico \
-	src/gui/bitmaps/exit.xpm \
-	src/gui/bitmaps/font.xpm \
 	src/gui/bitmaps/gambitbig.xpm \
 	src/gui/bitmaps/gambit.bmp \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
-	src/gui/bitmaps/label.xpm \
-	src/gui/bitmaps/layout.xpm \
 	src/gui/bitmaps/move.xpm \
-	src/gui/bitmaps/newcol.xpm \
-	src/gui/bitmaps/newrow.xpm \
 	src/gui/bitmaps/newtable.xpm \
 	src/gui/bitmaps/newtree.xpm \
-	src/gui/bitmaps/new.xpm \
 	src/gui/bitmaps/next.xpm \
 	src/gui/bitmaps/nfg.ico \
 	src/gui/bitmaps/open.xpm \
-	src/gui/bitmaps/person.xpm \
-	src/gui/bitmaps/preview.xpm \
 	src/gui/bitmaps/prev.xpm \
-	src/gui/bitmaps/print.xpm \
 	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/saveas.xpm \
-	src/gui/bitmaps/savedata.xpm \
 	src/gui/bitmaps/save.xpm \
 	src/gui/bitmaps/stop.xpm \
 	src/gui/bitmaps/table.xpm \
 	src/gui/bitmaps/tobegin.xpm \
 	src/gui/bitmaps/toend.xpm \
-	src/gui/bitmaps/tree.xpm \
 	src/gui/bitmaps/undo.xpm \
 	src/gui/bitmaps/redo.xpm \
-	src/gui/bitmaps/zoomfit.xpm \
-	src/gui/bitmaps/zoomin.xpm \
-	src/gui/bitmaps/zoomout.xpm \
-	src/gui/bitmaps/zoom1.xpm \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
 	contrib/games/2x2x2.efg \

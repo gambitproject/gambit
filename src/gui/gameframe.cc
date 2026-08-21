@@ -365,68 +365,32 @@ void GameFrame::OnUpdate()
 //          GameFrame: Creating and updating menus and toolbar
 //--------------------------------------------------------------------
 
-#include "bitmaps/about.xpm"
 #include "bitmaps/calc.xpm"
-#include "bitmaps/close.xpm"
-#include "bitmaps/exit.xpm"
-#include "bitmaps/font.xpm"
-#include "bitmaps/label.xpm"
-#include "bitmaps/layout.xpm"
 #include "bitmaps/newtable.xpm"
 #include "bitmaps/newtree.xpm"
 #include "bitmaps/open.xpm"
-#include "bitmaps/preview.xpm"
-#include "bitmaps/print.xpm"
 #include "bitmaps/profiles.xpm"
 #include "bitmaps/redo.xpm"
 #include "bitmaps/save.xpm"
-#include "bitmaps/saveas.xpm"
 #include "bitmaps/table.xpm"
 #include "bitmaps/undo.xpm"
-#include "bitmaps/zoomfit.xpm"
-#include "bitmaps/zoomin.xpm"
-#include "bitmaps/zoomout.xpm"
-#include "bitmaps/zoom1.xpm"
-
-//
-// wxWidgets does not appear to offer a method for easily creating
-// a menu item with a bitmap, so we write this convenience function
-// to simplify the process.
-//
-// The bitmaps have currently been disabled, since they really
-// don't look so great.
-//
-static void AppendBitmapItem(wxMenu *p_menu, int p_id, const wxString &p_label,
-                             const wxString &p_helpString, const wxBitmap &p_bitmap)
-{
-  auto *item = new wxMenuItem(p_menu, p_id, p_label, p_helpString);
-#ifdef UNUSED
-  // wxMac does not (apparently) support adding bitmaps to menu items,
-  // so we do not set the bitmap in this case.
-  item->SetBitmap(p_bitmap);
-#endif // UNUSED
-  p_menu->Append(item);
-}
 
 void GameFrame::MakeMenus()
 {
   auto *fileMenu = new wxMenu;
 
   auto *fileNewMenu = new wxMenu;
-  AppendBitmapItem(fileNewMenu, GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
-                   _("Create a new extensive (tree) game"), wxBitmap(newtree_xpm));
-  AppendBitmapItem(fileNewMenu, GBT_MENU_FILE_NEW_NFG, _("&Strategic game"),
-                   _("Create a new strategic (table) game"), wxBitmap(newtable_xpm));
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
+                      _("Create a new extensive (tree) game"));
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_NFG, _("&Strategic game"),
+                      _("Create a new strategic (table) game"));
   fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu, _("Create a new game"));
 
-  AppendBitmapItem(fileMenu, wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"),
-                   wxBitmap(open_xpm));
+  fileMenu->Append(wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"));
   fileMenu->AppendSeparator();
 
-  AppendBitmapItem(fileMenu, wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"),
-                   wxBitmap(save_xpm));
-  AppendBitmapItem(fileMenu, wxID_SAVEAS, _("Save &as\tShift-Ctrl-S"),
-                   _("Save game to a different file"), wxBitmap(saveas_xpm));
+  fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
+  fileMenu->Append(wxID_SAVEAS, _("Save &as\tShift-Ctrl-S"), _("Save game to a different file"));
 
   fileMenu->AppendSeparator();
   auto *fileExportMenu = new wxMenu;
@@ -445,21 +409,16 @@ void GameFrame::MakeMenus()
                    _("Export the game in various formats"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"), _("Set up preferences for printing"));
-  AppendBitmapItem(fileMenu, wxID_PREVIEW, _("Print Pre&view"),
-                   _("View a preview of the game printout"), wxBitmap(preview_xpm));
-  AppendBitmapItem(fileMenu, wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"),
-                   wxBitmap(print_xpm));
+  fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"), _("View a preview of the game printout"));
+  fileMenu->Append(wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"));
 
   fileMenu->AppendSeparator();
-  AppendBitmapItem(fileMenu, wxID_CLOSE, _("&Close\tCtrl-W"), _("Close this window"),
-                   wxBitmap(close_xpm));
-  AppendBitmapItem(fileMenu, wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"), wxBitmap(exit_xpm));
+  fileMenu->Append(wxID_CLOSE, _("&Close\tCtrl-W"), _("Close this window"));
+  fileMenu->Append(wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"));
 
   auto *editMenu = new wxMenu;
-  AppendBitmapItem(editMenu, wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"),
-                   wxBitmap(undo_xpm));
-  AppendBitmapItem(editMenu, wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"),
-                   wxBitmap(redo_xpm));
+  editMenu->Append(wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"));
+  editMenu->Append(wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"));
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
 
@@ -469,14 +428,14 @@ void GameFrame::MakeMenus()
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
 
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
-                   _("Increase display magnification"), wxBitmap(zoomin_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
-                   _("Decrease display magnification"), wxBitmap(zoomout_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
-                   _("Set magnification to 1:1"), wxBitmap(zoom1_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
-                   _("Rescale to show entire tree in window"), wxBitmap(zoomfit_xpm));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
+                   _("Increase display magnification"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
+                   _("Decrease display magnification"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
+                   _("Set magnification to 1:1"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
+                   _("Rescale to show entire tree in window"));
 
   viewMenu->AppendSeparator();
 
@@ -488,12 +447,9 @@ void GameFrame::MakeMenus()
   }
 
   auto *formatMenu = new wxMenu;
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
-                   _("Set tree layout parameters"), wxBitmap(layout_xpm));
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LABELS, _("La&bels"),
-                   _("Set labels for parts of trees"), wxBitmap(label_xpm));
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_FONTS, _("&Font"),
-                   _("Set the font for tree labels"), wxBitmap(font_xpm));
+  formatMenu->Append(GBT_MENU_FORMAT_LAYOUT, _("&Layout"), _("Set tree layout parameters"));
+  formatMenu->Append(GBT_MENU_FORMAT_LABELS, _("La&bels"), _("Set labels for parts of trees"));
+  formatMenu->Append(GBT_MENU_FORMAT_FONTS, _("&Font"), _("Set the font for tree labels"));
 
   auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
@@ -501,14 +457,13 @@ void GameFrame::MakeMenus()
   if (m_doc->GetGame()->IsTree()) {
     toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
   }
-  AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
-                   _("Compute Nash equilibria and refinements"), wxBitmap(calc_xpm));
+  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
+                    _("Compute Nash equilibria and refinements"));
 
   toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
-  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About Gambit"), _("About Gambit"),
-                   wxBitmap(about_xpm));
+  helpMenu->Append(wxID_ABOUT, _("&About Gambit"), _("About Gambit"));
 
   auto *menuBar = new wxMenuBar();
   menuBar->Append(fileMenu, _("&File"));
@@ -528,7 +483,7 @@ void GameFrame::MakeToolbar()
 {
   wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
   toolBar->SetMargins(2, 2);
-  toolBar->SetToolBitmapSize(wxSize(20, 20));
+  toolBar->SetToolBitmapSize(wxSize(24, 24));
 
   toolBar->AddTool(GBT_MENU_FILE_NEW_EFG, wxEmptyString, wxBitmap(newtree_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Create a new extensive (tree) game"),
@@ -547,11 +502,6 @@ void GameFrame::MakeToolbar()
                    _("Undo the last change"), _("Undo the last change"), nullptr);
   toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Redo the last undone change"), _("Redo the last undone change"), nullptr);
-
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(wxID_PRINT, wxEmptyString, wxBitmap(print_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Print this game"), _("Print this game"), nullptr);
 
   toolBar->AddSeparator();
 
