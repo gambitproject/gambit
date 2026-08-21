@@ -21,6 +21,7 @@
 //
 
 #include <charconv>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -178,7 +179,7 @@ int main(int argc, char *argv[])
     case 'e': {
       size_t parsed;
       const auto *begin = optarg;
-      const auto *end = optarg + std::char_traits<char>::length(optarg);
+      const auto *end = optarg + std::strlen(optarg);
       const auto result = std::from_chars(begin, end, parsed);
       if (result.ec != std::errc{} || result.ptr != end || parsed == 0) {
         std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
