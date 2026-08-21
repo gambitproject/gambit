@@ -94,13 +94,8 @@ int main(int argc, char *argv[])
     case 'e': {
       char *endptr;
       double val = std::strtod(optarg, &endptr);
-      if (*endptr != '\0' || val != std::floor(val) ||
+      if (*endptr != '\0' || val <= 0 || val != std::floor(val) ||
           val > static_cast<double>(std::numeric_limits<size_t>::max())) {
-        std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
-                  << std::endl;
-        exit(1);
-      }
-      if (val <= 0) {
         std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
                   << std::endl;
         exit(1);
