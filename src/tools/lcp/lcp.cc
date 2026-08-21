@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -89,8 +90,9 @@ int main(int argc, char *argv[])
       printDetail = true;
       break;
     case 'e': {
-      int val = atoi(optarg);
-      if (val > 0) {
+      char *endptr;
+      double val = std::strtod(optarg, &endptr);
+      if (*endptr == '\0' && val > 0 && val == static_cast<size_t>(val)) {
         stopAfter = static_cast<size_t>(val);
       }
       break;

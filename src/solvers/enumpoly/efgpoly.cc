@@ -184,8 +184,7 @@ FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_ma
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
                                                      bool &p_isSingular, bool &p_budgetExceeded,
                                                      std::optional<size_t> p_stopAfter,
-                                                     double p_maxRegret,
-                                                     size_t p_maxRectangles,
+                                                     double p_maxRegret, size_t p_maxRectangles,
                                                      const CancelToken &p_cancel)
 {
   ProblemData data(p_support);
@@ -201,9 +200,9 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   PolynomialSystemSolver solver(equations);
   std::list<Vector<double>> roots;
   try {
-    roots = solver.FindRoots({bottoms, tops},
-                             p_stopAfter.value_or(std::numeric_limits<int>::max()),
-                             p_maxRectangles, p_budgetExceeded, p_cancel);
+    roots =
+        solver.FindRoots({bottoms, tops}, p_stopAfter.value_or(std::numeric_limits<int>::max()),
+                         p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;
@@ -255,10 +254,10 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
     for (const auto &solution :
          SolveSupport(support, isSingular, budgetExceeded,
                       p_stopAfter.has_value()
-                          ? std::optional<size_t>(p_stopAfter.value() - std::min(ret.size(), p_stopAfter.value()))
+                          ? std::optional<size_t>(p_stopAfter.value() -
+                                                  std::min(ret.size(), p_stopAfter.value()))
                           : std::nullopt,
-                      p_maxregret,
-                      p_maxRectangles, p_cancel)) {
+                      p_maxregret, p_maxRectangles, p_cancel)) {
       p_onEquilibrium(solution);
       ret.push_back(solution);
     }

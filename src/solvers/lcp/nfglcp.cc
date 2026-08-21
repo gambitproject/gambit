@@ -217,7 +217,8 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
   m_onEquilibrium(profile);
   p_solution.m_equilibria.push_back(profile);
 
-  if (m_stopAfter.has_value() && static_cast<size_t>(p_solution.EquilibriumCount()) >= m_stopAfter.value()) {
+  if (m_stopAfter.has_value() &&
+      static_cast<size_t>(p_solution.EquilibriumCount()) >= m_stopAfter.value()) {
     return SearchResult::LimitReached;
   }
 
@@ -303,9 +304,13 @@ LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_ma
       .Solve(p_game);
 }
 
-template std::list<MixedStrategyProfile<double>>
-LcpStrategySolve(const Game &, std::optional<size_t>, int, StrategyCallbackType<double>, const CancelToken &);
-template std::list<MixedStrategyProfile<Rational>>
-LcpStrategySolve(const Game &, std::optional<size_t>, int, StrategyCallbackType<Rational>, const CancelToken &);
+template std::list<MixedStrategyProfile<double>> LcpStrategySolve(const Game &,
+                                                                  std::optional<size_t>, int,
+                                                                  StrategyCallbackType<double>,
+                                                                  const CancelToken &);
+template std::list<MixedStrategyProfile<Rational>> LcpStrategySolve(const Game &,
+                                                                    std::optional<size_t>, int,
+                                                                    StrategyCallbackType<Rational>,
+                                                                    const CancelToken &);
 
 } // end namespace Gambit::Nash

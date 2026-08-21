@@ -246,6 +246,10 @@ def lcp_solve(
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
+    if stop_after is not None and isinstance(stop_after, float) and not stop_after.is_integer():
+        raise ValueError(
+            f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
+        )
     if not game.is_tree or use_strategic:
         if rational:
             equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after, max_depth or 0)
@@ -710,6 +714,11 @@ def enumpoly_solve(
     PHCpack is available at https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
     if stop_after is not None and stop_after <= 0:
+        raise ValueError(
+            f"enumpoly_solve(): "
+            f"stop_after argument must be a positive integer; got {stop_after}"
+        )
+    if stop_after is not None and isinstance(stop_after, float) and not stop_after.is_integer():
         raise ValueError(
             f"enumpoly_solve(): "
             f"stop_after argument must be a positive integer; got {stop_after}"

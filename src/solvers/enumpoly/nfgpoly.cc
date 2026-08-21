@@ -104,8 +104,7 @@ namespace Gambit::Nash {
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_singular,
                              bool &p_budgetExceeded, std::optional<size_t> p_stopAfter,
-                             size_t p_maxRectangles,
-                             const CancelToken &p_cancel)
+                             size_t p_maxRectangles, const CancelToken &p_cancel)
 {
   auto space = std::make_shared<VariableSpace>(support.MixedProfileLength() -
                                                support.GetGame()->NumPlayers());
@@ -120,9 +119,9 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   is_singular = false;
   std::list<Vector<double>> roots;
   try {
-    roots = solver.FindRoots({bottoms, tops},
-                             p_stopAfter.value_or(std::numeric_limits<int>::max()),
-                             p_maxRectangles, p_budgetExceeded, p_cancel);
+    roots =
+        solver.FindRoots({bottoms, tops}, p_stopAfter.value_or(std::numeric_limits<int>::max()),
+                         p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
     is_singular = true;
@@ -169,7 +168,8 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
     for (auto solution : EnumPolyStrategySupportSolve(
              support, is_singular, budget_exceeded,
              p_stopAfter.has_value()
-                 ? std::optional<size_t>(p_stopAfter.value() - std::min(ret.size(), p_stopAfter.value()))
+                 ? std::optional<size_t>(p_stopAfter.value() -
+                                         std::min(ret.size(), p_stopAfter.value()))
                  : std::nullopt,
              p_maxRectangles, p_cancel)) {
       const MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
