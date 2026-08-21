@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/mixed.h
+// FILE: src/games/stratmixed.h
 // Declaration of mixed strategy profile classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_MIXED_H
-#define LIBGAMBIT_MIXED_H
+#ifndef GAMBIT_GAMES_STRATMIXED_H
+#define GAMBIT_GAMES_STRATMIXED_H
 
 #include <random>
 #include <vector>
 
 #include "core/vector.h"
+#include "core/segment.h"
+#include "games/game.h"
+#include "games/stratspt.h"
 #include "games/gamebagg.h"
 
 namespace Gambit {
@@ -450,4 +453,4 @@ NewRandomStrategyProfiles(const Game &p_game, int count, int denom)
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_MIXED_H
+#endif // GAMBIT_GAMES_STRATMIXED_H

@@ -182,8 +182,10 @@ FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_ma
 }
 
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
-                                                     bool &p_isSingular, int p_stopAfter,
-                                                     double p_maxRegret)
+                                                     bool &p_isSingular, bool &p_budgetExceeded,
+                                                     int p_stopAfter, double p_maxRegret,
+                                                     size_t p_maxRectangles,
+                                                     const CancelToken &p_cancel)
 {
   ProblemData data(p_support);
   PolynomialSystem<double> equations(data.space);
@@ -199,7 +201,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<Vector<double>> roots;
   try {
     roots = solver.FindRoots({bottoms, tops},
-                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max());
+                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max(),
+                             p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;
@@ -226,8 +229,9 @@ namespace Gambit::Nash {
 
 std::list<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
-                      BehaviorCallbackType<double> p_onEquilibrium,
-                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent)
+                      size_t p_maxRectangles, BehaviorCallbackType<double> p_onEquilibrium,
+                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
+                      const CancelToken &p_cancel)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -243,16 +247,22 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   PossibleNashBehaviorSupports possible_supports(p_game);
 
   for (auto support : possible_supports) {
+    p_cancel.Check();
     p_onEvent(EnumPolyCandidateSupportEvent<BehaviorSupportProfile>{support});
     bool isSingular = false;
+    bool budgetExceeded = false;
     for (const auto &solution :
-         SolveSupport(support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0),
-                      p_maxregret)) {
+         SolveSupport(support, isSingular, budgetExceeded,
+                      std::max(p_stopAfter - static_cast<int>(ret.size()), 0), p_maxregret,
+                      p_maxRectangles, p_cancel)) {
       p_onEquilibrium(solution);
       ret.push_back(solution);
     }
     if (isSingular) {
       p_onEvent(EnumPolySingularSupportEvent<BehaviorSupportProfile>{support});
+    }
+    if (budgetExceeded) {
+      p_onEvent(EnumPolyBudgetExceededSupportEvent<BehaviorSupportProfile>{support});
     }
     if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;

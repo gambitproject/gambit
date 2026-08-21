@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/file.cc
+// FILE: src/games/file.cc
 // Parser for reading game savefiles
 //
 // This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 #include <set>
 #include <algorithm>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameagg.h"
 
 namespace {
@@ -375,24 +375,6 @@ template <class Container> void NormalizeLabelStrings(Container &p_labels)
       [](std::string &s, const std::string &v) { s = v; });
 }
 
-template <class Container>
-void RelabelWithoutCollision(Container &&p_container, const std::vector<std::string> &p_labels)
-{
-  const std::set<std::string> forbidden(p_labels.begin(), p_labels.end());
-  size_t scratchIndex = 0;
-  for (auto &&element : p_container) {
-    std::string candidate;
-    do {
-      candidate = "_gambit_reader_scratch_" + std::to_string(scratchIndex++);
-    } while (forbidden.contains(candidate));
-    element->SetLabel(candidate);
-  }
-  size_t index = 0;
-  for (auto &&element : p_container) {
-    element->SetLabel(p_labels[index++]);
-  }
-}
-
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
@@ -538,7 +520,12 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
     playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
   }
   NormalizeLabelStrings(playerLabels);
-  RelabelWithoutCollision(nfg->GetPlayers(), playerLabels);
+  std::map<std::string, std::string> playerRelabels;
+  size_t playerIndex = 0;
+  for (auto player : nfg->GetPlayers()) {
+    playerRelabels[player->GetLabel()] = playerLabels[playerIndex++];
+  }
+  nfg->RelabelPlayers(playerRelabels);
 
   for (auto player : nfg->GetPlayers()) {
     std::vector<std::string> strategyLabels;
@@ -546,7 +533,12 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
       strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
     NormalizeLabelStrings(strategyLabels);
-    RelabelWithoutCollision(player->GetStrategies(), strategyLabels);
+    std::map<std::string, std::string> labels;
+    size_t index = 0;
+    for (auto strategy : player->GetStrategies()) {
+      labels[strategy->GetLabel()] = strategyLabels[index++];
+    }
+    nfg->RelabelStrategies(player, labels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
@@ -902,16 +894,18 @@ void NormalizeGameLabels(const Game &p_game)
 {
   const auto get_label = [](const auto &e) { return e->GetLabel(); };
   const auto set_label = [](const auto &e, const std::string &s) { e->SetLabel(s); };
-  NormalizeLabels(p_game->GetPlayers(), get_label, set_label);
+  const auto relabel_player = [&p_game](const auto &e, const std::string &s) {
+    p_game->RelabelPlayers({{e->GetLabel(), s}});
+  };
+  NormalizeLabels(p_game->GetPlayers(), get_label, relabel_player);
   NormalizeLabels(p_game->GetOutcomes(), get_label, set_label);
   // Action labels are not normalized here: for tree games, ParseNode/ParsePersonalNode
   // already normalize each infoset's actions individually, at creation, from the raw
   // labels as parsed (see there for why the raw labels must be kept around too).
-  if (!p_game->IsTree()) {
-    for (const auto &player : p_game->GetPlayers()) {
-      NormalizeLabels(player->GetStrategies(), get_label, set_label);
-    }
-  }
+  // Strategy labels are not normalized here either: every strategic-form construction
+  // path (BuildNfg via RelabelStrategies, and the "1".."N" numbering GameAGGRep/
+  // GameBAGGRep assign directly) already guarantees unique, nonempty labels per player
+  // by the time a game reaches here.
 }
 
 Game ReadEfgFile(std::istream &p_stream)

@@ -32,7 +32,8 @@ namespace Gambit::GUI {
 //              class MixedProfileList: Member functions
 //-------------------------------------------------------------------------
 
-MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent, GameDocument *p_doc)
+MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
+                                                   const std::shared_ptr<GameDocument> &p_doc)
   : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
@@ -78,7 +79,7 @@ void MixedStrategyProfileList::OnSelectCell(wxGridEvent &p_event)
 }
 
 #ifdef UNUSED
-static Gambit::GameStrategy GetStrategy(GameDocument *p_doc, int p_index)
+static Gambit::GameStrategy GetStrategy(const std::shared_ptr<GameDocument> &p_doc, int p_index)
 {
   int index = 0;
   for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
@@ -93,7 +94,7 @@ static Gambit::GameStrategy GetStrategy(GameDocument *p_doc, int p_index)
 }
 #endif
 
-static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
+static wxColour GetPlayerColor(const std::shared_ptr<GameDocument> &p_doc, int p_index)
 {
   int index = 0;
   for (const auto &player : p_doc->GetGame()->GetPlayers()) {

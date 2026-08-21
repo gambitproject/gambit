@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/logit/logbehav.h
+// FILE: src/solvers/logit/logbehav.h
 // Behavior strategy profile where action probabilities are represented using
 // logarithms.
 //
@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LOGBEHAV_H
-#define LOGBEHAV_H
+#ifndef GAMBIT_SOLVERS_LOGIT_LOGBEHAV_H
+#define GAMBIT_SOLVERS_LOGIT_LOGBEHAV_H
 
 using namespace Gambit;
 
@@ -131,4 +131,4 @@ public:
   //@}
 };
 
-#endif // LOGBEHAV_H
+#endif // GAMBIT_SOLVERS_LOGIT_LOGBEHAV_H

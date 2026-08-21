@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/nfgensup.h
+// FILE: src/solvers/nashsupport/nashsupport.h
 // Enumerate undominated subsupports of a support
 //
 // This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,8 @@
 #include <memory>
 #include <optional>
 
-#include "gambit.h"
+#include "games/stratspt.h"
+#include "games/behavspt.h"
 
 using namespace Gambit;
 

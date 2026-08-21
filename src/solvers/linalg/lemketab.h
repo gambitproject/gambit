@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lemketab.h
+// FILE: src/solvers/linalg/lemketab.h
 // Declaration of Lemke tableau class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,37 +20,43 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LINALG_LEMKETAB_H
-#define GAMBIT_LINALG_LEMKETAB_H
+#ifndef GAMBIT_SOLVERS_LINALG_LEMKETAB_H
+#define GAMBIT_SOLVERS_LINALG_LEMKETAB_H
 
 #include "core/cancel.h"
 #include "tableau.h"
 
 namespace Gambit::linalg {
 
-template <class T> class LemkeTableau : public Tableau<T> {
+template <class T> class LemkeTableau final : public Tableau<T> {
 public:
   class BadPivot final : public std::runtime_error {
   public:
-    BadPivot() : std::runtime_error("Bad pivot in LTableau") {}
+    BadPivot() : std::runtime_error("Bad pivot in LemkeTableau") {}
     ~BadPivot() noexcept override = default;
   };
   class BadExitIndex final : public std::runtime_error {
   public:
-    BadExitIndex() : std::runtime_error("Bad exit index in LTableau") {}
+    BadExitIndex() : std::runtime_error("Bad exit index in LemkeTableau") {}
     ~BadExitIndex() noexcept override = default;
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b) : Tableau<T>(A, b) {}
-  ~LemkeTableau() override = default;
+  ~LemkeTableau() = default;
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
-  int SF_LCPPath(int dup,
-                 const CancelToken &p_cancel = CancelToken()); // follow a path of ACBFS's
-                                                               // from one CBFS to another
+  /// Executes one step of the Lemke-Howson algorithm, following a path of
+  /// ACBFS's (almost-complementary basic feasible solutions) from one CBFS to
+  /// another
+  int SF_LCPPath(int dup, const CancelToken &p_cancel = CancelToken());
+
+  /// Determines, for the current tableau and variable to be added to the
+  /// basis, which element should leave the basis. The choice is the one
+  /// specified by Eaves, which is guaranteed not to cycle, even if the
+  /// problem is degenerate.
   int ExitIndex(int i);
 };
 
 } // end namespace Gambit::linalg
 
-#endif // GAMBIT_LINALG_LEMKETAB_H
+#endif // GAMBIT_SOLVERS_LINALG_LEMKETAB_H

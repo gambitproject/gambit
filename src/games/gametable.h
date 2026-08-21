@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametable.h
+// FILE: src/games/gametable.h
 // Declaration of strategic game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMETABLE_H
-#define GAMETABLE_H
+#ifndef GAMBIT_GAMES_GAMETABLE_H
+#define GAMBIT_GAMES_GAMETABLE_H
 
 #include "gameexpl.h"
 
@@ -40,8 +40,10 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void RebuildTable(const std::vector<long> &old_radices, long p_deletedPlayer = -1,
-                    long p_deletedDigit = -1);
+  /// Rebuild the outcome table after the strategies of p_player have changed.
+  /// p_oldToNew maps old strategy indices to new index, or to -1 if the strategy was removed.
+  void RebuildTable(const std::vector<long> &old_radices, long p_player,
+                    const std::vector<long> &p_oldToNew);
   //@}
 
 public:
@@ -98,8 +100,8 @@ public:
 
   /// @name Strategies
   //@{
-  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
-  void DeleteStrategy(const GameStrategy &p_strategy) override;
+  void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &) override;
+  void SetStrategies(const GamePlayer &, const std::vector<std::string> &) override;
   //@}
 
   /// @name Writing data files
@@ -118,4 +120,4 @@ public:
 
 } // namespace Gambit
 
-#endif // GAMETABLE_H
+#endif // GAMBIT_GAMES_GAMETABLE_H

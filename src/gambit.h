@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gambit.h
-// Top-level include file for Gambit library
+// Top-level include file for all of Gambit
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,19 +23,7 @@
 #ifndef GAMBIT_H
 #define GAMBIT_H
 
-#include "core/core.h"
-
-#include "games/game.h"
-#include "games/writer.h"
-
-#include "games/behavspt.h"
-#include "games/behavmixed.h"
-#include "games/behavpure.h"
-#include "games/seqpure.h"
-#include "games/seqmixed.h"
-
-#include "games/stratspt.h"
-#include "games/stratpure.h"
-#include "games/stratmixed.h"
+#include "games.h"
+#include "solvers.h"
 
 #endif // GAMBIT_H

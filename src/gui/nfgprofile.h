@@ -42,7 +42,7 @@ class MixedStrategyProfileList final : public wxGrid, public GameView {
   void OnUpdate() override;
 
 public:
-  MixedStrategyProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  MixedStrategyProfileList(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~MixedStrategyProfileList() override;
 };
 } // namespace Gambit::GUI

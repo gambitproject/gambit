@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/ludecomp.h
+// FILE: src/solvers/linalg/ludecomp.h
 // Interface to LU decomposition classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,96 +20,98 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LUDECOMP_H
-#define LUDECOMP_H
+#ifndef GAMBIT_SOLVERS_LINALG_LUDECOMP_H
+#define GAMBIT_SOLVERS_LINALG_LUDECOMP_H
 
-#include "gambit.h"
-#include "btableau.h"
+#include <list>
+#include <memory>
+
+#include "core/core.h"
 
 namespace Gambit::linalg {
 
 template <class T> class Tableau;
+class Basis;
 
 template <class T> class LUDecomposition {
+public:
+  class BadPivot final : public std::runtime_error {
+  public:
+    BadPivot() : std::runtime_error("Bad pivot in LUDecomposition") {}
+    ~BadPivot() noexcept override = default;
+  };
+
+  /// @name Constructors and destructor
+  //@{
+  LUDecomposition(const LUDecomposition<T> &) = delete;
+
+  /// Copy constructor. The copy shares `a`'s factorization state as of the
+  /// time of copying; subsequent updates to either are independent.
+  LUDecomposition(const LUDecomposition<T> &a, Tableau<T> &t);
+
+  /// Decompose given matrix
+  explicit LUDecomposition(Tableau<T> &, int rfac = 0);
+
+  /// Destructor
+  ~LUDecomposition() = default;
+
+  /// Don't use the equals operator, use the Copy function instead
+  LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
+  //@}
+
+  /// @name Operations
+  //@{
+  /// Copies the LUDecomposition given (except for the basis reference)
+  void Copy(const LUDecomposition<T> &, Tableau<T> &);
+
+  /// Replace (update) the column given with the vector given
+  void Update(int, int matcol); // matcol is the column number in the matrix
+
+  /// Refactor
+  void Refactor();
+
+  /// Solve: Bk d = a
+  void Solve(const Vector<T> &, Vector<T> &) const;
+
+  /// Solve: y Bk = c
+  void SolveT(const Vector<T> &, Vector<T> &) const;
+
+  /// Set number of eta matrices added before refactoring;
+  /// if number is set to zero, refactoring is done automatically;
+  /// if number is < 0, no refactoring is done
+  void SetRefactor(int a) { m_refactorInterval = a; }
+  //@}
+
 private:
   struct EtaMatrix {
     int col;
     Vector<T> etadata;
   };
 
-  Tableau<T> &tab;
-  Basis &basis;
-
-  std::list<EtaMatrix> U;
-  std::list<EtaMatrix> E;
-  std::vector<std::pair<int, EtaMatrix>> L;
-
-  int refactor_number;
-  int iterations;
-  int total_operations;
-
-  const LUDecomposition<T> *parent;
-  mutable int copycount;
-
-public:
-  class BadPivot final : public std::runtime_error {
-  public:
-    BadPivot() : std::runtime_error("Bad pivot in LUdecomp") {}
-    ~BadPivot() noexcept override = default;
-  };
-  class BadCount final : public std::runtime_error {
-  public:
-    BadCount() : std::runtime_error("Bad reference count in LUdecomp") {}
-    ~BadCount() noexcept override = default;
+  // Immutable node in a persistently-shared eta chain: forking is an O(1)
+  // shared_ptr copy of the tail, and appending never disturbs it.
+  struct EtaNode {
+    EtaMatrix eta;
+    std::shared_ptr<const EtaNode> prev;
   };
 
-  // ------------------------
-  // Constructors, Destructor
-  // ------------------------
+  // FactorBasis()'s output: expensive to compute, shared across copies.
+  struct BaseFactorization {
+    std::list<EtaMatrix> upperEtas;
+    std::vector<std::pair<int, EtaMatrix>> lowerFactors;
+  };
 
-  LUDecomposition(const LUDecomposition<T> &) = delete;
+  Tableau<T> &m_tableau;
+  Basis &m_basis;
 
-  // copy constructor
-  // note:  Copying will fail an assertion if you try to update or delete
-  //        the original before the copy has been deleted, refactored
-  //        Or set to something else.
-  LUDecomposition(const LUDecomposition<T> &, Tableau<T> &);
+  std::shared_ptr<const BaseFactorization> m_base;
+  std::shared_ptr<const EtaNode> m_updateTail;
 
-  // Decompose given matrix
-  explicit LUDecomposition(Tableau<T> &, int rfac = 0);
+  int m_refactorInterval;
+  int m_iterationsSinceRefactor;
+  int m_totalOperations;
 
-  // Destructor
-  ~LUDecomposition();
-
-  // don't use the equals operator, use the Copy function instead
-  LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
-
-  // --------------------
-  // Public Members
-  // --------------------
-
-  // copies the LUdecomp given (expect for the basis &).
-  void Copy(const LUDecomposition<T> &, Tableau<T> &);
-
-  // replace (update) the column given with the vector given.
-  void update(int, int matcol); // matcol is the column number in the matrix
-
-  // refactor
-  void refactor();
-
-  // solve: Bk d = a
-  void solve(const Vector<T> &, Vector<T> &) const;
-
-  // solve: y Bk = c
-  void solveT(const Vector<T> &, Vector<T> &) const;
-
-  // set number of etamatrices added before refactoring;
-  // if number is set to zero, refactoring is done automatically.
-  // if number is < 0, no refactoring is done
-  void SetRefactor(int a) { refactor_number = a; }
-
-private:
-  void FactorBasis();
+  BaseFactorization FactorBasis();
 
   void GaussElem(Matrix<T> &, int, int);
 
@@ -129,8 +131,8 @@ private:
 
   void LPd_mult(Vector<T> &d, int j, Vector<T> &) const;
 
-}; // end of class LUdecomp
+}; // end of class LUDecomposition
 
 } // end namespace Gambit::linalg
 
-#endif // LUDECOMP_H
+#endif // GAMBIT_SOLVERS_LINALG_LUDECOMP_H

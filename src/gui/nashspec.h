@@ -27,7 +27,7 @@
 #include <variant>
 
 #include "core/cancel.h"
-#include "games/nash.h"
+#include "solvers/nash.h"
 #include "core/rational.h"
 
 namespace Gambit::GUI {
@@ -75,7 +75,7 @@ struct EnumPolyNashSpec {
   int stopAfter{0};
   double maxRegret{1.0e-4};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct GNMNashSpec {
@@ -85,13 +85,13 @@ struct GNMNashSpec {
   int localNewtonInterval{3};
   int localNewtonMaxIterations{10};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct IPANashSpec {
   int perturbations{1};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct LPNashSpec {
@@ -110,7 +110,7 @@ struct LiapNashSpec {
   double maxRegret{1.0e-4};
   int maxIterations{1000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 struct LogitNashSpec {
@@ -129,7 +129,7 @@ struct SimpdivNashSpec {
   int leashLength{0};
   Rational maxRegret{1, 10000000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const { return std::nullopt; }
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
 using NashMethodSpec =

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/vertenum.h
+// FILE: src/solvers/linalg/vertenum.h
 // Interface to vertex enumerator
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,55 +20,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LINALG_VERTENUM_H
-#define GAMBIT_LINALG_VERTENUM_H
+#ifndef GAMBIT_SOLVERS_LINALG_VERTENUM_H
+#define GAMBIT_SOLVERS_LINALG_VERTENUM_H
+
+#include <list>
 
 #include "core/cancel.h"
-#include "gambit.h"
+#include "core/core.h"
 #include "lptab.h"
 
 namespace Gambit::linalg {
 
-//
-// This class enumerates the vertices of the convex polyhedron
-//
-//        P = { y : Ay + b <= 0, y>=0 }
-//
-// where b <= 0.  Enumeration starts from the vertex y = 0.
-// All computation is done in the class constructor. The
-// list of vertices can be accessed by VertexList()
-//
-// The code is based on the reverse Pivoting algorithm of Avis
-// and Fukuda, Discrete Computational Geom (1992) 8:295-313.
-//
-template <class T> class VertexEnumerator {
-private:
-  bool mult_opt;
-  size_t depth{0};
-  // int n; // N is the number of columns, which is the # of dimensions.
-  // int k; // K is the number of inequalities given.
-  const Matrix<T> &A;
-  const Vector<T> &b;
-  Vector<T> btemp;
-  Array<BFS<T>> m_list, m_duallist;
-  Array<long> visits, branches;
-  CancelToken m_cancel;
+template <class T> struct VertexEnumerationResult {
+  Array<BFS<T>> vertices;
+  Array<BFS<T>> dualVertices;
+  int numColumns;
 
-  void Deeper();
-  void Search(LPTableau<T> &tab);
-  void DualSearch(LPTableau<T> &tab);
-
-public:
-  VertexEnumerator(const Matrix<T> &, const Vector<T> &,
-                   const CancelToken &p_cancel = CancelToken());
-  // explicit VertexEnumerator(LPTableau<T> &);
-  ~VertexEnumerator() = default;
-
-  const Array<BFS<T>> &VertexList() const { return m_list; }
-  const Array<BFS<T>> &DualVertexList() const { return m_duallist; }
+  /// Vertices as dense vectors over the structural (column-indexed) variables
   std::list<Vector<T>> GetVertices() const;
 };
 
+/// Enumerates the vertices of the convex polyhedron
+///
+///     P = { y : Ay + b <= 0, y >= 0 }
+///
+/// where b <= 0. Enumeration starts from the vertex y = 0.
+///
+/// The code is based on the reverse Pivoting algorithm of Avis and Fukuda,
+/// Discrete Computational Geom (1992) 8:295-313.
+template <class T>
+VertexEnumerationResult<T> EnumerateVertices(const Matrix<T> &A, const Vector<T> &b,
+                                             const CancelToken &p_cancel = CancelToken());
+
 } // namespace Gambit::linalg
 
-#endif // GAMBIT_LINALG_VERTENUM_H
+#endif // GAMBIT_SOLVERS_LINALG_VERTENUM_H

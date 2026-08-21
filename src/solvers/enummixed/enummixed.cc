@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/enummixed.cc
+// FILE: src/solvers/enummixed/enummixed.cc
 // Compute Nash equilibria via Mangasarian's algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
-#include "solvers/linalg/vertenum.imp"
+#include "games.h"
+#include "solvers/linalg/vertenum.h"
 #include "solvers/enummixed/enummixed.h"
 #include "clique.h"
 
@@ -128,11 +128,11 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   b2 = (T)-1;
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
-  const VertexEnumerator<T> poly1(A1, b1, p_cancel);
-  const VertexEnumerator<T> poly2(A2, b2, p_cancel);
+  const auto poly1 = EnumerateVertices(A1, b1, p_cancel);
+  const auto poly2 = EnumerateVertices(A2, b2, p_cancel);
 
-  const auto &verts1(poly1.VertexList());
-  const auto &verts2(poly2.VertexList());
+  const auto &verts1(poly1.vertices);
+  const auto &verts2(poly2.vertices);
   solution->m_v1 = verts1.size();
   solution->m_v2 = verts2.size();
 

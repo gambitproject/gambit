@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/trie_map.cc
+// FILE: src/games/agg/trie_map.cc
 // Trie with STL-like interfaces
 //
 // This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,10 @@
 
 namespace Gambit::agg {
 
-template class trie_map<AggNumber>;
-template std::ostream &operator<<(std::ostream &s, const trie_map<AggNumber> &t);
+template class trie_map<double>;
+template std::ostream &operator<<(std::ostream &s, const trie_map<double> &t);
+
+template class trie_map<Rational>;
+template std::ostream &operator<<(std::ostream &s, const trie_map<Rational> &t);
 
 } // namespace Gambit::agg

@@ -87,7 +87,7 @@ wxString SafeGenerate(const LabelGenerator &p_generator, const GameNode &p_node)
 // (if not the root node)
 //
 void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
-                          const GameNode &p_selection, bool p_noHints) const
+                          bool p_noHints) const
 {
   const int nodeSize = m_doc->GetStyle().GetNodeSize();
   const NodeTokenStyle tokenStyle = GetTokenForNode(m_doc->GetStyle(), p_entry->m_node);
@@ -95,8 +95,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   // For every style but "line", this is exactly the shape drawn below --
   // computed once by ComputeTokenGeometry, not recomputed here, so drawing
   // and hit-testing (NodeEntry::NodeHitTest) can never silently disagree.
-  // "Line" has no real width of its own, so its selection ring keeps its own
-  // (differently-sized) padding rather than reusing the hit-test region.
   const wxRect &token = p_entry->m_geometry.token;
 
   if (p_entry->m_node->GetParent()) {
@@ -104,22 +102,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
 
   const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
-  const bool selected = (p_selection == p_entry->m_node);
-  constexpr int selectionPadding = 6;
-
-  if (selected) {
-    p_dc.SetPen(*wxTRANSPARENT_PEN);
-    p_dc.SetBrush(wxBrush(wxColour(235, 235, 235), wxBRUSHSTYLE_SOLID));
-
-    if (isLine) {
-      p_dc.DrawRoundedRectangle(
-          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
-          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
-    }
-    else {
-      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
-    }
-  }
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
@@ -154,20 +136,6 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     // Default: draw circles
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawEllipse(token);
-  }
-
-  if (selected) {
-    p_dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
-
-    if (isLine) {
-      p_dc.DrawRoundedRectangle(
-          p_entry->GetX() - selectionPadding, p_entry->GetY() - selectionPadding,
-          nodeSize + 2 * selectionPadding, 2 * selectionPadding, selectionPadding);
-    }
-    else {
-      p_dc.DrawEllipse(token.Inflate(selectionPadding, selectionPadding));
-    }
   }
 
   int textWidth, textHeight;
@@ -544,34 +512,6 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
   return {};
 }
 
-GameNode TreeLayout::PriorSameLevel(const GameNode &p_node) const
-{
-  if (auto entry = GetNodeEntry(p_node)) {
-    auto e = std::next(std::find(m_nodeList.rbegin(), m_nodeList.rend(), entry));
-    while (e != m_nodeList.rend()) {
-      if ((*e)->GetLevel() == entry->GetLevel()) {
-        return (*e)->GetNode();
-      }
-      --e;
-    }
-  }
-  return nullptr;
-}
-
-GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
-{
-  if (auto entry = GetNodeEntry(p_node)) {
-    auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
-    while (e != m_nodeList.end()) {
-      if ((*e)->GetLevel() == entry->GetLevel()) {
-        return (*e)->GetNode();
-      }
-      ++e;
-    }
-  }
-  return nullptr;
-}
-
 std::shared_ptr<NodeEntry>
 TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
@@ -627,14 +567,23 @@ void TreeLayout::Layout(const Game &p_game)
 {
   m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
-    // We only rebuild the node list if the number of nodes changes.  If we only have
-    // information set changes this can be handled just by the traversal below
-    BuildNodeList(p_game);
-  }
-
   auto layout = Gambit::Layout(m_doc->GetGame());
   layout.LayoutTree(p_game);
+
+  // We only rebuild the node list if the set of nodes has changed.  If we only have
+  // information set changes this can be handled just by the traversal below.  A count
+  // comparison alone isn't enough to detect that: an edit that drops one node and creates
+  // another in the same operation (e.g. simultaneously adding and removing actions at an
+  // information set) leaves the count unchanged while still swapping out which nodes exist,
+  // so we also check that every node in the freshly computed layout is one we already have
+  // an entry for.
+  const bool nodeSetChanged =
+      m_nodeList.size() != m_doc->GetGame()->NumNodes() ||
+      std::any_of(layout.GetNodeMap().begin(), layout.GetNodeMap().end(),
+                  [this](const auto &p_pair) { return !m_nodeMap.contains(p_pair.first); });
+  if (nodeSetChanged) {
+    BuildNodeList(p_game);
+  }
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
   for (auto [node, entry] : layout.GetNodeMap()) {
@@ -703,7 +652,7 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     auto parentEntry = entry->GetParent();
 
     if (entry->GetChildNumber() == 1) {
-      DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, parentEntry, p_noHints);
 
       if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
         const int nextY = nextMember->GetY();
@@ -749,7 +698,7 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     }
 
     if (entry->GetNode()->IsTerminal()) {
-      DrawNode(p_dc, entry, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, entry, p_noHints);
     }
   }
 }

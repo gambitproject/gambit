@@ -29,7 +29,7 @@
 namespace Gambit::GUI {
 
 class InsertMoveDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
   wxChoice *m_playerItem, *m_infosetItem;
   wxSpinCtrl *m_actions;
@@ -39,7 +39,7 @@ class InsertMoveDialog final : public wxDialog {
 
 public:
   // Constructor
-  InsertMoveDialog(wxWindow *, GameDocument *);
+  InsertMoveDialog(wxWindow *, const std::shared_ptr<GameDocument> &);
 
   // Data access (only valid if ShowModal() returns wxID_OK.
   // If GetInfoset() returns null, user selected "new infoset"

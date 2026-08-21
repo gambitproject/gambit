@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/efglcp.cc
+// FILE: src/solvers/lcp/efglcp.cc
 // Implementation of algorithm to solve extensive forms using linear
 // complementarity program from sequence form
 //
@@ -21,7 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/linalg/lemketab.h"
 #include "solvers/lcp/lcp.h"
 
@@ -156,12 +156,12 @@ template <class T>
 MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
                                    const ColumnIndexMap &p_indexMap)
 {
-  const T eps = tab.Epsilon();
+  const T eps = tab.GetZeroTolerance();
   std::map<GameSequence, T> x;
   for (const auto &[sequence, idx] : p_indexMap.index) {
     T value{0};
-    if (tab.Member(idx)) {
-      const T candidate = sol[tab.Find(idx)];
+    if (tab.IsMember(idx)) {
+      const T candidate = sol[tab.GetPosition(idx)];
       if (candidate > eps) {
         value = candidate;
       }
@@ -196,7 +196,7 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   tab.Pivot(columns.rootIndex1, 0);
   tab.SF_LCPPath(columns.rootIndex1, p_cancel);
   Vector<T> sol(tab.MinRow(), tab.MaxRow());
-  tab.BasisVector(sol);
+  tab.GetBasisVector(sol);
 
   MixedBehaviorProfile<T> profile = GetProfile(tab, sol, columns);
   profile.UndefinedToCentroid();

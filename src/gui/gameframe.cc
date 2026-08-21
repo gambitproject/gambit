@@ -36,7 +36,7 @@
 #include <wx/splitter.h>
 #include <wx/artprov.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "app.h" // for wxGetApp()
 #include "gameframe.h"
@@ -55,9 +55,6 @@
 #include "dlefglogit.h"
 #include "dlabout.h"
 
-#include "dlinsertmove.h"
-#include "dleditnode.h"
-#include "dleditmove.h"
 #include "dlefglayout.h"
 #include "dlefglegend.h"
 #include "dlnewtable.h"
@@ -74,12 +71,12 @@ class ProfileListPanel final : public wxPanel, public GameView {
   void OnUpdate() override {}
 
 public:
-  ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc);
+  ProfileListPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
+ProfileListPanel::ProfileListPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -127,12 +124,12 @@ class AnalysisNotebook final : public wxPanel, public GameView {
   void OnUpdate() override;
 
 public:
-  AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc);
+  AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc)
+AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_profiles(new ProfileListPanel(this, p_doc))
 {
   m_choices = new wxChoice(this, wxID_ANY);
@@ -199,14 +196,6 @@ EVT_MENU(wxID_PREVIEW, GameFrame::OnFilePrintPreview)
 EVT_MENU(wxID_PRINT, GameFrame::OnFilePrint)
 EVT_MENU(wxID_EXIT, GameFrame::OnFileExit)
 EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
-EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, GameFrame::OnEditInsertMove)
-EVT_MENU(GBT_MENU_EDIT_INSERT_ACTION, GameFrame::OnEditInsertAction)
-EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, GameFrame::OnEditDeleteTree)
-EVT_MENU(GBT_MENU_EDIT_DELETE_PARENT, GameFrame::OnEditDeleteParent)
-EVT_MENU(GBT_MENU_EDIT_REMOVE_OUTCOME, GameFrame::OnEditRemoveOutcome)
-EVT_MENU(GBT_MENU_EDIT_REVEAL, GameFrame::OnEditReveal)
-EVT_MENU(GBT_MENU_EDIT_NODE, GameFrame::OnEditNode)
-EVT_MENU(GBT_MENU_EDIT_MOVE, GameFrame::OnEditMove)
 EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
 EVT_MENU(GBT_MENU_EDIT_NEWPLAYER, GameFrame::OnEditNewPlayer)
 EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
@@ -231,7 +220,7 @@ END_EVENT_TABLE()
 //               GameFrame: Constructor and destructor
 //---------------------------------------------------------------------
 
-GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
+GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize), GameView(p_doc)
 {
   const wxRect area = wxGetClientDisplayRect();
@@ -320,19 +309,7 @@ void GameFrame::OnUpdate()
     SetTitle(GetTitle() + wxT(" (unsaved changes)"));
   }
 
-  const GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
-
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
-  menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
-  menuBar->Enable(GBT_MENU_EDIT_REVEAL,
-                  selectNode && selectNode->GetInfoset() &&
-                      !m_doc->GetGame()->IsAbsentMinded(selectNode->GetInfoset()));
-  menuBar->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
-  menuBar->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
-  menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());
-  menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != nullptr);
-  menuBar->Enable(GBT_MENU_EDIT_MOVE, selectNode && selectNode->GetInfoset());
 
   GetToolBar()->EnableTool(GBT_MENU_EDIT_NEWPLAYER, !m_efgPanel || m_efgPanel->IsShown());
 
@@ -455,24 +432,6 @@ void GameFrame::MakeMenus()
   auto *editMenu = new wxMenu;
   AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
                    _("Add a new player to the game"), wxBitmap(newplayer_xpm));
-
-  editMenu->AppendSeparator();
-  editMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), _("Insert a move"));
-  editMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
-                   _("Insert an action at the current move"));
-  editMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), _("Reveal choice at node"));
-  editMenu->AppendSeparator();
-
-  editMenu->Append(GBT_MENU_EDIT_DELETE_TREE, _("&Delete subtree"),
-                   _("Delete the subtree starting at the selected node"));
-  editMenu->Append(GBT_MENU_EDIT_DELETE_PARENT, _("Delete &parent"),
-                   _("Delete the node directly before the selected node"));
-  editMenu->Append(GBT_MENU_EDIT_REMOVE_OUTCOME, _("Remove &outcome"),
-                   _("Remove the outcome from the selected node"));
-  editMenu->AppendSeparator();
-
-  editMenu->Append(GBT_MENU_EDIT_NODE, _("&Node"), _("Edit properties of the node"));
-  editMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move"), _("Edit properties of the move"));
 
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
@@ -915,148 +874,38 @@ void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 //                GameFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
-void GameFrame::OnEditInsertMove(wxCommandEvent &)
-{
-  InsertMoveDialog dialog(this, m_doc);
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      if (dialog.GetInfoset()) {
-        m_doc->DoInsertMove(m_doc->GetSelectNode(), dialog.GetInfoset());
-      }
-      else {
-        m_doc->DoInsertMove(m_doc->GetSelectNode(), dialog.GetPlayer(), dialog.GetActions());
-      }
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
-  }
-}
-
-void GameFrame::OnEditInsertAction(wxCommandEvent &)
-{
-  try {
-    m_doc->DoInsertAction(m_doc->GetSelectNode());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
-void GameFrame::OnEditDeleteTree(wxCommandEvent &)
-{
-  try {
-    m_doc->DoDeleteTree(m_doc->GetSelectNode());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
-void GameFrame::OnEditDeleteParent(wxCommandEvent &)
-{
-  try {
-    m_doc->DoDeleteParent(m_doc->GetSelectNode());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
-void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
-{
-  try {
-    m_doc->DoRemoveOutcome(m_doc->GetSelectNode());
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
-}
-
-std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
-
-void GameFrame::OnEditReveal(wxCommandEvent &)
-{
-  if (const auto players = RevealMove(this, m_doc->GetGame()); players) {
-    try {
-      const auto &infoset = m_doc->GetSelectNode()->GetInfoset();
-      for (const auto &player : *players) {
-        m_doc->DoRevealAction(infoset, player);
-      }
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
-  }
-}
-
-void GameFrame::OnEditNode(wxCommandEvent &)
-{
-  EditNodeDialog dialog(this, m_doc->GetSelectNode());
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeLabel());
-      if (dialog.GetOutcome() > 0) {
-        m_doc->DoSetOutcome(m_doc->GetSelectNode(),
-                            m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
-      }
-      else {
-        m_doc->DoSetOutcome(m_doc->GetSelectNode(), nullptr);
-      }
-
-      if (!m_doc->GetSelectNode()->IsTerminal() &&
-          dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
-        if (dialog.GetInfoset() == nullptr) {
-          m_doc->DoLeaveInfoset(m_doc->GetSelectNode());
-        }
-        else {
-          m_doc->DoSetInfoset(m_doc->GetSelectNode(), dialog.GetInfoset());
-        }
-      }
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
-  }
-}
-
-void GameFrame::OnEditMove(wxCommandEvent &)
-{
-  const GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
-  if (!infoset) {
-    return;
-  }
-
-  EditMoveDialog dialog(this, infoset);
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
-
-      if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-        m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
-      }
-
-      std::map<std::string, std::string> labels;
-      for (const auto &action : infoset->GetActions()) {
-        labels[action->GetLabel()] =
-            dialog.GetActionLabel(action->GetNumber()).ToStdString(wxConvUTF8);
-      }
-      m_doc->DoRelabelActions(infoset, labels);
-      if (infoset->IsChanceInfoset()) {
-        m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());
-      }
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
-  }
-}
-
 void GameFrame::OnEditGame(wxCommandEvent &)
 {
   GamePropertiesDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
+    try {
+      m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
+
+      TreeRenderConfig style = m_doc->GetStyle();
+      std::map<std::string, std::string> labels;
+      for (int i = 0; i < dialog.NumRows(); i++) {
+        const GamePlayer player = dialog.GetPlayer(i);
+        if (player->IsChance()) {
+          style.SetChanceColor(dialog.GetPlayerColor(i));
+          continue; // chance's label is reserved and can't be changed
+        }
+        const std::string newLabel = dialog.GetPlayerLabel(i).ToStdString(wxConvUTF8);
+        if (newLabel != player->GetLabel()) {
+          labels[player->GetLabel()] = newLabel;
+        }
+        style.SetPlayerColor(player->GetNumber(), dialog.GetPlayerColor(i));
+      }
+      // Relabeling all players in one call, rather than one at a time, lets two players'
+      // labels be swapped directly without tripping the duplicate-label check on an
+      // intermediate state that a per-player rename would pass through.
+      if (!labels.empty()) {
+        m_doc->DoRelabelPlayers(labels);
+      }
+      m_doc->SetStyle(style);
+    }
+    catch (std::exception &ex) {
+      ExceptionDialog(this, ex.what()).ShowModal();
+    }
   }
 }
 
@@ -1231,7 +1080,7 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
   }
 }
 
-extern void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+extern void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
                                   const std::shared_ptr<AnalysisOutput> &p_command);
 
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
@@ -1277,7 +1126,7 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
   }
 }
 
-extern void LogitStrategic(wxWindow *, GameDocument *);
+extern void LogitStrategic(wxWindow *, const std::shared_ptr<GameDocument> &);
 
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {
@@ -1320,7 +1169,7 @@ struct CloseWarningText {
   wxString secondary;
 };
 
-CloseWarningText CloseWarningMessage(GameDocument *p_doc)
+CloseWarningText CloseWarningMessage(const std::shared_ptr<GameDocument> &p_doc)
 {
   const bool gameModified = p_doc->IsGameModified();
   const bool workspaceModified = p_doc->IsWorkspaceModified();

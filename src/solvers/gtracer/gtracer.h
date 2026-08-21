@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/gtracer.h
+// FILE: src/solvers/gtracer/gtracer.h
 // Top-level include file for Gametracer embedding in Gambit
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -22,14 +22,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_GTRACER_H
-#define GAMBIT_GTRACER_GTRACER_H
+#ifndef GAMBIT_SOLVERS_GTRACER_GTRACER_H
+#define GAMBIT_SOLVERS_GTRACER_GTRACER_H
 
 #include <functional>
+#include "core/cancel.h"
 #include "cmatrix.h"
 #include "nfgame.h"
 #include "aggame.h"
-#include "gambit.h"
+#include "games/game.h"
 
 namespace Gambit::gametracer {
 
@@ -84,7 +85,8 @@ struct GNMResult {
 ///                   equilibrium is found (with label "NE")
 GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
               double LambdaMin, bool wobble, double threshold,
-              std::function<void(const std::string &, const cvector &)> p_onStep);
+              std::function<void(const std::string &, const cvector &)> p_onStep,
+              const CancelToken &p_cancel = CancelToken());
 
 /// @brief Why a call to IPA terminated
 enum class IPATerminationReason {
@@ -116,10 +118,13 @@ struct IPAResult {
 /// @param fuzz    the cutoff accuracy for an equilibrium after which the algorithm
 ///                stops refining it
 /// @param maxiter the maximum number of iterations to attempt
-/// @param verbose whether to print intermediate information on the progress of the
-///                algorithm
+/// @param p_onStep a callback function executed at the end of each iteration, with the
+///                 iteration number, the current approximate strategy, and the current
+///                 z- and s-differences (the same quantities used to test for convergence)
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
-              unsigned int maxiter = 100, bool p_verbose = false);
+              unsigned int maxiter,
+              std::function<void(int, const cvector &, double, double)> p_onStep,
+              const CancelToken &p_cancel = CancelToken());
 
 /// @brief Build a Gametracer representation based on a Gambit game
 /// @param p_game  The game to convert to Gametracer's representation
@@ -138,4 +143,4 @@ MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_prof
 
 } // end namespace Gambit::gametracer
 
-#endif // GAMBIT_GTRACER_GTRACER_H
+#endif // GAMBIT_SOLVERS_GTRACER_GTRACER_H

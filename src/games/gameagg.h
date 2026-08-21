@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gameagg.h
+// FILE: src/games/gameagg.h
 // Declaration of GameAGGRep, the action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMEAGG_H
-#define GAMEAGG_H
+#ifndef GAMBIT_GAMES_GAMEAGG_H
+#define GAMBIT_GAMES_GAMEAGG_H
 
+#include "games/game.h"
 #include "games/agg/agg.h"
 
 namespace Gambit {
@@ -83,11 +84,11 @@ public:
   bool IsPerfectRecall() const override { return true; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
-  Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
+  Rational GetMinPayoff() const override { return aggPtr->getMinPayoff<Rational>(); }
   /// Returns the smallest payoff to the player in any outcome of the game
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
-  Rational GetMaxPayoff() const override { return Rational(aggPtr->getMaxPayoff()); }
+  Rational GetMaxPayoff() const override { return aggPtr->getMaxPayoff<Rational>(); }
   /// Returns the largest payoff to the player in any outcome of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
@@ -109,4 +110,4 @@ public:
 
 } // namespace Gambit
 
-#endif // GAMEAGG_H
+#endif // GAMBIT_GAMES_GAMEAGG_H

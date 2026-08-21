@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/stratspt.cc
+// FILE: src/games/stratspt.cc
 // Implementation of strategy classes for normal forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "gametable.h"
 
 namespace Gambit {

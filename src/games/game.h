@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/game.h
+// FILE: src/games/game.h
 // Declaration of base class for representing games
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_GAME_H
-#define LIBGAMBIT_GAME_H
+#ifndef GAMBIT_GAMES_GAME_H
+#define GAMBIT_GAMES_GAME_H
 
 #include <algorithm>
 #include <compare>
@@ -33,6 +33,7 @@
 #include <set>
 #include <stack>
 
+#include "core/array.h"
 #include "number.h"
 #include "gameobject.h"
 
@@ -521,8 +522,6 @@ public:
   //@{
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
-  /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
@@ -626,7 +625,6 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
@@ -648,8 +646,10 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
-  /// Validate that p_label is a nonempty, valid, unique label for a strategy of this player.
-  void CheckStrategyLabel(const std::string &p_label) const;
+  /// Validate that p_label is a valid label for a strategy of this player,
+  /// disregarding any strategies in p_ignore.
+  void CheckStrategyLabel(const std::string &p_label,
+                          const std::set<const GameStrategyRep *> &p_ignore) const;
   //@}
 
   /// @name Sequences
@@ -935,7 +935,9 @@ protected:
   void IncrementVersion() { m_version++; }
   void IndexStrategies() const;
   /// Validate that p_label is a nonempty, valid, unique label for a player of this game,
-  void CheckPlayerLabel(const std::string &p_label) const;
+  /// ignoring the labels of the players in p_ignore.
+  void CheckPlayerLabel(const std::string &p_label,
+                        const std::set<const GamePlayerRep *> &p_ignore = {}) const;
   /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
   void CheckOutcomeLabel(const std::string &p_label) const;
   //@}
@@ -1308,14 +1310,21 @@ public:
   /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
   /// so that any two nodes reached via different actions at p_infoset are distinguished.
   virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
-  virtual GameAction InsertAction(GameInfoset, GameAction p_where = nullptr)
-  {
-    throw UndefinedException();
-  }
-  virtual void DeleteAction(GameAction) { throw UndefinedException(); }
   /// Simultaneously reassign action labels at an information set.
   /// Keys of p_labels are current action labels; values are their replacements.
   virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of a personal player's move.
+  virtual void SetMoveActions(const GameInfoset &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
+  /// Declare the ordered action list of an event, together with the probability
+  /// distribution over its actions.
+  virtual void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                               const std::vector<Number> &)
   {
     throw UndefinedException();
   }
@@ -1349,6 +1358,8 @@ public:
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
+  /// Reassign player labels. Keys of p_labels are current labels; values are their replacements.
+  void RelabelPlayers(const std::map<std::string, std::string> &p_labels);
   //@}
 
   /// @name Dimensions of the game
@@ -1370,13 +1381,17 @@ public:
     }
     return *std::next(strategies.begin(), p_index - 1);
   }
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  /// Simultaneously reassign strategy labels for a player: keys are current labels.
+  /// Keys of p_labels are current action labels; values are their replacements.
+  virtual void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &)
   {
     throw UndefinedException();
   }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Declare the ordered list of strategies of a player.
+  virtual void SetStrategies(const GamePlayer &, const std::vector<std::string> &)
+  {
+    throw UndefinedException();
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   //@}
@@ -1517,23 +1532,17 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
-inline void GameStrategyRep::SetLabel(const std::string &p_label)
-{
-  if (p_label == m_label) {
-    return;
-  }
-  GetPlayer()->CheckStrategyLabel(p_label);
-  m_label = p_label;
-}
 
-inline void GamePlayerRep::CheckStrategyLabel(const std::string &p_label) const
+inline void
+GamePlayerRep::CheckStrategyLabel(const std::string &p_label,
+                                  const std::set<const GameStrategyRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Strategy label must not be empty");
   }
   CheckLabel(p_label);
   for (const auto &strategy : m_strategies) {
-    if (strategy->GetLabel() == p_label) {
+    if (p_ignore.count(strategy.get()) == 0 && strategy->GetLabel() == p_label) {
       throw ValueException("Strategy label must be unique for the player");
     }
   }
@@ -1583,7 +1592,8 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
 }
-inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
+inline void GameRep::CheckPlayerLabel(const std::string &p_label,
+                                      const std::set<const GamePlayerRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Player label must not be empty");
@@ -1593,7 +1603,7 @@ inline void GameRep::CheckPlayerLabel(const std::string &p_label) const
     throw ValueException("Player label must not be the reserved chance player label");
   }
   for (const auto &player : m_players) {
-    if (player->GetLabel() == p_label) {
+    if (p_ignore.count(player.get()) == 0 && player->GetLabel() == p_label) {
       throw ValueException("Player label must be unique within the game");
     }
   }
@@ -1613,17 +1623,6 @@ inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
-inline void GamePlayerRep::SetLabel(const std::string &p_label)
-{
-  if (IsChance()) {
-    throw ValueException("The chance player's label cannot be changed");
-  }
-  if (p_label == m_label) {
-    return;
-  }
-  GetGame()->CheckPlayerLabel(p_label);
-  m_label = p_label;
-}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->EnsureStrategies();
@@ -1767,4 +1766,4 @@ std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &gener
 
 } // namespace Gambit
 
-#endif // LIBGAMBIT_GAME_H
+#endif // GAMBIT_GAMES_GAME_H

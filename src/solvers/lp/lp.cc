@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lp/efglp.cc
+// FILE: src/solvers/lp/lp.cc
 // Implementation of algorithm to solve efgs via linear programming
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "solvers/lp/lp.h"
 #include "solvers/linalg/lpsolve.h"
 
@@ -199,8 +199,8 @@ template <class T>
 void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals,
              Array<T> &p_primal, Array<T> &p_dual, const CancelToken &p_cancel = CancelToken())
 {
-  const linalg::LPSolve<T> LP(A, b, c, nequals, p_cancel);
-  const auto &cbfs = LP.OptimumBFS();
+  const auto result = linalg::SolveLP(A, b, c, nequals, p_cancel);
+  const auto &cbfs = result.bfs;
 
   for (size_t i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);

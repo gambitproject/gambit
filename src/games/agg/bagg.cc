@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <type_traits>
 #include "games/agg/bagg.h"
 
 using namespace std;
@@ -11,10 +12,11 @@ using namespace std;
 namespace Gambit::agg {
 
 BAGG::BAGG(int N, int S, vector<int> &numTypes, vector<ProbDist> &TDist,
-           vector<vector<vector<int>>> &typeActionSets, vector<vector<vector<int>>> &ta2a,
-           std::shared_ptr<AGG> aggPtr)
+           vector<vector<Number>> &exactTDist, vector<vector<vector<int>>> &typeActionSets,
+           vector<vector<vector<int>>> &ta2a, std::shared_ptr<AGG> aggPtr)
   : numPlayers(N), numActionNodes(S), numTypes(numTypes), indepTypeDist(TDist),
-    typeActionSets(typeActionSets), typeAction2ActionIndex(ta2a), aggPtr(aggPtr)
+    exactIndepTypeDist(exactTDist), typeActionSets(typeActionSets), typeAction2ActionIndex(ta2a),
+    aggPtr(aggPtr)
 {
   typeOffset = std::vector<int>(numPlayers + 1);
   typeOffset[0] = 0;
@@ -94,13 +96,18 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   // input the type distributions
   stripComment(in);
   vector<ProbDist> TDist;
+  vector<vector<Number>> exactTDist(N);
   for (int i = 0; i < N; ++i) {
     TDist.emplace_back(numTypes[i]);
     for (int j = 0; j < numTypes[i]; ++j) {
-      in >> TDist[i][j];
+      std::string word;
+      in >> word;
       if (!in) {
         throw std::runtime_error("Error in game file: number expected for type distribution");
       }
+      const Number num(word);
+      TDist[i][j] = static_cast<double>(num);
+      exactTDist[i].push_back(num);
     }
   }
 
@@ -175,31 +182,32 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   }
 
   const std::shared_ptr<AGG> aggPtr = AGG::makeAGG(aggss);
-  return std::make_shared<BAGG>(N, S, numTypes, TDist, typeActionSets, typeAction2ActionIndex,
-                                aggPtr);
+  return std::make_shared<BAGG>(N, S, numTypes, TDist, exactTDist, typeActionSets,
+                                typeAction2ActionIndex, aggPtr);
 }
 
-AggNumber BAGG::getMixedPayoff(int player, StrategyProfile &s)
+double BAGG::getMixedPayoff(int player, StrategyProfile<double> &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (int tp = 0; tp < numTypes[player]; ++tp) {
     res += indepTypeDist[player][tp] * getMixedPayoff(player, tp, s);
   }
   return res;
 }
 
-AggNumber BAGG::getMixedPayoff(int player, int tp, StrategyProfile &s)
+template <class V> V BAGG::getMixedPayoff(int player, int tp, const StrategyProfile<V> &s) const
 {
-  AggNumber res(0);
+  V res(0);
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
-    if (s[act + firstAction(player, tp)] > AggNumber(0.0)) {
+    if (s[act + firstAction(player, tp)] > V(0)) {
       res += s[act + firstAction(player, tp)] * getV(player, tp, act, s);
     }
   }
   return res;
 }
 
-void BAGG::getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s)
+void BAGG::getPayoffVector(std::vector<double> &dest, int player, int tp,
+                           const StrategyProfile<double> &s)
 {
   assert(player >= 0 && player < getNumPlayers() && tp >= 0 && tp < getNumTypes(player));
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
@@ -207,11 +215,12 @@ void BAGG::getPayoffVector(AggNumberVector &dest, int player, int tp, const Stra
   }
 }
 
-void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player, int tp,
-                       int action)
+template <class V>
+void BAGG::getAGGStrat(StrategyProfile<V> &as, const StrategyProfile<V> &s, int player, int tp,
+                       int action) const
 {
   for (int i = 0; i < aggPtr->getNumActions(); ++i) {
-    as[i] = AggNumber(0.0);
+    as[i] = V(0);
   }
 
   for (int pl = 0; pl < numPlayers; ++pl) {
@@ -219,39 +228,68 @@ void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player
       for (int t = 0; t < numTypes[pl]; ++t) {
         for (size_t act = 0; act < typeActionSets[pl][t].size(); ++act) {
           const int aact = typeAction2ActionIndex[pl][t][act];
-          as[aact + aggPtr->firstAction(pl)] += indepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+          if constexpr (std::is_same_v<V, Rational>) {
+            as[aact + aggPtr->firstAction(pl)] +=
+                static_cast<Rational>(exactIndepTypeDist[pl][t]) * s[act + firstAction(pl, t)];
+          }
+          else {
+            as[aact + aggPtr->firstAction(pl)] +=
+                indepTypeDist[pl][t] * s[act + firstAction(pl, t)];
+          }
         }
       }
     }
     else {
       const int aact = typeAction2ActionIndex[player][tp][action];
-      as[aact + aggPtr->firstAction(player)] = 1;
+      as[aact + aggPtr->firstAction(player)] = V(1);
     }
   }
 }
-AggNumber BAGG::getV(int player, int tp, int action, const StrategyProfile &s)
+
+template <class V> V BAGG::getV(int player, int tp, int action, const StrategyProfile<V> &s) const
 {
-  StrategyProfile as(aggPtr->getNumActions());
+  StrategyProfile<V> as(aggPtr->getNumActions());
   getAGGStrat(as, s, player, tp, action);
   return aggPtr->getV(player, typeAction2ActionIndex[player][tp][action], as);
 }
 
-AggNumber BAGG::getPurePayoff(int player, int tp, std::vector<int> &ps)
-{
-  StrategyProfile st(strategyOffset[typeOffset[numPlayers]]);
-  for (int i = 0; i < strategyOffset[typeOffset[numPlayers]]; i++) {
-    st[i] = (AggNumber)0.0;
-  }
-  for (int i = 0; i < typeOffset[numPlayers]; i++) {
-    st[strategyOffset[i] + ps[i]] = (AggNumber)1.0;
-  }
-  return getMixedPayoff(player, tp, st);
-}
+template void BAGG::getAGGStrat<double>(StrategyProfile<double> &as,
+                                        const StrategyProfile<double> &s, int player, int tp,
+                                        int action) const;
+template void BAGG::getAGGStrat<Rational>(StrategyProfile<Rational> &as,
+                                          const StrategyProfile<Rational> &s, int player, int tp,
+                                          int action) const;
+template double BAGG::getV<double>(int player, int tp, int action,
+                                   const StrategyProfile<double> &s) const;
+template Rational BAGG::getV<Rational>(int player, int tp, int action,
+                                       const StrategyProfile<Rational> &s) const;
+template double BAGG::getMixedPayoff<double>(int player, int tp,
+                                             const StrategyProfile<double> &s) const;
+template Rational BAGG::getMixedPayoff<Rational>(int player, int tp,
+                                                 const StrategyProfile<Rational> &s) const;
 
-void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
+// payoff of the pure profile ps, via the degenerate mixed profile and the convolution engine
+// (mirrors AGG::getPurePayoff<V>). Deliberately does NOT enumerate the Cartesian product of the
+// other players' types directly: that product grows with the number of OTHER PLAYERS, not just
+// their type counts, defeating the whole point of the action-graph representation (efficient
+// computation for many-player games via the graph structure). getMixedPayoff's convolution
+// algorithm computes the same expectation in time polynomial in the number of players.
+template <class V> V BAGG::getPurePayoff(int player, int tp, const std::vector<int> &ps) const
+{
+  StrategyProfile<V> s(strategyOffset[typeOffset[numPlayers]]);
+  for (int i = 0; i < typeOffset[numPlayers]; i++) {
+    s[strategyOffset[i] + ps[i]] = V(1);
+  }
+  return getMixedPayoff(player, tp, s);
+}
+template double BAGG::getPurePayoff<double>(int player, int tp, const std::vector<int> &ps) const;
+template Rational BAGG::getPurePayoff<Rational>(int player, int tp,
+                                                const std::vector<int> &ps) const;
+
+void BAGG::getSymAGGStrat(StrategyProfile<double> &as, const StrategyProfile<double> &s)
 {
   for (int i = 0; i < aggPtr->getNumActionNodes(); ++i) {
-    as[i] = AggNumber(0.0);
+    as[i] = double(0.0);
   }
   for (int t = 0; t < numTypes[0]; ++t) {
     for (size_t act = 0; act < typeActionSets[0][t].size(); ++act) {
@@ -261,29 +299,29 @@ void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
   }
 }
 
-AggNumber BAGG::getSymMixedPayoff(StrategyProfile &s)
+double BAGG::getSymMixedPayoff(StrategyProfile<double> &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (int tp = 0; tp < numTypes[0]; ++tp) {
     res += indepTypeDist[0][tp] * getSymMixedPayoff(tp, s);
   }
   return res;
 }
 
-AggNumber BAGG::getSymMixedPayoff(int tp, StrategyProfile &s)
+double BAGG::getSymMixedPayoff(int tp, StrategyProfile<double> &s)
 {
-  AggNumber res(0);
+  double res(0);
   for (size_t act = 0; act < typeActionSets[0][tp].size(); ++act) {
-    if (s[act + firstAction(0, tp)] > AggNumber(0.0)) {
+    if (s[act + firstAction(0, tp)] > double(0.0)) {
       res += s[act + firstAction(0, tp)] * getSymMixedPayoff(tp, act, s);
     }
   }
   return res;
 }
 
-AggNumber BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile &s)
+double BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile<double> &s)
 {
-  StrategyProfile as(aggPtr->getNumActionNodes());
+  StrategyProfile<double> as(aggPtr->getNumActionNodes());
   getSymAGGStrat(as, s);
   return aggPtr->getSymMixedPayoff(typeActionSets[0][tp][act], as);
 }
@@ -309,7 +347,7 @@ ostream &operator<<(ostream &s, const BAGG &g)
   // type distrib
   for (int i = 0; i < g.getNumPlayers(); ++i) {
     for (int j = 0; j < g.getNumTypes(i); ++j) {
-      s << g.indepTypeDist[i][j] << " ";
+      s << g.exactIndepTypeDist[i][j] << " ";
     }
     s << endl;
   }

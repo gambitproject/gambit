@@ -24,7 +24,7 @@
 #include <fstream>
 #include <set>
 
-#include "gambit.h"
+#include "games.h"
 #include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()
@@ -204,8 +204,7 @@ bool AnalysisWorkspace::Load(const std::vector<LegacyWorkspaceFile::Analysis> &p
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_workspaceModified(false),
-    m_workspace(this)
+  : m_game(p_game), m_gameModified(false), m_workspaceModified(false), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
 
@@ -215,32 +214,44 @@ GameDocument::GameDocument(Game p_game)
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadWorkspace(const wxString &p_filename)
+GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 {
   std::ifstream input(p_filename.mb_str());
   if (!input) {
-    return false;
+    return {LoadResult::OpenFailed, nullptr};
   }
 
-  LegacyWorkspaceFile workspace;
+  // First, see whether this is a Gambit workspace (.gbt) file.
   try {
-    workspace = Gambit::ReadLegacyWorkspace(input);
-  }
-  catch (const std::runtime_error &) {
-    return false;
-  }
-  try {
+    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
     std::istringstream game_text(workspace.game);
-    m_game = ReadGame(game_text);
+    auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
+    if (doc->m_workspace.Load(workspace.analyses)) {
+      doc->m_style.Load(workspace);
+      doc->SetFilename(p_filename);
+      return {LoadResult::Success, doc};
+    }
   }
-  catch (...) {
-    return false;
+  catch (const std::exception &) {
+    // Not a recognized (or not fully valid) workspace file; fall through to
+    // try it as a bare game file instead.
   }
-  if (!m_workspace.Load(workspace.analyses)) {
-    return false;
+
+  // Not a (valid) workspace -- try reading it as a bare .efg/.nfg file.
+  input.clear();
+  input.seekg(0);
+  try {
+    const Game game = ReadGame(input);
+    if (game->IsAgg()) {
+      return {LoadResult::UnsupportedRepresentation, nullptr};
+    }
+    auto doc = std::make_shared<GameDocument>(game);
+    doc->SetFilename(p_filename);
+    return {LoadResult::Success, doc};
   }
-  m_style.Load(workspace);
-  return true;
+  catch (const InvalidFileException &) {
+    return {LoadResult::ParseFailed, nullptr};
+  }
 }
 
 void GameDocument::SaveWorkspace(std::ostream &p_file) const
@@ -358,12 +369,6 @@ void GameDocument::DoTopDominanceLevel()
   UpdateViews();
 }
 
-void GameDocument::SetSelectNode(GameNode p_node)
-{
-  m_selectNode = p_node;
-  UpdateViews();
-}
-
 //======================================================================
 // Commands for model part of MVC architecture start here.
 //======================================================================
@@ -417,43 +422,36 @@ GamePlayer GameDocument::DoNewPlayer()
     number++;
   }
   const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
-  if (!m_game->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
-  }
   NotifyChanged(GameModificationType::GameForm);
   return player;
 }
 
-void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
+void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_labels)
 {
-  p_player->SetLabel(p_label.ToStdString(wxConvUTF8));
+  m_game->RelabelPlayers(p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoNewStrategy(GamePlayer p_player)
+void GameDocument::DoSetStrategies(GamePlayer p_player,
+                                   const std::vector<std::string> &p_stableLabels,
+                                   const std::vector<std::string> &p_labels)
 {
-  std::set<std::string> strategyLabels;
-  for (const auto &strategy : p_player->GetStrategies()) {
-    strategyLabels.insert(strategy->GetLabel());
-  }
-  int number = p_player->GetStrategies().size() + 1;
-  while (strategyLabels.contains(std::to_string(number))) {
-    number++;
-  }
-  m_game->NewStrategy(p_player, std::to_string(number));
-  NotifyChanged(GameModificationType::GameForm);
-}
+  // Phase 1: structure (which strategies exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetStrategies(p_player, p_stableLabels);
 
-void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
-{
-  m_game->DeleteStrategy(p_strategy);
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelStrategies(p_player, relabels);
+  }
   NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
-{
-  p_strategy->SetLabel(p_label.ToStdString(wxConvUTF8));
-  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
@@ -469,12 +467,32 @@ void GameDocument::DoRelabelActions(GameInfoset p_infoset,
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
+void GameDocument::DoSetActions(GameInfoset p_infoset,
+                                const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
-  m_game->MakeEvent(members, std::vector<Number>(p_probs.begin(), p_probs.end()),
-                    p_infoset->GetLabel());
-  NotifyChanged(GameModificationType::GamePayoffs);
+  // Phase 1: structure (which actions exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  if (p_infoset->IsChanceInfoset()) {
+    m_game->SetEventActions(p_infoset, p_stableLabels, p_probs);
+  }
+  else {
+    m_game->SetMoveActions(p_infoset, p_stableLabels);
+  }
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelActions(p_infoset, relabels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
@@ -506,26 +524,6 @@ void GameDocument::DoLeaveInfoset(GameNode p_node)
 void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   m_game->Reveal(p_infoset, p_player);
-  NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoInsertAction(GameNode p_node)
-{
-  if (!p_node || !p_node->GetInfoset()) {
-    return;
-  }
-  const GameInfoset infoset = p_node->GetInfoset();
-  const GameAction action = m_game->InsertAction(infoset);
-
-  std::set<std::string> actionLabels;
-  for (const auto &sibling : infoset->GetActions()) {
-    actionLabels.insert(sibling->GetLabel());
-  }
-  int number = action->GetNumber();
-  while (contains(actionLabels, std::to_string(number))) {
-    number++;
-  }
-  m_game->RelabelActions(infoset, {{action->GetLabel(), std::to_string(number)}});
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -716,17 +714,6 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
     return;
   }
   m_game->SetOutcome(p_node, nullptr);
-  NotifyChanged(GameModificationType::GamePayoffs);
-}
-
-void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
-{
-  const GameOutcome outcome = m_game->NewOutcome(GenerateOutcomeLabel(m_game));
-  outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
-  for (const auto &player : m_game->GetPlayers()) {
-    outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
-  }
-  m_game->SetOutcome(p_node, outcome);
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 

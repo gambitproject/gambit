@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/src/gtracer/gnm.cc
+// FILE: src/solvers/gtracer/ipa.cc
 // Implementation of Global Newton Method from Gametracer
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -210,7 +210,9 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
 }
 
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
-              unsigned int maxiter, bool p_verbose)
+              unsigned int maxiter,
+              std::function<void(int, const cvector &, double, double)> p_onStep,
+              const CancelToken &p_cancel)
 {
   const int N = A.getNumPlayers(),
             M = A.getNumActions(); // For easy reference
@@ -241,6 +243,7 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
   so = sh;
 
   for (unsigned int iter = 1; iter <= maxiter; iter++) {
+    p_cancel.Check();
     A.payoffMatrix(DG, sh, 0.0);
     DG /= (double)(N - 1); // find the Jacobian of the approximating bimatrix game
 
@@ -328,10 +331,7 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
     ym1 -= zh;
     ym2 = s;
     ym2 -= sh;
-    if (p_verbose) {
-      std::cerr << "iter " << iter << "\tz diff " << ym1.norm() << "\ts diff " << ym2.norm()
-                << std::endl;
-    }
+    p_onStep(static_cast<int>(iter), s, ym1.norm(), ym2.norm());
     if (!std::isfinite(ym1.norm()) || !std::isfinite(ym2.norm())) {
       return {s,
               IPATerminationReason::NonfiniteStrategy,

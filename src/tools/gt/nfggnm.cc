@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
-#include "gambit.h"
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/gnm/gnm.h"
 
@@ -74,9 +74,13 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -n COUNT         number of perturbation vectors to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   perturbation vectors (default is to seed from system\n";
+  std::cerr << "                   entropy); requires -n\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -m LAMBDA        lambda to end tracing (must be negative, default "
             << std::to_string(GNM_LAMBDA_END_DEFAULT) << ")\n";
   std::cerr << "  -f FREQ          frequency to run local Newton method (default "
@@ -94,13 +98,14 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, verbose = false;
+  bool quiet = false, verbose = false, numVectorsSet = false;
   int numDecimals = 6, numVectors = 1;
   double lambdaEnd = GNM_LAMBDA_END_DEFAULT;
   int localNewtonInterval = GNM_LOCAL_NEWTON_INTERVAL_DEFAULT;
   int localNewtonMaxits = GNM_LOCAL_NEWTON_MAXITS_DEFAULT;
   int steps = GNM_STEPS_DEFAULT;
   std::string startFile;
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
   option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -108,7 +113,7 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:m:f:i:c:qvVh", long_options, &long_opt_index)) !=
+  while ((c = getopt_long(argc, argv, "d:n:s:m:f:i:c:R:qvVh", long_options, &long_opt_index)) !=
          -1) {
     switch (c) {
     case 'v':
@@ -125,6 +130,10 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       numVectors = atoi(optarg);
+      numVectorsSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 's':
       startFile = optarg;
@@ -177,6 +186,14 @@ int main(int argc, char *argv[])
     std::cerr << "Error: Value for -c (steps in support cell) must be at least 1\n";
     return 1;
   }
+  if (numVectorsSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
+    return 1;
+  }
+  if (seed && !numVectorsSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
+  }
 
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
@@ -201,7 +218,7 @@ int main(int argc, char *argv[])
     }
     else {
       // Generate the desired number of points randomly
-      std::default_random_engine engine;
+      auto engine = MakeRandomEngine(seed);
       perts = NewRandomStrategyProfiles(game, numVectors, engine);
     }
     for (auto pert : perts) {

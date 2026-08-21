@@ -15,11 +15,28 @@
   mixed strategy, like `profile[player] = distribution`, but can require `distribution` to give
   a weight for every one of the player's strategies (the default) rather than treating strategies
   it omits as having weight zero. (#763)
+- Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
+- Added `Game.set_strategies`, which declares the ordered list of a player's strategies in a game in strategic form,
+  matching by label.  (#1056)
+- `gambit-ipa` now supports verbose output via the `-V` flag, reporting on intermediate progress. (#501)
+- Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
+  random starting point generation. (#448)
+- Added `Game.relabel_players`, which simultaneously reassigns the labels of the game's players.  (#1058)
+- Added `max_rectangles` to `enumpoly_solve` (and `-r` to `gambit-enumpoly`), bounding the number
+  of cells examined when searching for equilibria on a single support. (#1055)
 
 ### Fixed
 - `MixedStrategy.__eq__` raised `AttributeError` when comparing two `MixedStrategy` instances
   directly (as opposed to a `MixedStrategy` and a plain `Mapping`), because it read a Cython
   ``cdef``-declared attribute off `other` without first casting it to `MixedStrategy`.
+- `Game.add_player`, on a game in strategic form, no longer leaves the new player's sole
+  strategy with an empty label; it is now labeled `"1"`, as `Game.new_table` already labels
+  every other player's initial strategies.  (#1047)
+- Numerical data in action graph games is now read with exact precision, to match other game formats.  (#879)
+- `enumpoly_solve` correctly handles failed perturbations at singular Jacobians (#591)
+- `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
+  possibility of equilibria being found in orders that differ across runs. (#1016)
+- Improved the numerical stability of `enumpoly_solve` handling less-well-conditioned systems.  (#1055)
 
 ### Changed
 - `MixedBehavior.__iter__` now yields `(Infoset, MixedAction)` pairs, one per information set
@@ -98,6 +115,16 @@
   profile is next assigned into (copy-on-write), rather than eagerly duplicating; this is not
   observable from the profiles' behavior, only from how soon the duplication happens. Mirrors the
   earlier `MixedStrategyProfile.copy()` change.
+- All long-running calculations are now done in a thread in the GUI process, rather than calling the
+  command-line executables as external processes. (#990)
+- When displaying a strategic form, the graphical interface preserves decimal payoffs when those are
+  what are specified in the game, whenever possible.  (#867)
+- The GUI's strategic game table gained an "Edit strategies" dialog, opened by clicking any of a
+  player's strategy labels, supporting adding, deleting, reordering, and renaming that player's
+  strategies in one operation. The "+" toolbar icon for adding a strategy, and the strategy
+  label's right-click "Delete strategy" menu, are removed, superseded by the dialog. (#1056)
+
+### Removed
 - `MixedBehavior.mixed_actions` has been removed; it is now redundant with iterating the
   `MixedBehavior` directly.
 - `MixedStrategyProfile.mixed_strategies` has been removed; it is now redundant with iterating
@@ -114,6 +141,16 @@
   and is a specific evaluation of the payoff Jacobian that is straightforward to reconstruct
   directly: it equals the payoff obtained by substituting the two given pure strategies into
   the profile (0 if both belong to the same player).
+- Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
+  nonempty, unique labels.  (#1047)
+- `Game.add_strategy` and `Game.delete_strategy` have been removed; use `Game.set_strategies`,
+  specifying the labels of the strategies the player is to have.  (#1056)
+- The C++ `Game` interface's `NewStrategy` and `DeleteStrategy` methods have been removed; they
+  were subsumed by `SetStrategies`, and by this point were used only in support of `pygambit`'s
+  `add_strategy`/`delete_strategy` and the GUI's strategy add/delete controls, which now build the
+  equivalent `SetStrategies` call directly.  (#1056)
+  - Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
+    nonempty, unique labels.  (#1058)
 
 
 ## [17.0.0-alpha.1] - 2026-08-13
@@ -129,6 +166,11 @@
   its actions to be specified up front, just as `Game.make_event` does.  (#999)
 - `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
   information sets; the unreachable information sets are absent.  (#1002)
+- Added `Game.set_move_actions` and `Game.set_event_actions`, declaring the ordered action list
+  of a move or an event (respectively) in a single operation: a label matching a current action
+  keeps its subtree, an unmatched current label is dropped (with confirmation), and an unmatched
+  new label creates a fresh action; listing the current labels in a new order reorders the
+  actions and their subtrees together.  (#1040)
 
 ### Changed
 - Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
@@ -173,6 +215,9 @@
   personal decision nodes and discarding their probabilities; previously only personal decision
   nodes were accepted.  This matches `Game.make_event`, which has always accepted personal
   decision nodes and converted them to a chance event.  (#999)
+- The GUI's "Move properties" dialog is renamed "Edit move", and now supports adding, deleting,
+  and reordering the actions at a move directly. The standalone "Insert action" menu command is
+  removed, superseded by the dialog.  (#1040)
 
 ### Fixed
 - Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
@@ -191,6 +236,8 @@
   nonempty, unique labels.  (#1026)
 - `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
   probabilities as forming the nodes of the event with the required distribution.  (#1009)
+- `Game.add_action` and `Game.delete_action` have been removed; use `Game.set_move_actions`
+  or `Game.set_event_actions`.  (#1040)
 - The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
   removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
   only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
@@ -201,6 +248,11 @@
   stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
   `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
   now builds the equivalent `MakeEvent` call directly.  (#999)
+- The C++ `Game` interface's `InsertAction`, `DeleteAction`, and `NormalizeChanceProbs` methods
+  have been removed; they were subsumed by `SetMoveActions`/`SetEventActions`, and by this point
+  were used only in support of `pygambit`'s `add_action`/`delete_action` and the GUI's "Insert
+  action" command, which now build the equivalent `SetMoveActions`/`SetEventActions` call
+  directly.  (#1040)
 
 ## [16.7.0] - 2026-07-11
 

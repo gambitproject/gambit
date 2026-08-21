@@ -49,6 +49,7 @@ choke me
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_RANLIB
 dnl LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST

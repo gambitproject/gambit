@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/nash/gnm.h
+// FILE: src/solvers/gnm/gnm.h
 // Compute Nash equilibria via the global Newton method
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_GNM_H
-#define GAMBIT_NASH_GNM_H
+#ifndef GAMBIT_SOLVERS_GNM_GNM_H
+#define GAMBIT_SOLVERS_GNM_GNM_H
 
 #include <variant>
 
-#include "games/nash.h"
+#include "solvers/nash.h"
 #include "solvers/gtracer/gtracer.h"
 
 namespace Gambit::Nash {
@@ -64,7 +64,8 @@ std::list<MixedStrategyProfile<double>>
 GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
                  int p_localNewtonMaxits,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 GNMEventCallbackType p_onEvent = NullGNMEventCallback);
+                 GNMEventCallbackType p_onEvent = NullGNMEventCallback,
+                 const CancelToken &p_cancel = CancelToken());
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
@@ -72,8 +73,9 @@ std::list<MixedStrategyProfile<double>>
 GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
                  int p_localNewtonInterval, int p_localNewtonMaxits,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 GNMEventCallbackType p_onEvent = NullGNMEventCallback);
+                 GNMEventCallbackType p_onEvent = NullGNMEventCallback,
+                 const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_GNM_H
+#endif // GAMBIT_SOLVERS_GNM_GNM_H

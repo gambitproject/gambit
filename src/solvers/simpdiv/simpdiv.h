@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/nash/simpdiv.h
+// FILE: src/solvers/simpdiv/simpdiv.h
 // Compute Nash equilibria via simplicial subdivision on the normal form
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_SIMPDIV_H
-#define GAMBIT_NASH_SIMPDIV_H
+#ifndef GAMBIT_SOLVERS_SIMPDIV_SIMPDIV_H
+#define GAMBIT_SOLVERS_SIMPDIV_SIMPDIV_H
 
 #include <variant>
-#include "games/nash.h"
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
@@ -67,8 +67,9 @@ std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
     const Rational &p_maxregret = Rational(1, 10000000), int p_gridResize = 2,
     int p_leashLength = 0,
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
-    SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback);
+    SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_SIMPDIV_H
+#endif // GAMBIT_SOLVERS_SIMPDIV_SIMPDIV_H

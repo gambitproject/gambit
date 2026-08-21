@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/trie_map.h
+// FILE: src/games/agg/trie_map.h
 // Trie with STL-like interfaces
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_AGG_TRIEMAP_H
-#define GAMBIT_AGG_TRIEMAP_H
+#ifndef GAMBIT_GAMES_AGG_TRIE_MAP_H
+#define GAMBIT_GAMES_AGG_TRIE_MAP_H
 
 // Mapping from vector of ints to type V.
 // WARNING: traversal using the iterators is in the reverse order of insertion.
@@ -277,4 +277,4 @@ template <class V> std::ostream &operator<<(std::ostream &s, const trie_map<V> &
 
 } // end namespace Gambit::agg
 
-#endif // GAMBIT_AGG_TRIEMAP_H
+#endif // GAMBIT_GAMES_AGG_TRIE_MAP_H

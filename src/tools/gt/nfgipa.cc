@@ -23,13 +23,29 @@
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
-#include "gambit.h"
+#include <type_traits>
+#include "games.h"
 #include "tools/util.h"
 #include "solvers/ipa/ipa.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
-using namespace Gambit::gametracer;
+
+namespace {
+
+void RenderIPAEvent(const IPAEvent &p_event,
+                    const std::shared_ptr<MixedProfileRenderer<double>> &p_renderer)
+{
+  std::visit(
+      [p_renderer]<typename Event>(const Event &event) {
+        if constexpr (std::is_same_v<Event, IPAStepEvent>) {
+          p_renderer->Render(event.profile, "iter-" + lexical_cast<std::string>(event.iteration));
+        }
+      },
+      p_event);
+}
+
+} // namespace
 
 extern std::vector<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
                                                                            std::istream &p_stream);
@@ -51,10 +67,15 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
-  std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "                   (ignored if -s is given)\n";
+  std::cerr << "  -n COUNT         number of perturbation vectors to generate randomly\n";
+  std::cerr << "                   (mutually exclusive with -s)\n";
+  std::cerr << "  -R SEED          seed the random number generator used to generate\n";
+  std::cerr << "                   perturbation vectors (default is to seed from system\n";
+  std::cerr << "                   entropy); requires -n\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
+  std::cerr << "                   (mutually exclusive with -n)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
+  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
   exit(0);
 }
@@ -62,15 +83,18 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false;
+  bool quiet = false, verbose = false, numVectorsSet = false;
   int numDecimals = 6, numVectors = 1;
   std::string startFile;
+  std::optional<unsigned long> seed;
 
   int long_opt_index = 0;
-  option long_options[] = {
-      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
+  option long_options[] = {{"help", 0, nullptr, 'h'},
+                           {"version", 0, nullptr, 'v'},
+                           {"verbose", 0, nullptr, 'V'},
+                           {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:vqh", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:R:vVqh", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -78,11 +102,18 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
+    case 'V':
+      verbose = true;
+      break;
     case 'd':
       numDecimals = atoi(optarg);
       break;
     case 'n':
       numVectors = atoi(optarg);
+      numVectorsSet = true;
+      break;
+    case 'R':
+      seed = std::strtoul(optarg, nullptr, 10);
       break;
     case 's':
       startFile = optarg;
@@ -105,6 +136,15 @@ int main(int argc, char *argv[])
 
   if (!quiet) {
     PrintBanner(std::cerr);
+  }
+
+  if (numVectorsSet && !startFile.empty()) {
+    std::cerr << "Error: The -n and -s options are mutually exclusive.\n";
+    return 1;
+  }
+  if (seed && !numVectorsSet) {
+    std::cerr << "Error: The -R option requires -n.\n";
+    return 1;
   }
 
   std::istream *input_stream = &std::cin;
@@ -131,14 +171,21 @@ int main(int argc, char *argv[])
     }
     else {
       // Generate the desired number of points randomly
-      std::default_random_engine engine;
+      auto engine = MakeRandomEngine(seed);
       perts = NewRandomStrategyProfiles(game, numVectors, engine);
     }
 
     for (auto pert : perts) {
-      IPAStrategySolve(pert, [renderer](const MixedStrategyProfile<double> &p_profile) {
-        renderer->Render(p_profile);
-      });
+      IPAStrategySolve(
+          pert,
+          [renderer](const MixedStrategyProfile<double> &p_profile) {
+            renderer->Render(p_profile);
+          },
+          [renderer, verbose](const IPAEvent &p_event) {
+            if (verbose) {
+              RenderIPAEvent(p_event, renderer);
+            }
+          });
     }
     return 0;
   }

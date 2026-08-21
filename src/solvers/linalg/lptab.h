@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/lptab.h
+// FILE: src/solvers/linalg/lptab.h
 // Interface to LP tableaus
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,45 +20,54 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LPTAB_H
-#define LPTAB_H
+#ifndef GAMBIT_SOLVERS_LINALG_LPTAB_H
+#define GAMBIT_SOLVERS_LINALG_LPTAB_H
+
+#include <list>
 
 #include "tableau.h"
 
 namespace Gambit::linalg {
 
-template <class T> class LPTableau : public Tableau<T> {
-private:
-  Vector<T> dual;
-  Vector<T> unitcost;
-  Vector<T> cost;
-
-  void SolveDual();
-
+template <class T> class LPTableau final : public Tableau<T> {
 public:
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
   LPTableau(const LPTableau<T> &) = default;
-  ~LPTableau() override = default;
+  ~LPTableau() = default;
 
   LPTableau<T> &operator=(const LPTableau<T> &) = default;
 
-  // cost information
-  void SetCost(const Vector<T> &); // unit column cost := 0
-  T TotalCost() const;             // cost of current solution
-  T RelativeCost(int) const;       // negative index convention
-  const Vector<T> &GetDualVector() const { return dual; }
+  /// @name Cost information
+  //@{
+  /// Set cost vector; unit column cost := 0
+  void SetCost(const Vector<T> &);
+  /// Cost of current solution
+  T ComputeTotalCost() const;
+  /// Relative cost of a column; negative index convention
+  T ComputeRelativeCost(int) const;
+  const Vector<T> &GetDualVector() const { return m_dual; }
+  //@}
 
-  void Refactor() override;
-  void Pivot(int outrow, int col) override;
-  std::list<Array<int>> ReversePivots();
+  void Refactor();
+  void SetConst(const Vector<T> &bnew);
+  void Pivot(int outrow, int col);
+  std::list<Array<int>> ComputeReversePivots();
   bool IsDualReversePivot(int i, int j);
-  BFS<T> DualBFS() const;
+  BFS<T> GetDualBFS() const;
 
-  // as above, but unit column elements nonzero
+private:
+  Vector<T> m_dual;
+  Vector<T> m_unitCost;
+  Vector<T> m_cost;
+
+  void SolveDual();
+
+  // Same unit-column convention as ComputeRelativeCost, but selects the
+  // vector entries themselves rather than a single cost
   void BasisSelect(const Vector<T> &unitv, const Vector<T> &rowv, Vector<T> &colv) const;
 };
 
 } // end namespace Gambit::linalg
 
-#endif // LPTAB_H
+#endif // GAMBIT_SOLVERS_LINALG_LPTAB_H

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/src/gtracer/gnm.cc
+// FILE: src/solvers/gtracer/gnm.cc
 // Implementation of Global Newton Method from Gametracer
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -22,7 +22,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "games.h"
 #include "gtracer.h"
 
 namespace Gambit::gametracer {
@@ -112,7 +112,8 @@ void FindUniquePerturbedEquilibrium(const gnmgame &A, const cvector &g, std::vec
 
 GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
               double LambdaMin, bool wobble, double threshold,
-              std::function<void(const std::string &, const cvector &)> p_onStep)
+              std::function<void(const std::string &, const cvector &)> p_onStep,
+              const CancelToken &p_cancel)
 {
   std::list<cvector> equilibria;
   int numSteps = 0, numBoundaryCrossings = 0, numLNMCalls = 0;
@@ -220,6 +221,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
 
     // take the specified number of steps within these support boundaries.
     for (stepsLeft = steps; stepsLeft > 0; stepsLeft--) {
+      p_cancel.Check();
       numSteps++;
       // find J = Adj psi
       J = I;
