@@ -149,6 +149,9 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
   const double c_orientTol = 1.0e-8; // tolerance for detecting change in orientation
 
+  const double b_tol = 1.0e-10; // Tolerance for perturbing the b matrix in case of singularity
+  const double b_pert = 1.0e-8; // Perturbation of the b matrix in case of singularity
+
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.size()), newT(x.size());
@@ -206,6 +209,17 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     double decel = 1.0 / m_maxDecel; // initialize deceleration factor
     p_jacobian(u, b);
     QRDecomp(b, q);
+
+    for (size_t i = 1; i < b.NumRows(); i++) {
+      if (std::abs(b(i, i)) < b_tol) {
+        if (b(i, i) < 0) {
+          b(i, i) -= b_pert;
+        }
+        else {
+          b(i, i) += b_pert;
+        }
+      }
+    }
 
     int iter = 1;
     double disto = 0.0;
@@ -314,12 +328,16 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
 {
   x[fixed_index] = fixed_value;
 
+  const Vector<double> original_x = x;
+
   const size_t N = x.size() - 1;
   Vector<double> y(N);               // Equations results
   Matrix<double> jac_full(N + 1, N); // Full Jacobian matrix (N+1 unknowns, N equations)
   Matrix<double> jac_square(N, N);   // Jacobian matrix with fixed_index row removed
   Matrix<double> Q(N, N);            // Orthogonal matrix from QR decomposition
   Vector<double> x_reduced(N);       // Reduced x vector with fixed_index removed
+
+  double const eq_tol = 1e-2;
 
   int steps = 0;
   double dist = 0.0;
@@ -367,6 +385,14 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
 
     if (p_callback) {
       p_callback(x);
+    }
+  }
+
+  // Checking that the profile satisfies the system of equations
+  for (size_t i = 1; i <= N; ++i) {
+    if (std::abs(y[i]) > eq_tol) {
+      x = original_x;
+      return {x, false, "Polishing converged to an invalid mathematical state. Reverted.", steps};
     }
   }
 
