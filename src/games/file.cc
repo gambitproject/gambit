@@ -589,8 +589,8 @@ void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
   }
   p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   NormalizeLabelStrings(player_labels);
-  for (const auto &label : player_labels) {
-    p_game->NewPlayer(label);
+  if (!player_labels.empty()) {
+    p_game->SetPlayers(player_labels);
   }
 }
 

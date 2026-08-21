@@ -927,7 +927,14 @@ Game GameTreeRep::Copy() const
   return ReadGame(is);
 }
 
-Game NewTree() { return std::make_shared<GameTreeRep>(); }
+Game NewTree(const std::vector<std::string> &p_players)
+{
+  auto game = std::make_shared<GameTreeRep>();
+  if (!p_players.empty()) {
+    game->SetPlayers(p_players);
+  }
+  return game;
+}
 
 //------------------------------------------------------------------------
 //                 GameTreeRep: General data access
@@ -1705,19 +1712,6 @@ int GameTreeRep::BehavProfileLength() const
 //------------------------------------------------------------------------
 //                        GameTreeRep: Players
 //------------------------------------------------------------------------
-
-GamePlayer GameTreeRep::NewPlayer(const std::string &p_label)
-{
-  CheckPlayerLabel(p_label);
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label);
-  IncrementVersion();
-  m_players.push_back(player);
-  for (const auto &outcome : m_outcomes) {
-    outcome->m_payoffs[player.get()] = Number();
-  }
-  ClearComputedValues();
-  return player;
-}
 
 void GameTreeRep::SetPlayers(const std::vector<std::string> &p_labels)
 {

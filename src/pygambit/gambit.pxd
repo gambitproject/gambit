@@ -317,7 +317,6 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer(int) except +IndexError
         Players GetPlayers() except +
         c_GamePlayer GetChance() except +
-        c_GamePlayer NewPlayer(string) except +ValueError
         void RelabelPlayers(stdmap[string, string]) except +ValueError
         void SetPlayers(stdvector[string]) except +ValueError
 
@@ -383,7 +382,7 @@ cdef extern from "games/game.h":
         c_GameSubgame GetMinimalSubgame(c_GameInfoset) except +
         stdvector[c_GameSubgame] GetSubgames() except +
 
-    c_Game NewTree() except +
+    c_Game NewTree(stdvector[string]) except +ValueError
     c_Game NewTable(stdvector[int]) except +
 
 

@@ -367,10 +367,8 @@ public:
 
 inline std::shared_ptr<GameDocument> NewTreeDocument()
 {
-  const Game efg = NewTree();
+  const Game efg = NewTree({"Player 1", "Player 2"});
   efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer("Player 1");
-  efg->NewPlayer("Player 2");
   return std::make_shared<GameDocument>(efg);
 }
 

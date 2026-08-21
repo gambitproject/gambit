@@ -560,10 +560,11 @@ class Game:
         Game
             The newly-created extensive game.
         """
-        g = Game.wrap(NewTree())
+        c_labels = stdvector[string]()
+        for player in (players or []):
+            c_labels.push_back(str(player).encode("utf-8"))
+        g = Game.wrap(NewTree(c_labels))
         g.title = title
-        if players:
-            g.set_players([str(player) for player in players])
         return g
 
     @classmethod

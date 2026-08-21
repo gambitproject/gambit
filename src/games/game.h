@@ -1356,8 +1356,6 @@ public:
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
-  /// Creates a new player in the game, with no moves
-  virtual GamePlayer NewPlayer(const std::string &p_label) = 0;
   /// Reassign player labels. Keys of p_labels are current labels; values are their replacements.
   void RelabelPlayers(const std::map<std::string, std::string> &p_labels);
   /// Declare the ordered list of players of the game.
@@ -1709,8 +1707,8 @@ inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this();
 
 //=======================================================================
 
-/// Factory function to create new game tree
-[[nodiscard]] Game NewTree();
+/// Factory function to create new game tree,
+[[nodiscard]] Game NewTree(const std::vector<std::string> &p_players = {});
 /// Factory function to create new game table
 [[nodiscard]] Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
