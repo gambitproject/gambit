@@ -13,9 +13,8 @@ for players, dominance and probability indicators, and so forth.
 Printing a game
 ---------------
 
-To print the game, press :kbd:`Ctrl`-:kbd:`P`, select
-:menuselection:`File --> Print`, or click
-the printer icon on the toolbar. The game is scaled so that the
+To print the game, press :kbd:`Ctrl`-:kbd:`P` or select
+:menuselection:`File --> Print`. The game is scaled so that the
 printout fits on one page, while maintaining the same ratio of
 horizontal to vertical size; that is, the scaling factor is the same
 in both horizontal and vertical dimensions.
