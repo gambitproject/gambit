@@ -3163,7 +3163,7 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
 
 
 ##################################################################################################
-# BEHVAIOR SOLVER -- UNORDERED
+# BEHAVIOR SOLVER -- UNORDERED
 ##################################################################################################
 
 ENUMPOLY_BEHAVIOR_UNORDERED_CASES = [
