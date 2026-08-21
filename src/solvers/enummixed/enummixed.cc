@@ -21,7 +21,7 @@
 //
 
 #include "games.h"
-#include "solvers/linalg/vertenum.imp"
+#include "solvers/linalg/vertenum.h"
 #include "solvers/enummixed/enummixed.h"
 #include "clique.h"
 
@@ -128,11 +128,11 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   b2 = (T)-1;
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
-  const VertexEnumerator<T> poly1(A1, b1, p_cancel);
-  const VertexEnumerator<T> poly2(A2, b2, p_cancel);
+  const auto poly1 = EnumerateVertices(A1, b1, p_cancel);
+  const auto poly2 = EnumerateVertices(A2, b2, p_cancel);
 
-  const auto &verts1(poly1.VertexList());
-  const auto &verts2(poly2.VertexList());
+  const auto &verts1(poly1.vertices);
+  const auto &verts2(poly2.vertices);
   solution->m_v1 = verts1.size();
   solution->m_v2 = verts2.size();
 

@@ -165,7 +165,7 @@ typename NashLcpStrategySolver<T>::SearchResult
 NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tableau,
                                 Solution &p_solution) const
 {
-  const Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
+  const Gambit::linalg::BFS<T> cbfs(p_tableau.GetColumnBFS());
   if (p_solution.Contains(cbfs)) {
     return SearchResult::PruneBranch;
   }
