@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hp.h"
 #include "solvers/hp/hpsystem.h"
@@ -39,34 +38,70 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   const PathTracer tracer;
   const PathTracer::TraceDirection direction = PathTracer::TraceDirection::Positive;
   const size_t tracking_index = 1; // Track the first variable (t) for orientation
-  auto termination_condition = [](const Vector<double> &point) { return point[1] >= 1.5; };
-  auto criterion_function = [](const Vector<double> &point,
-                               const Vector<double> &tangent) -> double { return point[1] - 1.0; };
+
+  const double t_target = 1.0;
+  const double tol = 1e-8;
+  double last_t = 0.0;
+  bool has_crossed = false;
+
+  auto termination_condition = [t_target, &last_t, &has_crossed, tol,
+                                &system](const Vector<double> &point) {
+    const double t = point[1];
+
+    // Path tracer reaches tol
+    if (system.ExtractEquilibrium(point).GetMaxRegret() <= tol && t >= t_target - tol) {
+      return true;
+    }
+
+    if (t > t_target) {
+      if (!has_crossed) {
+        has_crossed = true;
+      }
+      else if (t > last_t + tol) { // Criterion function is not working; polish will do the job
+        return true;
+      }
+    }
+    else {
+      // Criterion function might take t back to being less than t_target
+      has_crossed = false;
+    }
+
+    last_t = t;
+    return false;
+  };
+
+  auto criterion_function = [t_target](const Vector<double> &point,
+                                       const Vector<double> &tangent) -> double {
+    return point[1] - t_target;
+  };
+
+  auto polishing_termination_condition = [tol, &system](const Vector<double> &point) -> bool {
+    return system.ExtractEquilibrium(point).GetMaxRegret() <= tol;
+  };
 
   const TracePathResult result = tracer.TracePath(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, direction, tracking_index, termination_condition,
-      [&system](const Vector<double> &point) {
-        std::cout << "[Path Tracer Step] t = " << point[1];
-        std::cout << " | Alfas: ";
-        for (size_t i = 2; i <= 5; ++i) {
-          std::cout << point[i] << " ";
-        }
-        std::cout << "| Mu: " << point[6] << " " << point[7] << std::endl;
-
-        std::cout << "Full point vector in probabilities: ";
-        Vector<double> prob_vector = system.ExtractEquilibrium(point).GetProbVector();
-        for (size_t i = 1; i <= prob_vector.size(); ++i) {
-          std::cout << prob_vector[i] << " ";
-        }
-        std::cout << std::endl;
-      },
+      x, direction, tracking_index, termination_condition, NullCallbackFunction,
       criterion_function);
+  if (!result.status && system.ExtractEquilibrium(x).GetMaxRegret() > tol) {
+    return {};
+  }
 
+  const PolishResult polishing_result = PolishPoint(
+      [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
+      [&system](const Vector<double> &point, Matrix<double> &jac) {
+        system.GetJacobian(point, jac);
+      },
+      x, t_target, 1, polishing_termination_condition, 100, NullCallbackFunction);
+
+  if (!polishing_result.status) {
+    return {};
+  }
   equilibria.push_back(system.ExtractEquilibrium(x));
+
   return equilibria;
 }
 } // namespace Gambit
