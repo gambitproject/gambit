@@ -217,7 +217,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
   m_onEquilibrium(profile);
   p_solution.m_equilibria.push_back(profile);
 
-  if (m_stopAfter.has_value() && p_solution.EquilibriumCount() >= static_cast<int>(m_stopAfter.value())) {
+  if (m_stopAfter.has_value() && static_cast<size_t>(p_solution.EquilibriumCount()) >= m_stopAfter.value()) {
     return SearchResult::LimitReached;
   }
 

@@ -173,9 +173,13 @@ int main(int argc, char *argv[])
     case 'm':
       maxregret = atof(optarg);
       break;
-    case 'e':
-      stopAfter = static_cast<size_t>(atoi(optarg));
+    case 'e': {
+      int val = atoi(optarg);
+      if (val > 0) {
+        stopAfter = static_cast<size_t>(val);
+      }
       break;
+    }
     case 'r':
       maxRectangles = std::strtoull(optarg, nullptr, 10);
       break;

@@ -88,9 +88,13 @@ int main(int argc, char *argv[])
     case 'D':
       printDetail = true;
       break;
-    case 'e':
-      stopAfter = static_cast<size_t>(atoi(optarg));
+    case 'e': {
+      int val = atoi(optarg);
+      if (val > 0) {
+        stopAfter = static_cast<size_t>(val);
+      }
       break;
+    }
     case 'h':
       PrintHelp(argv[0]);
       break;
