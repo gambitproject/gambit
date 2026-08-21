@@ -300,6 +300,19 @@ public:
   GamePlayer DoNewPlayer();
   /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
   void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
+  /// Declare the players of the game in a single operation, covering any combination of
+  /// adding, deleting, reordering, and relabeling players. Chance is not part of either list;
+  /// it is not affected by this operation.
+  ///
+  /// `p_stableLabels` identifies each player as it was before this edit (an existing player's
+  /// current label, or a placeholder for one newly created); `p_labels` is what that same
+  /// player, by position, is to be labeled after the edit.  Structure (which players exist,
+  /// and in what order) is resolved first, purely from `p_stableLabels`; labels are then
+  /// reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order means a rename
+  /// that reuses a label freed up by a simultaneous deletion never collides with the
+  /// not-yet-renamed original.
+  void DoSetPlayers(const std::vector<std::string> &p_stableLabels,
+                    const std::vector<std::string> &p_labels);
   /// Declare the strategies of `p_player` in a single operation, covering any combination
   /// of adding, deleting, reordering, and relabeling strategies.
   ///

@@ -432,6 +432,27 @@ void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_
   NotifyChanged(GameModificationType::GameLabels);
 }
 
+void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels)
+{
+  // Phase 1: structure (which players exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetPlayers(p_stableLabels);
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelPlayers(relabels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
+}
+
 void GameDocument::DoSetStrategies(GamePlayer p_player,
                                    const std::vector<std::string> &p_stableLabels,
                                    const std::vector<std::string> &p_labels)

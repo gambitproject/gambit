@@ -47,8 +47,6 @@ enum MenuItems {
   // context menu, one per player (plus chance); see EfgDisplay::UpdateSetPlayerMenu.
   GBT_MENU_EDIT_SET_PLAYER_BASE = 1430,
 
-  GBT_MENU_EDIT_NEWPLAYER = 1500,
-
   GBT_MENU_VIEW_PROFILES = 1850,
   GBT_MENU_VIEW_ZOOMIN = 1601,
   GBT_MENU_VIEW_ZOOMOUT = 1602,
