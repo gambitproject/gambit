@@ -11,10 +11,14 @@
   label). Each quantity is its own type — a `PayoffVector` and a `PlayerRegretVector`
   never compare equal, even if they happen to hold the same numbers, though either
   compares equal to a plain `Mapping` with the same contents. (#763)
-- `MixedStrategyProfile.set_strategy(player, distribution, sparse=False)` sets a player's whole
+- `MixedStrategyProfile.set_mixed_strategy(player, distribution, sparse=False)` sets a player's whole
   mixed strategy, like `profile[player] = distribution`, but can require `distribution` to give
   a weight for every one of the player's strategies (the default) rather than treating strategies
   it omits as having weight zero. (#763)
+- `MixedBehaviorProfile.set_mixed_action(node, distribution, sparse=False)` sets the mixed action
+  at `node`'s information set, like `profile[node] = distribution`, but can require `distribution`
+  to give a weight for every one of the information set's actions (the default) rather than
+  treating actions it omits as having weight zero. (#763)
 - Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
 - Added `Game.set_strategies`, which declares the ordered list of a player's strategies in a game in strategic form,
   matching by label.  (#1056)
@@ -85,7 +89,7 @@
   `Mapping` from strategy label to a non-negative weight, keyed by strategy label); setting a
   single strategy's probability directly is no longer supported. `distribution` need not specify
   every strategy: strategies it omits are treated as having weight zero (use the new
-  `set_strategy` to make that an error instead). A weight may be given as any value Gambit can
+  `set_mixed_strategy` to make that an error instead). A weight may be given as any value Gambit can
   interpret as a number (`int`, `float`, `str`, `Decimal`, or `Rational`), and given weights need
   not sum to one. Validation moved here from `normalize()`, which no longer needs to check for
   negative or all-zero entries, since a `MixedStrategyProfile` can no longer hold them. (#763)
@@ -97,15 +101,15 @@
   `mixed_behaviors()` returned; previously it yielded `(Action, probability)` pairs flattened
   across every player's actions, which discarded which player each action belonged to. Mirrors
   the earlier `MixedStrategyProfile.__iter__` change.
-- `MixedBehaviorProfile`/`MixedBehavior.__getitem__`/`__setitem__` now only accept a `player: str`
-  label (returning/setting a `MixedBehavior`) or a `node: Node` (returning/setting the `MixedAction`
-  at that node's information set); indexing directly by an `Infoset`, `Action`, or a bare infoset/
-  action label string is no longer supported. Since information sets don't reliably have unique
-  persistent labels the way players/strategies/actions do, a `Node` belonging to the information
-  set is used as the stable anchor instead — any member node works, since it resolves the
-  information set fresh each time rather than caching a handle to it. `MixedAction`/`MixedBehavior`
-  themselves are unaffected: still index by `str` action label / `Node` respectively. A terminal
-  `Node` (belonging to no information set) raises `ValueError`.
+- `MixedBehaviorProfile`/`MixedBehavior.__getitem__` now only accept a `player: str` label
+  (returning a `MixedBehavior`) or a `node: Node` (returning the `MixedAction` at that node's
+  information set); indexing directly by an `Infoset`, `Action`, or a bare infoset/action label
+  string is no longer supported. Since information sets don't reliably have unique persistent
+  labels the way players/strategies/actions do, a `Node` belonging to the information set is used
+  as the stable anchor instead — any member node works, since it resolves the information set
+  fresh each time rather than caching a handle to it. `MixedAction`'s own indexing is unaffected:
+  still by `str` action label. A terminal `Node` (belonging to no information set) raises
+  `ValueError`.
 - `MixedAction`/`MixedBehavior` are now immutable snapshots of a profile's state at the moment
   they were retrieved, rather than live views onto the profile; they no longer reflect later
   changes to the profile, and can no longer be assigned into (`MixedAction.__setitem__`/
@@ -115,6 +119,17 @@
   profile is next assigned into (copy-on-write), rather than eagerly duplicating; this is not
   observable from the profiles' behavior, only from how soon the duplication happens. Mirrors the
   earlier `MixedStrategyProfile.copy()` change.
+- `MixedBehaviorProfile.__setitem__` now only accepts a `node: Node`, setting a validated whole
+  distribution over that node's information set (a `Mapping` from action label to a non-negative
+  weight); setting a single action's probability directly, or a whole player's behavior in one
+  call, is no longer supported. Unlike a mixed strategy, a whole player's behavior has no
+  meaningful atomic unit larger than one information set's distribution, so there is no
+  player-level assignment to mirror `MixedStrategyProfile.__setitem__`'s player-label form —
+  assign information set by information set instead. `distribution` need not specify every
+  action: actions it omits are treated as having weight zero (use the new `set_mixed_action` to
+  make that an error instead). A weight may be given as any value Gambit can interpret as a
+  number (`int`, `float`, `str`, `Decimal`, or `Rational`), and given weights need not sum to
+  one. (#763)
 - All long-running calculations are now done in a thread in the GUI process, rather than calling the
   command-line executables as external processes. (#990)
 - When displaying a strategic form, the graphical interface preserves decimal payoffs when those are

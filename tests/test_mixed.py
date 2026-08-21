@@ -214,7 +214,7 @@ def test_setitem_allows_sparse_distribution():
 def test_set_strategy_sparse_matches_setitem():
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     sparse_profile = game.mixed_strategy_profile()
-    sparse_profile.set_strategy(P1, {"1": 1}, sparse=True)
+    sparse_profile.set_mixed_strategy(P1, {"1": 1}, sparse=True)
     setitem_profile = game.mixed_strategy_profile()
     setitem_profile[P1] = {"1": 1}
     assert sparse_profile[P1] == setitem_profile[P1]
@@ -224,7 +224,7 @@ def test_set_strategy_defaults_to_requiring_every_label():
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     with pytest.raises(ValueError, match="exactly one weight"):
-        profile.set_strategy(P1, {"1": 1})
+        profile.set_mixed_strategy(P1, {"1": 1})
 
 
 @pytest.mark.parametrize("sparse", [False, True])
@@ -232,7 +232,7 @@ def test_setitem_and_set_strategy_reject_unknown_strategy_label(sparse: bool):
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     with pytest.raises(ValueError, match="not a strategy label"):
-        profile.set_strategy(P1, {"not-a-strategy": 1}, sparse=sparse)
+        profile.set_mixed_strategy(P1, {"not-a-strategy": 1}, sparse=sparse)
     with pytest.raises(ValueError, match="not a strategy label"):
         profile[P1] = {"not-a-strategy": 1}
 
@@ -249,7 +249,7 @@ def test_setitem_and_set_strategy_reject_non_mapping(sparse: bool):
     game = games.read_from_file("coordination_4x4_payoff.nfg")
     profile = game.mixed_strategy_profile()
     with pytest.raises(TypeError, match="Mapping"):
-        profile.set_strategy(P1, [1, 0, 0, 0], sparse=sparse)
+        profile.set_mixed_strategy(P1, [1, 0, 0, 0], sparse=sparse)
     with pytest.raises(TypeError, match="Mapping"):
         profile[P1] = [1, 0, 0, 0]
 
@@ -260,7 +260,7 @@ def test_setitem_and_set_strategy_reject_uncoercible_weight(sparse: bool):
     profile = game.mixed_strategy_profile()
     full_distribution = {"1": "abc", "2": 0, "3": 0, "4": 0}
     with pytest.raises(ValueError, match="convert"):
-        profile.set_strategy(P1, full_distribution, sparse=sparse)
+        profile.set_mixed_strategy(P1, full_distribution, sparse=sparse)
     with pytest.raises(ValueError, match="convert"):
         profile[P1] = full_distribution
 
@@ -284,7 +284,7 @@ def test_indexing_rejects_player_object(sparse: bool):
     with pytest.raises(TypeError):
         profile[player] = {"1": 1}
     with pytest.raises(TypeError):
-        profile.set_strategy(player, {"1": 1}, sparse=sparse)
+        profile.set_mixed_strategy(player, {"1": 1}, sparse=sparse)
 
 
 @pytest.mark.parametrize("rational_flag", [False, True])

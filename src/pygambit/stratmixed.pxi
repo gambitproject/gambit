@@ -288,7 +288,7 @@ class MixedStrategyProfile:
 
         `distribution` need not specify a weight for every one of the player's
         strategies: strategies it omits are treated as having weight zero. Use
-        `set_strategy` if you want that to be an error instead.
+        `set_mixed_strategy` if you want that to be an error instead.
 
         Parameters
         ----------
@@ -314,7 +314,7 @@ class MixedStrategyProfile:
 
         See Also
         --------
-        set_strategy
+        set_mixed_strategy
             Equivalent, but can require a weight for every strategy instead of silently
             defaulting omitted ones to zero.
         """
@@ -322,7 +322,7 @@ class MixedStrategyProfile:
         resolved_player = self.game._resolve_player(player, "__setitem__")
         self._setprob_player(resolved_player, distribution, sparse=True)
 
-    def set_strategy(
+    def set_mixed_strategy(
         self, player: str, distribution: collections.abc.Mapping, sparse: bool = False
     ) -> None:
         """Sets the mixed strategy for the player with label `player`.
@@ -365,7 +365,7 @@ class MixedStrategyProfile:
         __setitem__
         """
         self._check_validity()
-        resolved_player = self.game._resolve_player(player, "set_strategy")
+        resolved_player = self.game._resolve_player(player, "set_mixed_strategy")
         self._setprob_player(resolved_player, distribution, sparse=sparse)
 
     @property

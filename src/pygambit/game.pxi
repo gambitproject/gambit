@@ -1227,7 +1227,9 @@ class Game:
                         f"Number of elements does not match number of "
                         f"actions for infoset {i} for {p}"
                     )
-                profile[next(iter(i.members))] = [typefunc(u) for u in v]
+                profile[next(iter(i.members))] = {
+                    a.label: typefunc(u) for a, u in zip(i.actions, v, strict=True)
+                }
         return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
@@ -1309,7 +1311,9 @@ class Game:
                 weights = scipy.stats.dirichlet(
                     alpha=[1 for action in infoset.actions], seed=gen
                 ).rvs(size=1)[0]
-                profile[next(iter(infoset.members))] = list(weights)
+                profile[next(iter(infoset.members))] = dict(
+                    zip((a.label for a in infoset.actions), weights, strict=True)
+                )
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1324,10 +1328,12 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                distribution = [
-                    Rational(hi - lo - 1, denom)
-                    for hi, lo in zip(sample[1:], sample[:-1], strict=True)
-                ]
+                distribution = {
+                    a.label: Rational(hi - lo - 1, denom)
+                    for a, hi, lo in zip(
+                        infoset.actions, sample[1:], sample[:-1], strict=True
+                    )
+                }
                 profile[next(iter(infoset.members))] = distribution
             return profile
 

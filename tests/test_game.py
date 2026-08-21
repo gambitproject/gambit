@@ -198,7 +198,7 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__setitem__(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_strategy(player.label, distribution)
+            profile.set_mixed_strategy(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__getitem__(player.label)
 
@@ -234,7 +234,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__setitem__(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_strategy(player.label, distribution)
+            profile.set_mixed_strategy(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.__getitem__(player.label)
 
@@ -246,7 +246,6 @@ def test_mixed_behavior_profile_game_structure_changed():
     game.set_move_actions(game.root.infoset, ["D1"], drop=True)
     action = next(iter(game.actions))
     infoset = next(iter(game.infosets))
-    infoset_action = next(iter(infoset.actions))
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.action_regret(action)
@@ -289,9 +288,11 @@ def test_mixed_behavior_profile_game_structure_changed():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(infoset_action, 0)
+            profile.__setitem__(game.root, {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(infoset)
+            profile.set_mixed_action(game.root, {})
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.__getitem__(game.root)
 
 
 COLLECTION_GETTERS = [

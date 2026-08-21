@@ -313,12 +313,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         if isinstance(index, Node):
-            if index.game != self.game:
-                raise MismatchError("node must belong to this game")
-            infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-            if infoset is None:
-                raise ValueError("node is terminal, has no information set")
-            return self._mixed_action_at(infoset)
+            return self._mixed_action_at(self._resolve_infoset_for_node(index))
         if isinstance(index, str):
             resolved_player = self.game._resolve_player(index, "__getitem__")
             values = {
@@ -329,69 +324,158 @@ class MixedBehaviorProfile:
             f"profile index must be str or Node, not {index.__class__.__name__}"
         )
 
+    def _resolve_infoset_for_node(self, node: Node) -> Infoset:
+        """Resolves the information set containing node.
+
+        Raises
+        ------
+        MismatchError
+            If `node` belongs to a different game.
+        ValueError
+            If `node` is terminal, and so belongs to no information set.
+        """
+        if node.game != self.game:
+            raise MismatchError("node must belong to this game")
+        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
+        if infoset is None:
+            raise ValueError("node is terminal, has no information set")
+        return infoset
+
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
         return MixedAction.wrap(
             infoset, {a.label: self._getprob_action(a) for a in infoset.actions}
         )
 
-    def _setprob_infoset(self, infoset: Infoset, value: typing.Any) -> None:
-        if len(infoset.actions) != len(value):
-            raise ValueError(
-                "when setting an agent strategy, must specify exactly one value per action"
-            )
-        for a, v in zip(infoset.actions, value):
-            self._setprob_action(a, v)
+    def _setprob_infoset(
+        self, infoset: Infoset, distribution: collections.abc.Mapping, sparse: bool
+    ) -> None:
+        """Validates and sets the whole mixed action for infoset.
 
-    def _setprob_player(self, player: Player, value: typing.Any) -> None:
-        if len(player.infosets) != len(value):
-            raise ValueError(
-                "when setting a behavior strategy, must specify exactly one distribution "
-                "per infoset"
+        Every key of `distribution` must be one of the information set's action
+        labels. If `sparse` is True, actions `distribution` omits are treated as
+        having weight zero; if False, `distribution` must specify a weight for every
+        action. Weights must be non-negative and not all zero.
+        """
+        if not isinstance(distribution, collections.abc.Mapping):
+            raise TypeError(
+                f"a mixed action must be set from a Mapping from action label to "
+                f"weight, not {distribution.__class__.__name__}"
             )
-        for s, v in zip(player.infosets, value):
-            self._setprob_infoset(s, v)
+        labels = {a.label for a in infoset.actions}
+        given = set(distribution.keys())
+        unknown = given - labels
+        if unknown:
+            raise ValueError(
+                f"not an action label at this information set: {', '.join(sorted(unknown))}"
+            )
+        if not sparse and given != labels:
+            raise ValueError(
+                "a distribution must specify exactly one weight for each action at the "
+                "information set, unless sparse=True"
+            )
+        zero = self._to_prob(0)
+        values = {label: zero for label in labels}
+        values.update({label: self._to_prob(weight) for label, weight in distribution.items()})
+        if any(v < 0 for v in values.values()):
+            raise ValueError("a mixed action's weights must be non-negative")
+        if all(v == 0 for v in values.values()):
+            raise ValueError("a mixed action's weights must not all be zero")
+        for a in infoset.actions:
+            self._setprob_action(a, values[a.label])
 
-    def __setitem__(self, index: typing.Any, value: typing.Any) -> None:
-        """Sets a component of the mixed behavior profile specified by `index` to `value`.
+    def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
+        """Sets the mixed action at the information set containing `index`.
+
+        `distribution` need not specify a weight for every one of the information
+        set's actions: actions it omits are treated as having weight zero. Use
+        `set_mixed_action` if you want that to be an error instead.
 
         Parameters
         ----------
-        index : str or Node
-            The part of the profile to set:
-
-            * If `index` is a ``str``, sets the ``MixedBehavior`` over the player's
-              information sets. The player is determined by finding the player with
-              that label, if any.
-            * If `index` is a ``Node``, sets the ``MixedAction`` over the actions at
-              the node's information set.
+        index : Node
+            A node belonging to the information set to set.
+        distribution : Mapping[str, Any]
+            A non-negative weight for some or all of the information set's actions,
+            keyed by action label; actions it omits are treated as having weight
+            zero. A weight may be any value Gambit can interpret as a number
+            (`int`, `float`, `str`, `Decimal`, or `Rational`). Weights need not sum
+            to one, and at least one must be nonzero.
 
         Raises
         ------
         TypeError
-            If `index` is not a ``str`` or a ``Node``.
+            If `index` is not a ``Node``, or `distribution` is not a Mapping.
         MismatchError
             If `index` is a ``Node`` from a different game.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set.
-        KeyError
-            If `index` is a ``str`` and no player in the game has that label.
+            If `index` is a terminal ``Node``, which belongs to no information set;
+            if any key of `distribution` is not one of the information set's action
+            labels; if any weight cannot be interpreted as a number; if any weight
+            is negative; or if the weights are all zero.
+
+        See Also
+        --------
+        set_mixed_action
+            Equivalent, but can require a weight for every action instead of
+            silently defaulting omitted ones to zero.
         """
         self._check_validity()
-        if isinstance(index, Node):
-            if index.game != self.game:
-                raise MismatchError("node must belong to this game")
-            infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-            if infoset is None:
-                raise ValueError("node is terminal, has no information set")
-            self._setprob_infoset(infoset, value)
-            return
-        if isinstance(index, str):
-            self._setprob_player(self.game._resolve_player(index, "__setitem__"), value)
-            return
-        raise TypeError(
-            f"profile index must be str or Node, not {index.__class__.__name__}"
-        )
+        if not isinstance(index, Node):
+            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
+        infoset = self._resolve_infoset_for_node(index)
+        self._setprob_infoset(infoset, distribution, sparse=True)
+
+    def set_mixed_action(
+        self, index: Node, distribution: collections.abc.Mapping, sparse: bool = False
+    ) -> None:
+        """Sets the mixed action at the information set containing `index`.
+
+        Equivalent to ``profile[index] = distribution``, except that by default
+        every one of the information set's actions must be given an explicit
+        weight in `distribution`. Use this instead of `__setitem__` when omitting
+        an action should be an error rather than silently defaulting its weight to
+        zero.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        index : Node
+            A node belonging to the information set to set.
+        distribution : Mapping[str, Any]
+            A non-negative weight for the information set's actions, keyed by
+            action label. A weight may be any value Gambit can interpret as a
+            number (`int`, `float`, `str`, `Decimal`, or `Rational`). Weights need
+            not sum to one, and at least one must be nonzero.
+        sparse : bool, default False
+            If False (the default), `distribution` must specify a weight for every
+            one of the information set's actions. If True, actions it omits are
+            treated as having weight zero, the same as
+            ``profile[index] = distribution``.
+
+        Raises
+        ------
+        TypeError
+            If `index` is not a ``Node``, or `distribution` is not a Mapping.
+        MismatchError
+            If `index` is a ``Node`` from a different game.
+        ValueError
+            If `index` is a terminal ``Node``, which belongs to no information set;
+            if any key of `distribution` is not one of the information set's action
+            labels; if `sparse` is False and `distribution` omits an action; if any
+            weight cannot be interpreted as a number; if any weight is negative; or
+            if the weights are all zero.
+
+        See Also
+        --------
+        __setitem__
+        """
+        self._check_validity()
+        if not isinstance(index, Node):
+            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
+        infoset = self._resolve_infoset_for_node(index)
+        self._setprob_infoset(infoset, distribution, sparse=sparse)
 
     def is_defined_at(self, infoset: InfosetReference) -> bool:
         """Returns whether the profile has probabilities defined at the information set.
@@ -828,6 +912,14 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         self._ensure_unshared()
         setitem_mbpd_action(deref(self.profile), index.action, value)
 
+    def _to_prob(self, value: typing.Any) -> float:
+        normalized = _to_number_string(value)
+        try:
+            return float(normalized)
+        except ValueError:
+            # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
+            return float(Rational(normalized))
+
     def _payoff(self, player: Player) -> float:
         return deref(self.profile).GetPayoff(player.player)
 
@@ -947,6 +1039,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         self._ensure_unshared()
         setitem_mbpr_action(deref(self.profile), index.action,
                             to_rational(str(value).encode("ascii")))
+
+    def _to_prob(self, value: typing.Any) -> Rational:
+        return Rational(_to_number_string(value))
 
     def _payoff(self, player: Player) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(player.player))

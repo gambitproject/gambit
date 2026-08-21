@@ -254,7 +254,7 @@ Probability distributions over strategies
    MixedStrategyProfile.__iter__
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
-   MixedStrategyProfile.set_strategy
+   MixedStrategyProfile.set_mixed_strategy
    MixedStrategyProfile.payoffs
    MixedStrategyProfile.strategy_values
    MixedStrategyProfile.strategy_regrets
@@ -288,6 +288,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.__iter__
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
+   MixedBehaviorProfile.set_mixed_action
    MixedBehaviorProfile.payoff
    MixedBehaviorProfile.action_value
    MixedBehaviorProfile.action_regret
