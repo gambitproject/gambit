@@ -34,6 +34,7 @@
 #include <wx/dcps.h>
 #endif // !defined(__WXMSW__) || wxUSE_POSTSCRIPT
 #include <wx/splitter.h>
+#include <wx/spinctrl.h>
 #include <wx/artprov.h>
 
 #include "games.h"
@@ -119,8 +120,11 @@ class AnalysisNotebook final : public wxPanel, public GameView {
   ProfileListPanel *m_profiles;
   wxChoice *m_choices;
   wxStaticText *m_description;
+  wxStaticText *m_decimalsLabel;
+  wxSpinCtrl *m_decimals;
 
   void OnChoice(wxCommandEvent &);
+  void OnDecimals(wxSpinEvent &);
   void OnUpdate() override;
 
 public:
@@ -141,11 +145,20 @@ AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<Gam
 
   m_description = new wxStaticText(this, wxID_STATIC, wxT(""));
 
+  m_decimalsLabel = new wxStaticText(this, wxID_STATIC, _("Decimals"));
+  m_decimals = new wxSpinCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                              wxSP_ARROW_KEYS, 1, 15, p_doc->GetStyle().NumDecimals());
+  m_decimals->SetToolTip(_("Number of decimal places to display for floating-point profiles"));
+
+  Connect(m_decimals->GetId(), wxEVT_SPINCTRL, wxSpinEventHandler(AnalysisNotebook::OnDecimals));
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *horizSizer = new wxBoxSizer(wxHORIZONTAL);
   horizSizer->Add(m_choices, 0, wxALL | wxALIGN_CENTER, 5);
   horizSizer->Add(m_description, 1, wxALL | wxALIGN_CENTER, 5);
+  horizSizer->Add(m_decimalsLabel, 0, wxALL | wxALIGN_CENTER, 5);
+  horizSizer->Add(m_decimals, 0, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(horizSizer, 0, wxEXPAND, 0);
 
   topSizer->Add(m_profiles, 1, wxEXPAND, 0);
@@ -160,6 +173,13 @@ void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
   m_doc->DoSelectEquilibriumOutput(p_event.GetSelection() + 1);
 }
 
+void AnalysisNotebook::OnDecimals(wxSpinEvent &p_event)
+{
+  TreeRenderConfig style = m_doc->GetStyle();
+  style.SetNumDecimals(p_event.GetPosition());
+  m_doc->SetStyle(style);
+}
+
 void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
@@ -170,8 +190,16 @@ void AnalysisNotebook::OnUpdate()
   }
   m_choices->SetSelection(m_doc->GetWorkspace().GetCurrentProfileList() - 1);
 
-  if (m_doc->GetWorkspace().GetCurrentProfileList() > 0) {
+  const bool haveProfiles = m_doc->GetWorkspace().GetCurrentProfileList() > 0;
+  if (haveProfiles) {
     m_description->SetLabel(m_doc->GetWorkspace().GetProfiles().GetDescription());
+  }
+
+  const bool showDecimals = haveProfiles && m_doc->GetWorkspace().GetProfiles().IsFloatingPoint();
+  m_decimalsLabel->Show(showDecimals);
+  m_decimals->Show(showDecimals);
+  if (showDecimals) {
+    m_decimals->SetValue(m_doc->GetStyle().NumDecimals());
   }
 }
 
@@ -208,8 +236,6 @@ EVT_MENU(GBT_MENU_VIEW_STRATEGIC, GameFrame::OnViewStrategic)
 EVT_MENU(GBT_MENU_FORMAT_FONTS, GameFrame::OnFormatFonts)
 EVT_MENU(GBT_MENU_FORMAT_LAYOUT, GameFrame::OnFormatLayout)
 EVT_MENU(GBT_MENU_FORMAT_LABELS, GameFrame::OnFormatLabels)
-EVT_MENU(GBT_MENU_FORMAT_DECIMALS_ADD, GameFrame::OnFormatDecimalsAdd)
-EVT_MENU(GBT_MENU_FORMAT_DECIMALS_DELETE, GameFrame::OnFormatDecimalsDelete)
 EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, GameFrame::OnToolsDominance)
 EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, GameFrame::OnToolsEquilibrium)
 EVT_MENU(GBT_MENU_TOOLS_QRE, GameFrame::OnToolsQre)
@@ -321,7 +347,6 @@ void GameFrame::OnUpdate()
 
   menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
   GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
-  GetToolBar()->EnableTool(GBT_MENU_FORMAT_DECIMALS_DELETE, m_doc->GetStyle().NumDecimals() > 1);
 
   if (m_doc->GetWorkspace().NumProfileLists() == 0 && m_splitter->IsSplit()) {
     m_splitter->Unsplit(m_analysisPanel);
@@ -334,80 +359,38 @@ void GameFrame::OnUpdate()
   menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
   menuBar->Enable(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
   menuBar->Enable(GBT_MENU_VIEW_ZOOM100, canZoomTree);
-
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
 }
 
 //--------------------------------------------------------------------
 //          GameFrame: Creating and updating menus and toolbar
 //--------------------------------------------------------------------
 
-#include "bitmaps/about.xpm"
-#include "bitmaps/adddecimal.xpm"
 #include "bitmaps/calc.xpm"
-#include "bitmaps/close.xpm"
-#include "bitmaps/deldecimal.xpm"
-#include "bitmaps/exit.xpm"
-#include "bitmaps/font.xpm"
-#include "bitmaps/label.xpm"
-#include "bitmaps/layout.xpm"
 #include "bitmaps/newtable.xpm"
 #include "bitmaps/newtree.xpm"
 #include "bitmaps/open.xpm"
-#include "bitmaps/preview.xpm"
-#include "bitmaps/print.xpm"
 #include "bitmaps/profiles.xpm"
 #include "bitmaps/redo.xpm"
 #include "bitmaps/save.xpm"
-#include "bitmaps/saveas.xpm"
 #include "bitmaps/table.xpm"
 #include "bitmaps/undo.xpm"
-#include "bitmaps/zoomfit.xpm"
-#include "bitmaps/zoomin.xpm"
-#include "bitmaps/zoomout.xpm"
-#include "bitmaps/zoom1.xpm"
-
-//
-// wxWidgets does not appear to offer a method for easily creating
-// a menu item with a bitmap, so we write this convenience function
-// to simplify the process.
-//
-// The bitmaps have currently been disabled, since they really
-// don't look so great.
-//
-static void AppendBitmapItem(wxMenu *p_menu, int p_id, const wxString &p_label,
-                             const wxString &p_helpString, const wxBitmap &p_bitmap)
-{
-  auto *item = new wxMenuItem(p_menu, p_id, p_label, p_helpString);
-#ifdef UNUSED
-  // wxMac does not (apparently) support adding bitmaps to menu items,
-  // so we do not set the bitmap in this case.
-  item->SetBitmap(p_bitmap);
-#endif // UNUSED
-  p_menu->Append(item);
-}
 
 void GameFrame::MakeMenus()
 {
   auto *fileMenu = new wxMenu;
 
   auto *fileNewMenu = new wxMenu;
-  AppendBitmapItem(fileNewMenu, GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
-                   _("Create a new extensive (tree) game"), wxBitmap(newtree_xpm));
-  AppendBitmapItem(fileNewMenu, GBT_MENU_FILE_NEW_NFG, _("&Strategic game"),
-                   _("Create a new strategic (table) game"), wxBitmap(newtable_xpm));
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
+                      _("Create a new extensive (tree) game"));
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_NFG, _("&Strategic game"),
+                      _("Create a new strategic (table) game"));
   fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu, _("Create a new game"));
 
-  AppendBitmapItem(fileMenu, wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"),
-                   wxBitmap(open_xpm));
+  fileMenu->Append(wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"));
   fileMenu->AppendSeparator();
 
-  AppendBitmapItem(fileMenu, wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"),
-                   wxBitmap(save_xpm));
-  AppendBitmapItem(fileMenu, wxID_SAVEAS, _("Save &as\tShift-Ctrl-S"),
-                   _("Save game to a different file"), wxBitmap(saveas_xpm));
+  fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
+  fileMenu->Append(wxID_SAVEAS, _("Save &as\tShift-Ctrl-S"), _("Save game to a different file"));
 
   fileMenu->AppendSeparator();
   auto *fileExportMenu = new wxMenu;
@@ -426,21 +409,16 @@ void GameFrame::MakeMenus()
                    _("Export the game in various formats"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"), _("Set up preferences for printing"));
-  AppendBitmapItem(fileMenu, wxID_PREVIEW, _("Print Pre&view"),
-                   _("View a preview of the game printout"), wxBitmap(preview_xpm));
-  AppendBitmapItem(fileMenu, wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"),
-                   wxBitmap(print_xpm));
+  fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"), _("View a preview of the game printout"));
+  fileMenu->Append(wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"));
 
   fileMenu->AppendSeparator();
-  AppendBitmapItem(fileMenu, wxID_CLOSE, _("&Close\tCtrl-W"), _("Close this window"),
-                   wxBitmap(close_xpm));
-  AppendBitmapItem(fileMenu, wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"), wxBitmap(exit_xpm));
+  fileMenu->Append(wxID_CLOSE, _("&Close\tCtrl-W"), _("Close this window"));
+  fileMenu->Append(wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"));
 
   auto *editMenu = new wxMenu;
-  AppendBitmapItem(editMenu, wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"),
-                   wxBitmap(undo_xpm));
-  AppendBitmapItem(editMenu, wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"),
-                   wxBitmap(redo_xpm));
+  editMenu->Append(wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"));
+  editMenu->Append(wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"));
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
 
@@ -450,14 +428,14 @@ void GameFrame::MakeMenus()
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
 
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
-                   _("Increase display magnification"), wxBitmap(zoomin_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
-                   _("Decrease display magnification"), wxBitmap(zoomout_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
-                   _("Set magnification to 1:1"), wxBitmap(zoom1_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
-                   _("Rescale to show entire tree in window"), wxBitmap(zoomfit_xpm));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
+                   _("Increase display magnification"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
+                   _("Decrease display magnification"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
+                   _("Set magnification to 1:1"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
+                   _("Rescale to show entire tree in window"));
 
   viewMenu->AppendSeparator();
 
@@ -469,12 +447,9 @@ void GameFrame::MakeMenus()
   }
 
   auto *formatMenu = new wxMenu;
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
-                   _("Set tree layout parameters"), wxBitmap(layout_xpm));
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LABELS, _("La&bels"),
-                   _("Set labels for parts of trees"), wxBitmap(label_xpm));
-  AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_FONTS, _("&Font"),
-                   _("Set the font for tree labels"), wxBitmap(font_xpm));
+  formatMenu->Append(GBT_MENU_FORMAT_LAYOUT, _("&Layout"), _("Set tree layout parameters"));
+  formatMenu->Append(GBT_MENU_FORMAT_LABELS, _("La&bels"), _("Set labels for parts of trees"));
+  formatMenu->Append(GBT_MENU_FORMAT_FONTS, _("&Font"), _("Set the font for tree labels"));
 
   auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
@@ -482,14 +457,13 @@ void GameFrame::MakeMenus()
   if (m_doc->GetGame()->IsTree()) {
     toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
   }
-  AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
-                   _("Compute Nash equilibria and refinements"), wxBitmap(calc_xpm));
+  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
+                    _("Compute Nash equilibria and refinements"));
 
   toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
-  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About Gambit"), _("About Gambit"),
-                   wxBitmap(about_xpm));
+  helpMenu->Append(wxID_ABOUT, _("&About Gambit"), _("About Gambit"));
 
   auto *menuBar = new wxMenuBar();
   menuBar->Append(fileMenu, _("&File"));
@@ -508,7 +482,7 @@ void GameFrame::MakeMenus()
 void GameFrame::MakeToolbar()
 {
   wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
-  toolBar->SetMargins(4, 4);
+  toolBar->SetMargins(2, 2);
   toolBar->SetToolBitmapSize(wxSize(24, 24));
 
   toolBar->AddTool(GBT_MENU_FILE_NEW_EFG, wxEmptyString, wxBitmap(newtree_xpm), wxNullBitmap,
@@ -521,8 +495,6 @@ void GameFrame::MakeToolbar()
                    _("Open a file"), _("Open a file"), nullptr);
   toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Save this game"), _("Save this game"), nullptr);
-  toolBar->AddTool(wxID_SAVEAS, wxEmptyString, wxBitmap(saveas_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Save to a different file"), _("Save this game to another file"), nullptr);
 
   toolBar->AddSeparator();
 
@@ -530,33 +502,6 @@ void GameFrame::MakeToolbar()
                    _("Undo the last change"), _("Undo the last change"), nullptr);
   toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Redo the last undone change"), _("Redo the last undone change"), nullptr);
-
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(wxID_PRINT, wxEmptyString, wxBitmap(print_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Print this game"), _("Print this game"), nullptr);
-  toolBar->AddTool(wxID_PREVIEW, wxEmptyString, wxBitmap(preview_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Print preview"), _("View a preview of the game printout"), nullptr);
-
-  if (m_doc->GetGame()->IsTree()) {
-    toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxEmptyString, wxBitmap(zoomin_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Zoom in"), _("Increase magnification"), nullptr);
-    toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, wxEmptyString, wxBitmap(zoomout_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Zoom out"), _("Decrease magnification"), nullptr);
-    toolBar->AddTool(GBT_MENU_VIEW_ZOOM100, wxEmptyString, wxBitmap(zoom1_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Actual size"), _("Set magnification to 1:1"), nullptr);
-    toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT, wxEmptyString, wxBitmap(zoomfit_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Zoom to fit"), _("Fit the tree in the window"), nullptr);
-  }
-
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(GBT_MENU_FORMAT_DECIMALS_ADD, wxEmptyString, wxBitmap(adddecimal_xpm),
-                   wxNullBitmap, wxITEM_NORMAL, _("Increase the number of decimals displayed"),
-                   _("Increase the number of decimal places shown"), nullptr);
-  toolBar->AddTool(GBT_MENU_FORMAT_DECIMALS_DELETE, wxEmptyString, wxBitmap(deldecimal_xpm),
-                   wxNullBitmap, wxITEM_NORMAL, _("Decrease the number of decimals displayed"),
-                   _("Decrease the number of decimal places shown"), nullptr);
 
   toolBar->AddSeparator();
 
@@ -571,11 +516,6 @@ void GameFrame::MakeToolbar()
   toolBar->AddTool(GBT_MENU_TOOLS_EQUILIBRIUM, wxEmptyString, wxBitmap(calc_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Compute Nash equilibria of this game"),
                    _("Compute Nash equilibria of this game"), nullptr);
-
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(wxID_ABOUT, wxEmptyString, wxBitmap(about_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("About Gambit"), _("About Gambit"), nullptr);
 
   toolBar->Realize();
   toolBar->SetRows(1);
@@ -1083,20 +1023,6 @@ void GameFrame::OnFormatFonts(wxCommandEvent &)
     style.SetFont(dialog.GetFontData().GetChosenFont());
     m_doc->SetStyle(style);
   }
-}
-
-void GameFrame::OnFormatDecimalsAdd(wxCommandEvent &)
-{
-  TreeRenderConfig style = m_doc->GetStyle();
-  style.SetNumDecimals(style.NumDecimals() + 1);
-  m_doc->SetStyle(style);
-}
-
-void GameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
-{
-  TreeRenderConfig style = m_doc->GetStyle();
-  style.SetNumDecimals(style.NumDecimals() - 1);
-  m_doc->SetStyle(style);
 }
 
 //----------------------------------------------------------------------
