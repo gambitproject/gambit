@@ -297,7 +297,9 @@ public:
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  GamePlayer DoNewPlayer();
+  /// Adds one player to the game, via `Game::SetPlayers`, labeled with the first unused
+  /// "Player N".
+  GamePlayer DoAddPlayer();
   /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
   void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
   /// Declare the players of the game in a single operation, covering any combination of

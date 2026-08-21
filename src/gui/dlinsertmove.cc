@@ -190,7 +190,7 @@ GamePlayer InsertMoveDialog::GetPlayer() const
   if (playerNumber <= static_cast<int>(m_doc->GetGame()->NumPlayers())) {
     return m_doc->GetGame()->GetPlayer(playerNumber);
   }
-  return m_doc->DoNewPlayer();
+  return nullptr; // "Insert move for a new player" -- see the declaration's comment
 }
 
 GameInfoset InsertMoveDialog::GetInfoset() const
