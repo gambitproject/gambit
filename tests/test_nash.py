@@ -3510,6 +3510,34 @@ def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
 ##################################################################################################
 
 
+def test_enumpoly_solve_error_with_invalid_stop_after():
+    game = games.read_from_file("const_sum_game.nfg")
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=0)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=-1)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=0.5)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=1.2)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=float("inf"))
+
+
+def test_lcp_solve_error_with_invalid_stop_after():
+    game = games.read_from_file("const_sum_game.nfg")
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=0)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=-1)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=0.5)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=1.2)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=float("inf"))
+
+
 def test_logit_solve_branch_error_with_invalid_maxregret():
     game = games.read_from_file("const_sum_game.nfg")
     with pytest.raises(ValueError, match="must be positive"):

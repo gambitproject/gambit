@@ -86,15 +86,21 @@ def _lcp_behavior_solve_rational(
 
 
 def _lcp_strategy_solve_double(
-        game: Game, stop_after: int, max_depth: int
+        game: Game, stop_after, max_depth: int
 ) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(LcpStrategySolve[double](game.game, stop_after, max_depth))
+    cdef optional[size_t] c_stop_after
+    if stop_after is not None:
+        c_stop_after = <size_t>stop_after
+    return _convert_mspd(LcpStrategySolve[double](game.game, c_stop_after, max_depth))
 
 
 def _lcp_strategy_solve_rational(
-        game: Game, stop_after: int, max_depth: int
+        game: Game, stop_after, max_depth: int
 ) -> list[MixedStrategyProfileRational]:
-    return _convert_mspr(LcpStrategySolve[c_Rational](game.game, stop_after, max_depth))
+    cdef optional[size_t] c_stop_after
+    if stop_after is not None:
+        c_stop_after = <size_t>stop_after
+    return _convert_mspr(LcpStrategySolve[c_Rational](game.game, c_stop_after, max_depth))
 
 
 def _lp_behavior_solve_double(game: Game) -> list[MixedBehaviorProfileDouble]:
@@ -178,20 +184,26 @@ def _nashsupport_strategy_solve(
 
 def _enumpoly_strategy_solve(
         game: Game,
-        stop_after: int,
+        stop_after,
         maxregret: float,
         max_rectangles: int,
 ) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(EnumPolyStrategySolve(game.game, stop_after, maxregret, max_rectangles))
+    cdef optional[size_t] c_stop_after
+    if stop_after is not None:
+        c_stop_after = <size_t>stop_after
+    return _convert_mspd(EnumPolyStrategySolve(game.game, c_stop_after, maxregret, max_rectangles))
 
 
 def _enumpoly_behavior_solve(
         game: Game,
-        stop_after: int,
+        stop_after,
         maxregret: float,
         max_rectangles: int,
 ) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(EnumPolyBehaviorSolve(game.game, stop_after, maxregret, max_rectangles))
+    cdef optional[size_t] c_stop_after
+    if stop_after is not None:
+        c_stop_after = <size_t>stop_after
+    return _convert_mbpd(EnumPolyBehaviorSolve(game.game, c_stop_after, maxregret, max_rectangles))
 
 
 def _logit_strategy_solve(

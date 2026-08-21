@@ -20,10 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <charconv>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
+#include <limits>
 #include <type_traits>
 #include "games.h"
 #include "solvers/enumpoly/enumpoly.h"
@@ -147,7 +150,7 @@ int main(int argc, char *argv[])
   bool quiet = false;
   bool useStrategic = false;
   double maxregret = 1.0e-8;
-  int stopAfter = 0;
+  std::optional<size_t> stopAfter;
   size_t maxRectangles = Nash::kDefaultEnumPolyMaxRectangles;
 
   int long_opt_index = 0;
@@ -173,9 +176,19 @@ int main(int argc, char *argv[])
     case 'm':
       maxregret = atof(optarg);
       break;
-    case 'e':
-      stopAfter = atoi(optarg);
+    case 'e': {
+      size_t parsed;
+      const auto *begin = optarg;
+      const auto *end = optarg + std::strlen(optarg);
+      const auto result = std::from_chars(begin, end, parsed);
+      if (result.ec != std::errc{} || result.ptr != end || parsed == 0) {
+        std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
+                  << std::endl;
+        exit(1);
+      }
+      stopAfter = parsed;
       break;
+    }
     case 'r':
       maxRectangles = std::strtoull(optarg, nullptr, 10);
       break;

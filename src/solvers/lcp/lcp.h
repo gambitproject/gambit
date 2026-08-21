@@ -23,13 +23,15 @@
 #ifndef GAMBIT_SOLVERS_LCP_LCP_H
 #define GAMBIT_SOLVERS_LCP_LCP_H
 
+#include <optional>
+
 #include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
 template <class T>
 std::list<MixedStrategyProfile<T>>
-LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_maxDepth,
                  StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                  const CancelToken &p_cancel = CancelToken());
 
