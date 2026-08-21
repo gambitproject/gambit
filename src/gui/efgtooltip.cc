@@ -428,6 +428,9 @@ public:
 
   void ShowForNode(const GameNode &p_node);
 
+protected:
+  void OnDismiss() override { m_node = nullptr; }
+
 private:
   void BuildControls();
   void PositionPopup();

@@ -196,6 +196,8 @@ EVT_MENU(wxID_PREVIEW, GameFrame::OnFilePrintPreview)
 EVT_MENU(wxID_PRINT, GameFrame::OnFilePrint)
 EVT_MENU(wxID_EXIT, GameFrame::OnFileExit)
 EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
+EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
+EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
 EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
 EVT_MENU(GBT_MENU_EDIT_NEWPLAYER, GameFrame::OnEditNewPlayer)
 EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
@@ -238,7 +240,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   MakeMenus();
   MakeToolbar();
 
-  wxAcceleratorEntry entries[10];
+  wxAcceleratorEntry entries[12];
   entries[0].Set(wxACCEL_CTRL, 'o', wxID_OPEN);
   entries[1].Set(wxACCEL_CTRL, 's', wxID_SAVE);
   entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, 's', wxID_SAVEAS);
@@ -249,7 +251,9 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   entries[7].Set(wxACCEL_CTRL, '=', GBT_MENU_VIEW_ZOOMIN);
   entries[8].Set(wxACCEL_CTRL, '-', GBT_MENU_VIEW_ZOOMOUT);
   entries[9].Set(wxACCEL_CTRL, '0', GBT_MENU_VIEW_ZOOM100);
-  const wxAcceleratorTable accel(10, entries);
+  entries[10].Set(wxACCEL_CTRL, 'z', wxID_UNDO);
+  entries[11].Set(wxACCEL_CTRL | wxACCEL_SHIFT, 'z', wxID_REDO);
+  const wxAcceleratorTable accel(12, entries);
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
@@ -311,6 +315,11 @@ void GameFrame::OnUpdate()
 
   wxMenuBar *menuBar = GetMenuBar();
 
+  menuBar->Enable(wxID_UNDO, m_doc->CanUndo());
+  menuBar->Enable(wxID_REDO, m_doc->CanRedo());
+  GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
+  GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
+
   GetToolBar()->EnableTool(GBT_MENU_EDIT_NEWPLAYER, !m_efgPanel || m_efgPanel->IsShown());
 
   menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
@@ -354,9 +363,11 @@ void GameFrame::OnUpdate()
 #include "bitmaps/preview.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/profiles.xpm"
+#include "bitmaps/redo.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/saveas.xpm"
 #include "bitmaps/table.xpm"
+#include "bitmaps/undo.xpm"
 #include "bitmaps/zoomfit.xpm"
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoomout.xpm"
@@ -430,6 +441,11 @@ void GameFrame::MakeMenus()
   AppendBitmapItem(fileMenu, wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"), wxBitmap(exit_xpm));
 
   auto *editMenu = new wxMenu;
+  AppendBitmapItem(editMenu, wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"),
+                   wxBitmap(undo_xpm));
+  AppendBitmapItem(editMenu, wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"),
+                   wxBitmap(redo_xpm));
+  editMenu->AppendSeparator();
   AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
                    _("Add a new player to the game"), wxBitmap(newplayer_xpm));
 
@@ -515,6 +531,13 @@ void GameFrame::MakeToolbar()
                    _("Save this game"), _("Save this game"), nullptr);
   toolBar->AddTool(wxID_SAVEAS, wxEmptyString, wxBitmap(saveas_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Save to a different file"), _("Save this game to another file"), nullptr);
+
+  toolBar->AddSeparator();
+
+  toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), wxNullBitmap, wxITEM_NORMAL,
+                   _("Undo the last change"), _("Undo the last change"), nullptr);
+  toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
+                   _("Redo the last undone change"), _("Redo the last undone change"), nullptr);
 
   toolBar->AddSeparator();
 
@@ -873,6 +896,10 @@ void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 //----------------------------------------------------------------------
 //                GameFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
+
+void GameFrame::OnEditUndo(wxCommandEvent &) { m_doc->Undo(); }
+
+void GameFrame::OnEditRedo(wxCommandEvent &) { m_doc->Redo(); }
 
 void GameFrame::OnEditGame(wxCommandEvent &)
 {
