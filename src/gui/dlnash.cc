@@ -158,7 +158,10 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
         }
         else if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
           return prefix +
-                 wxString::Format("enumpoly -d 10 -e %d -m %.17g", method.stopAfter,
+                 wxString::Format("enumpoly -d 10 -e %d -m %.17g",
+                                  method.stopAfter.has_value()
+                                      ? static_cast<int>(method.stopAfter.value())
+                                      : 0,
                                   method.maxRegret) +
                  strategic;
         }
@@ -175,7 +178,11 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("lp") + strategic;
         }
         else if constexpr (std::is_same_v<Method, LCPNashSpec>) {
-          return prefix + wxString::Format("lcp -e %d -r %d", method.stopAfter, method.maxDepth) +
+          return prefix + wxString::Format("lcp -e %d -r %d",
+                                           method.stopAfter.has_value()
+                                               ? static_cast<int>(method.stopAfter.value())
+                                               : 0,
+                                           method.maxDepth) +
                  strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
@@ -244,7 +251,7 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
   return std::visit(
       []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
-          if (method.stopAfter == 1) {
+          if (method.stopAfter.has_value() && method.stopAfter.value() == 1) {
             return wxString::Format(" (stop after one equilibrium; maximum regret %.4g)",
                                     method.maxRegret);
           }

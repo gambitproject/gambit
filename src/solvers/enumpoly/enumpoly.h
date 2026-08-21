@@ -24,6 +24,7 @@
 #ifndef GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 #define GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 
+#include <optional>
 #include <variant>
 
 #include "solvers/nash.h"
@@ -62,7 +63,7 @@ template <class Support> void NullEnumPolyEventCallback(const EnumPolyEvent<Supp
 constexpr size_t kDefaultEnumPolyMaxRectangles = 20'000;
 
 std::list<MixedStrategyProfile<double>>
-EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
+EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
@@ -70,7 +71,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedBehaviorProfile<double>>
-EnumPolyBehaviorSolve(const Game &, int p_stopAfter, double p_maxregret,
+EnumPolyBehaviorSolve(const Game &, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =

@@ -183,7 +183,8 @@ FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_ma
 
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
                                                      bool &p_isSingular, bool &p_budgetExceeded,
-                                                     int p_stopAfter, double p_maxRegret,
+                                                     std::optional<size_t> p_stopAfter,
+                                                     double p_maxRegret,
                                                      size_t p_maxRectangles,
                                                      const CancelToken &p_cancel)
 {
@@ -201,7 +202,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<Vector<double>> roots;
   try {
     roots = solver.FindRoots({bottoms, tops},
-                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max(),
+                             p_stopAfter.value_or(std::numeric_limits<int>::max()),
                              p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
@@ -228,7 +229,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 namespace Gambit::Nash {
 
 std::list<MixedBehaviorProfile<double>>
-EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
+EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles, BehaviorCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
                       const CancelToken &p_cancel)
@@ -253,7 +254,10 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     bool budgetExceeded = false;
     for (const auto &solution :
          SolveSupport(support, isSingular, budgetExceeded,
-                      std::max(p_stopAfter - static_cast<int>(ret.size()), 0), p_maxregret,
+                      p_stopAfter.has_value()
+                          ? std::optional<size_t>(p_stopAfter.value() - std::min(ret.size(), p_stopAfter.value()))
+                          : std::nullopt,
+                      p_maxregret,
                       p_maxRectangles, p_cancel)) {
       p_onEquilibrium(solution);
       ret.push_back(solution);
@@ -264,7 +268,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     if (budgetExceeded) {
       p_onEvent(EnumPolyBudgetExceededSupportEvent<BehaviorSupportProfile>{support});
     }
-    if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
+    if (p_stopAfter.has_value() && ret.size() >= p_stopAfter.value()) {
       break;
     }
   }

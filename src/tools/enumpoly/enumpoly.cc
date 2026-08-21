@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
   bool quiet = false;
   bool useStrategic = false;
   double maxregret = 1.0e-8;
-  int stopAfter = 0;
+  std::optional<size_t> stopAfter;
   size_t maxRectangles = Nash::kDefaultEnumPolyMaxRectangles;
 
   int long_opt_index = 0;
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
       maxregret = atof(optarg);
       break;
     case 'e':
-      stopAfter = atoi(optarg);
+      stopAfter = static_cast<size_t>(atoi(optarg));
       break;
     case 'r':
       maxRectangles = std::strtoull(optarg, nullptr, 10);

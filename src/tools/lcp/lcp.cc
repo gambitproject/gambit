@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, useStrategic = false, quiet = false;
   bool printDetail = false;
-  int numDecimals = 6, stopAfter = 0, maxDepth = 0;
+  int numDecimals = 6, maxDepth = 0;
+  std::optional<size_t> stopAfter;
 
   int long_opt_index = 0;
   option long_options[] = {
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
       printDetail = true;
       break;
     case 'e':
-      stopAfter = atoi(optarg);
+      stopAfter = static_cast<size_t>(atoi(optarg));
       break;
     case 'h':
       PrintHelp(argv[0]);

@@ -72,7 +72,7 @@ struct EnumMixedNashSpec {
 };
 
 struct EnumPolyNashSpec {
-  int stopAfter{0};
+  std::optional<size_t> stopAfter{std::nullopt};
   double maxRegret{1.0e-4};
 
   std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
@@ -99,7 +99,7 @@ struct LPNashSpec {
 };
 
 struct LCPNashSpec {
-  int stopAfter{0};
+  std::optional<size_t> stopAfter{std::nullopt};
   int maxDepth{0};
 
   std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;

@@ -242,15 +242,15 @@ def lcp_solve(
             raise ValueError(
                 "lcp_solve(): max_depth can only be used on the strategic representation"
             )
-    if stop_after is not None and stop_after < 0:
+    if stop_after is not None and stop_after <= 0:
         raise ValueError(
-            f"lcp_solve(): stop_after argument must be a non-negative number; got {stop_after}"
+            f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
     if not game.is_tree or use_strategic:
         if rational:
-            equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after or 0, max_depth or 0)
+            equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after, max_depth or 0)
         else:
-            equilibria = libgbt._lcp_strategy_solve_double(game, stop_after or 0, max_depth or 0)
+            equilibria = libgbt._lcp_strategy_solve_double(game, stop_after, max_depth or 0)
     elif rational:
         equilibria = libgbt._lcp_behavior_solve_rational(game)
     else:
@@ -709,12 +709,10 @@ def enumpoly_solve(
     -----
     PHCpack is available at https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
-    if stop_after is None:
-        stop_after = 0
-    elif stop_after < 0:
+    if stop_after is not None and stop_after <= 0:
         raise ValueError(
             f"enumpoly_solve(): "
-            f"stop_after argument must be a non-negative number; got {stop_after}"
+            f"stop_after argument must be a positive integer; got {stop_after}"
         )
     if maxregret <= 0.0:
         raise ValueError(
