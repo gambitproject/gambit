@@ -68,19 +68,15 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
     s1 = list(p1.strategies)
 
     profile = game.mixed_strategy_profile(rational=True)
-    profile[s0[0]] = gbt.Rational(1)
-    profile[s0[1]] = gbt.Rational(0)
-    profile[s1[0]] = gbt.Rational(0)
-    profile[s1[1]] = gbt.Rational(1)
-    assert profile.payoff(p0) == gbt.Rational(1, 3)
+    profile[p0.label] = {s0[0].label: gbt.Rational(1), s0[1].label: gbt.Rational(0)}
+    profile[p1.label] = {s1[0].label: gbt.Rational(0), s1[1].label: gbt.Rational(1)}
+    assert profile.payoffs[p0.label] == gbt.Rational(1, 3)
 
     profile = game.mixed_strategy_profile(rational=True)
-    profile[s0[0]] = gbt.Rational(0)
-    profile[s0[1]] = gbt.Rational(1)
-    profile[s1[0]] = gbt.Rational(0)
-    profile[s1[1]] = gbt.Rational(1)
-    assert profile.payoff(p0) == gbt.Rational("0.123456789012345")
-    assert profile.payoff(p1) == gbt.Rational("0.123456789012345")
+    profile[p0.label] = {s0[0].label: gbt.Rational(0), s0[1].label: gbt.Rational(1)}
+    profile[p1.label] = {s1[0].label: gbt.Rational(0), s1[1].label: gbt.Rational(1)}
+    assert profile.payoffs[p0.label] == gbt.Rational("0.123456789012345")
+    assert profile.payoffs[p1.label] == gbt.Rational("0.123456789012345")
 
 
 def test_bagg_fraction_type_distribution_parsed_exactly():
@@ -96,11 +92,11 @@ def test_bagg_fraction_type_distribution_parsed_exactly():
     dbl = game.mixed_strategy_profile(rational=False)
     for profile, one, zero in [(exact, gbt.Rational(1), gbt.Rational(0)), (dbl, 1.0, 0.0)]:
         s0, s1, s2 = list(p1t0.strategies), list(p1t1.strategies), list(p2.strategies)
-        profile[s0[0]], profile[s0[1]] = one, zero
-        profile[s1[0]], profile[s1[1]] = zero, one
-        profile[s2[0]], profile[s2[1]] = one, zero
-    assert exact.payoff(p2) == gbt.Rational(22)
-    assert float(exact.payoff(p2)) == dbl.payoff(p2)
+        profile[p1t0.label] = {s0[0].label: one, s0[1].label: zero}
+        profile[p1t1.label] = {s1[0].label: zero, s1[1].label: one}
+        profile[p2.label] = {s2[0].label: one, s2[1].label: zero}
+    assert exact.payoffs[p2.label] == gbt.Rational(22)
+    assert float(exact.payoffs[p2.label]) == dbl.payoffs[p2.label]
 
 
 @pytest.mark.parametrize("game_path", ["2x2.agg", "2x2.bagg"])
@@ -117,10 +113,11 @@ def test_agg_bagg_mixed_strategy_profile_rational_exact_payoff(game_path):
     profile = game.mixed_strategy_profile(rational=True)
     for player in game.players:
         strategies = list(player.strategies)
-        profile[strategies[0]] = gbt.Rational(10, 11)
-        profile[strategies[1]] = gbt.Rational(1, 11)
+        profile[player.label] = {
+            strategies[0].label: gbt.Rational(10, 11), strategies[1].label: gbt.Rational(1, 11)
+        }
     for player in game.players:
-        assert profile.payoff(player) == gbt.Rational(-5, 11)
+        assert profile.payoffs[player.label] == gbt.Rational(-5, 11)
     assert profile.max_regret() == 0
 
 
@@ -136,18 +133,25 @@ def test_agg_bagg_rational_algorithms_find_exact_mixed_equilibrium(game_path):
         gbt.nash.enummixed_solve(game, rational=True),
     ]
     for result in results:
-        mixed = [eq for eq in result.equilibria if any(0 < eq[s] < 1 for s in game.strategies)]
+        mixed = [
+            eq for eq in result.equilibria
+            if any(0 < eq[s.player.label][s.label] < 1 for s in game.strategies)
+        ]
         assert len(mixed) == 1
         for player in game.players:
             for strategy in player.strategies:
-                assert mixed[0][strategy] in (gbt.Rational(10, 11), gbt.Rational(1, 11))
+                assert mixed[0][player.label][strategy.label] in (
+                    gbt.Rational(10, 11), gbt.Rational(1, 11)
+                )
         assert mixed[0].max_regret() == 0
 
 
 def _set_pure_profile(profile, players, contingency):
     for player, strat_index in zip(players, contingency, strict=True):
-        for i, strategy in enumerate(player.strategies):
-            profile[strategy] = gbt.Rational(1) if i == strat_index else gbt.Rational(0)
+        profile[player.label] = {
+            strategy.label: gbt.Rational(1) if i == strat_index else gbt.Rational(0)
+            for i, strategy in enumerate(player.strategies)
+        }
 
 
 @pytest.mark.parametrize("game_path", ["2x2.bagg", "2x2_fraction_types.bagg"])
@@ -163,7 +167,7 @@ def test_bagg_pure_strategy_payoff_matches_degenerate_mixed_profile(game_path):
 
         profile = game.mixed_strategy_profile(rational=True)
         _set_pure_profile(profile, players, contingency)
-        mixed_payoffs = [profile.payoff(p) for p in players]
+        mixed_payoffs = [profile.payoffs[p.label] for p in players]
 
         assert pure_payoffs == mixed_payoffs
 
@@ -186,6 +190,6 @@ def test_bagg_pure_strategy_payoff_with_multiple_players_and_types():
 
         profile = game.mixed_strategy_profile(rational=True)
         _set_pure_profile(profile, players, contingency)
-        mixed_payoffs = [profile.payoff(p) for p in players]
+        mixed_payoffs = [profile.payoffs[p.label] for p in players]
 
         assert pure_payoffs == mixed_payoffs

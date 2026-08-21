@@ -173,7 +173,7 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
     game = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    strategy1, strategy2, *_ = game.strategies
+    distribution = {s.label: 0 for s in player.strategies}
     next(iter(game.outcomes))[player] = 3
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -183,27 +183,24 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_strategies())
-        with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.payoff(player)
+            _ = profile.payoffs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.player_regret(player)
+            _ = profile.player_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_regret(strategy1)
+            _ = profile.strategy_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value(strategy1)
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value_deriv(strategy1, strategy2)
+            _ = profile.strategy_values
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(strategy1, 0)
+            profile.__setitem__(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(strategy1)
+            profile.set_mixed_strategy(player.label, distribution)
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.__getitem__(player.label)
 
 
 def test_mixed_strategy_profile_game_structure_changed_tree():
@@ -211,7 +208,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
     game.set_move_actions(game.root.infoset, ["D1"], drop=True)
-    strategy1, strategy2, *_ = game.strategies
+    distribution = {s.label: 0 for s in player.strategies}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.as_behavior()
@@ -222,54 +219,48 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_strategies())
-        with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.payoff(player)
+            _ = profile.payoffs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.player_regret(player)
+            _ = profile.player_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_regret(strategy1)
+            _ = profile.strategy_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value(strategy1)
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.strategy_value_deriv(strategy1, strategy2)
+            _ = profile.strategy_values
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(strategy1, 0)
+            profile.__setitem__(player.label, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(strategy1)
+            profile.set_mixed_strategy(player.label, distribution)
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.__getitem__(player.label)
 
 
 def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
-    player = next(iter(game.players))
     game.set_move_actions(game.root.infoset, ["D1"], drop=True)
-    action = next(iter(game.actions))
     infoset = next(iter(game.infosets))
-    infoset_action = next(iter(infoset.actions))
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.action_regret(action)
+            _ = profile.action_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.action_value(action)
+            _ = profile.action_values
         with pytest.raises(gbt.GameStructureChangedError):
             profile.as_strategy()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.belief(next(iter(game.nodes)))
+            _ = profile.beliefs
         with pytest.raises(gbt.GameStructureChangedError):
             profile.copy()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.infoset_prob(infoset)
+            _ = profile.infoset_probs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.infoset_regret(infoset)
+            _ = profile.infoset_regrets
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.infoset_value(infoset)
+            _ = profile.infoset_values
         with pytest.raises(gbt.GameStructureChangedError):
             profile.is_defined_at(infoset)
         with pytest.raises(gbt.GameStructureChangedError):
@@ -282,25 +273,24 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
-            next(profile.mixed_actions())
+            next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            # triggers error via __getitem__
-            next(profile.mixed_behaviors())
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.node_value(player, game.root)
+            _ = profile.node_values
         with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.payoff(player)
+            _ = profile.payoffs
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.realiz_prob(game.root)
+            _ = profile.realiz_probs
         with pytest.raises(gbt.GameStructureChangedError):
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(infoset_action, 0)
+            profile.__setitem__(game.root, {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(infoset)
+            profile.set_mixed_action(game.root, {})
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.__getitem__(game.root)
 
 
 COLLECTION_GETTERS = [

@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import collections.abc
 import decimal
 import fractions
 import typing
@@ -52,24 +53,30 @@ def rat_to_py(r: c_Rational):
 
 
 @cython.cfunc
-def _to_number(value: typing.Any) -> c_Number:
-    """Convert a value into a game Number representation."""
+def _to_number_string(value: typing.Any) -> str:
+    """Coerce a value (int, float, str, Decimal, or Rational) into a canonical string
+    representation of a number, following Gambit's usual numeric coercion rules.
+    """
     if isinstance(value, (int, Decimal, Rational)):
-        value = str(value)
-    elif "/" in str(value):
+        return str(value)
+    if "/" in str(value):
         try:
-            value = str(Rational(str(value)))
+            return str(Rational(str(value)))
         except ValueError:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
-    else:
-        # This slightly indirect way of converting deals best with
-        # rounding of floating point numbers - so calling code gets
-        # the value it expects when using a float
-        try:
-            value = str(Decimal(str(value)))
-        except decimal.InvalidOperation:
-            raise ValueError(f"Cannot convert '{value}' to a number") from None
-    return c_Number(value.encode("ascii"))
+    # This slightly indirect way of converting deals best with
+    # rounding of floating point numbers - so calling code gets
+    # the value it expects when using a float
+    try:
+        return str(Decimal(str(value)))
+    except decimal.InvalidOperation:
+        raise ValueError(f"Cannot convert '{value}' to a number") from None
+
+
+@cython.cfunc
+def _to_number(value: typing.Any) -> c_Number:
+    """Convert a value into a game Number representation."""
+    return c_Number(_to_number_string(value).encode("ascii"))
 
 
 @cython.cfunc
@@ -101,6 +108,84 @@ NodeReference = Node | str
 NodeReferenceSet = typing.Iterable[NodeReference]
 
 ProfileDType = float | Rational
+
+
+@cython.cclass
+class _LabeledVector:
+    """Shared implementation for a read-only mapping from a label to a computed value.
+
+    Not part of the public API; subclass this (see ``PlayerIndexedVector`` and
+    ``StrategyIndexedVector``) so that the concrete type of a computed quantity carries its
+    own meaning (e.g. a ``PayoffVector`` and a ``PlayerRegretVector`` never compare equal to
+    each other, even if they happen to hold the same numbers).
+    """
+    _values = cython.declare(dict)
+    _label_kind = "label"
+
+    def __init__(self, values: collections.abc.Mapping) -> None:
+        self._values = dict(values)
+
+    def __repr__(self) -> str:
+        return str(self._values)
+
+    def _repr_latex_(self) -> str:
+        values = list(self._values.values())
+        if not values or not hasattr(values[0], "_repr_latex_"):
+            return repr(self)
+        return (
+            r"$\left\{" +
+            ",".join(
+                r"\text{" + str(label) + "}:" + value._repr_latex_().replace("$", "")
+                for label, value in self._values.items()
+            ) +
+            r"\right\}$"
+        )
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if isinstance(other, collections.abc.Mapping):
+            return self._values == dict(other)
+        if type(other) is not type(self):
+            return False
+        return self._values == cython.cast(_LabeledVector, other)._values
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+    def __iter__(self) -> typing.Iterator[typing.Tuple[typing.Any, typing.Any], None, None]:
+        yield from self._values.items()
+
+    def __getitem__(self, label: typing.Any) -> typing.Any:
+        try:
+            return self._values[label]
+        except KeyError:
+            raise KeyError(f"no {self._label_kind} '{label}'") from None
+
+
+@cython.cclass
+class PlayerIndexedVector(_LabeledVector):
+    """A read-only mapping from player label to a computed value, one entry per player
+    in a game.
+    """
+    _label_kind = "player"
+
+
+@cython.cclass
+class StrategyIndexedVector(_LabeledVector):
+    """A read-only mapping from strategy label to a computed value, one entry per
+    strategy belonging to a single player.
+    """
+    _label_kind = "strategy"
+
+
+@cython.cclass
+class NodeIndexedVector(_LabeledVector):
+    """A read-only mapping from a ``Node`` to a computed value, one entry per node.
+
+    Unlike ``PlayerIndexedVector``/``StrategyIndexedVector``, which are keyed by a stable
+    label, this is keyed by node identity: the value can genuinely differ between two
+    nodes, even nodes belonging to the same information set.
+    """
+    _label_kind = "node"
 
 
 ######################
