@@ -3431,6 +3431,8 @@ def test_enumpoly_solve_error_with_invalid_stop_after():
         gbt.nash.enumpoly_solve(game, stop_after=0.5)
     with pytest.raises(ValueError, match="must be a positive integer"):
         gbt.nash.enumpoly_solve(game, stop_after=1.2)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.enumpoly_solve(game, stop_after=float("inf"))
 
 
 def test_lcp_solve_error_with_invalid_stop_after():
@@ -3443,6 +3445,8 @@ def test_lcp_solve_error_with_invalid_stop_after():
         gbt.nash.lcp_solve(game, stop_after=0.5)
     with pytest.raises(ValueError, match="must be a positive integer"):
         gbt.nash.lcp_solve(game, stop_after=1.2)
+    with pytest.raises(ValueError, match="must be a positive integer"):
+        gbt.nash.lcp_solve(game, stop_after=float("inf"))
 
 
 def test_logit_solve_branch_error_with_invalid_maxregret():

@@ -27,6 +27,7 @@ A set of utilities for computing Nash equilibria
 from __future__ import annotations
 
 import dataclasses
+import math
 import pathlib
 from collections.abc import Iterator
 
@@ -246,7 +247,9 @@ def lcp_solve(
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
-    if stop_after is not None and int(stop_after) != stop_after:
+    if stop_after is not None and (
+        not math.isfinite(stop_after) or int(stop_after) != stop_after
+    ):
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
@@ -718,7 +721,9 @@ def enumpoly_solve(
             f"enumpoly_solve(): "
             f"stop_after argument must be a positive integer; got {stop_after}"
         )
-    if stop_after is not None and int(stop_after) != stop_after:
+    if stop_after is not None and (
+        not math.isfinite(stop_after) or int(stop_after) != stop_after
+    ):
         raise ValueError(
             f"enumpoly_solve(): "
             f"stop_after argument must be a positive integer; got {stop_after}"
