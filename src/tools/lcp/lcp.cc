@@ -20,9 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <getopt.h>
 #include "games.h"
@@ -92,7 +94,8 @@ int main(int argc, char *argv[])
     case 'e': {
       char *endptr;
       double val = std::strtod(optarg, &endptr);
-      if (*endptr == '\0' && val > 0 && val == static_cast<size_t>(val)) {
+      if (*endptr == '\0' && val > 0 && val == std::floor(val) &&
+          val <= static_cast<double>(std::numeric_limits<size_t>::max())) {
         stopAfter = static_cast<size_t>(val);
       }
       break;

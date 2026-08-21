@@ -246,7 +246,7 @@ def lcp_solve(
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
-    if stop_after is not None and isinstance(stop_after, float) and not stop_after.is_integer():
+    if stop_after is not None and int(stop_after) != stop_after:
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
         )
@@ -718,7 +718,7 @@ def enumpoly_solve(
             f"enumpoly_solve(): "
             f"stop_after argument must be a positive integer; got {stop_after}"
         )
-    if stop_after is not None and isinstance(stop_after, float) and not stop_after.is_integer():
+    if stop_after is not None and int(stop_after) != stop_after:
         raise ValueError(
             f"enumpoly_solve(): "
             f"stop_after argument must be a positive integer; got {stop_after}"
