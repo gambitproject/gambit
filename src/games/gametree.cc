@@ -927,7 +927,14 @@ Game GameTreeRep::Copy() const
   return ReadGame(is);
 }
 
-Game NewTree() { return std::make_shared<GameTreeRep>(); }
+Game NewTree(const std::vector<std::string> &p_players)
+{
+  auto game = std::make_shared<GameTreeRep>();
+  if (!p_players.empty()) {
+    game->SetPlayers(p_players);
+  }
+  return game;
+}
 
 //------------------------------------------------------------------------
 //                 GameTreeRep: General data access
@@ -1706,17 +1713,65 @@ int GameTreeRep::BehavProfileLength() const
 //                        GameTreeRep: Players
 //------------------------------------------------------------------------
 
-GamePlayer GameTreeRep::NewPlayer(const std::string &p_label)
+void GameTreeRep::SetPlayers(const std::vector<std::string> &p_labels)
 {
-  CheckPlayerLabel(p_label);
-  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, p_label);
+  if (p_labels.empty()) {
+    throw ValueException("At least one player must be specified");
+  }
+  std::map<std::string, long> current;
+  for (const auto &player : m_players) {
+    if (!current.emplace(player->GetLabel(), player->GetNumber() - 1).second) {
+      throw ValueException("Player label '" + player->GetLabel() + "' is ambiguous in this game");
+    }
+  }
+  std::set<std::string> declared;
+  for (const auto &label : p_labels) {
+    if (!declared.insert(label).second) {
+      throw ValueException("Player label '" + label + "' appears more than once");
+    }
+    if (current.count(label) == 0) {
+      CheckPlayerLabel(label);
+    }
+  }
+  for (const auto &player : m_players) {
+    if (declared.count(player->GetLabel()) == 0 && !player->m_infosets.empty()) {
+      throw UndefinedException("A player who has decisions in the game cannot be deleted");
+    }
+  }
+  std::vector<long> source;
+  source.reserve(p_labels.size());
+  for (const auto &label : p_labels) {
+    const auto it = current.find(label);
+    source.push_back((it != current.end()) ? it->second : -1);
+  }
+
   IncrementVersion();
-  m_players.push_back(player);
-  for (const auto &outcome : m_outcomes) {
-    outcome->m_payoffs[player.get()] = Number();
+  std::vector<std::shared_ptr<GamePlayerRep>> newPlayers;
+  newPlayers.reserve(p_labels.size());
+  for (size_t j = 0; j < p_labels.size(); ++j) {
+    if (source[j] >= 0) {
+      newPlayers.push_back(m_players[source[j]]);
+      continue;
+    }
+    auto player = std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j]);
+    for (const auto &outcome : m_outcomes) {
+      outcome->m_payoffs[player.get()] = Number();
+    }
+    newPlayers.push_back(player);
+  }
+  for (const auto &player : m_players) {
+    if (declared.count(player->GetLabel()) == 0) {
+      for (const auto &outcome : m_outcomes) {
+        outcome->m_payoffs.erase(player.get());
+      }
+      player->Invalidate();
+    }
+  }
+  m_players = std::move(newPlayers);
+  for (size_t j = 0; j < m_players.size(); ++j) {
+    m_players[j]->m_number = static_cast<int>(j) + 1;
   }
   ClearComputedValues();
-  return player;
 }
 
 //------------------------------------------------------------------------

@@ -71,8 +71,6 @@ class GameFrame final : public wxFrame, public GameView {
 
   void OnEditGame(wxCommandEvent &);
 
-  void OnEditNewPlayer(wxCommandEvent &);
-
   void OnViewProfiles(wxCommandEvent &);
   void OnViewZoom(wxCommandEvent &);
   void OnViewStrategic(wxCommandEvent &);

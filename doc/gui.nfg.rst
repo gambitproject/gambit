@@ -141,10 +141,10 @@ continues to identify the player to whom it belongs.
 Adding players
 --------------
 
-To add an additional player to the game, use the menu item
-:menuselection:`Edit --> Add player`,
-or the corresponding toolbar icon . The newly created player
-has one strategy, by default labeled with the number :guilabel:`1`.
+Players are added, removed, and reordered on the :guilabel:`Players` page of
+the :guilabel:`Game properties` dialog (:menuselection:`Edit --> Game`); see
+:doc:`gui.general`. A newly added player has one strategy, by default
+labeled with the number :guilabel:`1`.
 
 
 Editing strategies
@@ -156,6 +156,8 @@ player's strategy labels appears. This opens an :guilabel:`Edit
 strategies` dialog for that player, titled with the player's own
 label, listing a row for each of the player's strategies and showing
 its label.
+
+.. _editing-strategies:
 
 Adding, removing, and reordering strategies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

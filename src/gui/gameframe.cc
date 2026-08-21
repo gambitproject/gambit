@@ -199,7 +199,6 @@ EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
 EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
 EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
 EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
-EVT_MENU(GBT_MENU_EDIT_NEWPLAYER, GameFrame::OnEditNewPlayer)
 EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
 EVT_MENU(GBT_MENU_VIEW_ZOOMIN, GameFrame::OnViewZoom)
 EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, GameFrame::OnViewZoom)
@@ -320,8 +319,6 @@ void GameFrame::OnUpdate()
   GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
   GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
 
-  GetToolBar()->EnableTool(GBT_MENU_EDIT_NEWPLAYER, !m_efgPanel || m_efgPanel->IsShown());
-
   menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
   GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
   GetToolBar()->EnableTool(GBT_MENU_FORMAT_DECIMALS_DELETE, m_doc->GetStyle().NumDecimals() > 1);
@@ -356,7 +353,6 @@ void GameFrame::OnUpdate()
 #include "bitmaps/font.xpm"
 #include "bitmaps/label.xpm"
 #include "bitmaps/layout.xpm"
-#include "bitmaps/newplayer.xpm"
 #include "bitmaps/newtable.xpm"
 #include "bitmaps/newtree.xpm"
 #include "bitmaps/open.xpm"
@@ -445,10 +441,6 @@ void GameFrame::MakeMenus()
                    wxBitmap(undo_xpm));
   AppendBitmapItem(editMenu, wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"),
                    wxBitmap(redo_xpm));
-  editMenu->AppendSeparator();
-  AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
-                   _("Add a new player to the game"), wxBitmap(newplayer_xpm));
-
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
 
@@ -546,11 +538,6 @@ void GameFrame::MakeToolbar()
   toolBar->AddTool(wxID_PREVIEW, wxEmptyString, wxBitmap(preview_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Print preview"), _("View a preview of the game printout"), nullptr);
 
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(GBT_MENU_EDIT_NEWPLAYER, wxEmptyString, wxBitmap(newplayer_xpm), wxNullBitmap,
-                   wxITEM_NORMAL, _("Add a new player"), _("Add a new player to the game"),
-                   nullptr);
   if (m_doc->GetGame()->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxEmptyString, wxBitmap(zoomin_xpm), wxNullBitmap,
                      wxITEM_NORMAL, _("Zoom in"), _("Increase magnification"), nullptr);
@@ -908,41 +895,60 @@ void GameFrame::OnEditGame(wxCommandEvent &)
     try {
       m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
 
-      TreeRenderConfig style = m_doc->GetStyle();
-      std::map<std::string, std::string> labels;
-      for (int i = 0; i < dialog.NumRows(); i++) {
-        const GamePlayer player = dialog.GetPlayer(i);
-        if (player->IsChance()) {
-          style.SetChanceColor(dialog.GetPlayerColor(i));
-          continue; // chance's label is reserved and can't be changed
+      std::vector<std::string> stableLabels, labels;
+      std::vector<wxColour> colors;
+      for (int i = 0; i < dialog.NumPlayerRows(); i++) {
+        if (dialog.IsPlayerDeleted(i)) {
+          continue;
         }
-        const std::string newLabel = dialog.GetPlayerLabel(i).ToStdString(wxConvUTF8);
-        if (newLabel != player->GetLabel()) {
-          labels[player->GetLabel()] = newLabel;
-        }
-        style.SetPlayerColor(player->GetNumber(), dialog.GetPlayerColor(i));
+        stableLabels.push_back(dialog.GetPlayerStableLabel(i));
+        labels.push_back(dialog.GetPlayerLabel(i).ToStdString(wxConvUTF8));
+        colors.push_back(dialog.GetPlayerColor(i));
       }
-      // Relabeling all players in one call, rather than one at a time, lets two players'
-      // labels be swapped directly without tripping the duplicate-label check on an
-      // intermediate state that a per-player rename would pass through.
-      if (!labels.empty()) {
-        m_doc->DoRelabelPlayers(labels);
+
+      std::vector<std::string> currentLabels;
+      for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+        currentLabels.push_back(player->GetLabel());
+      }
+
+      if (stableLabels != currentLabels) {
+        // The set, order, or count of players changed: add, delete, and/or reorder in a
+        // single operation.
+        m_doc->DoSetPlayers(stableLabels, labels);
+      }
+      else {
+        // No structural change -- relabeling all players in one call, rather than one at a
+        // time, lets two players' labels be swapped directly without tripping the
+        // duplicate-label check on an intermediate state that a per-player rename would pass
+        // through. (Also keeps this working for a game whose `Game::SetPlayers` is
+        // unsupported, e.g. one loaded from an action graph game file, as long as no
+        // structural edit was actually made.)
+        std::map<std::string, std::string> relabels;
+        for (size_t i = 0; i < stableLabels.size(); i++) {
+          if (stableLabels[i] != labels[i]) {
+            relabels[stableLabels[i]] = labels[i];
+          }
+        }
+        if (!relabels.empty()) {
+          m_doc->DoRelabelPlayers(relabels);
+        }
+      }
+
+      TreeRenderConfig style = m_doc->GetStyle();
+      if (m_doc->GetGame()->IsTree()) {
+        style.SetChanceColor(dialog.GetChanceColor());
+      }
+      // Colors are assigned by position among the surviving rows, which matches the players'
+      // resulting numbers whether or not the block above just changed them.
+      int number = 1;
+      for (const auto &color : colors) {
+        style.SetPlayerColor(number++, color);
       }
       m_doc->SetStyle(style);
     }
     catch (std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();
     }
-  }
-}
-
-void GameFrame::OnEditNewPlayer(wxCommandEvent &)
-{
-  try {
-    m_doc->DoNewPlayer();
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 

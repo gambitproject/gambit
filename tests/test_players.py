@@ -35,36 +35,35 @@ def test_player_label_unicode_accepted(label):
     assert player.label == label
 
 
-def test_add_player_requires_label():
-    """add_player now requires a label; omitting it is a TypeError."""
-    game = gbt.Game.new_tree()
+def test_set_players_requires_iterable_of_str():
+    game = gbt.Game.new_table([2, 2])
     with pytest.raises(TypeError):
-        game.add_player()
+        game.set_players("12")
+    with pytest.raises(TypeError):
+        game.set_players([1, 2])
 
 
-def test_add_player_duplicate_label_raises_and_leaves_game_unchanged():
+def test_set_players_duplicate_label_raises_and_leaves_game_unchanged():
     game = gbt.Game.new_table([2, 2])
-    existing = next(iter(game.players)).label
-    count_before = len(game.players)
+    labels = [player.label for player in game.players]
     with pytest.raises(ValueError):
-        game.add_player(existing)
-    assert len(game.players) == count_before
+        game.set_players(labels + [labels[0]])
+    assert [player.label for player in game.players] == labels
 
 
-def test_add_player_empty_label_raises_and_leaves_game_unchanged():
+def test_set_players_empty_label_raises_and_leaves_game_unchanged():
     game = gbt.Game.new_table([2, 2])
-    count_before = len(game.players)
+    labels = [player.label for player in game.players]
     with pytest.raises(ValueError):
-        game.add_player("")
-    assert len(game.players) == count_before
+        game.set_players(labels + [""])
+    assert [player.label for player in game.players] == labels
 
 
-def test_add_player_reserved_chance_label_raises_and_leaves_game_unchanged():
+def test_set_players_reserved_chance_label_raises_and_leaves_game_unchanged():
     game = gbt.Game.new_tree()
-    count_before = len(game.players)
     with pytest.raises(ValueError):
-        game.add_player("Chance")
-    assert len(game.players) == count_before
+        game.set_players(["Chance"])
+    assert len(game.players) == 0
 
 
 def test_chance_player_has_label():
@@ -82,7 +81,7 @@ def test_chance_player_label_cannot_be_changed():
 
 def test_regular_player_cannot_be_relabeled_to_chance():
     game = gbt.Game.new_tree()
-    game.add_player("Alice")
+    game.set_players(["Alice"])
     player = next(iter(game.players))
     with pytest.raises(ValueError):
         game.relabel_players({player.label: "Chance"})
@@ -171,17 +170,19 @@ def test_relabel_players_chance_key_raises_even_when_not_strict():
         game.relabel_players({"Chance": "Nature"}, strict=False)
 
 
-def test_strategic_game_add_player():
+def test_strategic_game_set_players_add():
     game = gbt.Game.new_table([2, 2])
-    new_player = game.add_player("Player 3")
+    labels = [player.label for player in game.players]
+    game.set_players(labels + ["Player 3"])
+    new_player = game.players["Player 3"]
     assert len(game.players) == 3
     assert len(new_player.strategies) == 1
     assert next(iter(new_player.strategies)).label == "1"
 
 
-def test_extensive_game_add_player():
+def test_extensive_game_set_players_add():
     game = gbt.Game.new_tree()
-    game.add_player("Alice")
+    game.set_players(["Alice"])
     pl1 = next(iter(game.players))
     assert len(game.players) == 1
     assert len(pl1.infosets) == 0
@@ -464,3 +465,49 @@ def test_set_strategies_empty_label_raises_and_leaves_game_unchanged():
     with pytest.raises(ValueError):
         game.set_strategies(pl, labels + [""])
     assert [s.label for s in pl.strategies] == labels
+
+
+def test_set_players_empty_raises():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_players([], drop=True)
+
+
+def test_set_players_reorder_transposes_table():
+    """Reordering the players permutes the axes of the payoff table."""
+    game = gbt.Game.from_arrays([[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]])
+    a, b = (player.label for player in game.players)
+    game.set_players([b, a])
+    assert [player.label for player in game.players] == [b, a]
+    assert game.to_arrays()[0].tolist() == [[7, 10], [8, 11], [9, 12]]
+    assert game.to_arrays()[1].tolist() == [[1, 4], [2, 5], [3, 6]]
+
+
+def test_set_players_add_then_drop_round_trips():
+    game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
+    labels = [player.label for player in game.players]
+    game.set_players(labels + ["X"])
+    assert all(outcome["X"] == 0 for outcome in game.outcomes)
+    game.set_players(labels, drop=True)
+    assert [player.label for player in game.players] == labels
+    assert game.to_arrays()[0].tolist() == [[1, 2], [3, 4]]
+
+
+def test_set_players_drop_requires_deletable_player():
+    game = gbt.Game.new_table([2, 2])
+    a, _ = (player.label for player in game.players)
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.set_players([a], drop=True)
+    tree = games.create_stripped_down_poker_efg()
+    with pytest.raises(gbt.UndefinedOperationError):
+        tree.set_players(["Bob"], drop=True)
+
+
+def test_set_players_unconfirmed_drop_and_disabled_add_raise():
+    game = gbt.Game.new_table([2, 2])
+    labels = [player.label for player in game.players]
+    with pytest.raises(ValueError):
+        game.set_players(labels[:1])
+    with pytest.raises(ValueError):
+        game.set_players(labels + ["X"], add=False)
+    assert [player.label for player in game.players] == labels

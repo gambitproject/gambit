@@ -14,13 +14,17 @@ The frame presenting a game consists of a single main panel, which displays
 the game graphically; in this case, showing the game tree of a simple
 one-card poker game. Note that where applicable, information is color-coded
 to match the colors assigned to the players: Fred's moves and payoffs are
-presented in red, and Alice's in blue. Player names and colors are set on
-the :guilabel:`Players` page of the :guilabel:`Game properties` dialog
-(:menuselection:`Edit --> Game`): each player is listed with a text field
-for its name and a color swatch beside it, which opens a color picker when
-clicked. A new player is added to the game using
-:menuselection:`Edit --> Add player`; the Players page itself does not yet
-support adding, removing, or reordering players.
+presented in red, and Alice's in blue. Players are added, removed, reordered,
+renamed, and recolored on the :guilabel:`Players` page of the
+:guilabel:`Game properties` dialog (:menuselection:`Edit --> Game`), in the
+same way as a player's strategies are edited on the :guilabel:`Edit
+strategies` dialog (see :ref:`Adding, removing, and reordering strategies
+<editing-strategies>`): each player has a text field for its name, a color
+swatch beside it that opens a color picker when clicked, and
+:guilabel:`↑`/:guilabel:`↓`/:guilabel:`✕` buttons to reorder or remove it.
+A player can't be removed if it has decisions in the game, or more than one
+strategy in the game's strategic representation; its :guilabel:`✕` button is
+disabled, with a tooltip explaining why.
 
 Hovering the mouse pointer over a node in the tree briefly displays a small
 window showing, for each player, that player's expected payoff from that

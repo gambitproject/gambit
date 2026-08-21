@@ -457,27 +457,51 @@ void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-GamePlayer GameDocument::DoNewPlayer()
+GamePlayer GameDocument::DoAddPlayer()
 {
   std::set<std::string> playerLabels;
-
+  std::vector<std::string> labels;
   for (const auto &player : m_game->GetPlayers()) {
     playerLabels.insert(player->GetLabel());
+    labels.push_back(player->GetLabel());
   }
 
   int number = m_game->NumPlayers() + 1;
   while (playerLabels.contains("Player " + lexical_cast<std::string>(number))) {
     number++;
   }
-  const GamePlayer player = m_game->NewPlayer("Player " + lexical_cast<std::string>(number));
+  labels.push_back("Player " + lexical_cast<std::string>(number));
+
+  m_game->SetPlayers(labels);
   NotifyChanged(GameModificationType::GameForm);
-  return player;
+  return m_game->GetPlayers().back();
 }
 
 void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_labels)
 {
   m_game->RelabelPlayers(p_labels);
   NotifyChanged(GameModificationType::GameLabels);
+}
+
+void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels)
+{
+  // Phase 1: structure (which players exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetPlayers(p_stableLabels);
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelPlayers(relabels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetStrategies(GamePlayer p_player,

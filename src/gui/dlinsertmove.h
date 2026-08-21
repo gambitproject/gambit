@@ -42,6 +42,9 @@ public:
   InsertMoveDialog(wxWindow *, const std::shared_ptr<GameDocument> &);
 
   // Data access (only valid if ShowModal() returns wxID_OK.
+  // If GetPlayer() returns null, the user selected "Insert move for a new player" -- no such
+  // player exists yet, so the caller must add one (e.g. via GameDocument::DoAddPlayer())
+  // before it can be used.
   // If GetInfoset() returns null, user selected "new infoset"
   GamePlayer GetPlayer() const;
   GameInfoset GetInfoset() const;

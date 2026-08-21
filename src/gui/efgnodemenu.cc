@@ -227,7 +227,12 @@ void EfgDisplay::OnEditInsertMove(wxCommandEvent &)
         m_doc->DoInsertMove(m_contextNode, dialog.GetInfoset());
       }
       else {
-        m_doc->DoInsertMove(m_contextNode, dialog.GetPlayer(), dialog.GetActions());
+        GamePlayer player = dialog.GetPlayer();
+        if (!player) {
+          // "Insert move for a new player" was selected: no such player exists yet.
+          player = m_doc->DoAddPlayer();
+        }
+        m_doc->DoInsertMove(m_contextNode, player, dialog.GetActions());
       }
     }
     catch (std::exception &ex) {
