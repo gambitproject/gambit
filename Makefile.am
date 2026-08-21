@@ -47,7 +47,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/layout.xpm \
 	src/gui/bitmaps/move.xpm \
 	src/gui/bitmaps/newcol.xpm \
-	src/gui/bitmaps/newplayer.xpm \
 	src/gui/bitmaps/newrow.xpm \
 	src/gui/bitmaps/newtable.xpm \
 	src/gui/bitmaps/newtree.xpm \
