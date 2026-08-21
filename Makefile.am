@@ -29,12 +29,10 @@ EXTRA_DIST = \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
 	src/gui/bitmaps/about.xpm \
-	src/gui/bitmaps/adddecimal.xpm \
 	src/gui/bitmaps/calc.xpm \
 	src/gui/bitmaps/close.xpm \
 	src/gui/bitmaps/color.xpm \
 	src/gui/bitmaps/datasrc.xpm \
-	src/gui/bitmaps/deldecimal.xpm \
 	src/gui/bitmaps/dice.xpm \
 	src/gui/bitmaps/efg.ico \
 	src/gui/bitmaps/exit.xpm \

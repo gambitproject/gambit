@@ -77,8 +77,6 @@ class GameFrame final : public wxFrame, public GameView {
 
   void OnFormatLayout(wxCommandEvent &);
   void OnFormatLabels(wxCommandEvent &);
-  void OnFormatDecimalsAdd(wxCommandEvent &);
-  void OnFormatDecimalsDelete(wxCommandEvent &);
   void OnFormatFonts(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);

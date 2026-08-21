@@ -24,6 +24,7 @@
 #define GAMBIT_GUI_ANALYSIS_H
 
 #include <optional>
+#include <type_traits>
 
 #include "games/workspace.h"
 #include "nashspec.h"
@@ -96,6 +97,9 @@ public:
   /// Are these behavior or strategy profiles natively?
   virtual bool IsBehavior() const = 0;
 
+  /// Are these profiles computed in floating-point (as opposed to exact rational) precision?
+  virtual bool IsFloatingPoint() const = 0;
+
   //@}
 
   virtual std::string GetPayoff(int pl, int p_index = -1) const = 0;
@@ -149,6 +153,9 @@ public:
   //@{
   /// Are these behavior or strategy profiles natively?
   bool IsBehavior() const override { return m_isBehav; }
+
+  /// Are these profiles computed in floating-point (as opposed to exact rational) precision?
+  bool IsFloatingPoint() const override { return std::is_same_v<T, double>; }
 
   /// The number of profiles in the list
   int NumProfiles() const override;
