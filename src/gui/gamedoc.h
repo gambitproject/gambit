@@ -224,8 +224,16 @@ class GameDocument {
 
   AnalysisWorkspace m_workspace;
 
+  std::list<std::string> m_undoList, m_redoList;
+
   void NotifyChanged(GameModificationType p_modifications);
   void UpdateViews();
+
+  /// Discard all undo/redo history, taking the current state as the new baseline
+  void ResetUndoHistory();
+  /// Replace the game, workspace, and style with those saved in a snapshot
+  /// previously produced by `SaveWorkspace`
+  void RestoreSnapshot(const std::string &p_snapshot);
 
 public:
   explicit GameDocument(Game p_game);
@@ -262,6 +270,17 @@ public:
   void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
 
   const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
+
+  //!
+  //! @name Undo/redo
+  //!
+  //@{
+  bool CanUndo() const { return m_undoList.size() > 1; }
+  void Undo();
+
+  bool CanRedo() const { return !m_redoList.empty(); }
+  void Redo();
+  //@}
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);

@@ -66,6 +66,9 @@ class GameFrame final : public wxFrame, public GameView {
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
+  void OnEditUndo(wxCommandEvent &);
+  void OnEditRedo(wxCommandEvent &);
+
   void OnEditGame(wxCommandEvent &);
 
   void OnEditNewPlayer(wxCommandEvent &);
