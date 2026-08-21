@@ -242,6 +242,14 @@ Computed quantities
    StrategyIndexedVector.__iter__
    StrategyIndexedVector.__getitem__
 
+   NodeIndexedVector
+   NodeIndexedVector.__iter__
+   NodeIndexedVector.__getitem__
+
+   InfosetIndexedVector
+   InfosetIndexedVector.__iter__
+   InfosetIndexedVector.__getitem__
+
 
 Probability distributions over strategies
 .........................................
@@ -289,15 +297,15 @@ Probability distributions over behavior
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.set_mixed_action
-   MixedBehaviorProfile.payoff
-   MixedBehaviorProfile.action_value
-   MixedBehaviorProfile.action_regret
-   MixedBehaviorProfile.infoset_value
-   MixedBehaviorProfile.infoset_regret
-   MixedBehaviorProfile.node_value
-   MixedBehaviorProfile.realiz_prob
-   MixedBehaviorProfile.infoset_prob
-   MixedBehaviorProfile.belief
+   MixedBehaviorProfile.payoffs
+   MixedBehaviorProfile.action_values
+   MixedBehaviorProfile.action_regrets
+   MixedBehaviorProfile.infoset_values
+   MixedBehaviorProfile.infoset_regrets
+   MixedBehaviorProfile.node_values
+   MixedBehaviorProfile.realiz_probs
+   MixedBehaviorProfile.infoset_probs
+   MixedBehaviorProfile.beliefs
    MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
@@ -314,6 +322,18 @@ Probability distributions over behavior
    MixedAction
    MixedAction.__iter__
    MixedAction.__getitem__
+
+   InfosetValueVector
+   InfosetRegretVector
+   InfosetProbVector
+   ActionValueVector
+   ActionRegretVector
+   ActionValuesVector
+   ActionRegretsVector
+   RealizProbVector
+   BeliefVector
+   NodeValueVector
+   NodeValuesVector
 
 
 Computation on supports

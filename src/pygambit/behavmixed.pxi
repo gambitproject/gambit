@@ -24,6 +24,102 @@ from cython.operator cimport dereference as deref
 
 
 @cython.cclass
+class InfosetIndexedVector(_LabeledVector):
+    """A read-only mapping from an information set to a computed value, one entry per
+    information set.
+
+    Since information sets don't reliably have unique persistent labels, this is indexed
+    by any ``Node`` belonging to the information set (resolved to the information set
+    itself before lookup) rather than by a label: any member node is an equally valid
+    key, unlike ``NodeIndexedVector``.
+    """
+    _label_kind = "information set"
+
+    def __getitem__(self, node: Node) -> typing.Any:
+        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
+        if infoset is None:
+            raise ValueError("node is terminal, has no information set")
+        try:
+            return self._values[infoset]
+        except KeyError:
+            raise KeyError(f"no {self._label_kind} for this node") from None
+
+
+@cython.cclass
+class InfosetValueVector(InfosetIndexedVector):
+    """The expected payoff to the player conditional on reaching each information set,
+    one entry per (non-chance) information set.
+    """
+
+
+@cython.cclass
+class InfosetRegretVector(InfosetIndexedVector):
+    """The regret of playing the mixed action at each information set, one entry per
+    information set.
+    """
+
+
+@cython.cclass
+class InfosetProbVector(InfosetIndexedVector):
+    """The probability with which each information set is reached, one entry per
+    information set.
+    """
+
+
+@cython.cclass
+class ActionValueVector(StrategyIndexedVector):
+    """The expected payoff of playing each action, conditional on reaching it, for one
+    information set's actions.
+    """
+
+
+@cython.cclass
+class ActionRegretVector(StrategyIndexedVector):
+    """The regret of playing each action, for one information set's actions."""
+
+
+@cython.cclass
+class ActionValuesVector(InfosetIndexedVector):
+    """The expected payoff of playing each action, conditional on reaching it, grouped
+    by information set; each value is an `ActionValueVector` for that information set's
+    actions.
+    """
+
+
+@cython.cclass
+class ActionRegretsVector(InfosetIndexedVector):
+    """The regret of playing each action, grouped by information set; each value is an
+    `ActionValueVector` for that information set's actions.
+    """
+
+
+@cython.cclass
+class RealizProbVector(NodeIndexedVector):
+    """The probability with which each node is reached, one entry per node."""
+
+
+@cython.cclass
+class BeliefVector(NodeIndexedVector):
+    """The conditional probability that each node is reached, given that its
+    information set is reached, one entry per node.
+    """
+
+
+@cython.cclass
+class NodeValueVector(NodeIndexedVector):
+    """The expected payoff to one player conditional on reaching each node, one entry
+    per node.
+    """
+
+
+@cython.cclass
+class NodeValuesVector(PlayerIndexedVector):
+    """The expected payoff to each (non-chance) player conditional on reaching each
+    node, grouped by player; each value is a `NodeValueVector` for that player.
+    """
+
+
+@cython.cclass
 class MixedAction:
     """A probability distribution over a player's actions at an information set.
 
@@ -341,6 +437,13 @@ class MixedBehaviorProfile:
             raise ValueError("node is terminal, has no information set")
         return infoset
 
+    def _all_infosets(self) -> typing.Iterator[Infoset]:
+        """Iterates over every information set in the game, including the chance
+        player's, which ``self.game.infosets`` excludes.
+        """
+        yield from self.game.infosets
+        yield from self.game.players.chance.infosets
+
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
         return MixedAction.wrap(
@@ -498,181 +601,76 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
 
-    def belief(self, node: NodeReference) -> ProfileDType | None:
-        """Returns the conditional probability that a node is reached, given that
-        its information set is reached.
+    @property
+    def payoffs(self) -> PayoffVector:
+        """Returns the expected payoff to each player, if all players play according to
+        the profile.
 
-        The conditioning event is that the information set is reached at least once,
-        so beliefs are normalized by the upper-frontier probability returned by
-        `infoset_prob` (following :cite:p:`HalPas21`), rather than by the sum of the
-        members' realization probabilities.  For a non-absent-minded information set
-        the two approaches agree.  For an absent-minded information set they need not:
-        the beliefs over its members may sum to more than one.
+        The chance player is excluded, since it takes no decisions and so has no
+        well-defined payoff; ``self.game.players`` already excludes it.
+        """
+        self._check_validity()
+        return PayoffVector({p.label: self._payoff(p) for p in self.game.players})
 
-        If the information set is reached with zero probability under the profile, the
-        belief is not well-defined and the function returns `None`.  This is the same
-        reach probability returned by `infoset_prob`, so a `None` belief corresponds
-        exactly to `infoset_prob` being zero there.
+    @property
+    def node_values(self) -> NodeValuesVector:
+        """Returns the expected payoff to each player conditional on play reaching each
+        node, if all players play according to the profile, grouped by player.
+        """
+        self._check_validity()
+        return NodeValuesVector({
+            p.label: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
+            for p in self.game.players
+        })
 
-        Parameters
-        ----------
-        node
-            The node of the game tree
+    @property
+    def infoset_values(self) -> InfosetValueVector:
+        """Returns the expected payoff to the player conditional on reaching each
+        information set, if all players play according to the profile.
 
-        Raises
-        ------
-        MismatchError
-            If `node` is not in the same game as the profile
+        If an information set is not reachable, its expected payoff is not
+        well-defined, and the corresponding entry is `None`.
 
         See Also
         --------
-        MixedBehaviorProfile.infoset_prob
+        MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return self._belief(self.game._resolve_node(node, "belief"))
+        return InfosetValueVector({
+            infoset: self._infoset_value(infoset) for infoset in self.game.infosets
+        })
 
-    def payoff(self, player: PlayerReference) -> ProfileDType:
-        """Returns the expected payoff to a player if all players play
-        according to the profile.
+    @property
+    def action_values(self) -> ActionValuesVector:
+        """Returns the expected payoff to the player of playing each action,
+        conditional on reaching its information set, if all players play according to
+        the profile, grouped by information set.
 
-        Parameters
-        ----------
-        player : Player or str
-            The player to get the payoff for.  If a string is passed, the
-            player is determined by finding the player with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a ``Player`` from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label.
-        ValueError
-            If `player` resolves to the chance player
-        """
-        self._check_validity()
-        resolved_player = self.game._resolve_player(player, "payoff")
-        if resolved_player.is_chance:
-            raise ValueError("payoff() is not defined for the chance player")
-        return self._payoff(resolved_player)
-
-    def node_value(self, player: PlayerReference,
-                   node: NodeReference) -> ProfileDType:
-        """Returns the expected payoff to `player` conditional on play reaching `node`,
-        if all players play according to the profile.
-
-        Parameters
-        ----------
-        player : Player or str
-            The player to get the payoff for.  If a string is passed, the
-            player is determined by finding the player with that label, if any.
-        node : Node or str
-            The node to get the payoff at.  If a string is passed, the
-            node is determined by finding the node with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a ``Player`` from a different game or `node` is a ``Node``
-            from a different game.
-        KeyError
-            If `player` is a string and no player in the game has that label, or
-            `node` is a string and no node in the game has that label.
-        ValueError
-            If `player` resolves to the chance player
-        """
-        self._check_validity()
-        resolved_player = self.game._resolve_player(player, "node_value")
-        resolved_node = self.game._resolve_node(node, "node_value")
-        if resolved_player.is_chance:
-            raise ValueError("node_value() is not defined for the chance player")
-        return self._node_value(resolved_player, resolved_node)
-
-    def infoset_value(self, infoset: InfosetReference) -> ProfileDType | None:
-        """Returns the expected payoff to the player conditional on reaching an information set,
-        if all players play according to the profile.
-
-        If the information set is not reachable, the expected payoff is not well-defined.
-        In this case, the function returns `None`.
-
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The information set to get the payoff for.  If a string is passed, the
-            information set is determined by finding the information set with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is an ``Infoset`` from a different game.
-        KeyError
-            If `infoset` is a string and no information set in the game has that label.
-        ValueError
-            If `infoset` resolves to an infoset that belongs to the chance player
+        If an information set is not reachable, the expected payoffs of its actions
+        are not well-defined, and the corresponding entries are `None`.
 
         See Also
         --------
-        MixedBehaviorProfile.infoset_prob
+        MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        resolved_infoset = self.game._resolve_infoset(infoset, "infoset_value")
-        if resolved_infoset.player.is_chance:
-            raise ValueError("infoset_value() is not defined for the chance player")
-        return self._infoset_value(resolved_infoset)
+        return ActionValuesVector({
+            infoset: ActionValueVector({a.label: self._action_value(a) for a in infoset.actions})
+            for infoset in self.game.infosets
+        })
 
-    def action_value(self, action: ActionReference) -> ProfileDType | None:
-        """Returns the expected payoff to the player of playing an action conditional on reaching
-        its information set, if all players play according to the profile.
-
-        If the information set is not reachable, the expected payoff is not well-defined.
-        In this case, the function returns `None`.
-
-        Parameters
-        ----------
-        action : Action or str
-            The action to get the payoff for.  If a string is passed, the
-            action is determined by finding the action with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `action` is an ``Action`` from a different game.
-        KeyError
-            If `action` is a string and no action in the game has that label.
-        ValueError
-            If `action` resolves to an action that belongs to the chance player
-
-        See Also
-        --------
-        MixedBehaviorProfile.infoset_prob
+    @property
+    def realiz_probs(self) -> RealizProbVector:
+        """Returns the probability with which each node is reached, if all players
+        play according to the profile.
         """
         self._check_validity()
-        resolved_action = self.game._resolve_action(action, "action_value")
-        if resolved_action.infoset.player.is_chance:
-            raise ValueError("action_value() is not defined for the chance player")
-        return self._action_value(resolved_action)
+        return RealizProbVector({n: self._realiz_prob(n) for n in self.game.nodes})
 
-    def realiz_prob(self, node: NodeReference) -> ProfileDType:
-        """Returns the probability with which a node is reached.
-
-        Parameters
-        ----------
-        node : Node or str
-            The node to get the payoff for.  If a string is passed, the
-            node is determined by finding the node with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `node` is a ``Node`` from a different game.
-        KeyError
-            If `node` is a string and no node in the game has that label.
-        """
-        self._check_validity()
-        return self._realiz_prob(self.game._resolve_node(node, "realiz_prob"))
-
-    def infoset_prob(self, infoset: InfosetReference) -> ProfileDType:
-        """Returns the probability with which an information set is reached.
+    @property
+    def infoset_probs(self) -> InfosetProbVector:
+        """Returns the probability with which each information set is reached, if all
+        players play according to the profile.
 
         This is the probability that the information set is reached *at least once*
         under the profile: the realization probability of its upper frontier, i.e. the
@@ -682,92 +680,86 @@ class MixedBehaviorProfile:
         the members below its frontier are excluded, so this is generally less than
         the sum of the members' realization probabilities; see :cite:p:`HalPas21`.
 
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The information set to get the probability for.  If a string is passed, the
-            information set is determined by finding the information set with that label, if any.
+        See Also
+        --------
+        MixedBehaviorProfile.beliefs
+        """
+        self._check_validity()
+        return InfosetProbVector({
+            infoset: self._infoset_prob(infoset) for infoset in self._all_infosets()
+        })
 
-        Raises
-        ------
-        MismatchError
-            If `infoset` is an ``Infoset`` from a different game.
-        KeyError
-            If `infoset` is a string and no information set in the game has that label.
+    @property
+    def beliefs(self) -> BeliefVector:
+        """Returns, for each node, the conditional probability that the node is
+        reached, given that its information set is reached, if all players play
+        according to the profile.
+
+        The conditioning event is that the information set is reached at least once,
+        so beliefs are normalized by the upper-frontier probability returned by
+        `infoset_probs` (following :cite:p:`HalPas21`), rather than by the sum of the
+        members' realization probabilities.  For a non-absent-minded information set
+        the two approaches agree.  For an absent-minded information set they need not:
+        the beliefs over its members may sum to more than one.
+
+        If a node's information set is reached with zero probability under the
+        profile, the belief is not well-defined and the corresponding entry is `None`.
+        This is the same reach probability returned by `infoset_probs`, so a `None`
+        belief corresponds exactly to `infoset_probs` being zero there.
 
         See Also
         --------
-        MixedBehaviorProfile.belief
+        MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return self._infoset_prob(self.game._resolve_infoset(infoset, "infoset_prob"))
+        return BeliefVector({n: self._belief(n) for n in self.game.nodes})
 
-    def action_regret(self, action: ActionReference) -> ProfileDType:
-        """Returns the regret to playing `action`, if all other
-        players play according to the profile.
+    @property
+    def action_regrets(self) -> ActionRegretsVector:
+        """Returns the regret to playing each action, if all other players play
+        according to the profile, grouped by information set.
 
         The regret is defined as the difference between the payoff of the
-        best-response action and the payoff of `action`.  Payoffs are computed
-        conditional on reaching the information set.  By convention, the
-        regret is always non-negative.
+        best-response action and the payoff of the action.  Payoffs are computed
+        conditional on reaching the information set.  By convention, the regret is
+        always non-negative.
 
-        .. versionchanged:: 16.2.0
-
-            Changed from `regret()` to disambiguate from other regret concepts.
-
-        Parameters
-        ----------
-        action : Action or str
-            The action to get the regret for.  If a string is passed, the
-            action is determined by finding the action with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `action` is an ``Action`` from a different game.
-        KeyError
-            If `action` is a string and no action in the game has that label.
+        Regret is not defined for the chance player, which takes no decisions; its
+        information sets are excluded (``self.game.infosets`` already excludes them).
 
         See Also
         --------
-        infoset_regret
-        max_regret
+        infoset_regrets
+        agent_max_regret
         """
         self._check_validity()
-        return self._action_regret(self.game._resolve_action(action, "action_regret"))
+        return ActionRegretsVector({
+            infoset: ActionRegretVector({a.label: self._action_regret(a) for a in infoset.actions})
+            for infoset in self.game.infosets
+        })
 
-    def infoset_regret(self, infoset: InfosetReference) -> ProfileDType:
-        """Returns the regret to the player for playing their mixed action at
-        `infoset`, if all other players play according to the profile.
+    @property
+    def infoset_regrets(self) -> InfosetRegretVector:
+        """Returns the regret to the player for playing their mixed action at each
+        information set, if all other players play according to the profile.
 
         The regret is defined as the difference between the payoff of the
         best-response action and the payoff of the player's mixed action.
         Payoffs are computed conditional on reaching the information set.
         By convention, the regret is always non-negative.
 
-        .. versionadded:: 16.2.0
-
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The information set to get the regret at.  If a string is passed, the
-            information set is determined by finding the information set with that
-            label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is an ``Infoset`` from a different game.
-        KeyError
-            If `infoset` is a string and no information set in the game has that label.
+        Regret is not defined for the chance player, which takes no decisions; its
+        information sets are excluded (``self.game.infosets`` already excludes them).
 
         See Also
         --------
-        action_regret
+        action_regrets
         agent_max_regret
         """
         self._check_validity()
-        return self._infoset_regret(self.game._resolve_infoset(infoset, "infoset_regret"))
+        return InfosetRegretVector({
+            infoset: self._infoset_regret(infoset) for infoset in self.game.infosets
+        })
 
     def agent_max_regret(self) -> ProfileDType:
         """Returns the maximum regret at any information set.
@@ -781,8 +773,8 @@ class MixedBehaviorProfile:
 
         See Also
         --------
-        action_regret
-        infoset_regret
+        action_regrets
+        infoset_regrets
         max_regret
         agent_liap_value
         """

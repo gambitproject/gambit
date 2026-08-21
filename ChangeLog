@@ -15,6 +15,17 @@
   mixed strategy, like `profile[player] = distribution`, but can require `distribution` to give
   a weight for every one of the player's strategies (the default) rather than treating strategies
   it omits as having weight zero. (#763)
+- `MixedBehaviorProfile.payoffs`, `.node_values`, `.infoset_values`, `.infoset_regrets`,
+  `.action_values`, `.action_regrets`, `.realiz_probs`, `.infoset_probs`, and `.beliefs` return the
+  corresponding quantity for every player/node/information set/action at once, rather than one at
+  a time, mirroring `MixedStrategyProfile`'s vectorized quantities. Since information sets don't
+  reliably have unique persistent labels, `.infoset_values`/`.infoset_regrets`/`.infoset_probs`/
+  `.action_values`/`.action_regrets` are indexed by a `Node` belonging to the information set (any
+  member node works, resolved fresh each time) rather than by label; `.realiz_probs`/`.beliefs`
+  are indexed directly by `Node`, and `.payoffs`/`.node_values` by player label. Each quantity is
+  its own type, following the same `_LabeledVector` family as the strategy side's; `.node_values`/
+  `.action_values`/`.action_regrets` nest a per-player/per-information-set vector, keyed by player
+  label/`Node` then `Node`/action label respectively. (#763)
 - `MixedBehaviorProfile.set_mixed_action(node, distribution, sparse=False)` sets the mixed action
   at `node`'s information set, like `profile[node] = distribution`, but can require `distribution`
   to give a weight for every one of the information set's actions (the default) rather than
@@ -156,6 +167,13 @@
   and is a specific evaluation of the payoff Jacobian that is straightforward to reconstruct
   directly: it equals the payoff obtained by substituting the two given pure strategies into
   the profile (0 if both belong to the same player).
+- `MixedBehaviorProfile.payoff`, `.node_value`, `.infoset_value`, `.action_value`, `.realiz_prob`,
+  `.infoset_prob`, `.belief`, `.action_regret`, and `.infoset_regret` have been removed, superseded
+  by `.payoffs`, `.node_values`, `.infoset_values`, `.action_values`, `.realiz_probs`,
+  `.infoset_probs`, `.beliefs`, `.action_regrets`, and `.infoset_regrets`; index the result for a
+  single player/node/information set/action (e.g. `profile.payoffs[player_label]` instead of
+  `profile.payoff(player_label)`, or `profile.infoset_values[node]` instead of
+  `profile.infoset_value(infoset)`). (#763)
 - Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
   nonempty, unique labels.  (#1047)
 - `Game.add_strategy` and `Game.delete_strategy` have been removed; use `Game.set_strategies`,

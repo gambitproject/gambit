@@ -43,7 +43,7 @@ def test_payoff_by_label_reference(
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     payoff = gbt.Rational(payoff) if rational_flag else payoff
-    assert profile.payoff(label) == payoff
+    assert profile.payoffs[label] == payoff
 
 
 @pytest.mark.parametrize(
@@ -776,7 +776,7 @@ def test_realiz_prob_nodes_reference(
     node = game.root
     for action_label in path:
         node = node.children[action_label]
-    assert profile.realiz_prob(node) == realiz_prob
+    assert profile.realiz_probs[node] == realiz_prob
 
 
 @pytest.mark.parametrize(
@@ -800,7 +800,8 @@ def test_infoset_prob_reference(
     game: gbt.Game, player_label: str, infoset_label: str, prob: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    ip = profile.infoset_prob(game.players[player_label].infosets[infoset_label])
+    infoset = game.players[player_label].infosets[infoset_label]
+    ip = profile.infoset_probs[next(iter(infoset.members))]
     assert ip == (gbt.Rational(prob) if rational_flag else prob)
 
 
@@ -825,7 +826,8 @@ def test_infoset_prob_by_label_reference(
     game: gbt.Game, label: str, prob: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile.infoset_prob(label) == (gbt.Rational(prob) if rational_flag else prob)
+    node = next(iter(game.infosets[label].members))
+    assert profile.infoset_probs[node] == (gbt.Rational(prob) if rational_flag else prob)
 
 
 @pytest.mark.parametrize(
@@ -863,7 +865,8 @@ def test_absent_minded_infoset_prob(
     game: gbt.Game, infoset_label: str, prob: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    ip = profile.infoset_prob(game.infosets[infoset_label])
+    node = next(iter(game.infosets[infoset_label].members))
+    ip = profile.infoset_probs[node]
     assert ip == (gbt.Rational(prob) if rational_flag else prob)
 
 
@@ -873,8 +876,8 @@ def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
     game = gbt.catalog.load("journals/geb/gilboa1997/fig2")
     profile = game.mixed_behavior_profile(rational=rational_flag)
     one = gbt.Rational(1) if rational_flag else 1.0
-    assert profile.realiz_prob(game.root) == one
-    assert profile.infoset_prob(game.root.infoset) == one
+    assert profile.realiz_probs[game.root] == one
+    assert profile.infoset_probs[game.root] == one
 
 
 @pytest.mark.parametrize(
@@ -898,7 +901,8 @@ def test_infoset_payoff_reference(
     game: gbt.Game, player_label: str, infoset_label: str, payoff: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    iv = profile.infoset_value(game.players[player_label].infosets[infoset_label])
+    infoset = game.players[player_label].infosets[infoset_label]
+    iv = profile.infoset_values[next(iter(infoset.members))]
     assert iv == (gbt.Rational(payoff) if rational_flag else payoff)
 
 
@@ -923,7 +927,8 @@ def test_infoset_payoff_by_label_reference(
     game: gbt.Game, label: str, payoff: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile.infoset_value(label) == (gbt.Rational(payoff) if rational_flag else payoff)
+    node = next(iter(game.infosets[label].members))
+    assert profile.infoset_values[node] == (gbt.Rational(payoff) if rational_flag else payoff)
 
 
 @pytest.mark.parametrize(
@@ -1056,9 +1061,8 @@ def test_action_payoff_reference(
     rational_flag: bool,
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    av = profile.action_value(
-        game.players[player_label].infosets[infoset_label].actions[action_label]
-    )
+    infoset = game.players[player_label].infosets[infoset_label]
+    av = profile.action_values[next(iter(infoset.members))][action_label]
     assert av == (gbt.Rational(payoff) if rational_flag else payoff)
 
 
@@ -1085,7 +1089,10 @@ def test_action_value_by_label_reference(
     game: gbt.Game, label: str, payoff: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile.action_value(label) == (gbt.Rational(payoff) if rational_flag else payoff)
+    action = game.actions[label]
+    node = next(iter(action.infoset.members))
+    payoff = gbt.Rational(payoff) if rational_flag else payoff
+    assert profile.action_values[node][label] == payoff
 
 
 @pytest.mark.parametrize(
@@ -1103,10 +1110,11 @@ def test_action_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for player in game.players:
         for infoset in player.infosets:
+            node = next(iter(infoset.members))
             for action in infoset.actions:
-                assert profile.action_regret(action) == max(
-                    profile.action_value(a) for a in infoset.actions
-                ) - profile.action_value(action)
+                assert profile.action_regrets[node][action.label] == max(
+                    profile.action_values[node][a.label] for a in infoset.actions
+                ) - profile.action_values[node][action.label]
 
 
 @pytest.mark.parametrize(
@@ -1124,9 +1132,10 @@ def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for player in game.players:
         for infoset in player.infosets:
-            assert profile.infoset_regret(infoset) == max(
-                profile.action_value(a) for a in infoset.actions
-            ) - profile.infoset_value(infoset)
+            node = next(iter(infoset.members))
+            assert profile.infoset_regrets[node] == max(
+                profile.action_values[node][a.label] for a in infoset.actions
+            ) - profile.infoset_values[node]
 
 
 @pytest.mark.parametrize(
@@ -1160,9 +1169,88 @@ def test_max_regret_consistency(game: gbt.Game, rational_flag: bool):
 )
 def test_agent_max_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
+    infoset_regrets = profile.infoset_regrets
     assert profile.agent_max_regret() == max(
-        [profile.infoset_regret(infoset) for infoset in game.infosets]
+        infoset_regrets[next(iter(infoset.members))] for infoset in game.infosets
     )
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [
+        (games.read_from_file("mixed_behavior_game.efg"), False),
+        (games.read_from_file("mixed_behavior_game.efg"), True),
+        (games.create_stripped_down_poker_efg(), False),
+        (games.create_stripped_down_poker_efg(), True),
+    ],
+)
+def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
+    """The vectorized payoffs/node_values/infoset_values/infoset_regrets/action_values/
+    action_regrets/realiz_probs/infoset_probs/beliefs properties are mathematically
+    consistent with each other (regret is the gap to the best response), and carry their
+    own type identity.
+    """
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+
+    payoffs = profile.payoffs
+    node_values = profile.node_values
+    infoset_values = profile.infoset_values
+    infoset_regrets = profile.infoset_regrets
+    action_values = profile.action_values
+    action_regrets = profile.action_regrets
+    realiz_probs = profile.realiz_probs
+    infoset_probs = profile.infoset_probs
+    beliefs = profile.beliefs
+
+    assert isinstance(payoffs, gbt.PayoffVector)
+    assert isinstance(payoffs, gbt.PlayerIndexedVector)
+    assert isinstance(node_values, gbt.NodeValuesVector)
+    assert isinstance(infoset_values, gbt.InfosetValueVector)
+    assert isinstance(infoset_regrets, gbt.InfosetRegretVector)
+    assert isinstance(action_values, gbt.ActionValuesVector)
+    assert isinstance(action_regrets, gbt.ActionRegretsVector)
+    assert isinstance(realiz_probs, gbt.RealizProbVector)
+    assert isinstance(infoset_probs, gbt.InfosetProbVector)
+    assert isinstance(beliefs, gbt.BeliefVector)
+
+    for player in game.players:
+        player_node_values = node_values[player.label]
+        assert isinstance(player_node_values, gbt.NodeValueVector)
+        assert player_node_values[game.root] == payoffs[player.label]
+
+        for infoset in player.infosets:
+            node = next(iter(infoset.members))
+            infoset_action_values = action_values[node]
+            infoset_action_regrets = action_regrets[node]
+            assert isinstance(infoset_action_values, gbt.ActionValueVector)
+            assert isinstance(infoset_action_regrets, gbt.ActionRegretVector)
+
+            best_response_value = max(infoset_action_values[a.label] for a in infoset.actions)
+            assert infoset_regrets[node] == best_response_value - infoset_values[node]
+            for action in infoset.actions:
+                assert (
+                    infoset_action_regrets[action.label]
+                    == best_response_value - infoset_action_values[action.label]
+                )
+
+    for node in game.nodes:
+        if node.is_terminal:
+            continue
+        if infoset_probs[node] == 0:
+            assert beliefs[node] is None
+        else:
+            assert beliefs[node] is not None
+
+    # equal to an equivalent plain dict or same-type vector, but never to a vector of a
+    # different quantity, even where the underlying numbers happen to coincide
+    expected = {n: realiz_probs[n] for n in game.nodes}
+    assert realiz_probs == expected
+    assert realiz_probs == gbt.RealizProbVector(expected)
+    assert realiz_probs != beliefs
+    assert realiz_probs != gbt.BeliefVector(expected)
+
+    with pytest.raises(KeyError):
+        payoffs["not a player label"]
 
 
 @pytest.mark.parametrize(
@@ -1465,11 +1553,11 @@ def test_action_regret_reference(
     tol: gbt.Rational | float,
     value: str | float,
 ):
-    action = game.players[player_label].infosets[infoset_label].actions[action_label]
+    infoset = game.players[player_label].infosets[infoset_label]
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if action_probs:
         _set_action_probs(profile, action_probs, rational_flag)
-    regret = profile.action_regret(action)
+    regret = profile.action_regrets[next(iter(infoset.members))][action_label]
     value = gbt.Rational(value) if rational_flag else value
     assert abs(regret - value) <= tol
 
@@ -1489,15 +1577,18 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     realization probabilities of those children
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
+    realiz_probs = profile.realiz_probs
+    node_values = profile.node_values
     for node in game.nodes:
         if node.is_terminal or node.player.is_chance:
             continue
         expected_val = 0
-        node_prob = profile.realiz_prob(node)
+        node_prob = realiz_probs[node]
+        player_node_values = node_values[node.player.label]
         for child in node.children:
-            prob = profile.realiz_prob(child) / node_prob
-            expected_val += prob * profile.node_value(node.player, child)
-        assert profile.node_value(node.player, node) == expected_val
+            prob = realiz_probs[child] / node_prob
+            expected_val += prob * player_node_values[child]
+        assert player_node_values[node] == expected_val
 
 
 @pytest.mark.parametrize(
@@ -1513,8 +1604,10 @@ def test_node_value_consistency(game: gbt.Game, rational_flag: bool):
     """Test that the profile's node value at the root for each player matches the profile's payoff
     for the respective player"""
     profile = game.mixed_behavior_profile(rational=rational_flag)
+    node_values = profile.node_values
+    payoffs = profile.payoffs
     for player in game.players:
-        assert profile.node_value(player, game.root) == profile.payoff(player)
+        assert node_values[player.label][game.root] == payoffs[player.label]
 
 
 @pytest.mark.parametrize(
@@ -1819,7 +1912,7 @@ def test_node_belief_reference(
     for action_label in path:
         node = node.children[action_label]
     value = gbt.Rational(value) if rational_flag else value
-    assert abs(profile.belief(node) - value) <= tol
+    assert abs(profile.beliefs[node] - value) <= tol
 
 
 @pytest.mark.parametrize(
@@ -1830,10 +1923,10 @@ def test_node_belief_reference(
     ],
 )
 def test_payoff_value_error_with_chance_player(game: gbt.Game, rational_flag: bool):
-    """Ensure a value error is thrown when we call payoff for a chance player"""
+    """The chance player is excluded from payoffs, so looking it up is a KeyError."""
     chance_player = game.players.chance
-    with pytest.raises(ValueError):
-        game.mixed_behavior_profile(rational=rational_flag).payoff(chance_player)
+    with pytest.raises(KeyError):
+        game.mixed_behavior_profile(rational=rational_flag).payoffs[chance_player.label]
 
 
 @pytest.mark.parametrize(
@@ -1844,10 +1937,13 @@ def test_payoff_value_error_with_chance_player(game: gbt.Game, rational_flag: bo
     ],
 )
 def test_infoset_value_error_with_chance_player_infoset(game: gbt.Game, rational_flag: bool):
-    """Ensure a value error is raised when we call action value for a chance action"""
+    """The chance player's infosets are excluded from infoset_values, so looking one up
+    is a KeyError.
+    """
     chance_infoset = next(iter(game.players.chance.infosets))
-    with pytest.raises(ValueError):
-        game.mixed_behavior_profile(rational=rational_flag).infoset_value(chance_infoset)
+    chance_node = next(iter(chance_infoset.members))
+    with pytest.raises(KeyError):
+        game.mixed_behavior_profile(rational=rational_flag).infoset_values[chance_node]
 
 
 @pytest.mark.parametrize(
@@ -1858,10 +1954,13 @@ def test_infoset_value_error_with_chance_player_infoset(game: gbt.Game, rational
     ],
 )
 def test_action_value_error_with_chance_player_action(game: gbt.Game, rational_flag: bool):
-    """Ensure a value error is raised when we call action value for a chance action"""
-    chance_action = next(iter(next(iter(game.players.chance.infosets)).actions))
-    with pytest.raises(ValueError):
-        game.mixed_behavior_profile(rational=rational_flag).action_value(chance_action)
+    """The chance player's infosets are excluded from action_values, so looking up an
+    action there is a KeyError.
+    """
+    chance_infoset = next(iter(game.players.chance.infosets))
+    chance_node = next(iter(chance_infoset.members))
+    with pytest.raises(KeyError):
+        game.mixed_behavior_profile(rational=rational_flag).action_values[chance_node]
 
 
 def _get_answers_one_order(
@@ -1926,7 +2025,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.belief(y),
+            lambda x, y: x.beliefs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1934,7 +2033,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.belief(y),
+            lambda x, y: x.beliefs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1942,7 +2041,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.belief(y),
+            lambda x, y: x.beliefs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1950,7 +2049,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.belief(y),
+            lambda x, y: x.beliefs[y],
             lambda x: x.nodes,
         ),
         ######################################################################################
@@ -1960,7 +2059,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.realiz_prob(y),
+            lambda x, y: x.realiz_probs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1968,7 +2067,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.realiz_prob(y),
+            lambda x, y: x.realiz_probs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1976,7 +2075,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.realiz_prob(y),
+            lambda x, y: x.realiz_probs[y],
             lambda x: x.nodes,
         ),
         (
@@ -1984,7 +2083,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.realiz_prob(y),
+            lambda x, y: x.realiz_probs[y],
             lambda x: x.nodes,
         ),
         ######################################################################################
@@ -1994,7 +2093,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.infoset_prob(y),
+            lambda x, y: x.infoset_probs[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2002,7 +2101,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_prob(y),
+            lambda x, y: x.infoset_probs[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2010,7 +2109,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.infoset_prob(y),
+            lambda x, y: x.infoset_probs[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2018,7 +2117,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_prob(y),
+            lambda x, y: x.infoset_probs[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         ######################################################################################
@@ -2028,7 +2127,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.infoset_value(y),
+            lambda x, y: x.infoset_values[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2036,7 +2135,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_value(y),
+            lambda x, y: x.infoset_values[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2044,7 +2143,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.infoset_value(y),
+            lambda x, y: x.infoset_values[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         (
@@ -2052,7 +2151,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_value(y),
+            lambda x, y: x.infoset_values[next(iter(y.members))],
             lambda x: x.infosets,
         ),
         ######################################################################################
@@ -2062,7 +2161,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.action_value(y),
+            lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2070,7 +2169,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.action_value(y),
+            lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2078,7 +2177,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.action_value(y),
+            lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2086,7 +2185,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.action_value(y),
+            lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         ######################################################################################
@@ -2096,7 +2195,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.action_regret(y),
+            lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2104,7 +2203,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.action_regret(y),
+            lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2112,7 +2211,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.action_regret(y),
+            lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         (
@@ -2120,7 +2219,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.action_regret(y),
+            lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
             lambda x: x.actions,
         ),
         ######################################################################################
@@ -2130,7 +2229,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.node_value(player=y[0], node=y[1]),
+            lambda x, y: x.node_values[y[0].label][y[1]],
             lambda x: list(product(x.players, x.nodes)),
         ),
         (
@@ -2138,7 +2237,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.node_value(player=y[0], node=y[1]),
+            lambda x, y: x.node_values[y[0].label][y[1]],
             lambda x: list(product(x.players, x.nodes)),
         ),
         (
@@ -2146,7 +2245,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.node_value(player=y[0], node=y[1]),
+            lambda x, y: x.node_values[y[0].label][y[1]],
             lambda x: list(product(x.players, x.nodes)),
         ),
         (
@@ -2154,7 +2253,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.node_value(player=y[0], node=y[1]),
+            lambda x, y: x.node_values[y[0].label][y[1]],
             lambda x: list(product(x.players, x.nodes)),
         ),
         ######################################################################################
@@ -2435,10 +2534,12 @@ def test_undefined_action_value():
     """Test that undefined action values return `None`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
-    action = next(iter(next(iter(p3.infosets)).actions))
+    infoset = next(iter(p3.infosets))
+    node = next(iter(infoset.members))
+    action = next(iter(infoset.actions))
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.action_value(action) is None
+        assert profile.action_values[node][action.label] is None
 
 
 def test_undefined_belief():
@@ -2448,14 +2549,14 @@ def test_undefined_belief():
     node = next(iter(next(iter(p3.infosets)).members))
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.belief(node) is None
+        assert profile.beliefs[node] is None
 
 
 def test_undefined_infoset_value():
     """Test that undefined infoset values return `None`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
-    infoset = next(iter(p3.infosets))
+    node = next(iter(next(iter(p3.infosets)).members))
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.infoset_value(infoset) is None
+        assert profile.infoset_values[node] is None

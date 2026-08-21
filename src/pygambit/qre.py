@@ -237,8 +237,10 @@ def _estimate_behavior_empirical(
         for p in data.game.players for s in p.infosets for a in s.actions
     ]
     normalized = data.normalize()
-    regrets = [[-normalized.action_regret(a) for a in infoset.actions]
-               for player in data.game.players for infoset in player.infosets]
+    regrets = [
+        [-normalized.action_regrets[next(iter(infoset.members))][a.label] for a in infoset.actions]
+        for player in data.game.players for infoset in player.infosets
+    ]
     res = scipy.optimize.minimize(
         lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
         (0.1,),

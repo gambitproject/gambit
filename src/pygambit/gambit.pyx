@@ -135,7 +135,7 @@ class _LabeledVector:
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + label + "}:" + value._repr_latex_().replace("$", "")
+                r"\text{" + str(label) + "}:" + value._repr_latex_().replace("$", "")
                 for label, value in self._values.items()
             ) +
             r"\right\}$"
@@ -151,14 +151,14 @@ class _LabeledVector:
     def __len__(self) -> int:
         return len(self._values)
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[str, typing.Any], None, None]:
+    def __iter__(self) -> typing.Iterator[typing.Tuple[typing.Any, typing.Any], None, None]:
         yield from self._values.items()
 
-    def __getitem__(self, label: str) -> typing.Any:
+    def __getitem__(self, label: typing.Any) -> typing.Any:
         try:
             return self._values[label]
         except KeyError:
-            raise KeyError(f"no {self._label_kind} with label '{label}'") from None
+            raise KeyError(f"no {self._label_kind} '{label}'") from None
 
 
 @cython.cclass
@@ -175,6 +175,17 @@ class StrategyIndexedVector(_LabeledVector):
     strategy belonging to a single player.
     """
     _label_kind = "strategy"
+
+
+@cython.cclass
+class NodeIndexedVector(_LabeledVector):
+    """A read-only mapping from a ``Node`` to a computed value, one entry per node.
+
+    Unlike ``PlayerIndexedVector``/``StrategyIndexedVector``, which are keyed by a stable
+    label, this is keyed by node identity: the value can genuinely differ between two
+    nodes, even nodes belonging to the same information set.
+    """
+    _label_kind = "node"
 
 
 ######################
