@@ -105,7 +105,7 @@ public:
   // Find up to `max_roots` roots inside rectangle `r`, examining at most
   // `max_rectangles` subdivisions.  Sets `p_budgetExceeded` if that budget
   // runs out first, in which case the roots returned may be incomplete.
-  std::list<Vector<double>> FindRoots(const Rectangle<double> &r, int max_roots,
+  std::list<Vector<double>> FindRoots(const Rectangle<double> &r, size_t max_roots,
                                       size_t max_rectangles, bool &p_budgetExceeded,
                                       const CancelToken &p_cancel = CancelToken());
 };

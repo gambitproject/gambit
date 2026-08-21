@@ -201,7 +201,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<Vector<double>> roots;
   try {
     roots =
-        solver.FindRoots({bottoms, tops}, p_stopAfter.value_or(std::numeric_limits<int>::max()),
+        solver.FindRoots({bottoms, tops}, p_stopAfter.value_or(std::numeric_limits<size_t>::max()),
                          p_maxRectangles, p_budgetExceeded, p_cancel);
   }
   catch (const SingularMatrixException &) {
