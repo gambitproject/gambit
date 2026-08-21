@@ -207,9 +207,7 @@ GameDocument::GameDocument(Game p_game)
   : m_game(p_game), m_gameModified(false), m_workspaceModified(false), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
-
-  std::ostringstream s;
-  SaveWorkspace(s);
+  ResetUndoHistory();
 }
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
@@ -229,6 +227,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
     if (doc->m_workspace.Load(workspace.analyses)) {
       doc->m_style.Load(workspace);
       doc->SetFilename(p_filename);
+      doc->ResetUndoHistory();
       return {LoadResult::Success, doc};
     }
   }
@@ -283,12 +282,61 @@ void GameDocument::NotifyChanged(GameModificationType p_modifications)
                       GameModificationType::GameForm | GameModificationType::GamePayoffs)) {
     m_workspace.ResetForGameChange();
   }
+  if (p_modifications != GameModificationType::None) {
+    m_redoList.clear();
+    std::ostringstream s;
+    SaveWorkspace(s);
+    m_undoList.push_back(s.str());
+  }
   UpdateViews();
 }
 
 void GameDocument::UpdateViews()
 {
   std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
+}
+
+void GameDocument::ResetUndoHistory()
+{
+  m_undoList.clear();
+  m_redoList.clear();
+  std::ostringstream s;
+  SaveWorkspace(s);
+  m_undoList.push_back(s.str());
+}
+
+void GameDocument::RestoreSnapshot(const std::string &p_snapshot)
+{
+  std::istringstream input(p_snapshot);
+  const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
+  std::istringstream game_text(workspace.game);
+  m_game = ReadGame(game_text);
+  m_workspace.Load(workspace.analyses);
+  m_style.Load(workspace);
+}
+
+void GameDocument::Undo()
+{
+  if (!CanUndo()) {
+    return;
+  }
+  m_redoList.push_back(m_undoList.back());
+  m_undoList.pop_back();
+  RestoreSnapshot(m_undoList.back());
+  m_gameModified = m_workspaceModified = true;
+  UpdateViews();
+}
+
+void GameDocument::Redo()
+{
+  if (!CanRedo()) {
+    return;
+  }
+  m_undoList.push_back(m_redoList.back());
+  m_redoList.pop_back();
+  RestoreSnapshot(m_undoList.back());
+  m_gameModified = m_workspaceModified = true;
+  UpdateViews();
 }
 
 void GameDocument::PostPendingChanges()

@@ -67,6 +67,8 @@ EXTRA_DIST = \
 	src/gui/bitmaps/tobegin.xpm \
 	src/gui/bitmaps/toend.xpm \
 	src/gui/bitmaps/tree.xpm \
+	src/gui/bitmaps/undo.xpm \
+	src/gui/bitmaps/redo.xpm \
 	src/gui/bitmaps/zoomfit.xpm \
 	src/gui/bitmaps/zoomin.xpm \
 	src/gui/bitmaps/zoomout.xpm \

@@ -1,6 +1,7 @@
 ## [17.0.0-alpha.2] - unreleased
 
 ### Added
+- Undo/redo support has been re-enabled in the graphical interface.
 - `MixedStrategyProfile.payoffs`, `.player_regrets`, `.strategy_values`, and
   `.strategy_regrets` return the corresponding quantity for every player (and, for the
   latter two, every strategy) at once, rather than one at a time.
