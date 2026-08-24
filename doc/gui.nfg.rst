@@ -41,12 +41,6 @@ For a two-player game, Gambit initially uses the familiar matrix
 arrangement. One player's strategies label the rows, and the other
 player's strategies label the columns.
 
-.. image:: screens/pd1.*
-   :width: 50%
-   :alt: A two-player strategic game with Alice's strategies on the rows and Bob's strategies on the columns.
-   :align: center
-   :target: _images/pd1.png
-
 Each row-and-column combination identifies one strategy profile. For
 example, a cell in the row labelled ``Cooperate`` and the column
 labelled ``Defect`` represents the outcome in which the row player
@@ -84,12 +78,6 @@ For example, suppose Alice and Bob are both assigned to the rows. If
 Alice is above Bob in the row hierarchy, Gambit first groups the rows
 by Alice's strategy and then lists Bob's strategies within each group.
 
-.. image:: screens/pd2.*
-   :width: 50%
-   :alt: A strategic game with Alice and Bob arranged as two levels of hierarchical row labels.
-   :align: center
-   :target: _images/pd2.png
-
 Reversing their order groups the rows first by Bob's strategy and then
 by Alice's. The strategy profiles and payoffs do not change; only their
 arrangement in the table changes.
@@ -121,12 +109,6 @@ The available positions depend on the current arrangement. Choosing a
 player from :guilabel:`Place player before` makes that player a higher
 level in the hierarchy than the row or column that was right-clicked;
 choosing one from :guilabel:`Place player after` makes it a lower level.
-
-.. image:: screens/pd3.*
-   :width: 50%
-   :alt: The same strategic game displayed with a different ordering of its hierarchical strategy labels.
-   :align: center
-   :target: _images/pd3.png
 
 Changing the row and column hierarchies may also change the order in
 which payoffs appear within each cell. The colour of each payoff

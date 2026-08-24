@@ -27,12 +27,6 @@ done on the extensive or strategic games, and on details of the game,
 such as whether the game has two players or more, and whether the game
 is constant-sum.
 
-.. image::  screens/nash.*
-            :width: 33%
-            :alt: dialog for computing Nash equilibria
-            :align: right
-            :target: _images/nash.png
-
 The first step in finding equilibria is to specify how many equilibria
 are to be found. Some algorithms for computing equilibria are adapted
 to finding a single equilibrium, while others attempt to compute the
@@ -95,12 +89,6 @@ Method            Parameters used by the graphical interface
                   local Newton refinement every 3 steps, with at most 10 iterations.
 ================  ============================================================================
 
-.. image::  screens/computing.*
-            :width: 33%
-            :alt: dialog for monitoring computation of equilibria
-            :align: right
-            :target: _images/computing.png
-
 For extensive games, there is an option of whether to use the
 extensive or strategic game for computation when the selected method
 supports both. In general, computation
@@ -113,7 +101,7 @@ time-intensive process. Gambit runs all computations in the
 background, and displays a dialog
 showing all equilibria computed so
 far. The computation can be cancelled at any time by clicking on the
-cancel icon , which terminates the computation but keeps any
+cancel icon, which terminates the computation but keeps any
 equilibria computed.
 
 
@@ -127,12 +115,6 @@ toggled by selecting :menuselection:`View --> Profiles`,
 or clicking on the playing card
 icon on the toolbar.
 
-.. image::  screens/profiles.*
-            :width: 33%
-            :alt: poker game with the unique equilibrium displayed
-            :align: right
-            :target: _images/profiles.png
-
 This game has a unique equilibrium in which Fred raises after Red with
 probability one, and raises with probability one-third after Black.
 Alice, at her only information set, plays meet with probability two-
@@ -143,32 +125,30 @@ more than one equilibrium is found, this panel lists all equilibria
 found. Equilibria computed are grouped by separate computational runs;
 computing equilibria using a different method (or different settings)
 will add a second list of profiles. The list of profiles displayed is
-selected using the drop-down at the top left of the profiles panel; in
-the screenshot, it is set to
+selected using the drop-down at the top left of the profiles panel;
+since only one computation has been run in this example, it shows
 :guilabel:`Profiles 1`. A
 brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
 
 The currently selected equilibrium is shown in bold in the profiles
 listing, and information about this equilibrium is displayed in the
-extensive game. In the figure, the probabilities of selecting each
+extensive game. For this equilibrium, the probabilities of selecting each
 action are displayed below each branch of the tree. (This is the
 default Gambit setting; see :ref:`gui-tree-layout`
 for configuring the labeling of trees.)
 Each branch of the tree also shows a black line, the length of which
 is proportional to the probability with which the action is played.
 
-.. image::  screens/beliefs.*
-            :width: 33%
-            :alt: poker game with the beliefs at Alice's top node
-            :align: right
-            :target: _images/beliefs.png
-
-Hovering the mouse pointer over any node in the tree briefly displays
-additional information about the profile at that node, in a small window
-next to the node, including each player's expected payoff from that point
-in the game onward, as well as information about Alice's beliefs at the
-node.
+Hovering the mouse pointer over any node in the tree briefly displays a
+popup listing, for each player, that player's expected payoff from that
+point in the game onward under the currently-selected profile, color-coded
+to match the player. For a node that is not a terminal node, the popup
+also names the player who moves there and shows the probability of
+reaching the node, the probability of reaching its information set, that
+player's belief about being at this particular node conditional on having
+reached the information set, and the information set's value to the
+player who moves there.
 
 The computed profiles can also be viewed in the reduced strategic
 game. Clicking on the strategic game icon changes the view to the
@@ -188,13 +168,6 @@ Gambit provides methods for computing the logit quantal response
 equilibrium correspondence for extensive games :cite:p:`McKPal98`
 and strategic games :cite:p:`McKPal95`,
 using the tracing method of :cite:p:`Tur05`.
-
-.. image::  screens/qre.*
-            :width: 33%
-            :alt: quantal response equilibria
-            :align: right
-            :target: _images/qre.png
-
 
 To compute the correspondence, select :menuselection:`Tools --> Qre`.
 If viewing an

@@ -12,7 +12,7 @@ Creating a new extensive game
 
 To create a new extensive game, select
 :menuselection:`File --> New --> Extensive game`, or
-click on the new extensive game icon . The extensive game created is a
+click on the new extensive game icon. The extensive game created is a
 trivial game with two players, named by default
 :guilabel:`Player 1` and :guilabel:`Player 2`,
 with one node, which is both the root and terminal node of the game.
@@ -44,12 +44,6 @@ submenu, and the more flexible :guilabel:`Insert move` dialog.
    to which the move can be reassigned. A move cannot currently be
    changed between the chance player and a personal player this way --
    nor can it be, at present, using any other method in the interface.
-
-.. image:: screens/insertmove.*
-           :width: 33%
-           :alt: insert move dialog
-           :align: right
-           :target: _images/insertmove.png
 
 2. Right-click any terminal node in
    the tree, and choose :guilabel:`Insert move`
@@ -209,16 +203,15 @@ node onto another and choosing :guilabel:`Put node in same information
 set` (or, when dropping on a terminal node, :guilabel:`Insert move
 using same information set`) from the popup menu.
 
-.. image::  screens/editnode.*
-            :width: 33%
-            :alt: node properties dialog
-            :align: right
-            :target:  _images/editnode.png
-
 The information set to which a node belongs can also be set by
 right-clicking the node and choosing :guilabel:`Node properties`
 (or by double-clicking the node). This displays the
-:guilabel:`node properties` dialog.
+:guilabel:`node properties` dialog, which besides the information set
+has a text field for the node's label and, at the bottom, a dropdown
+for the node's outcome, offering the same choices and editing behavior
+described in :ref:`Outcomes and payoffs <outcomes-and-payoffs>` below.
+If the node is the root of the tree, or the root of a proper subgame,
+the dialog states this beneath the information set dropdown.
 The :guilabel:`Information set` dropdown defaults
 to the current information set to which the node belongs, and contains
 a list of all other information sets in the game which are compatible
@@ -251,6 +244,8 @@ are adjusted based on the action selected at this node.
    particular, it does not enforce the separation of information sets
    based on this information during subsequent editing of the game.
 
+
+.. _outcomes-and-payoffs:
 
 Outcomes and payoffs
 --------------------
@@ -293,12 +288,6 @@ Labels on nodes and branches
 The information displayed at the nodes and on the branches of the tree
 can be configured by selecting :menuselection:`Format --> Labels`,
 which displays the :guilabel:`tree labels` dialog.
-
-.. image::  screens/labels.*
-            :width: 33%
-            :alt: tree labels dialog
-            :align: right
-            :target: _images/labels.png
 
 Above and below each node, the following information can be displayed:
 
@@ -378,12 +367,6 @@ provides generally good results for most games. These can be adjusted
 by selecting :menuselection:`Format --> Layout`.
 The layout parameters are organized on three tabs.
 
-.. image::  screens/layoutnodes.*
-            :width: 33%
-            :alt: layout options dialog, nodes tab
-            :align: right
-            :target: _images/layoutnodes.png
-
 The first tab,
 labeled :guilabel:`Nodes`, controls the size, location, and
 rendering of nodes in the tree.
@@ -397,12 +380,6 @@ The sizing of nodes can be configured for best results. Gambit styling
 from previous versions used the horizontal line tokens with relatively
 long lines; when using the other tokens, smaller node sizes often look
 better.
-
-.. image::  screens/layoutbranches.*
-            :width: 33%
-            :alt: layout options dialog, branches tab
-            :align: right
-            :target: _images/layoutbranches.png
 
 The layout algorithm is based upon identifying the location of
 terminal nodes. The vertical spacing between these nodes can be set;
@@ -425,12 +402,6 @@ branches by setting :guilabel:`Draw labels` to rotated.
 The rotated label drawing is experimental, and does not always look
 good on screen.
 
-.. image::  screens/layoutinfosets.*
-            :width: 33%
-            :alt: layout options dialog, information sets tab
-            :align: right
-            :target: _images/layoutinfosets.png
-
 The length used for branches and their tines, if drawn, can be
 configured. Longer branch and tine lengths give more space for longer
 labels to be drawn, at the cost of giving the tree a larger horizontal
@@ -450,13 +421,7 @@ The layout of the tree may be such that members of the same
 information set appear at different horizontal locations in the tree.
 In such a case, by default, Gambit draws a horizontal arrow pointing
 rightward or leftward to indicate the continuation of the information
-set, as illustrated in the diagram nearby.
-
-.. image::  screens/connectinfoset.*
-            :width: 33%
-            :alt: information sets spanning multiple levels
-            :align: right
-            :target: _images/connectinfoset.png
+set.
 
 These connections can be disabled by setting
 :guilabel:`Connect members of information
