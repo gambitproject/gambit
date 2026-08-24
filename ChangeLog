@@ -58,6 +58,9 @@
   action belonged to. Index an information set's own `actions` instead, iterating
   `Game.infosets`/`Player.infosets` as needed. `Game._resolve_action`, an internal helper
   with no callers besides its own tests, is removed along with it.
+- `Strategy.action` has been removed; it is superseded by `Game.get_behavior`, which returns
+  a `StrategyBehavior`, a full map-like view of a strategy's information-set-to-action
+  mapping rather than a one-information-set-at-a-time query.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

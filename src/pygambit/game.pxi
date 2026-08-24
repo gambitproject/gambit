@@ -921,10 +921,6 @@ class Game:
             If `player` is from a different game, or `strategy` belongs to a different player.
         KeyError
             If `strategy` is a string and `player` has no strategy with that label.
-
-        See Also
-        --------
-        Strategy.action : The action prescribed at a single information set.
         """
         if not self.is_tree:
             raise UndefinedOperationError(

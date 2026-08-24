@@ -327,7 +327,7 @@ def test_action_plays():
 def test_strategy_action_defined(
     game, player_label, strategy_label, infoset_path, expected_action_label
 ):
-    """Verify `Strategy.action` retrieves the correct action for defined actions."""
+    """Verify `StrategyBehavior` retrieves the correct action for defined actions."""
     player = game.players[player_label]
     strategy = player.strategies[strategy_label]
     node = game.root
@@ -336,7 +336,7 @@ def test_strategy_action_defined(
     infoset = node.infoset
     expected_action = infoset.actions[expected_action_label]
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player, strategy).get(infoset)
 
     assert prescribed_action == expected_action
 
@@ -356,7 +356,7 @@ def test_strategy_action_defined(
 def test_strategy_action_undefined_returns_none(
     game, player_label, strategy_label, infoset_label, infoset_path
 ):
-    """Verify `Strategy.action` returns None when called on an unreached player's infoset"""
+    """Verify `StrategyBehavior` returns None when queried on an unreached player's infoset"""
     player = game.players[player_label]
     strategy = player.strategies[strategy_label]
     if infoset_label is not None:
@@ -367,7 +367,7 @@ def test_strategy_action_undefined_returns_none(
             node = node.children[action_label]
         infoset = node.infoset
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player, strategy).get(infoset)
 
     assert prescribed_action is None
 
@@ -388,7 +388,7 @@ def test_strategy_action_raises_value_error_for_wrong_player(
     game, player_label, other_infoset_path
 ):
     """
-    Verify `Strategy.action` raises ValueError when the infoset belongs
+    Verify `StrategyBehavior` raises ValueError when the infoset belongs
     to a different player than the strategy.
     """
     player = game.players[player_label]
@@ -399,16 +399,15 @@ def test_strategy_action_raises_value_error_for_wrong_player(
     other_players_infoset = node.infoset
 
     with pytest.raises(ValueError):
-        strategy.action(other_players_infoset)
+        _ = game.get_behavior(player, strategy)[other_players_infoset]
 
 
-def test_strategy_action_raises_error_for_strategic_game():
-    """Verify `Strategy.action` retrieves the action prescribed by the strategy"""
+def test_get_behavior_raises_error_for_strategic_game():
+    """Verify `Game.get_behavior` raises UndefinedOperationError for a strategic game."""
     game_efg = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     game_nfg = game_efg.from_arrays(game_efg.to_arrays()[0], game_efg.to_arrays()[1])
     alice = next(iter(game_nfg.players))
     strategy = next(iter(alice.strategies))
-    test_infoset = next(iter(game_efg.infosets))
 
     with pytest.raises(gbt.UndefinedOperationError):
-        strategy.action(test_infoset)
+        game_nfg.get_behavior(alice, strategy)

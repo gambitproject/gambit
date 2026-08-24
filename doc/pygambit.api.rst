@@ -195,7 +195,6 @@ Information about the game
    Strategy.game
    Strategy.player
    Strategy.number
-   Strategy.action
 
 .. autosummary::
 
@@ -216,6 +215,19 @@ Player behavior
    Game.mixed_behavior_profile
    Game.random_behavior_profile
    Game.strategy_support_profile
+   Game.get_behavior
+
+   StrategyBehavior
+   StrategyBehavior.player
+   StrategyBehavior.strategy
+   StrategyBehavior.__getitem__
+   StrategyBehavior.get
+   StrategyBehavior.__contains__
+   StrategyBehavior.__iter__
+   StrategyBehavior.__len__
+   StrategyBehavior.keys
+   StrategyBehavior.values
+   StrategyBehavior.items
 
 
 Representation of strategic behavior

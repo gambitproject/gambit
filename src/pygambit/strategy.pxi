@@ -80,50 +80,14 @@ class Strategy:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
 
-    def action(self, infoset: Infoset | str) -> Action | None:
-        """Get the action prescribed by a strategy for a given information set.
-
-        .. versionadded:: 16.4.0
-
-        Parameters
-        ----------
-        infoset
-            The information set for which to find the prescribed action.
-            Can be an Infoset object or its string label.
-
-        Returns
-        -------
-        Action or None
-            The prescribed action or None if the strategy is not defined for this
-            information set, that is, the information set is unreachable under this strategy.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game is not an extensive-form (tree) game.
-        ValueError
-            If the information set belongs to a different player than the strategy.
-
-        See Also
-        --------
-        Game.get_behavior :
-            A map-like view of the strategy's full mapping from information sets to actions.
+    @cython.cfunc
+    def _get_action(self, infoset: c_GameInfoset) -> Action:
+        """Returns the action this strategy prescribes at `infoset`, or None if the
+        strategy does not reach it.  Unlike the removed public `action()` method, this
+        performs no validation of `infoset`: used internally by `StrategyBehavior`,
+        which has already resolved and validated it.
         """
-        if not self.game.is_tree:
-            raise UndefinedOperationError(
-                "Strategy.action is only defined for strategies in extensive-form games."
-            )
-
-        resolved_infoset: Infoset = self.game._resolve_infoset(infoset, "Strategy.action")
-
-        if resolved_infoset.player != self.player:
-            raise ValueError(
-                f"Information set {resolved_infoset} belongs to player "
-                f"'{resolved_infoset.player.label}', but this strategy "
-                f"belongs to player '{self.player.label}'."
-            )
-
-        action: c_GameAction = self.strategy.deref().GetAction(resolved_infoset.infoset)
+        action: c_GameAction = self.strategy.deref().GetAction(infoset)
         if not action:
             return None
         return Action.wrap(action)
@@ -187,8 +151,8 @@ class StrategyBehavior:
         ValueError
             If the information set belongs to a different player.
         """
-        infoset = self._resolve_key(key)
-        action = self._strategy.action(infoset)
+        infoset: Infoset = self._resolve_key(key)
+        action = self._strategy._get_action(infoset.infoset)
         if action is None:
             raise KeyError(
                 f"Strategy '{self._strategy.label}' prescribes no action at {infoset}."
@@ -197,20 +161,21 @@ class StrategyBehavior:
 
     def get(self, key: Infoset | str, default: typing.Any = None) -> Action | None:
         """Return the action prescribed at `key`, or `default` if none is prescribed."""
-        infoset = self._resolve_key(key)
-        action = self._strategy.action(infoset)
+        infoset: Infoset = self._resolve_key(key)
+        action = self._strategy._get_action(infoset.infoset)
         return default if action is None else action
 
     def __contains__(self, key: typing.Any) -> bool:
         try:
-            infoset = self._resolve_key(key)
+            infoset: Infoset = self._resolve_key(key)
         except (KeyError, ValueError, TypeError):
             return False
-        return self._strategy.action(infoset) is not None
+        return self._strategy._get_action(infoset.infoset) is not None
 
     def __iter__(self) -> typing.Iterator[Infoset]:
+        infoset: Infoset
         for infoset in self._player.infosets:
-            if self._strategy.action(infoset) is not None:
+            if self._strategy._get_action(infoset.infoset) is not None:
                 yield infoset
 
     def __len__(self) -> int:
@@ -222,11 +187,13 @@ class StrategyBehavior:
 
     def values(self) -> list[Action]:
         """The prescribed actions, in the order of `keys`."""
-        return [self._strategy.action(infoset) for infoset in self]
+        infoset: Infoset
+        return [self._strategy._get_action(infoset.infoset) for infoset in self]
 
     def items(self) -> list[tuple[Infoset, Action]]:
         """(information set, action) pairs, in the order of `keys`."""
-        return [(infoset, self._strategy.action(infoset)) for infoset in self]
+        infoset: Infoset
+        return [(infoset, self._strategy._get_action(infoset.infoset)) for infoset in self]
 
 
 @cython.cclass
