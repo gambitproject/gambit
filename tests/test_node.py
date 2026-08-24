@@ -830,7 +830,7 @@ def test_append_move_labels_list_of_nodes():
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
 
     for action1, action2 in zip(node1.infoset.actions, node2.infoset.actions, strict=True):
-        assert action1.label == action2.label
+        assert action1 == action2
 
 
 def test_append_move_node_list_with_non_terminal_node():
@@ -1008,7 +1008,7 @@ def test_insert_event_actions_labeled():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
     game.insert_event(node, ["Up", "Down"], [gbt.Rational(1, 2)] * 2)
-    assert [a.label for a in node.parent.infoset.actions] == ["Up", "Down"]
+    assert list(node.parent.infoset.actions) == ["Up", "Down"]
     assert node.parent.infoset.is_chance
 
 
@@ -1154,7 +1154,7 @@ def test_len_after_set_move_actions_add():
     initial_number_of_nodes = len(game.nodes)
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
-    labels = [action.label for action in infoset_to_modify.actions]
+    labels = list(infoset_to_modify.actions)
     game.set_move_actions(infoset_to_modify, labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
@@ -1163,13 +1163,14 @@ def test_len_after_set_move_actions_drop():
     """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
-    action_to_drop = game.root.infoset.actions["L"]
+    infoset_to_modify = game.root.infoset
+    label_to_drop = "L"
     nodes_to_delete = sum(
-        _count_subtree_nodes(member.children[action_to_drop.label], True)
-        for member in action_to_drop.infoset.members
+        _count_subtree_nodes(member.children[label_to_drop], True)
+        for member in infoset_to_modify.members
     )
-    remaining = [a.label for a in game.root.infoset.actions if a.label != "L"]
-    game.set_move_actions(game.root.infoset, remaining, drop=True)
+    remaining = [label for label in infoset_to_modify.actions if label != label_to_drop]
+    game.set_move_actions(infoset_to_modify, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 
@@ -1192,7 +1193,7 @@ def test_insert_move_actions_labeled():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
     game.insert_move(node, game.players["Player 2"], ["Up", "Down"])
-    assert [a.label for a in node.parent.infoset.actions] == ["Up", "Down"]
+    assert list(node.parent.infoset.actions) == ["Up", "Down"]
 
 
 def test_len_after_insert_infoset():
@@ -1252,15 +1253,6 @@ def test_node_children_action_label():
     assert game.root.children["Queen"].children["Fold"] == list(root_children[1].children)[1]
 
 
-def test_node_children_action():
-    """Action lookup returns the correct child.
-
-    The RHS reaches the child positionally -- cf. `test_node_children_action_label()`.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    assert game.root.children[game.root.infoset.actions["King"]] == list(game.root.children)[0]
-
-
 def test_node_children_empty_label():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError, match="empty or all whitespace"):
@@ -1284,12 +1276,6 @@ def test_node_children_rejects_int():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(TypeError, match="16.7.0"):
         _ = game.root.children[0]
-
-
-def test_node_children_other_infoset_action():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children["King"].infoset.actions["Bet"]]
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)

@@ -447,7 +447,7 @@ class MixedBehaviorProfile:
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
         return MixedAction.wrap(
-            infoset, {a.label: self._getprob_action(a) for a in infoset.actions}
+            infoset, {label: self._getprob_action(infoset, label) for label in infoset.actions}
         )
 
     def _setprob_infoset(
@@ -465,7 +465,7 @@ class MixedBehaviorProfile:
                 f"a mixed action must be set from a Mapping from action label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = {a.label for a in infoset.actions}
+        labels = set(infoset.actions)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -484,8 +484,8 @@ class MixedBehaviorProfile:
             raise ValueError("a mixed action's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed action's weights must not all be zero")
-        for a in infoset.actions:
-            self._setprob_action(a, values[a.label])
+        for label in infoset.actions:
+            self._setprob_action(infoset, label, values[label])
 
     def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed action at the information set containing `index`.
@@ -655,7 +655,9 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionValuesVector({
-            infoset: ActionValueVector({a.label: self._action_value(a) for a in infoset.actions})
+            infoset: ActionValueVector({
+                label: self._action_value(infoset, label) for label in infoset.actions
+            })
             for infoset in self.game.infosets
         })
 
@@ -734,7 +736,9 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionRegretsVector({
-            infoset: ActionRegretVector({a.label: self._action_regret(a) for a in infoset.actions})
+            infoset: ActionRegretVector({
+                label: self._action_regret(infoset, label) for label in infoset.actions
+            })
             for infoset in self.game.infosets
         })
 
@@ -889,8 +893,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset.infoset)
 
-    def _getprob_action(self, index: Action) -> float:
-        return deref(self.profile).getaction(index.action)
+    def _getprob_action(self, infoset: Infoset, label: str) -> float:
+        action = _resolve_action_handle(infoset.infoset, label)
+        return deref(self.profile).getaction(action)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -900,9 +905,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value) -> None:
+    def _setprob_action(self, infoset: Infoset, label: str, value) -> None:
         self._ensure_unshared()
-        setitem_mbpd_action(deref(self.profile), index.action, value)
+        action = _resolve_action_handle(infoset.infoset, label)
+        setitem_mbpd_action(deref(self.profile), action, value)
 
     def _to_prob(self, value: typing.Any) -> float:
         normalized = _to_number_string(value)
@@ -936,14 +942,16 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _node_value(self, player: Player, node: Node) -> float:
         return deref(self.profile).GetPayoff(player.player, node.node)
 
-    def _action_value(self, action: Action) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(action.action)
+    def _action_value(self, infoset: Infoset, label: str) -> float | None:
+        action = _resolve_action_handle(infoset.infoset, label)
+        cdef optional[double] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return value.value()
         return None
 
-    def _action_regret(self, action: Action) -> float:
-        return deref(self.profile).GetRegret(action.action)
+    def _action_regret(self, infoset: Infoset, label: str) -> float:
+        action = _resolve_action_handle(infoset.infoset, label)
+        return deref(self.profile).GetRegret(action)
 
     def _infoset_regret(self, infoset: Infoset) -> float:
         return deref(self.profile).GetRegret(infoset.infoset)
@@ -1011,8 +1019,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset.infoset)
 
-    def _getprob_action(self, index: Action) -> Rational:
-        return rat_to_py(deref(self.profile).getaction(index.action))
+    def _getprob_action(self, infoset: Infoset, label: str) -> Rational:
+        action = _resolve_action_handle(infoset.infoset, label)
+        return rat_to_py(deref(self.profile).getaction(action))
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -1022,14 +1031,15 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value: typing.Any) -> None:
+    def _setprob_action(self, infoset: Infoset, label: str, value: typing.Any) -> None:
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError(
                 f"rational precision profile requires int or Fraction probability, "
                 f"not {value.__class__.__name__}"
             )
         self._ensure_unshared()
-        setitem_mbpr_action(deref(self.profile), index.action,
+        action = _resolve_action_handle(infoset.infoset, label)
+        setitem_mbpr_action(deref(self.profile), action,
                             to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
@@ -1059,14 +1069,16 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _node_value(self, player: Player, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
 
-    def _action_value(self, action: Action) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action.action)
+    def _action_value(self, infoset: Infoset, label: str) -> Rational | None:
+        action = _resolve_action_handle(infoset.infoset, label)
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return rat_to_py(value.value())
         return None
 
-    def _action_regret(self, action: Action) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(action.action))
+    def _action_regret(self, infoset: Infoset, label: str) -> Rational:
+        action = _resolve_action_handle(infoset.infoset, label)
+        return rat_to_py(deref(self.profile).GetRegret(action))
 
     def _infoset_regret(self, infoset: Infoset) -> Rational:
         return rat_to_py(deref(self.profile).GetRegret(infoset.infoset))

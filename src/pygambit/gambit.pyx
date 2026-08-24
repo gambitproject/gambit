@@ -100,10 +100,21 @@ def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural
     return matches[0]
 
 
+@cython.cfunc
+def _resolve_action_handle(infoset: c_GameInfoset, label: str) -> c_GameAction:
+    """Finds the action with `label` at `infoset`, as a transient C++ handle -- used
+    internally where a label must be turned into a handle to call a C++ method, and
+    discarded immediately afterward.  Raises KeyError if no action matches.
+    """
+    for action in infoset.deref().GetActions():
+        if action.deref().GetLabel().decode("utf-8") == label:
+            return action
+    raise KeyError(f"no action with label '{label}' at this information set")
+
+
 PlayerReference = Player | str
 StrategyReference = Strategy | str
 InfosetReference = Infoset | str
-ActionReference = Action | str
 NodeReference = Node | str
 NodeReferenceSet = typing.Iterable[NodeReference]
 

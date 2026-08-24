@@ -1159,7 +1159,7 @@ class Game:
                         f"actions for infoset {i} for {p}"
                     )
                 profile[next(iter(i.members))] = {
-                    a.label: typefunc(u) for a, u in zip(i.actions, v, strict=True)
+                    a: typefunc(u) for a, u in zip(i.actions, v, strict=True)
                 }
         return profile
 
@@ -1243,7 +1243,7 @@ class Game:
                     alpha=[1 for action in infoset.actions], seed=gen
                 ).rvs(size=1)[0]
                 profile[next(iter(infoset.members))] = dict(
-                    zip((a.label for a in infoset.actions), weights, strict=True)
+                    zip(infoset.actions, weights, strict=True)
                 )
             return profile
         elif denom < 1:
@@ -2051,7 +2051,7 @@ class Game:
             raise TypeError("set_move_actions(): actions must be an iterable of str")
         if not labels:
             raise UndefinedOperationError("set_move_actions(): `actions` must be a nonempty list")
-        current = [action.label for action in resolved_infoset.actions]
+        current = list(resolved_infoset.actions)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_move_actions(): the information set has duplicate action labels, "
@@ -2150,7 +2150,7 @@ class Game:
             raise UndefinedOperationError(
                 "set_event_actions(): `probs` must be a nonempty mapping"
             )
-        current = [action.label for action in resolved_infoset.actions]
+        current = list(resolved_infoset.actions)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_event_actions(): the information set has duplicate action labels, "
@@ -2185,8 +2185,8 @@ class Game:
         converted, and the move is thereafter resolved by chance.  Nodes are removed from
         whatever information sets or events they currently belong to; any of those which
         retain members survive, keeping their labels, and those left with no members are deleted.
-        Any ``Infoset`` object, and any of its ``Action`` objects, referring to a deleted one
-        becomes invalid, and subsequent use raises ``RuntimeError``.
+        Any ``Infoset`` object referring to a deleted one becomes invalid, and subsequent
+        use raises ``RuntimeError``.
         The resulting event is accessible as ``node.infoset`` for any node in `nodes`.
 
         The first node in `nodes` determines the action order of the event,
@@ -2235,8 +2235,8 @@ class Game:
                 "make_event(): all nodes must be nonterminal"
             )
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        action_labels = [a.label for a in resolved_node.infoset.actions]
-        if any([a.label for a in n.infoset.actions] != action_labels
+        action_labels = list(resolved_node.infoset.actions)
+        if any(list(n.infoset.actions) != action_labels
                for n in resolved_nodes[1:]):
             raise ValueError(
                 "make_event(): all nodes must have the same actions, "
@@ -2299,7 +2299,7 @@ class Game:
                 f"relabel_actions(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = [action.label for action in resolved_infoset.actions]
+        current = list(resolved_infoset.actions)
         c_labels = stdmap[string, string]()
         for old, new in labels.items():
             if not isinstance(old, str) or not isinstance(new, str):

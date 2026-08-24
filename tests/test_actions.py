@@ -7,10 +7,14 @@ from . import games
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_action_label(label: str):
+    """A label captured before relabeling is just a plain string -- it does not update
+    to reflect the new label, since actions are values, not live references.
+    """
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.infoset.actions))
-    game.relabel_actions(game.root.infoset, {action.label: label})
-    assert action.label == label
+    original = next(iter(game.root.infoset.actions))
+    game.relabel_actions(game.root.infoset, {original: label})
+    assert label in game.root.infoset.actions
+    assert original not in game.root.infoset.actions
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
@@ -18,14 +22,14 @@ def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root.infoset, {action.label: label})
+        game.relabel_actions(game.root.infoset, {action: label})
 
 
 def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.infoset.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root.infoset, {action.label: ""})
+        game.relabel_actions(game.root.infoset, {action: ""})
 
 
 def test_relabel_actions_duplicate_raises_valueerror():
@@ -40,7 +44,7 @@ def test_relabel_actions_simultaneous_swap():
     """
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(game.root.infoset, {"King": "Queen", "Queen": "King"})
-    assert [action.label for action in game.root.infoset.actions] == ["Queen", "King"]
+    assert list(game.root.infoset.actions) == ["Queen", "King"]
 
 
 def test_relabel_actions_duplicate_targets_raises_valueerror():
@@ -61,7 +65,7 @@ def test_relabel_actions_unknown_label_raises_keyerror():
 def test_relabel_actions_unknown_label_not_strict_is_ignored():
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(game.root.infoset, {"Jack": "Ace", "King": "Ace"}, strict=False)
-    assert [action.label for action in game.root.infoset.actions] == ["Ace", "Queen"]
+    assert list(game.root.infoset.actions) == ["Ace", "Queen"]
 
 
 def test_relabel_actions_failure_leaves_game_unchanged():
@@ -71,7 +75,7 @@ def test_relabel_actions_failure_leaves_game_unchanged():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
         game.relabel_actions(game.root.infoset, {"King": "Ace", "Queen": ""})
-    assert [action.label for action in game.root.infoset.actions] == ["King", "Queen"]
+    assert list(game.root.infoset.actions) == ["King", "Queen"]
 
 
 def test_relabel_actions_scope_is_the_information_set():
@@ -83,10 +87,10 @@ def test_relabel_actions_scope_is_the_information_set():
     king = game.players["Alice"].infosets["Alice has King"]
     queen = game.players["Alice"].infosets["Alice has Queen"]
     game.relabel_actions(king, {"Bet": "Raise"})
-    assert [action.label for action in king.actions] == ["Raise", "Fold"]
-    assert [action.label for action in queen.actions] == ["Bet", "Fold"]
+    assert list(king.actions) == ["Raise", "Fold"]
+    assert list(queen.actions) == ["Bet", "Fold"]
     game.relabel_actions(queen, {"Bet": "Raise"})
-    assert [action.label for action in queen.actions] == ["Raise", "Fold"]
+    assert list(queen.actions) == ["Raise", "Fold"]
 
 
 def test_relabel_actions_not_a_mapping_raises_typeerror():
@@ -117,7 +121,7 @@ def test_set_move_actions_drop_shrinks_actions_and_children():
     infoset = game.players["Alice"].infosets["Alice has King"]
     node = next(iter(infoset.members))
     action_count = len(infoset.actions)
-    remaining = [action.label for action in infoset.actions][1:]
+    remaining = list(infoset.actions)[1:]
     game.set_move_actions(infoset, remaining, drop=True)
     assert len(infoset.actions) == action_count - 1
     assert len(node.children) == action_count - 1
@@ -126,9 +130,9 @@ def test_set_move_actions_drop_shrinks_actions_and_children():
 def test_set_move_actions_cannot_remove_the_only_action():
     game = games.create_stripped_down_poker_efg()
     infoset = game.players["Alice"].infosets["Alice has King"]
-    last = next(iter(infoset.actions)).label
+    last = next(iter(infoset.actions))
     game.set_move_actions(infoset, [last], drop=True)
-    assert [action.label for action in infoset.actions] == [last]
+    assert list(infoset.actions) == [last]
     with pytest.raises(gbt.UndefinedOperationError):
         game.set_move_actions(infoset, [], drop=True)
 
@@ -150,13 +154,13 @@ def test_set_move_actions_reorder_carries_subtrees():
         """`Action.plays` was removed; composes from `Infoset.members`,
         `Node.children`, and `Node.plays`."""
         return {
-            action.label: {n for m in infoset.members for n in m.children[action.label].plays}
-            for action in infoset.actions
+            label: {n for m in infoset.members for n in m.children[label].plays}
+            for label in infoset.actions
         }
 
     plays_before = action_plays(infoset)
     game.set_move_actions(infoset, ["c", "a", "b"])
-    assert [action.label for action in infoset.actions] == ["c", "a", "b"]
+    assert list(infoset.actions) == ["c", "a", "b"]
     for member, children in zip(members, children_before, strict=True):
         assert list(member.children) == [children["c"], children["a"], children["b"]]
     assert action_plays(infoset) == plays_before
@@ -167,7 +171,7 @@ def test_set_move_actions_add_drop_and_reorder_together():
     infoset = game.players["Alice"].infosets["Alice has King"]
     nodes_before = len(game.nodes)
     game.set_move_actions(infoset, ["Raise", "Fold"], drop=True)
-    assert [action.label for action in infoset.actions] == ["Raise", "Fold"]
+    assert list(infoset.actions) == ["Raise", "Fold"]
     # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
     assert len(game.nodes) == nodes_before - 3 + 1
     assert len(game.players["Bob"].infosets["Bob's response"].members) == 1
@@ -211,7 +215,7 @@ def test_set_move_actions_absent_minded_drop_and_add():
     game.append_move(game.root, "Alice", ["a", "b"])
     game.append_infoset(game.root.children["a"], game.root.infoset)
     game.set_move_actions(game.root.infoset, ["b", "c"], drop=True)
-    assert [action.label for action in game.root.infoset.actions] == ["b", "c"]
+    assert list(game.root.infoset.actions) == ["b", "c"]
     assert len(game.root.infoset.members) == 1
     assert len(game.nodes) == 3
 

@@ -301,8 +301,6 @@ COLLECTION_GETTERS = [
     pytest.param(lambda g: g.infosets, id="GameInfosets"),
     pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
     pytest.param(lambda g: g.players["Alice"].infosets, id="PlayerInfosets"),
-    pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].actions,
-                 id="InfosetActions"),
     pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].members,
                  id="InfosetMembers"),
 ]

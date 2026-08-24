@@ -67,6 +67,10 @@
   instead of `Action` objects.
 - `Infoset.own_prior_actions` has been removed; it composes from `Infoset.members` and
   `Node.own_prior_action`, e.g. `{m.own_prior_action for m in infoset.members}`.
+- `Infoset.actions` now returns `list[str]` (the actions' labels, in order) instead of a
+  collection of `Action` objects. `NodeChildren.__getitem__` (`node.children[...]`) no longer
+  accepts an `Action`; index by label only. `Action` itself is no longer referenced anywhere
+  in pygambit's public surface.
 - `Node.prior_action` and `Node.own_prior_action` now return `tuple[Node, str] | None`
   (the node on the path at which the action was taken, paired with its label) instead of
   `Action | None`. `Node.own_prior_action` no longer calls into the C++ core at all; it is

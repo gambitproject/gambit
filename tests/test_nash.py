@@ -23,12 +23,12 @@ def d(*probs) -> tuple:
     return tuple(probs)
 
 
-def _action_prob(profile: gbt.MixedBehaviorProfile, action: gbt.Action):
-    """The probability profile assigns to action, addressed via a representative node
-    of its information set (MixedBehaviorProfile no longer indexes by Action directly).
+def _action_prob(profile: gbt.MixedBehaviorProfile, infoset: gbt.Infoset, label: str):
+    """The probability profile assigns to the action at infoset with label, addressed
+    via a representative node of the information set.
     """
-    node = next(iter(action.infoset.members))
-    return profile[node][action.label]
+    node = next(iter(infoset.members))
+    return profile[node][label]
 
 
 @dataclasses.dataclass
@@ -3157,9 +3157,10 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for infoset in player.infosets:
-                    for action in infoset.actions:
+                    for label in infoset.actions:
                         assert abs(
-                            _action_prob(eq, action) - _action_prob(expected, action)
+                            _action_prob(eq, infoset, label)
+                            - _action_prob(expected, infoset, label)
                         ) <= test_case.prob_tol
 
 
@@ -3208,8 +3209,11 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
     def are_the_same(game, found, candidate):
         for p in game.players:
             for infoset in p.infosets:
-                for a in infoset.actions:
-                    if not abs(_action_prob(found, a) - _action_prob(candidate, a)) <= TOL:
+                for label in infoset.actions:
+                    if not abs(
+                        _action_prob(found, infoset, label)
+                        - _action_prob(candidate, infoset, label)
+                    ) <= TOL:
                         return False
         return True
 
@@ -3373,9 +3377,10 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for infoset in player.infosets:
-                    for action in infoset.actions:
+                    for label in infoset.actions:
                         assert abs(
-                            _action_prob(eq, action) - _action_prob(expected, action)
+                            _action_prob(eq, infoset, label)
+                            - _action_prob(expected, infoset, label)
                         ) <= test_case.prob_tol
 
 
@@ -3428,9 +3433,10 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for infoset in player.infosets:
-                    for action in infoset.actions:
+                    for label in infoset.actions:
                         assert abs(
-                            _action_prob(eq, action) - _action_prob(expected, action)
+                            _action_prob(eq, infoset, label)
+                            - _action_prob(expected, infoset, label)
                         ) <= test_case.prob_tol
 
 
