@@ -38,6 +38,10 @@ MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
 {
   CreateGrid(0, 0);
 
+  // The table takes ownership of the provider
+  m_labels = new ProfileLabelProvider;
+  GetTable()->SetAttrProvider(m_labels);
+
   SetRowLabelSize(40);
   SetColLabelSize(25);
   SetCornerLabelValue(wxT("#"));
@@ -49,6 +53,12 @@ MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
 
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
+
+  // Suppress wxGrid's own label highlighting, which follows the grid cursor.
+  // The cursor is meaningless here, and cannot be moved out of the way, as
+  // wxGrid puts it back on the first cell whenever the grid is repainted;
+  // the labels worth highlighting are chosen in OnUpdate() instead.
+  DisableOverlaySelection();
 
   // The column and corner labels sort the list, so show them as clickable
   GetGridColLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
@@ -194,6 +204,13 @@ void MixedStrategyProfileList::UpdateCells()
   }
 }
 
+void MixedStrategyProfileList::UpdateHighlights()
+{
+  // GetColumn() numbers columns from one, and is zero when unsorted
+  m_labels->SetSortedColumn(m_sortOrder.GetColumn() - 1);
+  m_labels->SetSelectedRow(m_sortOrder.GetRow(m_doc->GetWorkspace().GetCurrentProfile()));
+}
+
 void MixedStrategyProfileList::OnUpdate()
 {
   if (m_doc->GetWorkspace().NumProfileLists() == 0) {
@@ -217,6 +234,7 @@ void MixedStrategyProfileList::OnUpdate()
   m_sortOrder.Rebuild(newRows, newCols, [&](int p_col, int p_profile) {
     return profiles.GetStrategyProbValue(p_col, p_profile);
   });
+  UpdateHighlights();
   UpdateLabels();
   UpdateCells();
 

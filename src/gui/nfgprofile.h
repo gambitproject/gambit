@@ -26,12 +26,16 @@
 #include <wx/grid.h>
 
 #include "gamedoc.h"
+#include "profilelabels.h"
 #include "profilesort.h"
 
 namespace Gambit::GUI {
 class MixedStrategyProfileList final : public wxGrid, public GameView {
   /// The order in which the profiles are listed
   ProfileSortOrder m_sortOrder;
+  /// Highlights the sorted column and the selected profile's row; owned by
+  /// the grid's table, which deletes it
+  ProfileLabelProvider *m_labels{nullptr};
 
   // Event handlers
   void OnLabelClick(wxGridEvent &);
@@ -40,6 +44,7 @@ class MixedStrategyProfileList final : public wxGrid, public GameView {
 
   void ResizeGrid(int p_rows, int p_cols);
   void UpdateLabels();
+  void UpdateHighlights();
   void UpdateCells();
 
   // Overriding GameView members

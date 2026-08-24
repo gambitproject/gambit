@@ -38,6 +38,10 @@ MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent,
 {
   CreateGrid(0, 0);
 
+  // The table takes ownership of the provider
+  m_labels = new ProfileLabelProvider;
+  GetTable()->SetAttrProvider(m_labels);
+
   SetRowLabelSize(40);
   SetColLabelSize(25);
   SetCornerLabelValue(wxT("#"));
@@ -49,6 +53,12 @@ MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent,
 
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
+
+  // Suppress wxGrid's own label highlighting, which follows the grid cursor.
+  // The cursor is meaningless here, and cannot be moved out of the way, as
+  // wxGrid puts it back on the first cell whenever the grid is repainted;
+  // the labels worth highlighting are chosen in OnUpdate() instead.
+  DisableOverlaySelection();
 
   // The column and corner labels sort the list, so show them as clickable
   GetGridColLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
@@ -184,6 +194,13 @@ void MixedBehaviorProfileList::UpdateCells()
   }
 }
 
+void MixedBehaviorProfileList::UpdateHighlights()
+{
+  // GetColumn() numbers columns from one, and is zero when unsorted
+  m_labels->SetSortedColumn(m_sortOrder.GetColumn() - 1);
+  m_labels->SetSelectedRow(m_sortOrder.GetRow(m_doc->GetWorkspace().GetCurrentProfile()));
+}
+
 void MixedBehaviorProfileList::OnUpdate()
 {
   if (!m_doc->GetGame() || m_doc->GetWorkspace().NumProfileLists() == 0) {
@@ -205,6 +222,7 @@ void MixedBehaviorProfileList::OnUpdate()
   m_sortOrder.Rebuild(profiles.NumProfiles(), profileLength, [&](int p_col, int p_profile) {
     return profiles.GetActionProbValue(p_col, p_profile);
   });
+  UpdateHighlights();
   UpdateLabels();
   UpdateCells();
 
