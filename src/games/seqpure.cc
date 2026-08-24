@@ -149,9 +149,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
     frames.pop();
     const GameNode &n = frame.node;
 
-    if (n->GetOutcome()) {
-      frame.cumulative += n->GetOutcome()->GetPayoff<Rational>(p_player);
-    }
+    frame.cumulative += n->GetOutcome()->GetPayoff<Rational>(p_player);
 
     if (n->IsTerminal()) {
       // Credit the cumulative payoff along this path only if every

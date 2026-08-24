@@ -552,11 +552,9 @@ template <class T> void MixedBehaviorProfile<T>::ComputeNodeValues() const
     for (const auto &player : game->GetPlayers()) {
       vals[player] = static_cast<T>(0);
     }
-    if (node->GetOutcome()) {
-      const GameOutcome &outcome = node->GetOutcome();
-      for (const auto &player : game->GetPlayers()) {
-        vals[player] += outcome->GetPayoff<T>(player);
-      }
+    const GameOutcome &outcome = node->GetOutcome();
+    for (const auto &player : game->GetPlayers()) {
+      vals[player] += outcome->GetPayoff<T>(player);
     }
     for (auto [action, child] : node->GetActions()) {
       const T p = GetActionProb(action);

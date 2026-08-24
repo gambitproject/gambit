@@ -208,6 +208,7 @@ cdef extern from "games/game.h":
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame() except +
         int GetNumber() except +
+        bool IsNull() except +
 
         string GetLabel() except +
         void SetLabel(string) except +ValueError

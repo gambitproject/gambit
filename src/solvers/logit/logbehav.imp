@@ -169,11 +169,9 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
 
 template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
-  if (node->GetOutcome()) {
-    const GameOutcome outcome = node->GetOutcome();
-    for (auto player : m_game->GetPlayers()) {
-      m_nodeValues[node][player] += outcome->GetPayoff<T>(player);
-    }
+  const GameOutcome outcome = node->GetOutcome();
+  for (auto player : m_game->GetPlayers()) {
+    m_nodeValues[node][player] += outcome->GetPayoff<T>(player);
   }
 
   const GameInfoset infoset = node->GetInfoset();

@@ -975,11 +975,10 @@ bool GameTreeRep::IsConstSum() const
         }
       }
 
-      if (const auto outcome = p_node->GetOutcome()) {
-        sum += sum_function(m_game->m_players, [&](const auto &p_player) {
-          return outcome->GetPayoff<Rational>(p_player);
-        });
-      }
+      const auto outcome = p_node->GetOutcome();
+      sum += sum_function(m_game->m_players, [&](const auto &p_player) {
+        return outcome->GetPayoff<Rational>(p_player);
+      });
       m_subtreeSums[p_node] = sum;
       return DFSCallbackResult::Continue;
     }
@@ -1018,9 +1017,7 @@ Rational GameTreeRep::AggregateSubtreePayoff(const GamePlayer &p_player,
           m_subtreeValues.erase(child);
         }
       }
-      if (const auto outcome = p_node->GetOutcome()) {
-        value += outcome->GetPayoff<Rational>(m_player);
-      }
+      value += p_node->GetOutcome()->GetPayoff<Rational>(m_player);
       m_subtreeValues[p_node] = value;
       m_result = value; // We write the root node value last, so will be correct on termination
       return DFSCallbackResult::Continue;
@@ -1665,7 +1662,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
     }
     f << ' ';
   }
-  if (n->GetOutcome()) {
+  if (!n->GetOutcome()->IsNull()) {
     f << n->GetOutcome()->GetNumber() << " " << QuoteString(n->GetOutcome()->GetLabel()) << ' '
       << FormatList(
              n->GetGame()->GetPlayers(),

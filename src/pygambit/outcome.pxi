@@ -42,6 +42,8 @@ class Outcome:
         return obj
 
     def __repr__(self) -> str:
+        if self.outcome.deref().IsNull():
+            return f"Outcome(game={self.game}, label=None)"
         if self.label:
             return f"Outcome(game={self.game}, label='{self.label}')"
         else:
@@ -50,10 +52,18 @@ class Outcome:
     def __eq__(self, other: typing.Any):
         if not isinstance(other, Outcome):
             return NotImplemented
+        if (self.outcome.deref().IsNull()
+                or cython.cast(Outcome, other).outcome.deref().IsNull()):
+            # Null outcomes are not equal to anything, including themselves (cf. nan).
+            return False
         return self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
+
+    def __bool__(self) -> bool:
+        """``True`` for a real outcome; the null outcome is falsy."""
+        return not self.outcome.deref().IsNull()
 
     @property
     def game(self) -> Game:
@@ -61,8 +71,11 @@ class Outcome:
         return Game.wrap(self.outcome.deref().GetGame())
 
     @property
-    def label(self) -> str:
+    def label(self) -> str | None:
         """The text label associated with this outcome.
+
+        The null outcome's label is ``None``; testing ``outcome.label is None`` is the
+        idiomatic nullity check.
 
         .. versionchanged:: 16.7.0
             An outcome label must be nonempty and unique within the game; an empty or duplicate
@@ -73,7 +86,10 @@ class Outcome:
             contain no control characters, and must not begin/end with whitespace or have
             two consecutive whitespace characters.  "Whitespace" means any Unicode space
             separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
+            The null outcome resolves with label ``None``.
         """
+        if self.outcome.deref().IsNull():
+            return None
         return self.outcome.deref().GetLabel().decode("utf-8")
 
     @label.setter
@@ -81,16 +97,25 @@ class Outcome:
         self.outcome.deref().SetLabel(value.encode("utf-8"))
 
     @property
-    def number(self) -> int:
+    def number(self) -> int | None:
         """Returns the number of the outcome in the game.
         Outcomes are numbered starting with 0.
+
+        The null outcome is not a member of the game's outcomes, so it has no number.
+
+        .. versionchanged:: 17.0.0
+            The null outcome resolves here with number ``None``.
         """
+        if self.outcome.deref().IsNull():
+            return None
         return self.outcome.deref().GetNumber() - 1
 
     def __getitem__(
             self, player: Player | str
     ) -> decimal.Decimal | Rational:
         """The payoff to `player` at the outcome.
+
+        The null outcome reports a zero payoff to every player of its game.
 
         Raises
         ------
@@ -124,7 +149,11 @@ class Outcome:
             If `player` is a ``Player`` from a different game than the outcome.
         ValueError
             If `value` cannot be interpreted as a number.
+        UndefinedOperationError
+            If this is the null outcome; payoffs cannot be set on it.
         """
+        if self.outcome.deref().IsNull():
+            raise UndefinedOperationError("Payoffs cannot be set on the null outcome")
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__setitem__"))
         self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))

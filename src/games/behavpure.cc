@@ -50,9 +50,7 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
 {
   T payoff(0);
 
-  if (p_node->GetOutcome()) {
-    payoff += p_node->GetOutcome()->GetPayoff<T>(p_player);
-  }
+  payoff += p_node->GetOutcome()->GetPayoff<T>(p_player);
 
   if (!p_node->IsTerminal()) {
     if (p_node->GetInfoset()->IsChanceInfoset()) {
@@ -78,7 +76,7 @@ GameOutcome PureBehaviorProfile::GetOutcome(const GameNode &p_start) const
   GameOutcome outcome;
   GameNode node = p_start;
   while (true) {
-    if (node->GetOutcome()) {
+    if (!node->GetOutcome()->IsNull()) {
       if (outcome) {
         // More than one outcome-bearing node along this path; the combined
         // payoff cannot be attributed to a single outcome's preserved text.

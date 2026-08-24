@@ -736,10 +736,7 @@ public:
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
 
-  GameOutcome GetOutcome() const
-  {
-    return (m_outcome->IsNull()) ? nullptr : m_outcome->shared_from_this();
-  }
+  GameOutcome GetOutcome() const { return m_outcome->shared_from_this(); }
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
