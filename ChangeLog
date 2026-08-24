@@ -78,6 +78,10 @@
   this node's own player. This further breaks `gtdraw`, which reads `.label` off the
   previous return value; more tutorial notebooks now report `xfail` under `--run-tutorials`
   as a result (already covered by the content-based gating added earlier).
+- The `Action` class has been removed entirely, completing the removals above: an action
+  is now represented purely as a text label (`str`), optionally paired with the `Infoset`
+  or `Node` that gives it context, rather than as an object holding a live reference into
+  the game.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

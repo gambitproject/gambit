@@ -203,7 +203,6 @@ class NodeIndexedVector(_LabeledVector):
 # Includes
 ######################
 
-include "action.pxi"
 include "infoset.pxi"
 include "strategy.pxi"
 include "player.pxi"

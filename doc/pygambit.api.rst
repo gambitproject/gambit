@@ -18,7 +18,6 @@ Representation of games
    Outcome
    Node
    Infoset
-   Action
    Strategy
    Subgame
 
@@ -178,13 +177,6 @@ Information about the game
    Infoset.members
    Infoset.precedes
    Infoset.plays
-
-.. autosummary::
-
-   :toctree: api/
-
-   Action.label
-   Action.infoset
 
 .. autosummary::
 
