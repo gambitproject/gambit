@@ -110,7 +110,6 @@ Information about the game
    Game.max_payoff
    Game.strategies
    Game.root
-   Game.actions
    Game.infosets
    Game.nodes
    Game.contingencies
@@ -125,7 +124,6 @@ Information about the game
    Player.game
    Player.strategies
    Player.infosets
-   Player.actions
    Player.is_chance
    Player.min_payoff
    Player.max_payoff

@@ -79,58 +79,6 @@ class PlayerInfosets:
 
 
 @cython.cclass
-class PlayerActions:
-    """Represents the set of all actions available to a player at some information set."""
-    player = cython.declare(Player)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create PlayerActions outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(player: Player) -> PlayerActions:
-        obj: PlayerActions = PlayerActions.__new__(PlayerActions)
-        obj.player = player
-        return obj
-
-    def __repr__(self) -> str:
-        return f"PlayerActions(player={self.player})"
-
-    def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.player.infosets)
-
-    def __iter__(self) -> typing.Iterator[Action]:
-        for infoset in self.player.infosets:
-            yield from infoset.actions
-
-    def __getitem__(self, label: str) -> Action:
-        """Returns the player's action with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the action to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the player has no action with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one of the player's actions
-            has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an action by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Player", "action", "actions")
-
-
-@cython.cclass
 class PlayerStrategies:
     """The set of strategies available to a player."""
     player = cython.declare(c_GamePlayer)
@@ -301,21 +249,6 @@ class Player:
                 "Operation only defined for games with a tree representation"
             )
         return PlayerInfosets.wrap(self.player)
-
-    @property
-    def actions(self) -> PlayerActions:
-        """Returns the set of actions available to the player at some information set.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.game.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-        return PlayerActions.wrap(self)
 
     @property
     def min_payoff(self) -> Rational:

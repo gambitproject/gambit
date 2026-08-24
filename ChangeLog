@@ -53,6 +53,11 @@
   `Node.is_successor_of`) and have no direct replacement. `Action.number` was always just
   the action's position in `Infoset.actions`.  This breaks the `gtdraw` package used by some
   tutorial notebooks; the affected notebook tests are `xfail`-gated pending a `gtdraw` update.
+- `Game.actions` and `Player.actions` have been removed; both flattened actions across
+  several information sets into a single collection, discarding which information set each
+  action belonged to. Index an information set's own `actions` instead, iterating
+  `Game.infosets`/`Player.infosets` as needed. `Game._resolve_action`, an internal helper
+  with no callers besides its own tests, is removed along with it.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

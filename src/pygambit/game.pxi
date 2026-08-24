@@ -363,57 +363,6 @@ class GamePlayers:
 
 
 @cython.cclass
-class GameActions:
-    """Represents the set of all actions in a game."""
-    game = cython.declare(Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameActions outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: Game) -> GameActions:
-        obj: GameActions = GameActions.__new__(GameActions)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameActions(game={self.game})"
-
-    def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.game.infosets)
-
-    def __iter__(self) -> typing.Iterator[Action]:
-        for infoset in self.game.infosets:
-            yield from infoset.actions
-
-    def __getitem__(self, label: str) -> Action:
-        """Returns the action with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the action to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no action in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one action has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an action by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "action", "actions")
-
-
-@cython.cclass
 class GameInfosets:
     """Represents the set of all infosets in a game."""
     game = cython.declare(Game)
@@ -779,21 +728,6 @@ class Game:
     @description.setter
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
-
-    @property
-    def actions(self) -> GameActions:
-        """The set of actions available in the game.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-        return GameActions.wrap(self)
 
     @property
     def infosets(self) -> GameInfosets:
@@ -1717,47 +1651,6 @@ class Game:
                 raise KeyError(f"{funcname}(): no information set with label '{infoset}'")
         raise TypeError(
             f"{funcname}(): {argname} must be Infoset or str, not {infoset.__class__.__name__}"
-        )
-
-    def _resolve_action(self,
-                        action: typing.Any, funcname: str, argname: str = "action") -> Action:
-        """Resolve an attempt to reference an action of the game.
-
-        Parameters
-        ----------
-        action : Any
-            An object to resolve as a reference to an action.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'action'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `action` is an `Action` from a different game.
-        KeyError
-            If `action` is a string and no action in the game has that label.
-        TypeError
-            If `action` is not an `Action` or a `str`
-        ValueError
-            If `action` is an empty `str` or all spaces
-        """
-        if isinstance(action, Action):
-            if action.infoset.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return action
-        elif isinstance(action, str):
-            if not action.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return self.actions[action]
-            except KeyError:
-                raise KeyError(f"{funcname}(): no action with label '{action}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}"
         )
 
     def _resolve_probs(self,

@@ -13,8 +13,8 @@ ZERO = gbt.Rational(0)  # tolerance for rational assertions
 
 def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_flag: bool):
     """Set the action probabilities in a behavior profile called ```profile``` according to a
-    list with probabilities in the order of ```profile.game.actions``` (grouped by information
-    set, matching how ```game.actions``` itself is ordered).
+    flat list with probabilities in the order of ```profile.game.infosets```, and then each
+    information set's ```actions```.
     """
     convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
     probs_iter = iter(probs)
@@ -1612,7 +1612,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_doub,
             False,
             lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.read_from_file("mixed_behavior_game.efg"),
@@ -1620,7 +1620,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1628,7 +1628,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2B_doub,
             False,
             lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1636,7 +1636,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.action_values[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         ######################################################################################
         # regret (for actions)
@@ -1646,7 +1646,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_doub,
             False,
             lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.read_from_file("mixed_behavior_game.efg"),
@@ -1654,7 +1654,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1662,7 +1662,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2B_doub,
             False,
             lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1670,7 +1670,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.action_regrets[next(iter(y.infoset.members))][y.label],
-            lambda x: x.actions,
+            lambda x: [a for infoset in x.infosets for a in infoset.actions],
         ),
         ######################################################################################
         # node_value

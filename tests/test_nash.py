@@ -3156,10 +3156,11 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for infoset in player.infosets:
+                    for action in infoset.actions:
+                        assert abs(
+                            _action_prob(eq, action) - _action_prob(expected, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -3206,9 +3207,10 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
 
     def are_the_same(game, found, candidate):
         for p in game.players:
-            for a in p.actions:
-                if not abs(_action_prob(found, a) - _action_prob(candidate, a)) <= TOL:
-                    return False
+            for infoset in p.infosets:
+                for a in infoset.actions:
+                    if not abs(_action_prob(found, a) - _action_prob(candidate, a)) <= TOL:
+                        return False
         return True
 
     game = test_case.factory()
@@ -3370,10 +3372,11 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for infoset in player.infosets:
+                    for action in infoset.actions:
+                        assert abs(
+                            _action_prob(eq, action) - _action_prob(expected, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -3424,10 +3427,11 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for infoset in player.infosets:
+                    for action in infoset.actions:
+                        assert abs(
+                            _action_prob(eq, action) - _action_prob(expected, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################

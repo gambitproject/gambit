@@ -420,7 +420,7 @@ def games(
         if n_actions is not None:
             if not game.is_tree:
                 return False
-            if len(game.actions) != n_actions:
+            if sum(len(infoset.actions) for infoset in game.infosets) != n_actions:
                 return False
         if n_contingencies is not None and len(game.contingencies) != n_contingencies:
             return False

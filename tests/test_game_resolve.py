@@ -145,27 +145,3 @@ def test_resolve_infoset(game: gbt.Game) -> None:
 def test_resolve_infoset_invalid(game: gbt.Game, infoset: str, exception: BaseException) -> None:
     with pytest.raises(exception):
         game._resolve_infoset(infoset, "test_resolve_infoset_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
-def test_resolve_action(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.actions,
-                            lambda label, fn: game._resolve_action(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,action,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "inaction", KeyError),
-    ]
-)
-def test_resolve_action_invalid(game: gbt.Game, action: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_action(action, "test_resolve_action_invalid")

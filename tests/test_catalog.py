@@ -61,7 +61,7 @@ def test_catalog_games_filter_n_actions(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.actions) == 2
+        assert sum(len(infoset.actions) for infoset in g.infosets) == 2
 
 
 def test_catalog_games_filter_n_contingencies(all_games):
