@@ -500,9 +500,16 @@ private:
   // would leave the fields uncoloured until a commit was attempted; this runs on every
   // keystroke instead (see UpdateValidation) so the highlighting is never stale.
   wxString ValidateLabels();
-  // Refreshes the error text/highlighting from ValidateLabels() -- called after every row-label
-  // edit and every row-count change, not just when a commit is attempted, so a duplicate or
-  // empty label is flagged immediately rather than only when the user tries to leave.
+  // Chance moves only. Parses every row's probability field into p_probs and checks the
+  // resulting distribution (via ValidateDistribution), colouring offending fields the same way
+  // ValidateLabels() does and returning a description of the first problem found, or an empty
+  // string if the distribution is valid -- in which case p_probs holds the parsed values.
+  // Leaves p_probs empty on any failure.
+  wxString ValidateProbabilities(std::vector<Number> &p_probs);
+  // Refreshes the error text/highlighting from ValidateLabels() (and, for chance moves,
+  // ValidateProbabilities()) -- called after every row edit and every row-count change, not
+  // just when a commit is attempted, so an invalid label or probability is flagged immediately
+  // rather than only when the user tries to leave.
   void UpdateValidation();
   void ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl);
   void ClearValidationFailure();
@@ -692,6 +699,7 @@ void AppendMovePopup::RebuildGrid()
         if (i < m_rows.size()) {
           m_rows[i].prob = m_rows[i].probCtrl->GetValue();
         }
+        UpdateValidation();
         p_event.Skip();
       });
       row.probCtrl->Bind(wxEVT_KEY_DOWN, [this, ctrl = row.probCtrl](wxKeyEvent &p_event) {
@@ -730,6 +738,27 @@ void AppendMovePopup::SetRowCount(int p_count)
     }
   }
 
+  const bool hadExistingRows = !m_rows.empty();
+
+  // For a chance move, a newly added row's default probability is whatever's still needed to
+  // bring the *existing* rows up to summing to one (or zero, if they already sum to one or
+  // more) -- not a uniform recompute of every row, which would silently overwrite whatever was
+  // already typed into rows that aren't changing. The one exception is populating the panel
+  // for the first time (no existing rows to take a share from at all), which still defaults to
+  // a uniform split, same as before.
+  Rational remaining(1);
+  if (m_isChance && hadExistingRows) {
+    for (const auto &row : m_rows) {
+      try {
+        remaining -= static_cast<Rational>(Number(row.prob.ToStdString()));
+      }
+      catch (const std::exception &) {
+        // Not parseable (yet) -- contributes nothing to the running sum, since there's no
+        // sensible number to subtract.
+      }
+    }
+  }
+
   if (p_count < static_cast<int>(m_rows.size())) {
     m_rows.resize(p_count); // trim from the bottom, unconditionally -- see SetRowCount's header
   }
@@ -737,15 +766,20 @@ void AppendMovePopup::SetRowCount(int p_count)
     for (int i = static_cast<int>(m_rows.size()); i < p_count; i++) {
       Row row;
       row.label = wxString::Format(wxT("%d"), i + 1);
+      if (m_isChance && hadExistingRows) {
+        const Rational share = (remaining > Rational(0)) ? remaining : Rational(0);
+        row.prob = wxString::FromUTF8(static_cast<std::string>(Number(share)));
+        remaining -= share;
+      }
       m_rows.push_back(std::move(row));
     }
-  }
 
-  if (m_isChance) {
-    const wxString uniform = wxString::FromUTF8(
-        static_cast<std::string>(Number(Rational(1, static_cast<int>(m_rows.size())))));
-    for (auto &row : m_rows) {
-      row.prob = uniform;
+    if (m_isChance && !hadExistingRows) {
+      const wxString uniform = wxString::FromUTF8(
+          static_cast<std::string>(Number(Rational(1, static_cast<int>(m_rows.size())))));
+      for (auto &row : m_rows) {
+        row.prob = uniform;
+      }
     }
   }
 
@@ -916,9 +950,58 @@ wxString AppendMovePopup::ValidateLabels()
   return message;
 }
 
+wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
+{
+  p_probs.clear();
+
+  wxString message;
+  bool allParsed = true;
+  for (auto &row : m_rows) {
+    bool invalid = false;
+    try {
+      p_probs.emplace_back(row.probCtrl->GetValue().ToStdString());
+    }
+    catch (const std::exception &) {
+      invalid = true;
+      allParsed = false;
+    }
+    row.probCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultLabelBg);
+    row.probCtrl->Refresh();
+    if (invalid && message.empty()) {
+      message = _("Probabilities must be valid numbers.");
+    }
+  }
+
+  if (!allParsed) {
+    p_probs.clear();
+    return message;
+  }
+
+  try {
+    ValidateDistribution(p_probs);
+  }
+  catch (const std::exception &) {
+    for (auto &row : m_rows) {
+      row.probCtrl->SetBackgroundColour(kInvalidLabelBg);
+      row.probCtrl->Refresh();
+    }
+    p_probs.clear();
+    return _("Probabilities must be nonnegative numbers summing to one.");
+  }
+
+  return wxEmptyString;
+}
+
 void AppendMovePopup::UpdateValidation()
 {
-  const wxString message = ValidateLabels();
+  wxString message = ValidateLabels();
+  if (m_isChance) {
+    std::vector<Number> probs;
+    const wxString probError = ValidateProbabilities(probs);
+    if (message.empty()) {
+      message = probError;
+    }
+  }
   if (message.empty()) {
     ClearValidationFailure();
   }
@@ -950,30 +1033,19 @@ bool AppendMovePopup::Commit()
   }
 
   std::vector<std::string> labels;
-  std::vector<Number> probs;
   for (auto &row : m_rows) {
     labels.push_back(row.labelCtrl->GetValue().ToStdString(wxConvUTF8));
-    if (m_isChance) {
-      try {
-        probs.emplace_back(row.probCtrl->GetValue().ToStdString());
-      }
-      catch (const std::exception &) {
-        ShowValidationFailure(_("Probabilities must be valid numbers."), row.probCtrl);
-        RestoreAfterFailedCommit(row.probCtrl);
-        m_committing = false;
-        return false;
-      }
-    }
   }
 
+  std::vector<Number> probs;
   if (m_isChance) {
-    try {
-      ValidateDistribution(probs);
-    }
-    catch (const std::exception &) {
-      wxTextCtrl *ctrl = m_rows.back().probCtrl;
-      ShowValidationFailure(_("Probabilities must be nonnegative numbers summing to one."), ctrl);
-      RestoreAfterFailedCommit(ctrl);
+    // UpdateValidation() above already ran this and found nothing wrong, but re-run it rather
+    // than trust that nothing changed in between -- this is also what actually produces the
+    // parsed probs DoAppendMove needs, which UpdateValidation() itself discards.
+    const wxString probError = ValidateProbabilities(probs);
+    if (!probError.empty()) {
+      wxBell();
+      RestoreAfterFailedCommit(m_rows.back().probCtrl);
       m_committing = false;
       return false;
     }
