@@ -36,6 +36,8 @@ in :ref:`computing-equilibria`.
 
 
 
+.. _payoffs-and-probabilities:
+
 Payoffs and probabilities in Gambit
 -----------------------------------
 
@@ -45,24 +47,10 @@ decimal places. In addition, Gambit supports representing payoffs
 using rational numbers. So, for example, in any place in which a
 payoff may appear, either an outcome of an extensive game or a payoff
 entry in a strategic game, the payoff one-tenth may be entered either
-as .1 or 1/10.
-
-The advantage of this format is that, in certain circumstances, Gambit
-may be able to compute equilibria exactly. In addition, some methods
-for computing equilibria construct good numerical approximations to
-equilibrium points. For these methods, the computed equilibria are
-stored in floating-point format. When such a profile is displayed in
-the profiles panel, a :guilabel:`Decimals` control appears next to the
-profile list chooser, letting you increase or decrease the number of
-decimal places shown. This control only appears for profiles computed
-in floating-point precision; it is hidden when the displayed profiles
-are exact (rational-number) equilibria, since changing the number of
-decimals would have no effect on them.
-
-Increasing or decreasing the number of decimals displayed in
-computed strategy profiles will not have any effect on the display of
-outcome payoffs in the game itself, since those are stored in
-arbitrary precision.
+as .1 or 1/10. The advantage of this format is that, in certain
+circumstances, Gambit may be able to compute equilibria exactly; see
+:ref:`computing-equilibria` for how this interacts with the display of
+computed profiles.
 
 
 

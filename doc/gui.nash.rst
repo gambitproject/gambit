@@ -131,6 +131,21 @@ since only one computation has been run in this example, it shows
 brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
 
+Some methods for computing equilibria construct good numerical
+approximations to equilibrium points rather than exact values; for
+these methods, the computed equilibria are stored in floating-point
+format. When such a profile is displayed in the profiles panel, a
+:guilabel:`Decimals` control appears next to the profile list chooser,
+letting you increase or decrease the number of decimal places shown.
+This control only appears for profiles computed in floating-point
+precision; it is hidden when the displayed profiles are exact
+(rational-number) equilibria, since changing the number of decimals
+would have no effect on them. Increasing or decreasing the number of
+decimals displayed in computed strategy profiles will not have any
+effect on the display of outcome payoffs in the game itself, since
+those are always stored in arbitrary precision (see
+:ref:`payoffs-and-probabilities`).
+
 The currently selected equilibrium is shown in bold in the profiles
 listing, and information about this equilibrium is displayed in the
 extensive game. For this equilibrium, the probabilities of selecting each
