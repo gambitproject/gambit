@@ -370,8 +370,11 @@ public:
   // is ignored otherwise.
   void DoAppendMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
                     const std::vector<Number> &p_probs);
-  void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);
-  void DoInsertMove(GameNode p_node, GameInfoset p_infoset);
+  // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
+  // and everything below it becomes the first action's subtree. p_probs gives the chance
+  // distribution when p_player is the chance player, and is ignored otherwise.
+  void DoInsertMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
   void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
   void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
   void DoDeleteParent(GameNode p_node);

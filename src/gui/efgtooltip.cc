@@ -451,7 +451,13 @@ class AppendMovePopup : public wxDialog {
 public:
   AppendMovePopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
 
+  // Appends a fresh move for p_player at the terminal node p_node.
   void BeginAppend(const GameNode &p_node, const GamePlayer &p_player);
+  // Inserts a move for p_player prior to the non-terminal node p_node -- p_node and everything
+  // below it becomes the new move's first action. Otherwise identical to BeginAppend: same
+  // popup, same growable action list, same validation: only the verb in the header sentence,
+  // the dialog title, and which GameDocument method Commit() ultimately calls differ.
+  void BeginInsert(const GameNode &p_node, const GamePlayer &p_player);
   bool Commit();
   void Cancel();
 
@@ -464,6 +470,8 @@ private:
   };
 
   void BuildControls();
+  // Shared guts of BeginAppend()/BeginInsert().
+  void Begin(const GameNode &p_node, const GamePlayer &p_player, bool p_isInsert);
   // Rebuilds the row grid's controls from m_rows -- called whenever the row count changes.
   void RebuildGrid();
   // Snapshots whatever's typed in the live controls into m_rows, then grows or shrinks m_rows
@@ -521,11 +529,16 @@ private:
   GameNode m_node;
   GamePlayer m_player;
   bool m_isChance{false};
+  // True for an insert (m_node and everything below it becomes the new move's first action),
+  // false for an append (m_node is an empty terminal node). Set by Begin(); read by Commit()
+  // to decide between DoInsertMove/DoAppendMove, and by RebuildGrid() for the header sentence.
+  bool m_isInsert{false};
 
   wxPanel *m_contentPanel;
-  // Shaded strip holding the "Append move for <player> with <count> actions" sentence,
+  // Shaded strip holding the "Append/Insert move for <player> with <count> actions" sentence,
   // divided from the action list below by a wxStaticLine (see BuildControls).
   wxPanel *m_headerPanel;
+  wxStaticText *m_verbText; // "Append move for" or "Insert move for", per m_isInsert
   wxStaticBitmap *m_playerSwatch;
   wxStaticText *m_playerNameText;
   wxSpinCtrl *m_countCtrl;
@@ -550,8 +563,8 @@ private:
 AppendMovePopup::AppendMovePopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_owner, wxID_ANY, _("Append move"), wxDefaultPosition, wxDefaultSize, wxCAPTION),
     m_owner(p_owner), m_doc(p_doc), m_contentPanel(nullptr), m_headerPanel(nullptr),
-    m_playerSwatch(nullptr), m_playerNameText(nullptr), m_countCtrl(nullptr), m_hintText(nullptr),
-    m_errorText(nullptr)
+    m_verbText(nullptr), m_playerSwatch(nullptr), m_playerNameText(nullptr), m_countCtrl(nullptr),
+    m_hintText(nullptr), m_errorText(nullptr)
 {
   BuildControls();
 
@@ -582,8 +595,8 @@ void AppendMovePopup::BuildControls()
   // width changed. A non-wrapping sizer reports its true, one-line width as its minimum, so
   // Fit() below sizes the whole dialog to comfortably fit the sentence on one line every time.
   auto *sentenceSizer = new wxBoxSizer(wxHORIZONTAL);
-  sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("Append move for")), 0,
-                     wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+  m_verbText = new wxStaticText(m_headerPanel, wxID_ANY, _("Append move for"));
+  sentenceSizer->Add(m_verbText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
 
   m_playerSwatch = new wxStaticBitmap(m_headerPanel, wxID_ANY, wxNullBitmap);
   sentenceSizer->Add(m_playerSwatch, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
@@ -834,13 +847,27 @@ void AppendMovePopup::PositionPopup()
 
 void AppendMovePopup::BeginAppend(const GameNode &p_node, const GamePlayer &p_player)
 {
+  Begin(p_node, p_player, false);
+}
+
+void AppendMovePopup::BeginInsert(const GameNode &p_node, const GamePlayer &p_player)
+{
+  Begin(p_node, p_player, true);
+}
+
+void AppendMovePopup::Begin(const GameNode &p_node, const GamePlayer &p_player, bool p_isInsert)
+{
   m_node = p_node;
   m_player = p_player;
   m_isChance = p_player->IsChance();
+  m_isInsert = p_isInsert;
   m_cancelled = false;
   m_dismissing = false;
   m_committing = false;
   m_restoringAfterFailedCommit = false;
+
+  SetTitle(p_isInsert ? _("Insert move") : _("Append move"));
+  m_verbText->SetLabel(p_isInsert ? _("Insert move for") : _("Append move for"));
 
   wxString label = wxString::FromUTF8(p_player->GetLabel());
   if (label.empty()) {
@@ -1052,7 +1079,12 @@ bool AppendMovePopup::Commit()
   }
 
   try {
-    m_doc->DoAppendMove(m_node, m_player, labels, probs);
+    if (m_isInsert) {
+      m_doc->DoInsertMove(m_node, m_player, labels, probs);
+    }
+    else {
+      m_doc->DoAppendMove(m_node, m_player, labels, probs);
+    }
   }
   catch (const std::exception &ex) {
     wxTextCtrl *ctrl = m_rows.empty() ? nullptr : m_rows.front().labelCtrl;
@@ -1328,6 +1360,11 @@ void EfgDisplay::BeginEditOutcome(const GameNode &p_node, int p_initialPlayer)
 void EfgDisplay::BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player)
 {
   m_appendMoveEditor->BeginAppend(p_node, p_player);
+}
+
+void EfgDisplay::BeginInsertMove(const GameNode &p_node, const GamePlayer &p_player)
+{
+  m_appendMoveEditor->BeginInsert(p_node, p_player);
 }
 
 void EfgDisplay::DismissNodeInfo()

@@ -455,7 +455,7 @@ wxString ActionPanel::ValidateLabels()
 //======================================================================
 
 EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
-  : wxDialog(p_parent, wxID_ANY, _("Edit move"), wxDefaultPosition, wxDefaultSize,
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_infoset(p_infoset)
 {
