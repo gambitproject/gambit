@@ -178,7 +178,6 @@ Information about the game
    Infoset.members
    Infoset.precedes
    Infoset.plays
-   Infoset.own_prior_actions
 
 .. autosummary::
 

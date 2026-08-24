@@ -65,6 +65,8 @@
   its action's label) instead of `list[Action]`.
 - `StrategyBehavior.__getitem__`/`.get`/`.values`/`.items` now return action labels (`str`)
   instead of `Action` objects.
+- `Infoset.own_prior_actions` has been removed; it composes from `Infoset.members` and
+  `Node.own_prior_action`, e.g. `{m.own_prior_action for m in infoset.members}`.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

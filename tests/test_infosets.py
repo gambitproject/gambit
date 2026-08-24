@@ -426,7 +426,9 @@ def _get_node_by_path(game, path: list[str]) -> gbt.Node:
 @pytest.mark.parametrize("test_case", PRIOR_ACTIONS_CASES)
 def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
     """
-    Test `infoset.own_prior_actions`.
+    Test the set of prior actions across an information set's members
+    (`Infoset.own_prior_actions` was removed; composes from `Infoset.members` and
+    `Node.own_prior_action`).
 
     Verifies that the set of prior actions (as player-infoset-label tuples)
     matches the expected results.  Each infoset is identified by an action
@@ -440,7 +442,7 @@ def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
             node = node.children[action_label]
         infoset = node.infoset
 
-        actual_actions = infoset.own_prior_actions
+        actual_actions = {member.own_prior_action for member in infoset.members}
 
         actual_details = {
             (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
