@@ -352,7 +352,7 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(node.prior_action.label)
+            path.append(node.prior_action[1])
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
@@ -434,28 +434,42 @@ class Node:
         return None
 
     @property
-    def prior_action(self) -> Action | None:
-        """The action which leads to this node.
+    def prior_action(self) -> tuple[Node, str] | None:
+        """The parent of this node, paired with the label of the action taken there
+        which leads to this node.
 
         If this is the root node, None is returned.
         """
-        if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetPriorAction())
+        action: c_GameAction = self.node.deref().GetPriorAction()
+        if action != cython.cast(c_GameAction, NULL):
+            return (self.parent, action.deref().GetLabel().decode("utf-8"))
         return None
 
     @property
-    def own_prior_action(self) -> Action | None:
-        """The last action taken by the node's owner before reaching this node.
+    def own_prior_action(self) -> tuple[Node, str] | None:
+        """The most recent node on the path to this one at which this node's own
+        player had the move, paired with the label of the action taken there.
 
         Returns
         -------
-        Action or None
-            The action object, or None if the player has not moved previously
-            on the path to this node.
+        tuple of Node and str, or None
+            None if the player has not moved previously on the path to this node,
+            or if this is a terminal node.
         .. versionadded:: 16.5.0
+
+        .. versionchanged:: 17.0.0
+            Now returns a `(Node, str)` pair -- the node at which the action was
+            taken, and its label -- instead of an `Action` object.
         """
-        if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetOwnPriorAction())
+        if self.is_terminal:
+            return None
+        target_player = self.player
+        node = self
+        while node.parent is not None:
+            prior_node, prior_label = node.prior_action
+            node = prior_node
+            if node.player == target_player:
+                return (node, prior_label)
         return None
 
     @property

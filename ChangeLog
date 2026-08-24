@@ -67,6 +67,13 @@
   instead of `Action` objects.
 - `Infoset.own_prior_actions` has been removed; it composes from `Infoset.members` and
   `Node.own_prior_action`, e.g. `{m.own_prior_action for m in infoset.members}`.
+- `Node.prior_action` and `Node.own_prior_action` now return `tuple[Node, str] | None`
+  (the node on the path at which the action was taken, paired with its label) instead of
+  `Action | None`. `Node.own_prior_action` no longer calls into the C++ core at all; it is
+  computed by walking up `Node.parent`/`Node.prior_action` to the nearest ancestor sharing
+  this node's own player. This further breaks `gtdraw`, which reads `.label` off the
+  previous return value; more tutorial notebooks now report `xfail` under `--run-tutorials`
+  as a result (already covered by the content-based gating added earlier).
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

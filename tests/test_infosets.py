@@ -445,7 +445,7 @@ def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
         actual_actions = {member.own_prior_action for member in infoset.members}
 
         actual_details = {
-            (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
+            (a[0].infoset.player.label, a[0].infoset.number, a[1]) if a is not None else None
             for a in actual_actions
         }
 

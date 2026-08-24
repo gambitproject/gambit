@@ -243,7 +243,6 @@ cdef extern from "games/game.h":
         bint IsSubgameRoot() except +
         bint IsStrategyReachable() except +
         c_GameAction GetPriorAction() except +
-        c_GameAction GetOwnPriorAction() except +
 
     cdef cppclass c_GameSubgameRep "GameSubgameRep":
         cppclass SubgameCollection:

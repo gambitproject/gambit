@@ -116,7 +116,7 @@ def test_get_parent():
 def test_get_prior_action():
     """Test to ensure that we can retrieve the prior action for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].prior_action == game.root.infoset.actions["U1"]
+    assert game.root.children["U1"].prior_action == (game.root, "U1")
     assert game.root.prior_action is None
 
 
@@ -167,7 +167,7 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     path = []
     current_node = node
     while current_node.parent:
-        path.append(current_node.prior_action.label)
+        path.append(current_node.prior_action[1])
         current_node = current_node.parent
 
     return path
@@ -512,7 +512,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
             # Only collect data for non-terminal nodes
             opa = node.own_prior_action
             details = (
-                (opa.infoset.player.label, opa.infoset.number, opa.label)
+                (opa[0].infoset.player.label, opa[0].infoset.number, opa[1])
                 if opa is not None else None
             )
             actual_node_data.append((_get_path_of_action_labels(node), details))

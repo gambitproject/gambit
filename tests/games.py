@@ -233,7 +233,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         def get_path(node):
             path = []
             while node.parent:
-                path.append(node.prior_action.label)
+                path.append(node.prior_action[1])
                 node = node.parent
             return path
 
@@ -325,7 +325,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         def get_path(node):
             path = []
             while node.parent:
-                path.append((node, node.prior_action.label))
+                path.append((node, node.prior_action[1]))
                 node = node.parent
             return path
 
