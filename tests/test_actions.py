@@ -104,16 +104,12 @@ def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
 
 @pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
 def test_action_precedes(game: gbt.Game):
+    """`Action.precedes` was removed; the equivalent predicate composes from
+    `Node.is_successor_of` over the information set's members."""
+    infoset = game.root.infoset
     child = game.root.children["King"]
-    assert game.root.infoset.actions["King"].precedes(child)
-    assert not game.root.infoset.actions["Queen"].precedes(child)
-
-
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_precedes_nonnode(game: gbt.Game):
-    action = next(iter(game.root.infoset.actions))
-    with pytest.raises(TypeError):
-        action.precedes(game)
+    assert any(child.is_successor_of(m.children["King"]) for m in infoset.members)
+    assert not any(child.is_successor_of(m.children["Queen"]) for m in infoset.members)
 
 
 def test_set_move_actions_drop_shrinks_actions_and_children():
@@ -149,12 +145,21 @@ def test_set_move_actions_reorder_carries_subtrees():
     members = list(infoset.members)
     children_before = [{label: member.children[label] for label in ("a", "b", "c")}
                        for member in members]
-    plays_before = {action.label: set(action.plays) for action in infoset.actions}
+
+    def action_plays(infoset):
+        """`Action.plays` was removed; composes from `Infoset.members`,
+        `Node.children`, and `Node.plays`."""
+        return {
+            action.label: {n for m in infoset.members for n in m.children[action.label].plays}
+            for action in infoset.actions
+        }
+
+    plays_before = action_plays(infoset)
     game.set_move_actions(infoset, ["c", "a", "b"])
     assert [action.label for action in infoset.actions] == ["c", "a", "b"]
     for member, children in zip(members, children_before, strict=True):
         assert list(member.children) == [children["c"], children["a"], children["b"]]
-    assert {action.label: set(action.plays) for action in infoset.actions} == plays_before
+    assert action_plays(infoset) == plays_before
 
 
 def test_set_move_actions_add_drop_and_reorder_together():
@@ -216,8 +221,8 @@ def test_set_event_actions_reorder_carries_probabilities():
     event = game.root.infoset
     game.set_event_actions(event, {"King": "3/4", "Queen": "1/4"})
     game.set_event_actions(event, {"Queen": "1/4", "King": "3/4"})
-    assert [(a.label, a.prob) for a in event.actions] == [("Queen", gbt.Rational(1, 4)),
-                                                          ("King", gbt.Rational(3, 4))]
+    assert list(event.action_probs.items()) == [("Queen", gbt.Rational(1, 4)),
+                                                ("King", gbt.Rational(3, 4))]
 
 
 def test_set_event_actions_add_with_probs_mapping():
@@ -225,9 +230,9 @@ def test_set_event_actions_add_with_probs_mapping():
     event = game.root.infoset
     nodes_before = len(game.nodes)
     game.set_event_actions(event, {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
-    assert [(a.label, a.prob) for a in event.actions] == [("Jack", gbt.Rational(1, 2)),
-                                                          ("King", gbt.Rational(1, 4)),
-                                                          ("Queen", gbt.Rational(1, 4))]
+    assert list(event.action_probs.items()) == [("Jack", gbt.Rational(1, 2)),
+                                                ("King", gbt.Rational(1, 4)),
+                                                ("Queen", gbt.Rational(1, 4))]
     assert len(game.nodes) == nodes_before + 1
 
 
@@ -235,7 +240,7 @@ def test_set_event_actions_drop_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     event = game.root.infoset
     game.set_event_actions(event, {"King": 1}, drop=True)
-    assert [(a.label, a.prob) for a in event.actions] == [("King", 1)]
+    assert list(event.action_probs.items()) == [("King", 1)]
 
 
 def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
@@ -277,7 +282,8 @@ def test_set_event_actions_bad_distribution_raises_valueerror():
 
 
 def test_action_plays():
-    """Verify `action.plays` returns plays reachable from a given action."""
+    """Verify the plays reachable from a given action, composed from `Infoset.members`,
+    `Node.children`, and `Node.plays` (`Action.plays` was removed)."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
 
     def node_at(path: list[str]) -> gbt.Node:
@@ -286,11 +292,15 @@ def test_action_plays():
             node = node.children[action_label]
         return node
 
-    test_action = node_at(["L"]).infoset.actions["R"]
+    test_infoset = node_at(["L"]).infoset
+    test_label = "R"
 
     expected_set_of_plays = {node_at(["R", "L", "R"]), node_at(["L", "R"])}
 
-    assert set(test_action.plays) == expected_set_of_plays
+    actual_set_of_plays = {
+        n for m in test_infoset.members for n in m.children[test_label].plays
+    }
+    assert actual_set_of_plays == expected_set_of_plays
 
 
 @pytest.mark.parametrize(

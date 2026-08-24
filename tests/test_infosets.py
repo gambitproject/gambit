@@ -165,8 +165,7 @@ def test_make_event_sets_probabilities(inprobs, outprobs):
     """
     game = games.read_from_file("stripped_down_poker.efg")
     game.make_event([game.root], inprobs, "Deal")
-    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
-        assert action.prob == prob
+    assert list(game.root.infoset.action_probs.values()) == outprobs
 
 
 def test_make_event_pools_nodes_from_different_infosets():
@@ -176,8 +175,8 @@ def test_make_event_pools_nodes_from_different_infosets():
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].infoset == nodes[1].infoset
     assert nodes[0].infoset.is_chance
-    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
-                                                          gbt.Rational("3/4")]
+    assert list(nodes[0].infoset.action_probs.values()) == [gbt.Rational("1/4"),
+                                                            gbt.Rational("3/4")]
     assert not list(game.players["Alice"].infosets)
 
 
@@ -200,8 +199,8 @@ def test_make_event_converts_personal_node():
     node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
     game.make_event([node], ["1/4", "3/4"])
     assert node.infoset.is_chance
-    assert [a.prob for a in node.infoset.actions] == [gbt.Rational("1/4"),
-                                                      gbt.Rational("3/4")]
+    assert list(node.infoset.action_probs.values()) == [gbt.Rational("1/4"),
+                                                        gbt.Rational("3/4")]
 
 
 def test_make_event_terminal_node_raises():
@@ -257,8 +256,8 @@ def test_make_event_label_reused_when_fully_absorbed():
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].infoset == nodes[1].infoset
     assert nodes[0].infoset.label == "Coin"
-    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
-                                                          gbt.Rational("3/4")]
+    assert list(nodes[0].infoset.action_probs.values()) == [gbt.Rational("1/4"),
+                                                            gbt.Rational("3/4")]
     assert [infoset.label for infoset in game.players.chance.infosets].count("Coin") == 1
 
 

@@ -216,6 +216,31 @@ class Infoset:
         return InfosetActions.wrap(self.infoset)
 
     @property
+    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
+        """The probability of each action at the information set, keyed by label.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the information set does not belong to the chance player.
+        """
+        if not self.is_chance:
+            raise UndefinedOperationError(
+                "action probabilities are only defined at events"
+            )
+        probs = {}
+        for action in self.infoset.deref().GetActions():
+            py_string = cython.cast(string, self.infoset.deref().GetActionProb(action))
+            if "." in py_string.decode("ascii"):
+                prob = decimal.Decimal(py_string.decode("ascii"))
+            else:
+                prob = Rational(py_string.decode("ascii"))
+            probs[action.deref().GetLabel().decode("utf-8")] = prob
+        return probs
+
+    @property
     def own_prior_actions(self) -> list[Action | None]:
         """The set of actions taken by the player immediately preceding the member nodes
         in the information set.

@@ -176,6 +176,7 @@ Information about the game
    Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
+   Infoset.action_probs
    Infoset.members
    Infoset.precedes
    Infoset.plays
@@ -187,9 +188,6 @@ Information about the game
 
    Action.label
    Action.infoset
-   Action.precedes
-   Action.prob
-   Action.plays
 
 .. autosummary::
 

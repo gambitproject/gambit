@@ -932,7 +932,7 @@ def test_append_event_sets_distribution():
     game = games.read_from_file("sample_extensive_game.efg")
     node = game.root.children["1"].children["1"]
     game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.infoset.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+    assert list(node.infoset.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
 
 def test_append_event_error_actions_empty():
@@ -1017,7 +1017,7 @@ def test_insert_event_sets_distribution():
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root
     game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.parent.infoset.actions] == [
+    assert list(node.parent.infoset.action_probs.values()) == [
         gbt.Rational(1, 4), gbt.Rational(3, 4)
     ]
 

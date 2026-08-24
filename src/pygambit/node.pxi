@@ -352,7 +352,7 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(node.prior_action.number)
+            path.append(node.prior_action.label)
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
