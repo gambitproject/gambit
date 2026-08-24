@@ -54,11 +54,14 @@ MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
 
+#if wxCHECK_VERSION(3, 3, 0)
   // Suppress wxGrid's own label highlighting, which follows the grid cursor.
   // The cursor is meaningless here, and cannot be moved out of the way, as
   // wxGrid puts it back on the first cell whenever the grid is repainted;
   // the labels worth highlighting are chosen in OnUpdate() instead.
+  // Versions before 3.3 do not highlight labels, so there is nothing to do.
   DisableOverlaySelection();
+#endif
 
   // The column and corner labels sort the list, so show them as clickable
   GetGridColLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
