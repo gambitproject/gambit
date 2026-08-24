@@ -63,6 +63,8 @@
   mapping rather than a one-information-set-at-a-time query.
 - `Sequence.actions` now returns `list[tuple[Infoset, str]]` (an information set paired with
   its action's label) instead of `list[Action]`.
+- `StrategyBehavior.__getitem__`/`.get`/`.values`/`.items` now return action labels (`str`)
+  instead of `Action` objects.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

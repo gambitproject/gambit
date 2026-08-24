@@ -327,18 +327,17 @@ def test_action_plays():
 def test_strategy_action_defined(
     game, player_label, strategy_label, infoset_path, expected_action_label
 ):
-    """Verify `StrategyBehavior` retrieves the correct action for defined actions."""
+    """Verify `StrategyBehavior` retrieves the correct action label for defined actions."""
     player = game.players[player_label]
     strategy = player.strategies[strategy_label]
     node = game.root
     for action_label in infoset_path:
         node = node.children[action_label]
     infoset = node.infoset
-    expected_action = infoset.actions[expected_action_label]
 
     prescribed_action = game.get_behavior(player, strategy).get(infoset)
 
-    assert prescribed_action == expected_action
+    assert prescribed_action == expected_action_label
 
 
 @pytest.mark.parametrize(
