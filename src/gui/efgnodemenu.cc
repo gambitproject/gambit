@@ -354,7 +354,7 @@ void EfgDisplay::OnEditMove(wxCommandEvent &)
     return;
   }
 
-  EditMoveDialog dialog(this, infoset);
+  EditMoveDialog dialog(this, m_doc, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
