@@ -61,6 +61,8 @@
 - `Strategy.action` has been removed; it is superseded by `Game.get_behavior`, which returns
   a `StrategyBehavior`, a full map-like view of a strategy's information-set-to-action
   mapping rather than a one-information-set-at-a-time query.
+- `Sequence.actions` now returns `list[tuple[Infoset, str]]` (an information set paired with
+  its action's label) instead of `list[Action]`.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13

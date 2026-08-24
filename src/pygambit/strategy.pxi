@@ -253,14 +253,19 @@ class Sequence:
         return ret
 
     @property
-    def actions(self) -> list[Action]:
-        """Get the collection of actions defining this sequence.
+    def actions(self) -> list[tuple[Infoset, str]]:
+        """Get the (information set, action label) pairs defining this sequence, in
+        order from the player's root sequence to this one.
 
         Returns the empty list for the root sequence of the player.
         """
-        actions: list[Action] = []
+        actions: list[tuple[Infoset, str]] = []
         seq = self.sequence
         while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
-            actions.insert(0, Action.wrap(seq.deref().GetAction()))
+            action: c_GameAction = seq.deref().GetAction()
+            actions.insert(0, (
+                Infoset.wrap(action.deref().GetInfoset()),
+                action.deref().GetLabel().decode("utf-8")
+            ))
             seq = seq.deref().GetParent()
         return actions

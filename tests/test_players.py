@@ -348,7 +348,8 @@ def test_player_sequence_actions():
     player = game.players["Alice"]
     sequences = set(tuple(seq.actions) for seq in player.sequences)
     reference = (
-        set((action, ) for infoset in player.infosets for action in infoset.actions) |
+        set(((infoset, action.label), ) for infoset in player.infosets
+            for action in infoset.actions) |
         {tuple()}
     )
     assert sequences == reference
