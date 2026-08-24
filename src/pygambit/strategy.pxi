@@ -20,6 +20,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+class Action(typing.NamedTuple):
+    """An information set, together with the label of one of its actions.
+    """
+    infoset: Infoset
+    label: str
+
+
 @cython.cclass
 class Strategy:
     """A plan of action for a ``Player`` in a ``Game``."""
@@ -193,11 +200,12 @@ class StrategyBehavior:
         infoset: Infoset
         return [self._strategy._get_action_label(infoset.infoset) for infoset in self]
 
-    def items(self) -> list[tuple[Infoset, str]]:
+    def items(self) -> list[Action]:
         """(information set, action label) pairs, in the order of `keys`."""
         infoset: Infoset
         return [
-            (infoset, self._strategy._get_action_label(infoset.infoset)) for infoset in self
+            Action(infoset, self._strategy._get_action_label(infoset.infoset))
+            for infoset in self
         ]
 
 
@@ -258,17 +266,17 @@ class Sequence:
         return ret
 
     @property
-    def actions(self) -> list[tuple[Infoset, str]]:
+    def actions(self) -> list[Action]:
         """Get the (information set, action label) pairs defining this sequence, in
         order from the player's root sequence to this one.
 
         Returns the empty list for the root sequence of the player.
         """
-        actions: list[tuple[Infoset, str]] = []
+        actions: list[Action] = []
         seq = self.sequence
         while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
             action: c_GameAction = seq.deref().GetAction()
-            actions.insert(0, (
+            actions.insert(0, Action(
                 Infoset.wrap(action.deref().GetInfoset()),
                 action.deref().GetLabel().decode("utf-8")
             ))

@@ -347,7 +347,7 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(node.prior_action[1])
+            path.append(node.prior_action.label)
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
@@ -429,7 +429,7 @@ class Node:
         return None
 
     @property
-    def prior_action(self) -> tuple[Node, str] | None:
+    def prior_action(self) -> Branch | None:
         """The parent of this node, paired with the label of the action taken there
         which leads to this node.
 
@@ -437,24 +437,24 @@ class Node:
         """
         action: c_GameAction = self.node.deref().GetPriorAction()
         if action != cython.cast(c_GameAction, NULL):
-            return (self.parent, action.deref().GetLabel().decode("utf-8"))
+            return Branch(self.parent, action.deref().GetLabel().decode("utf-8"))
         return None
 
     @property
-    def own_prior_action(self) -> tuple[Node, str] | None:
+    def own_prior_action(self) -> Branch | None:
         """The most recent node on the path to this one at which this node's own
         player had the move, paired with the label of the action taken there.
 
         Returns
         -------
-        tuple of Node and str, or None
+        Branch or None
             None if the player has not moved previously on the path to this node,
             or if this is a terminal node.
         .. versionadded:: 16.5.0
 
         .. versionchanged:: 17.0.0
-            Now returns a `(Node, str)` pair -- the node at which the action was
-            taken, and its label -- instead of an `Action` object.
+            Now returns a `Branch` (the node at which the action was taken,
+            and its label) instead of an `Action` object.
         """
         if self.is_terminal:
             return None
@@ -464,7 +464,7 @@ class Node:
             prior_node, prior_label = node.prior_action
             node = prior_node
             if node.player == target_player:
-                return (node, prior_label)
+                return Branch(node, prior_label)
         return None
 
     @property
@@ -535,6 +535,14 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
+
+
+class Branch(typing.NamedTuple):
+    """A specific edge in the game tree: a node, together with the label of the
+    action taken there.
+    """
+    node: Node
+    label: str
 
 
 @cython.cclass

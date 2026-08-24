@@ -155,6 +155,8 @@ Information about the game
    Node.plays
    Node.own_prior_action
 
+   Branch
+
 .. autosummary::
    :toctree: api/
 
@@ -194,6 +196,8 @@ Information about the game
    Sequence.player
    Sequence.parent
    Sequence.actions
+
+   Action
 
 Player behavior
 ...............

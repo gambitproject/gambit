@@ -61,18 +61,18 @@
 - `Strategy.action` has been removed; it is superseded by `Game.get_behavior`, which returns
   a `StrategyBehavior`, a full map-like view of a strategy's information-set-to-action
   mapping rather than a one-information-set-at-a-time query.
-- `Sequence.actions` now returns `list[tuple[Infoset, str]]` (an information set paired with
-  its action's label) instead of `list[Action]`.
-- `StrategyBehavior.__getitem__`/`.get`/`.values`/`.items` now return action labels (`str`)
-  instead of `Action` objects.
+- `Sequence.actions` now returns `list[Action]`, a `NamedTuple` pairing an information set
+  with its action's label -- see the note on `Action`/`Branch` below.
+- `StrategyBehavior.__getitem__`/`.get`/`.values` now return action labels (`str`) instead of
+  `Action` objects (the removed class); `.items` returns `list[Action]` (the new `NamedTuple`).
 - `Infoset.own_prior_actions` has been removed; it composes from `Infoset.members` and
   `Node.own_prior_action`, e.g. `{m.own_prior_action for m in infoset.members}`.
 - `Infoset.actions` now returns `list[str]` (the actions' labels, in order) instead of a
   collection of `Action` objects. `NodeChildren.__getitem__` (`node.children[...]`) no longer
   accepts an `Action`; index by label only. `Action` itself is no longer referenced anywhere
   in pygambit's public surface.
-- `Node.prior_action` and `Node.own_prior_action` now return `tuple[Node, str] | None`
-  (the node on the path at which the action was taken, paired with its label) instead of
+- `Node.prior_action` and `Node.own_prior_action` now return `Branch | None`, a `NamedTuple`
+  pairing the node on the path at which the action was taken with its label, instead of
   `Action | None`. `Node.own_prior_action` no longer calls into the C++ core at all; it is
   computed by walking up `Node.parent`/`Node.prior_action` to the nearest ancestor sharing
   this node's own player. This further breaks `gtdraw`, which reads `.label` off the
@@ -81,7 +81,13 @@
 - The `Action` class has been removed entirely, completing the removals above: an action
   is now represented purely as a text label (`str`), optionally paired with the `Infoset`
   or `Node` that gives it context, rather than as an object holding a live reference into
-  the game.
+  the game. Two new lightweight `NamedTuple` types formalize that pairing where it recurs:
+  `Action` (an `Infoset` and a label -- reusing the removed class's name, but now a plain
+  immutable value with no live reference, used by `Sequence.actions` and
+  `StrategyBehavior.items`) and `Branch` (a `Node` and a label -- a specific edge in the game
+  tree, used by `Node.prior_action` and `Node.own_prior_action`). Both are ordinary tuples
+  (support positional indexing, unpacking, and equality against a plain 2-tuple) with named
+  `.infoset`/`.node` and `.label` fields added for clarity.
 
 
 ## [17.0.0-alpha.1] - 2026-08-13
