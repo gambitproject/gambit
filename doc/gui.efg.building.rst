@@ -27,51 +27,57 @@ strategic players in the game.
 Adding moves
 ------------
 
-There are two options for adding moves to a tree, both reached by
-right-clicking the node where the move should go: a quick per-player
-submenu, and the more flexible :guilabel:`Insert move` dialog.
+Right-clicking any node in the tree offers a per-player submenu for adding
+a move: :guilabel:`Append move for` at a terminal node, or
+:guilabel:`Insert move for` at a nonterminal one. Either way, the submenu
+lists every player (each shown with its assigned colour), plus the chance
+player.
 
-#. Right-clicking any terminal node in the tree and choosing
-   :guilabel:`Insert move for` opens a submenu listing every player
-   (each shown with its assigned colour), plus the chance player. Choosing
-   a player extends the tree with a new move for that player at the node,
-   with two actions. Choosing the chance player adds a chance move instead,
-   with its two actions each given a probability weight of one-half.
+Choosing a player opens a small window anchored at the node, meant to be
+read as a sentence: :guilabel:`Append move for` (or :guilabel:`Insert move
+for`) the chosen player, :guilabel:`with` a number of actions. The number
+of actions defaults to two, and can be changed directly -- with the arrows
+beside it, or by typing -- at any point; below it, a label field is shown
+for each action, defaulting to a placeholder number that can be typed over.
+Tabbing past the last action's field adds another action and moves into it,
+so a move can be built up to more than two actions just by typing and
+tabbing, without touching the number-of-actions field at all. Pressing
+Enter in any field accepts the move as currently specified; pressing
+Escape, or clicking anywhere else, cancels it. If any action's label is
+currently invalid -- left empty, or duplicated among the move's other
+actions -- accepting is refused: the window stays open, with the problem
+described and the offending field or fields highlighted, whether that was
+attempted with Enter or by clicking away.
 
-   The player who moves at an *existing* move can be changed the same
-   way: right-clicking a nonterminal node offers the same submenu,
-   labeled :guilabel:`Assign this move to`, listing the other players
-   to which the move can be reassigned. A move cannot currently be
-   changed between the chance player and a personal player this way --
-   nor can it be, at present, using any other method in the interface.
+Choosing the chance player adds a probability field next to each action's
+label. These default to splitting evenly across whatever actions currently
+exist. Adding an action gives the new one whatever share is still needed to
+bring the total to one (or zero, if the existing actions already summed to
+one or more), leaving every other action's probability exactly as typed --
+so growing the list never silently overwrites a probability already
+entered. As with action labels, the move cannot be accepted unless every
+probability is a nonnegative number and they sum to exactly one.
 
-2. Right-click any terminal node in
-   the tree, and choose :guilabel:`Insert move`
-   to display the :guilabel:`insert move` dialog.
-   The dialog is intended to read like a sentence:
+The two submenu labels reflect different underlying operations. At a
+terminal node, :guilabel:`Append move for` attaches the new move directly,
+since nothing is there yet. At a nonterminal node, :guilabel:`Insert move
+for` instead makes the new move the parent of the clicked node: the subtree
+that used to start there becomes the *first* action's subtree, and the new
+move's other actions each lead to a fresh terminal node. There is currently
+no way to choose a different action for the displaced subtree at insert
+time; to relocate it afterward, use drag-and-drop (see
+:ref:`copying-trees` below).
 
-   + The first control specifies the player who will make the move. The
-     move can be assigned to a new player by specifying
-     :guilabel:`Insert move for a new player here`.
-   + The second control selects the information set to which to add the
-     move. To create the move in a new information set, select
-     :guilabel:`at a new information set` for this control.
-   + The third control sets the number of actions. This control is
-     disabled unless the second control is set to
-     :guilabel:`at a new information set`.
-     Otherwise, it is set automatically to the number of actions at
-     the selected information set.
-
-Both are reached with a right-click, and can be useful in different
-contexts. The per-player submenu is a bit quicker to use, especially
-when creating trees that have few actions at each move. The dialog
-approach is a bit more flexible, in that a move can be added for a new,
-as-yet-undefined player, a move can be added directly into an existing
-information set, and a move can be immediately given more than two
-actions.
+The player who moves at an *existing* move can be changed separately,
+using the :guilabel:`Assign this move to` submenu, also reached by
+right-clicking a nonterminal node: this lists the other players to which
+the move can be reassigned, without changing the move's actions or the
+subtrees that follow them. A move cannot currently be changed between the
+chance player and a personal player this way -- nor can it be, at present,
+using any other method in the interface.
 
 A single action can also be added to, or removed from, an existing
-move using the :guilabel:`Edit move` dialog described next.
+move using the :guilabel:`Move properties` dialog described next.
 
 
 .. _editing-moves:
@@ -82,11 +88,11 @@ Editing moves
 The properties of an existing move -- the label of its information
 set, the player to which it belongs, and the actions available at it
 -- can be changed by right-clicking on any node belonging to the move
-and choosing :guilabel:`Edit move`. This displays the
-:guilabel:`Edit move` dialog, which lists a text field for the
-information set's label, a dropdown for the player to which the move
-belongs, and a row for each action, showing its label and, for moves
-belonging to the chance player, its probability.
+and choosing :guilabel:`Move properties`. This displays the
+:guilabel:`Move properties` dialog, which shows a dropdown for the player
+to which the move belongs (each player again shown with its colour), a text
+field for the information set's label, and a row for each action, showing
+its label and, for moves belonging to the chance player, its probability.
 
 Adding, removing, and reordering actions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,13 +201,14 @@ Managing information sets
 Gambit provides several methods to help manage the information
 structure in an extensive game.
 
-When building a tree, new moves can be placed in a given information
-set using the :ref:`Insert move dialog <adding-moves>`. Additionally, a
-node can be placed in the same information set as another using the
+A node can be placed in the same information set as another using the
 drag-and-drop idiom described in :ref:`copying-trees`: dragging one
 node onto another and choosing :guilabel:`Put node in same information
 set` (or, when dropping on a terminal node, :guilabel:`Insert move
-using same information set`) from the popup menu.
+using same information set`) from the popup menu. This is currently the
+only way to have a newly created move share an information set with an
+existing one; the :ref:`per-player submenu <adding-moves>` for adding a
+move always creates a fresh information set.
 
 The information set to which a node belongs can also be set by
 right-clicking the node and choosing :guilabel:`Node properties`
