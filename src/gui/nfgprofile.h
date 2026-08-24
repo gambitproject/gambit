@@ -26,9 +26,13 @@
 #include <wx/grid.h>
 
 #include "gamedoc.h"
+#include "profilesort.h"
 
 namespace Gambit::GUI {
 class MixedStrategyProfileList final : public wxGrid, public GameView {
+  /// The order in which the profiles are listed
+  ProfileSortOrder m_sortOrder;
+
   // Event handlers
   void OnLabelClick(wxGridEvent &);
   void OnCellClick(wxGridEvent &);

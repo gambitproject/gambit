@@ -50,6 +50,15 @@ MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent,
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
 
+  // The column and corner labels sort the list, so show them as clickable
+  GetGridColLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
+  GetGridCornerLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
+
+  GetGridColLabelWindow()->SetToolTip(_("Click an action to sort the profiles by its probability; "
+                                        "click it again to reverse the order"));
+  GetGridCornerLabelWindow()->SetToolTip(
+      _("Click to list the profiles in the order in which they were computed"));
+
   Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &MixedBehaviorProfileList::OnLabelClick, this);
   Bind(wxEVT_GRID_CELL_LEFT_CLICK, &MixedBehaviorProfileList::OnCellClick, this);
   Bind(wxEVT_GRID_SELECT_CELL, &MixedBehaviorProfileList::OnSelectCell, this);
@@ -59,8 +68,20 @@ MixedBehaviorProfileList::~MixedBehaviorProfileList() = default;
 
 void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 {
-  if (p_event.GetCol() == -1) {
-    m_doc->DoSelectProfile(p_event.GetRow() + 1);
+  if (p_event.GetCol() == -1 && p_event.GetRow() == -1) {
+    // The corner label: restore the order in which the profiles were computed
+    p_event.Veto();
+    m_sortOrder.Reset();
+    OnUpdate();
+  }
+  else if (p_event.GetCol() == -1) {
+    m_doc->DoSelectProfile(m_sortOrder.GetProfile(p_event.GetRow()));
+  }
+  else if (p_event.GetRow() == -1) {
+    // An action: sort the profiles on the probability it is played with
+    p_event.Veto();
+    m_sortOrder.ToggleColumn(p_event.GetCol() + 1);
+    OnUpdate();
   }
 
   ClearSelection();
@@ -68,7 +89,7 @@ void MixedBehaviorProfileList::OnLabelClick(wxGridEvent &p_event)
 
 void MixedBehaviorProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->DoSelectProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(m_sortOrder.GetProfile(p_event.GetRow()));
   ClearSelection();
 }
 
@@ -103,9 +124,11 @@ void MixedBehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
 
 void MixedBehaviorProfileList::UpdateLabels()
 {
+  // Row labels identify the profile itself, so that a profile keeps its
+  // number however the list happens to be sorted.
   for (int row = 0; row < GetNumberRows(); ++row) {
     wxString label;
-    label << (row + 1);
+    label << m_sortOrder.GetProfile(row);
     SetRowLabelValue(row, label);
   }
 
@@ -113,7 +136,8 @@ void MixedBehaviorProfileList::UpdateLabels()
     const GameAction action = m_doc->GetAction(col + 1);
 
     wxString label;
-    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
+    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel()
+          << wxString::FromUTF8(m_sortOrder.GetColumnMarker(col + 1));
     SetColLabelValue(col, label);
   }
 }
@@ -126,14 +150,16 @@ void MixedBehaviorProfileList::UpdateCells()
   const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
   for (int row = 0; row < GetNumberRows(); ++row) {
+    const int profile = m_sortOrder.GetProfile(row);
+
     for (int col = 0; col < GetNumberCols(); ++col) {
       SetCellValue(
           row, col,
-          wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, row + 1).c_str(),
+          wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, profile).c_str(),
                    *wxConvCurrent));
 
       wxGridCellAttr *attr = new wxGridCellAttr;
-      attr->SetFont(row + 1 == currentProfile ? boldFont : normalFont);
+      attr->SetFont(profile == currentProfile ? boldFont : normalFont);
       attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
       attr->SetReadOnly(true);
 
@@ -176,6 +202,9 @@ void MixedBehaviorProfileList::OnUpdate()
   BeginBatch();
 
   ResizeGrid(profiles.NumProfiles(), profileLength);
+  m_sortOrder.Rebuild(profiles.NumProfiles(), profileLength, [&](int p_col, int p_profile) {
+    return profiles.GetActionProbValue(p_col, p_profile);
+  });
   UpdateLabels();
   UpdateCells();
 

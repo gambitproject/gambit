@@ -115,6 +115,12 @@ public:
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
+  /// Get the probability of an action as a number, for ordering profiles;
+  /// empty if the profile does not define behavior at the information set
+  virtual std::optional<double> GetActionProbValue(int p_action, int p_index) const = 0;
+  /// Get the probability of a strategy as a number, for ordering profiles
+  virtual std::optional<double> GetStrategyProbValue(int p_strategy, int p_index) const = 0;
+
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
@@ -173,6 +179,8 @@ public:
   std::string GetActionProb(int p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
+  std::optional<double> GetActionProbValue(int p_action, int p_index) const override;
+  std::optional<double> GetStrategyProbValue(int p_strategy, int p_index) const override;
 
   /// Get the index of the currently selected profile
   int GetCurrent() const override { return m_current; }

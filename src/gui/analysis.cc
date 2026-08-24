@@ -346,6 +346,36 @@ std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index
   }
 }
 
+template <class T>
+std::optional<double> AnalysisProfileList<T>::GetActionProbValue(int p_action, int p_index) const
+{
+  try {
+    const MixedBehaviorProfile<T> &profile = *m_behavProfiles[p_index];
+
+    if (!profile.IsDefinedAt(m_doc->GetAction(p_action)->GetInfoset())) {
+      return {};
+    }
+
+    return static_cast<double>(profile[p_action]);
+  }
+  catch (std::out_of_range &) {
+    return {};
+  }
+}
+
+template <class T>
+std::optional<double> AnalysisProfileList<T>::GetStrategyProbValue(int p_strategy,
+                                                                   int p_index) const
+{
+  try {
+    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[p_index];
+    return static_cast<double>(profile[p_strategy]);
+  }
+  catch (std::out_of_range &) {
+    return {};
+  }
+}
+
 template <class T> LegacyWorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 {
   LegacyWorkspaceFile::Analysis result;

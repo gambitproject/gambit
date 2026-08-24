@@ -149,6 +149,25 @@ the screenshot, it is set to
 brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
 
+By default the equilibria are listed in the order in which they were
+computed. Whenever more than one equilibrium has been found, each
+column label in the profiles listing carries a small
+:guilabel:`↕` marker, indicating that the list can be sorted on that
+column. Clicking on the label of a column sorts the equilibria by the
+probability with which that action or strategy is played; clicking on
+the same column label again reverses the order. The marker on the
+column sorted on becomes an arrow, :guilabel:`▲` or :guilabel:`▼`,
+showing the direction of the sort. Equilibria which agree on that
+column are ordered by
+comparing their profiles entry-by-entry from the leftmost column
+onwards, so sorting on the first column lists the equilibria in
+lexicographic order by profile. Clicking on the :guilabel:`#` label in
+the top left corner of the listing restores the order in which the
+equilibria were computed. Sorting only changes the order in which the
+equilibria are listed: the number shown at the left of each row always
+identifies the equilibrium itself, so it does not change when the list
+is re-sorted.
+
 The currently selected equilibrium is shown in bold in the profiles
 listing, and information about this equilibrium is displayed in the
 extensive game. In the figure, the probabilities of selecting each
