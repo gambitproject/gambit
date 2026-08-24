@@ -27,9 +27,9 @@ A set of utilities for computing Nash equilibria
 from __future__ import annotations
 
 import dataclasses
-import math
 import pathlib
 from collections.abc import Iterator
+from numbers import Integral
 
 import pygambit.gambit as libgbt
 
@@ -243,12 +243,10 @@ def lcp_solve(
             raise ValueError(
                 "lcp_solve(): max_depth can only be used on the strategic representation"
             )
-    if stop_after is not None and stop_after <= 0:
-        raise ValueError(
-            f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
-        )
     if stop_after is not None and (
-        not math.isfinite(stop_after) or int(stop_after) != stop_after
+        isinstance(stop_after, bool)
+        or not isinstance(stop_after, Integral)
+        or stop_after <= 0
     ):
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
@@ -716,13 +714,10 @@ def enumpoly_solve(
     -----
     PHCpack is available at https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
-    if stop_after is not None and stop_after <= 0:
-        raise ValueError(
-            f"enumpoly_solve(): "
-            f"stop_after argument must be a positive integer; got {stop_after}"
-        )
     if stop_after is not None and (
-        not math.isfinite(stop_after) or int(stop_after) != stop_after
+        isinstance(stop_after, bool)
+        or not isinstance(stop_after, Integral)
+        or stop_after <= 0
     ):
         raise ValueError(
             f"enumpoly_solve(): "
