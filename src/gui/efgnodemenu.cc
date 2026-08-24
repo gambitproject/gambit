@@ -128,7 +128,7 @@ void EfgDisplay::OnSetPlayerMenu(wxCommandEvent &p_event)
 
   try {
     if (m_contextNode->IsTerminal()) {
-      m_doc->DoInsertMove(m_contextNode, player, 2);
+      BeginAppendMove(m_contextNode, player);
     }
     else {
       m_doc->DoSetPlayer(m_contextNode, player);

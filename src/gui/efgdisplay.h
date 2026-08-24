@@ -31,6 +31,7 @@
 namespace Gambit::GUI {
 
 class OutcomeEditorPopup;
+class AppendMovePopup;
 class NodeInfoPopup;
 
 // Number of IDs reserved (starting at GBT_MENU_EDIT_SET_PLAYER_BASE) for
@@ -49,6 +50,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   wxMenuItem *m_setPlayerItem{nullptr};
   std::vector<GamePlayer> m_setPlayerList;
   OutcomeEditorPopup *m_outcomeEditor{nullptr};
+  AppendMovePopup *m_appendMoveEditor{nullptr};
   NodeInfoPopup *m_nodeInfoPopup{nullptr};
   wxTimer m_hoverTimer;
   GameNode m_hoverNode;
@@ -66,11 +68,11 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   GameNode m_dragOverNode;
   bool m_dragOverValid{false};
 
-  // Constructs m_outcomeEditor/m_nodeInfoPopup (efgtooltip.cc) and installs the tree drop
-  // target (efgdragdrop.cc), respectively. Called from the constructor body -- rather than
-  // its initializer list -- since OutcomeEditorPopup/NodeInfoPopup/TreeDropTarget are only
-  // forward-declared here; InitPopups() must run before OnUpdate(), which dereferences
-  // m_nodeInfoPopup via DismissNodeInfo().
+  // Constructs m_outcomeEditor/m_appendMoveEditor/m_nodeInfoPopup (efgtooltip.cc) and installs
+  // the tree drop target (efgdragdrop.cc), respectively. Called from the constructor body --
+  // rather than its initializer list -- since OutcomeEditorPopup/AppendMovePopup/NodeInfoPopup/
+  // TreeDropTarget are only forward-declared here; InitPopups() must run before OnUpdate(),
+  // which dereferences m_nodeInfoPopup via DismissNodeInfo().
   void InitPopups();
   void InitDropTarget();
 
@@ -86,6 +88,9 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   // Forwards to m_outcomeEditor->BeginEdit(); lets OnLeftDoubleClick (efgnodemenu.cc) start
   // an outcome edit without needing OutcomeEditorPopup's complete type.
   void BeginEditOutcome(const GameNode &p_node, int p_initialPlayer = 0);
+  // Forwards to m_appendMoveEditor->BeginAppend(); lets OnSetPlayerMenu (efgnodemenu.cc) start
+  // an append-move edit without needing AppendMovePopup's complete type.
+  void BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player);
   void DrawDragOverHighlight(wxDC &p_dc);
 
   /// @name Event handlers

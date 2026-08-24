@@ -611,6 +611,19 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
+void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
+{
+  if (p_player->IsChance()) {
+    m_game->AppendEvent(p_node, p_labels, p_probs);
+  }
+  else {
+    m_game->AppendMove(p_node, p_player, p_labels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
+}
+
 void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
   if (p_player->IsChance()) {
