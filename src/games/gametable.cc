@@ -58,20 +58,20 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 
 GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 {
-  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index)) {
-    return outcome->shared_from_this();
-  }
-  return nullptr;
+  const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index);
+  return outcome->IsNull() ? nullptr : outcome->shared_from_this();
 }
 
 void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
 {
-  dynamic_cast<GameTableRep &>(*m_game).m_results[m_index] = p_outcome.get();
+  dynamic_cast<GameTableRep &>(*m_game).m_results[m_index] =
+      p_outcome ? p_outcome.get() : m_game->m_nullOutcome.get();
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index)) {
+  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index);
+      !outcome->IsNull()) {
     return outcome->GetPayoff<Rational>(p_player);
   }
   return Rational(0);
@@ -86,7 +86,8 @@ Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_str
   const long digit_old = (m_index / stride) % m_radices[index];
   const long digit_new = p_strategy->GetNumber() - 1;
   const long new_index = m_index + (digit_new - digit_old) * stride;
-  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results[new_index]) {
+  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results[new_index];
+      !outcome->IsNull()) {
     return outcome->GetPayoff<Rational>(player);
   }
   return Rational(0);
@@ -297,7 +298,7 @@ template <class T> T TableMixedStrategyProfileRep<T>::GetPayoff(int pl) const
   const auto player = game->GetPlayer(pl);
   T value{0};
   for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets)) {
-    if (const auto outcome = g.m_results[index]) {
+    if (const auto outcome = g.m_results[index]; !outcome->IsNull()) {
       value += prob * outcome->template GetPayoff<T>(player);
     }
   }
@@ -314,7 +315,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
   T value{0};
   for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets,
                                                    strategy->GetPlayer()->GetNumber())) {
-    if (const auto outcome = g.m_results[base_index + index]) {
+    if (const auto outcome = g.m_results[base_index + index]; !outcome->IsNull()) {
       value += prob * outcome->template GetPayoff<T>(player);
     }
   }
@@ -332,7 +333,7 @@ bool TableMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_deriv
   for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets, pl)) {
     auto deriv_it = p_derivs.begin();
     for (const auto base_index : segment) {
-      if (const auto outcome = g.m_results[base_index + index]) {
+      if (const auto outcome = g.m_results[base_index + index]; !outcome->IsNull()) {
         *deriv_it += prob * outcome->template GetPayoff<T>(player);
         ++deriv_it;
       }
@@ -356,7 +357,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
   for (auto [index, prob] :
        ProductDistribution<T>(this->m_probs, this->m_offsets, strategy1->GetPlayer()->GetNumber(),
                               strategy2->GetPlayer()->GetNumber())) {
-    if (const auto outcome = g.m_results[base_index + index]) {
+    if (const auto outcome = g.m_results[base_index + index]; !outcome->IsNull()) {
       value += prob * outcome->template GetPayoff<T>(player);
     }
   }
@@ -385,7 +386,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   IndexStrategies();
 
   if (p_sparseOutcomes) {
-    std::fill(m_results.begin(), m_results.end(), nullptr);
+    std::fill(m_results.begin(), m_results.end(), m_nullOutcome.get());
   }
   else {
     m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
@@ -500,8 +501,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  std::replace(m_results.begin(), m_results.end(), p_outcome.get(),
-               static_cast<GameOutcomeRep *>(nullptr));
+  std::replace(m_results.begin(), m_results.end(), p_outcome.get(), m_nullOutcome.get());
   m_outcomes.erase(
       std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
@@ -692,9 +692,9 @@ void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
     new_strides[j] = new_size;
     new_size *= m_players[j]->m_strategies.size();
   }
-  std::vector<GameOutcomeRep *> newResults(new_size, nullptr);
+  std::vector<GameOutcomeRep *> newResults(new_size, m_nullOutcome.get());
   for (long old_index = 0; old_index < old_size; ++old_index) {
-    if (m_results[old_index] == nullptr) {
+    if (m_results[old_index]->IsNull()) {
       continue;
     }
     long new_index = 0;
@@ -763,9 +763,9 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_pla
     new_size *= m_players[i]->m_strategies.size();
   }
 
-  std::vector<GameOutcomeRep *> newResults(new_size, nullptr);
+  std::vector<GameOutcomeRep *> newResults(new_size, m_nullOutcome.get());
   for (long old_index = 0; old_index < old_size; ++old_index) {
-    if (m_results[old_index] == nullptr) {
+    if (m_results[old_index]->IsNull()) {
       continue;
     }
     long new_index = 0;

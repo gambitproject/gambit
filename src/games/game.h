@@ -331,6 +331,7 @@ class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   friend class GameTableRep;
 
   bool m_valid{true};
+  bool m_isNull;
   GameRep *m_game;
   int m_number;
   std::string m_label;
@@ -340,12 +341,14 @@ public:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
-  GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label);
+  GameOutcomeRep(GameRep *p_game, int p_number, const std::string &p_label, bool p_isNull = false);
   ~GameOutcomeRep() = default;
   //@}
 
   bool IsValid() const { return m_valid; }
   void Invalidate() { m_valid = false; }
+  /// Returns whether this is the game's null outcome.
+  bool IsNull() const { return m_isNull; }
 
   /// @name Data access
   //@{
@@ -674,7 +677,7 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
   std::string m_label;
   GameInfosetRep *m_infoset{nullptr};
   GameNodeRep *m_parent;
-  GameOutcomeRep *m_outcome{nullptr};
+  GameOutcomeRep *m_outcome;
   std::vector<std::shared_ptr<GameNodeRep>> m_children;
 
   void DeleteOutcome(GameOutcomeRep *outc);
@@ -733,7 +736,10 @@ public:
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
 
-  GameOutcome GetOutcome() const { return (m_outcome) ? m_outcome->shared_from_this() : nullptr; }
+  GameOutcome GetOutcome() const
+  {
+    return (m_outcome->IsNull()) ? nullptr : m_outcome->shared_from_this();
+  }
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
@@ -923,11 +929,13 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
 protected:
   std::vector<std::shared_ptr<GamePlayerRep>> m_players;
   std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
+  /// The game's null outcome, shared by every node or contingency with no outcome attached.
+  std::shared_ptr<GameOutcomeRep> m_nullOutcome;
   mutable CartesianProductSpace m_pureStrategies;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
-  GameRep() = default;
+  GameRep() { m_nullOutcome = std::make_shared<GameOutcomeRep>(this, 0, "", true); }
 
   /// @name Managing the representation
   //@{
@@ -1494,6 +1502,9 @@ public:
 inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
 inline void GameOutcomeRep::SetLabel(const std::string &p_label)
 {
+  if (m_isNull) {
+    throw ValueException("The null outcome's label cannot be changed");
+  }
   if (p_label == m_label) {
     return;
   }
@@ -1503,6 +1514,10 @@ inline void GameOutcomeRep::SetLabel(const std::string &p_label)
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
+  if (m_isNull) {
+    static const Number kZeroPayoff;
+    return static_cast<const T &>(kZeroPayoff);
+  }
   try {
     return static_cast<const T &>(m_payoffs.at(p_player.get()));
   }
@@ -1513,6 +1528,10 @@ template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player
 
 template <> inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
+  if (m_isNull) {
+    static const Number kZeroPayoff;
+    return kZeroPayoff;
+  }
   try {
     return m_payoffs.at(p_player.get());
   }
@@ -1523,6 +1542,9 @@ template <> inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_p
 
 inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &p_value)
 {
+  if (m_isNull) {
+    throw UndefinedException("Payoffs cannot be set on the null outcome");
+  }
   if (p_player->GetGame() != GetGame()) {
     throw MismatchException();
   }

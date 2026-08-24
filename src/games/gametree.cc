@@ -360,7 +360,10 @@ GameSubgameRep::InfosetCollection GameSubgameRep::GetSubgameDifference() const
 //                         class GameNodeRep
 //========================================================================
 
-GameNodeRep::GameNodeRep(GameRep *e, GameNodeRep *p) : m_game(e), m_parent(p) {}
+GameNodeRep::GameNodeRep(GameRep *e, GameNodeRep *p)
+  : m_game(e), m_parent(p), m_outcome(e->m_nullOutcome.get())
+{
+}
 
 GameNodeRep::~GameNodeRep()
 {
@@ -413,7 +416,7 @@ void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 {
   m_game->IncrementVersion();
   if (outc == m_outcome) {
-    m_outcome = nullptr;
+    m_outcome = m_game->m_nullOutcome.get();
   }
   for (auto child : m_children) {
     child->DeleteOutcome(outc);
@@ -428,7 +431,8 @@ void GameTreeRep::SetOutcome(const GameNode &p_node, const GameOutcome &p_outcom
   if (p_outcome && p_outcome->m_game != this) {
     throw MismatchException();
   }
-  if (const auto newOutcome = p_outcome.get_shared().get(); newOutcome != p_node->m_outcome) {
+  if (const auto newOutcome = p_outcome ? p_outcome.get_shared().get() : m_nullOutcome.get();
+      newOutcome != p_node->m_outcome) {
     p_node->m_outcome = newOutcome;
     IncrementVersion();
   }
@@ -511,7 +515,7 @@ void GameTreeRep::DeleteTree(GameNode p_node)
     RemoveMember(node->m_infoset, node);
     node->m_infoset = nullptr;
   }
-  node->m_outcome = nullptr;
+  node->m_outcome = m_nullOutcome.get();
   node->m_label = "";
 
   ClearComputedValues();
@@ -578,7 +582,7 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
                            dest->shared_from_this()));
   std::swap(src->m_parent, dest->m_parent);
   dest->m_label = "";
-  dest->m_outcome = nullptr;
+  dest->m_outcome = m_nullOutcome.get();
 
   ClearComputedValues();
   InvalidateTreeOrdering();
