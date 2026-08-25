@@ -683,8 +683,6 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   DoSetPlayer(p_node->GetInfoset(), p_player);
 }
 
-namespace {
-
 std::string GenerateOutcomeLabel(const Game &p_game)
 {
   std::set<std::string> outcomeLabels;
@@ -698,18 +696,8 @@ std::string GenerateOutcomeLabel(const Game &p_game)
   return "Outcome " + std::to_string(outc);
 }
 
-} // namespace
-
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  std::set<std::string> outcomeLabels;
-  for (const auto &outcome : m_game->GetOutcomes()) {
-    outcomeLabels.insert(outcome->GetLabel());
-  }
-  int outc = m_game->GetOutcomes().size() + 1;
-  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
-    outc++;
-  }
   m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
