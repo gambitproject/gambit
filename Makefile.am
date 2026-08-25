@@ -469,8 +469,6 @@ gambit_SOURCES = \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
-	src/gui/dlinsertmove.cc \
-	src/gui/dlinsertmove.h \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \

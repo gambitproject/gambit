@@ -31,11 +31,13 @@
 namespace Gambit::GUI {
 
 class OutcomeEditorPopup;
+class AppendMovePopup;
 class NodeInfoPopup;
 
-// Number of IDs reserved (starting at GBT_MENU_EDIT_SET_PLAYER_BASE) for
-// entries in the node menu's "set player" submenu; one per player, plus chance.
-constexpr int gbtSetPlayerMenuCount = 64;
+// Number of IDs reserved (starting at each of GBT_MENU_EDIT_NEW_MOVE_BASE and
+// GBT_MENU_EDIT_REASSIGN_PLAYER_BASE) for their respective node-context-menu submenus, one per
+// player (plus chance, for the former).
+constexpr int gbtPlayerMenuCount = 64;
 
 class EfgDisplay final : public wxScrolledWindow, public GameView {
   TreeLayout m_layout;
@@ -45,10 +47,18 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   // of whichever of that menu's commands the user picks. Purely local to the tree display;
   // there is no persistent "selected node" elsewhere (see UpdateNodeMenu()).
   GameNode m_contextNode;
-  wxMenu *m_setPlayerMenu{nullptr};
-  wxMenuItem *m_setPlayerItem{nullptr};
-  std::vector<GamePlayer> m_setPlayerList;
+  // "Append move for"/"Insert move for" -- creates a fresh move for the chosen player. Always
+  // present regardless of node type; see UpdateNewMoveMenu.
+  wxMenu *m_newMoveMenu{nullptr};
+  wxMenuItem *m_newMoveItem{nullptr};
+  std::vector<GamePlayer> m_newMoveList;
+  // "Assign this move to" -- reassigns m_contextNode's *existing* move to a different player.
+  // Only meaningful at a non-terminal, non-chance node; see UpdateReassignPlayerMenu.
+  wxMenu *m_reassignPlayerMenu{nullptr};
+  wxMenuItem *m_reassignPlayerItem{nullptr};
+  std::vector<GamePlayer> m_reassignPlayerList;
   OutcomeEditorPopup *m_outcomeEditor{nullptr};
+  AppendMovePopup *m_appendMoveEditor{nullptr};
   NodeInfoPopup *m_nodeInfoPopup{nullptr};
   wxTimer m_hoverTimer;
   GameNode m_hoverNode;
@@ -66,11 +76,11 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   GameNode m_dragOverNode;
   bool m_dragOverValid{false};
 
-  // Constructs m_outcomeEditor/m_nodeInfoPopup (efgtooltip.cc) and installs the tree drop
-  // target (efgdragdrop.cc), respectively. Called from the constructor body -- rather than
-  // its initializer list -- since OutcomeEditorPopup/NodeInfoPopup/TreeDropTarget are only
-  // forward-declared here; InitPopups() must run before OnUpdate(), which dereferences
-  // m_nodeInfoPopup via DismissNodeInfo().
+  // Constructs m_outcomeEditor/m_appendMoveEditor/m_nodeInfoPopup (efgtooltip.cc) and installs
+  // the tree drop target (efgdragdrop.cc), respectively. Called from the constructor body --
+  // rather than its initializer list -- since OutcomeEditorPopup/AppendMovePopup/NodeInfoPopup/
+  // TreeDropTarget are only forward-declared here; InitPopups() must run before OnUpdate(),
+  // which dereferences m_nodeInfoPopup via DismissNodeInfo().
   void InitPopups();
   void InitDropTarget();
 
@@ -79,13 +89,19 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   // enabled accordingly. Called right before the menu is popped up, since nothing else
   // keeps it live anymore.
   void UpdateNodeMenu(const GameNode &p_node);
-  void UpdateSetPlayerMenu();
+  void UpdateNewMoveMenu();
+  void UpdateReassignPlayerMenu();
   void AdjustScrollbarSteps();
   // Clears the hovered-node tracking and hides the node info popup, if shown.
   void DismissNodeInfo();
   // Forwards to m_outcomeEditor->BeginEdit(); lets OnLeftDoubleClick (efgnodemenu.cc) start
   // an outcome edit without needing OutcomeEditorPopup's complete type.
   void BeginEditOutcome(const GameNode &p_node, int p_initialPlayer = 0);
+  // Forwards to m_appendMoveEditor->BeginAppend()/BeginInsert(); let OnNewMoveMenu
+  // (efgnodemenu.cc) start an append/insert-move edit without needing AppendMovePopup's
+  // complete type.
+  void BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player);
+  void BeginInsertMove(const GameNode &p_node, const GamePlayer &p_player);
   void DrawDragOverHighlight(wxDC &p_dc);
 
   /// @name Event handlers
@@ -97,12 +113,12 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
   void OnMagnify(wxMouseEvent &);
-  void OnSetPlayerMenu(wxCommandEvent &);
+  void OnNewMoveMenu(wxCommandEvent &);
+  void OnReassignPlayerMenu(wxCommandEvent &);
   void OnHoverTimer(wxTimerEvent &);
 
   // Node menu command handlers -- operate on m_contextNode (the node the menu was shown
   // for), formerly on GameDocument's now-removed persistent selection.
-  void OnEditInsertMove(wxCommandEvent &);
   void OnEditDeleteTree(wxCommandEvent &);
   void OnEditDeleteParent(wxCommandEvent &);
   void OnEditRemoveOutcome(wxCommandEvent &);

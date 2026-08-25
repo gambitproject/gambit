@@ -611,27 +611,29 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
+void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
   if (p_player->IsChance()) {
-    // A newly-inserted chance move defaults to a uniform distribution over its actions;
-    // the UX for specifying a distribution at creation time is a separate piece of work.
-    std::vector<std::string> actions;
-    for (unsigned int act = 1; act <= p_actions; act++) {
-      actions.push_back(std::to_string(act));
-    }
-    m_game->InsertEvent(p_node, actions,
-                        std::vector<Number>(p_actions, Number(Rational(1, p_actions))));
+    m_game->AppendEvent(p_node, p_labels, p_probs);
   }
   else {
-    m_game->InsertMove(p_node, p_player, p_actions);
+    m_game->AppendMove(p_node, p_player, p_labels);
   }
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  m_game->InsertMove(p_node, p_infoset);
+  if (p_player->IsChance()) {
+    m_game->InsertEvent(p_node, p_labels, p_probs);
+  }
+  else {
+    m_game->InsertMove(p_node, p_player, p_labels);
+  }
   NotifyChanged(GameModificationType::GameForm);
 }
 

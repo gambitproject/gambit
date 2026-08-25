@@ -46,10 +46,11 @@ EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
 EVT_MAGNIFY(EfgDisplay::OnMagnify)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
 EVT_SIZE(EfgDisplay::OnSize)
-EVT_MENU_RANGE(GBT_MENU_EDIT_SET_PLAYER_BASE,
-               GBT_MENU_EDIT_SET_PLAYER_BASE + gbtSetPlayerMenuCount - 1,
-               EfgDisplay::OnSetPlayerMenu)
-EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, EfgDisplay::OnEditInsertMove)
+EVT_MENU_RANGE(GBT_MENU_EDIT_NEW_MOVE_BASE, GBT_MENU_EDIT_NEW_MOVE_BASE + gbtPlayerMenuCount - 1,
+               EfgDisplay::OnNewMoveMenu)
+EVT_MENU_RANGE(GBT_MENU_EDIT_REASSIGN_PLAYER_BASE,
+               GBT_MENU_EDIT_REASSIGN_PLAYER_BASE + gbtPlayerMenuCount - 1,
+               EfgDisplay::OnReassignPlayerMenu)
 EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, EfgDisplay::OnEditDeleteTree)
 EVT_MENU(GBT_MENU_EDIT_DELETE_PARENT, EfgDisplay::OnEditDeleteParent)
 EVT_MENU(GBT_MENU_EDIT_REMOVE_OUTCOME, EfgDisplay::OnEditRemoveOutcome)

@@ -365,8 +365,16 @@ public:
   void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
   void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
   void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
-  void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);
-  void DoInsertMove(GameNode p_node, GameInfoset p_infoset);
+  // Appends a fresh move for p_player at the terminal node p_node, with actions labeled per
+  // p_labels. p_probs gives the chance distribution when p_player is the chance player, and
+  // is ignored otherwise.
+  void DoAppendMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
+  // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
+  // and everything below it becomes the first action's subtree. p_probs gives the chance
+  // distribution when p_player is the chance player, and is ignored otherwise.
+  void DoInsertMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
   void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
   void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
   void DoDeleteParent(GameNode p_node);

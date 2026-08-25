@@ -26,6 +26,8 @@
 #endif // WX_PRECOMP
 #include <wx/scrolwin.h>
 #include <wx/richmsgdlg.h>
+#include <wx/bmpcbox.h>
+#include <wx/statline.h>
 
 #include <algorithm>
 #include <functional>
@@ -33,6 +35,7 @@
 #include <set>
 
 #include "games.h"
+#include "gamedoc.h"
 #include "dleditmove.h"
 #include "valnumber.h"
 #include "editlabel.h"
@@ -93,6 +96,9 @@ private:
         std::count_if(m_rows.begin(), m_rows.end(), [](const Row &r) { return !r.isDeleted; }));
   }
   void Rebuild();
+  // Scrolls to show the last row -- called after AddAction() so the row just added (which a
+  // long list would otherwise leave below the fold) is immediately visible.
+  void ScrollToBottom();
   // Colours a (non-deleted) row's label to reflect whether it's new, renamed from its
   // stable label, or unchanged, and sets/clears the "renamed from" tooltip to match.
   static void UpdateRowStyle(Row &row);
@@ -137,6 +143,11 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
                      wxVSCROLL | wxTAB_TRAVERSAL),
     m_isChance(p_infoset->IsChanceInfoset()), m_onChanged(p_onChanged)
 {
+  // Explicit, rather than inherited from the dialog: this is what gives the action list a
+  // visible contrast against the shaded header panel above it, the same white-against-shaded
+  // distinction AppendMovePopup uses.
+  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
   for (const auto &action : p_infoset->GetActions()) {
     Row row;
     row.stableLabel = action->GetLabel();
@@ -212,15 +223,15 @@ void ActionPanel::Rebuild()
   m_topSizer->Clear(true); // destroys the previous row controls; each Row's own state
                            // (stableLabel, currentLabelText, probValue) isn't owned by them
 
-  const int numColumns = m_isChance ? 4 : 3;
+  const int numColumns = m_isChance ? 3 : 2;
   auto *gridSizer = new wxFlexGridSizer(numColumns, 5, 10);
-  gridSizer->AddGrowableCol(1, 1);
+  gridSizer->AddGrowableCol(0, 1);
   if (m_isChance) {
-    gridSizer->AddGrowableCol(2, 1);
+    gridSizer->AddGrowableCol(1, 1);
   }
 
-  gridSizer->AddSpacer(1);
-  gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
+  gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Action labels")), 0,
+                 wxALIGN_CENTER_VERTICAL);
   if (m_isChance) {
     gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Probability")), 0,
                    wxALIGN_CENTER_VERTICAL);
@@ -232,11 +243,6 @@ void ActionPanel::Rebuild()
 
   for (size_t i = 0; i < m_rows.size(); i++) {
     Row &row = m_rows[i];
-
-    wxString number;
-    number << (i + 1);
-    gridSizer->Add(new wxStaticText(this, wxID_STATIC, number), 0,
-                   wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
     row.labelCtrl = new LabelTextCtrl(this, wxID_ANY, row.currentLabelText);
     if (row.isDeleted) {
@@ -320,7 +326,6 @@ void ActionPanel::Rebuild()
   // directly below the last row's Up/Down/Delete buttons rather than as a separate control
   // elsewhere in the dialog.
   gridSizer->AddSpacer(1);
-  gridSizer->AddSpacer(1);
   if (m_isChance) {
     gridSizer->AddSpacer(1);
   }
@@ -331,7 +336,7 @@ void ActionPanel::Rebuild()
   addSizer->Add(addButton, 0, wxLEFT, 2);
   gridSizer->Add(addSizer, 0, wxALIGN_CENTER_VERTICAL);
 
-  m_topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
+  m_topSizer->Add(gridSizer, 1, wxEXPAND);
   FitInside();
   Layout();
   m_rebuilding = false;
@@ -360,8 +365,18 @@ void ActionPanel::AddAction()
   m_rebuilding = true;
   CallAfter([this]() {
     Rebuild();
+    ScrollToBottom();
     NotifyChanged();
   });
+}
+
+void ActionPanel::ScrollToBottom()
+{
+  int xUnit, yUnit;
+  GetScrollPixelsPerUnit(&xUnit, &yUnit);
+  if (yUnit > 0) {
+    Scroll(0, GetVirtualSize().GetHeight() / yUnit);
+  }
 }
 
 void ActionPanel::ToggleDeleted(int p_index)
@@ -454,17 +469,69 @@ wxString ActionPanel::ValidateLabels()
 //                      class EditMoveDialog
 //======================================================================
 
-EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
-  : wxDialog(p_parent, wxID_ANY, _("Edit move"), wxDefaultPosition, wxDefaultSize,
+EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
+                               const GameInfoset &p_infoset)
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-    m_infoset(p_infoset)
+    m_doc(p_doc), m_infoset(p_infoset)
 {
+  // The dialog keeps the platform's normal dialog-chrome background; only the header panel
+  // (explicitly BTNFACE, just below) and the action list itself (explicitly WINDOW, in
+  // ActionPanel's own constructor) are given a different one, so the action list reads as the
+  // one light "surface" rather than the whole dialog being white.
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
+  // Header: a shaded strip, divided from the action list below -- the same treatment
+  // AppendMovePopup uses for its "Append/Insert move for <player>" sentence, applied here to
+  // the analogous "which player, which information set" fields.
+  m_headerPanel = new wxPanel(this);
+  m_headerPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+
+  auto *headerSizer = new wxBoxSizer(wxVERTICAL);
+
+  auto *sentenceSizer = new wxBoxSizer(wxHORIZONTAL);
+  sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("Move for")), 0,
+                     wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  // wxBitmapComboBox carries each player's colour swatch as part of the dropdown itself
+  // (cross-platform -- Windows/GTK/macOS all implement it), rather than needing a separate
+  // wxStaticBitmap kept in sync alongside a plain wxChoice.
+  m_player = new wxBitmapComboBox(m_headerPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                                  wxDefaultSize, 0, nullptr, wxCB_READONLY);
+  if (p_infoset->IsChanceInfoset()) {
+    m_player->Append(_("Chance"), MakeColorSwatch(p_doc->GetStyle().GetPlayerColor(
+                                      p_infoset->GetGame()->GetChance())));
+    m_player->SetSelection(0);
+    m_player->Disable();
+  }
+  else {
+    for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
+      wxString label;
+      label << player->GetNumber() << ": " << player->GetLabel();
+      m_player->Append(label, MakeColorSwatch(p_doc->GetStyle().GetPlayerColor(player)));
+    }
+    m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
+  }
+  sentenceSizer->Add(m_player, 1, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
+  headerSizer->Add(sentenceSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+
+  {
+    wxString label;
+    label << _("Shared by ") << p_infoset->GetMembers().size() << _(" node(s)");
+    auto *memberText = new wxStaticText(m_headerPanel, wxID_ANY, label);
+    memberText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+    wxFont memberFont = memberText->GetFont();
+    memberFont.SetPointSize(memberFont.GetPointSize() - 1);
+    memberText->SetFont(memberFont);
+    headerSizer->Add(memberText, 0, wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+  }
+
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_infosetLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(p_infoset->GetLabel()));
+  labelSizer->Add(new wxStaticText(m_headerPanel, wxID_STATIC, _("Information set label")), 0,
+                  wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(7));
+  m_infosetLabel =
+      new LabelTextCtrl(m_headerPanel, wxID_ANY, wxString::FromUTF8(p_infoset->GetLabel()));
   m_infosetLabelDefaultBg = m_infosetLabel->GetBackgroundColour();
   m_infosetLabel->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_event) {
     UpdateValidation();
@@ -474,62 +541,52 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
     UpdateValidation();
     p_event.Skip();
   });
-  labelSizer->Add(m_infosetLabel, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(labelSizer, 0, wxEXPAND);
+  labelSizer->Add(m_infosetLabel, 1, wxEXPAND);
+  headerSizer->Add(labelSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
 
-  {
-    wxString label;
-    label << _("Number of members: ") << p_infoset->GetMembers().size();
-    topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
-  }
+  m_headerPanel->SetSizer(headerSizer);
+  topSizer->Add(m_headerPanel, 0, wxEXPAND);
 
-  auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
-                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  m_player = new wxChoice(this, wxID_ANY);
-  if (p_infoset->IsChanceInfoset()) {
-    m_player->Append(_("Chance"));
-    m_player->SetSelection(0);
-    m_player->Disable();
-  }
-  else {
-    for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
-      wxString label;
-      label << player->GetNumber() << ": " << player->GetLabel();
-      m_player->Append(label);
-    }
-    m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
-  }
-  playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(playerSizer, 0, wxEXPAND);
+  topSizer->Add(new wxStaticLine(this), 0, wxEXPAND);
 
-  auto *actionBoxSizer =
-      new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxVERTICAL);
+  // A white surface, like the header panel is a shaded one, so the margin around the action
+  // list reads as part of that white surface rather than as a strip of the dialog's own grey
+  // showing through: putting the padding directly on topSizer (the dialog itself) would have
+  // left the margin grey while only the list inside it was white.
+  auto *actionAreaPanel = new wxPanel(this);
+  actionAreaPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+  auto *actionAreaSizer = new wxBoxSizer(wxVERTICAL);
   // ActionPanel sizes itself to fit its own content (see its constructor); don't override
   // that with a fixed estimate here, which would go stale as soon as the row count changes.
-  m_actionPanel = new ActionPanel(this, p_infoset, [this]() { UpdateValidation(); });
+  m_actionPanel = new ActionPanel(actionAreaPanel, p_infoset, [this]() { UpdateValidation(); });
+  actionAreaSizer->Add(m_actionPanel, 1, wxEXPAND | wxALL, FromDIP(12));
+  actionAreaPanel->SetSizer(actionAreaSizer);
+  topSizer->Add(actionAreaPanel, 1, wxEXPAND);
 
-  actionBoxSizer->Add(m_actionPanel, 1, wxALL | wxEXPAND, 5);
-
-  topSizer->Add(actionBoxSizer, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(new wxStaticLine(this), 0, wxEXPAND);
 
   m_errorText = new wxStaticText(this, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
-  topSizer->Add(m_errorText, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 5);
+  topSizer->Add(m_errorText, 0, wxEXPAND | wxALL, FromDIP(10));
 
+  // No wxTOP here: the error text above already carries its own bottom margin, and stacking
+  // that with this sizer's own top margin was the extra, unintended gap above the buttons.
   if (auto *buttons = CreateSeparatedButtonSizer(wxOK | wxCANCEL)) {
-    topSizer->Add(buttons, 0, wxALL | wxEXPAND, 5);
+    topSizer->Add(buttons, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
   }
 
   SetSizer(topSizer);
+  Bind(wxEVT_BUTTON, &EditMoveDialog::OnOK, this, wxID_OK);
+
+  // Hides m_errorText when there's nothing to report (there never is yet, at this point) --
+  // done before the size calculations below so the empty state doesn't reserve dead space
+  // for a message that isn't there, the extra gap above OK/Cancel that this was chasing.
+  UpdateValidation();
+
   topSizer->SetSizeHints(this);
   SetSize(GetBestSize());
   SetMinSize(GetSize());
   CenterOnParent();
-
-  Bind(wxEVT_BUTTON, &EditMoveDialog::OnOK, this, wxID_OK);
-
-  UpdateValidation();
 }
 
 void EditMoveDialog::UpdateValidation()
@@ -558,6 +615,8 @@ void EditMoveDialog::UpdateValidation()
   }
 
   m_errorText->SetLabel(message);
+  m_errorText->Show(!message.empty());
+  Layout();
   if (auto *ok = FindWindow(wxID_OK)) {
     ok->Enable(message.empty());
   }
