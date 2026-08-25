@@ -180,19 +180,6 @@ class BehaviorSupportProfile:
             deref(self.profile) == deref(cython.cast(BehaviorSupportProfile, other).profile)
         )
 
-    def __contains__(self, action: Action) -> bool:
-        if action.infoset.game != self.game:
-            raise MismatchError(
-                "action is not part of the game on which the profile is defined."
-            )
-        return deref(self.profile).Contains(cython.cast(Action, action).action)
-
-    def __iter__(self) -> typing.Generator[Action, None, None]:
-        for infoset in self.game.infosets:
-            infoset_handle = cython.cast(Infoset, infoset).infoset
-            for action in deref(self.profile).GetActions(infoset_handle):
-                yield Action.wrap(action)
-
     def __getitem__(self, index: typing.Any) -> BehaviorSupport | ActionSupport:
         """Access a component of the support profile specified by `index`.
 
@@ -221,7 +208,7 @@ class BehaviorSupportProfile:
                 raise MismatchError("infoset must be part of the same game")
             return self._action_support_at(index)
         if isinstance(index, str):
-            resolved_player = cython.cast(Player, self.game._resolve_player(index, "__getitem__"))
+            resolved_player: Player = self.game.players[index]
             values = {
                 infoset: self._action_support_at(infoset) for infoset in resolved_player.infosets
             }

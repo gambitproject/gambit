@@ -27,14 +27,17 @@ from libcpp.memory cimport unique_ptr
 
 @cython.cclass
 class StrategySupport:
-    """A set of strategies for a specified player in a `StrategySupportProfile`.
+    """The labels of the strategies for a specified player in a
+    `StrategySupportProfile`.
 
     An immutable snapshot taken from a ``StrategySupportProfile`` at retrieval time: it
     does not reflect later changes to the profile. The player is accessible via `player`.
 
     .. versionchanged:: 17.0.0
 
-        No longer a live view onto the profile: holds its own copy of the strategies.
+        No longer a live view onto the profile: holds its own copy of the strategy
+        labels. Iterates over strategy labels (``str``) rather than ``Strategy``
+        objects.
     """
     _player = cython.declare(Player)
     _strategies = cython.declare(tuple)
@@ -67,11 +70,11 @@ class StrategySupport:
     def __len__(self) -> int:
         return len(self._strategies)
 
-    def __iter__(self) -> typing.Generator[Strategy, None, None]:
+    def __iter__(self) -> typing.Generator[str, None, None]:
         yield from self._strategies
 
-    def __contains__(self, strategy: Strategy) -> bool:
-        return strategy in self._strategies
+    def __contains__(self, label: str) -> bool:
+        return label in self._strategies
 
 
 @cython.cclass
@@ -110,36 +113,25 @@ class StrategySupportProfile:
             deref(self.profile) == deref(cython.cast(StrategySupportProfile, other).profile)
         )
 
-    def __contains__(self, strategy: Strategy) -> bool:
-        if strategy not in self.game.strategies:
-            raise MismatchError(
-                "strategy is not part of the game on which the profile is defined."
-            )
-        return deref(self.profile).Contains(strategy.strategy)
-
-    def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        for player in deref(self.profile).GetGame().deref().GetPlayers():
-            for strat in deref(self.profile).GetStrategies(player):
-                yield Strategy.wrap(strat)
-
-    def __getitem__(self, player: PlayerReference) -> StrategySupport:
-        """Return a `StrategySupport` representing the strategies in the support
-        belonging to `player`, as of now; it will not reflect any later changes to
-        this profile.
+    def __getitem__(self, player: str) -> StrategySupport:
+        """Return a `StrategySupport` representing the labels of the strategies in the
+        support belonging to the player with label `player`, as of now; it will not
+        reflect any later changes to this profile.
 
         Parameters
         ----------
-        player : Player
-            The player to extract the support for
+        player : str
+            The label of the player to extract the support for.
 
         Raises
         ------
-        MismatchError
-            If `player` is a `Player` from a different game.
+        KeyError
+            If no player in the game has the label `player`.
         """
-        resolved_player = cython.cast(Player, self.game._resolve_player(player, "__getitem__"))
+        resolved_player: Player = self.game.players[player]
         strategies = tuple(
-            Strategy.wrap(s) for s in deref(self.profile).GetStrategies(resolved_player.player)
+            Strategy.wrap(s).label
+            for s in deref(self.profile).GetStrategies(resolved_player.player)
         )
         return StrategySupport.wrap(resolved_player, strategies)
 
@@ -200,7 +192,7 @@ class StrategySupportProfile:
             If any entry of `strategies` is not one of the player's strategy labels,
             or if `strategies` is empty.
         """
-        resolved_player = cython.cast(Player, self.game._resolve_player(player, "__setitem__"))
+        resolved_player: Player = self.game.players[player]
         self._set_support(resolved_player, strategies)
 
     def copy(self) -> StrategySupportProfile:
@@ -227,8 +219,36 @@ class StrategySupportProfile:
         with io.StringIO(WriteNfgFileSupport(deref(self.profile)).decode()) as f:
             return read_nfg(f)
 
-    def is_dominated(self, strategy: Strategy, strict: bool, external: bool = False) -> bool:
-        return deref(self.profile).IsDominated(strategy.strategy, strict, external)
+    def is_dominated(
+        self, player: str, strategy: str, strict: bool, external: bool = False
+    ) -> bool:
+        """Returns whether the strategy with label `strategy`, belonging to the player
+        with label `player`, is dominated.
+
+        Parameters
+        ----------
+        player : str
+            The label of the player to whom the strategy belongs.
+        strategy : str
+            The label of the strategy to check.
+        strict : bool
+            If `True`, only checks for strict dominance.
+        external : bool, default False
+            The default is to consider dominance only by strategies which are in
+            the support for the player. If `True`, strategies which are dominated
+            by another strategy not in the support profile are also considered.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has the label `player`, or the player has no
+            strategy with the label `strategy`.
+        """
+        resolved_player: Player = self.game.players[player]
+        resolved_strategy: Strategy = resolved_player.strategies[strategy]
+        return deref(self.profile).IsDominated(
+            cython.cast(Strategy, resolved_strategy).strategy, strict, external
+        )
 
 
 def _undominated_strategies_solve(
