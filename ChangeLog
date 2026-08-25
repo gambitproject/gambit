@@ -2,6 +2,8 @@
 
 ### Added
 - Added `BehaviorSupportProfile` to `pygambit`.
+- Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
+  is found or another solver event is emitted.
 
 ### Changed
 - Revised `StrategySupportProfile` to expose a slimmer set of operations, and
