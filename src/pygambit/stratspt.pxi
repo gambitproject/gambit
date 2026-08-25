@@ -113,6 +113,17 @@ class StrategySupportProfile:
             deref(self.profile) == deref(cython.cast(StrategySupportProfile, other).profile)
         )
 
+    def __iter__(self) -> typing.Generator[StrategySupport, None, None]:
+        """Iterate over the strategy supports in the profile, one per player.
+
+        Yields
+        ------
+        support : StrategySupport
+            The player's strategy support specified in the profile
+        """
+        for player in self.game.players:
+            yield self[player.label]
+
     def __getitem__(self, player: str) -> StrategySupport:
         """Return a `StrategySupport` representing the labels of the strategies in the
         support belonging to the player with label `player`, as of now; it will not

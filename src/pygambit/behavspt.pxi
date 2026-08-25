@@ -111,10 +111,8 @@ class BehaviorSupport:
     def __len__(self) -> int:
         return len(self._values)
 
-    def __iter__(self) -> typing.Iterator[tuple[Infoset, ActionSupport]]:
-        """Iterate over the action supports specified by the behavior support.
-
-        A ``BehaviorSupport`` is a collection of ``ActionSupport``\\ s, one per
+    def __iter__(self) -> typing.Generator[ActionSupport, None, None]:
+        """Iterate over the action supports specified by the behavior support, one per
         information set belonging to the player.
 
         Yields
@@ -124,7 +122,8 @@ class BehaviorSupport:
         support : ActionSupport
             The support at the information set
         """
-        yield from self._values.items()
+        for infoset in self.player.infosets:
+            yield self[infoset]
 
     def __getitem__(self, infoset: Infoset) -> ActionSupport:
         """Returns the action support at `infoset`.
@@ -179,6 +178,17 @@ class BehaviorSupportProfile:
             isinstance(other, BehaviorSupportProfile) and
             deref(self.profile) == deref(cython.cast(BehaviorSupportProfile, other).profile)
         )
+
+    def __iter__(self) -> typing.Generator[BehaviorSupport, None, None]:
+        """Iterate over the behavior supports in the profile, one per player.
+
+        Yields
+        ------
+        support : BehaviorSupport
+            The player's behavior support specified in the profile
+        """
+        for player in self.game.players:
+            yield self[player.label]
 
     def __getitem__(self, index: typing.Any) -> BehaviorSupport | ActionSupport:
         """Access a component of the support profile specified by `index`.
