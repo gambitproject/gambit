@@ -117,10 +117,8 @@ class BehaviorSupport:
 
         Yields
         ------
-        infoset : Infoset
-            An information set belonging to the player
         support : ActionSupport
-            The support at the information set
+            The support at an information set belonging to the player
         """
         for infoset in self.player.infosets:
             yield self[infoset]
@@ -201,8 +199,9 @@ class BehaviorSupportProfile:
             * If `index` is a ``str``, returns a ``BehaviorSupport`` over the player's
               information sets. The player is determined by finding the player with
               that label, if any.
-            * If `index` is an ``Infoset``, returns an ``ActionSupport`` over the
-              actions in the support at the information set.
+            * If `index` is an ``Infoset`` (or the value of a node's ``infoset``
+              property), returns an ``ActionSupport`` over the actions in the support
+              at the information set.
 
         Raises
         ------
@@ -213,10 +212,11 @@ class BehaviorSupportProfile:
         KeyError
             If `index` is a ``str`` and no player in the game has that label.
         """
-        if isinstance(index, Infoset):
-            if index.game != self.game:
+        resolved_infoset = self._resolve_infoset_arg(index)
+        if resolved_infoset is not None:
+            if resolved_infoset.game != self.game:
                 raise MismatchError("infoset must be part of the same game")
-            return self._action_support_at(index)
+            return self._action_support_at(resolved_infoset)
         if isinstance(index, str):
             resolved_player: Player = self.game.players[index]
             values = {
@@ -226,6 +226,20 @@ class BehaviorSupportProfile:
         raise TypeError(
             f"profile index must be str or Infoset, not {index.__class__.__name__}"
         )
+
+    @cython.cfunc
+    def _resolve_infoset_arg(self, index: object) -> object:
+        """Resolves index to an Infoset if it is one (or a NodeInfoset, which resolves
+        via the node it was fetched from), or returns None if index is neither.
+        """
+        if isinstance(index, NodeInfoset):
+            resolved = cython.cast(NodeInfoset, index)._resolve()
+            if resolved is None:
+                raise ValueError("index resolves to no information set (the node is terminal)")
+            return resolved
+        if isinstance(index, Infoset):
+            return index
+        return None
 
     def _action_support_at(self, infoset: Infoset) -> ActionSupport:
         """Returns a snapshot of the action support at infoset, as of now."""
@@ -276,7 +290,8 @@ class BehaviorSupportProfile:
         Parameters
         ----------
         infoset : Infoset
-            The information set whose support is to be set.
+            The information set whose support is to be set. The value of a node's
+            ``infoset`` property is also accepted.
         actions : Iterable[str]
             The labels of the actions which should be in the support at the
             information set. Every other action at the information set is removed
@@ -292,11 +307,12 @@ class BehaviorSupportProfile:
             If any entry of `actions` is not one of the information set's action
             labels, or if `actions` is empty.
         """
-        if not isinstance(infoset, Infoset):
+        resolved_infoset = self._resolve_infoset_arg(infoset)
+        if resolved_infoset is None:
             raise TypeError(f"profile index must be Infoset, not {infoset.__class__.__name__}")
-        if infoset.game != self.game:
+        if resolved_infoset.game != self.game:
             raise MismatchError("infoset must be part of the same game")
-        self._set_support(infoset, actions)
+        self._set_support(resolved_infoset, actions)
 
     def copy(self) -> BehaviorSupportProfile:
         """Creates a copy of the support profile.
