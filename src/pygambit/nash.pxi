@@ -438,121 +438,121 @@ def _convert_mbpr(
 
 
 def _enumpure_strategy_solve(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedStrategyProfile[c_Rational]]:
     return _convert_mspr(
-        EnumPureStrategySolve(game.game, MakeStrategyCallback[c_Rational](eqm_callback))
+        EnumPureStrategySolve(game.game, MakeStrategyCallback[c_Rational](nash_callback))
     )
 
 
 def _enumpure_agent_solve(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileRational]:
     return _convert_mbpr(
-        EnumPureAgentSolve(game.game, MakeBehaviorCallback[c_Rational](eqm_callback))
+        EnumPureAgentSolve(game.game, MakeBehaviorCallback[c_Rational](nash_callback))
     )
 
 
 def _enummixed_strategy_solve_double(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedStrategyProfileDouble]:
     return _convert_mspd(
-        EnumMixedStrategySolve[double](game.game, MakeStrategyCallback[double](eqm_callback))
+        EnumMixedStrategySolve[double](game.game, MakeStrategyCallback[double](nash_callback))
     )
 
 
 def _enummixed_strategy_solve_rational(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedStrategyProfileRational]:
     return _convert_mspr(
         EnumMixedStrategySolve[c_Rational](
-            game.game, MakeStrategyCallback[c_Rational](eqm_callback)
+            game.game, MakeStrategyCallback[c_Rational](nash_callback)
         )
     )
 
 
 def _lcp_behavior_solve_double(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileDouble]:
     return _convert_mbpd(
-        LcpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](eqm_callback))
+        LcpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](nash_callback))
     )
 
 
 def _lcp_behavior_solve_rational(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileRational]:
     return _convert_mbpr(
-        LcpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](eqm_callback))
+        LcpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](nash_callback))
     )
 
 
 def _lcp_strategy_solve_double(
-        game: Game, stop_after, max_depth: int, eqm_callback: object = None
+        game: Game, stop_after, max_depth: int, nash_callback: object = None
 ) -> list[MixedStrategyProfileDouble]:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
     return _convert_mspd(
         LcpStrategySolve[double](
-            game.game, c_stop_after, max_depth, MakeStrategyCallback[double](eqm_callback)
+            game.game, c_stop_after, max_depth, MakeStrategyCallback[double](nash_callback)
         )
     )
 
 
 def _lcp_strategy_solve_rational(
-        game: Game, stop_after, max_depth: int, eqm_callback: object = None
+        game: Game, stop_after, max_depth: int, nash_callback: object = None
 ) -> list[MixedStrategyProfileRational]:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
     return _convert_mspr(
         LcpStrategySolve[c_Rational](
-            game.game, c_stop_after, max_depth, MakeStrategyCallback[c_Rational](eqm_callback)
+            game.game, c_stop_after, max_depth, MakeStrategyCallback[c_Rational](nash_callback)
         )
     )
 
 
 def _lp_behavior_solve_double(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileDouble]:
     return _convert_mbpd(
-        LpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](eqm_callback))
+        LpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](nash_callback))
     )
 
 
 def _lp_behavior_solve_rational(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileRational]:
     return _convert_mbpr(
-        LpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](eqm_callback))
+        LpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](nash_callback))
     )
 
 
 def _lp_strategy_solve_double(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedStrategyProfileDouble]:
     return _convert_mspd(
-        LpStrategySolve[double](game.game, MakeStrategyCallback[double](eqm_callback))
+        LpStrategySolve[double](game.game, MakeStrategyCallback[double](nash_callback))
     )
 
 
 def _lp_strategy_solve_rational(
-        game: Game, eqm_callback: object = None
+        game: Game, nash_callback: object = None
 ) -> list[MixedStrategyProfileRational]:
     return _convert_mspr(
-        LpStrategySolve[c_Rational](game.game, MakeStrategyCallback[c_Rational](eqm_callback))
+        LpStrategySolve[c_Rational](game.game, MakeStrategyCallback[c_Rational](nash_callback))
     )
 
 
 def _liap_strategy_solve(start: MixedStrategyProfileDouble,
                          maxregret: float,
                          maxiter: int,
-                         eqm_callback: object = None,
+                         nash_callback: object = None,
                          event_callback: object = None) -> list[MixedStrategyProfileDouble]:
     return _convert_mspd(LiapStrategySolve(
         deref(start.profile), maxregret, maxiter,
-        MakeStrategyCallback[double](eqm_callback),
+        MakeStrategyCallback[double](nash_callback),
         MakeLiapEventCallback[c_MixedStrategyProfile[double]](event_callback)
     ))
 
@@ -560,33 +560,33 @@ def _liap_strategy_solve(start: MixedStrategyProfileDouble,
 def _liap_behavior_solve(start: MixedBehaviorProfileDouble,
                          maxregret: float,
                          maxiter: int,
-                         eqm_callback: object = None,
+                         nash_callback: object = None,
                          event_callback: object = None) -> list[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LiapAgentSolve(
         deref(start.profile), maxregret, maxiter,
-        MakeBehaviorCallback[double](eqm_callback),
+        MakeBehaviorCallback[double](nash_callback),
         MakeLiapEventCallback[c_MixedBehaviorProfile[double]](event_callback)
     ))
 
 
 def _simpdiv_strategy_solve(
         start: MixedStrategyProfileRational, maxregret: Rational, gridstep: int, leash: int,
-        eqm_callback: object = None, event_callback: object = None
+        nash_callback: object = None, event_callback: object = None
 ) -> list[MixedStrategyProfileRational]:
     return _convert_mspr(SimpdivStrategySolve(
         deref(start.profile), to_rational(str(maxregret).encode("ascii")), gridstep, leash,
-        MakeStrategyCallback[c_Rational](eqm_callback), MakeSimpdivEventCallback(event_callback)
+        MakeStrategyCallback[c_Rational](nash_callback), MakeSimpdivEventCallback(event_callback)
     ))
 
 
 def _ipa_strategy_solve(
-        pert: MixedStrategyProfileDouble, eqm_callback: object = None,
+        pert: MixedStrategyProfileDouble, nash_callback: object = None,
         event_callback: object = None
 ) -> list[MixedStrategyProfileDouble]:
     try:
         return _convert_mspd(IPAStrategySolve(
             deref(pert.profile),
-            MakeStrategyCallback[double](eqm_callback), MakeIPAEventCallback(event_callback)
+            MakeStrategyCallback[double](nash_callback), MakeIPAEventCallback(event_callback)
         ))
     except RuntimeError as e:
         if "does not have unique maximizer" in str(e):
@@ -600,13 +600,13 @@ def _gnm_strategy_solve(
         steps: int,
         local_newton_interval: int,
         local_newton_maxits: int,
-        eqm_callback: object = None,
+        nash_callback: object = None,
         event_callback: object = None,
 ) -> list[MixedStrategyProfileDouble]:
     try:
         return _convert_mspd(GNMStrategySolve(
             deref(pert.profile), end_lambda, steps, local_newton_interval, local_newton_maxits,
-            MakeStrategyCallback[double](eqm_callback), MakeGNMEventCallback(event_callback)
+            MakeStrategyCallback[double](nash_callback), MakeGNMEventCallback(event_callback)
         ))
     except RuntimeError as e:
         if "does not have unique maximizer" in str(e):
@@ -635,7 +635,7 @@ def _enumpoly_strategy_solve(
         stop_after,
         maxregret: float,
         max_rectangles: int,
-        eqm_callback: object = None,
+        nash_callback: object = None,
         event_callback: object = None,
 ) -> list[MixedStrategyProfileDouble]:
     cdef optional[size_t] c_stop_after
@@ -643,7 +643,7 @@ def _enumpoly_strategy_solve(
         c_stop_after = <size_t>stop_after
     return _convert_mspd(EnumPolyStrategySolve(
         game.game, c_stop_after, maxregret, max_rectangles,
-        MakeStrategyCallback[double](eqm_callback),
+        MakeStrategyCallback[double](nash_callback),
         MakeEnumPolyEventCallback[c_StrategySupportProfile](event_callback)
     ))
 
@@ -653,7 +653,7 @@ def _enumpoly_behavior_solve(
         stop_after,
         maxregret: float,
         max_rectangles: int,
-        eqm_callback: object = None,
+        nash_callback: object = None,
         event_callback: object = None,
 ) -> list[MixedBehaviorProfileDouble]:
     cdef optional[size_t] c_stop_after
@@ -661,7 +661,7 @@ def _enumpoly_behavior_solve(
         c_stop_after = <size_t>stop_after
     return _convert_mbpd(EnumPolyBehaviorSolve(
         game.game, c_stop_after, maxregret, max_rectangles,
-        MakeBehaviorCallback[double](eqm_callback),
+        MakeBehaviorCallback[double](nash_callback),
         MakeEnumPolyEventCallback[c_BehaviorSupportProfile](event_callback)
     ))
 

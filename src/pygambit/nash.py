@@ -70,7 +70,7 @@ class NashComputationResult:
 
 def enumpure_solve(
         game: libgbt.Game,
-        eqm_callback: Callable[[libgbt.MixedStrategyProfileRational], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedStrategyProfileRational], None] | None = None,
 ) -> NashComputationResult:
     """Compute all :ref:`pure-strategy Nash equilibria <enumpure>` of game.
 
@@ -81,14 +81,14 @@ def enumpure_solve(
 
     .. versionchanged:: 17.0.0
 
-       Added `eqm_callback` parameter.
+       Added `nash_callback` parameter.
 
     Parameters
     ----------
     game : Game
         The game to compute equilibria in.
 
-    eqm_callback : Callable[[MixedStrategyProfileRational], None], optional
+    nash_callback : Callable[[MixedStrategyProfileRational], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.
 
@@ -106,13 +106,13 @@ def enumpure_solve(
         method="enumpure",
         rational=True,
         use_strategic=True,
-        equilibria=libgbt._enumpure_strategy_solve(game, eqm_callback)
+        equilibria=libgbt._enumpure_strategy_solve(game, nash_callback)
     )
 
 
 def enumpure_agent_solve(
         game: libgbt.Game,
-        eqm_callback: Callable[[libgbt.MixedBehaviorProfileRational], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedBehaviorProfileRational], None] | None = None,
 ) -> NashComputationResult:
     """Compute all :ref:`pure-strategy agent Nash equilibria <gambit-enumpure>` of game.
 
@@ -122,14 +122,14 @@ def enumpure_agent_solve(
 
     .. versionchanged:: 17.0.0
 
-       Added `eqm_callback` parameter.
+       Added `nash_callback` parameter.
 
     Parameters
     ----------
     game : Game
         The game to compute agent-Nash equilibria in.
 
-    eqm_callback : Callable[[MixedBehaviorProfileRational], None], optional
+    nash_callback : Callable[[MixedBehaviorProfileRational], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.
 
@@ -147,7 +147,7 @@ def enumpure_agent_solve(
         method="enumpure-agent",
         rational=True,
         use_strategic=False,
-        equilibria=libgbt._enumpure_agent_solve(game, eqm_callback)
+        equilibria=libgbt._enumpure_agent_solve(game, nash_callback)
     )
 
 
@@ -155,7 +155,7 @@ def enummixed_solve(
         game: libgbt.Game,
         rational: bool = True,
         lrsnash_path: pathlib.Path | str | None = None,
-        eqm_callback: Callable[
+        nash_callback: Callable[
             [libgbt.MixedStrategyProfile], None
         ] | None = None,
 ) -> NashComputationResult:
@@ -177,7 +177,7 @@ def enummixed_solve(
 
         .. versionadded:: 16.3.0
 
-    eqm_callback : Callable[[MixedStrategyProfile], None], optional
+    nash_callback : Callable[[MixedStrategyProfile], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.  Not
         available when `lrsnash_path` is specified.
@@ -195,16 +195,16 @@ def enummixed_solve(
         If game has more than two players.
 
     ValueError
-        If both `lrsnash_path` and `eqm_callback` are specified.
+        If both `lrsnash_path` and `nash_callback` are specified.
 
     Notes
     -----
     `lrsnash` is part of `lrslib`, available at http://cgm.cs.mcgill.ca/~avis/C/lrs.html
     """
     if lrsnash_path is not None:
-        if eqm_callback is not None:
+        if nash_callback is not None:
             raise ValueError(
-                "enummixed_solve(): eqm_callback cannot be used with lrsnash_path"
+                "enummixed_solve(): nash_callback cannot be used with lrsnash_path"
             )
         equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
         return NashComputationResult(
@@ -216,9 +216,9 @@ def enummixed_solve(
             equilibria=equilibria,
         )
     if rational:
-        equilibria = libgbt._enummixed_strategy_solve_rational(game, eqm_callback)
+        equilibria = libgbt._enummixed_strategy_solve_rational(game, nash_callback)
     else:
-        equilibria = libgbt._enummixed_strategy_solve_double(game, eqm_callback)
+        equilibria = libgbt._enummixed_strategy_solve_double(game, nash_callback)
     return NashComputationResult(
         game=game,
         method="enummixed",
@@ -234,7 +234,7 @@ def lcp_solve(
         use_strategic: bool = False,
         stop_after: int | None = None,
         max_depth: int | None = None,
-        eqm_callback: Callable[
+        nash_callback: Callable[
             [libgbt.MixedStrategyProfile | libgbt.MixedBehaviorProfile], None
         ] | None = None,
 ) -> NashComputationResult:
@@ -263,7 +263,7 @@ def lcp_solve(
         If specified, will limit the recursive search, but may result in some accessible
         equilibria not being found.
 
-    eqm_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
+    nash_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.
 
@@ -302,16 +302,16 @@ def lcp_solve(
     if not game.is_tree or use_strategic:
         if rational:
             equilibria = libgbt._lcp_strategy_solve_rational(
-                game, stop_after, max_depth or 0, eqm_callback
+                game, stop_after, max_depth or 0, nash_callback
             )
         else:
             equilibria = libgbt._lcp_strategy_solve_double(
-                game, stop_after, max_depth or 0, eqm_callback
+                game, stop_after, max_depth or 0, nash_callback
             )
     elif rational:
-        equilibria = libgbt._lcp_behavior_solve_rational(game, eqm_callback)
+        equilibria = libgbt._lcp_behavior_solve_rational(game, nash_callback)
     else:
-        equilibria = libgbt._lcp_behavior_solve_double(game, eqm_callback)
+        equilibria = libgbt._lcp_behavior_solve_double(game, nash_callback)
     return NashComputationResult(
         game=game,
         method="lcp",
@@ -326,7 +326,7 @@ def lp_solve(
         game: libgbt.Game,
         rational: bool = True,
         use_strategic: bool = False,
-        eqm_callback: Callable[
+        nash_callback: Callable[
             [libgbt.MixedStrategyProfile | libgbt.MixedBehaviorProfile], None
         ] | None = None,
 ) -> NashComputationResult:
@@ -346,7 +346,7 @@ def lp_solve(
         Whether to use the strategic form.  If `True`, always uses the strategic
         representation even if the game's native representation is extensive.
 
-    eqm_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
+    nash_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.
 
@@ -364,13 +364,13 @@ def lp_solve(
     """
     if not game.is_tree or use_strategic:
         if rational:
-            equilibria = libgbt._lp_strategy_solve_rational(game, eqm_callback)
+            equilibria = libgbt._lp_strategy_solve_rational(game, nash_callback)
         else:
-            equilibria = libgbt._lp_strategy_solve_double(game, eqm_callback)
+            equilibria = libgbt._lp_strategy_solve_double(game, nash_callback)
     elif rational:
-        equilibria = libgbt._lp_behavior_solve_rational(game, eqm_callback)
+        equilibria = libgbt._lp_behavior_solve_rational(game, nash_callback)
     else:
-        equilibria = libgbt._lp_behavior_solve_double(game, eqm_callback)
+        equilibria = libgbt._lp_behavior_solve_double(game, nash_callback)
     return NashComputationResult(
         game=game,
         method="lp",
@@ -384,7 +384,7 @@ def liap_solve(
         start: libgbt.MixedStrategyProfileDouble,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
-        eqm_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.LiapStartEvent | libgbt.LiapEndEvent], None
         ] | None = None,
@@ -422,7 +422,7 @@ def liap_solve(
 
         .. versionadded: 16.2.0
 
-    eqm_callback : Callable[[MixedStrategyProfileDouble], None], optional
+    nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
 
         .. versionadded:: 17.0.0
@@ -443,7 +443,7 @@ def liap_solve(
         raise ValueError("liap_solve(): maxregret argument must be positive")
     equilibria = libgbt._liap_strategy_solve(
         start, maxregret=maxregret, maxiter=maxiter,
-        eqm_callback=eqm_callback, event_callback=event_callback
+        nash_callback=nash_callback, event_callback=event_callback
     )
     return NashComputationResult(
         game=start.game,
@@ -459,7 +459,7 @@ def liap_agent_solve(
         start: libgbt.MixedBehaviorProfileDouble,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
-        eqm_callback: Callable[[libgbt.MixedBehaviorProfileDouble], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedBehaviorProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.LiapStartEvent | libgbt.LiapEndEvent], None
         ] | None = None,
@@ -487,7 +487,7 @@ def liap_agent_solve(
     maxiter : int, default 1000
         Maximum number of iterations in function minimization.
 
-    eqm_callback : Callable[[MixedBehaviorProfileDouble], None], optional
+    nash_callback : Callable[[MixedBehaviorProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
 
         .. versionadded:: 17.0.0
@@ -508,7 +508,7 @@ def liap_agent_solve(
         raise ValueError("liap_solve(): maxregret argument must be positive")
     equilibria = libgbt._liap_behavior_solve(
         start, maxregret=maxregret, maxiter=maxiter,
-        eqm_callback=eqm_callback, event_callback=event_callback
+        nash_callback=nash_callback, event_callback=event_callback
     )
     return NashComputationResult(
         game=start.game,
@@ -525,7 +525,7 @@ def simpdiv_solve(
         maxregret: libgbt.Rational | None = None,
         refine: int = 2,
         leash: int | None = None,
-        eqm_callback: Callable[[libgbt.MixedStrategyProfileRational], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedStrategyProfileRational], None] | None = None,
         event_callback: Callable[
             [libgbt.SimpdivStartEvent | libgbt.SimpdivRefinementEvent], None
         ] | None = None,
@@ -562,7 +562,7 @@ def simpdiv_solve(
         may explore.  This trades off the possibility of finding an equilibrium more
         quickly by giving up the guarantee than an equilibrium will necessarily be found.
 
-    eqm_callback : Callable[[MixedStrategyProfileRational], None], optional
+    nash_callback : Callable[[MixedStrategyProfileRational], None], optional
         If specified, called with the equilibrium found, if any.
 
         .. versionadded:: 17.0.0
@@ -587,7 +587,7 @@ def simpdiv_solve(
     elif maxregret < libgbt.Rational(0):
         raise ValueError("simpdiv_solve(): maxregret must be positive")
     equilibria = libgbt._simpdiv_strategy_solve(
-        start, maxregret, refine, leash or 0, eqm_callback, event_callback
+        start, maxregret, refine, leash or 0, nash_callback, event_callback
     )
     return NashComputationResult(
         game=start.game,
@@ -601,7 +601,7 @@ def simpdiv_solve(
 
 def ipa_solve(
         perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
-        eqm_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.IPAStepEvent | libgbt.IPATerminationEvent], None
         ] | None = None,
@@ -620,7 +620,7 @@ def ipa_solve(
 
            Allow selection of the perturbation vector
 
-    eqm_callback : Callable[[MixedStrategyProfileDouble], None], optional
+    nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
 
         .. versionadded:: 17.0.0
@@ -664,7 +664,7 @@ def ipa_solve(
         rational=False,
         use_strategic=True,
         parameters={"perturbation": perturbation},
-        equilibria=libgbt._ipa_strategy_solve(perturbation, eqm_callback, event_callback),
+        equilibria=libgbt._ipa_strategy_solve(perturbation, nash_callback, event_callback),
     )
 
 
@@ -674,7 +674,7 @@ def gnm_solve(
         steps: int = 100,
         local_newton_interval: int = 3,
         local_newton_maxits: int = 10,
-        eqm_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
+        nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [
                 libgbt.GNMPerturbationEvent
@@ -724,7 +724,7 @@ def gnm_solve(
 
         .. versionadded:: 16.2.0
 
-    eqm_callback : Callable[[MixedStrategyProfileDouble], None], optional
+    nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues tracing the path.
 
@@ -795,7 +795,7 @@ GNMTerminationEvent], None], optional
             equilibria=libgbt._gnm_strategy_solve(perturbation, end_lambda,
                                                   steps,
                                                   local_newton_interval, local_newton_maxits,
-                                                  eqm_callback, event_callback)
+                                                  nash_callback, event_callback)
         )
     except RuntimeError as e:
         if "at least one nonzero" in str(e):
@@ -831,7 +831,7 @@ def enumpoly_solve(
         maxregret: float = 1.0e-8,
         max_rectangles: int = 20_000,
         phcpack_path: pathlib.Path | str | None = None,
-        eqm_callback: Callable[
+        nash_callback: Callable[
             [libgbt.MixedStrategyProfile | libgbt.MixedBehaviorProfile], None
         ] | None = None,
         event_callback: Callable[
@@ -877,7 +877,7 @@ def enumpoly_solve(
         This argument specifies the path to the PHCpack executable.
         With this method, only enumeration on the strategic game is supported.
 
-    eqm_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
+    nash_callback : Callable[[MixedStrategyProfile | MixedBehaviorProfile], None], optional
         If specified, called with each equilibrium as it is found, before
         the method continues searching for any further equilibria.  Not
         available when `phcpack_path` is specified.
@@ -906,7 +906,7 @@ def enumpoly_solve(
     Raises
     ------
     ValueError
-        If either `eqm_callback` or `event_callback` is specified along with
+        If either `nash_callback` or `event_callback` is specified along with
         `phcpack_path`.
 
     Notes
@@ -937,9 +937,9 @@ def enumpoly_solve(
                 "enumpoly_solve(): only solving on the strategic representation is "
                 "supported by the PHCpack implementation"
             )
-        if eqm_callback is not None or event_callback is not None:
+        if nash_callback is not None or event_callback is not None:
             raise ValueError(
-                "enumpoly_solve(): eqm_callback and event_callback cannot be used "
+                "enumpoly_solve(): nash_callback and event_callback cannot be used "
                 "with phcpack_path"
             )
         equilibria = nashphc.phcpack_solve(game, phcpack_path, maxregret)
@@ -955,11 +955,11 @@ def enumpoly_solve(
 
     if not game.is_tree or use_strategic:
         equilibria = libgbt._enumpoly_strategy_solve(
-            game, stop_after, maxregret, max_rectangles, eqm_callback, event_callback
+            game, stop_after, maxregret, max_rectangles, nash_callback, event_callback
         )
     else:
         equilibria = libgbt._enumpoly_behavior_solve(
-            game, stop_after, maxregret, max_rectangles, eqm_callback, event_callback
+            game, stop_after, maxregret, max_rectangles, nash_callback, event_callback
         )
     return NashComputationResult(
         game=game,
