@@ -891,9 +891,10 @@ def enumpoly_solve(
         skipped because its system of equations was singular
         (``EnumPolySingularSupportEvent``), or on which the rectangle budget was
         exhausted before completing the search for roots
-        (``EnumPolyBudgetExceededSupportEvent``).  Only available when solving
-        on the strategic representation; not available when `phcpack_path` is
-        specified.
+        (``EnumPolyBudgetExceededSupportEvent``).  The ``support`` carried by
+        each event is a ``StrategySupportProfile`` or ``BehaviorSupportProfile``
+        according to which representation is being solved on.  Not available
+        when `phcpack_path` is specified.
 
         .. versionadded:: 17.0.0
 
@@ -905,9 +906,8 @@ def enumpoly_solve(
     Raises
     ------
     ValueError
-        If `event_callback` is specified while solving on the extensive
-        representation, or either `eqm_callback` or `event_callback` is
-        specified along with `phcpack_path`.
+        If either `eqm_callback` or `event_callback` is specified along with
+        `phcpack_path`.
 
     Notes
     -----
@@ -958,13 +958,8 @@ def enumpoly_solve(
             game, stop_after, maxregret, max_rectangles, eqm_callback, event_callback
         )
     else:
-        if event_callback is not None:
-            raise ValueError(
-                "enumpoly_solve(): event_callback is only available when solving on the "
-                "strategic representation"
-            )
         equilibria = libgbt._enumpoly_behavior_solve(
-            game, stop_after, maxregret, max_rectangles, eqm_callback
+            game, stop_after, maxregret, max_rectangles, eqm_callback, event_callback
         )
     return NashComputationResult(
         game=game,

@@ -128,7 +128,7 @@ class EnumPolyCandidateSupportEvent:
     """Reports a support profile examined by :ref:`enumpoly <enumpoly>` as a candidate
     to contain a totally-mixed equilibrium.
     """
-    support: StrategySupportProfile
+    support: StrategySupportProfile | BehaviorSupportProfile
 
 
 @dataclasses.dataclass(frozen=True)
@@ -136,7 +136,7 @@ class EnumPolySingularSupportEvent:
     """Reports a support profile skipped by :ref:`enumpoly <enumpoly>` because the
     system of equations over it was singular.
     """
-    support: StrategySupportProfile
+    support: StrategySupportProfile | BehaviorSupportProfile
 
 
 @dataclasses.dataclass(frozen=True)
@@ -144,7 +144,7 @@ class EnumPolyBudgetExceededSupportEvent:
     """Reports a support profile on which :ref:`enumpoly <enumpoly>` exhausted its
     rectangle budget before completing the search for roots.
     """
-    support: StrategySupportProfile
+    support: StrategySupportProfile | BehaviorSupportProfile
 
 
 cdef public string InvokeStrategyCallbackDouble(
@@ -341,7 +341,7 @@ cdef public string InvokeIPATerminationEventCallback(
     return b""
 
 
-cdef public string InvokeEnumPolyCandidateSupportEventCallback(
+cdef public string InvokeEnumPolyStrategyCandidateSupportEventCallback(
         callback, support: shared_ptr[c_StrategySupportProfile]
 ):
     try:
@@ -351,7 +351,7 @@ cdef public string InvokeEnumPolyCandidateSupportEventCallback(
     return b""
 
 
-cdef public string InvokeEnumPolySingularSupportEventCallback(
+cdef public string InvokeEnumPolyStrategySingularSupportEventCallback(
         callback, support: shared_ptr[c_StrategySupportProfile]
 ):
     try:
@@ -361,12 +361,44 @@ cdef public string InvokeEnumPolySingularSupportEventCallback(
     return b""
 
 
-cdef public string InvokeEnumPolyBudgetExceededSupportEventCallback(
+cdef public string InvokeEnumPolyStrategyBudgetExceededSupportEventCallback(
         callback, support: shared_ptr[c_StrategySupportProfile]
 ):
     try:
         callback(
             EnumPolyBudgetExceededSupportEvent(support=StrategySupportProfile.wrap(support))
+        )
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeEnumPolyBehaviorCandidateSupportEventCallback(
+        callback, support: shared_ptr[c_BehaviorSupportProfile]
+):
+    try:
+        callback(EnumPolyCandidateSupportEvent(support=BehaviorSupportProfile.wrap(support)))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeEnumPolyBehaviorSingularSupportEventCallback(
+        callback, support: shared_ptr[c_BehaviorSupportProfile]
+):
+    try:
+        callback(EnumPolySingularSupportEvent(support=BehaviorSupportProfile.wrap(support)))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeEnumPolyBehaviorBudgetExceededSupportEventCallback(
+        callback, support: shared_ptr[c_BehaviorSupportProfile]
+):
+    try:
+        callback(
+            EnumPolyBudgetExceededSupportEvent(support=BehaviorSupportProfile.wrap(support))
         )
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
@@ -622,13 +654,15 @@ def _enumpoly_behavior_solve(
         maxregret: float,
         max_rectangles: int,
         eqm_callback: object = None,
+        event_callback: object = None,
 ) -> list[MixedBehaviorProfileDouble]:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
     return _convert_mbpd(EnumPolyBehaviorSolve(
         game.game, c_stop_after, maxregret, max_rectangles,
-        MakeBehaviorCallback[double](eqm_callback)
+        MakeBehaviorCallback[double](eqm_callback),
+        MakeEnumPolyEventCallback[c_BehaviorSupportProfile](event_callback)
     ))
 
 

@@ -99,12 +99,18 @@ InvokeIPAStepEventCallback(PyObject *p_callback,
                            int p_iteration, double p_zDiff, double p_sDiff);
 std::string InvokeIPATerminationEventCallback(PyObject *p_callback, int p_reason,
                                               std::string p_message);
-std::string InvokeEnumPolyCandidateSupportEventCallback(
+std::string InvokeEnumPolyStrategyCandidateSupportEventCallback(
     PyObject *p_callback, std::shared_ptr<Gambit::StrategySupportProfile> p_support);
-std::string InvokeEnumPolySingularSupportEventCallback(
+std::string InvokeEnumPolyStrategySingularSupportEventCallback(
     PyObject *p_callback, std::shared_ptr<Gambit::StrategySupportProfile> p_support);
-std::string InvokeEnumPolyBudgetExceededSupportEventCallback(
+std::string InvokeEnumPolyStrategyBudgetExceededSupportEventCallback(
     PyObject *p_callback, std::shared_ptr<Gambit::StrategySupportProfile> p_support);
+std::string InvokeEnumPolyBehaviorCandidateSupportEventCallback(
+    PyObject *p_callback, std::shared_ptr<Gambit::BehaviorSupportProfile> p_support);
+std::string InvokeEnumPolyBehaviorSingularSupportEventCallback(
+    PyObject *p_callback, std::shared_ptr<Gambit::BehaviorSupportProfile> p_support);
+std::string InvokeEnumPolyBehaviorBudgetExceededSupportEventCallback(
+    PyObject *p_callback, std::shared_ptr<Gambit::BehaviorSupportProfile> p_support);
 
 namespace Gambit {
 
@@ -391,10 +397,7 @@ inline Gambit::Nash::IPAEventCallbackType MakeIPAEventCallback(PyObject *p_callb
 /// dispatches to whichever Invoke*EventCallback trampoline matches the
 /// alternative held by the event, calling a Python callable with the
 /// corresponding pygambit event object. A null callback (Python `None`)
-/// yields the solver's own no-op default. Only instantiated for
-/// Support = StrategySupportProfile: pygambit does not yet expose a
-/// BehaviorSupportProfile type, so the enumpoly_solve() behavior-form path
-/// keeps using the solver's own null event callback, matching the GUI.
+/// yields the solver's own no-op default.
 ///
 template <class Support>
 Gambit::Nash::EnumPolyEventCallbackType<Support> MakeEnumPolyEventCallback(PyObject *p_callback);
@@ -411,19 +414,50 @@ MakeEnumPolyEventCallback<Gambit::StrategySupportProfile>(PyObject *p_callback)
         [p_callback]<typename Event>(const Event &event) {
           if constexpr (std::is_same_v<Event, Gambit::Nash::EnumPolyCandidateSupportEvent<
                                                   Gambit::StrategySupportProfile>>) {
-            Gambit::ThrowIfPythonError(InvokeEnumPolyCandidateSupportEventCallback(
+            Gambit::ThrowIfPythonError(InvokeEnumPolyStrategyCandidateSupportEventCallback(
                 p_callback, std::make_shared<Gambit::StrategySupportProfile>(event.support)));
           }
           else if constexpr (std::is_same_v<Event, Gambit::Nash::EnumPolySingularSupportEvent<
                                                        Gambit::StrategySupportProfile>>) {
-            Gambit::ThrowIfPythonError(InvokeEnumPolySingularSupportEventCallback(
+            Gambit::ThrowIfPythonError(InvokeEnumPolyStrategySingularSupportEventCallback(
                 p_callback, std::make_shared<Gambit::StrategySupportProfile>(event.support)));
           }
           else if constexpr (std::is_same_v<Event,
                                             Gambit::Nash::EnumPolyBudgetExceededSupportEvent<
                                                 Gambit::StrategySupportProfile>>) {
-            Gambit::ThrowIfPythonError(InvokeEnumPolyBudgetExceededSupportEventCallback(
+            Gambit::ThrowIfPythonError(InvokeEnumPolyStrategyBudgetExceededSupportEventCallback(
                 p_callback, std::make_shared<Gambit::StrategySupportProfile>(event.support)));
+          }
+        },
+        p_event);
+  };
+}
+
+template <>
+inline Gambit::Nash::EnumPolyEventCallbackType<Gambit::BehaviorSupportProfile>
+MakeEnumPolyEventCallback<Gambit::BehaviorSupportProfile>(PyObject *p_callback)
+{
+  if (!p_callback || p_callback == Py_None) {
+    return Gambit::Nash::NullEnumPolyEventCallback<Gambit::BehaviorSupportProfile>;
+  }
+  return [p_callback](const Gambit::Nash::EnumPolyEvent<Gambit::BehaviorSupportProfile> &p_event) {
+    std::visit(
+        [p_callback]<typename Event>(const Event &event) {
+          if constexpr (std::is_same_v<Event, Gambit::Nash::EnumPolyCandidateSupportEvent<
+                                                  Gambit::BehaviorSupportProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeEnumPolyBehaviorCandidateSupportEventCallback(
+                p_callback, std::make_shared<Gambit::BehaviorSupportProfile>(event.support)));
+          }
+          else if constexpr (std::is_same_v<Event, Gambit::Nash::EnumPolySingularSupportEvent<
+                                                       Gambit::BehaviorSupportProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeEnumPolyBehaviorSingularSupportEventCallback(
+                p_callback, std::make_shared<Gambit::BehaviorSupportProfile>(event.support)));
+          }
+          else if constexpr (std::is_same_v<Event,
+                                            Gambit::Nash::EnumPolyBudgetExceededSupportEvent<
+                                                Gambit::BehaviorSupportProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeEnumPolyBehaviorBudgetExceededSupportEventCallback(
+                p_callback, std::make_shared<Gambit::BehaviorSupportProfile>(event.support)));
           }
         },
         p_event);

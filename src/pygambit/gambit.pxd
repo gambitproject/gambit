@@ -663,7 +663,8 @@ cdef extern from "solvers/enumpoly/enumpoly.h":
             StrategyCallbackType[double], EnumPolyEventCallbackType[c_StrategySupportProfile]
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
-            c_Game, optional[size_t], float, size_t, BehaviorCallbackType[double]
+            c_Game, optional[size_t], float, size_t,
+            BehaviorCallbackType[double], EnumPolyEventCallbackType[c_BehaviorSupportProfile]
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/logit.h":
