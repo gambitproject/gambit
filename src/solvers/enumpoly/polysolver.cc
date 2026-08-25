@@ -181,7 +181,7 @@ Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> 
 }
 
 std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<double> &r,
-                                                            const int max_roots,
+                                                            const size_t max_roots,
                                                             const size_t max_rectangles,
                                                             bool &p_budgetExceeded,
                                                             const CancelToken &p_cancel)

@@ -554,7 +554,7 @@ cdef extern from "solvers/enummixed/enummixed.h":
 
 cdef extern from "solvers/lcp/lcp.h":
     stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
-            c_Game, int p_stopAfter, int p_maxDepth
+            c_Game, optional[size_t] p_stopAfter, int p_maxDepth
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](c_Game) except +RuntimeError
 
@@ -594,10 +594,10 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
     stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
-            c_Game, int, float, size_t
+            c_Game, optional[size_t], float, size_t
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
-            c_Game, int, float, size_t
+            c_Game, optional[size_t], float, size_t
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/logit.h":

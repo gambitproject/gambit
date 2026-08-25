@@ -20,8 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <charconv>
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <getopt.h>
 #include "games.h"
@@ -70,7 +74,8 @@ int main(int argc, char *argv[])
   int c;
   bool useFloat = false, useStrategic = false, quiet = false;
   bool printDetail = false;
-  int numDecimals = 6, stopAfter = 0, maxDepth = 0;
+  int numDecimals = 6, maxDepth = 0;
+  std::optional<size_t> stopAfter;
 
   int long_opt_index = 0;
   option long_options[] = {
@@ -87,9 +92,19 @@ int main(int argc, char *argv[])
     case 'D':
       printDetail = true;
       break;
-    case 'e':
-      stopAfter = atoi(optarg);
+    case 'e': {
+      size_t parsed;
+      const auto *begin = optarg;
+      const auto *end = optarg + std::strlen(optarg);
+      const auto result = std::from_chars(begin, end, parsed);
+      if (result.ec != std::errc{} || result.ptr != end || parsed == 0) {
+        std::cerr << "Error: -e argument must be a positive integer; got '" << optarg << "'."
+                  << std::endl;
+        exit(1);
+      }
+      stopAfter = parsed;
       break;
+    }
     case 'h':
       PrintHelp(argv[0]);
       break;
