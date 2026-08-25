@@ -25,14 +25,16 @@
 using namespace std;
 using namespace Gambit;
 
-std::list<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_game,
-                                                                  double p_regret,
-                                                                  double p_firstStep,
-                                                                  double p_maxAccel)
+std::list<MixedBehaviorProfile<double>>
+LogitBehaviorSolveWrapper(const Game &p_game, double p_regret, double p_firstStep,
+                          double p_maxAccel,
+                          LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
+                              NullLogitEventCallback<LogitQREMixedBehaviorProfile>)
 {
   std::list<MixedBehaviorProfile<double>> ret;
   ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0,
-                                   p_firstStep, p_maxAccel)
+                                   p_firstStep, p_maxAccel, Nash::NullBehaviorCallback<double>,
+                                   p_onEvent)
                     .back()
                     .GetProfile());
   return ret;
@@ -66,14 +68,16 @@ LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targ
   return ret;
 }
 
-std::list<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_game,
-                                                                  double p_regret,
-                                                                  double p_firstStep,
-                                                                  double p_maxAccel)
+std::list<MixedStrategyProfile<double>>
+LogitStrategySolveWrapper(const Game &p_game, double p_regret, double p_firstStep,
+                          double p_maxAccel,
+                          LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
+                              NullLogitEventCallback<LogitQREMixedStrategyProfile>)
 {
   std::list<MixedStrategyProfile<double>> ret;
   ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0,
-                                   p_firstStep, p_maxAccel)
+                                   p_firstStep, p_maxAccel, Nash::NullStrategyCallback<double>,
+                                   p_onEvent)
                     .back()
                     .GetProfile());
   return ret;
