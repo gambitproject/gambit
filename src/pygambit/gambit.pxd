@@ -468,6 +468,7 @@ cdef extern from "games/stratspt.h":
         int MixedProfileLength() except +
         int GetIndex(c_GameStrategy) except +
         bool IsSubsetOf(c_StrategySupportProfile) except +
+        void AddStrategy(c_GameStrategy) except +
         bool RemoveStrategy(c_GameStrategy) except +
         Support GetStrategies(c_GamePlayer) except +
         bool Contains(c_GameStrategy) except +
@@ -481,7 +482,29 @@ cdef extern from "games/stratspt.h":
 
 cdef extern from "games/behavspt.h":
     cdef cppclass c_BehaviorSupportProfile "BehaviorSupportProfile":
+        cppclass Support:
+            cppclass const_iterator:
+                c_GameAction operator *()
+                const_iterator operator++()
+                bint operator ==(const_iterator)
+                bint operator !=(const_iterator)
+            Support()
+            size_t size()
+            const_iterator begin() except +
+            const_iterator end() except +
+
         c_BehaviorSupportProfile(c_Game) except +
+        c_BehaviorSupportProfile(c_BehaviorSupportProfile) except +
+        bool operator ==(c_BehaviorSupportProfile) except +
+        bool operator !=(c_BehaviorSupportProfile) except +
+        c_Game GetGame() except +
+        size_t BehaviorProfileLength() except +
+        Support GetActions(c_GameInfoset) except +
+        bool HasAction(c_GameInfoset) except +
+        bool Contains(c_GameAction) except +
+        void AddAction(c_GameAction) except +
+        bool RemoveAction(c_GameAction) except +
+        bool IsReachable(c_GameInfoset) except +
 
 
 cdef extern from "games/layout.h":

@@ -1363,6 +1363,34 @@ class Game:
                         raise ValueError("attempted to remove the last strategy for player")
         return profile
 
+    def behavior_support_profile(
+            self, actions: typing.Callable | None = None
+    ) -> BehaviorSupportProfile:
+        """Create a new `BehaviorSupportProfile` on the game.
+
+        Parameters
+        ----------
+        actions : function, optional
+            By default the support profile contains all actions at all information
+            sets. If specified, only actions for which the supplied function returns
+            `True` are included.
+
+        Returns
+        -------
+        BehaviorSupportProfile
+        """
+        profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
+        if actions is not None:
+            for infoset in self.infosets:
+                for action in infoset.actions:
+                    if not actions(action):
+                        if not (deref(profile.profile)
+                                .RemoveAction(cython.cast(Action, action).action)):
+                            raise ValueError(
+                                "attempted to remove the last action at an information set"
+                            )
+        return profile
+
     @cython.cfunc
     def _to_format(
         self,
