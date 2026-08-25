@@ -25,6 +25,7 @@ import pathlib
 
 import cython
 import numpy as np
+from scipy.optimize import linprog
 
 import pygambit.gameiter
 
@@ -986,3 +987,125 @@ class Game:
         for old, new in remap.items():
             c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelPlayers(c_labels)
+
+    def is_degenerate(self, certificate=False):
+        """Check whether this two-player game is degenerate.
+
+        A two-player game is *nondegenerate* if no mixed strategy of support
+        size ``k`` has more than ``k`` pure best responses. A degenerate game
+        violates this -- for example, a pure strategy with two pure best
+        responses. The check searches over supports (a discrete search); the
+        problem is NP-hard in general.
+
+        Parameters
+        ----------
+        certificate : bool, default False
+            If True, also return a witness when the game is degenerate.
+
+        Returns
+        -------
+        bool or tuple
+            Whether the game is degenerate. If ``certificate=True``, returns
+            ``(is_degenerate, witness)``. When degenerate, ``witness`` is
+            ``(player, strategy)``: ``player`` is 0 (row) or 1 (column), and
+            ``strategy`` is the  mixed strategy (of support size k) whose
+            opponent has more than k best responses has more best responses
+            than its support size. When nondegenerate, ``witness`` is None.
+
+        Raises
+        ------
+        ValueError
+            If the game does not have exactly two players.
+
+        Examples
+        --------
+        >>> import pygambit as gbt
+        >>> g = gbt.Game.from_arrays([[3, 3], [2, 5], [0, 6]],
+        ...                          [[3, 3], [2, 6], [3, 1]])
+        >>> g.is_degenerate()
+        True
+
+        >>> g = gbt.Game.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]])
+        >>> g.is_degenerate()
+        False
+
+        >>> g = gbt.Game.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]])
+        >>> g.is_degenerate(certificate=True)
+        (True, (0, (1.0, 0.0)))
+        """
+
+        if len(self.players) != 2:
+            raise ValueError("is_degenerate() is only defined for two-player games")
+
+        M1, M2 = (np.asarray(a, dtype=float) for a in self.to_arrays())
+        m, n = M1.shape
+
+        def feasible(M, S, T):
+            """Search for a small-support strategy with too many best responses.
+
+            Given a candidate support ``S`` for the strategizing player and a
+            candidate best-response set ``T`` for the opponent (with
+            ``len(T) == len(S) + 1``), determine whether there exists a mixed
+            strategy supported on ``S`` such that every pure strategy in ``T``
+            is an equal, maximal best response for the opponent. If such a
+            strategy exists, it witnesses degeneracy, because the opponent then
+            has more best responses (``len(T)``) than the support size
+            (``len(S)``).
+
+            Parameters
+            ----------
+            M : numpy.ndarray
+                The opponent's payoff matrix, oriented so the strategizing
+                player indexes axis 0 and the opponent indexes axis 1.
+            S : sequence of int
+                Indices (axis 0) forming the candidate support.
+            T : sequence of int
+                Indices (axis 1) of the candidate best responses;
+                ``len(T) == len(S) + 1``.
+
+            Returns
+            -------
+            numpy.ndarray or None
+                A full-length probability vector supported on ``S`` that makes
+                every strategy in ``T`` an equal, maximal best response, or
+                None if no such strategy exists.
+
+
+            This is solved as a linear feasibility problem: find x >= 0 on S
+            with sum 1 making the opponent's payoff equal across all of T (tie
+            constraints) and no greater for any strategy outside T (maximality).
+
+            """
+
+            S, T = list(S), list(T)
+            k = len(S)
+            sub = M[S, :]
+            A_eq = [sub[:, T[t]] - sub[:, T[0]] for t in range(1, len(T))]
+            A_eq.append(np.ones(k))
+            b_eq = [0.0] * (len(T) - 1) + [1.0]
+            others = [j for j in range(M.shape[1]) if j not in T]
+            A_ub = [sub[:, j] - sub[:, T[0]] for j in others]
+            b_ub = [0.0] * len(others)
+            res = linprog(np.zeros(k), A_ub or None, b_ub or None,
+                          A_eq, b_eq, bounds=[(0, None)] * k, method="highs")
+            if not res.success:
+                return None
+            x = np.zeros(M.shape[0])
+            x[S] = res.x
+            return x
+
+        for k in range(1, min(m, n) + 1):
+            # P1 mixes over k rows -> can P2 get k+1 tied best responses? (use M2)
+            for S in itertools.combinations(range(m), k):
+                for T in itertools.combinations(range(n), k + 1):
+                    x = feasible(M2, S, T)
+                    if x is not None:
+                        return (True, (0, tuple(x.tolist()))) if certificate else True
+            # P2 mixes over k cols -> can P1 get k+1 tied best responses? (use M1.T)
+            for S in itertools.combinations(range(n), k):
+                for T in itertools.combinations(range(m), k + 1):
+                    y = feasible(M1.T, S, T)
+                    if y is not None:
+                        return (True, (1, tuple(y.tolist()))) if certificate else True
+
+        return (False, None) if certificate else False
