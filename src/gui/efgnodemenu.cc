@@ -204,7 +204,7 @@ void EfgDisplay::UpdateNodeMenu(const GameNode &p_node)
                          !m_doc->GetGame()->IsAbsentMinded(p_node->GetInfoset()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, p_node && !p_node->IsTerminal());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, p_node && p_node->GetParent());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, p_node && p_node->GetOutcome());
+  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, p_node && !p_node->GetOutcome()->IsNull());
   m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, static_cast<bool>(p_node));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, p_node && p_node->GetInfoset());
 

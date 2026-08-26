@@ -735,9 +735,9 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   const std::string label = p_label.ToStdString(wxConvUTF8);
   GameOutcome outcome = p_node->GetOutcome();
 
-  bool changed = !outcome;
+  bool changed = outcome->IsNull();
 
-  if (outcome) {
+  if (!outcome->IsNull()) {
     changed = outcome->GetLabel() != label;
 
     if (!changed) {
@@ -755,7 +755,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     return;
   }
 
-  if (!outcome) {
+  if (outcome->IsNull()) {
     outcome = m_game->NewOutcome(p_label.ToStdString(wxConvUTF8));
     m_game->SetOutcome(p_node, outcome);
   }
@@ -772,7 +772,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
 
 void GameDocument::DoRemoveOutcome(GameNode p_node)
 {
-  if (!p_node || !p_node->GetOutcome()) {
+  if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
   }
   m_game->SetOutcome(p_node, nullptr);

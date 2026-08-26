@@ -511,7 +511,7 @@ void TableWidget::SetPayoffCellValue(int row, int col, const wxString &value)
 {
   PureStrategyProfile profile = GetPayoffProfile(row, col);
   GameOutcome outcome = profile->GetOutcome();
-  if (!outcome) {
+  if (outcome->IsNull()) {
     m_doc->DoNewOutcome(profile);
     profile = GetPayoffProfile(row, col);
     outcome = profile->GetOutcome();
