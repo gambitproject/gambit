@@ -463,8 +463,6 @@ gambit_SOURCES = \
 	src/gui/dlefglayout.h \
 	src/gui/dlefglegend.cc \
 	src/gui/dlefglegend.h \
-	src/gui/dlefglogit.cc \
-	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
@@ -476,8 +474,8 @@ gambit_SOURCES = \
 	src/gui/nashspec.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
-	src/gui/dlnfglogit.cc \
-	src/gui/dlnfglogit.h \
+	src/gui/dllogit.cc \
+	src/gui/dllogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
 	src/gui/efgdragdrop.cc \

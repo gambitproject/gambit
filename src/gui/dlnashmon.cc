@@ -361,25 +361,28 @@ public:
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
                                      const std::shared_ptr<GameDocument> &p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
-  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
+  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition,
+             wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc), m_output(p_command)
 {
+  const int S = FromDIP(5);
+
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
   m_statusText = new wxStaticText(this, wxID_STATIC, "The computation is currently in progress.");
-  startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
+  startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, S);
 
   m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
-  startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
+  startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, S);
 
   m_stopButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(stop_xpm));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
-  startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
+  startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, S);
 
-  sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, S);
 
   if (p_command->IsBehavior()) {
     m_profileList = new MixedBehaviorProfileList(this, m_doc);
@@ -387,16 +390,18 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
   else {
     m_profileList = new MixedStrategyProfileList(this, m_doc);
   }
-  m_profileList->SetMinSize(wxSize(500, 300));
-  sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
+  m_profileList->SetMinSize(wxSize(FromDIP(500), FromDIP(300)));
+  sizer->Add(m_profileList, 1, wxALL | wxEXPAND, S);
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK);
-  sizer->Add(buttonSizer, 0, wxALL | wxEXPAND, 5);
+  sizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
   m_okButton = dynamic_cast<wxButton *>(FindWindow(wxID_OK));
   m_okButton->Enable(false);
 
-  SetSizerAndFit(sizer);
+  SetSizer(sizer);
   sizer->SetSizeHints(this);
+  SetSize(GetBestSize());
+  SetMinSize(GetSize());
   CenterOnParent();
 
   Bind(wxEVT_EXTERNAL_RUNNER_PROFILE, &NashMonitorDialog::OnRunnerProfile, this);
