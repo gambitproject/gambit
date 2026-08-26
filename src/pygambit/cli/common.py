@@ -90,9 +90,15 @@ def read_game(source: io.IOBase) -> gbt.Game:
     raise ValueError("Unrecognized file format")
 
 
-def print_banner(description: str) -> None:
-    """Print the standard Gambit command-line tool banner to standard error."""
+def print_banner(description: str, extra_lines: tuple[str, ...] = ()) -> None:
+    """Print the standard Gambit command-line tool banner to standard error.  Some
+    tools (`gambit-gnm`, `gambit-ipa`) insert additional lines, such as a Gametracer
+    credit, between the description and the Gambit version line; pass those as
+    `extra_lines`.
+    """
     click.echo(description, err=True)
+    for line in extra_lines:
+        click.echo(line, err=True)
     click.echo(
         f"Gambit version {_gambit_version()}, Copyright (C) 1994-2026, The Gambit Project",
         err=True,
@@ -101,15 +107,16 @@ def print_banner(description: str) -> None:
     click.echo(err=True)
 
 
-def version_option(description: str) -> callable:
+def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> callable:
     """A ``-v``/``--version`` option which prints the tool's banner and exits,
-    matching the behavior of the C++ command-line tools.
+    matching the behavior of the C++ command-line tools.  See `print_banner` for
+    the meaning of `extra_lines`.
     """
 
     def callback(ctx: click.Context, _param: click.Parameter, value: bool) -> None:
         if not value or ctx.resilient_parsing:
             return
-        print_banner(description)
+        print_banner(description, extra_lines)
         ctx.exit(0)
 
     return click.option(
@@ -139,17 +146,41 @@ def handle_errors(f: callable) -> callable:
     return wrapper
 
 
-def format_value(value: gbt.Rational | float, decimals: int, fixed: bool = True) -> str:
+def validate_stop_after(
+    ctx: click.Context, param: click.Parameter, value: str | None
+) -> int | None:
+    """A click callback for a ``-e``/``stop_after``-style option: validates that `value`
+    is a positive integer, matching the C++ tools' `std::from_chars`-based validation,
+    reporting the same error text and exiting immediately (before the tool's banner)
+    on failure.
+    """
+    if value is None:
+        return None
+    if not value.isdigit() or int(value) == 0:
+        click.echo(f"Error: -e argument must be a positive integer; got '{value}'.", err=True)
+        sys.exit(1)
+    return int(value)
+
+
+def format_value(
+    value: gbt.Rational | float,
+    decimals: int,
+    fixed: bool = True,
+    as_float: bool = False,
+) -> str:
     """Format a probability or payoff value the way the C++ tools do: exactly, for a
     `Rational`, or, for a float, fixed-point with `decimals` digits after the point
     (`fixed=True`, matching `MixedStrategyProfileCSVRenderer`/`MixedBehaviorProfileCSVRenderer`),
     or with `decimals` significant digits, trimmed of trailing zeroes and switching to
     scientific notation as needed (`fixed=False`, matching `gambit-logit`'s own
     `PrintProfile`, which explicitly unsets `std::ios::fixed` before printing profile
-    values).
+    values).  If `as_float` is True, a `Rational` is first converted to a float and
+    formatted the same way as a float would be, matching `gambit-simpdiv`'s
+    `MixedStrategyCSVAsFloatRenderer`.
     """
-    if isinstance(value, gbt.Rational):
+    if isinstance(value, gbt.Rational) and not as_float:
         return str(value)
+    value = float(value)
     return f"{value:.{decimals}f}" if fixed else f"{value:.{decimals}g}"
 
 
@@ -162,11 +193,12 @@ def render_profile_csv(
     label: str,
     decimals: int,
     fixed: bool = True,
+    as_float: bool = False,
 ) -> str:
     """Render a strategy or behavior profile as a single comma-separated line,
     tagged with `label`, matching `MixedStrategyProfileCSVRenderer` and
     `MixedBehaviorProfileCSVRenderer` in the C++ tools.  See `format_value` for
-    the meaning of `fixed`.
+    the meaning of `fixed` and `as_float`.
     """
     if _is_behavior_profile(profile):
         values = [
@@ -179,7 +211,36 @@ def render_profile_csv(
         values = [
             prob for player in profile.game.players for _label, prob in profile[player.label]
         ]
-    return ",".join([label, *(format_value(v, decimals, fixed) for v in values)])
+    return ",".join([label, *(format_value(v, decimals, fixed, as_float) for v in values)])
+
+
+def render_support_csv(
+    support: gbt.StrategySupportProfile | gbt.BehaviorSupportProfile,
+    label: str,
+) -> str:
+    """Render a strategy or behavior support profile as a single comma-separated line,
+    tagged with `label`: one field per player (strategy support) or per information set
+    (behavior support), each field a string of `1`/`0` digits marking membership in the
+    support, matching `gambit-enumpoly`'s own `PrintSupport`.
+    """
+    if isinstance(support, gbt.BehaviorSupportProfile):
+        fields = [
+            "".join(
+                "1" if action.label in action_support else "0"
+                for action in action_support.infoset.actions
+            )
+            for player in support.game.players
+            for action_support in support[player.label]
+        ]
+    else:
+        fields = [
+            "".join(
+                "1" if strategy.label in support[player.label] else "0"
+                for strategy in player.strategies
+            )
+            for player in support.game.players
+        ]
+    return ",".join([label, *fields])
 
 
 def render_profile_detail(
@@ -252,3 +313,58 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
                 )
         lines.append("")
     return "\n".join(lines)
+
+
+def read_strategy_profiles_csv(
+    path: str,
+    game: gbt.Game,
+    rational: bool = False,
+) -> list[gbt.MixedStrategyProfile]:
+    """Read one mixed strategy profile per line from `path`, each a flat comma-separated
+    list of probabilities in the same order as a profile's CSV row (excluding any
+    leading label), matching the C++ tools' `ReadStrategyProfiles`/`ReadProfiles`.
+    """
+    convert = gbt.Rational if rational else float
+    strategies = [strategy for player in game.players for strategy in player.strategies]
+    profiles = []
+    for line in pathlib.Path(path).read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split(",")
+        try:
+            values = iter([convert(fields[i]) for i in range(len(strategies))])
+        except (ValueError, IndexError) as exc:
+            raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
+        profile = game.mixed_strategy_profile(rational=rational)
+        for player in game.players:
+            profile[player.label] = {s.label: next(values) for s in player.strategies}
+        profiles.append(profile)
+    return profiles
+
+
+def read_behavior_profiles_csv(path: str, game: gbt.Game) -> list[gbt.MixedBehaviorProfileDouble]:
+    """Read one mixed behavior profile per line from `path`, each a flat comma-separated
+    list of probabilities in the same order as a profile's CSV row (excluding any
+    leading label), matching the C++ tools' `ReadBehaviorProfiles`.
+    """
+    count = sum(
+        len(list(infoset.actions)) for player in game.players for infoset in player.infosets
+    )
+    profiles = []
+    for line in pathlib.Path(path).read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split(",")
+        try:
+            values = iter([float(fields[i]) for i in range(count)])
+        except (ValueError, IndexError) as exc:
+            raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
+        profile = game.mixed_behavior_profile()
+        for player in game.players:
+            for infoset in player.infosets:
+                node = next(iter(infoset.members))
+                profile[node] = {a.label: next(values) for a in infoset.actions}
+        profiles.append(profile)
+    return profiles

@@ -25,8 +25,6 @@ complementarity programming.
 
 from __future__ import annotations
 
-import sys
-
 import click
 
 import pygambit as gbt
@@ -38,22 +36,12 @@ from .common import (
     read_game,
     render_profile_csv,
     render_profile_detail,
+    validate_stop_after,
     version_option,
 )
 
 DESCRIPTION = "Compute Nash equilibria by solving a linear complementarity program"
 PROG_NAME = "gambit-lcp"
-
-
-def _validate_stop_after(
-    ctx: click.Context, param: click.Parameter, value: str | None
-) -> int | None:
-    if value is None:
-        return None
-    if not value.isdigit() or int(value) == 0:
-        click.echo(f"Error: -e argument must be a positive integer; got '{value}'.", err=True)
-        sys.exit(1)
-    return int(value)
 
 
 @click.command(
@@ -80,7 +68,7 @@ def _validate_stop_after(
     "stop_after",
     type=str,
     default=None,
-    callback=_validate_stop_after,
+    callback=validate_stop_after,
     help="terminate after finding EQA equilibria "
     "(strategic games only; default is to find all accessible equilibria)",
 )

@@ -273,7 +273,7 @@ def _estimate_behavior_empirical(
     for player in data.game.players:
         for infoset in player.infosets:
             node = next(iter(infoset.members))
-            profile[node] = [math.exp(next(log_probs)) for _ in infoset.actions]
+            profile[node] = {a.label: math.exp(next(log_probs)) for a in infoset.actions}
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )
