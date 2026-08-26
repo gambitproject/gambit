@@ -29,7 +29,12 @@ dependencies = [
     "numpy",
     "scipy",
     "pandas",
+    "click",
 ]
+
+[project.scripts]
+gambit-enumpure = "pygambit.cli.enumpure:main"
+gambit-logit = "pygambit.cli.logit:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
@@ -124,7 +129,7 @@ markers = [
 ]
 
 [tool.setuptools]
-packages = ["pygambit"]
+packages = ["pygambit", "pygambit.cli"]
 package-dir = { "pygambit" = "src/pygambit" }
 
 [tool.setuptools.package-data]

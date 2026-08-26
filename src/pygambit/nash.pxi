@@ -737,19 +737,24 @@ class LogitQREMixedStrategyProfile:
 def _logit_strategy_estimate(profile: MixedStrategyProfileDouble,
                              local_max: bool = False,
                              first_step: float = .03,
-                             max_accel: float = 1.1) -> LogitQREMixedStrategyProfile:
+                             max_accel: float = 1.1,
+                             event_callback: object = None) -> LogitQREMixedStrategyProfile:
     """Estimate QRE corresponding to mixed strategy profile using
     maximum likelihood along the principal branch.
     """
     return LogitQREMixedStrategyProfile.wrap(
-        LogitStrategyEstimateWrapper(profile.profile, local_max, first_step, max_accel)
+        LogitStrategyEstimateWrapper(
+            profile.profile, local_max, first_step, max_accel,
+            MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
+        )
     )
 
 
 def _logit_strategy_lambda(game: Game,
                            lam: float | list[float],
                            first_step: float = .03,
-                           max_accel: float = 1.1) -> list[LogitQREMixedStrategyProfile]:
+                           max_accel: float = 1.1,
+                           event_callback: object = None) -> list[LogitQREMixedStrategyProfile]:
     """Compute the first QRE encountered along the principal branch of the strategic
     game corresponding to lambda value `lam`.
     """
@@ -758,7 +763,10 @@ def _logit_strategy_lambda(game: Game,
     except TypeError:
         lam = [lam]
     return [LogitQREMixedStrategyProfile.wrap(profile)
-            for profile in LogitStrategyAtLambdaWrapper(game.game, lam, first_step, max_accel)]
+            for profile in LogitStrategyAtLambdaWrapper(
+                game.game, lam, first_step, max_accel,
+                MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
+            )]
 
 
 def _logit_strategy_branch(game: Game,
@@ -791,9 +799,7 @@ class LogitQREMixedBehaviorProfile:
     @property
     def game(self) -> Game:
         """The game on which this mixed strategy profile is defined."""
-        g = Game()
-        g.game = deref(self.thisptr).GetGame()
-        return g
+        return Game.wrap(deref(self.thisptr).GetGame())
 
     @property
     def lam(self) -> double:
@@ -808,29 +814,32 @@ class LogitQREMixedBehaviorProfile:
     @property
     def profile(self) -> MixedBehaviorProfileDouble:
         """The mixed strategy profile."""
-        profile = MixedBehaviorProfileDouble()
-        profile.profile = (
+        return MixedBehaviorProfileDouble.wrap(
             make_shared[c_MixedBehaviorProfile[double]](deref(self.thisptr).GetProfile())
         )
-        return profile
 
 
 def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,
                              local_max: bool = False,
                              first_step: float = .03,
-                             max_accel: float = 1.1) -> LogitQREMixedBehaviorProfile:
+                             max_accel: float = 1.1,
+                             event_callback: object = None) -> LogitQREMixedBehaviorProfile:
     """Estimate QRE corresponding to mixed behavior profile using
     maximum likelihood along the principal branch.
     """
     ret = LogitQREMixedBehaviorProfile(profile.game)
-    ret.thisptr = LogitBehaviorEstimateWrapper(profile.profile, local_max, first_step, max_accel)
+    ret.thisptr = LogitBehaviorEstimateWrapper(
+        profile.profile, local_max, first_step, max_accel,
+        MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+    )
     return ret
 
 
 def _logit_behavior_lambda(game: Game,
                            lam: float | list[float],
                            first_step: float = .03,
-                           max_accel: float = 1.1) -> list[LogitQREMixedBehaviorProfile]:
+                           max_accel: float = 1.1,
+                           event_callback: object = None) -> list[LogitQREMixedBehaviorProfile]:
     """Compute the first QRE encountered along the principal branch of the extensive
     game corresponding to lambda value `lam`.
     """
@@ -839,7 +848,10 @@ def _logit_behavior_lambda(game: Game,
     except TypeError:
         lam = [lam]
     ret = []
-    for profile in LogitBehaviorAtLambdaWrapper(game.game, lam, first_step, max_accel):
+    for profile in LogitBehaviorAtLambdaWrapper(
+        game.game, lam, first_step, max_accel,
+        MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+    ):
         qre = LogitQREMixedBehaviorProfile()
         qre.thisptr = profile
         ret.append(qre)
