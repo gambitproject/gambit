@@ -133,3 +133,21 @@ inputting the payoff for the first (row) player, pressing the :kbd:`Tab`
 key, inputting the payoff for the second (column) player, pressing the
 :kbd:`Tab` key, and so forth, until all the payoff entries in the table
 have been filled.
+
+Shared outcomes
+^^^^^^^^^^^^^^^^
+
+The payoffs shown at a contingency are stored as an *outcome*, and the
+same outcome can be attached to more than one contingency -- most
+commonly because several strategy profiles induce the same terminal
+node in the reduced strategic game of an extensive game, but a
+strategic game can also be built or loaded with outcomes shared this
+way directly. Editing a payoff at any one of these contingencies
+changes it at every other contingency sharing that outcome, since they
+are, in fact, the same outcome.
+
+To see this grouping before editing, hover the mouse pointer over any
+payoff cell: every other cell sharing its outcome is shown with a
+shaded background for as long as the pointer remains over one of them.
+The highlight does not change while a payoff is being edited, even if
+the pointer moves elsewhere in the meantime.

@@ -34,6 +34,9 @@
 
 namespace Gambit::GUI {
 
+/// Background for every payoff cell sharing the outcome currently under the mouse.
+static const wxColour kHoverOutcomeBg(220, 240, 234);
+
 //=========================================================================
 //                       class PayoffCellRenderer
 //=========================================================================
@@ -179,7 +182,8 @@ wxGridCellAttr *PayoffTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKin
   // header cell, not empty space.
   attr->SetOverflow(false);
   attr->SetTextColour(m_table->GetPlayerColor(m_table->GetPayoffPlayerForColumn(col)));
-  attr->SetBackgroundColour(*wxWHITE);
+  attr->SetBackgroundColour(m_table->IsPayoffCellHighlighted(row, col) ? kHoverOutcomeBg
+                                                                       : *wxWHITE);
   m_renderer->IncRef();
   attr->SetRenderer(m_renderer);
   m_editor->IncRef();
@@ -250,6 +254,9 @@ class PayoffGrid final : public TableGridBase {
   void OnCharHook(wxKeyEvent &);
   void HandleTabTraversal(wxKeyEvent &);
   void MoveEditorByTab(bool p_backwards);
+  /// Highlight every cell sharing the outcome under the mouse
+  void OnMotion(wxMouseEvent &);
+  void OnLeaveWindow(wxMouseEvent &);
   //@}
 
 public:
@@ -265,6 +272,46 @@ PayoffGrid::PayoffGrid(TableWidget *p_parent)
 
   Bind(wxEVT_KEY_DOWN, &PayoffGrid::OnKeyDown, this);
   Bind(wxEVT_CHAR_HOOK, &PayoffGrid::OnCharHook, this);
+  GetGridWindow()->Bind(wxEVT_MOTION, &PayoffGrid::OnMotion, this);
+  GetGridWindow()->Bind(wxEVT_LEAVE_WINDOW, &PayoffGrid::OnLeaveWindow, this);
+}
+
+void PayoffGrid::OnMotion(wxMouseEvent &p_event)
+{
+  // While a cell is being edited, the highlight is pinned to whatever outcome it showed
+  // when editing began -- the mouse may wander (e.g. to check another part of the table)
+  // without that being taken as "now hovering something else".
+  if (IsCellEditControlShown()) {
+    p_event.Skip();
+    return;
+  }
+  const wxGridCellCoords coords = XYToCell(p_event.GetPosition());
+  if (coords.GetRow() >= 0 && coords.GetCol() >= 0) {
+    m_table->SetHoverOutcome(
+        m_table->GetPayoffProfile(coords.GetRow(), coords.GetCol())->GetOutcome());
+  }
+  else {
+    m_table->SetHoverOutcome(GameOutcome());
+  }
+  p_event.Skip();
+}
+
+void PayoffGrid::OnLeaveWindow(wxMouseEvent &p_event)
+{
+  if (IsCellEditControlShown()) {
+    p_event.Skip();
+    return;
+  }
+  // A cell editor is a real child window created directly over the current cell (by
+  // EnableCellEditControl(), including the deferred one MoveEditorByTab() creates for
+  // the next cell); on at least macOS/Cocoa, that can itself generate a leave-window
+  // event on the grid window underneath even though the pointer never moved. Only
+  // clear the highlight if the pointer has genuinely left the grid's screen area.
+  const wxRect windowRect(GetGridWindow()->GetScreenPosition(), GetGridWindow()->GetSize());
+  if (!windowRect.Contains(wxGetMousePosition())) {
+    m_table->SetHoverOutcome(GameOutcome());
+  }
+  p_event.Skip();
 }
 
 void PayoffGrid::MoveEditorByTab(bool p_backwards)

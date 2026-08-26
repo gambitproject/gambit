@@ -289,6 +289,10 @@ class TableWidget final : public wxPanel {
 
   std::shared_ptr<StrategicTableLayout> m_layout;
 
+  /// The outcome currently under the mouse in the payoff grid, or the null handle if
+  /// none (including when the cell under the mouse has the game's null outcome).
+  GameOutcome m_hoverOutcome;
+
   /// @name Event handlers
   //@{
   /// Called when the payoff grid is scrolled; keeps row/col header grids in sync
@@ -448,6 +452,13 @@ public:
   GamePlayer GetPayoffPlayer(int payoffCol) const;
   int GetPayoffColumnsPerContingency() const;
   bool IsPayoffStrategyDominated(int row, int col, bool strict) const;
+
+  /// Sets the outcome to highlight in the payoff grid (every cell sharing it), e.g. as
+  /// the mouse moves over the grid; pass the null handle (or the game's null outcome) to
+  /// clear the highlight. Repaints the payoff grid if the highlighted outcome changes.
+  void SetHoverOutcome(const GameOutcome &p_outcome);
+  /// Whether the given cell's outcome is the one currently set by SetHoverOutcome.
+  bool IsPayoffCellHighlighted(int row, int col) const;
 
   //@}
 

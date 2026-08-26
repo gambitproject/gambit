@@ -546,4 +546,19 @@ GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) 
   auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
 }
+
+void TableWidget::SetHoverOutcome(const GameOutcome &p_outcome)
+{
+  const GameOutcome outcome = (p_outcome && !p_outcome->IsNull()) ? p_outcome : GameOutcome();
+  if (m_hoverOutcome == outcome) {
+    return;
+  }
+  m_hoverOutcome = outcome;
+  m_payoffGrid->Refresh();
+}
+
+bool TableWidget::IsPayoffCellHighlighted(int row, int col) const
+{
+  return m_hoverOutcome && GetPayoffProfile(row, col)->GetOutcome() == m_hoverOutcome;
+}
 } // namespace Gambit::GUI
