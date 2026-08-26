@@ -368,6 +368,10 @@ cdef extern from "games/game.h":
         void DeleteParent(c_GameNode) except +
         void DeleteTree(c_GameNode) except +
         c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
+        c_GameOutcome MakeOutcome(stdvector[c_GameNode], stdvector[c_Number],
+                                  string) except +ValueError
+        c_GameOutcome MakeOutcome(stdvector[stdvector[c_GameStrategy]], stdvector[c_Number],
+                                  string) except +ValueError
         void Reveal(c_GameInfoset, c_GamePlayer) except +
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
@@ -384,7 +388,7 @@ cdef extern from "games/game.h":
         stdvector[c_GameSubgame] GetSubgames() except +
 
     c_Game NewTree(stdvector[string]) except +ValueError
-    c_Game NewTable(stdvector[int]) except +
+    c_Game NewTable(stdvector[int], bool) except +
 
 
 cdef extern from "games/stratpure.h":

@@ -99,6 +99,7 @@ def test_from_dict():
 
 def test_game_get_outcome_by_index():
     game = gbt.Game.new_table([2, 2])
+    game.make_outcome((0, 0), {"1": 0, "2": 0}, "top left")
     assert game[0, 0] == next(iter(game.outcomes))
 
 
@@ -107,6 +108,7 @@ def test_game_get_outcome_by_label():
     pl1, pl2 = game.players
     game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
     game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
+    game.make_outcome(("defect", "cooperate"), {"1": 0, "2": 0}, "corner")
     assert game["defect", "cooperate"] == next(iter(game.outcomes))
 
 
@@ -146,6 +148,9 @@ def test_game_get_outcome_unmatched_label():
 def test_game_get_outcome_with_strategies():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
+    game.make_outcome(
+        (next(iter(pl1.strategies)), next(iter(pl2.strategies))), {"1": 0, "2": 0}, "corner"
+    )
     assert (
         game[next(iter(pl1.strategies)), next(iter(pl2.strategies))]
         == next(iter(game.outcomes))

@@ -153,7 +153,10 @@ class Outcome:
             If this is the null outcome; payoffs cannot be set on it.
         """
         if self.outcome.deref().IsNull():
-            raise UndefinedOperationError("Payoffs cannot be set on the null outcome")
+            raise UndefinedOperationError(
+                "Payoffs cannot be set on the null outcome; "
+                "use Game.make_outcome to create and attach an outcome"
+            )
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__setitem__"))
         self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))

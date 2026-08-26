@@ -944,7 +944,8 @@ protected:
   void CheckPlayerLabel(const std::string &p_label,
                         const std::set<const GamePlayerRep *> &p_ignore = {}) const;
   /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
-  void CheckOutcomeLabel(const std::string &p_label) const;
+  void CheckOutcomeLabel(const std::string &p_label,
+                         const std::set<const GameOutcomeRep *> &p_ignore = {}) const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1432,6 +1433,18 @@ public:
   }
   /// Creates a new outcome in the game
   virtual GameOutcome NewOutcome(const std::string &p_label) { throw UndefinedException(); }
+  /// Creates an outcome with the given payoffs and label for the specified nodes.
+  virtual GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
+                                  const std::string &)
+  {
+    throw UndefinedException();
+  }
+  /// Creates an outcome with the given payoffs and label for the specified contingencies.
+  virtual GameOutcome MakeOutcome(const std::vector<std::vector<GameStrategy>> &,
+                                  const std::vector<Number> &, const std::string &)
+  {
+    throw UndefinedException();
+  }
   /// Deletes the specified outcome from the game
   virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
@@ -1627,14 +1640,15 @@ inline void GameRep::CheckPlayerLabel(const std::string &p_label,
     }
   }
 }
-inline void GameRep::CheckOutcomeLabel(const std::string &p_label) const
+inline void GameRep::CheckOutcomeLabel(const std::string &p_label,
+                                       const std::set<const GameOutcomeRep *> &p_ignore) const
 {
   if (p_label.empty()) {
     throw ValueException("Outcome label must not be empty");
   }
   CheckLabel(p_label);
   for (const auto &outcome : m_outcomes) {
-    if (outcome->GetLabel() == p_label) {
+    if (outcome->GetLabel() == p_label && !p_ignore.contains(outcome.get())) {
       throw ValueException("Outcome label must be unique within the game");
     }
   }

@@ -1833,8 +1833,71 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   return plays;
 }
 
+GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
+                                     const std::vector<Number> &p_payoffs,
+                                     const std::string &p_label)
+{
+  if (p_nodes.empty()) {
+    throw ValueException("At least one node must be specified");
+  }
+  if (p_payoffs.size() != m_players.size()) {
+    throw ValueException("A payoff must be specified for each player");
+  }
+  std::set<GameNodeRep *> selected;
+  std::set<const GameOutcomeRep *> covered;
+  for (const auto &node : p_nodes) {
+    if (node->m_game != this) {
+      throw MismatchException();
+    }
+    if (!selected.insert(node.get()).second) {
+      throw ValueException("Each node may be referenced only once");
+    }
+    if (!node->m_outcome->IsNull()) {
+      covered.insert(node->m_outcome);
+    }
+  }
+  std::set<const GameOutcomeRep *> absorbed;
+  if (!covered.empty()) {
+    absorbed = covered;
+    for (const auto &node : GetNodes()) {
+      if (absorbed.empty()) {
+        break;
+      }
+      if (!selected.contains(node.get())) {
+        absorbed.erase(node->m_outcome);
+      }
+    }
+  }
+  CheckOutcomeLabel(p_label, absorbed);
+
+  IncrementVersion();
+  auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label);
+  m_outcomes.push_back(outcome);
+  for (const auto &[pl, player] : enumerate(m_players)) {
+    outcome->SetPayoff(player, p_payoffs[pl]);
+  }
+  for (auto *node : selected) {
+    node->m_outcome = outcome.get();
+  }
+  if (!absorbed.empty()) {
+    for (const auto *dead : absorbed) {
+      auto member = std::find_if(m_outcomes.begin(), m_outcomes.end(),
+                                 [dead](const auto &c) { return c.get() == dead; });
+      (*member)->Invalidate();
+      m_outcomes.erase(member);
+    }
+    std::for_each(
+        m_outcomes.begin(), m_outcomes.end(),
+        [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  }
+  return outcome;
+}
+
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
+  if (p_outcome->IsNull()) {
+    throw UndefinedException("The null outcome cannot be deleted");
+  }
   IncrementVersion();
   m_root->DeleteOutcome(p_outcome.get());
   p_outcome->Invalidate();
