@@ -6,6 +6,8 @@
   is found or another solver event is emitted.
 
 ### Changed
+- Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
+  The `gambit-convert` utility has been removed.
 - Revised `StrategySupportProfile` to expose a slimmer set of operations, and
   implement `StrategySupport` as an immutable snapshot.
 
