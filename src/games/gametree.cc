@@ -1880,15 +1880,7 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
     node->m_outcome = outcome.get();
   }
   if (!absorbed.empty()) {
-    for (const auto *dead : absorbed) {
-      auto member = std::find_if(m_outcomes.begin(), m_outcomes.end(),
-                                 [dead](const auto &c) { return c.get() == dead; });
-      (*member)->Invalidate();
-      m_outcomes.erase(member);
-    }
-    std::for_each(
-        m_outcomes.begin(), m_outcomes.end(),
-        [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+    EraseOutcomes(absorbed);
   }
   return outcome;
 }
@@ -1900,12 +1892,7 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
   }
   IncrementVersion();
   m_root->DeleteOutcome(p_outcome.get());
-  p_outcome->Invalidate();
-  m_outcomes.erase(
-      std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
-  std::for_each(
-      m_outcomes.begin(), m_outcomes.end(),
-      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  EraseOutcomes({p_outcome.get()});
 }
 
 //------------------------------------------------------------------------

@@ -326,6 +326,7 @@ inline void CheckText(const std::string &p_text)
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.
 class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
+  friend class GameRep;
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
@@ -946,6 +947,8 @@ protected:
   /// Validate that p_label is a nonempty, valid, unique label for an outcome of this game.
   void CheckOutcomeLabel(const std::string &p_label,
                          const std::set<const GameOutcomeRep *> &p_ignore = {}) const;
+  /// Invalidate and remove the given outcomes from the game, renumbering the survivors.
+  void EraseOutcomes(const std::set<const GameOutcomeRep *> &p_outcomes);
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1652,6 +1655,18 @@ inline void GameRep::CheckOutcomeLabel(const std::string &p_label,
       throw ValueException("Outcome label must be unique within the game");
     }
   }
+}
+inline void GameRep::EraseOutcomes(const std::set<const GameOutcomeRep *> &p_outcomes)
+{
+  for (const auto *outcome : p_outcomes) {
+    auto member = std::find_if(m_outcomes.begin(), m_outcomes.end(),
+                               [outcome](const auto &c) { return c.get() == outcome; });
+    (*member)->Invalidate();
+    m_outcomes.erase(member);
+  }
+  std::for_each(
+      m_outcomes.begin(), m_outcomes.end(),
+      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
 }
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 

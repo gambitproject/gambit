@@ -538,15 +538,7 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
     m_results[index] = outcome.get();
   }
   if (!absorbed.empty()) {
-    for (const auto *dead : absorbed) {
-      auto member = std::find_if(m_outcomes.begin(), m_outcomes.end(),
-                                 [dead](const auto &c) { return c.get() == dead; });
-      (*member)->Invalidate();
-      m_outcomes.erase(member);
-    }
-    std::for_each(
-        m_outcomes.begin(), m_outcomes.end(),
-        [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+    EraseOutcomes(absorbed);
   }
   return outcome;
 }
@@ -558,12 +550,7 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
   }
   IncrementVersion();
   std::replace(m_results.begin(), m_results.end(), p_outcome.get(), m_nullOutcome.get());
-  m_outcomes.erase(
-      std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
-  p_outcome->Invalidate();
-  std::for_each(
-      m_outcomes.begin(), m_outcomes.end(),
-      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  EraseOutcomes({p_outcome.get()});
 }
 
 //------------------------------------------------------------------------
