@@ -532,8 +532,9 @@ std::vector<PureStrategyProfile> PayoffGrid::GetSelectedContingencies(int p_fall
       }
     }
   }
-  for (const auto &coords : GetSelectedCells()) {
-    blocks.emplace(coords.GetRow(), coords.GetCol() / perContingency);
+  const wxGridCellCoordsArray selectedCells = GetSelectedCells();
+  for (size_t i = 0; i < selectedCells.size(); ++i) {
+    blocks.emplace(selectedCells[i].GetRow(), selectedCells[i].GetCol() / perContingency);
   }
   if (blocks.empty()) {
     blocks.emplace(p_fallbackRow, p_fallbackCol / perContingency);
