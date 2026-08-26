@@ -342,21 +342,8 @@ if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++
 endif
 
-bin_PROGRAMS = \
-	gambit-convert \
-	gambit-enummixed \
-	gambit-enumpoly \
-	gambit-enumpure \
-	gambit-gnm \
-	gambit-ipa \
-	gambit-lcp \
-	gambit-liap \
-	gambit-logit \
-	gambit-lp \
-	gambit-simpdiv
-
 if WITH_GUI
-bin_PROGRAMS += gambit
+bin_PROGRAMS = gambit
 endif
 
 # Read version from GAMBIT_VERSION file for use in compilation
@@ -383,64 +370,6 @@ libliap_a_SOURCES = ${liap_SOURCES}
 liblogit_a_SOURCES = ${logit_SOURCES}
 libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
 libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
-
-## Command-line tools
-
-gambit_convert_SOURCES = \
-	src/tools/convert/convert.cc
-gambit_convert_LDADD = libgames.a libcore.a
-
-gambit_enummixed_SOURCES = \
-	src/tools/util.h \
-	src/tools/enummixed/enummixed.cc
-gambit_enummixed_LDADD = libbimatrix.a libgames.a libcore.a
-
-gambit_enumpoly_SOURCES = \
-	src/tools/util.h \
-	src/tools/enumpoly/enumpoly.cc
-gambit_enumpoly_LDADD = libenumpoly.a libgames.a libcore.a
-
-gambit_enumpure_SOURCES = \
-	src/solvers/enumpure/enumpure.h \
-	src/tools/util.h \
-	src/tools/enumpure/enumpure.cc
-gambit_enumpure_LDADD = libgames.a libcore.a
-
-gambit_gnm_SOURCES = \
-	src/tools/gt/nfggt.cc \
-	src/tools/gt/nfggnm.cc
-gambit_gnm_LDADD = libgtracer.a libgames.a libcore.a
-
-gambit_ipa_SOURCES = \
-	src/tools/gt/nfggt.cc \
-	src/tools/util.h \
-	src/tools/gt/nfgipa.cc
-gambit_ipa_LDADD = libgtracer.a libgames.a libcore.a
-
-gambit_lcp_SOURCES = \
-	src/tools/util.h \
-	src/tools/lcp/lcp.cc
-gambit_lcp_LDADD = libbimatrix.a libgames.a libcore.a
-
-gambit_liap_SOURCES = \
-	src/tools/util.h \
-	src/tools/liap/liap.cc
-gambit_liap_LDADD = libliap.a libgames.a libcore.a
-
-gambit_logit_SOURCES = \
-	src/tools/util.h \
-	src/tools/logit/logit.cc
-gambit_logit_LDADD = liblogit.a libgames.a libcore.a
-
-gambit_lp_SOURCES = \
-	src/tools/util.h \
-	src/tools/lp/lp.cc
-gambit_lp_LDADD = libbimatrix.a libgames.a libcore.a
-
-gambit_simpdiv_SOURCES = \
-	src/tools/util.h \
-	src/tools/simpdiv/nfgsimpdiv.cc
-gambit_simpdiv_LDADD = libsimpdiv.a libgames.a libcore.a
 
 gambit_SOURCES = \
 	src/gui/analysis.cc \
@@ -554,4 +483,3 @@ clang-tidy:
 	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
 	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
 	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
