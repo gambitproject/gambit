@@ -85,7 +85,7 @@ GameOutcome PureBehaviorProfile::GetOutcome(const GameNode &p_start) const
       outcome = node->GetOutcome();
     }
     if (node->IsTerminal()) {
-      return outcome;
+      return outcome ? outcome : node->GetOutcome();
     }
     if (node->GetInfoset()->IsChanceInfoset()) {
       throw UndefinedException();
