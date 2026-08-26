@@ -779,6 +779,32 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
+void GameDocument::DoRemoveOutcome(const PureStrategyProfile &p_profile)
+{
+  if (p_profile->GetOutcome()->IsNull()) {
+    return;
+  }
+  p_profile->SetOutcome(nullptr);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
+                                 const std::vector<Number> &p_payoffs, const std::string &p_label)
+{
+  std::vector<std::vector<GameStrategy>> contingencies;
+  contingencies.reserve(p_profiles.size());
+  for (const auto &profile : p_profiles) {
+    std::vector<GameStrategy> strategies;
+    strategies.reserve(m_game->NumPlayers());
+    for (const auto &player : m_game->GetPlayers()) {
+      strategies.push_back(profile->GetStrategy(player));
+    }
+    contingencies.push_back(strategies);
+  }
+  m_game->MakeOutcome(contingencies, p_payoffs, p_label);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
 void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));

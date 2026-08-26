@@ -151,3 +151,36 @@ payoff cell: every other cell sharing its outcome is shown with a
 shaded background for as long as the pointer remains over one of them.
 The highlight does not change while a payoff is being edited, even if
 the pointer moves elsewhere in the meantime.
+
+Merging and splitting outcomes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Which contingencies share an outcome can itself be changed from the
+table. Click and drag, or shift-click, across several payoff cells to
+select them; the selection automatically expands to cover every
+payoff column of any contingency it touches, since an outcome is
+shared at the level of a whole contingency, not a single payoff cell.
+Right-clicking the selection -- or, with nothing selected,
+right-clicking a single cell -- opens a menu with two commands:
+
++ :guilabel:`Set outcome...` (labelled :guilabel:`Merge into one
+  outcome...` when more than one contingency is selected) opens a
+  dialog to give a label and a payoff for each player, then attaches
+  the resulting outcome to every selected contingency. Selecting
+  several contingencies this way merges them into one shared outcome;
+  selecting a single contingency that is currently part of a larger
+  shared outcome splits it off into its own outcome, leaving the rest
+  of the group unchanged. If the selection already matches one
+  outcome's full membership exactly, this instead edits that outcome's
+  own label and payoffs in place, rather than creating a new one.
+  The dialog starts from a label and payoffs to edit -- the shared
+  outcome's own, if editing one in place, or the first selected
+  contingency's current payoffs with a freshly generated label
+  otherwise -- and disables :guilabel:`OK` until the label is
+  nonempty and unique among the game's outcomes and every payoff is a
+  valid number.
++ :guilabel:`Remove outcome` clears every selected contingency back to
+  having no outcome. It is disabled if none of the selection currently
+  has one.
+
+Clicking any cell afterward clears the selection.

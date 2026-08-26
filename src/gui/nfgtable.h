@@ -43,13 +43,7 @@ class NfgPanel;
 //! file-local to one of them, since it's a base class used across all three .cc files.
 //!
 class TableGridBase : public wxGrid {
-  //!
-  //! @name Suppressing the built-in selection highlight & cursor rectangle
-  //!
-  //@{
-  void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
   void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
-  //@}
 
 protected:
   /// Shows the editor on one click; overridden by the header grids to edit strategies
@@ -60,6 +54,12 @@ protected:
     EnableCellEditControl();
     p_event.Skip(false);
   }
+
+  /// Suppresses the built-in selection highlight and cursor rectangle by default, since
+  /// most of the grids in this display have no use for a range selection at all. The
+  /// payoff grid overrides this to allow selecting several contingencies at once, to act
+  /// on together (e.g. merging them into one outcome).
+  virtual void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
 
 public:
   explicit TableGridBase(wxWindow *p_parent, wxWindowID p_id = wxID_ANY) : wxGrid(p_parent, p_id)
