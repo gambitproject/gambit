@@ -805,6 +805,20 @@ void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profi
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
+void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                                    const std::vector<wxString> &p_payoffs)
+{
+  if (p_payoffs.size() != m_game->NumPlayers()) {
+    throw std::invalid_argument("Incorrect number of payoff values");
+  }
+  p_outcome->SetLabel(p_label.ToStdString(wxConvUTF8));
+  for (size_t index = 0; index < p_payoffs.size(); ++index) {
+    p_outcome->SetPayoff(m_game->GetPlayer(static_cast<int>(index) + 1),
+                         Number(p_payoffs[index].ToStdString()));
+  }
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
 void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));

@@ -459,7 +459,11 @@ class PayoffGrid final : public TableGridBase {
   /// nothing is currently selected (e.g. a right-click with no preceding drag/shift-click).
   std::vector<PureStrategyProfile> GetSelectedContingencies(int p_fallbackRow,
                                                             int p_fallbackCol) const;
+  /// The one outcome shared by every given contingency, if they all have the same
+  /// non-null outcome -- the null handle otherwise (mixed outcomes, or none at all).
+  static GameOutcome GetSharedOutcome(const std::vector<PureStrategyProfile> &p_profiles);
   void ShowSetOutcomeDialog(const std::vector<PureStrategyProfile> &p_profiles);
+  void ShowEditOutcomeDialog(const GameOutcome &p_outcome);
 
 public:
   explicit PayoffGrid(TableWidget *p_parent);
@@ -543,25 +547,29 @@ std::vector<PureStrategyProfile> PayoffGrid::GetSelectedContingencies(int p_fall
   return profiles;
 }
 
+GameOutcome PayoffGrid::GetSharedOutcome(const std::vector<PureStrategyProfile> &p_profiles)
+{
+  GameOutcome shared = p_profiles.front()->GetOutcome();
+  for (const auto &profile : p_profiles) {
+    if (profile->GetOutcome() != shared) {
+      return GameOutcome();
+    }
+  }
+  return (shared && !shared->IsNull()) ? shared : GameOutcome();
+}
+
 void PayoffGrid::ShowSetOutcomeDialog(const std::vector<PureStrategyProfile> &p_profiles)
 {
   const Game game = m_table->GetDocument()->GetGame();
 
   // Does the selection already exactly match one existing outcome's membership?  If so,
   // this is really an in-place edit of that outcome, not a merge or split.
-  GameOutcome shared = p_profiles.front()->GetOutcome();
-  for (const auto &profile : p_profiles) {
-    if (profile->GetOutcome() != shared) {
-      shared = GameOutcome();
-      break;
-    }
-  }
-  const bool editingInPlace = shared && !shared->IsNull();
+  const GameOutcome shared = GetSharedOutcome(p_profiles);
 
   wxString label;
   std::vector<wxString> payoffValues;
   std::set<const GameOutcomeRep *> ignoreForLabel;
-  if (editingInPlace) {
+  if (shared) {
     label = wxString::FromUTF8(shared->GetLabel());
     ignoreForLabel.insert(shared.get());
     for (const auto &player : game->GetPlayers()) {
@@ -587,6 +595,26 @@ void PayoffGrid::ShowSetOutcomeDialog(const std::vector<PureStrategyProfile> &p_
   ClearSelection();
 }
 
+void PayoffGrid::ShowEditOutcomeDialog(const GameOutcome &p_outcome)
+{
+  const Game game = m_table->GetDocument()->GetGame();
+  std::vector<wxString> payoffValues;
+  for (const auto &player : game->GetPlayers()) {
+    payoffValues.push_back(wxString::FromUTF8(p_outcome->GetPayoff<std::string>(player)));
+  }
+  SetOutcomeDialog dialog(this, game, _("Edit outcome"), wxString::FromUTF8(p_outcome->GetLabel()),
+                          payoffValues, {p_outcome.get()});
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+  std::vector<wxString> payoffs;
+  for (const auto &value : dialog.GetPayoffs()) {
+    payoffs.push_back(wxString::FromUTF8(lexical_cast<std::string>(value)));
+  }
+  m_table->GetDocument()->DoSetOutcomeData(p_outcome, dialog.GetOutcomeLabel(), payoffs);
+  ClearSelection();
+}
+
 void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
 {
   const std::vector<PureStrategyProfile> profiles =
@@ -596,13 +624,17 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
       std::any_of(profiles.begin(), profiles.end(), [](const PureStrategyProfile &p_profile) {
         return !p_profile->GetOutcome()->IsNull();
       });
+  const GameOutcome shared = GetSharedOutcome(profiles);
 
   const int setOutcomeId = wxWindow::NewControlId();
+  const int editOutcomeId = wxWindow::NewControlId();
   const int removeOutcomeId = wxWindow::NewControlId();
 
   wxMenu menu;
   menu.Append(setOutcomeId,
               profiles.size() > 1 ? _("Merge into one outcome...") : _("Set outcome..."));
+  menu.Append(editOutcomeId, _("Edit outcome..."));
+  menu.Enable(editOutcomeId, static_cast<bool>(shared));
   menu.Append(removeOutcomeId, _("Remove outcome"));
   menu.Enable(removeOutcomeId, anyHasOutcome);
 
@@ -611,6 +643,9 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
   try {
     if (selection == setOutcomeId) {
       ShowSetOutcomeDialog(profiles);
+    }
+    else if (selection == editOutcomeId) {
+      ShowEditOutcomeDialog(shared);
     }
     else if (selection == removeOutcomeId) {
       for (const auto &profile : profiles) {

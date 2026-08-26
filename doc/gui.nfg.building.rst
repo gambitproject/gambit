@@ -161,7 +161,7 @@ select them; the selection automatically expands to cover every
 payoff column of any contingency it touches, since an outcome is
 shared at the level of a whole contingency, not a single payoff cell.
 Right-clicking the selection -- or, with nothing selected,
-right-clicking a single cell -- opens a menu with two commands:
+right-clicking a single cell -- opens a menu with three commands:
 
 + :guilabel:`Set outcome...` (labelled :guilabel:`Merge into one
   outcome...` when more than one contingency is selected) opens a
@@ -179,6 +179,16 @@ right-clicking a single cell -- opens a menu with two commands:
   otherwise -- and disables :guilabel:`OK` until the label is
   nonempty and unique among the game's outcomes and every payoff is a
   valid number.
++ :guilabel:`Edit outcome...` is the direct route to that same
+  in-place case: it is enabled whenever the selection matches one
+  existing outcome's full membership exactly (a single contingency is
+  enough, if that contingency's outcome has no other members), and
+  opens the same label-and-payoffs dialog pre-filled with that
+  outcome's own values, changing them in place without touching which
+  contingencies share it. Editing a payoff here is no different from
+  typing directly into a payoff cell -- it is offered as a second way
+  to reach the same result, alongside also being able to change the
+  label, matching how outcomes are edited in an extensive game.
 + :guilabel:`Remove outcome` clears every selected contingency back to
   having no outcome. It is disabled if none of the selection currently
   has one.

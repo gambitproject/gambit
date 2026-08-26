@@ -392,6 +392,8 @@ public:
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
+  void DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                        const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
   void DoRemoveOutcome(const PureStrategyProfile &p_profile);
   void DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
