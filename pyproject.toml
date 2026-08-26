@@ -35,6 +35,9 @@ dependencies = [
 [project.scripts]
 gambit-enumpure = "pygambit.cli.enumpure:main"
 gambit-logit = "pygambit.cli.logit:main"
+gambit-enummixed = "pygambit.cli.enummixed:main"
+gambit-lcp = "pygambit.cli.lcp:main"
+gambit-lp = "pygambit.cli.lp:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]

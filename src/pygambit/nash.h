@@ -20,10 +20,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "solvers/enummixed/enummixed.h"
 #include "solvers/logit/logit.h"
 
 using namespace std;
 using namespace Gambit;
+
+template <class T>
+std::pair<std::list<MixedStrategyProfile<T>>, std::list<std::list<MixedStrategyProfile<T>>>>
+EnumMixedStrategySolveCliquesWrapper(
+    const Game &p_game,
+    Nash::StrategyCallbackType<T> p_onEquilibrium = Nash::NullStrategyCallback<T>)
+{
+  auto solution = Nash::EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium);
+  std::list<std::list<MixedStrategyProfile<T>>> cliques;
+  for (auto &clique : solution->GetCliques()) {
+    cliques.emplace_back(clique.begin(), clique.end());
+  }
+  return {solution->GetExtremeEquilibria(), cliques};
+}
 
 std::list<MixedBehaviorProfile<double>>
 LogitBehaviorSolveWrapper(const Game &p_game, double p_regret, double p_firstStep,

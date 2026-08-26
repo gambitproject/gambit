@@ -471,6 +471,35 @@ def _enummixed_strategy_solve_rational(
     )
 
 
+def _enummixed_strategy_solve_cliques_double(
+        game: Game, nash_callback: object = None
+) -> tuple[list[MixedStrategyProfileDouble], list[list[MixedStrategyProfileDouble]]]:
+    result: pair[
+        stdlist[c_MixedStrategyProfile[float]], stdlist[stdlist[c_MixedStrategyProfile[float]]]
+    ] = EnumMixedStrategySolveCliquesWrapper[double](
+        game.game, MakeStrategyCallback[double](nash_callback)
+    )
+    return (
+        _convert_mspd(result.first),
+        [_convert_mspd(clique) for clique in result.second],
+    )
+
+
+def _enummixed_strategy_solve_cliques_rational(
+        game: Game, nash_callback: object = None
+) -> tuple[list[MixedStrategyProfileRational], list[list[MixedStrategyProfileRational]]]:
+    result: pair[
+        stdlist[c_MixedStrategyProfile[c_Rational]],
+        stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]
+    ] = EnumMixedStrategySolveCliquesWrapper[c_Rational](
+        game.game, MakeStrategyCallback[c_Rational](nash_callback)
+    )
+    return (
+        _convert_mspr(result.first),
+        [_convert_mspr(clique) for clique in result.second],
+    )
+
+
 def _lcp_behavior_solve_double(
         game: Game, nash_callback: object = None
 ) -> list[MixedBehaviorProfileDouble]:

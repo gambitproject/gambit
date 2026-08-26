@@ -6,6 +6,7 @@ from libcpp.vector cimport vector as stdvector
 from libcpp.set cimport set as stdset
 from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
+from libcpp.pair cimport pair
 
 
 cdef extern from "games.h":
@@ -690,6 +691,11 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "nash.h":
+    pair[
+        stdlist[c_MixedStrategyProfile[T]], stdlist[stdlist[c_MixedStrategyProfile[T]]]
+    ] EnumMixedStrategySolveCliquesWrapper[T](
+            c_Game, StrategyCallbackType[T]
+    ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
