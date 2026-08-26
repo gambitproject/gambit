@@ -4,10 +4,18 @@
 - Added `BehaviorSupportProfile` to `pygambit`.
 - Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
   is found or another solver event is emitted.
+- Added `Game.make_outcome`, which creates an outcome with the given payoffs and attaches it to a
+  set of nodes (extensive) or contingencies (strategic) in a single operation.  (#1061)
 
 ### Changed
 - Revised `StrategySupportProfile` to expose a slimmer set of operations, and
   implement `StrategySupport` as an immutable snapshot.
+- Absent outcomes are now represented by a per-game null outcome rather than by a null reference.
+  Two null outcomes always compare unequal (cf. missing values in `pandas`).  Null outcomes do not appear when
+  iterating over a game's outcomes, and assigning a payoff to one raises `UndefinedOperationError`. (#1061)
+- `Game.new_table` no longer creates an outcome for every contingency; a new strategic game has no outcomes,
+  and every contingency is initially null. Outcomes are created as they are needed;
+  games built by `Game.from_arrays` and `Game.from_dict` are unaffected.  (#1061)
 
 ## [17.0.0-alpha.2] - 2026-08-21
 
