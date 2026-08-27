@@ -151,7 +151,7 @@ def main(
     as_float = decimals > 0
 
     if start_file is not None:
-        starts = read_strategy_profiles_csv(start_file, game, rational=True)
+        starts = read_strategy_profiles_csv(start_file, game)
     elif rand_denom is not None:
         starts = [
             game.random_strategy_profile(denom=rand_denom, gen=np.random.default_rng(seed))

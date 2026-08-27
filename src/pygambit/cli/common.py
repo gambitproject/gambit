@@ -318,13 +318,13 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
 def read_strategy_profiles_csv(
     path: str,
     game: gbt.Game,
-    rational: bool = False,
-) -> list[gbt.MixedStrategyProfile]:
+) -> list[gbt.MixedStrategyProfileRational]:
     """Read one mixed strategy profile per line from `path`, each a flat comma-separated
     list of probabilities in the same order as a profile's CSV row (excluding any
     leading label), matching the C++ tools' `ReadStrategyProfiles`/`ReadProfiles`.
+    Values are parsed as exact rationals; a method which requires floating-point
+    starting points converts the result via `~MixedStrategyProfile.as_float`.
     """
-    convert = gbt.Rational if rational else float
     strategies = [strategy for player in game.players for strategy in player.strategies]
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -333,20 +333,24 @@ def read_strategy_profiles_csv(
             continue
         fields = line.split(",")
         try:
-            values = iter([convert(fields[i]) for i in range(len(strategies))])
+            values = iter([gbt.Rational(fields[i]) for i in range(len(strategies))])
         except (ValueError, IndexError) as exc:
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
-        profile = game.mixed_strategy_profile(rational=rational)
+        profile = game.mixed_strategy_profile(rational=True)
         for player in game.players:
             profile[player.label] = {s.label: next(values) for s in player.strategies}
         profiles.append(profile)
     return profiles
 
 
-def read_behavior_profiles_csv(path: str, game: gbt.Game) -> list[gbt.MixedBehaviorProfileDouble]:
+def read_behavior_profiles_csv(
+    path: str, game: gbt.Game
+) -> list[gbt.MixedBehaviorProfileRational]:
     """Read one mixed behavior profile per line from `path`, each a flat comma-separated
     list of probabilities in the same order as a profile's CSV row (excluding any
-    leading label), matching the C++ tools' `ReadBehaviorProfiles`.
+    leading label), matching the C++ tools' `ReadBehaviorProfiles`.  Values are parsed
+    as exact rationals; a method which requires floating-point starting points converts
+    the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
         len(list(infoset.actions)) for player in game.players for infoset in player.infosets
@@ -358,10 +362,10 @@ def read_behavior_profiles_csv(path: str, game: gbt.Game) -> list[gbt.MixedBehav
             continue
         fields = line.split(",")
         try:
-            values = iter([float(fields[i]) for i in range(count)])
+            values = iter([gbt.Rational(fields[i]) for i in range(count)])
         except (ValueError, IndexError) as exc:
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
-        profile = game.mixed_behavior_profile()
+        profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for infoset in player.infosets:
                 node = next(iter(infoset.members))

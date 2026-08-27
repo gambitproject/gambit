@@ -15,6 +15,16 @@ def test_default_finds_an_equilibrium_from_a_starting_file(
     assert result.stdout.strip() == "NE,0.750000,0.250000,0.250000,0.750000"
 
 
+def test_starting_file_accepts_exact_fractions(cli_runner, nfg_asymmetric_table_text, tmp_path):
+    start_file = tmp_path / "start.csv"
+    start_file.write_text("1/2,1/2,1/2,1/2\n")
+    result = cli_runner.invoke(
+        liap.main, ["-q", "-s", str(start_file)], input=nfg_asymmetric_table_text
+    )
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "NE,0.750000,0.250000,0.250000,0.750000"
+
+
 def test_verbose_flag_adds_a_start_line(cli_runner, nfg_asymmetric_table_text, tmp_path):
     start_file = tmp_path / "start.csv"
     start_file.write_text("0.5,0.5,0.5,0.5\n")
@@ -79,6 +89,20 @@ def test_agent_flag_reports_behavior_form_on_a_tree_game(
 ):
     start_file = tmp_path / "start.csv"
     start_file.write_text("0.5,0.5,0.3,0.3,0.4,0.5,0.5\n")
+    result = cli_runner.invoke(
+        liap.main, ["-q", "-A", "-s", str(start_file)], input=efg_asymmetric_tree_text
+    )
+    assert result.exit_code == 0
+    lines = result.stdout.strip().splitlines()
+    assert lines
+    assert all(len(line.split(",")) == 8 for line in lines)
+
+
+def test_agent_flag_starting_file_accepts_exact_fractions(
+    cli_runner, efg_asymmetric_tree_text, tmp_path
+):
+    start_file = tmp_path / "start.csv"
+    start_file.write_text("1/2,1/2,3/10,3/10,2/5,1/2,1/2\n")
     result = cli_runner.invoke(
         liap.main, ["-q", "-A", "-s", str(start_file)], input=efg_asymmetric_tree_text
     )

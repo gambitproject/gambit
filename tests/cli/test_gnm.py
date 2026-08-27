@@ -22,6 +22,19 @@ def test_default_finds_equilibria_along_the_path(cli_runner, nfg_asymmetric_tabl
     ]
 
 
+def test_starting_file_accepts_exact_fractions(cli_runner, nfg_asymmetric_table_text, tmp_path):
+    start_file = _start_file(tmp_path, "9/10,1/10,9/10,1/10\n")
+    result = cli_runner.invoke(
+        gnm.main, ["-q", "-s", str(start_file)], input=nfg_asymmetric_table_text
+    )
+    assert result.exit_code == 0
+    assert result.stdout.strip().splitlines() == [
+        "NE,1.000000,0.000000,1.000000,0.000000",
+        "NE,0.750000,0.250000,0.250000,0.750000",
+        "NE,0.000000,1.000000,0.000000,1.000000",
+    ]
+
+
 def test_decimals_flag_changes_precision(cli_runner, nfg_asymmetric_table_text, tmp_path):
     start_file = _start_file(tmp_path)
     result = cli_runner.invoke(
