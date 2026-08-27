@@ -465,6 +465,32 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
         _ = game.mixed_strategy_profile(rational=rational_flag).as_behavior()
 
 
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_as_float_returns_double(rational_flag: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    result = game.mixed_strategy_profile(rational=rational_flag).as_float()
+    assert isinstance(result, gbt.MixedStrategyProfileDouble)
+
+
+def test_as_float_converts_rational_probabilities():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile(rational=True)
+    profile[P1] = {"1": "1/3", "2": "2/3", "3": 0, "4": 0}
+    result = profile.as_float()
+    assert result[P1] == {
+        "1": pytest.approx(1 / 3), "2": pytest.approx(2 / 3), "3": 0.0, "4": 0.0
+    }
+
+
+def test_as_float_is_independent_copy():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile(rational=False)
+    result = profile.as_float()
+    assert result == profile
+    result[P1] = {"1": 1.0}
+    assert dict(profile[P1]) != dict(result[P1])
+
+
 @pytest.mark.parametrize(
     "game,profile_data,rational_flag,payoffs",
     [

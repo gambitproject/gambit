@@ -26,29 +26,30 @@ include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
+	build_support/msw/banner.bmp \
+	build_support/msw/dialog.bmp \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
-	src/gui/bitmaps/calc.xpm \
-	src/gui/bitmaps/efg.ico \
+	build_support/osx/dmg_background.tiff \
+	build_support/osx/make-dmg.sh \
+	src/gui/bitmaps/calc.h \
 	src/gui/bitmaps/gambitbig.xpm \
-	src/gui/bitmaps/gambit.bmp \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
 	src/gui/bitmaps/move.xpm \
-	src/gui/bitmaps/newtable.xpm \
-	src/gui/bitmaps/newtree.xpm \
-	src/gui/bitmaps/next.xpm \
-	src/gui/bitmaps/nfg.ico \
-	src/gui/bitmaps/open.xpm \
-	src/gui/bitmaps/prev.xpm \
-	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/save.xpm \
-	src/gui/bitmaps/stop.xpm \
-	src/gui/bitmaps/table.xpm \
-	src/gui/bitmaps/tobegin.xpm \
-	src/gui/bitmaps/toend.xpm \
-	src/gui/bitmaps/undo.xpm \
-	src/gui/bitmaps/redo.xpm \
+	src/gui/bitmaps/newtable.h \
+	src/gui/bitmaps/newtree.h \
+	src/gui/bitmaps/next.h \
+	src/gui/bitmaps/open.h \
+	src/gui/bitmaps/prev.h \
+	src/gui/bitmaps/profiles.h \
+	src/gui/bitmaps/save.h \
+	src/gui/bitmaps/stop.h \
+	src/gui/bitmaps/table.h \
+	src/gui/bitmaps/tobegin.h \
+	src/gui/bitmaps/toend.h \
+	src/gui/bitmaps/undo.h \
+	src/gui/bitmaps/redo.h \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
 	contrib/games/2x2x2.efg \
@@ -392,8 +393,6 @@ gambit_SOURCES = \
 	src/gui/dlefglayout.h \
 	src/gui/dlefglegend.cc \
 	src/gui/dlefglegend.h \
-	src/gui/dlefglogit.cc \
-	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
@@ -405,8 +404,8 @@ gambit_SOURCES = \
 	src/gui/nashspec.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
-	src/gui/dlnfglogit.cc \
-	src/gui/dlnfglogit.h \
+	src/gui/dllogit.cc \
+	src/gui/dllogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
 	src/gui/efgdragdrop.cc \
@@ -447,11 +446,16 @@ gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
+gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
+
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 else
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
 endif
+
+src/gui/bitmaps/gambitrc.o: src/gui/bitmaps/gambitrc.rc
+	$(WINDRES) $(WX_CXXFLAGS) -I$(srcdir)/src/gui/bitmaps -o $@ $<
 
 osx-bundle:
 	make all
@@ -467,11 +471,7 @@ osx-bundle:
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
-	-rm -rf .dmg
-	-mkdir .dmg
-	cp -r Gambit.app .dmg
-	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
-	rm -rf .dmg
+	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg
 
 msw-msi:
 	-mkdir installer

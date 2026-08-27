@@ -4,10 +4,17 @@
 - Added `BehaviorSupportProfile` to `pygambit`.
 - Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
   is found or another solver event is emitted.
+- Added `MixedStrategyProfile.as_float` and `MixedBehaviorProfile.as_float`, converting a
+  rational-precision profile to floating-point precision.  `liap_solve`, `liap_agent_solve`,
+  `logit_estimate`, `ipa_solve`, and `gnm_solve` now also accept a rational-precision profile
+  directly (as a starting point or perturbation vector), converting it internally.
+  (#721, #458)
 
 ### Changed
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
   The `gambit-convert` utility has been removed.
+- Refreshed GUI icons and standardised dialog layout and formatting
+- Improved installers for Windows, and disk-image "installer" for MacOS
 - Revised `StrategySupportProfile` to expose a slimmer set of operations, and
   implement `StrategySupport` as an immutable snapshot.
 

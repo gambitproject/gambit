@@ -34,19 +34,23 @@ namespace Gambit::GUI {
 //======================================================================
 
 EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
-  : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), m_node(p_node)
+  : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_node(p_node)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, 5);
+  labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, S);
   m_nodeLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(m_node->GetLabel()));
-  labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, 5);
-  topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
+  labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, S);
+  topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, S);
 
   auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
   infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")), 0, wxALL | wxCENTER,
-                    5);
+                    S);
   m_infoset = new wxChoice(this, wxID_ANY);
   if (!p_node->IsTerminal()) {
     m_infoset->Append(_("New information set"));
@@ -89,23 +93,23 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
     m_infoset->SetSelection(0);
     m_infoset->Enable(false);
   }
-  infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, 5);
+  infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, S);
 
   auto *subgameSizer = new wxBoxSizer(wxVERTICAL);
   if (!p_node->GetParent()) {
     subgameSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is the root node of the tree")),
-                      0, wxALL | wxCENTER, 5);
+                      0, wxALL | wxCENTER, S);
   }
   else if (p_node->IsSubgameRoot()) {
     subgameSizer->Add(
         new wxStaticText(this, wxID_STATIC, _("This is the root of a proper subgame")), 0,
-        wxALL | wxCENTER, 5);
+        wxALL | wxCENTER, S);
   }
-  topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, S);
 
   auto *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
-  outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")), 0, wxALL | wxCENTER, 5);
+  outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")), 0, wxALL | wxCENTER, S);
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
@@ -137,15 +141,12 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
       m_outcome->SetSelection(outcome->GetNumber());
     }
   }
-  outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, 5);
+  outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, S);
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
+    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  }
 
   SetSizer(topSizer);
   topSizer->Fit(this);

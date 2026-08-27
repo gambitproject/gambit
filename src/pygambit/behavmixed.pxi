@@ -844,6 +844,21 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._as_strategy()
 
+    def as_float(self) -> MixedBehaviorProfileDouble:
+        """Creates a floating-point copy of this mixed behavior profile.
+
+        If this profile is already a `MixedBehaviorProfileDouble`, returns a copy of it.
+
+        .. versionadded:: 17.0.0
+
+        Returns
+        -------
+        MixedBehaviorProfileDouble
+            A profile with the same probabilities, represented as floating-point numbers.
+        """
+        self._check_validity()
+        return self._as_float()
+
     def normalize(self) -> MixedBehaviorProfile:
         """Create a profile with the same action proportions as this
         one, but normalised so probabilities for each infoset sum to one.
@@ -970,6 +985,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             deref(self.profile).ToMixedProfile()
         ))
 
+    def _as_float(self) -> MixedBehaviorProfileDouble:
+        return self._copy()
+
     def _agent_liap_value(self) -> float:
         return deref(self.profile).GetAgentLiapValue()
 
@@ -1092,6 +1110,17 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return MixedStrategyProfileRational.wrap(make_shared[c_MixedStrategyProfile[c_Rational]](
             deref(self.profile).ToMixedProfile()
         ))
+
+    def _as_float(self) -> MixedBehaviorProfileDouble:
+        profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
+        for player in self.game.players:
+            for infoset in player.infosets:
+                profile._setprob_infoset(
+                    infoset,
+                    {a.label: float(self._getprob_action(a)) for a in infoset.actions},
+                    sparse=True,
+                )
+        return profile
 
     def _agent_liap_value(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentLiapValue())

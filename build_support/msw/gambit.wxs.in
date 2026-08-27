@@ -6,9 +6,64 @@
 
         <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed." />
 
-        <WixVariable Id="WixUILicenseRtf" Value="build_support/msw/license.rtf"/>
-        <UI>
-            <UIRef Id="WixUI_Minimal"/>
+        <WixVariable Id="WixUIBannerBmp" Value="build_support/msw/banner.bmp"/>
+        <WixVariable Id="WixUIDialogBmp" Value="build_support/msw/dialog.bmp"/>
+
+        <Icon Id="Gambit.ico" SourceFile="src/gui/bitmaps/gambit.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="Gambit.ico"/>
+
+        <Property Id="WIXUI_INSTALLDIR" Value="ApplicationRootDirectory"/>
+        <UI Id="WixUI_GambitInstall">
+            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
+            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
+            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes"/>
+            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal"/>
+            <Property Id="WixUI_Mode" Value="InstallDir"/>
+
+            <DialogRef Id="WelcomeDlg"/>
+            <DialogRef Id="InstallDirDlg"/>
+            <DialogRef Id="VerifyReadyDlg"/>
+            <DialogRef Id="MaintenanceWelcomeDlg"/>
+            <DialogRef Id="MaintenanceTypeDlg"/>
+            <DialogRef Id="ExitDialog"/>
+            <DialogRef Id="BrowseDlg"/>
+            <DialogRef Id="DiskCostDlg"/>
+            <DialogRef Id="ErrorDlg"/>
+            <DialogRef Id="FatalError"/>
+            <DialogRef Id="FilesInUse"/>
+            <DialogRef Id="MsiRMFilesInUse"/>
+            <DialogRef Id="PrepareDlg"/>
+            <DialogRef Id="ProgressDlg"/>
+            <DialogRef Id="ResumeDlg"/>
+            <DialogRef Id="UserExit"/>
+
+            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+
+            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">NOT Installed</Publish>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+
+            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">NOT Installed</Publish>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+
+            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+
+            <UIRef Id="WixUI_Common"/>
         </UI>
 
         <Directory Id="TARGETDIR" Name="SourceDir">
@@ -24,6 +79,9 @@
             <Component Id="Gambit.exe" Guid="AEB0EAF8-246A-4194-9628-A4ED3092CD93" Win64="yes">
                 <File Id="gambit.exe" Source="installer\gambit.exe" KeyPath="yes" Checksum="yes"/>
             </Component>
+            <Component Id="Gambit.copying" Guid="F3CFB57F-7C3E-4E9C-AA80-C9BED8B1FAF4" Win64="yes">
+                <File Id="copying.txt" Source="COPYING" Name="COPYING.txt" KeyPath="yes"/>
+            </Component>
         </DirectoryRef>
 
         <DirectoryRef Id="ApplicationProgramsFolder">
@@ -37,13 +95,15 @@
                           Name="Uninstall Gambit @GAMBIT_MSI_MAJOR@"
                           Description="Uninstalls Gambit"
                           Target="[System64Folder]msiexec.exe"
-                          Arguments="/x [ProductCode]"/>
+                          Arguments="/x [ProductCode]"
+                          Icon="Gambit.ico"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
                 <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit @GAMBIT_MSI_MAJOR@" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
             </Component>
         </DirectoryRef>
         <Feature Id="Complete" Level="1">
             <ComponentRef Id="Gambit.exe"/>
+            <ComponentRef Id="Gambit.copying"/>
             <ComponentRef Id="ApplicationShortcut"/>
         </Feature>
     </Product>

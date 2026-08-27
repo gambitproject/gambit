@@ -33,8 +33,11 @@ namespace Gambit::GUI {
 //==========================================================================
 
 LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options)
-  : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
+  : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
+  const int S = FromDIP(5);
+
   auto *nodeGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")), wxVERTICAL);
 
@@ -49,23 +52,23 @@ LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options
 
   auto *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
-                      5);
+                      S);
   m_nodeAbove = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
   m_nodeAbove->SetSelection(p_options.GetNodeAboveLabel());
-  nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, 5);
+  nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, S);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each node")), 0,
-                      wxALL | wxALIGN_CENTER, 5);
-  nodeGroup->Add(nodeAboveSizer, 0, wxALL | wxEXPAND, 5);
+                      wxALL | wxALIGN_CENTER, S);
+  nodeGroup->Add(nodeAboveSizer, 0, wxALL | wxEXPAND, S);
 
   auto *nodeBelowSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
-                      5);
+                      S);
   m_nodeBelow = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
   m_nodeBelow->SetSelection(p_options.GetNodeBelowLabel());
-  nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, 5);
+  nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, S);
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each node")), 0,
-                      wxALL | wxALIGN_CENTER, 5);
-  nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, 5);
+                      wxALL | wxALIGN_CENTER, S);
+  nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, S);
 
   auto *actionGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")), wxVERTICAL);
@@ -76,36 +79,33 @@ LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options
 
   auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
-                        wxALL | wxALIGN_CENTER, 5);
+                        wxALL | wxALIGN_CENTER, S);
   m_actionAbove =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
   m_actionAbove->SetSelection(p_options.GetBranchAboveLabel());
-  actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, 5);
+  actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, S);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each action")), 0,
-                        wxALL | wxALIGN_CENTER, 5);
-  actionGroup->Add(actionAboveSizer, 0, wxALL | wxEXPAND, 5);
+                        wxALL | wxALIGN_CENTER, S);
+  actionGroup->Add(actionAboveSizer, 0, wxALL | wxEXPAND, S);
 
   auto *actionBelowSizer = new wxBoxSizer(wxHORIZONTAL);
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
-                        wxALL | wxALIGN_CENTER, 5);
+                        wxALL | wxALIGN_CENTER, S);
   m_actionBelow =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
   m_actionBelow->SetSelection(p_options.GetBranchBelowLabel());
-  actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, 5);
+  actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, S);
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each action")), 0,
-                        wxALL | wxALIGN_CENTER, 5);
-  actionGroup->Add(actionBelowSizer, 0, wxALL | wxEXPAND, 5);
+                        wxALL | wxALIGN_CENTER, S);
+  actionGroup->Add(actionBelowSizer, 0, wxALL | wxEXPAND, S);
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(nodeGroup, 0, wxEXPAND | wxALL, 5);
-  topSizer->Add(actionGroup, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(nodeGroup, 0, wxEXPAND | wxALL, S);
+  topSizer->Add(actionGroup, 0, wxEXPAND | wxALL, S);
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
+    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  }
 
   SetSizer(topSizer);
   topSizer->Fit(this);

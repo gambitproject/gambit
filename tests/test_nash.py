@@ -1624,6 +1624,47 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
+@pytest.mark.nash
+@pytest.mark.parametrize("solver", [gbt.nash.ipa_solve, gbt.nash.gnm_solve])
+def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) -> None:
+    """`ipa_solve` and `gnm_solve` accept a `MixedStrategyProfileRational` perturbation
+    vector, converting it to floating-point precision internally, and give the same
+    result as passing the equivalent floating-point perturbation directly.
+    (gambitproject/gambit#721, #458)
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+
+    def _one_hot_perturbation(rational: bool) -> gbt.MixedStrategyProfile:
+        one = gbt.Rational(1) if rational else 1.0
+        zero = gbt.Rational(0) if rational else 0.0
+        perturbation = game.mixed_strategy_profile(rational=rational)
+        for player in game.players:
+            strategies = list(player.strategies)
+            perturbation[player.label] = {
+                s.label: (one if s is strategies[0] else zero) for s in strategies
+            }
+        return perturbation
+
+    rational_result = solver(_one_hot_perturbation(rational=True))
+    double_result = solver(_one_hot_perturbation(rational=False))
+    with subtests.test("perturbation converted to double precision"):
+        assert isinstance(
+            rational_result.parameters["perturbation"], gbt.MixedStrategyProfileDouble
+        )
+    with subtests.test("number of equilibria found"):
+        assert len(rational_result.equilibria) == len(double_result.equilibria)
+    for i, (rational_eq, double_eq) in enumerate(
+        zip(rational_result.equilibria, double_result.equilibria, strict=True)
+    ):
+        with subtests.test(eq=i, check="strategy_profile"):
+            for player in game.players:
+                for strategy in player.strategies:
+                    assert (
+                        rational_eq[player.label][strategy.label]
+                        == pytest.approx(double_eq[player.label][strategy.label])
+                    )
+
+
 ##################################################################################################
 # NASH SOLVERS WITH START PROFILES
 ##################################################################################################
@@ -1641,6 +1682,18 @@ LIAP_STRATEGY_CASES = [
         ),
         marks=pytest.mark.nash_liap_strategy,
         id="test_liap_strategy_1",
+    ),
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.liap_solve,
+            start_data=dict(data=None, rational=True),
+            expected=[],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_liap_strategy,
+        id="test_liap_strategy_rational_start",
     ),
 ]
 
@@ -3393,6 +3446,18 @@ LIAP_AGENT_CASES = [
         ),
         marks=pytest.mark.nash_liap_agent,
         id="test_liap_agent_1",
+    ),
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.liap_agent_solve,
+            start_data=dict(data=None, rational=True),
+            expected=[[[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_liap_agent,
+        id="test_liap_agent_rational_start",
     ),
 ]
 

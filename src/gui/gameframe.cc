@@ -53,7 +53,7 @@
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
-#include "dlefglogit.h"
+#include "dllogit.h"
 #include "dlabout.h"
 
 #include "dlefglayout.h"
@@ -255,7 +255,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   Centre();
 
 #if defined(__WXMSW__)
-  SetIcon(wxIcon(wxT("efg_icn")));
+  SetIcon(wxIcon(wxT("gambit_icn")));
 #else
 #include "bitmaps/gambit.xpm"
   SetIcon(wxIcon(gambit_xpm));
@@ -365,15 +365,19 @@ void GameFrame::OnUpdate()
 //          GameFrame: Creating and updating menus and toolbar
 //--------------------------------------------------------------------
 
-#include "bitmaps/calc.xpm"
-#include "bitmaps/newtable.xpm"
-#include "bitmaps/newtree.xpm"
-#include "bitmaps/open.xpm"
-#include "bitmaps/profiles.xpm"
-#include "bitmaps/redo.xpm"
-#include "bitmaps/save.xpm"
-#include "bitmaps/table.xpm"
-#include "bitmaps/undo.xpm"
+#include "bitmaps/calc.h"
+#include "bitmaps/newtable.h"
+#include "bitmaps/newtree.h"
+#include "bitmaps/open.h"
+#include "bitmaps/profiles.h"
+#include "bitmaps/redo.h"
+#include "bitmaps/save.h"
+#include "bitmaps/table.h"
+#include "bitmaps/undo.h"
+
+namespace {
+const wxSize TOOLBAR_ICON_SIZE(24, 24);
+} // end anonymous namespace
 
 void GameFrame::MakeMenus()
 {
@@ -485,35 +489,43 @@ void GameFrame::MakeToolbar()
   toolBar->SetMargins(2, 2);
   toolBar->SetToolBitmapSize(wxSize(24, 24));
 
-  toolBar->AddTool(GBT_MENU_FILE_NEW_EFG, wxEmptyString, wxBitmap(newtree_xpm), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_FILE_NEW_EFG, wxEmptyString,
+                   wxBitmapBundle::FromSVG(newtree_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                    wxITEM_NORMAL, _("Create a new extensive (tree) game"),
                    _("Create a new extensive (tree) game"), nullptr);
-  toolBar->AddTool(GBT_MENU_FILE_NEW_NFG, wxEmptyString, wxBitmap(newtable_xpm), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_FILE_NEW_NFG, wxEmptyString,
+                   wxBitmapBundle::FromSVG(newtable_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                    wxITEM_NORMAL, _("Create a new strategic (table) game"),
                    _("Create a new strategic (table) game"), nullptr);
-  toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmap(open_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Open a file"), _("Open a file"), nullptr);
-  toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Save this game"), _("Save this game"), nullptr);
+  toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmapBundle::FromSVG(open_svg, TOOLBAR_ICON_SIZE),
+                   wxBitmapBundle(), wxITEM_NORMAL, _("Open a file"), _("Open a file"), nullptr);
+  toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmapBundle::FromSVG(save_svg, TOOLBAR_ICON_SIZE),
+                   wxBitmapBundle(), wxITEM_NORMAL, _("Save this game"), _("Save this game"),
+                   nullptr);
 
   toolBar->AddSeparator();
 
-  toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Undo the last change"), _("Undo the last change"), nullptr);
-  toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Redo the last undone change"), _("Redo the last undone change"), nullptr);
+  toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmapBundle::FromSVG(undo_svg, TOOLBAR_ICON_SIZE),
+                   wxBitmapBundle(), wxITEM_NORMAL, _("Undo the last change"),
+                   _("Undo the last change"), nullptr);
+  toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmapBundle::FromSVG(redo_svg, TOOLBAR_ICON_SIZE),
+                   wxBitmapBundle(), wxITEM_NORMAL, _("Redo the last undone change"),
+                   _("Redo the last undone change"), nullptr);
 
   toolBar->AddSeparator();
 
   if (m_doc->GetGame()->IsTree()) {
-    toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxEmptyString, wxBitmap(table_xpm), wxNullBitmap,
+    toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxEmptyString,
+                     wxBitmapBundle::FromSVG(table_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                      wxITEM_CHECK, _("Display the reduced strategic representation of the game"),
                      _("Display the reduced strategic representation of the game"), nullptr);
   }
-  toolBar->AddTool(GBT_MENU_VIEW_PROFILES, wxEmptyString, wxBitmap(profiles_xpm), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_VIEW_PROFILES, wxEmptyString,
+                   wxBitmapBundle::FromSVG(profiles_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                    wxITEM_CHECK, _("View the list of computed strategy profiles"),
                    _("Show or hide the list of computed strategy profiles"), nullptr);
-  toolBar->AddTool(GBT_MENU_TOOLS_EQUILIBRIUM, wxEmptyString, wxBitmap(calc_xpm), wxNullBitmap,
+  toolBar->AddTool(GBT_MENU_TOOLS_EQUILIBRIUM, wxEmptyString,
+                   wxBitmapBundle::FromSVG(calc_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                    wxITEM_NORMAL, _("Compute Nash equilibria of this game"),
                    _("Compute Nash equilibria of this game"), nullptr);
 
@@ -1084,8 +1096,6 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
     }
   }
 }
-
-extern void LogitStrategic(wxWindow *, const std::shared_ptr<GameDocument> &);
 
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {
