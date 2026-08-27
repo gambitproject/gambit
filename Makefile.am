@@ -26,19 +26,20 @@ include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
+	build_support/msw/banner.bmp \
+	build_support/msw/dialog.bmp \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
+	build_support/osx/dmg_background.tiff \
+	build_support/osx/make-dmg.sh \
 	src/gui/bitmaps/calc.xpm \
-	src/gui/bitmaps/efg.ico \
 	src/gui/bitmaps/gambitbig.xpm \
-	src/gui/bitmaps/gambit.bmp \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
 	src/gui/bitmaps/move.xpm \
 	src/gui/bitmaps/newtable.xpm \
 	src/gui/bitmaps/newtree.xpm \
 	src/gui/bitmaps/next.xpm \
-	src/gui/bitmaps/nfg.ico \
 	src/gui/bitmaps/open.xpm \
 	src/gui/bitmaps/prev.xpm \
 	src/gui/bitmaps/profiles.xpm \
@@ -516,11 +517,16 @@ gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
+gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
+
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 else
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
 endif
+
+src/gui/bitmaps/gambitrc.o: src/gui/bitmaps/gambitrc.rc
+	$(WINDRES) $(WX_CXXFLAGS) -I$(srcdir)/src/gui/bitmaps -o $@ $<
 
 osx-bundle:
 	make all
@@ -536,11 +542,7 @@ osx-bundle:
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
-	-rm -rf .dmg
-	-mkdir .dmg
-	cp -r Gambit.app .dmg
-	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
-	rm -rf .dmg
+	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg
 
 msw-msi:
 	-mkdir installer
