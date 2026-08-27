@@ -6,6 +6,8 @@
   is found or another solver event is emitted.
 
 ### Changed
+- Refreshed GUI icons and standardised dialog layout and formatting
+- Improved installers for Windows, and disk-image "installer" for MacOS
 - Revised `StrategySupportProfile` to expose a slimmer set of operations, and
   implement `StrategySupport` as an immutable snapshot.
 
