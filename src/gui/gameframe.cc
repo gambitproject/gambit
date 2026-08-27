@@ -53,7 +53,7 @@
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
-#include "dlefglogit.h"
+#include "dllogit.h"
 #include "dlabout.h"
 
 #include "dlefglayout.h"
@@ -1084,8 +1084,6 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
     }
   }
 }
-
-extern void LogitStrategic(wxWindow *, const std::shared_ptr<GameDocument> &);
 
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {

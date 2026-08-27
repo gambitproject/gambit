@@ -61,6 +61,8 @@ public:
 LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *nodeSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Drawing nodes"));
@@ -71,26 +73,26 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
                                    _("a diamond"), _("a filled circle")};
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate chance nodes with")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   m_chanceToken = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
   m_chanceToken->SetSelection(p_settings.GetChanceToken());
-  tokenSizer->Add(m_chanceToken, 1, wxALL | wxEXPAND, 5);
+  tokenSizer->Add(m_chanceToken, 1, wxALL | wxEXPAND, S);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate player nodes with")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   m_playerToken = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
   m_playerToken->SetSelection(p_settings.GetPlayerToken());
-  tokenSizer->Add(m_playerToken, 1, wxALL | wxEXPAND, 5);
+  tokenSizer->Add(m_playerToken, 1, wxALL | wxEXPAND, S);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate terminal nodes with")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   m_terminalToken =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
   m_terminalToken->SetSelection(p_settings.GetTerminalToken());
-  tokenSizer->Add(m_terminalToken, 1, wxALL | wxEXPAND, 5);
+  tokenSizer->Add(m_terminalToken, 1, wxALL | wxEXPAND, S);
 
-  nodeSizer->Add(tokenSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(nodeSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  nodeSizer->Add(tokenSizer, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(nodeSizer, 0, wxALL | wxALIGN_CENTER, S);
 
   auto *sizeSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Layout sizing"));
 
@@ -98,7 +100,7 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
   gridSizer->AddGrowableCol(1);
 
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Horizontal size of nodes")), 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                 wxALIGN_CENTER_VERTICAL | wxALL, S);
 
   {
     constexpr int NODE_LENGTH_MIN = 5;
@@ -107,11 +109,11 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
     label << p_settings.GetNodeSize();
     m_nodeSize = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
                                 wxSP_ARROW_KEYS, NODE_LENGTH_MIN, NODE_LENGTH_MAX);
-    gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
+    gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, S);
   }
 
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Vertical spacing between terminal nodes")), 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                 wxALIGN_CENTER_VERTICAL | wxALL, S);
 
   {
     constexpr int Y_SPACING_MIN = 15;
@@ -120,11 +122,11 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
     label << p_settings.GetTerminalSpacing();
     m_terminalSpacing = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
                                        wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
-    gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
+    gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, S);
   }
 
-  sizeSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(sizeSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  sizeSizer->Add(gridSizer, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(sizeSizer, 0, wxALL | wxALIGN_CENTER, S);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -155,6 +157,8 @@ public:
 LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderConfig &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *styleBoxSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Drawing branches"));
@@ -162,22 +166,22 @@ LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderCon
   auto *styleSizer = new wxFlexGridSizer(2);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw branches")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   wxString styleChoices[] = {_("using straight lines between nodes"),
                              _("with a tine for branch labels")};
   m_branchStyle = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, styleChoices);
   m_branchStyle->SetSelection(p_settings.GetBranchStyle());
-  styleSizer->Add(m_branchStyle, 1, wxALL | wxEXPAND, 5);
+  styleSizer->Add(m_branchStyle, 1, wxALL | wxEXPAND, S);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw labels")), 1,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   wxString labelChoices[] = {_("horizontally"), _("rotated parallel to the branch")};
   m_branchLabels = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, labelChoices);
   m_branchLabels->SetSelection(p_settings.GetBranchLabels());
-  styleSizer->Add(m_branchLabels, 1, wxALL | wxEXPAND, 5);
+  styleSizer->Add(m_branchLabels, 1, wxALL | wxEXPAND, S);
 
-  styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(styleBoxSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(styleBoxSizer, 0, wxALL | wxALIGN_CENTER, S);
 
   auto *lengthSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("size of branches"));
 
@@ -188,28 +192,28 @@ LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderCon
     constexpr int BRANCH_LENGTH_MIN = 0;
     constexpr int BRANCH_LENGTH_MAX = 100;
     gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch fork")), 0,
-                   wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                   wxALIGN_CENTER_VERTICAL | wxALL, S);
     wxString label;
     label << p_settings.GetBranchLength();
     m_branchLength = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
                                     wxSP_ARROW_KEYS, BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
-    gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
+    gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, S);
   }
 
   {
     constexpr int TINE_LENGTH_MIN = 20;
     constexpr int TINE_LENGTH_MAX = 100;
     gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch tine")), 1,
-                   wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                   wxALIGN_CENTER_VERTICAL | wxALL, S);
     wxString label;
     label << p_settings.GetTineLength();
     m_tineLength = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
                                   wxSP_ARROW_KEYS, TINE_LENGTH_MIN, TINE_LENGTH_MAX);
-    gridSizer->Add(m_tineLength, 1, wxALL | wxEXPAND, 5);
+    gridSizer->Add(m_tineLength, 1, wxALL | wxEXPAND, S);
   }
 
-  lengthSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(lengthSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  lengthSizer->Add(gridSizer, 1, wxALL | wxEXPAND, S);
+  topSizer->Add(lengthSizer, 0, wxALL | wxALIGN_CENTER, S);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -232,6 +236,8 @@ public:
 LayoutInfosetsPanel::LayoutInfosetsPanel(wxWindow *p_parent, const TreeRenderConfig &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *infosetSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Drawing information sets"));
@@ -239,13 +245,13 @@ LayoutInfosetsPanel::LayoutInfosetsPanel(wxWindow *p_parent, const TreeRenderCon
   auto *styleSizer = new wxFlexGridSizer(2);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw information set connections")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
+                  wxALL | wxALIGN_CENTER_VERTICAL, S);
   wxString joinChoices[] = {_("using lines"), _("using bubbles")};
   m_infosetJoin = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, joinChoices);
   m_infosetJoin->SetSelection(p_settings.GetInfosetJoin());
-  styleSizer->Add(m_infosetJoin, 0, wxALL | wxEXPAND, 5);
-  infosetSizer->Add(styleSizer, 0, wxALL | wxALIGN_CENTER, 5);
-  topSizer->Add(infosetSizer, 0, wxALL, 5);
+  styleSizer->Add(m_infosetJoin, 0, wxALL | wxEXPAND, S);
+  infosetSizer->Add(styleSizer, 0, wxALL | wxALIGN_CENTER, S);
+  topSizer->Add(infosetSizer, 0, wxALL, S);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -256,8 +262,12 @@ LayoutInfosetsPanel::LayoutInfosetsPanel(wxWindow *p_parent, const TreeRenderCon
 } // anonymous namespace
 
 LayoutDialog::LayoutDialog(wxWindow *p_parent, const TreeRenderConfig &p_settings)
-  : wxDialog(p_parent, wxID_ANY, _("Layout options"), wxDefaultPosition), m_toDefaults(false)
+  : wxDialog(p_parent, wxID_ANY, _("Layout options"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_toDefaults(false)
 {
+  const int S = FromDIP(5);
+
   m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
   m_notebook->AddPage(new LayoutNodesPanel(m_notebook, p_settings), _("Nodes"));
   m_notebook->AddPage(new LayoutBranchesPanel(m_notebook, p_settings), _("Branches"));
@@ -267,15 +277,15 @@ LayoutDialog::LayoutDialog(wxWindow *p_parent, const TreeRenderConfig &p_setting
   auto *defaultsButton = new wxButton(this, wxID_ANY, _("Set to defaults"));
   Connect(defaultsButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(LayoutDialog::OnSetDefaults));
-  buttonSizer->Add(defaultsButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(defaultsButton, 0, wxALL, S);
+  buttonSizer->AddStretchSpacer();
+  if (auto *stdButtons = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
+    buttonSizer->Add(stdButtons, 0, wxALL, S);
+  }
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_notebook, 0, wxEXPAND | wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  topSizer->Add(m_notebook, 0, wxEXPAND | wxALL, S);
+  topSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, S);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
