@@ -31,6 +31,8 @@ EXTRA_DIST = \
 	build_support/msw/dialog.bmp \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
+	build_support/osx/dmg_background.tiff \
+	build_support/osx/make-dmg.sh \
 	src/gui/bitmaps/calc.xpm \
 	src/gui/bitmaps/gambitbig.xpm \
 	src/gui/bitmaps/gambit.ico \
@@ -543,11 +545,7 @@ osx-bundle:
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
-	-rm -rf .dmg
-	-mkdir .dmg
-	cp -r Gambit.app .dmg
-	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
-	rm -rf .dmg
+	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg
 
 msw-msi:
 	-mkdir installer
