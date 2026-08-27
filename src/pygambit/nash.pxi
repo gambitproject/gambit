@@ -791,9 +791,7 @@ class LogitQREMixedBehaviorProfile:
     @property
     def game(self) -> Game:
         """The game on which this mixed strategy profile is defined."""
-        g = Game()
-        g.game = deref(self.thisptr).GetGame()
-        return g
+        return Game.wrap(deref(self.thisptr).GetGame())
 
     @property
     def lam(self) -> double:
@@ -808,11 +806,9 @@ class LogitQREMixedBehaviorProfile:
     @property
     def profile(self) -> MixedBehaviorProfileDouble:
         """The mixed strategy profile."""
-        profile = MixedBehaviorProfileDouble()
-        profile.profile = (
+        return MixedBehaviorProfileDouble.wrap(
             make_shared[c_MixedBehaviorProfile[double]](deref(self.thisptr).GetProfile())
         )
-        return profile
 
 
 def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,

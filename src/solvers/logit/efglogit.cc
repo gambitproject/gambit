@@ -145,7 +145,7 @@ private:
   };
 
   Array<std::shared_ptr<Equation>> m_equations;
-  const Game &m_game;
+  Game m_game;
 };
 
 EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
