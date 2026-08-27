@@ -272,7 +272,7 @@ LogitBehavDialog::LogitBehavDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_stopButton =
-      new wxBitmapButton(this, wxID_CANCEL, wxBitmapBundle::FromSVG(stop_svg, wxSize(24, 24)));
+      new wxBitmapButton(this, wxID_CANCEL, wxBitmapBundle::FromSVG(stop_svg, wxSize(16, 16)));
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_stopButton->Bind(wxEVT_BUTTON, &LogitBehavDialog::OnStop, this);
