@@ -513,6 +513,14 @@ void PayoffGrid::OnRangeSelecting(wxGridRangeSelectEvent &p_event)
 
 void PayoffGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
+  if (p_event.ControlDown() || p_event.MetaDown()) {
+    const int per = m_table->GetPayoffColumnsPerContingency();
+    const int left = (p_event.GetCol() / per) * per;
+    m_snappingSelection = true;
+    SelectBlock(p_event.GetRow(), left, p_event.GetRow(), left + per - 1, true);
+    m_snappingSelection = false;
+    return;
+  }
   ClearSelection();
   TableGridBase::OnCellLeftClick(p_event);
 }
