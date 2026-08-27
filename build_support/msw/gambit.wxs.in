@@ -7,9 +7,14 @@
         <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed." />
 
         <WixVariable Id="WixUILicenseRtf" Value="build_support/msw/license.rtf"/>
+        <WixVariable Id="WixUIBannerBmp" Value="build_support/msw/banner.bmp"/>
+        <WixVariable Id="WixUIDialogBmp" Value="build_support/msw/dialog.bmp"/>
         <UI>
             <UIRef Id="WixUI_Minimal"/>
         </UI>
+
+        <Icon Id="Gambit.ico" SourceFile="src/gui/bitmaps/gambit.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="Gambit.ico"/>
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder">
@@ -64,7 +69,8 @@
                           Name="Uninstall Gambit @GAMBIT_MSI_MAJOR@"
                           Description="Uninstalls Gambit"
                           Target="[System64Folder]msiexec.exe"
-                          Arguments="/x [ProductCode]"/>
+                          Arguments="/x [ProductCode]"
+                          Icon="Gambit.ico"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
                 <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit @GAMBIT_MSI_MAJOR@" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
             </Component>
