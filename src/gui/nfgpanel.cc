@@ -82,14 +82,14 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
                 5);
 
   m_topButton =
-      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(tobegin_svg, wxSize(16, 16)));
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(tobegin_svg, wxSize(24, 24)));
   m_topButton->SetToolTip(_("Show all strategies"));
   Connect(m_topButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnTopLevel));
   topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_prevButton =
-      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(prev_svg, wxSize(16, 16)));
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(prev_svg, wxSize(24, 24)));
   m_prevButton->SetToolTip(_("Previous round of elimination"));
   Connect(m_prevButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnPreviousLevel));
@@ -100,14 +100,14 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
   topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_nextButton =
-      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(next_svg, wxSize(16, 16)));
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(next_svg, wxSize(24, 24)));
   m_nextButton->SetToolTip(_("Next round of elimination"));
   Connect(m_nextButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnNextLevel));
   topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_allButton =
-      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(toend_svg, wxSize(16, 16)));
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(toend_svg, wxSize(24, 24)));
   m_allButton->SetToolTip(_("Eliminate iteratively"));
   Connect(m_allButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnLastLevel));

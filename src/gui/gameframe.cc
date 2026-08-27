@@ -376,7 +376,7 @@ void GameFrame::OnUpdate()
 #include "bitmaps/undo.h"
 
 namespace {
-const wxSize TOOLBAR_ICON_SIZE(16, 16);
+const wxSize TOOLBAR_ICON_SIZE(24, 24);
 } // end anonymous namespace
 
 void GameFrame::MakeMenus()
@@ -487,7 +487,7 @@ void GameFrame::MakeToolbar()
 {
   wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
   toolBar->SetMargins(2, 2);
-  toolBar->SetToolBitmapSize(TOOLBAR_ICON_SIZE);
+  toolBar->SetToolBitmapSize(wxSize(24, 24));
 
   toolBar->AddTool(GBT_MENU_FILE_NEW_EFG, wxEmptyString,
                    wxBitmapBundle::FromSVG(newtree_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),

@@ -375,7 +375,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_stopButton =
-      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(stop_svg, wxSize(16, 16)));
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(stop_svg, wxSize(24, 24)));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
