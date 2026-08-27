@@ -32,24 +32,24 @@ EXTRA_DIST = \
 	build_support/osx/gambit.icns \
 	build_support/osx/dmg_background.tiff \
 	build_support/osx/make-dmg.sh \
-	src/gui/bitmaps/calc.xpm \
+	src/gui/bitmaps/calc.h \
 	src/gui/bitmaps/gambitbig.xpm \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
 	src/gui/bitmaps/move.xpm \
-	src/gui/bitmaps/newtable.xpm \
-	src/gui/bitmaps/newtree.xpm \
-	src/gui/bitmaps/next.xpm \
-	src/gui/bitmaps/open.xpm \
-	src/gui/bitmaps/prev.xpm \
-	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/save.xpm \
-	src/gui/bitmaps/stop.xpm \
-	src/gui/bitmaps/table.xpm \
-	src/gui/bitmaps/tobegin.xpm \
-	src/gui/bitmaps/toend.xpm \
-	src/gui/bitmaps/undo.xpm \
-	src/gui/bitmaps/redo.xpm \
+	src/gui/bitmaps/newtable.h \
+	src/gui/bitmaps/newtree.h \
+	src/gui/bitmaps/next.h \
+	src/gui/bitmaps/open.h \
+	src/gui/bitmaps/prev.h \
+	src/gui/bitmaps/profiles.h \
+	src/gui/bitmaps/save.h \
+	src/gui/bitmaps/stop.h \
+	src/gui/bitmaps/table.h \
+	src/gui/bitmaps/tobegin.h \
+	src/gui/bitmaps/toend.h \
+	src/gui/bitmaps/undo.h \
+	src/gui/bitmaps/redo.h \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
 	contrib/games/2x2x2.efg \
