@@ -26,7 +26,6 @@ include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
-	build_support/msw/license.rtf \
 	build_support/msw/banner.bmp \
 	build_support/msw/dialog.bmp \
 	build_support/osx/Info.plist.in \
