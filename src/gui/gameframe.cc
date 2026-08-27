@@ -255,7 +255,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   Centre();
 
 #if defined(__WXMSW__)
-  SetIcon(wxIcon(wxT("efg_icn")));
+  SetIcon(wxIcon(wxT("gambit_icn")));
 #else
 #include "bitmaps/gambit.xpm"
   SetIcon(wxIcon(gambit_xpm));

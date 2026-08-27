@@ -29,16 +29,13 @@ EXTRA_DIST = \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
 	src/gui/bitmaps/calc.xpm \
-	src/gui/bitmaps/efg.ico \
 	src/gui/bitmaps/gambitbig.xpm \
-	src/gui/bitmaps/gambit.bmp \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
 	src/gui/bitmaps/move.xpm \
 	src/gui/bitmaps/newtable.xpm \
 	src/gui/bitmaps/newtree.xpm \
 	src/gui/bitmaps/next.xpm \
-	src/gui/bitmaps/nfg.ico \
 	src/gui/bitmaps/open.xpm \
 	src/gui/bitmaps/prev.xpm \
 	src/gui/bitmaps/profiles.xpm \
@@ -518,11 +515,16 @@ gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
+gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
+
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 else
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
 endif
+
+src/gui/bitmaps/gambitrc.o: src/gui/bitmaps/gambitrc.rc
+	$(WINDRES) $(WX_CXXFLAGS) -I$(srcdir)/src/gui/bitmaps -o $@ $<
 
 osx-bundle:
 	make all
