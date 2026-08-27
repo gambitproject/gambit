@@ -50,7 +50,7 @@ class TestOpenGameFile:
 
     def test_valid_path_is_opened(self, tmp_path):
         path = tmp_path / "game.nfg"
-        path.write_text("NFG 1 R\n")
+        path.write_bytes(b"NFG 1 R\n")
         f = common.open_game_file(str(path), "prog")
         try:
             assert f.read() == b"NFG 1 R\n"
