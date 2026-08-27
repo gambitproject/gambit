@@ -118,8 +118,8 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
   {
     auto *copyRow = new wxBoxSizer(wxHORIZONTAL);
 
-    copyRow->Add(new wxStaticText(panel, wxID_ANY, _("Copyright © 1994–2026 ")), 0,
-                 wxALIGN_CENTER_VERTICAL);
+    copyRow->Add(new wxStaticText(panel, wxID_ANY, wxString::FromUTF8("Copyright © 1994–2026 ")),
+                 0, wxALIGN_CENTER_VERTICAL);
 
     copyRow->Add(new wxHyperlinkCtrl(panel, wxID_ANY, _("The Gambit Project"),
                                      "https://www.gambit-project.org"),

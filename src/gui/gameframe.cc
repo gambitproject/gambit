@@ -53,7 +53,7 @@
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
-#include "dlefglogit.h"
+#include "dllogit.h"
 #include "dlabout.h"
 
 #include "dlefglayout.h"
@@ -255,7 +255,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   Centre();
 
 #if defined(__WXMSW__)
-  SetIcon(wxIcon(wxT("efg_icn")));
+  SetIcon(wxIcon(wxT("gambit_icn")));
 #else
 #include "bitmaps/gambit.xpm"
   SetIcon(wxIcon(gambit_xpm));
@@ -1096,8 +1096,6 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
     }
   }
 }
-
-extern void LogitStrategic(wxWindow *, const std::shared_ptr<GameDocument> &);
 
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {

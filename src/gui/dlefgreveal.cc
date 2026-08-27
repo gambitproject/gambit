@@ -60,10 +60,10 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
   auto f = groupLabel->GetFont();
   f.SetWeight(wxFONTWEIGHT_BOLD);
   groupLabel->SetFont(f);
-  topSizer->Add(groupLabel, wxSizerFlags().Border(wxLEFT | wxTOP | wxRIGHT, 10));
+  topSizer->Add(groupLabel, wxSizerFlags().Border(wxLEFT | wxTOP | wxRIGHT, FromDIP(10)));
 
   auto *playerBox = new wxBoxSizer(wxVERTICAL);
-  playerBox->AddSpacer(3);
+  playerBox->AddSpacer(FromDIP(3));
 
   const auto &players = p_game->GetPlayers();
   m_entries.reserve(players.size());
@@ -80,14 +80,14 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
     cb->SetValue(true);
     cb->Bind(wxEVT_CHECKBOX, &RevealMoveDialog::OnCheckbox, this);
     m_entries.push_back({player, cb});
-    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, 4));
+    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, FromDIP(4)));
   }
 
-  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border(wxALL, 5));
+  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border(wxALL, FromDIP(5)));
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
   buttonSizer->Realize();
-  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border(wxALL, 10));
+  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border(wxALL, FromDIP(10)));
 
   SetSizerAndFit(topSizer);
   CenterOnParent();

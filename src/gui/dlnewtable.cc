@@ -58,7 +58,7 @@ void NewTableDialog::LayoutControls()
 {
   m_topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *formSizer = new wxFlexGridSizer(2, 2, 8, 12);
+  auto *formSizer = new wxFlexGridSizer(2, 2, FromDIP(8), FromDIP(12));
   formSizer->AddGrowableCol(1, 1);
 
   auto *playerCountLabel = FindWindowByName("playerCountLabel", this);
@@ -66,13 +66,13 @@ void NewTableDialog::LayoutControls()
   formSizer->Add(m_playerCountCtrl, 0);
 
   auto *strategyBox = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Strategies per player"));
-  strategyBox->Add(m_strategyRowsSizer, 0, wxEXPAND | wxALL, 8);
+  strategyBox->Add(m_strategyRowsSizer, 0, wxEXPAND | wxALL, FromDIP(8));
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
 
-  m_topSizer->Add(formSizer, 0, wxEXPAND | wxALL, 12);
-  m_topSizer->Add(strategyBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 12);
-  m_topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 12);
+  m_topSizer->Add(formSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+  m_topSizer->Add(strategyBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+  m_topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
 
   SetSizer(m_topSizer);
 }
@@ -93,7 +93,7 @@ void NewTableDialog::RebuildStrategyControls()
 
   const int playerCount = m_playerCountCtrl->GetValue();
 
-  auto *grid = new wxFlexGridSizer(playerCount, 2, 8, 12);
+  auto *grid = new wxFlexGridSizer(playerCount, 2, FromDIP(8), FromDIP(12));
   grid->AddGrowableCol(1, 1);
 
   for (int i = 0; i < playerCount; ++i) {
