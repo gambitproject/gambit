@@ -162,12 +162,12 @@ class LogitQREMixedBehaviorFitResult:
 
 
 def _estimate_strategy_fixedpoint(
-        data: libgbt.MixedStrategyProfileDouble,
+        data: libgbt.MixedStrategyProfile,
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
 ) -> LogitQREMixedStrategyFitResult:
-    res = libgbt._logit_strategy_estimate(data, local_max=local_max,
+    res = libgbt._logit_strategy_estimate(data.as_float(), local_max=local_max,
                                           first_step=first_step, max_accel=max_accel)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
@@ -175,12 +175,12 @@ def _estimate_strategy_fixedpoint(
 
 
 def _estimate_behavior_fixedpoint(
-        data: libgbt.MixedBehaviorProfileDouble,
+        data: libgbt.MixedBehaviorProfile,
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
 ) -> LogitQREMixedBehaviorFitResult:
-    res = libgbt._logit_behavior_estimate(data, local_max=local_max,
+    res = libgbt._logit_behavior_estimate(data.as_float(), local_max=local_max,
                                           first_step=first_step, max_accel=max_accel)
     return LogitQREMixedBehaviorFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
@@ -207,7 +207,7 @@ def _empirical_log_like(lam: float, regrets: list, flattened_data: list) -> floa
 
 
 def _estimate_strategy_empirical(
-        data: libgbt.MixedStrategyProfileDouble
+        data: libgbt.MixedStrategyProfile
 ) -> LogitQREMixedStrategyFitResult:
     flattened_data = [
         data[p.label][s.label] for p in data.game.players for s in p.strategies
@@ -230,7 +230,7 @@ def _estimate_strategy_empirical(
 
 
 def _estimate_behavior_empirical(
-        data: libgbt.MixedBehaviorProfileDouble,
+        data: libgbt.MixedBehaviorProfile,
 ) -> LogitQREMixedBehaviorFitResult:
     flattened_data = [
         data[next(iter(s.members))][a.label]
@@ -269,6 +269,13 @@ def logit_estimate(
 
     .. versionadded:: 16.3.0
 
+    .. versionchanged:: 17.0.0
+
+       `data` may now also be a rational-precision profile
+       (`MixedStrategyProfileRational` or `MixedBehaviorProfileRational`); it is
+       converted to floating-point via `~MixedStrategyProfile.as_float` or
+       `~MixedBehaviorProfile.as_float` where needed.
+
     Parameters
     ----------
     data : MixedStrategyProfile or MixedBehaviorProfile
@@ -276,7 +283,9 @@ def logit_estimate(
         To obtain the correct resulting log-likelihood, these should
         be expressed as total counts of observations of each action
         rather than probabilities.  If a MixedBehaviorProfile is
-        specified, estimation is done using the agent QRE.
+        specified, estimation is done using the agent QRE.  A
+        rational-precision profile is accepted, and converted to
+        floating-point precision internally.
 
     use_empirical : bool, default = False
         If specified and True, use the empirical payoff approach for

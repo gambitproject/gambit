@@ -381,7 +381,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: libgbt.MixedStrategyProfileDouble,
+        start: libgbt.MixedStrategyProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
@@ -403,12 +403,18 @@ def liap_solve(
        Computing agent Nash equilibria in the extensive game moved to
        `liap_agent_solve` for clarity.
 
+    .. versionchanged:: 17.0.0
+
+       `start` may now also be a `MixedStrategyProfileRational`; it is converted to
+       floating-point via `~MixedStrategyProfile.as_float` before minimization.
+
     Parameters
     ----------
-    start : MixedStrategyProfileDouble
+    start : MixedStrategyProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
-        depend on the initial profile chosen.
+        depend on the initial profile chosen.  If a `MixedStrategyProfileRational` is
+        given, it is converted to floating-point precision first.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -441,6 +447,7 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    start = start.as_float()
     equilibria = libgbt._liap_strategy_solve(
         start, maxregret=maxregret, maxiter=maxiter,
         nash_callback=nash_callback, event_callback=event_callback
@@ -456,7 +463,7 @@ def liap_solve(
 
 
 def liap_agent_solve(
-        start: libgbt.MixedBehaviorProfileDouble,
+        start: libgbt.MixedBehaviorProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
         nash_callback: Callable[[libgbt.MixedBehaviorProfileDouble], None] | None = None,
@@ -472,12 +479,18 @@ def liap_agent_solve(
        Moved from `liap_solve` passing a `MixedBehaviorProfileDouble` for additional
        clarity in the solution concept computed.
 
+    .. versionchanged:: 17.0.0
+
+       `start` may now also be a `MixedBehaviorProfileRational`; it is converted to
+       floating-point via `~MixedBehaviorProfile.as_float` before minimization.
+
     Parameters
     ----------
-    start : MixedBehaviorProfileDouble
+    start : MixedBehaviorProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
-        depend on the initial profile chosen.
+        depend on the initial profile chosen.  If a `MixedBehaviorProfileRational` is
+        given, it is converted to floating-point precision first.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -506,6 +519,7 @@ def liap_agent_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    start = start.as_float()
     equilibria = libgbt._liap_behavior_solve(
         start, maxregret=maxregret, maxiter=maxiter,
         nash_callback=nash_callback, event_callback=event_callback
@@ -600,7 +614,7 @@ def simpdiv_solve(
 
 
 def ipa_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.IPAStepEvent | libgbt.IPATerminationEvent], None
@@ -611,14 +625,21 @@ def ipa_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfileDouble
+    perturbation : Game or MixedStrategyProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
-        strategy for each player and 0 for all other strategies.
+        strategy for each player and 0 for all other strategies.  If a
+        `MixedStrategyProfileRational` is given, it is converted to
+        floating-point precision first.
 
         .. versionchanged:: 16.2.0
 
            Allow selection of the perturbation vector
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `MixedStrategyProfileRational`, converted to floating-point via
+           `~MixedStrategyProfile.as_float`.
 
     nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
@@ -651,11 +672,12 @@ def ipa_solve(
             perturbation[player.label] = {
                 s.label: (1.0 if s is strategies[0] else 0.0) for s in strategies
             }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
         game = perturbation.game
+        perturbation = perturbation.as_float()
     else:
         raise TypeError(
-            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"parameter must be Game or MixedStrategyProfile, "
             f"not {perturbation.__class__.__name__}"
         )
     return NashComputationResult(
@@ -669,7 +691,7 @@ def ipa_solve(
 
 
 def gnm_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
         end_lambda: float = -10.0,
         steps: int = 100,
         local_newton_interval: int = 3,
@@ -690,14 +712,21 @@ def gnm_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfileDouble
+    perturbation : Game or MixedStrategyProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
-        strategy for each player and 0 for all other strategies.
+        strategy for each player and 0 for all other strategies.  If a
+        `MixedStrategyProfileRational` is given, it is converted to
+        floating-point precision first.
 
         .. versionchanged:: 16.2.0
 
            Allow selection of the perturbation vector
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `MixedStrategyProfileRational`, converted to floating-point via
+           `~MixedStrategyProfile.as_float`.
 
     end_lambda : float, default -10.0
         The value of the perturbation magnitude lambda at which to terminate
@@ -762,11 +791,12 @@ GNMTerminationEvent], None], optional
             perturbation[player.label] = {
                 s.label: (1.0 if s is strategies[0] else 0.0) for s in strategies
             }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
         game = perturbation.game
+        perturbation = perturbation.as_float()
     else:
         raise TypeError(
-            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"parameter must be Game or MixedStrategyProfile, "
             f"not {perturbation.__class__.__name__}"
         )
     if end_lambda >= 0.0:
