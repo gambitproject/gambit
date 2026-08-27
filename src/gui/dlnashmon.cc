@@ -49,7 +49,7 @@ wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_PROFILE, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
-#include "bitmaps/stop.xpm"
+#include "bitmaps/stop.h"
 
 template <class T>
 void AddProfile(AnalysisOutput &p_output, const MixedStrategyProfile<T> &p_profile)
@@ -374,7 +374,8 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
   m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_stopButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(stop_xpm));
+  m_stopButton =
+      new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(stop_svg, wxSize(24, 24)));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);

@@ -204,7 +204,7 @@ wxDEFINE_EVENT(wxEVT_LOGIT_POINT, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_LOGIT_FINISHED, wxThreadEvent);
 
-#include "bitmaps/stop.xpm"
+#include "bitmaps/stop.h"
 
 } // namespace
 
@@ -274,7 +274,8 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   m_statusText->SetForegroundColour(*wxBLUE);
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
+  m_stopButton =
+      new wxBitmapButton(this, wxID_CANCEL, wxBitmapBundle::FromSVG(stop_svg, wxSize(24, 24)));
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_stopButton->Bind(wxEVT_BUTTON, &LogitMixedDialog::OnStop, this);
