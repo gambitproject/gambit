@@ -25,6 +25,7 @@ ACLOCAL_AMFLAGS = -I m4
 include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
+    build_support/GAMBIT_VERSION \
     build_support/msw/gambit.wxs.in \
 	build_support/msw/banner.bmp \
 	build_support/msw/dialog.bmp \
@@ -337,7 +338,7 @@ enumpoly_SOURCES = \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h
 
-noinst_HEADERS = src/gambit.h src/solvers.h src/solvers/nash.h
+noinst_HEADERS = src/gambit.h src/solvers.h src/solvers/nash.h src/solvers/enumpure/enumpure.h
 
 if IS_WIN32
 AM_LDFLAGS = -static -static-libgcc -static-libstdc++
