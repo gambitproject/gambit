@@ -609,6 +609,32 @@ def test_behavior_copy_mutating_original_does_not_affect_copy(rational_flag: boo
     assert dict(original[node]) == {"U1": 1, "D1": 0}
 
 
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_as_float_returns_double(rational_flag: bool):
+    game = games.read_from_file("mixed_behavior_game.efg")
+    result = game.mixed_behavior_profile(rational=rational_flag).as_float()
+    assert isinstance(result, gbt.MixedBehaviorProfileDouble)
+
+
+def test_as_float_converts_rational_probabilities():
+    game = games.read_from_file("mixed_behavior_game.efg")
+    profile = game.mixed_behavior_profile(rational=True)
+    node = _p1_node(game)
+    profile[node] = {"U1": "1/3", "D1": "2/3"}
+    result = profile.as_float()
+    assert dict(result[node]) == {"U1": pytest.approx(1 / 3), "D1": pytest.approx(2 / 3)}
+
+
+def test_as_float_is_independent_copy():
+    game = games.read_from_file("mixed_behavior_game.efg")
+    profile = game.mixed_behavior_profile(rational=False)
+    node = _p1_node(game)
+    result = profile.as_float()
+    assert result == profile
+    result[node] = {"U1": 1.0, "D1": 0.0}
+    assert dict(profile[node]) != dict(result[node])
+
+
 @pytest.mark.parametrize(
     "game,path,realiz_prob,rational_flag",
     [
