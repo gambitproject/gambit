@@ -158,6 +158,7 @@ def enummixed_solve(
         nash_callback: Callable[
             [libgbt.MixedStrategyProfile], None
         ] | None = None,
+        cliques: bool = False,
 ) -> NashComputationResult:
     """Compute all :ref:`mixed-strategy Nash equilibria <enummixed>`
     of a two-player game using the strategic representation.
@@ -184,6 +185,13 @@ def enummixed_solve(
 
         .. versionadded:: 17.0.0
 
+    cliques : bool, default False
+        If specified and True, also compute the sets of extreme equilibria which
+        are connected to one another, returned as a list of lists of equilibria in
+        `parameters["cliques"]`.  Not available when `lrsnash_path` is specified.
+
+        .. versionadded:: 17.0.0
+
     Returns
     -------
     res : NashComputationResult
@@ -195,7 +203,8 @@ def enummixed_solve(
         If game has more than two players.
 
     ValueError
-        If both `lrsnash_path` and `nash_callback` are specified.
+        If both `lrsnash_path` and `nash_callback` are specified, or both
+        `lrsnash_path` and `cliques` are specified.
 
     Notes
     -----
@@ -206,6 +215,10 @@ def enummixed_solve(
             raise ValueError(
                 "enummixed_solve(): nash_callback cannot be used with lrsnash_path"
             )
+        if cliques:
+            raise ValueError(
+                "enummixed_solve(): cliques cannot be used with lrsnash_path"
+            )
         equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
         return NashComputationResult(
             game=game,
@@ -214,6 +227,23 @@ def enummixed_solve(
             use_strategic=True,
             parameters={"lrsnash_path": lrsnash_path},
             equilibria=equilibria,
+        )
+    if cliques:
+        if rational:
+            equilibria, clique_list = libgbt._enummixed_strategy_solve_cliques_rational(
+                game, nash_callback
+            )
+        else:
+            equilibria, clique_list = libgbt._enummixed_strategy_solve_cliques_double(
+                game, nash_callback
+            )
+        return NashComputationResult(
+            game=game,
+            method="enummixed",
+            rational=rational,
+            use_strategic=True,
+            equilibria=equilibria,
+            parameters={"cliques": clique_list},
         )
     if rational:
         equilibria = libgbt._enummixed_strategy_solve_rational(game, nash_callback)

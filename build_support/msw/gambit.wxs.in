@@ -79,33 +79,6 @@
             <Component Id="Gambit.exe" Guid="AEB0EAF8-246A-4194-9628-A4ED3092CD93" Win64="yes">
                 <File Id="gambit.exe" Source="installer\gambit.exe" KeyPath="yes" Checksum="yes"/>
             </Component>
-            <Component Id="Gambit_enummixed.exe" Guid="E529AE61-6BF7-418B-8EB7-24758D2F1A32" Win64="yes">
-                <File Id="gambit_enummixed.exe" Source="installer\gambit-enummixed.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_enumpure.exe" Guid="2B2FBF6E-ABBF-4189-AAF2-F66F63F07FE2" Win64="yes">
-                <File Id="gambit_enumpure.exe" Source="installer\gambit-enumpure.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_gnm.exe" Guid="E10C0653-EAFD-4C3D-9AE1-5BDE68A28585" Win64="yes">
-                <File Id="gambit_gnm.exe" Source="installer\gambit-gnm.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_ipa.exe" Guid="9E5E5696-080B-4205-A8DF-75800A50497B" Win64="yes">
-                <File Id="gambit_ipa.exe" Source="installer\gambit-ipa.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_lcp.exe" Guid="5A9D4F65-7748-4041-B886-C41E016815AB" Win64="yes">
-                <File Id="gambit_lcp.exe" Source="installer\gambit-lcp.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_liap.exe" Guid="BD9D75A2-D2A4-460F-AAB2-C3EA34488A1A" Win64="yes">
-                <File Id="gambit_liap.exe" Source="installer\gambit-liap.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_logit.exe" Guid="FA43C551-4B1D-4914-8D5B-596830142257" Win64="yes">
-                <File Id="gambit_logit.exe" Source="installer\gambit-logit.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_lp.exe" Guid="81CCED15-E164-4F1B-B57D-FBEB7F877E4B" Win64="yes">
-                <File Id="gambit_lp.exe" Source="installer\gambit-lp.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
-            <Component Id="Gambit_simpdiv.exe" Guid="354FC5CE-9067-4910-83CB-6014CC4318EF" Win64="yes">
-                <File Id="gambit_simpdiv.exe" Source="installer\gambit-simpdiv.exe" KeyPath="yes" Checksum="yes"/>
-            </Component>
             <Component Id="Gambit.copying" Guid="F3CFB57F-7C3E-4E9C-AA80-C9BED8B1FAF4" Win64="yes">
                 <File Id="copying.txt" Source="COPYING" Name="COPYING.txt" KeyPath="yes"/>
             </Component>
@@ -130,15 +103,6 @@
         </DirectoryRef>
         <Feature Id="Complete" Level="1">
             <ComponentRef Id="Gambit.exe"/>
-            <ComponentRef Id="Gambit_enummixed.exe"/>
-            <ComponentRef Id="Gambit_enumpure.exe"/>
-            <ComponentRef Id="Gambit_gnm.exe"/>
-            <ComponentRef Id="Gambit_ipa.exe"/>
-            <ComponentRef Id="Gambit_lcp.exe"/>
-            <ComponentRef Id="Gambit_liap.exe"/>
-            <ComponentRef Id="Gambit_logit.exe"/>
-            <ComponentRef Id="Gambit_lp.exe"/>
-            <ComponentRef Id="Gambit_simpdiv.exe"/>
             <ComponentRef Id="Gambit.copying"/>
             <ComponentRef Id="ApplicationShortcut"/>
         </Feature>

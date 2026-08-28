@@ -386,6 +386,13 @@ class Node:
         self.node.deref().SetLabel(value.encode("utf-8"))
 
     @property
+    def number(self) -> int:
+        """Returns the number of the node in its game.
+        Nodes are numbered starting with 0.
+        """
+        return self.node.deref().GetNumber() - 1
+
+    @property
     def children(self) -> NodeChildren:
         """The set of children of this node."""
         return NodeChildren.wrap(self.node)

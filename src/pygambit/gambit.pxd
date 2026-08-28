@@ -6,6 +6,7 @@ from libcpp.vector cimport vector as stdvector
 from libcpp.set cimport set as stdset
 from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
+from libcpp.pair cimport pair
 
 
 cdef extern from "games.h":
@@ -690,6 +691,11 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "nash.h":
+    pair[
+        stdlist[c_MixedStrategyProfile[T]], stdlist[stdlist[c_MixedStrategyProfile[T]]]
+    ] EnumMixedStrategySolveCliquesWrapper[T](
+            c_Game, StrategyCallbackType[T]
+    ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
@@ -697,10 +703,12 @@ cdef extern from "nash.h":
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
-            c_Game, stdlist[double], double, double
+            c_Game, stdlist[double], double, double,
+            LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
-            shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double
+            shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double,
+            LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
     stdlist[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
             c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
@@ -709,8 +717,10 @@ cdef extern from "nash.h":
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(
-            c_Game, stdlist[double], double, double
+            c_Game, stdlist[double], double, double,
+            LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateWrapper(
-            shared_ptr[c_MixedStrategyProfile[double]], bool, double, double
+            shared_ptr[c_MixedStrategyProfile[double]], bool, double, double,
+            LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
