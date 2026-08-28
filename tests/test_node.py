@@ -76,6 +76,45 @@ def test_outcome_equality_is_symmetric():
     assert outcome == proxy
 
 
+def test_null_outcome_label_is_none():
+    """The blessed nullity idiom: a node with no outcome has `outcome.label is None`."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.root.outcome.label is None
+
+
+def test_null_outcome_compares_unequal_to_itself():
+    """Null outcomes are unequal to everything, including another view of the same
+    node's outcome; equality must not short-circuit on node identity."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert (game.root.outcome == game.root.outcome) is False
+
+
+def test_null_outcome_reads_zero_payoffs():
+    """Reading a payoff through an unset node reports zero to every player of the game."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    for player in game.players:
+        assert game.root.outcome[player] == 0
+
+
+def test_null_outcome_payoff_write_raises():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.root.outcome[game.players["Player 1"]] = 1
+
+
+def test_null_outcome_label_write_raises():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.root.outcome.label = "Outcome 4"
+
+
+def test_null_outcome_number_is_none():
+    """The null outcome is not a member of the game's outcomes, so it has no number.
+    -1 would be a valid index and would silently resolve to the last real outcome."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.root.outcome.number is None
+
+
 def test_get_player():
     """Test to ensure that we can retrieve a player for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
@@ -686,6 +725,8 @@ def _subtrees_equal(
     if n1 == recursion_stop_node:
         return n2.is_terminal
     if n1.is_terminal and n2.is_terminal:
+        if not n1.outcome and not n2.outcome:
+            return True
         return n1.outcome == n2.outcome
     if n1.is_terminal is not n2.is_terminal:
         return False

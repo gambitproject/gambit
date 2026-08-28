@@ -43,13 +43,7 @@ class NfgPanel;
 //! file-local to one of them, since it's a base class used across all three .cc files.
 //!
 class TableGridBase : public wxGrid {
-  //!
-  //! @name Suppressing the built-in selection highlight & cursor rectangle
-  //!
-  //@{
-  void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
   void OnSelectCell(wxGridEvent &p_event) { p_event.Skip(); }
-  //@}
 
 protected:
   /// Shows the editor on one click; overridden by the header grids to edit strategies
@@ -60,6 +54,12 @@ protected:
     EnableCellEditControl();
     p_event.Skip(false);
   }
+
+  /// Suppresses the built-in selection highlight and cursor rectangle by default, since
+  /// most of the grids in this display have no use for a range selection at all. The
+  /// payoff grid overrides this to allow selecting several contingencies at once, to act
+  /// on together (e.g. merging them into one outcome).
+  virtual void OnRangeSelecting(wxGridRangeSelectEvent &p_event) { p_event.Veto(); }
 
 public:
   explicit TableGridBase(wxWindow *p_parent, wxWindowID p_id = wxID_ANY) : wxGrid(p_parent, p_id)
@@ -289,6 +289,10 @@ class TableWidget final : public wxPanel {
 
   std::shared_ptr<StrategicTableLayout> m_layout;
 
+  /// The outcome currently under the mouse in the payoff grid, or the null handle if
+  /// none (including when the cell under the mouse has the game's null outcome).
+  GameOutcome m_hoverOutcome;
+
   /// @name Event handlers
   //@{
   /// Called when the payoff grid is scrolled; keeps row/col header grids in sync
@@ -448,6 +452,13 @@ public:
   GamePlayer GetPayoffPlayer(int payoffCol) const;
   int GetPayoffColumnsPerContingency() const;
   bool IsPayoffStrategyDominated(int row, int col, bool strict) const;
+
+  /// Sets the outcome to highlight in the payoff grid (every cell sharing it), e.g. as
+  /// the mouse moves over the grid; pass the null handle (or the game's null outcome) to
+  /// clear the highlight. Repaints the payoff grid if the highlighted outcome changes.
+  void SetHoverOutcome(const GameOutcome &p_outcome);
+  /// Whether the given cell's outcome is the one currently set by SetHoverOutcome.
+  bool IsPayoffCellHighlighted(int row, int col) const;
 
   //@}
 

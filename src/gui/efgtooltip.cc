@@ -270,7 +270,7 @@ void OutcomeEditorPopup::LoadValues()
 {
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
-  if (!outcome) {
+  if (!outcome || outcome->IsNull()) {
     // GameOutcome::NewOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
     // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
     // opens already showing that as an error the user has to notice and fix before they can
@@ -330,7 +330,7 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
 
   // Like AppendMovePopup's "Append move"/"Insert move" title switch: which verb applies depends
   // on state BeginEdit() only just received, not anything fixed at construction.
-  SetTitle(m_node->GetOutcome() ? _("Edit outcome") : _("New outcome"));
+  SetTitle(!m_node->GetOutcome()->IsNull() ? _("Edit outcome") : _("New outcome"));
 
   LoadValues();
   UpdateValidation(); // also does the Fit()/PositionPopup() a plain node change still needs

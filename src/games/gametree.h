@@ -177,6 +177,8 @@ public:
   void MoveTree(GameNode dest, GameNode src) override;
   void DeleteParent(GameNode) override;
   void DeleteTree(GameNode) override;
+  GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
+                          const std::string &) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
   void Reveal(GameInfoset, GamePlayer) override;

@@ -133,3 +133,64 @@ inputting the payoff for the first (row) player, pressing the :kbd:`Tab`
 key, inputting the payoff for the second (column) player, pressing the
 :kbd:`Tab` key, and so forth, until all the payoff entries in the table
 have been filled.
+
+Shared outcomes
+^^^^^^^^^^^^^^^^
+
+The payoffs shown at a contingency are stored as an *outcome*, and the
+same outcome can be attached to more than one contingency -- most
+commonly because several strategy profiles induce the same terminal
+node in the reduced strategic game of an extensive game, but a
+strategic game can also be built or loaded with outcomes shared this
+way directly. Editing a payoff at any one of these contingencies
+changes it at every other contingency sharing that outcome, since they
+are, in fact, the same outcome.
+
+To see this grouping before editing, hover the mouse pointer over any
+payoff cell: every other cell sharing its outcome is shown with a
+shaded background for as long as the pointer remains over one of them.
+The highlight does not change while a payoff is being edited, even if
+the pointer moves elsewhere in the meantime.
+
+Merging and splitting outcomes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Which contingencies share an outcome can itself be changed from the
+table. Click and drag, or shift-click, across several payoff cells to
+select them; the selection automatically expands to cover every
+payoff column of any contingency it touches, since an outcome is
+shared at the level of a whole contingency, not a single payoff cell.
+Right-clicking the selection -- or, with nothing selected,
+right-clicking a single cell -- opens a menu with three commands:
+
++ :guilabel:`Set outcome...` (labelled :guilabel:`Merge into one
+  outcome...` when more than one contingency is selected) opens a
+  dialog to give a label and a payoff for each player, then attaches
+  the resulting outcome to every selected contingency. Selecting
+  several contingencies this way merges them into one shared outcome;
+  selecting a single contingency that is currently part of a larger
+  shared outcome splits it off into its own outcome, leaving the rest
+  of the group unchanged. If the selection already matches one
+  outcome's full membership exactly, this instead edits that outcome's
+  own label and payoffs in place, rather than creating a new one.
+  The dialog starts from a label and payoffs to edit -- the shared
+  outcome's own, if editing one in place, or the first selected
+  contingency's current payoffs with a freshly generated label
+  otherwise -- and disables :guilabel:`OK` until the label is
+  nonempty and unique among the game's outcomes and every payoff is a
+  valid number.
++ :guilabel:`Edit outcome...` is the direct route to that same
+  in-place case: it is enabled whenever the selection matches one
+  existing outcome's full membership exactly (a single contingency is
+  enough, if that contingency's outcome has no other members), and
+  opens the same label-and-payoffs dialog pre-filled with that
+  outcome's own values, changing them in place without touching which
+  contingencies share it. Editing a payoff here is no different from
+  typing directly into a payoff cell -- it is offered as a second way
+  to reach the same result, alongside also being able to change the
+  label, matching how outcomes are edited in an extensive game.
++ :guilabel:`Remove outcome` clears every selected contingency back to
+  having no outcome. It is disabled if none of the selection currently
+  has one.
+
+Clicking any cell afterward clears the selection.
