@@ -49,8 +49,7 @@ class Contingencies:
 
     def __iter__(self):
         if len(self.cont) == len(self.game.players):
-            yield [list(player.strategies).index(self.cont[player])
-                   for player in self.game.players]
+            yield {player.label: self.cont[player].label for player in self.game.players}
         else:
             players = list(self.game.players)
             nextpl = min(pl for (pl, player) in enumerate(players)

@@ -163,7 +163,11 @@ def test_bagg_pure_strategy_payoff_matches_degenerate_mixed_profile(game_path):
     game = games.read_from_file(game_path)
     players = list(game.players)
     for contingency in itertools.product(*(range(len(list(p.strategies))) for p in players)):
-        pure_payoffs = [game[contingency][p] for p in players]
+        labeled = {
+            p.label: list(p.strategies)[i].label
+            for p, i in zip(players, contingency, strict=True)
+        }
+        pure_payoffs = [game.get_payoffs(labeled)[p.label] for p in players]
 
         profile = game.mixed_strategy_profile(rational=True)
         _set_pure_profile(profile, players, contingency)
@@ -186,7 +190,11 @@ def test_bagg_pure_strategy_payoff_with_multiple_players_and_types():
         tuple(i % size for i, size in enumerate(sizes)),
     ]
     for contingency in contingencies:
-        pure_payoffs = [game[contingency][p] for p in players]
+        labeled = {
+            p.label: list(p.strategies)[i].label
+            for p, i in zip(players, contingency, strict=True)
+        }
+        pure_payoffs = [game.get_payoffs(labeled)[p.label] for p in players]
 
         profile = game.mixed_strategy_profile(rational=True)
         _set_pure_profile(profile, players, contingency)

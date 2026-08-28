@@ -99,34 +99,33 @@ def test_is_perfect_recall(game_input, expected_result: bool):
 
 def test_getting_payoff_by_label_string():
     game = games.read_from_file("sample_extensive_game.efg")
-    assert game[[0, 0]]["Player 1"] == 2
-    assert game[[0, 1]]["Player 1"] == 2
-    assert game[[1, 0]]["Player 1"] == 4
-    assert game[[1, 1]]["Player 1"] == 6
-    assert game[[0, 0]]["Player 2"] == 3
-    assert game[[0, 1]]["Player 2"] == 3
-    assert game[[1, 0]]["Player 2"] == 5
-    assert game[[1, 1]]["Player 2"] == 7
+    s1 = [s.label for s in game.players["Player 1"].strategies]
+    s2 = [s.label for s in game.players["Player 2"].strategies]
+    assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[0]})["Player 1"] == 2
+    assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[1]})["Player 1"] == 2
+    assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[0]})["Player 1"] == 4
+    assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[1]})["Player 1"] == 6
+    assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[0]})["Player 2"] == 3
+    assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[1]})["Player 2"] == 3
+    assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[0]})["Player 2"] == 5
+    assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[1]})["Player 2"] == 7
 
 
-def test_getting_payoff_by_player():
+def test_getting_payoff_player_object_key_raises():
     game = games.read_from_file("sample_extensive_game.efg")
     player1 = game.players["Player 1"]
-    player2 = game.players["Player 2"]
-    assert game[[0, 0]][player1] == 2
-    assert game[[0, 1]][player1] == 2
-    assert game[[1, 0]][player1] == 4
-    assert game[[1, 1]][player1] == 6
-    assert game[[0, 0]][player2] == 3
-    assert game[[0, 1]][player2] == 3
-    assert game[[1, 0]][player2] == 5
-    assert game[[1, 1]][player2] == 7
+    s1 = next(iter(player1.strategies)).label
+    s2 = next(iter(game.players["Player 2"].strategies)).label
+    with pytest.raises(TypeError):
+        _ = game.get_payoffs({player1: s1, "Player 2": s2})
 
 
 def test_outcome_index_exception_label():
     game = games.read_from_file("sample_extensive_game.efg")
+    s1 = next(iter(game.players["Player 1"].strategies)).label
+    s2 = next(iter(game.players["Player 2"].strategies)).label
     with pytest.raises(KeyError):
-        _ = game[[0, 0]]["Not a player"]
+        _ = game.get_payoffs({"Player 1": s1, "Player 2": s2})["Not a player"]
 
 
 @pytest.mark.parametrize(

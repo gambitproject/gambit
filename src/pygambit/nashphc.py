@@ -148,8 +148,9 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: gbt.Play
                                for strat in profile if strat is not None)
         for strategy in strategies:
             profile[player.number] = strategy
-            if support.game[profile][player] != 0:
-                payoffs[strategy].append(f"({support.game[profile][player]}*{contingency})")
+            payoff_vec = support.game.get_payoffs({s.player.label: s.label for s in profile})
+            if payoff_vec[player.label] != 0:
+                payoffs[strategy].append(f"({payoff_vec[player.label]}*{contingency})")
 
     payoffs = {s: "+".join(v) for s, v in payoffs.items()}
     equations = [f"({payoffs[strategies[0]]})-({payoffs[s]})" for s in strategies[1:]]

@@ -11,6 +11,10 @@
   `logit_estimate`, `ipa_solve`, and `gnm_solve` now also accept a rational-precision profile
   directly (as a starting point or perturbation vector), converting it internally.
   (#721, #458)
+- Added `Game.get_outcome`, which returns the `Outcome` attached to a pure-strategy contingency
+  of a game in strategic (table) representation.
+- Added `Game.get_payoffs`, which returns the payoff to each player at a pure-strategy
+  contingency, for a game in any representation.
 
 ### Changed
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
@@ -25,6 +29,11 @@
 - `Game.new_table` no longer creates an outcome for every contingency; a new strategic game has no outcomes,
   and every contingency is initially null. Outcomes are created as they are needed;
   games built by `Game.from_arrays` and `Game.from_dict` are unaffected.  (#1061)
+- `Game.contingencies` now yields contingencies as a mapping from player label to strategy
+  label, rather than a list of per-player strategy indices.
+
+### Removed
+- Removed `Game.__getitem__`, replaced by `Game.get_outcome`/`Game.get_payoffs`.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 

@@ -115,6 +115,8 @@ Information about the game
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.get_outcome
+   Game.get_payoffs
    Game.subgames
    Game.minimal_subgame
 

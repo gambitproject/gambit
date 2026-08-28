@@ -129,8 +129,12 @@ def test_relabel_strategies_tree_game_raises():
 
 def _payoffs_by_label(game: gbt.Game) -> dict:
     one, two = game.players
-    return {(s.label, t.label): (game[s, t][one], game[s, t][two])
-            for s in one.strategies for t in two.strategies}
+    result = {}
+    for s in one.strategies:
+        for t in two.strategies:
+            payoffs = game.get_payoffs({one.label: s.label, two.label: t.label})
+            result[s.label, t.label] = (payoffs[one.label], payoffs[two.label])
+    return result
 
 
 def test_set_strategies_reorder_carries_outcomes():
@@ -153,10 +157,16 @@ def test_set_strategies_add_drop_and_reorder_together():
     game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     player, other = game.players
     a, b = (s.label for s in player.strategies)
-    kept = {t.label: game[a, t.label][player] for t in other.strategies}
+    kept = {
+        t.label: game.get_payoffs({player.label: a, other.label: t.label})[player.label]
+        for t in other.strategies
+    }
     game.set_strategies(player, ["X", a], drop=True)
     assert [s.label for s in player.strategies] == ["X", a]
-    assert {t.label: game[a, t.label][player] for t in other.strategies} == kept
+    assert {
+        t.label: game.get_payoffs({player.label: a, other.label: t.label})[player.label]
+        for t in other.strategies
+    } == kept
 
 
 def test_set_strategies_unconfirmed_drop_and_disabled_add_raise():

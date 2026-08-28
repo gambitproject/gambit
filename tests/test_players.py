@@ -213,12 +213,11 @@ def _tag_contingencies(game: gbt.Game) -> None:
     """
     players = list(game.players)
     for n, contingency in enumerate(game.contingencies, start=1):
-        strategies = [list(p.strategies)[i] for p, i in zip(players, contingency, strict=True)]
         payoffs = {
-            player: int(f"{pl_index}{strategy.label}")
-            for pl_index, (player, strategy) in enumerate(zip(players, strategies, strict=True))
+            player: int(f"{pl_index}{contingency[player.label]}")
+            for pl_index, player in enumerate(players)
         }
-        game.make_outcome(tuple(strategies), payoffs, f"c{n}")
+        game.make_outcome(contingency, payoffs, f"c{n}")
 
 
 def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
@@ -231,7 +230,7 @@ def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
     surviving = [s.label for s in pl1.strategies if s.label != "2"]
     expected = {
         (s1.label, s2.label, s3.label):
-            tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+            game.get_payoffs({pl1.label: s1.label, pl2.label: s2.label, pl3.label: s3.label})
         for s1 in pl1.strategies if s1.label in surviving
         for s2 in pl2.strategies for s3 in pl3.strategies
     }
@@ -243,7 +242,9 @@ def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
         for s2 in pl2.strategies:
             for s3 in pl3.strategies:
                 key = (s1.label, s2.label, s3.label)
-                actual = tuple(game[s1, s2, s3][p] for p in (pl1, pl2, pl3))
+                actual = game.get_payoffs(
+                    {pl1.label: s1.label, pl2.label: s2.label, pl3.label: s3.label}
+                )
                 assert actual == expected[key]
 
 
@@ -254,7 +255,7 @@ def test_strategic_game_set_strategies_drop_first_preserves_other_payoffs():
 
     surviving = [s.label for s in pl1.strategies if s.label != "1"]
     expected = {
-        (s1.label, s2.label): tuple(game[s1, s2][p] for p in (pl1, pl2))
+        (s1.label, s2.label): game.get_payoffs({pl1.label: s1.label, pl2.label: s2.label})
         for s1 in pl1.strategies if s1.label in surviving
         for s2 in pl2.strategies
     }
@@ -265,7 +266,8 @@ def test_strategic_game_set_strategies_drop_first_preserves_other_payoffs():
     for s1 in pl1.strategies:
         for s2 in pl2.strategies:
             key = (s1.label, s2.label)
-            assert tuple(game[s1, s2][p] for p in (pl1, pl2)) == expected[key]
+            actual = game.get_payoffs({pl1.label: s1.label, pl2.label: s2.label})
+            assert actual == expected[key]
 
 
 def test_strategic_game_set_strategies_empty():

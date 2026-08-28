@@ -13,14 +13,19 @@ import pygambit.util as util
 
 
 def _generate_lrs_input(game: gbt.Game) -> str:
-    s = f"{len(game.players[0].strategies)} {len(game.players[1].strategies)}\n\n"
-    for st1 in game.players[0].strategies:
-        s += " ".join(str(gbt.Rational(game[st1, st2][game.players[0]]))
-                      for st2 in game.players[1].strategies) + "\n"
+    p1, p2 = game.players[0], game.players[1]
+    s = f"{len(p1.strategies)} {len(p2.strategies)}\n\n"
+    for st1 in p1.strategies:
+        s += " ".join(
+            str(game.get_payoffs({p1.label: st1.label, p2.label: st2.label})[p1.label])
+            for st2 in p2.strategies
+        ) + "\n"
     s += "\n"
-    for st1 in game.players[0].strategies:
-        s += " ".join(str(gbt.Rational(game[st1, st2][game.players[1]]))
-                      for st2 in game.players[1].strategies) + "\n"
+    for st1 in p1.strategies:
+        s += " ".join(
+            str(game.get_payoffs({p1.label: st1.label, p2.label: st2.label})[p2.label])
+            for st2 in p2.strategies
+        ) + "\n"
     return s
 
 

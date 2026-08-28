@@ -28,10 +28,12 @@ def test_make_outcome_attaches_to_all_given_nodes():
 
 def test_make_outcome_attaches_at_contingencies():
     game = gbt.Game.new_table([2, 2])
-    outcome = game.make_outcome([(0, 0), (1, 1)], {"1": 2, "2": -2}, "diagonal")
-    assert game[0, 0] == outcome
-    assert game[1, 1] == outcome
-    assert not game[0, 1]
+    outcome = game.make_outcome(
+        [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
+    )
+    assert game.get_outcome({"1": "1", "2": "1"}) == outcome
+    assert game.get_outcome({"1": "2", "2": "2"}) == outcome
+    assert not game.get_outcome({"1": "1", "2": "2"})
     assert outcome["1"] == 2
 
 
