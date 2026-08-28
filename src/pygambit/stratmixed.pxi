@@ -472,6 +472,21 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._as_behavior()
 
+    def as_float(self) -> MixedStrategyProfileDouble:
+        """Creates a floating-point copy of this mixed strategy profile.
+
+        If this profile is already a `MixedStrategyProfileDouble`, returns a copy of it.
+
+        .. versionadded:: 17.0.0
+
+        Returns
+        -------
+        MixedStrategyProfileDouble
+            A profile with the same probabilities, represented as floating-point numbers.
+        """
+        self._check_validity()
+        return self._as_float()
+
     def normalize(self) -> MixedStrategyProfile:
         """Create a profile with the same strategy proportions as this
         one, but normalised so probabilities for each player sum to one.
@@ -565,6 +580,10 @@ class MixedStrategyProfile:
         """Creates the equivalent mixed behavior profile."""
         raise NotImplementedError
 
+    def _as_float(self) -> MixedStrategyProfileDouble:
+        """Creates a floating-point copy of the profile."""
+        raise NotImplementedError
+
     def _normalize(self) -> MixedStrategyProfile:
         """Creates a copy of the profile, normalized so each player's strategy
         probabilities sum to one.
@@ -648,6 +667,9 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return MixedBehaviorProfileDouble.wrap(
             make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
         )
+
+    def _as_float(self) -> MixedStrategyProfileDouble:
+        return self._copy()
 
     def _normalize(self) -> MixedStrategyProfileDouble:
         return MixedStrategyProfileDouble.wrap(
@@ -736,6 +758,14 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return MixedBehaviorProfileRational.wrap(
             make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
         )
+
+    def _as_float(self) -> MixedStrategyProfileDouble:
+        profile: MixedStrategyProfileDouble = self.game.mixed_strategy_profile()
+        for player in self.game.players:
+            profile[player.label] = {
+                s.label: float(self._getprob_strategy(s)) for s in player.strategies
+            }
+        return profile
 
     def _normalize(self) -> MixedStrategyProfileRational:
         return MixedStrategyProfileRational.wrap(

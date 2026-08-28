@@ -4,17 +4,21 @@
 CLI
 ***
 
-See installation instructions in the :ref:`install-cli-gui` section.
-
 Gambit provides command-line interfaces for each method for computing
 Nash equilibria.  These are suitable for scripting or calling from
 other programs.  This chapter describes the use of these programs.
 For a general overview of methods for computing equilibria,
 see the survey of :cite:p:`McKMcL96`.
 
-The graphical interface also provides a frontend for calling these
-programs and evaluating their output.  Direct use of the command-line
-programs is intended for advanced users and applications.
+.. versionchanged:: 17.0.0
+
+   These programs are now implemented in Python, as part of the
+   :ref:`pygambit <pygambit>` package, rather than being separate
+   C++ executables.  Installing PyGambit (``pip install pygambit``,
+   see :ref:`install`) installs these command-line programs alongside
+   it; no separate download or build is needed.  Each program's
+   command-line interface, options, and output are unchanged from
+   the previous C++ versions, except as otherwise noted.
 
 These programs take an extensive or strategic game file, which can be
 specified on the command line or piped via standard input, and output
@@ -49,4 +53,3 @@ documentation.
    tools.logit
    tools.gnm
    tools.ipa
-   tools.convert

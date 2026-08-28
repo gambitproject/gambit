@@ -25,6 +25,7 @@ A set of utilities for computing and analyzing quantal response equilbria
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 
 import scipy.optimize
 
@@ -56,15 +57,32 @@ def logit_solve_lambda(
         use_strategic: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
+        event_callback: Callable[
+            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+        ] | None = None,
 ):
+    """Compute the QRE(s) at the specified value(s) of `lam` along the principal branch.
+
+    Parameters
+    ----------
+    event_callback : Callable, optional
+        If specified, called with each point traced along the principal branch on the
+        way to each requested value of `lam`.
+
+        .. versionadded:: 17.0.0
+    """
     if first_step <= 0.0:
         raise ValueError("logit_solve_lambda(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve_lambda(): max_accel argument must be at least 1.0")
     if not game.is_tree or use_strategic:
-        return libgbt._logit_strategy_lambda(game, lam, first_step, max_accel)
+        return libgbt._logit_strategy_lambda(
+            game, lam, first_step, max_accel, event_callback
+        )
     else:
-        return libgbt._logit_behavior_lambda(game, lam, first_step, max_accel)
+        return libgbt._logit_behavior_lambda(
+            game, lam, first_step, max_accel, event_callback
+        )
 
 
 class LogitQREMixedStrategyFitResult:
@@ -162,26 +180,30 @@ class LogitQREMixedBehaviorFitResult:
 
 
 def _estimate_strategy_fixedpoint(
-        data: libgbt.MixedStrategyProfileDouble,
+        data: libgbt.MixedStrategyProfile,
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
+        event_callback: object = None,
 ) -> LogitQREMixedStrategyFitResult:
-    res = libgbt._logit_strategy_estimate(data, local_max=local_max,
-                                          first_step=first_step, max_accel=max_accel)
+    res = libgbt._logit_strategy_estimate(data.as_float(), local_max=local_max,
+                                          first_step=first_step, max_accel=max_accel,
+                                          event_callback=event_callback)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
     )
 
 
 def _estimate_behavior_fixedpoint(
-        data: libgbt.MixedBehaviorProfileDouble,
+        data: libgbt.MixedBehaviorProfile,
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
+        event_callback: object = None,
 ) -> LogitQREMixedBehaviorFitResult:
-    res = libgbt._logit_behavior_estimate(data, local_max=local_max,
-                                          first_step=first_step, max_accel=max_accel)
+    res = libgbt._logit_behavior_estimate(data.as_float(), local_max=local_max,
+                                          first_step=first_step, max_accel=max_accel,
+                                          event_callback=event_callback)
     return LogitQREMixedBehaviorFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
     )
@@ -207,7 +229,7 @@ def _empirical_log_like(lam: float, regrets: list, flattened_data: list) -> floa
 
 
 def _estimate_strategy_empirical(
-        data: libgbt.MixedStrategyProfileDouble
+        data: libgbt.MixedStrategyProfile
 ) -> LogitQREMixedStrategyFitResult:
     flattened_data = [
         data[p.label][s.label] for p in data.game.players for s in p.strategies
@@ -230,7 +252,7 @@ def _estimate_strategy_empirical(
 
 
 def _estimate_behavior_empirical(
-        data: libgbt.MixedBehaviorProfileDouble,
+        data: libgbt.MixedBehaviorProfile,
 ) -> LogitQREMixedBehaviorFitResult:
     flattened_data = [
         data[next(iter(s.members))][a.label]
@@ -251,7 +273,7 @@ def _estimate_behavior_empirical(
     for player in data.game.players:
         for infoset in player.infosets:
             node = next(iter(infoset.members))
-            profile[node] = [math.exp(next(log_probs)) for _ in infoset.actions]
+            profile[node] = {a.label: math.exp(next(log_probs)) for a in infoset.actions}
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )
@@ -263,11 +285,21 @@ def logit_estimate(
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
+        event_callback: Callable[
+            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+        ] | None = None,
 ) -> LogitQREMixedStrategyFitResult | LogitQREMixedBehaviorFitResult:
     """Use maximum likelihood estimation to find the logit quantal
     response equilibrium which best fits empirical frequencies of play.
 
     .. versionadded:: 16.3.0
+
+    .. versionchanged:: 17.0.0
+
+       `data` may now also be a rational-precision profile
+       (`MixedStrategyProfileRational` or `MixedBehaviorProfileRational`); it is
+       converted to floating-point via `~MixedStrategyProfile.as_float` or
+       `~MixedBehaviorProfile.as_float` where needed.
 
     Parameters
     ----------
@@ -276,7 +308,9 @@ def logit_estimate(
         To obtain the correct resulting log-likelihood, these should
         be expressed as total counts of observations of each action
         rather than probabilities.  If a MixedBehaviorProfile is
-        specified, estimation is done using the agent QRE.
+        specified, estimation is done using the agent QRE.  A
+        rational-precision profile is accepted, and converted to
+        floating-point precision internally.
 
     use_empirical : bool, default = False
         If specified and True, use the empirical payoff approach for
@@ -311,6 +345,17 @@ def logit_estimate(
 
            This argument only has an effect when use_empirical is False.
 
+    event_callback : Callable[[LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile], \
+None], optional
+        If specified, called with each point traced along the principal branch on the
+        way to the best-fitting QRE.
+
+        .. note::
+
+           This argument only has an effect when use_empirical is False.
+
+        .. versionadded:: 17.0.0
+
     Returns
     -------
     LogitQREMixedStrategyFitResult or LogitQREMixedBehaviorFitResult
@@ -324,17 +369,23 @@ def logit_estimate(
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
+    if use_empirical and event_callback is not None:
+        raise ValueError(
+            "logit_estimate(): event_callback cannot be used with use_empirical"
+        )
     if isinstance(data, libgbt.MixedStrategyProfile):
         if use_empirical:
             return _estimate_strategy_empirical(data)
         else:
             return _estimate_strategy_fixedpoint(data, local_max=local_max,
-                                                 first_step=first_step, max_accel=max_accel)
+                                                 first_step=first_step, max_accel=max_accel,
+                                                 event_callback=event_callback)
     elif isinstance(data, libgbt.MixedBehaviorProfile):
         if use_empirical:
             return _estimate_behavior_empirical(data)
         else:
             return _estimate_behavior_fixedpoint(data, local_max=local_max,
-                                                 first_step=first_step, max_accel=max_accel)
+                                                 first_step=first_step, max_accel=max_accel,
+                                                 event_callback=event_callback)
     else:
         raise TypeError("data must be specified as a MixedStrategyProfile or MixedBehaviorProfile")

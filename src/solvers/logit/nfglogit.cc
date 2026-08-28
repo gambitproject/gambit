@@ -220,7 +220,7 @@ public:
 
 private:
   std::vector<std::shared_ptr<Equation>> m_equations;
-  const Game &m_game;
+  Game m_game;
   mutable MixedStrategyProfile<double> m_profile, m_logProfile;
   mutable Vector<double> m_strategyValues;
   mutable Matrix<double> m_strategyDerivs;

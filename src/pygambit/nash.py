@@ -158,6 +158,7 @@ def enummixed_solve(
         nash_callback: Callable[
             [libgbt.MixedStrategyProfile], None
         ] | None = None,
+        cliques: bool = False,
 ) -> NashComputationResult:
     """Compute all :ref:`mixed-strategy Nash equilibria <enummixed>`
     of a two-player game using the strategic representation.
@@ -184,6 +185,13 @@ def enummixed_solve(
 
         .. versionadded:: 17.0.0
 
+    cliques : bool, default False
+        If specified and True, also compute the sets of extreme equilibria which
+        are connected to one another, returned as a list of lists of equilibria in
+        `parameters["cliques"]`.  Not available when `lrsnash_path` is specified.
+
+        .. versionadded:: 17.0.0
+
     Returns
     -------
     res : NashComputationResult
@@ -195,7 +203,8 @@ def enummixed_solve(
         If game has more than two players.
 
     ValueError
-        If both `lrsnash_path` and `nash_callback` are specified.
+        If both `lrsnash_path` and `nash_callback` are specified, or both
+        `lrsnash_path` and `cliques` are specified.
 
     Notes
     -----
@@ -206,6 +215,10 @@ def enummixed_solve(
             raise ValueError(
                 "enummixed_solve(): nash_callback cannot be used with lrsnash_path"
             )
+        if cliques:
+            raise ValueError(
+                "enummixed_solve(): cliques cannot be used with lrsnash_path"
+            )
         equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
         return NashComputationResult(
             game=game,
@@ -214,6 +227,23 @@ def enummixed_solve(
             use_strategic=True,
             parameters={"lrsnash_path": lrsnash_path},
             equilibria=equilibria,
+        )
+    if cliques:
+        if rational:
+            equilibria, clique_list = libgbt._enummixed_strategy_solve_cliques_rational(
+                game, nash_callback
+            )
+        else:
+            equilibria, clique_list = libgbt._enummixed_strategy_solve_cliques_double(
+                game, nash_callback
+            )
+        return NashComputationResult(
+            game=game,
+            method="enummixed",
+            rational=rational,
+            use_strategic=True,
+            equilibria=equilibria,
+            parameters={"cliques": clique_list},
         )
     if rational:
         equilibria = libgbt._enummixed_strategy_solve_rational(game, nash_callback)
@@ -381,7 +411,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: libgbt.MixedStrategyProfileDouble,
+        start: libgbt.MixedStrategyProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
@@ -403,12 +433,18 @@ def liap_solve(
        Computing agent Nash equilibria in the extensive game moved to
        `liap_agent_solve` for clarity.
 
+    .. versionchanged:: 17.0.0
+
+       `start` may now also be a `MixedStrategyProfileRational`; it is converted to
+       floating-point via `~MixedStrategyProfile.as_float` before minimization.
+
     Parameters
     ----------
-    start : MixedStrategyProfileDouble
+    start : MixedStrategyProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
-        depend on the initial profile chosen.
+        depend on the initial profile chosen.  If a `MixedStrategyProfileRational` is
+        given, it is converted to floating-point precision first.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -441,6 +477,7 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    start = start.as_float()
     equilibria = libgbt._liap_strategy_solve(
         start, maxregret=maxregret, maxiter=maxiter,
         nash_callback=nash_callback, event_callback=event_callback
@@ -456,7 +493,7 @@ def liap_solve(
 
 
 def liap_agent_solve(
-        start: libgbt.MixedBehaviorProfileDouble,
+        start: libgbt.MixedBehaviorProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
         nash_callback: Callable[[libgbt.MixedBehaviorProfileDouble], None] | None = None,
@@ -472,12 +509,18 @@ def liap_agent_solve(
        Moved from `liap_solve` passing a `MixedBehaviorProfileDouble` for additional
        clarity in the solution concept computed.
 
+    .. versionchanged:: 17.0.0
+
+       `start` may now also be a `MixedBehaviorProfileRational`; it is converted to
+       floating-point via `~MixedBehaviorProfile.as_float` before minimization.
+
     Parameters
     ----------
-    start : MixedBehaviorProfileDouble
+    start : MixedBehaviorProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
-        depend on the initial profile chosen.
+        depend on the initial profile chosen.  If a `MixedBehaviorProfileRational` is
+        given, it is converted to floating-point precision first.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -506,6 +549,7 @@ def liap_agent_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    start = start.as_float()
     equilibria = libgbt._liap_behavior_solve(
         start, maxregret=maxregret, maxiter=maxiter,
         nash_callback=nash_callback, event_callback=event_callback
@@ -600,7 +644,7 @@ def simpdiv_solve(
 
 
 def ipa_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.IPAStepEvent | libgbt.IPATerminationEvent], None
@@ -611,14 +655,21 @@ def ipa_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfileDouble
+    perturbation : Game or MixedStrategyProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
-        strategy for each player and 0 for all other strategies.
+        strategy for each player and 0 for all other strategies.  If a
+        `MixedStrategyProfileRational` is given, it is converted to
+        floating-point precision first.
 
         .. versionchanged:: 16.2.0
 
            Allow selection of the perturbation vector
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `MixedStrategyProfileRational`, converted to floating-point via
+           `~MixedStrategyProfile.as_float`.
 
     nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
@@ -651,11 +702,12 @@ def ipa_solve(
             perturbation[player.label] = {
                 s.label: (1.0 if s is strategies[0] else 0.0) for s in strategies
             }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
         game = perturbation.game
+        perturbation = perturbation.as_float()
     else:
         raise TypeError(
-            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"parameter must be Game or MixedStrategyProfile, "
             f"not {perturbation.__class__.__name__}"
         )
     return NashComputationResult(
@@ -669,7 +721,7 @@ def ipa_solve(
 
 
 def gnm_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
         end_lambda: float = -10.0,
         steps: int = 100,
         local_newton_interval: int = 3,
@@ -690,14 +742,21 @@ def gnm_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfileDouble
+    perturbation : Game or MixedStrategyProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
-        strategy for each player and 0 for all other strategies.
+        strategy for each player and 0 for all other strategies.  If a
+        `MixedStrategyProfileRational` is given, it is converted to
+        floating-point precision first.
 
         .. versionchanged:: 16.2.0
 
            Allow selection of the perturbation vector
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `MixedStrategyProfileRational`, converted to floating-point via
+           `~MixedStrategyProfile.as_float`.
 
     end_lambda : float, default -10.0
         The value of the perturbation magnitude lambda at which to terminate
@@ -762,11 +821,12 @@ GNMTerminationEvent], None], optional
             perturbation[player.label] = {
                 s.label: (1.0 if s is strategies[0] else 0.0) for s in strategies
             }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
         game = perturbation.game
+        perturbation = perturbation.as_float()
     else:
         raise TypeError(
-            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"parameter must be Game or MixedStrategyProfile, "
             f"not {perturbation.__class__.__name__}"
         )
     if end_lambda >= 0.0:

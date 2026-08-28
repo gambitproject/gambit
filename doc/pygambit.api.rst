@@ -272,6 +272,7 @@ Probability distributions over strategies
    MixedStrategyProfile.max_regret
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
+   MixedStrategyProfile.as_float
    MixedStrategyProfile.normalize
    MixedStrategyProfile.copy
 
@@ -314,6 +315,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.max_regret
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
+   MixedBehaviorProfile.as_float
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy
 

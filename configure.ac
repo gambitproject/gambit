@@ -114,11 +114,14 @@ if test x$with_gui = xtrue; then
   if test `echo ${WX_CXXFLAGS} | grep -c __WXMSW__` -eq 1; then
     AC_MSG_RESULT(Windows)
     WXPORT="MSW"
-    dnl Windows uses the resources file
-    dnl RC_OBJECT="gambitrc.o"
-    dnl RC_OBJECT_PATH="bitmaps/gambitrc.o"
-    dnl AC_SUBST(RC_OBJECT)
-    dnl AC_SUBST(RC_OBJECT_PATH)
+    dnl Windows uses the resources file, which also embeds the application
+    dnl manifest.  The manifest is required for native rendering of some
+    dnl controls (e.g. wxCommandLinkButton) under modern Common Controls.
+    RC_OBJECT="gambitrc.o"
+    RC_OBJECT_PATH="src/gui/bitmaps/gambitrc.o"
+    AC_SUBST(RC_OBJECT)
+    AC_SUBST(RC_OBJECT_PATH)
+    AC_CHECK_TOOL([WINDRES], [windres], [:])
     dnl We insist on static build on Windows, not depending on
     dnl a shared wxWidgets library.
     WX_CXXFLAGS=`echo $WX_CXXFLAGS | sed 's/-DWXUSINGDLL//g'`
