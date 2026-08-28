@@ -19,7 +19,6 @@ Representation of games
    Node
    Infoset
    Action
-   Strategy
    Subgame
 
 
@@ -192,15 +191,6 @@ Information about the game
    Action.precedes
    Action.prob
    Action.plays
-
-.. autosummary::
-
-   :toctree: api/
-
-   Strategy.label
-   Strategy.game
-   Strategy.player
-   Strategy.number
 
 .. autosummary::
 

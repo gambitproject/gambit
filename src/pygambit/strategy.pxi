@@ -21,67 +21,6 @@
 #
 
 @cython.cclass
-class Strategy:
-    """A plan of action for a ``Player`` in a ``Game``."""
-    strategy = cython.declare(c_GameStrategy)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a Strategy outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(strategy: c_GameStrategy) -> Strategy:
-        obj: Strategy = Strategy.__new__(Strategy)
-        obj.strategy = strategy
-        return obj
-
-    def __repr__(self) -> str:
-        if self.label:
-            return f"Strategy(player={self.player}, label='{self.label}')"
-        else:
-            return f"Strategy(player={self.player}, number={self.number})"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Strategy) and
-            self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
-        )
-
-    def __hash__(self) -> int:
-        return cython.cast(cython.long, self.strategy.deref())
-
-    @property
-    def label(self) -> str:
-        """The text label of the strategy.
-
-        .. versionchanged:: 17.0.0
-            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
-            contain no control characters, and must not begin/end with whitespace or have
-            two consecutive whitespace characters.  "Whitespace" means any Unicode space
-            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
-
-            The label is now read-only, and must be nonempty and unique among the player's
-            strategies; use `Game.relabel_strategies` to change it.
-        """
-        return self.strategy.deref().GetLabel().decode("utf-8")
-
-    @property
-    def game(self) -> Game:
-        """The game to which the strategy belongs."""
-        return Game.wrap(self.strategy.deref().GetPlayer().deref().GetGame())
-
-    @property
-    def player(self) -> Player:
-        """The player to which the strategy belongs."""
-        return Player.wrap(self.strategy.deref().GetPlayer())
-
-    @property
-    def number(self) -> int:
-        """The number of the strategy."""
-        return self.strategy.deref().GetNumber() - 1
-
-
-@cython.cclass
 class StrategyBehavior:
     """A read-only, map-like view of the actions prescribed by a reduced strategy.
 

@@ -141,7 +141,7 @@ class StrategySupportProfile:
         """
         resolved_player: Player = self.game.players[player]
         strategies = tuple(
-            Strategy.wrap(s).label
+            s.deref().GetLabel().decode("utf-8")
             for s in deref(self.profile).GetStrategies(resolved_player.player)
         )
         return StrategySupport.wrap(resolved_player, strategies)

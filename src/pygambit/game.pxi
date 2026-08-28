@@ -953,10 +953,12 @@ class Game:
 
     def _resolve_contingency(self, contingency: typing.Any, funcname: str,
                              argname: str = "contingency") -> dict:
-        """Resolve a pure-strategy contingency to a dict from ``Player`` to ``Strategy``.
+        """Resolve a pure-strategy contingency to a dict from ``Player`` to strategy label.
 
         `contingency` must be a complete mapping from the game's players' labels to the
-        label of the strategy played by that player.
+        label of the strategy played by that player.  Each strategy label is validated
+        (but not resolved to a handle) eagerly, so the whole mapping is checked before
+        any use is made of it.
         """
         if not hasattr(contingency, "items"):
             raise TypeError(f"{funcname}(): {argname} must be a mapping")
@@ -970,9 +972,8 @@ class Game:
             player = cython.cast(Player, self.players[player_label])
             if player in resolved:
                 raise ValueError(f"{funcname}(): each player may appear only once in {argname}")
-            resolved[player] = Strategy.wrap(
-                self._resolve_strategy(player, strategy_label, funcname, argname)
-            )
+            self._resolve_strategy(player, strategy_label, funcname, argname)
+            resolved[player] = strategy_label
         if set(resolved) != set(self.players):
             raise ValueError(
                 f"{funcname}(): {argname} must specify exactly one strategy "
@@ -982,14 +983,17 @@ class Game:
 
     @cython.cfunc
     def _make_pure_strategy_profile(self, resolved: dict) -> shared_ptr[c_PureStrategyProfile]:
-        """Build a C++ pure-strategy profile from a dict mapping ``Player`` to ``Strategy``."""
+        """Build a C++ pure-strategy profile from a dict mapping ``Player`` to strategy
+        label."""
         psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
             self.game.deref().NewPureStrategyProfile()
         )
         for player in self.players:
-            deref(deref(psp).deref()).SetStrategy(
-                cython.cast(Strategy, resolved[player]).strategy
+            resolved_player: Player = cython.cast(Player, player)
+            handle = self._resolve_strategy(
+                resolved_player, resolved[resolved_player], "_make_pure_strategy_profile"
             )
+            deref(deref(psp).deref()).SetStrategy(handle)
         return psp
 
     def get_outcome(self, contingency: typing.Mapping) -> Outcome:
@@ -2723,7 +2727,11 @@ class Game:
             resolved = self._resolve_contingency(entry, "make_outcome", "location")
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
-                c_one.push_back(cython.cast(Strategy, resolved[player]).strategy)
+                resolved_player: Player = cython.cast(Player, player)
+                c_one.push_back(
+                    self._resolve_strategy(resolved_player, resolved[resolved_player],
+                                           "make_outcome")
+                )
             c_contingencies.push_back(c_one)
         return Outcome.wrap(
             self.game.deref().MakeOutcome(c_contingencies, c_payoffs, label.encode("utf-8"))
