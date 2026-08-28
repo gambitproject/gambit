@@ -515,9 +515,21 @@ void PayoffGrid::OnCellLeftClick(wxGridEvent &p_event)
 {
   if (p_event.ControlDown() || p_event.MetaDown()) {
     const int per = m_table->GetPayoffColumnsPerContingency();
+    const int row = p_event.GetRow();
     const int left = (p_event.GetCol() / per) * per;
+
+    // Selection is always block-aligned to whole contingencies (every payoff column of
+    // one, or none of them), so the first column of the block stands in for the whole
+    // block: toggle the block off if it's there, on otherwise.
     m_snappingSelection = true;
-    SelectBlock(p_event.GetRow(), left, p_event.GetRow(), left + per - 1, true);
+    if (IsInSelection(row, left)) {
+      for (int col = left; col < left + per; ++col) {
+        DeselectCell(row, col);
+      }
+    }
+    else {
+      SelectBlock(row, left, row, left + per - 1, true);
+    }
     m_snappingSelection = false;
     return;
   }
