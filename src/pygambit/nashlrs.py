@@ -13,17 +13,17 @@ import pygambit.util as util
 
 
 def _generate_lrs_input(game: gbt.Game) -> str:
-    p1, p2 = game.players[0], game.players[1]
+    p1, p2 = game.players
     s = f"{len(p1.strategies)} {len(p2.strategies)}\n\n"
     for st1 in p1.strategies:
         s += " ".join(
-            str(game.get_payoffs({p1.label: st1.label, p2.label: st2.label})[p1.label])
+            str(game.get_payoffs({p1.label: st1, p2.label: st2})[p1.label])
             for st2 in p2.strategies
         ) + "\n"
     s += "\n"
     for st1 in p1.strategies:
         s += " ".join(
-            str(game.get_payoffs({p1.label: st1.label, p2.label: st2.label})[p2.label])
+            str(game.get_payoffs({p1.label: st1, p2.label: st2})[p2.label])
             for st2 in p2.strategies
         ) + "\n"
     return s
@@ -67,7 +67,8 @@ def main():
     eqa = lrsnash_solve(game, "./lrsnash")
     for eqm in eqa:
         print("NE," +
-              ",".join(str(eqm[strat]) for player in game.players for strat in player.strategies))
+              ",".join(str(eqm[player.label][strat])
+                       for player in game.players for strat in player.strategies))
 
 
 if __name__ == "__main__":
