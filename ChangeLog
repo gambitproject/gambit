@@ -31,9 +31,15 @@
   games built by `Game.from_arrays` and `Game.from_dict` are unaffected.  (#1061)
 - `Game.contingencies` now yields contingencies as a mapping from player label to strategy
   label, rather than a list of per-player strategy indices.
+- `Player.strategies` now iterates strategy labels (`str`) rather than `Strategy` objects;
+  indexing by label is no longer supported (a label is already in hand once iterated) -- use
+  `in` to test membership.
+- `Game.strategy_support_profile`'s `strategies` filter callable is now called as
+  `strategies(player, label)` (two positional arguments) rather than with a single `Strategy`.
 
 ### Removed
 - Removed `Game.__getitem__`, replaced by `Game.get_outcome`/`Game.get_payoffs`.
+- Removed `Game.strategies`; iterate `Game.players` and each player's `strategies` instead.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 

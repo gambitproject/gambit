@@ -20,7 +20,7 @@ def _table_game(payoffs: dict, title: str) -> gbt.Game:
     p1, p2 = game.players
     s1a, s1b = p1.strategies
     s2a, s2b = p2.strategies
-    strategies = {"a": s1a.label, "b": s1b.label, "A": s2a.label, "B": s2b.label}
+    strategies = {"a": s1a, "b": s1b, "A": s2a, "B": s2b}
     for (row, col), (v1, v2) in payoffs.items():
         game.make_outcome(
             {p1.label: strategies[row], p2.label: strategies[col]}, {p1: v1, p2: v2}, f"{row}{col}"

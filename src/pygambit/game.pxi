@@ -467,57 +467,6 @@ class GameInfosets:
 
 
 @cython.cclass
-class GameStrategies:
-    """Represents the set of all strategies in the game."""
-    game = cython.declare(Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameStrategies outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: Game) -> GameStrategies:
-        obj: GameStrategies = GameStrategies.__new__(GameStrategies)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameStrategies(game={self.game})"
-
-    def __len__(self) -> int:
-        return sum(len(p.strategies) for p in self.game.players)
-
-    def __iter__(self) -> typing.Iterator[Strategy]:
-        for player in self.game.players:
-            yield from player.strategies
-
-    def __getitem__(self, label: str) -> Strategy:
-        """Returns the strategy with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the strategy to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no strategy in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one strategy has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a strategy by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "strategy", "strategies")
-
-
-@cython.cclass
 class Game:
     """A game, the fundamental unit of analysis in game theory.
 
@@ -666,7 +615,7 @@ class Game:
             array = np.zeros(shape=shape, dtype=object)
             for profile in itertools.product(*(range(s) for s in shape)):
                 contingency = {
-                    p.label: list(p.strategies)[i].label
+                    p.label: list(p.strategies)[i]
                     for p, i in zip(players, profile, strict=True)
                 }
                 payoffs = self.get_payoffs(contingency)
@@ -826,11 +775,6 @@ class Game:
     def players(self) -> GamePlayers:
         """The set of players in the game."""
         return GamePlayers.wrap(self.game)
-
-    @property
-    def strategies(self) -> GameStrategies:
-        """The set of strategies in the game."""
-        return GameStrategies.wrap(self)
 
     @property
     def outcomes(self) -> GameOutcomes:
@@ -1021,7 +965,9 @@ class Game:
                 raise ValueError(
                     "get_behavior(): strategy cannot be an empty string or all spaces"
                 )
-            resolved_strategy = resolved_player.strategies[strategy]
+            resolved_strategy = Strategy.wrap(
+                self._resolve_strategy(resolved_player, strategy, "get_behavior")
+            )
         else:
             raise TypeError(
                 f"get_behavior(): strategy must be Strategy or str, "
@@ -1048,12 +994,9 @@ class Game:
             player = cython.cast(Player, self.players[player_label])
             if player in resolved:
                 raise ValueError(f"{funcname}(): each player may appear only once in {argname}")
-            if not isinstance(strategy_label, str):
-                raise TypeError(
-                    f"{funcname}(): {argname} values must be strategy labels (str), "
-                    f"not {strategy_label.__class__.__name__}"
-                )
-            resolved[player] = player.strategies[strategy_label]
+            resolved[player] = Strategy.wrap(
+                self._resolve_strategy(player, strategy_label, funcname, argname)
+            )
         if set(resolved) != set(self.players):
             raise ValueError(
                 f"{funcname}(): {argname} must specify exactly one strategy "
@@ -1169,7 +1112,7 @@ class Game:
                     f"Number of elements does not match number of strategies for {p}"
                 )
             profile[p.label] = {
-                s.label: typefunc(v) for s, v in zip(p.strategies, d, strict=True)
+                s: typefunc(v) for s, v in zip(p.strategies, d, strict=True)
             }
         return profile
 
@@ -1247,11 +1190,11 @@ class Game:
             profile = self.mixed_strategy_profile()
             for player in self.players:
                 weights = scipy.stats.dirichlet(
-                    alpha=[1 for strategy in player.strategies],
+                    alpha=[1 for _ in player.strategies],
                     seed=gen
                 ).rvs(size=1)[0]
                 profile[player.label] = dict(
-                    zip((s.label for s in player.strategies), weights, strict=True)
+                    zip(player.strategies, weights, strict=True)
                 )
             return profile
         elif denom < 1:
@@ -1268,7 +1211,7 @@ class Game:
                     [denom + k]
                 )
                 distribution = {
-                    strategy.label: Rational(hi - lo - 1, denom)
+                    strategy: Rational(hi - lo - 1, denom)
                     for strategy, (hi, lo) in zip(
                         player.strategies,
                         zip(sample[1:], sample[:-1], strict=True),
@@ -1415,8 +1358,8 @@ class Game:
         ----------
         strategies : function, optional
             By default the support profile contains all strategies for all players.
-            If specified, only strategies for which the supplied function returns `True`
-            are included.
+            If specified, called as ``strategies(player, label)`` for each strategy of
+            each player; only strategies for which it returns `True` are included.
 
         Returns
         -------
@@ -1424,11 +1367,14 @@ class Game:
         """
         profile = StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](self.game))
         if strategies is not None:
-            for strategy in self.strategies:
-                if not strategies(strategy):
-                    if not (deref(profile.profile)
-                            .RemoveStrategy(cython.cast(Strategy, strategy).strategy)):
-                        raise ValueError("attempted to remove the last strategy for player")
+            for player in self.players:
+                for label in player.strategies:
+                    if not strategies(player, label):
+                        handle = self._resolve_strategy(
+                            player, label, "strategy_support_profile"
+                        )
+                        if not deref(profile.profile).RemoveStrategy(handle):
+                            raise ValueError("attempted to remove the last strategy for player")
         return profile
 
     def behavior_support_profile(
@@ -1663,47 +1609,35 @@ class Game:
             f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
         )
 
-    def _resolve_strategy(self,
-                          strategy: typing.Any,
-                          funcname: str,
-                          argname: str = "strategy") -> Strategy:
-        """Resolve an attempt to reference a strategy of the game.
+    @cython.cfunc
+    def _resolve_strategy(self, player: Player, label, funcname: str,
+                          argname: str = "strategy") -> c_GameStrategy:
+        """Resolve `label` to the C++ handle of one of `player`'s strategies.
 
-        Parameters
-        ----------
-        strategy : Any
-            An object to resolve as a reference to a strategy.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'strategy'
-            The name of the argument being checked
+        Not part of the public API -- used internally to bridge a strategy label to
+        the underlying C++ object without ever constructing a Python wrapper for it.
 
         Raises
         ------
-        MismatchError
-            If `strategy` is a `Strategy` from a different game.
         KeyError
-            If `strategy` is a string and no strategy in the game has that label.
+            If `player` has no strategy with label `label`.
         TypeError
-            If `strategy` is not a `Strategy` or a `str`
+            If `label` is not a `str`.
         ValueError
-            If `strategy` is an empty `str` or all spaces
+            If `label` is an empty string or all spaces.
         """
-        if isinstance(strategy, Strategy):
-            if strategy.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return strategy
-        elif isinstance(strategy, str):
-            if not strategy.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return self.strategies[strategy]
-            except KeyError:
-                raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}"
+        if not isinstance(label, str):
+            raise TypeError(
+                f"{funcname}(): {argname} must be a strategy label (str), "
+                f"not {label.__class__.__name__}"
+            )
+        if not label.strip():
+            raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+        for strategy in player.player.deref().GetStrategies():
+            if strategy.deref().GetLabel().decode("utf-8") == label:
+                return strategy
+        raise KeyError(
+            f"{funcname}(): player '{player.label}' has no strategy with label '{label}'"
         )
 
     def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
@@ -2960,7 +2894,7 @@ class Game:
                 f"relabel_strategies(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = [strategy.label for strategy in resolved_player.strategies]
+        current = list(resolved_player.strategies)
         c_labels = stdmap[string, string]()
         for old, new in labels.items():
             if not isinstance(old, str) or not isinstance(new, str):
@@ -3048,7 +2982,7 @@ class Game:
                 raise TypeError("set_strategies(): strategies must be an iterable of str")
         if not labels:
             raise UndefinedOperationError("set_strategies(): `strategies` must be a nonempty list")
-        current = [strategy.label for strategy in resolved_player.strategies]
+        current = list(resolved_player.strategies)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_strategies(): the player has duplicate strategy labels, "

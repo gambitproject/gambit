@@ -15,17 +15,18 @@ P3 = "Player 3"
 
 def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_flag: bool):
     """Set the action probabilities in a strategy profile called ```profile``` according to a
-    list with probabilities in the order of ```profile.game.strategies```
+    list with probabilities in the order of each player's strategies, in player order.
     """
     # assumes rationals given as strings
     convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
-    if len(probs) != len(profile.game.strategies):
+    total_strategies = sum(len(list(p.strategies)) for p in profile.game.players)
+    if len(probs) != total_strategies:
         raise ValueError("probs must have one entry per strategy in the game")
     offset = 0
     for player in profile.game.players:
         k = len(player.strategies)
         profile[player.label] = {
-            s.label: convert(p)
+            s: convert(p)
             for s, p in zip(player.strategies, probs[offset:offset + k], strict=True)
         }
         offset += k
@@ -167,9 +168,9 @@ def test_set_and_get_probability_by_strategy_label(
     """
     prob = gbt.Rational(prob) if rational_flag else prob
     profile = game.mixed_strategy_profile(rational=rational_flag)
-    player = game.strategies[strategy_label].player
+    player = next(p for p in game.players if strategy_label in p.strategies)
     profile[player.label] = {
-        s.label: (prob if s.label == strategy_label else 0) for s in player.strategies
+        s: (prob if s == strategy_label else 0) for s in player.strategies
     }
     assert profile[player.label][strategy_label] == prob
 
@@ -199,7 +200,7 @@ def test_set_and_get_probabilities_by_player_label(
     profile_data = [gbt.Rational(p) for p in profile_data] if rational_flag else profile_data
     profile = game.mixed_strategy_profile(rational=rational_flag)
     player = game.players[player_label]
-    expected = dict(zip((s.label for s in player.strategies), profile_data, strict=True))
+    expected = dict(zip(player.strategies, profile_data, strict=True))
     profile[player_label] = expected
     assert profile[player_label] == expected
 
@@ -432,7 +433,7 @@ def test_profile_indexing_by_player_label_reference(
     if rational_flag:
         strategy_data = [gbt.Rational(prob) for prob in strategy_data]
     player = game.players[player_label]
-    expected = dict(zip((s.label for s in player.strategies), strategy_data, strict=True))
+    expected = dict(zip(player.strategies, strategy_data, strict=True))
     assert profile[player_label] == expected
 
 
@@ -678,7 +679,7 @@ def test_strategy_value_reference(
         for i, s in enumerate(player.strategies):
             sv = strategy_values_for_player[i]
             sv = gbt.Rational(sv) if rational_flag else sv
-            assert profile.strategy_values[player.label][s.label] == sv
+            assert profile.strategy_values[player.label][s] == sv
 
 
 @pytest.mark.parametrize(
@@ -1106,9 +1107,9 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
     for player in game.players:
         player_strategy_values = strategy_values[player.label]
         for strategy in player.strategies:
-            assert strategy_regrets[player.label][strategy.label] == (
-                max(player_strategy_values[s.label] for s in player.strategies)
-                - player_strategy_values[strategy.label]
+            assert strategy_regrets[player.label][strategy] == (
+                max(player_strategy_values[s] for s in player.strategies)
+                - player_strategy_values[strategy]
             )
 
 
@@ -1197,7 +1198,7 @@ def test_liap_value_consistency(
             profile.liap_value()
             - sum(
                 [
-                    max(strategy_values[player.label][strategy.label] - payoffs[player.label], 0)
+                    max(strategy_values[player.label][strategy] - payoffs[player.label], 0)
                     ** 2
                     for player in game.players
                     for strategy in player.strategies
@@ -1291,7 +1292,7 @@ def test_player_regret_max_regret_consistency(
     for p in game.players:
         p_regret = max(
             [
-                max(strategy_values[p.label][strategy.label] - payoffs[p.label], 0)
+                max(strategy_values[p.label][strategy] - payoffs[p.label], 0)
                 for strategy in p.strategies
             ]
         )
@@ -1384,8 +1385,8 @@ def test_linearity_payoff_property(
 
     profile_data = [
         [
-            alpha * profile1[player.label][strategy.label]
-            + (1 - alpha) * profile2[player.label][strategy.label]
+            alpha * profile1[player.label][strategy]
+            + (1 - alpha) * profile2[player.label][strategy]
             for strategy in player.strategies
         ]
         for player in game.players
@@ -1487,8 +1488,8 @@ def test_payoff_and_strategy_value_consistency(
             abs(
                 sum(
                     [
-                        profile[player.label][strategy.label]
-                        * player_strategy_values[strategy.label]
+                        profile[player.label][strategy]
+                        * player_strategy_values[strategy]
                         for strategy in player.strategies
                     ]
                 )
@@ -1568,12 +1569,12 @@ def test_vectorized_quantities_consistency(game: gbt.Game, profile_data, rationa
         assert isinstance(player_strategy_values, gbt.StrategyIndexedVector)
         assert isinstance(player_strategy_regrets, gbt.StrategyRegretVector)
 
-        best_response_value = max(player_strategy_values[s.label] for s in player.strategies)
+        best_response_value = max(player_strategy_values[s] for s in player.strategies)
         assert player_regrets[player.label] == best_response_value - payoffs[player.label]
         for strategy in player.strategies:
             assert (
-                player_strategy_regrets[strategy.label]
-                == best_response_value - player_strategy_values[strategy.label]
+                player_strategy_regrets[strategy]
+                == best_response_value - player_strategy_values[strategy]
             )
 
     # equal to an equivalent plain dict or same-type vector, but never to a vector of a
@@ -1683,8 +1684,8 @@ def test_property_linearity_strategy_value(
 
     profile_data = [
         [
-            alpha * profile1[player.label][strategy.label]
-            + (1 - alpha) * profile2[player.label][strategy.label]
+            alpha * profile1[player.label][strategy]
+            + (1 - alpha) * profile2[player.label][strategy]
             for strategy in player.strategies
         ]
         for player in game.players
@@ -1697,10 +1698,10 @@ def test_property_linearity_strategy_value(
     for player in game.players:
         for strategy in player.strategies:
             convex_comb = (
-                alpha * strategy_values1[player.label][strategy.label]
-                + (1 - alpha) * strategy_values2[player.label][strategy.label]
+                alpha * strategy_values1[player.label][strategy]
+                + (1 - alpha) * strategy_values2[player.label][strategy]
             )
-            assert abs(strategy_values3[player.label][strategy.label] - convex_comb) <= tol
+            assert abs(strategy_values3[player.label][strategy] - convex_comb) <= tol
 
 
 def _get_answers_one_order(
@@ -1828,10 +1829,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_coord_doub",
         ),
         pytest.param(
@@ -1839,10 +1838,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_coord_rat",
         ),
         # 2x2x2 nfg
@@ -1851,10 +1848,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_2x2x2_doub",
         ),
         pytest.param(
@@ -1862,10 +1857,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_2x2x2_rat",
         ),
         # stripped-down poker
@@ -1874,10 +1867,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_poker_doub",
         ),
         pytest.param(
@@ -1885,10 +1876,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_regrets[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="regret_poker_rat",
         ),
         #################################################################################
@@ -1899,10 +1888,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_coord_doub",
         ),
         pytest.param(
@@ -1910,10 +1897,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_coord_rat",
         ),
         # 2x2x2 nfg
@@ -1922,10 +1907,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_2x2x2_doub",
         ),
         pytest.param(
@@ -1933,10 +1916,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_2x2x2_rat",
         ),
         # stripped-down poker
@@ -1945,10 +1926,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_poker_doub",
         ),
         pytest.param(
@@ -1956,10 +1935,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_values[strategy.player.label][
-                strategy.label
-            ],
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p.label, s) for p in game.players for s in p.strategies],
             id="strat_value_poker_rat",
         ),
         #################################################################################

@@ -167,5 +167,5 @@ class TestRenderSupportCsv:
         support = game.strategy_support_profile()
         p1 = next(iter(game.players))
         first_strategy = next(iter(p1.strategies))
-        support[p1.label] = [first_strategy.label]
+        support[p1.label] = [first_strategy]
         assert common.render_support_csv(support, "candidate") == "candidate,10,11"

@@ -242,7 +242,13 @@ class MixedStrategyProfile:
         """
         self._check_validity()
         resolved_player = self.game._resolve_player(player, "__getitem__")
-        values = {s.label: self._getprob_strategy(s) for s in resolved_player.strategies}
+        game: Game = cython.cast(Game, self.game)
+        values = {
+            s: self._getprob_strategy(
+                Strategy.wrap(game._resolve_strategy(resolved_player, s, "__getitem__"))
+            )
+            for s in resolved_player.strategies
+        }
         return MixedStrategy.wrap(resolved_player, values)
 
     def _setprob_player(
@@ -261,7 +267,7 @@ class MixedStrategyProfile:
                 f"a mixed strategy must be set from a Mapping from strategy label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = {s.label for s in player.strategies}
+        labels = set(player.strategies)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -280,8 +286,11 @@ class MixedStrategyProfile:
             raise ValueError("a mixed strategy's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed strategy's weights must not all be zero")
+        game: Game = cython.cast(Game, player.game)
         for s in player.strategies:
-            self._setprob_strategy(s, values[s.label])
+            self._setprob_strategy(
+                Strategy.wrap(game._resolve_strategy(player, s, "_setprob_player")), values[s]
+            )
 
     def __setitem__(self, player: str, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed strategy for the player with label `player`.
@@ -382,8 +391,14 @@ class MixedStrategyProfile:
         it, if all other players play according to the profile, grouped by player.
         """
         self._check_validity()
+        game: Game = cython.cast(Game, self.game)
         return StrategyValuesVector({
-            p.label: StrategyValueVector({s.label: self._strategy_value(s) for s in p.strategies})
+            p.label: StrategyValueVector({
+                s: self._strategy_value(
+                    Strategy.wrap(game._resolve_strategy(p, s, "strategy_values"))
+                )
+                for s in p.strategies
+            })
             for p in self.game.players
         })
 
@@ -402,10 +417,14 @@ class MixedStrategyProfile:
         max_regret
         """
         self._check_validity()
+        game: Game = cython.cast(Game, self.game)
         return StrategyRegretsVector({
-            p.label: StrategyRegretVector(
-                {s.label: self._strategy_regret(s) for s in p.strategies}
-            )
+            p.label: StrategyRegretVector({
+                s: self._strategy_regret(
+                    Strategy.wrap(game._resolve_strategy(p, s, "strategy_regrets"))
+                )
+                for s in p.strategies
+            })
             for p in self.game.players
         })
 
@@ -761,9 +780,13 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _as_float(self) -> MixedStrategyProfileDouble:
         profile: MixedStrategyProfileDouble = self.game.mixed_strategy_profile()
+        game: Game = cython.cast(Game, self.game)
         for player in self.game.players:
             profile[player.label] = {
-                s.label: float(self._getprob_strategy(s)) for s in player.strategies
+                s: float(self._getprob_strategy(
+                    Strategy.wrap(game._resolve_strategy(player, s, "as_float"))
+                ))
+                for s in player.strategies
             }
         return profile
 

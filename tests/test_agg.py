@@ -68,13 +68,13 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
     s1 = list(p1.strategies)
 
     profile = game.mixed_strategy_profile(rational=True)
-    profile[p0.label] = {s0[0].label: gbt.Rational(1), s0[1].label: gbt.Rational(0)}
-    profile[p1.label] = {s1[0].label: gbt.Rational(0), s1[1].label: gbt.Rational(1)}
+    profile[p0.label] = {s0[0]: gbt.Rational(1), s0[1]: gbt.Rational(0)}
+    profile[p1.label] = {s1[0]: gbt.Rational(0), s1[1]: gbt.Rational(1)}
     assert profile.payoffs[p0.label] == gbt.Rational(1, 3)
 
     profile = game.mixed_strategy_profile(rational=True)
-    profile[p0.label] = {s0[0].label: gbt.Rational(0), s0[1].label: gbt.Rational(1)}
-    profile[p1.label] = {s1[0].label: gbt.Rational(0), s1[1].label: gbt.Rational(1)}
+    profile[p0.label] = {s0[0]: gbt.Rational(0), s0[1]: gbt.Rational(1)}
+    profile[p1.label] = {s1[0]: gbt.Rational(0), s1[1]: gbt.Rational(1)}
     assert profile.payoffs[p0.label] == gbt.Rational("0.123456789012345")
     assert profile.payoffs[p1.label] == gbt.Rational("0.123456789012345")
 
@@ -92,9 +92,9 @@ def test_bagg_fraction_type_distribution_parsed_exactly():
     dbl = game.mixed_strategy_profile(rational=False)
     for profile, one, zero in [(exact, gbt.Rational(1), gbt.Rational(0)), (dbl, 1.0, 0.0)]:
         s0, s1, s2 = list(p1t0.strategies), list(p1t1.strategies), list(p2.strategies)
-        profile[p1t0.label] = {s0[0].label: one, s0[1].label: zero}
-        profile[p1t1.label] = {s1[0].label: zero, s1[1].label: one}
-        profile[p2.label] = {s2[0].label: one, s2[1].label: zero}
+        profile[p1t0.label] = {s0[0]: one, s0[1]: zero}
+        profile[p1t1.label] = {s1[0]: zero, s1[1]: one}
+        profile[p2.label] = {s2[0]: one, s2[1]: zero}
     assert exact.payoffs[p2.label] == gbt.Rational(22)
     assert float(exact.payoffs[p2.label]) == dbl.payoffs[p2.label]
 
@@ -114,7 +114,7 @@ def test_agg_bagg_mixed_strategy_profile_rational_exact_payoff(game_path):
     for player in game.players:
         strategies = list(player.strategies)
         profile[player.label] = {
-            strategies[0].label: gbt.Rational(10, 11), strategies[1].label: gbt.Rational(1, 11)
+            strategies[0]: gbt.Rational(10, 11), strategies[1]: gbt.Rational(1, 11)
         }
     for player in game.players:
         assert profile.payoffs[player.label] == gbt.Rational(-5, 11)
@@ -135,12 +135,14 @@ def test_agg_bagg_rational_algorithms_find_exact_mixed_equilibrium(game_path):
     for result in results:
         mixed = [
             eq for eq in result.equilibria
-            if any(0 < eq[s.player.label][s.label] < 1 for s in game.strategies)
+            if any(
+                0 < eq[p.label][s] < 1 for p in game.players for s in p.strategies
+            )
         ]
         assert len(mixed) == 1
         for player in game.players:
             for strategy in player.strategies:
-                assert mixed[0][player.label][strategy.label] in (
+                assert mixed[0][player.label][strategy] in (
                     gbt.Rational(10, 11), gbt.Rational(1, 11)
                 )
         assert mixed[0].max_regret() == 0
@@ -149,7 +151,7 @@ def test_agg_bagg_rational_algorithms_find_exact_mixed_equilibrium(game_path):
 def _set_pure_profile(profile, players, contingency):
     for player, strat_index in zip(players, contingency, strict=True):
         profile[player.label] = {
-            strategy.label: gbt.Rational(1) if i == strat_index else gbt.Rational(0)
+            strategy: gbt.Rational(1) if i == strat_index else gbt.Rational(0)
             for i, strategy in enumerate(player.strategies)
         }
 
@@ -164,7 +166,7 @@ def test_bagg_pure_strategy_payoff_matches_degenerate_mixed_profile(game_path):
     players = list(game.players)
     for contingency in itertools.product(*(range(len(list(p.strategies))) for p in players)):
         labeled = {
-            p.label: list(p.strategies)[i].label
+            p.label: list(p.strategies)[i]
             for p, i in zip(players, contingency, strict=True)
         }
         pure_payoffs = [game.get_payoffs(labeled)[p.label] for p in players]
@@ -191,7 +193,7 @@ def test_bagg_pure_strategy_payoff_with_multiple_players_and_types():
     ]
     for contingency in contingencies:
         labeled = {
-            p.label: list(p.strategies)[i].label
+            p.label: list(p.strategies)[i]
             for p, i in zip(players, contingency, strict=True)
         }
         pure_payoffs = [game.get_payoffs(labeled)[p.label] for p in players]

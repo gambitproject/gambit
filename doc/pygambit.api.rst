@@ -109,7 +109,6 @@ Information about the game
    Game.outcomes
    Game.min_payoff
    Game.max_payoff
-   Game.strategies
    Game.root
    Game.actions
    Game.infosets

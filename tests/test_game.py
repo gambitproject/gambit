@@ -106,8 +106,8 @@ def test_game_get_outcome():
 def test_game_get_outcome_by_relabeled_strategies():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
-    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)): "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)): "cooperate"})
     game.make_outcome({pl1.label: "defect", pl2.label: "cooperate"}, {"1": 0, "2": 0}, "corner")
     assert game.get_outcome({pl1.label: "defect", pl2.label: "cooperate"}) == \
         next(iter(game.outcomes))
@@ -137,15 +137,6 @@ def test_game_get_outcome_non_str_value_raises():
         _ = game.get_outcome({"1": 1.23, "2": "1"})
 
 
-def test_game_get_outcome_strategy_object_value_raises():
-    game = gbt.Game.new_table([2, 2])
-    pl1, pl2 = game.players
-    with pytest.raises(TypeError):
-        _ = game.get_outcome(
-            {pl1.label: next(iter(pl1.strategies)), pl2.label: next(iter(pl2.strategies))}
-        )
-
-
 def test_game_get_outcome_unknown_strategy_label_raises():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(KeyError):
@@ -155,8 +146,8 @@ def test_game_get_outcome_unknown_strategy_label_raises():
 def test_game_get_outcome_unmatched_label_after_relabel_raises():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    game.relabel_strategies(pl1, {next(iter(pl1.strategies)).label: "defect"})
-    game.relabel_strategies(pl2, {next(iter(pl2.strategies)).label: "cooperate"})
+    game.relabel_strategies(pl1, {next(iter(pl1.strategies)): "defect"})
+    game.relabel_strategies(pl2, {next(iter(pl2.strategies)): "cooperate"})
     with pytest.raises(KeyError):
         _ = game.get_outcome({pl1.label: "defect", pl2.label: "defect"})
 
@@ -186,12 +177,13 @@ def test_game_get_payoffs():
 def test_game_get_payoffs_tree():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(game.root, "Alice", ["a", "b"])
+    alice = game.players["Alice"]
     infoset = game.root.infoset
     strategy = next(
-        s for s in game.players["Alice"].strategies if s.action(infoset).label == "a"
+        s for s in alice.strategies if game.get_behavior(alice, s).get(infoset).label == "a"
     )
     game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
-    payoffs = game.get_payoffs({"Alice": strategy.label})
+    payoffs = game.get_payoffs({"Alice": strategy})
     assert payoffs["Alice"] == 1
 
 
@@ -199,7 +191,7 @@ def test_game_dereference_invalid():
     game = gbt.Game.new_tree()
     game.set_players(["One"])
     player = game.players["One"]
-    strategy = next(iter(player.strategies))
+    strategy = game.get_behavior(player, next(iter(player.strategies))).strategy
     game.append_move(game.root, player, ["a", "b"])
     with pytest.raises(RuntimeError):
         _ = strategy.label
@@ -209,7 +201,7 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
     game = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    distribution = {s.label: 0 for s in player.strategies}
+    distribution = {s: 0 for s in player.strategies}
     next(iter(game.outcomes))[player] = 3
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -244,7 +236,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
     game.set_move_actions(game.root.infoset, ["D1"], drop=True)
-    distribution = {s.label: 0 for s in player.strategies}
+    distribution = {s: 0 for s in player.strategies}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.as_behavior()
@@ -332,7 +324,6 @@ def test_mixed_behavior_profile_game_structure_changed():
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
-    pytest.param(lambda g: g.strategies, id="GameStrategies"),
     pytest.param(lambda g: g.infosets, id="GameInfosets"),
     pytest.param(lambda g: g.actions, id="GameActions"),
     pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),

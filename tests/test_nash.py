@@ -1619,8 +1619,8 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
                 for strategy in player.strategies:
-                    eq_prob = eq[player.label][strategy.label]
-                    exp_prob = expected[player.label][strategy.label]
+                    eq_prob = eq[player.label][strategy]
+                    exp_prob = expected[player.label][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
@@ -1641,7 +1641,7 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
         for player in game.players:
             strategies = list(player.strategies)
             perturbation[player.label] = {
-                s.label: (one if s is strategies[0] else zero) for s in strategies
+                s: (one if s == strategies[0] else zero) for s in strategies
             }
         return perturbation
 
@@ -1660,8 +1660,8 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
             for player in game.players:
                 for strategy in player.strategies:
                     assert (
-                        rational_eq[player.label][strategy.label]
-                        == pytest.approx(double_eq[player.label][strategy.label])
+                        rational_eq[player.label][strategy]
+                        == pytest.approx(double_eq[player.label][strategy])
                     )
 
 
@@ -1745,8 +1745,8 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
                 for strategy in player.strategies:
-                    eq_prob = eq[player.label][strategy.label]
-                    exp_prob = expected[player.label][strategy.label]
+                    eq_prob = eq[player.label][strategy]
+                    exp_prob = expected[player.label][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
@@ -3565,8 +3565,8 @@ def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
             exp_profile = game.mixed_strategy_profile(rational=True, data=exp["profile"])
             for player in game.players:
                 for s in player.strategies:
-                    found_prob = found.profile[player.label][s.label]
-                    exp_prob = exp_profile[player.label][s.label]
+                    found_prob = found.profile[player.label][s]
+                    exp_prob = exp_profile[player.label][s]
                     assert abs(found_prob - exp_prob) <= test_case.prob_tol
 
 

@@ -50,7 +50,7 @@ def _default_start(game: gbt.Game) -> gbt.MixedStrategyProfileRational:
     start = game.mixed_strategy_profile(rational=True)
     for player in game.players:
         first_strategy = next(iter(player.strategies))
-        start[player.label] = {first_strategy.label: 1}
+        start[player.label] = {first_strategy: 1}
     return start
 
 

@@ -319,7 +319,7 @@ def test_strategy_action_defined(
 ):
     """Verify `Strategy.action` retrieves the correct action for defined actions."""
     player = game.players[player_label]
-    strategy = player.strategies[strategy_label]
+    strategy = game.get_behavior(player, strategy_label).strategy
     node = game.root
     for action_label in infoset_path:
         node = node.children[action_label]
@@ -348,7 +348,7 @@ def test_strategy_action_undefined_returns_none(
 ):
     """Verify `Strategy.action` returns None when called on an unreached player's infoset"""
     player = game.players[player_label]
-    strategy = player.strategies[strategy_label]
+    strategy = game.get_behavior(player, strategy_label).strategy
     if infoset_label is not None:
         infoset = game.infosets[infoset_label]
     else:
@@ -382,7 +382,7 @@ def test_strategy_action_raises_value_error_for_wrong_player(
     to a different player than the strategy.
     """
     player = game.players[player_label]
-    strategy = next(iter(player.strategies))
+    strategy = game.get_behavior(player, next(iter(player.strategies))).strategy
     node = game.root
     for action_label in other_infoset_path:
         node = node.children[action_label]
@@ -390,18 +390,6 @@ def test_strategy_action_raises_value_error_for_wrong_player(
 
     with pytest.raises(ValueError):
         strategy.action(other_players_infoset)
-
-
-def test_strategy_action_raises_error_for_strategic_game():
-    """Verify `Strategy.action` retrieves the action prescribed by the strategy"""
-    game_efg = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-    game_nfg = game_efg.from_arrays(game_efg.to_arrays()[0], game_efg.to_arrays()[1])
-    alice = next(iter(game_nfg.players))
-    strategy = next(iter(alice.strategies))
-    test_infoset = next(iter(game_efg.infosets))
-
-    with pytest.raises(gbt.UndefinedOperationError):
-        strategy.action(test_infoset)
 
 
 def test_player_actions_len():

@@ -232,10 +232,10 @@ def _estimate_strategy_empirical(
         data: libgbt.MixedStrategyProfile
 ) -> LogitQREMixedStrategyFitResult:
     flattened_data = [
-        data[p.label][s.label] for p in data.game.players for s in p.strategies
+        data[p.label][s] for p in data.game.players for s in p.strategies
     ]
     strategy_regrets = data.normalize().strategy_regrets
-    regrets = [[-strategy_regrets[player.label][s.label] for s in player.strategies]
+    regrets = [[-strategy_regrets[player.label][s] for s in player.strategies]
                for player in data.game.players]
     res = scipy.optimize.minimize(
         lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
@@ -245,7 +245,7 @@ def _estimate_strategy_empirical(
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
     profile = data.game.mixed_strategy_profile()
     for player in data.game.players:
-        profile[player.label] = {s.label: math.exp(next(log_probs)) for s in player.strategies}
+        profile[player.label] = {s: math.exp(next(log_probs)) for s in player.strategies}
     return LogitQREMixedStrategyFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )

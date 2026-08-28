@@ -235,7 +235,7 @@ def render_support_csv(
     else:
         fields = [
             "".join(
-                "1" if strategy.label in support[player.label] else "0"
+                "1" if strategy in support[player.label] else "0"
                 for strategy in player.strategies
             )
             for player in support.game.players
@@ -271,10 +271,9 @@ def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) ->
         probs = profile[player.label]
         values = profile.strategy_values[player.label]
         for strategy in player.strategies:
-            name = _name_or_number(strategy)
-            prob = format_value(probs[strategy.label], decimals)
-            value = format_value(values[strategy.label], decimals)
-            lines.append(f"{name:>8}    {prob:>10}   {value:>11}")
+            prob = format_value(probs[strategy], decimals)
+            value = format_value(values[strategy], decimals)
+            lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
 
 
@@ -338,7 +337,7 @@ def read_strategy_profiles_csv(
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
         profile = game.mixed_strategy_profile(rational=True)
         for player in game.players:
-            profile[player.label] = {s.label: next(values) for s in player.strategies}
+            profile[player.label] = {s: next(values) for s in player.strategies}
         profiles.append(profile)
     return profiles
 
