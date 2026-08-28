@@ -180,21 +180,11 @@ def test_game_get_payoffs_tree():
     alice = game.players["Alice"]
     infoset = game.root.infoset
     strategy = next(
-        s for s in alice.strategies if game.get_behavior(alice, s).get(infoset).label == "a"
+        s for s in alice.strategies if game.get_behavior("Alice", s).get(infoset).label == "a"
     )
     game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})
     assert payoffs["Alice"] == 1
-
-
-def test_game_dereference_invalid():
-    game = gbt.Game.new_tree()
-    game.set_players(["One"])
-    player = game.players["One"]
-    strategy = game.get_behavior(player, next(iter(player.strategies))).strategy
-    game.append_move(game.root, player, ["a", "b"])
-    with pytest.raises(RuntimeError):
-        _ = strategy.label
 
 
 def test_mixed_strategy_profile_game_structure_changed_no_tree():

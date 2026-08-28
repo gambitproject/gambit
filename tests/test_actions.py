@@ -314,19 +314,17 @@ def test_action_plays():
         (games.read_from_file("basic_extensive_game.efg"), "Player 3", "2", ["U1", "U2"], "D3"),
     ],
 )
-def test_strategy_action_defined(
+def test_get_behavior_prescribed_action_defined(
     game, player_label, strategy_label, infoset_path, expected_action_label
 ):
-    """Verify `Strategy.action` retrieves the correct action for defined actions."""
-    player = game.players[player_label]
-    strategy = game.get_behavior(player, strategy_label).strategy
+    """Verify `Game.get_behavior` retrieves the correct action for defined actions."""
     node = game.root
     for action_label in infoset_path:
         node = node.children[action_label]
     infoset = node.infoset
     expected_action = infoset.actions[expected_action_label]
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
 
     assert prescribed_action == expected_action
 
@@ -343,12 +341,10 @@ def test_strategy_action_defined(
         (games.read_from_file("cent3.efg"), "Player 2", "2", "(2,5)", None),
     ],
 )
-def test_strategy_action_undefined_returns_none(
+def test_get_behavior_prescribed_action_undefined_returns_none(
     game, player_label, strategy_label, infoset_label, infoset_path
 ):
-    """Verify `Strategy.action` returns None when called on an unreached player's infoset"""
-    player = game.players[player_label]
-    strategy = game.get_behavior(player, strategy_label).strategy
+    """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
     if infoset_label is not None:
         infoset = game.infosets[infoset_label]
     else:
@@ -357,7 +353,7 @@ def test_strategy_action_undefined_returns_none(
             node = node.children[action_label]
         infoset = node.infoset
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
 
     assert prescribed_action is None
 
@@ -374,22 +370,22 @@ def test_strategy_action_undefined_returns_none(
         (games.read_from_file("basic_extensive_game.efg"), "Player 3", []),
     ],
 )
-def test_strategy_action_raises_value_error_for_wrong_player(
+def test_get_behavior_raises_value_error_for_wrong_player(
     game, player_label, other_infoset_path
 ):
     """
-    Verify `Strategy.action` raises ValueError when the infoset belongs
+    Verify `Game.get_behavior`'s result raises ValueError when the infoset belongs
     to a different player than the strategy.
     """
     player = game.players[player_label]
-    strategy = game.get_behavior(player, next(iter(player.strategies))).strategy
+    behavior = game.get_behavior(player_label, next(iter(player.strategies)))
     node = game.root
     for action_label in other_infoset_path:
         node = node.children[action_label]
     other_players_infoset = node.infoset
 
     with pytest.raises(ValueError):
-        strategy.action(other_players_infoset)
+        behavior.get(other_players_infoset)
 
 
 def test_player_actions_len():

@@ -918,18 +918,18 @@ class Game:
         )
 
     def get_behavior(self,
-                     player: Player | str,
-                     strategy: Strategy | str) -> StrategyBehavior:
+                     player: str,
+                     strategy: str) -> StrategyBehavior:
         """Return the mapping from information sets to actions prescribed by a strategy.
 
         .. versionadded:: 17.0.0
 
         Parameters
         ----------
-        player : Player or str
-            The player whose strategy to view.
-        strategy : Strategy or str
-            The strategy to view.
+        player : str
+            The label of the player whose strategy to view.
+        strategy : str
+            The label of the strategy to view.
 
         Returns
         -------
@@ -939,41 +939,17 @@ class Game:
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
-        MismatchError
-            If `player` is from a different game, or `strategy` belongs to a different player.
         KeyError
-            If `strategy` is a string and `player` has no strategy with that label.
-
-        See Also
-        --------
-        Strategy.action : The action prescribed at a single information set.
+            If no player has the label `player`, or `player` has no strategy with
+            the label `strategy`.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
                 "get_behavior(): only defined for games with a tree representation"
             )
-        resolved_player = cython.cast(Player, self._resolve_player(player, "get_behavior"))
-        if isinstance(strategy, Strategy):
-            if strategy.player != resolved_player:
-                raise MismatchError(
-                    f"get_behavior(): strategy must belong to player "
-                    f"'{resolved_player.label}'"
-                )
-            resolved_strategy = strategy
-        elif isinstance(strategy, str):
-            if not strategy.strip():
-                raise ValueError(
-                    "get_behavior(): strategy cannot be an empty string or all spaces"
-                )
-            resolved_strategy = Strategy.wrap(
-                self._resolve_strategy(resolved_player, strategy, "get_behavior")
-            )
-        else:
-            raise TypeError(
-                f"get_behavior(): strategy must be Strategy or str, "
-                f"not {strategy.__class__.__name__}"
-            )
-        return StrategyBehavior.wrap(resolved_player, resolved_strategy)
+        resolved_player = cython.cast(Player, self.players[player])
+        self._resolve_strategy(resolved_player, strategy, "get_behavior")  # validate eagerly
+        return StrategyBehavior.wrap(self, resolved_player.label, strategy)
 
     def _resolve_contingency(self, contingency: typing.Any, funcname: str,
                              argname: str = "contingency") -> dict:

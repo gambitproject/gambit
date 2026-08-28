@@ -36,10 +36,15 @@
   `in` to test membership.
 - `Game.strategy_support_profile`'s `strategies` filter callable is now called as
   `strategies(player, label)` (two positional arguments) rather than with a single `Strategy`.
+- `Game.get_behavior`'s `player` and `strategy` parameters are now labels (`str`) rather than
+  accepting a `Player`/`Strategy` object; `StrategyBehavior.player`/`.strategy` now return
+  labels rather than `Player`/`Strategy` objects.
 
 ### Removed
 - Removed `Game.__getitem__`, replaced by `Game.get_outcome`/`Game.get_payoffs`.
 - Removed `Game.strategies`; iterate `Game.players` and each player's `strategies` instead.
+- Removed `Strategy.action`; use `Game.get_behavior(player, strategy)[infoset]` (or `.get`),
+  already the documented fuller form of the same lookup.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 
