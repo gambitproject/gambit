@@ -346,8 +346,33 @@ std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index
   }
 }
 
+namespace {
+
+/// Order two entries, either of which may be undefined; undefined entries
+/// order after defined ones.  Only operator< is used, so entries are ordered
+/// exactly in whatever type the profiles are stored in.
 template <class T>
-std::optional<double> AnalysisProfileList<T>::GetActionProbValue(int p_action, int p_index) const
+int CompareEntries(const std::optional<T> &p_left, const std::optional<T> &p_right)
+{
+  if (!p_left.has_value()) {
+    return p_right.has_value() ? 1 : 0;
+  }
+  if (!p_right.has_value()) {
+    return -1;
+  }
+  if (p_left.value() < p_right.value()) {
+    return -1;
+  }
+  if (p_right.value() < p_left.value()) {
+    return 1;
+  }
+  return 0;
+}
+
+} // end anonymous namespace
+
+template <class T>
+std::optional<T> AnalysisProfileList<T>::GetActionProbEntry(int p_action, int p_index) const
 {
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[p_index];
@@ -356,7 +381,7 @@ std::optional<double> AnalysisProfileList<T>::GetActionProbValue(int p_action, i
       return {};
     }
 
-    return static_cast<double>(profile[p_action]);
+    return profile[p_action];
   }
   catch (std::out_of_range &) {
     return {};
@@ -364,16 +389,28 @@ std::optional<double> AnalysisProfileList<T>::GetActionProbValue(int p_action, i
 }
 
 template <class T>
-std::optional<double> AnalysisProfileList<T>::GetStrategyProbValue(int p_strategy,
-                                                                   int p_index) const
+std::optional<T> AnalysisProfileList<T>::GetStrategyProbEntry(int p_strategy, int p_index) const
 {
   try {
-    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[p_index];
-    return static_cast<double>(profile[p_strategy]);
+    return (*m_mixedProfiles[p_index])[p_strategy];
   }
   catch (std::out_of_range &) {
     return {};
   }
+}
+
+template <class T>
+int AnalysisProfileList<T>::CompareActionProb(int p_action, int p_left, int p_right) const
+{
+  return CompareEntries(GetActionProbEntry(p_action, p_left),
+                        GetActionProbEntry(p_action, p_right));
+}
+
+template <class T>
+int AnalysisProfileList<T>::CompareStrategyProb(int p_strategy, int p_left, int p_right) const
+{
+  return CompareEntries(GetStrategyProbEntry(p_strategy, p_left),
+                        GetStrategyProbEntry(p_strategy, p_right));
 }
 
 template <class T> LegacyWorkspaceFile::Analysis AnalysisProfileList<T>::Save() const

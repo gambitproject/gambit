@@ -234,8 +234,8 @@ void MixedStrategyProfileList::OnUpdate()
   const int newCols = m_doc->GetGame()->GetStrategies().size();
 
   ResizeGrid(newRows, newCols);
-  m_sortOrder.Rebuild(newRows, newCols, [&](int p_col, int p_profile) {
-    return profiles.GetStrategyProbValue(p_col, p_profile);
+  m_sortOrder.Rebuild(newRows, newCols, [&](int p_col, int p_left, int p_right) {
+    return profiles.CompareStrategyProb(p_col, p_left, p_right);
   });
   UpdateHighlights();
   UpdateLabels();

@@ -115,11 +115,15 @@ public:
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
-  /// Get the probability of an action as a number, for ordering profiles;
-  /// empty if the profile does not define behavior at the information set
-  virtual std::optional<double> GetActionProbValue(int p_action, int p_index) const = 0;
-  /// Get the probability of a strategy as a number, for ordering profiles
-  virtual std::optional<double> GetStrategyProbValue(int p_strategy, int p_index) const = 0;
+  /// Compare the probability of an action in two profiles, for ordering
+  /// them; negative, zero, or positive as the probability in p_left is less
+  /// than, equal to, or greater than that in p_right.  Probabilities are
+  /// compared in the type the profiles are stored in, so that exact
+  /// representations are ordered exactly.  A profile which does not define
+  /// behavior at the action's information set orders after those which do.
+  virtual int CompareActionProb(int p_action, int p_left, int p_right) const = 0;
+  /// Compare the probability of a strategy in two profiles, as above
+  virtual int CompareStrategyProb(int p_strategy, int p_left, int p_right) const = 0;
 
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
@@ -179,8 +183,8 @@ public:
   std::string GetActionProb(int p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
-  std::optional<double> GetActionProbValue(int p_action, int p_index) const override;
-  std::optional<double> GetStrategyProbValue(int p_strategy, int p_index) const override;
+  int CompareActionProb(int p_action, int p_left, int p_right) const override;
+  int CompareStrategyProb(int p_strategy, int p_left, int p_right) const override;
 
   /// Get the index of the currently selected profile
   int GetCurrent() const override { return m_current; }
@@ -210,6 +214,13 @@ public:
   void Load(const LegacyWorkspaceFile::Analysis &p_analysis);
   LegacyWorkspaceFile::Analysis Save() const override;
   //@}
+
+private:
+  /// The probability of an action in a profile, empty if the profile does
+  /// not define behavior at the action's information set
+  std::optional<T> GetActionProbEntry(int p_action, int p_index) const;
+  /// The probability of a strategy in a profile
+  std::optional<T> GetStrategyProbEntry(int p_strategy, int p_index) const;
 };
 
 } // namespace Gambit::GUI

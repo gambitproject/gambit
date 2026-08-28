@@ -222,9 +222,10 @@ void MixedBehaviorProfileList::OnUpdate()
   BeginBatch();
 
   ResizeGrid(profiles.NumProfiles(), profileLength);
-  m_sortOrder.Rebuild(profiles.NumProfiles(), profileLength, [&](int p_col, int p_profile) {
-    return profiles.GetActionProbValue(p_col, p_profile);
-  });
+  m_sortOrder.Rebuild(profiles.NumProfiles(), profileLength,
+                      [&](int p_col, int p_left, int p_right) {
+                        return profiles.CompareActionProb(p_col, p_left, p_right);
+                      });
   UpdateHighlights();
   UpdateLabels();
   UpdateCells();

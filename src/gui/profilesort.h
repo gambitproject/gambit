@@ -24,7 +24,6 @@
 #define GAMBIT_GUI_PROFILESORT_H
 
 #include <functional>
-#include <optional>
 #include <vector>
 
 namespace Gambit::GUI {
@@ -48,8 +47,12 @@ namespace Gambit::GUI {
 //!
 class ProfileSortOrder {
 public:
-  /// Returns the entry in column p_col of profile p_profile, if defined
-  using EntryFunc = std::function<std::optional<double>(int p_col, int p_profile)>;
+  /// Compares the entries in column p_col of two profiles, returning a
+  /// negative value, zero, or a positive value as the entry of p_left is
+  /// less than, equal to, or greater than that of p_right.  Comparing is
+  /// left to the caller so that entries are ordered in their own type,
+  /// exactly, rather than through a common numeric type.
+  using CompareFunc = std::function<int(int p_col, int p_left, int p_right)>;
 
   /// @name Selecting the sort
   //@{
@@ -69,7 +72,7 @@ public:
   /// @name Applying the sort
   //@{
   /// Recompute the ordering of p_numProfiles profiles of p_numCols entries
-  void Rebuild(int p_numProfiles, int p_numCols, const EntryFunc &p_entry);
+  void Rebuild(int p_numProfiles, int p_numCols, const CompareFunc &p_compare);
 
   /// The profile displayed in row p_row, or zero if there is no such row
   int GetProfile(int p_row) const;
@@ -78,9 +81,8 @@ public:
   int GetRow(int p_profile) const;
 
   /// The marker to append to the label of column p_col, as UTF-8: an arrow
-  /// showing the direction of the sort on the column being sorted on, and a
-  /// hint that sorting is possible on the others.  Empty when there are
-  /// fewer than two profiles, as there is then nothing to sort.
+  /// showing the direction of the sort on the column being sorted on, and
+  /// empty for every other column.
   const char *GetColumnMarker(int p_col) const;
   //@}
 

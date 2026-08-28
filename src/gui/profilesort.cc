@@ -27,32 +27,6 @@
 
 namespace Gambit::GUI {
 
-namespace {
-
-/// The sort key of a profile: the entry in the sort column, followed by
-/// the entries of the profile in column order.  Undefined entries are
-/// represented by an empty optional, and sort after all defined entries.
-using SortKey = std::vector<std::optional<double>>;
-
-bool EntryLess(const std::optional<double> &p_left, const std::optional<double> &p_right)
-{
-  if (!p_left.has_value()) {
-    return false;
-  }
-  if (!p_right.has_value()) {
-    return true;
-  }
-  return p_left.value() < p_right.value();
-}
-
-bool KeyLess(const SortKey &p_left, const SortKey &p_right)
-{
-  return std::lexicographical_compare(p_left.begin(), p_left.end(), p_right.begin(), p_right.end(),
-                                      EntryLess);
-}
-
-} // end anonymous namespace
-
 void ProfileSortOrder::ToggleColumn(int p_col)
 {
   if (p_col == m_column) {
@@ -70,7 +44,7 @@ void ProfileSortOrder::Reset()
   m_ascending = true;
 }
 
-void ProfileSortOrder::Rebuild(int p_numProfiles, int p_numCols, const EntryFunc &p_entry)
+void ProfileSortOrder::Rebuild(int p_numProfiles, int p_numCols, const CompareFunc &p_compare)
 {
   m_profiles.resize(p_numProfiles);
   std::iota(m_profiles.begin(), m_profiles.end(), 1);
@@ -83,22 +57,24 @@ void ProfileSortOrder::Rebuild(int p_numProfiles, int p_numCols, const EntryFunc
     return;
   }
 
-  std::vector<SortKey> keys(p_numProfiles);
-  for (int profile = 1; profile <= p_numProfiles; ++profile) {
-    SortKey &key = keys[profile - 1];
-    key.reserve(p_numCols + 1);
-    key.push_back(p_entry(m_column, profile));
-    for (int col = 1; col <= p_numCols; ++col) {
-      key.push_back(p_entry(col, profile));
-    }
-  }
-
-  // std::stable_sort keeps profiles whose keys are equal in the order in
-  // which they were computed, in both sort directions.
+  // Order on the sort column first, then on the profile as a whole, taking
+  // the columns from left to right.  std::stable_sort leaves profiles which
+  // compare equal throughout in the order in which they were computed, in
+  // both sort directions.
   std::stable_sort(m_profiles.begin(), m_profiles.end(), [&](int p_left, int p_right) {
-    const SortKey &left = keys[p_left - 1];
-    const SortKey &right = keys[p_right - 1];
-    return m_ascending ? KeyLess(left, right) : KeyLess(right, left);
+    const int direction = m_ascending ? 1 : -1;
+
+    const int onSortColumn = p_compare(m_column, p_left, p_right);
+    if (onSortColumn != 0) {
+      return onSortColumn * direction < 0;
+    }
+    for (int col = 1; col <= p_numCols; ++col) {
+      const int onColumn = p_compare(col, p_left, p_right);
+      if (onColumn != 0) {
+        return onColumn * direction < 0;
+      }
+    }
+    return false;
   });
 }
 
@@ -118,15 +94,8 @@ int ProfileSortOrder::GetRow(int p_profile) const
 
 const char *ProfileSortOrder::GetColumnMarker(int p_col) const
 {
-  if (m_profiles.size() < 2) {
-    // With at most one profile there is nothing to sort, so offering to
-    // sort would only be a distraction.
-    return "";
-  }
   if (p_col != m_column) {
-    // A light marker on the other columns, so that it is apparent that
-    // the list can be sorted on any of them.
-    return " ↕";
+    return "";
   }
   return m_ascending ? " ▲" : " ▼";
 }

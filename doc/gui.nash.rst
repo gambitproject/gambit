@@ -150,14 +150,12 @@ brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
 
 By default the equilibria are listed in the order in which they were
-computed. Whenever more than one equilibrium has been found, each
-column label in the profiles listing carries a small
-:guilabel:`↕` marker, indicating that the list can be sorted on that
-column. Clicking on the label of a column sorts the equilibria by the
-probability with which that action or strategy is played; clicking on
-the same column label again reverses the order. The marker on the
-column sorted on becomes an arrow, :guilabel:`▲` or :guilabel:`▼`,
-showing the direction of the sort. Equilibria which agree on that
+computed. Clicking on the label of a column in the profiles listing
+sorts the equilibria by the probability with which that action or
+strategy is played; clicking on the same column label again reverses
+the order. The label of the column sorted on is highlighted and
+carries an arrow, :guilabel:`▲` or :guilabel:`▼`, showing the
+direction of the sort. Equilibria which agree on that
 column are ordered by
 comparing their profiles entry-by-entry from the leftmost column
 onwards, so sorting on the first column lists the equilibria in
