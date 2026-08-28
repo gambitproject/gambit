@@ -36,9 +36,9 @@ WelcomePanel::WelcomePanel(wxWindow *parent) : wxPanel(parent)
   LayoutControls();
 }
 
-#include "bitmaps/newtable.xpm"
-#include "bitmaps/newtree.xpm"
-#include "bitmaps/open.xpm"
+#include "bitmaps/newtable.h"
+#include "bitmaps/newtree.h"
+#include "bitmaps/open.h"
 #include "bitmaps/gambitbig.xpm"
 
 namespace {
@@ -85,13 +85,13 @@ void WelcomePanel::CreateControls()
       new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive form game",
                               "Create a game with a tree representation");
 
-  m_openButton->SetBitmap(open_xpm);
+  m_openButton->SetBitmap(wxBitmapBundle::FromSVG(open_svg, wxSize(24, 24)));
   m_openButton->SetBitmapMargins(24, 12);
 
-  m_newNormalFormButton->SetBitmap(newtable_xpm);
+  m_newNormalFormButton->SetBitmap(wxBitmapBundle::FromSVG(newtable_svg, wxSize(24, 24)));
   m_newNormalFormButton->SetBitmapMargins(24, 12);
 
-  m_newExtensiveFormButton->SetBitmap(newtree_xpm);
+  m_newExtensiveFormButton->SetBitmap(wxBitmapBundle::FromSVG(newtree_svg, wxSize(24, 24)));
   m_newExtensiveFormButton->SetBitmapMargins(24, 12);
 
   const wxSize buttonSize(340, 72);

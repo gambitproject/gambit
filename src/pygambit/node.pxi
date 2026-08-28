@@ -182,6 +182,11 @@ class NodeOutcome:
     so the value reflects the current state of the game even after the game is mutated.
 
     .. versionadded:: 16.7.0
+
+    .. versionchanged:: 17.0.0
+        A node with no outcome attached resolves to the game's null outcome: the view is
+        falsy, its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
+        to every outcome — including another null and itself — and to ``None``.
     """
     node = cython.declare(c_GameNode)
 
@@ -197,65 +202,38 @@ class NodeOutcome:
 
     @cython.cfunc
     def _resolve(self) -> Outcome:
-        if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
-            return None
         return Outcome.wrap(self.node.deref().GetOutcome())
 
     def __getattr__(self, name):
         if name.startswith("_"):
             raise AttributeError(f"'NodeOutcome' object has no attribute '{name}'")
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                f"node has no outcome attached; cannot access '{name}'"
-            )
-        return getattr(resolved, name)
+        return getattr(self._resolve(), name)
 
     def __getitem__(self, player):
-        resolved = self._resolve()
-        if resolved is None:
-            raise KeyError("node has no outcome attached")
-        return resolved[player]
+        return self._resolve()[player]
 
     def __setitem__(self, player, value):
-        resolved = self._resolve()
-        if resolved is None:
-            raise KeyError("node has no outcome attached")
-        resolved[player] = value
+        self._resolve()[player] = value
 
     @property
     def label(self):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no outcome attached; cannot access 'label'")
-        return resolved.label
+        return self._resolve().label
 
     @label.setter
     def label(self, value):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no outcome attached; cannot set 'label'")
-        resolved.label = value
+        self._resolve().label = value
 
     def __repr__(self) -> str:
-        resolved = self._resolve()
-        return repr(resolved) if resolved is not None else "None"
+        return repr(self._resolve())
 
     def __eq__(self, other: typing.Any) -> bool:
-        mine = self._resolve()
-        if isinstance(other, NodeOutcome):
-            other = cython.cast(NodeOutcome, other)._resolve()
-        if mine is None or other is None:
-            return mine is None and other is None
-        return mine == other
+        return self._resolve() == other
 
     def __bool__(self) -> bool:
-        return self._resolve() is not None
+        return not self.node.deref().GetOutcome().deref().IsNull()
 
     def __hash__(self) -> int:
-        # Hash by the resolved outcome (transitional).
-        resolved = self._resolve()
-        return hash(resolved) if resolved is not None else 0
+        return hash(self._resolve())
 
 
 @cython.cclass
@@ -384,6 +362,13 @@ class Node:
     @label.setter
     def label(self, value: str) -> None:
         self.node.deref().SetLabel(value.encode("utf-8"))
+
+    @property
+    def number(self) -> int:
+        """Returns the number of the node in its game.
+        Nodes are numbered starting with 0.
+        """
+        return self.node.deref().GetNumber() - 1
 
     @property
     def children(self) -> NodeChildren:
@@ -517,11 +502,17 @@ class Node:
 
         Returns a lazy, node-anchored view resolved on each access, so the value reflects
         the current state of the game even if the game is mutated after this property is read.
-        When no outcome is attached, the view is falsy and equals ``None``.
+        When no outcome is attached, the view resolves to the game's null outcome:
+        its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
+        to every outcome, including another null.
 
         .. versionchanged:: 16.7.0
             Now returns a lazily-evaluated, node-anchored view rather than capturing the
             outcome at the time of access.
+
+        .. versionchanged:: 17.0.0
+            Resolves to the null outcome rather than ``None`` when no outcome is attached;
+            two null outcomes compare unequal.
         """
         return NodeOutcome.wrap(self.node)
 

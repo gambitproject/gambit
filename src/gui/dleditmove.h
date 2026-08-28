@@ -23,14 +23,18 @@
 #ifndef GAMBIT_GUI_DLEDITMOVE_H
 #define GAMBIT_GUI_DLEDITMOVE_H
 
+#include <wx/bmpcbox.h>
+
 #include "editlabel.h"
 
 namespace Gambit::GUI {
 class ActionPanel;
 
 class EditMoveDialog final : public wxDialog {
+  std::shared_ptr<GameDocument> m_doc;
   GameInfoset m_infoset;
-  wxChoice *m_player;
+  wxPanel *m_headerPanel;
+  wxBitmapComboBox *m_player; // shows each player's colour swatch alongside their name
   LabelTextCtrl *m_infosetLabel;
   wxColour m_infosetLabelDefaultBg;
   ActionPanel *m_actionPanel;
@@ -41,7 +45,8 @@ class EditMoveDialog final : public wxDialog {
 
 public:
   // Lifecycle
-  EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset);
+  EditMoveDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
+                 const GameInfoset &p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetLabel() const { return m_infosetLabel->GetNormalizedValue(); }

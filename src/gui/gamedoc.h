@@ -205,6 +205,12 @@ public:
   bool Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses);
 };
 
+// Generates a label guaranteed not to collide with any of p_game's current outcome labels, of
+// the form "Outcome N" -- GameOutcome::NewOutcome() itself rejects an empty or duplicate label,
+// so callers that need to pre-fill a fresh outcome's label (rather than make the user type one
+// first) use this.
+std::string GenerateOutcomeLabel(const Game &p_game);
+
 class GameDocument {
   friend class GameView;
 
@@ -365,8 +371,16 @@ public:
   void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
   void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
   void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
-  void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);
-  void DoInsertMove(GameNode p_node, GameInfoset p_infoset);
+  // Appends a fresh move for p_player at the terminal node p_node, with actions labeled per
+  // p_labels. p_probs gives the chance distribution when p_player is the chance player, and
+  // is ignored otherwise.
+  void DoAppendMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
+  // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
+  // and everything below it becomes the first action's subtree. p_probs gives the chance
+  // distribution when p_player is the chance player, and is ignored otherwise.
+  void DoInsertMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
   void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
   void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
   void DoDeleteParent(GameNode p_node);
@@ -378,7 +392,12 @@ public:
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
+  void DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                        const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
+  void DoRemoveOutcome(const PureStrategyProfile &p_profile);
+  void DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
+                     const std::vector<Number> &p_payoffs, const std::string &p_label);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAnalysisOutputChanged();

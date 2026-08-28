@@ -30,7 +30,6 @@
 #include "efgdisplay.h"
 #include "menuconst.h"
 #include "dlexcept.h"
-#include "dlinsertmove.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
 
@@ -39,13 +38,25 @@ namespace Gambit::GUI {
 void EfgDisplay::MakeMenus()
 {
   m_nodeMenu = new wxMenu;
-  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), _("Insert a move"));
+
+  // Player submenus: create a new move for a player, or reassign the existing one. Labels get
+  // their mnemonics set here (UpdateNewMoveMenu only ever changes the text between "Append"
+  // and "Insert"); "Assign" uses 's' rather than 'A' so it never collides with "Append"/
+  // "Insert", both of which are visible (if not always enabled) in the same menu.
+  m_newMoveMenu = new wxMenu;
+  m_newMoveItem = m_nodeMenu->AppendSubMenu(m_newMoveMenu, _("&Append move for"),
+                                            _("Create a new move for the chosen player"));
+
+  m_reassignPlayerMenu = new wxMenu;
+  m_reassignPlayerItem = m_nodeMenu->AppendSubMenu(m_reassignPlayerMenu, _("As&sign this move to"),
+                                                   _("Set the player who moves at this node"));
+  m_nodeMenu->AppendSeparator();
+
+  // Properties dialogs for the node and the move at it, plus the one quick action that also
+  // operates on the move's infoset (revealing it to other players).
+  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties"), _("Edit properties of the node"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move properties"), _("Edit properties of the move"));
   m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), _("Reveal choice at node"));
-
-  m_setPlayerMenu = new wxMenu;
-  m_setPlayerItem = m_nodeMenu->AppendSubMenu(m_setPlayerMenu, _("Assign this move to"),
-                                              _("Set the player who moves at this node"));
-
   m_nodeMenu->AppendSeparator();
 
   m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_TREE, _("&Delete subtree"),
@@ -56,47 +67,32 @@ void EfgDisplay::MakeMenus()
                      _("Remove the outcome from the selected node"));
   m_nodeMenu->AppendSeparator();
 
-  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties"), _("Edit properties of the node"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Edit move"), _("Edit properties of the move"));
-
-  m_nodeMenu->AppendSeparator();
   m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties"), _("Edit properties of the game"));
 }
 
-void EfgDisplay::UpdateSetPlayerMenu()
+void EfgDisplay::UpdateNewMoveMenu()
 {
-  while (m_setPlayerMenu->GetMenuItemCount() > 0) {
-    m_setPlayerMenu->Destroy(m_setPlayerMenu->FindItemByPosition(0));
+  while (m_newMoveMenu->GetMenuItemCount() > 0) {
+    m_newMoveMenu->Destroy(m_newMoveMenu->FindItemByPosition(0));
   }
-  m_setPlayerList.clear();
+  m_newMoveList.clear();
 
   if (!m_contextNode) {
-    m_nodeMenu->Enable(m_setPlayerItem->GetId(), false);
+    m_nodeMenu->Enable(m_newMoveItem->GetId(), false);
     return;
   }
+  m_nodeMenu->Enable(m_newMoveItem->GetId(), true);
 
   const bool terminal = m_contextNode->IsTerminal();
-
-  // Swapping a node between a chance move and a personal player's move is
-  // not currently supported, so the operation isn't offered at chance nodes.
-  if (!terminal && m_contextNode->GetPlayer()->IsChance()) {
-    m_nodeMenu->Enable(m_setPlayerItem->GetId(), false);
-    return;
-  }
-  m_nodeMenu->Enable(m_setPlayerItem->GetId(), true);
-
-  m_setPlayerItem->SetItemLabel(terminal ? _("Insert move for") : _("Assign this move to"));
+  m_newMoveItem->SetItemLabel(terminal ? _("&Append move for") : _("&Insert move for"));
 
   const Game efg = m_doc->GetGame();
   for (const auto &player : efg->GetPlayersWithChance()) {
-    if (!terminal && player->IsChance()) {
-      continue; // can't reassign an existing personal player's move to chance
-    }
-    if (static_cast<int>(m_setPlayerList.size()) >= gbtSetPlayerMenuCount) {
+    if (static_cast<int>(m_newMoveList.size()) >= gbtPlayerMenuCount) {
       break;
     }
-    const int id = GBT_MENU_EDIT_SET_PLAYER_BASE + static_cast<int>(m_setPlayerList.size());
-    m_setPlayerList.push_back(player);
+    const int id = GBT_MENU_EDIT_NEW_MOVE_BASE + static_cast<int>(m_newMoveList.size());
+    m_newMoveList.push_back(player);
 
     wxString label = wxString::FromUTF8(player->GetLabel());
     if (label.empty()) {
@@ -104,35 +100,95 @@ void EfgDisplay::UpdateSetPlayerMenu()
                                  : wxString::Format(_("Player %d"), player->GetNumber());
     }
 
-    auto *item = new wxMenuItem(m_setPlayerMenu, id, label);
+    auto *item = new wxMenuItem(m_newMoveMenu, id, label);
     item->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(player)));
-    m_setPlayerMenu->Append(item);
+    m_newMoveMenu->Append(item);
+  }
+}
 
-    if (!terminal && m_contextNode->GetPlayer() == player) {
-      m_setPlayerMenu->Enable(id, false);
+void EfgDisplay::UpdateReassignPlayerMenu()
+{
+  while (m_reassignPlayerMenu->GetMenuItemCount() > 0) {
+    m_reassignPlayerMenu->Destroy(m_reassignPlayerMenu->FindItemByPosition(0));
+  }
+  m_reassignPlayerList.clear();
+
+  if (!m_contextNode || m_contextNode->IsTerminal()) {
+    m_nodeMenu->Enable(m_reassignPlayerItem->GetId(), false);
+    return;
+  }
+
+  // Swapping a node between a chance move and a personal player's move is
+  // not currently supported, so the operation isn't offered at chance nodes.
+  if (m_contextNode->GetPlayer()->IsChance()) {
+    m_nodeMenu->Enable(m_reassignPlayerItem->GetId(), false);
+    return;
+  }
+  m_nodeMenu->Enable(m_reassignPlayerItem->GetId(), true);
+
+  const Game efg = m_doc->GetGame();
+  for (const auto &player : efg->GetPlayers()) { // excludes chance -- see the check above
+    if (static_cast<int>(m_reassignPlayerList.size()) >= gbtPlayerMenuCount) {
+      break;
+    }
+    const int id =
+        GBT_MENU_EDIT_REASSIGN_PLAYER_BASE + static_cast<int>(m_reassignPlayerList.size());
+    m_reassignPlayerList.push_back(player);
+
+    wxString label = wxString::FromUTF8(player->GetLabel());
+    if (label.empty()) {
+      label = wxString::Format(_("Player %d"), player->GetNumber());
+    }
+
+    auto *item = new wxMenuItem(m_reassignPlayerMenu, id, label);
+    item->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(player)));
+    m_reassignPlayerMenu->Append(item);
+
+    if (m_contextNode->GetPlayer() == player) {
+      m_reassignPlayerMenu->Enable(id, false);
     }
   }
 }
 
-void EfgDisplay::OnSetPlayerMenu(wxCommandEvent &p_event)
+void EfgDisplay::OnNewMoveMenu(wxCommandEvent &p_event)
 {
   if (!m_contextNode) {
     return;
   }
 
-  const size_t index = p_event.GetId() - GBT_MENU_EDIT_SET_PLAYER_BASE;
-  if (index >= m_setPlayerList.size()) {
+  const size_t index = p_event.GetId() - GBT_MENU_EDIT_NEW_MOVE_BASE;
+  if (index >= m_newMoveList.size()) {
     return;
   }
-  const GamePlayer player = m_setPlayerList[index];
+  const GamePlayer player = m_newMoveList[index];
 
   try {
     if (m_contextNode->IsTerminal()) {
-      m_doc->DoInsertMove(m_contextNode, player, 2);
+      BeginAppendMove(m_contextNode, player);
     }
     else {
-      m_doc->DoSetPlayer(m_contextNode, player);
+      BeginInsertMove(m_contextNode, player);
     }
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+}
+
+void EfgDisplay::OnReassignPlayerMenu(wxCommandEvent &p_event)
+{
+  if (!m_contextNode) {
+    return;
+  }
+
+  const size_t index = p_event.GetId() - GBT_MENU_EDIT_REASSIGN_PLAYER_BASE;
+  if (index >= m_reassignPlayerList.size()) {
+    return;
+  }
+  const GamePlayer player = m_reassignPlayerList[index];
+
+  try {
+    m_doc->DoSetPlayer(m_contextNode, player);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
@@ -143,17 +199,17 @@ void EfgDisplay::UpdateNodeMenu(const GameNode &p_node)
 {
   m_contextNode = p_node;
 
-  m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, static_cast<bool>(p_node));
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL,
                      p_node && p_node->GetInfoset() &&
                          !m_doc->GetGame()->IsAbsentMinded(p_node->GetInfoset()));
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, p_node && !p_node->IsTerminal());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, p_node && p_node->GetParent());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, p_node && p_node->GetOutcome());
+  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, p_node && !p_node->GetOutcome()->IsNull());
   m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, static_cast<bool>(p_node));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, p_node && p_node->GetInfoset());
 
-  UpdateSetPlayerMenu();
+  UpdateNewMoveMenu();
+  UpdateReassignPlayerMenu();
 }
 
 //
@@ -217,29 +273,6 @@ void EfgDisplay::OnRightClick(wxMouseEvent &p_event)
 // Forward declaration only: defined in dlefgreveal.cc, with no header of its own -- this
 // mirrors how it was previously forward-declared in gameframe.cc.
 std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
-
-void EfgDisplay::OnEditInsertMove(wxCommandEvent &)
-{
-  InsertMoveDialog dialog(this, m_doc);
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      if (dialog.GetInfoset()) {
-        m_doc->DoInsertMove(m_contextNode, dialog.GetInfoset());
-      }
-      else {
-        GamePlayer player = dialog.GetPlayer();
-        if (!player) {
-          // "Insert move for a new player" was selected: no such player exists yet.
-          player = m_doc->DoAddPlayer();
-        }
-        m_doc->DoInsertMove(m_contextNode, player, dialog.GetActions());
-      }
-    }
-    catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
-    }
-  }
-}
 
 void EfgDisplay::OnEditDeleteTree(wxCommandEvent &)
 {
@@ -321,7 +354,7 @@ void EfgDisplay::OnEditMove(wxCommandEvent &)
     return;
   }
 
-  EditMoveDialog dialog(this, infoset);
+  EditMoveDialog dialog(this, m_doc, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());

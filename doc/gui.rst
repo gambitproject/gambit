@@ -30,9 +30,11 @@ systematically, it is recommended to use
 .. toctree::
    :maxdepth: 2
 
-   gui.general
-   gui.efg
-   gui.nfg
+   gui.orientation
+   gui.efg.building
+   gui.nfg.building
+   gui.efg.viewing
+   gui.nfg.viewing
    gui.dominance
    gui.nash
    gui.export

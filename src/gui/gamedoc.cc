@@ -611,27 +611,29 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
+void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
   if (p_player->IsChance()) {
-    // A newly-inserted chance move defaults to a uniform distribution over its actions;
-    // the UX for specifying a distribution at creation time is a separate piece of work.
-    std::vector<std::string> actions;
-    for (unsigned int act = 1; act <= p_actions; act++) {
-      actions.push_back(std::to_string(act));
-    }
-    m_game->InsertEvent(p_node, actions,
-                        std::vector<Number>(p_actions, Number(Rational(1, p_actions))));
+    m_game->AppendEvent(p_node, p_labels, p_probs);
   }
   else {
-    m_game->InsertMove(p_node, p_player, p_actions);
+    m_game->AppendMove(p_node, p_player, p_labels);
   }
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  m_game->InsertMove(p_node, p_infoset);
+  if (p_player->IsChance()) {
+    m_game->InsertEvent(p_node, p_labels, p_probs);
+  }
+  else {
+    m_game->InsertMove(p_node, p_player, p_labels);
+  }
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -681,8 +683,6 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   DoSetPlayer(p_node->GetInfoset(), p_player);
 }
 
-namespace {
-
 std::string GenerateOutcomeLabel(const Game &p_game)
 {
   std::set<std::string> outcomeLabels;
@@ -696,18 +696,8 @@ std::string GenerateOutcomeLabel(const Game &p_game)
   return "Outcome " + std::to_string(outc);
 }
 
-} // namespace
-
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  std::set<std::string> outcomeLabels;
-  for (const auto &outcome : m_game->GetOutcomes()) {
-    outcomeLabels.insert(outcome->GetLabel());
-  }
-  int outc = m_game->GetOutcomes().size() + 1;
-  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
-    outc++;
-  }
   m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
@@ -745,9 +735,9 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   const std::string label = p_label.ToStdString(wxConvUTF8);
   GameOutcome outcome = p_node->GetOutcome();
 
-  bool changed = !outcome;
+  bool changed = outcome->IsNull();
 
-  if (outcome) {
+  if (!outcome->IsNull()) {
     changed = outcome->GetLabel() != label;
 
     if (!changed) {
@@ -765,7 +755,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     return;
   }
 
-  if (!outcome) {
+  if (outcome->IsNull()) {
     outcome = m_game->NewOutcome(p_label.ToStdString(wxConvUTF8));
     m_game->SetOutcome(p_node, outcome);
   }
@@ -782,10 +772,50 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
 
 void GameDocument::DoRemoveOutcome(GameNode p_node)
 {
-  if (!p_node || !p_node->GetOutcome()) {
+  if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
   }
   m_game->SetOutcome(p_node, nullptr);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoRemoveOutcome(const PureStrategyProfile &p_profile)
+{
+  if (p_profile->GetOutcome()->IsNull()) {
+    return;
+  }
+  p_profile->SetOutcome(nullptr);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
+                                 const std::vector<Number> &p_payoffs, const std::string &p_label)
+{
+  std::vector<std::vector<GameStrategy>> contingencies;
+  contingencies.reserve(p_profiles.size());
+  for (const auto &profile : p_profiles) {
+    std::vector<GameStrategy> strategies;
+    strategies.reserve(m_game->NumPlayers());
+    for (const auto &player : m_game->GetPlayers()) {
+      strategies.push_back(profile->GetStrategy(player));
+    }
+    contingencies.push_back(strategies);
+  }
+  m_game->MakeOutcome(contingencies, p_payoffs, p_label);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                                    const std::vector<wxString> &p_payoffs)
+{
+  if (p_payoffs.size() != m_game->NumPlayers()) {
+    throw std::invalid_argument("Incorrect number of payoff values");
+  }
+  p_outcome->SetLabel(p_label.ToStdString(wxConvUTF8));
+  for (size_t index = 0; index < p_payoffs.size(); ++index) {
+    p_outcome->SetPayoff(m_game->GetPlayer(static_cast<int>(index) + 1),
+                         Number(p_payoffs[index].ToStdString()));
+  }
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 

@@ -1,0 +1,196 @@
+Building a strategic-form game
+================================
+
+Gambit has full support for constructing and manipulating arbitrary
+N-player strategic (also known as normal form) games.
+
+For extensive games, Gambit automatically computes the corresponding
+reduced strategic game. To view the reduced strategic game
+corresponding to an extensive game, select
+:menuselection:`View --> Strategic game` or
+click the strategic game table icon on the toolbar.
+
+
+
+The strategic games computed by Gambit as the reduced strategic game
+of an extensive game cannot be modified directly. Instead, edit the
+original extensive game; Gambit automatically recomputes the strategic
+game after any changes to the extensive game.
+
+Strategies in a reduced strategic game are assigned numeric labels for
+identification.  These labels are assigned via a deterministic algorithm for
+constructing the reduced strategic game from an extensive game.
+Hovering the mouse pointer over a strategy's row or column label briefly
+displays a small window listing the action selected at each information set
+where the reduced strategy specifies an action.
+
+Strategic games may also be input directly. To create a new strategic
+game, select :menuselection:`File --> New --> Strategic game`,
+or click the new strategic game icon on the toolbar.
+
+
+Adding players
+--------------
+
+Players are added, removed, and reordered on the :guilabel:`Players` page of
+the :guilabel:`Game properties` dialog (:menuselection:`Edit --> Game`); see
+:doc:`gui.orientation`. A newly added player has one strategy, by default
+labeled with the number :guilabel:`1`.
+
+
+Editing strategies
+-------------------
+
+A player's strategies can be added, removed, reordered, and renamed by
+clicking any cell in the strategic game table where one of that
+player's strategy labels appears. This opens an :guilabel:`Edit
+strategies` dialog for that player, titled with the player's own
+label, listing a row for each of the player's strategies and showing
+its label.
+
+.. _editing-strategies:
+
+Adding, removing, and reordering strategies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Clicking :guilabel:`+`, below the list of strategies, adds a new
+strategy with an automatically generated numeric label, which can be
+relabeled like any other strategy. Each strategy's row has a
+:guilabel:`✕` button to remove it, and :guilabel:`↑`/:guilabel:`↓`
+buttons to move it earlier or later among the player's other
+strategies.
+
+Removing a strategy does not immediately discard the payoffs at the
+contingencies that use it. Instead, the row is shown disabled, with
+its label struck through, and its :guilabel:`✕` button is replaced by
+a :guilabel:`↺` (restore) button, so that what is about to be
+destroyed remains visible -- and reversible -- until the dialog is
+confirmed. Clicking :guilabel:`↺` returns the strategy, and the
+payoffs at every contingency involving it, exactly as they were.
+Nothing is actually deleted until :guilabel:`OK` is clicked; clicking
+:guilabel:`Cancel` leaves the player's strategies entirely unchanged.
+At least one strategy must remain: the last remaining strategy cannot
+be removed.
+
+Renaming versus reordering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Typing a new label into a strategy's row, and moving that row to a
+different position with the :guilabel:`↑`/:guilabel:`↓` buttons, are
+two distinct operations. They can be combined, but neither substitutes
+for the other:
+
++ Changing the text in a row renames that strategy, wherever it ends
+  up in the list. The payoffs at every contingency involving it travel
+  with it: renaming a strategy never changes any payoff.
++ Moving a row up or down changes the strategy's position among the
+  player's other strategies, permuting the payoff table to match. Each
+  strategy keeps its own payoffs as it moves: reordering a strategy
+  never changes what it is called.
+
+Because these are separate operations, two strategies can have their
+labels swapped in place -- for instance, relabeling :guilabel:`Cooperate`
+to :guilabel:`Defect` and :guilabel:`Defect` to :guilabel:`Cooperate` at
+the same time, since all the relabeling for a player happens
+simultaneously when :guilabel:`OK` is clicked -- without touching the
+payoffs at any contingency. This is different from using the
+:guilabel:`↑`/:guilabel:`↓` buttons to swap the *positions* of
+:guilabel:`Cooperate` and :guilabel:`Defect`, which exchanges the
+payoffs at the contingencies where each is chosen, while leaving each
+strategy's own label attached to it.
+
+To help keep track of which is which while editing, a strategy whose
+label has been changed from what it started as is shown in italic blue
+text, and shows the original label in a tooltip on hover; a newly
+added strategy is shown in bold green text.
+
+Strategy labels must be nonempty, and unique among the strategies
+currently kept for the player (a removed strategy's label is not
+considered). Any field that currently violates one of these rules is
+highlighted, and a description of the problem is shown below the list
+of strategies; the :guilabel:`OK` button is disabled until all fields
+are valid.
+
+
+Editing payoffs
+---------------
+
+Payoffs for each player are specified individually for each
+contingency, or collection of strategies, in the game. To edit any
+payoff in the table, click that cell in the table and edit the payoff.
+Pressing the Escape key (:kbd:`Esc`) cancels any editing of the payoff
+and restores the previous value.
+
+To speed entry of many payoffs, as is typical when creating a new
+game, accepting a payoff entry via the :kbd:`Tab` key automatically moves
+the edit control to the next cell to the right. If the payoff is the
+last payoff listed in a row of the table, the edit control wraps
+around to the first payoff in the next row; if the payoff is in the
+last row, the edit control wraps around to the first payoff in the
+first row. So a strategic game payoff table can be quickly entered by
+clicking on the first payoff in the upper-left cell of the table,
+inputting the payoff for the first (row) player, pressing the :kbd:`Tab`
+key, inputting the payoff for the second (column) player, pressing the
+:kbd:`Tab` key, and so forth, until all the payoff entries in the table
+have been filled.
+
+Shared outcomes
+^^^^^^^^^^^^^^^^
+
+The payoffs shown at a contingency are stored as an *outcome*, and the
+same outcome can be attached to more than one contingency -- most
+commonly because several strategy profiles induce the same terminal
+node in the reduced strategic game of an extensive game, but a
+strategic game can also be built or loaded with outcomes shared this
+way directly. Editing a payoff at any one of these contingencies
+changes it at every other contingency sharing that outcome, since they
+are, in fact, the same outcome.
+
+To see this grouping before editing, hover the mouse pointer over any
+payoff cell: every other cell sharing its outcome is shown with a
+shaded background for as long as the pointer remains over one of them.
+The highlight does not change while a payoff is being edited, even if
+the pointer moves elsewhere in the meantime.
+
+Merging and splitting outcomes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Which contingencies share an outcome can itself be changed from the
+table. Click and drag, or shift-click, across several payoff cells to
+select them; the selection automatically expands to cover every
+payoff column of any contingency it touches, since an outcome is
+shared at the level of a whole contingency, not a single payoff cell.
+Right-clicking the selection -- or, with nothing selected,
+right-clicking a single cell -- opens a menu with three commands:
+
++ :guilabel:`Set outcome...` (labelled :guilabel:`Merge into one
+  outcome...` when more than one contingency is selected) opens a
+  dialog to give a label and a payoff for each player, then attaches
+  the resulting outcome to every selected contingency. Selecting
+  several contingencies this way merges them into one shared outcome;
+  selecting a single contingency that is currently part of a larger
+  shared outcome splits it off into its own outcome, leaving the rest
+  of the group unchanged. If the selection already matches one
+  outcome's full membership exactly, this instead edits that outcome's
+  own label and payoffs in place, rather than creating a new one.
+  The dialog starts from a label and payoffs to edit -- the shared
+  outcome's own, if editing one in place, or the first selected
+  contingency's current payoffs with a freshly generated label
+  otherwise -- and disables :guilabel:`OK` until the label is
+  nonempty and unique among the game's outcomes and every payoff is a
+  valid number.
++ :guilabel:`Edit outcome...` is the direct route to that same
+  in-place case: it is enabled whenever the selection matches one
+  existing outcome's full membership exactly (a single contingency is
+  enough, if that contingency's outcome has no other members), and
+  opens the same label-and-payoffs dialog pre-filled with that
+  outcome's own values, changing them in place without touching which
+  contingencies share it. Editing a payoff here is no different from
+  typing directly into a payoff cell -- it is offered as a second way
+  to reach the same result, alongside also being able to change the
+  label, matching how outcomes are edited in an extensive game.
++ :guilabel:`Remove outcome` clears every selected contingency back to
+  having no outcome. It is disabled if none of the selection currently
+  has one.
+
+Clicking any cell afterward clears the selection.

@@ -511,7 +511,7 @@ void TableWidget::SetPayoffCellValue(int row, int col, const wxString &value)
 {
   PureStrategyProfile profile = GetPayoffProfile(row, col);
   GameOutcome outcome = profile->GetOutcome();
-  if (!outcome) {
+  if (outcome->IsNull()) {
     m_doc->DoNewOutcome(profile);
     profile = GetPayoffProfile(row, col);
     outcome = profile->GetOutcome();
@@ -545,5 +545,20 @@ GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) 
 {
   auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
+}
+
+void TableWidget::SetHoverOutcome(const GameOutcome &p_outcome)
+{
+  const GameOutcome outcome = (p_outcome && !p_outcome->IsNull()) ? p_outcome : GameOutcome();
+  if (m_hoverOutcome == outcome) {
+    return;
+  }
+  m_hoverOutcome = outcome;
+  m_payoffGrid->Refresh();
+}
+
+bool TableWidget::IsPayoffCellHighlighted(int row, int col) const
+{
+  return m_hoverOutcome && GetPayoffProfile(row, col)->GetOutcome() == m_hoverOutcome;
 }
 } // namespace Gambit::GUI

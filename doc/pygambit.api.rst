@@ -71,6 +71,7 @@ Transforming game information structure
    :toctree: api/
 
    Game.make_infoset
+   Game.make_outcome
    Game.make_event
    Game.relabel_actions
    Game.set_move_actions
@@ -220,6 +221,7 @@ Player behavior
    Game.mixed_behavior_profile
    Game.random_behavior_profile
    Game.strategy_support_profile
+   Game.behavior_support_profile
 
 
 Representation of strategic behavior
@@ -270,6 +272,7 @@ Probability distributions over strategies
    MixedStrategyProfile.max_regret
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
+   MixedStrategyProfile.as_float
    MixedStrategyProfile.normalize
    MixedStrategyProfile.copy
 
@@ -312,6 +315,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.max_regret
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
+   MixedBehaviorProfile.as_float
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy
 
@@ -334,6 +338,56 @@ Probability distributions over behavior
    BeliefVector
    NodeValueVector
    NodeValuesVector
+
+
+Representation of supports
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: pygambit.gambit
+
+Subsets of strategies
+......................
+
+.. autosummary::
+   :toctree: api/
+
+   StrategySupportProfile
+   StrategySupportProfile.game
+   StrategySupportProfile.__iter__
+   StrategySupportProfile.__getitem__
+   StrategySupportProfile.__setitem__
+   StrategySupportProfile.copy
+   StrategySupportProfile.restrict
+   StrategySupportProfile.is_dominated
+
+   StrategySupport
+   StrategySupport.player
+   StrategySupport.__iter__
+   StrategySupport.__contains__
+
+Subsets of actions
+...................
+
+.. autosummary::
+   :toctree: api/
+
+   BehaviorSupportProfile
+   BehaviorSupportProfile.game
+   BehaviorSupportProfile.__iter__
+   BehaviorSupportProfile.__getitem__
+   BehaviorSupportProfile.__setitem__
+   BehaviorSupportProfile.copy
+   BehaviorSupportProfile.is_reachable
+
+   BehaviorSupport
+   BehaviorSupport.player
+   BehaviorSupport.__iter__
+   BehaviorSupport.__getitem__
+
+   ActionSupport
+   ActionSupport.infoset
+   ActionSupport.__iter__
+   ActionSupport.__contains__
 
 
 Computation on supports

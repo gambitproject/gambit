@@ -441,19 +441,22 @@ void ParseNfgHeader(GameFileLexer &p_state, TableFileGame &p_data)
   }
 }
 
-void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
+struct NfgOutcomeRecords {
+  std::vector<std::string> m_labels;
+  std::vector<std::vector<Number>> m_payoffs;
+};
+
+NfgOutcomeRecords ReadOutcomeList(GameFileLexer &p_parser, const Game &p_nfg)
 {
   auto players = p_nfg->GetPlayers();
   p_parser.GetNextToken();
 
-  // Buffer raw labels + payoffs so labels can be normalized (unique, nonempty)
-  // before the outcome objects are created (NewOutcome now rejects empty/duplicate).
-  std::vector<std::string> labels;
-  std::vector<std::vector<Number>> payoff_lists;
+  // Buffer raw labels + payoffs; which records become outcomes depends on the index table
+  NfgOutcomeRecords records;
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
-    labels.push_back(p_parser.GetLastText());
+    records.m_labels.push_back(p_parser.GetLastText());
     p_parser.GetNextToken();
 
     std::vector<Number> payoffs;
@@ -462,34 +465,54 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
       payoffs.emplace_back(p_parser.GetLastText());
       p_parser.AcceptNextToken(TOKEN_COMMA);
     }
-    payoff_lists.push_back(payoffs);
+    records.m_payoffs.push_back(payoffs);
 
     p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_parser.GetNextToken();
   }
   p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_parser.GetNextToken();
-
-  NormalizeLabelStrings(labels);
-  for (size_t i = 0; i < labels.size(); ++i) {
-    auto outcome = p_nfg->NewOutcome(labels[i]);
-    auto player_it = players.begin();
-    for (const auto &payoff : payoff_lists[i]) {
-      outcome->SetPayoff(*player_it, payoff);
-      ++player_it;
-    }
-  }
+  return records;
 }
 
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
-  ReadOutcomeList(p_parser, p_nfg);
-  for (const auto &profile : StrategyContingencies(p_nfg)) {
+  const auto records = ReadOutcomeList(p_parser, p_nfg);
+  // First pass: the outcome id at each contingency, in iteration order.
+  std::vector<int> ids;
+  for ([[maybe_unused]] const auto &profile : StrategyContingencies(p_nfg)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
-    if (const int outcomeId = std::stoi(p_parser.GetLastText())) {
-      profile->SetOutcome(p_nfg->GetOutcome(outcomeId));
-    }
+    ids.push_back(std::stoi(p_parser.GetLastText()));
     p_parser.GetNextToken();
+  }
+  const std::set<int> referenced(ids.begin(), ids.end());
+  std::vector<std::string> labels;
+  for (size_t i = 0; i < records.m_labels.size(); ++i) {
+    if (referenced.contains(static_cast<int>(i) + 1)) {
+      labels.push_back(records.m_labels[i]);
+    }
+  }
+  NormalizeLabelStrings(labels);
+  std::map<int, GameOutcome> created;
+  auto label_it = labels.begin();
+  for (size_t i = 0; i < records.m_labels.size(); ++i) {
+    if (!referenced.contains(static_cast<int>(i) + 1)) {
+      continue;
+    }
+    auto outcome = p_nfg->NewOutcome(*label_it++);
+    auto player_it = p_nfg->GetPlayers().begin();
+    for (const auto &payoff : records.m_payoffs[i]) {
+      outcome->SetPayoff(*player_it, payoff);
+      ++player_it;
+    }
+    created.emplace(static_cast<int>(i) + 1, outcome);
+  }
+  // Second pass: attach.
+  auto id_it = ids.begin();
+  for (const auto &profile : StrategyContingencies(p_nfg)) {
+    if (const int outcomeId = *id_it++) {
+      profile->SetOutcome(created.at(outcomeId));
+    }
   }
 }
 

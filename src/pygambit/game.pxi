@@ -590,7 +590,7 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        g = Game.wrap(NewTable(list(dim)))
+        g = Game.wrap(NewTable(list(dim), True))
         g.title = title
         return g
 
@@ -631,7 +631,7 @@ class Game:
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
         shape = arrays[0].shape
-        g = Game.new_table(shape)
+        g = Game.wrap(NewTable(list(shape), False))
         for profile in itertools.product(*(range(s) for s in shape)):
             for array, player in zip(arrays, g.players, strict=True):
                 g[profile][player] = array[profile]
@@ -707,7 +707,7 @@ class Game:
             raise ValueError("All specified arrays must have the same shape")
         arrays = list(payoffs.values())
         shape = arrays[0].shape
-        g = Game.new_table(shape)
+        g = Game.wrap(NewTable(list(shape), False))
         g.relabel_players(
             {player.label: label for player, label in zip(g.players, payoffs, strict=True)}
         )
@@ -1029,12 +1029,7 @@ class Game:
 
         if self.is_tree or self.game.deref().IsAgg():
             return DerivedGameOutcome.wrap(self.game, psp)
-        else:
-            outcome = Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
-            if outcome.outcome != cython.cast(c_GameOutcome, NULL):
-                return outcome
-            else:
-                return None
+        return Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
 
     def __getitem__(self, contingency):
         """Returns the `Outcome` associated with a profile of pure strategies.
@@ -1053,38 +1048,63 @@ class Game:
         IndexError
             If an integer index is out of range for the corresponding player,
             or a label or ``Strategy`` does not belong to that player.
+        MismatchError
+            If a ``Strategy`` belongs to a different game.
 
         .. note::
             Unlike the game's object collections, strategies within a contingency can be referenced
             by integer index, as a contingency is a coordinate in the players' strategy spaces;
             labels and ``Strategy`` objects are also accepted.
         """
+        return self._get_contingency(
+            *tuple(self._resolve_contingency(contingency, "Game.__getitem__"))
+        )
+
+    def _resolve_contingency(self, contingency: typing.Any, funcname: str,
+                             argname: str = "contingency") -> list:
+        """Resolve a pure-strategy contingency to a list of per-player strategy indices.
+
+        Each element may be a ``Strategy``, its label, or its index within the
+        corresponding player's strategies.
+        """
         players = list(self.players)
         try:
             if len(contingency) != len(players):
-                raise KeyError("Number of strategies is not equal to the number of players")
+                raise KeyError(
+                    f"{funcname}(): number of strategies in {argname} is not equal to "
+                    f"the number of players"
+                )
         except TypeError:
-            raise TypeError("contingency must be a tuple-like object") from None
+            raise TypeError(f"{funcname}(): {argname} must be a tuple-like object") from None
         cont = [0 for _ in players]
         for (pl, st) in enumerate(contingency):
             player = players[pl]
             if isinstance(st, int):
                 if st < 0 or st >= len(player.strategies):
-                    raise IndexError(f"Provided strategy index {st} out of range for player {pl}")
+                    raise IndexError(
+                        f"{funcname}(): strategy index {st} out of range for player {pl}"
+                    )
                 cont[pl] = st
             elif isinstance(st, str):
                 try:
                     cont[pl] = [s.label for s in player.strategies].index(st)
                 except ValueError:
-                    raise IndexError(f"Provided strategy label '{st}' not defined")
+                    raise IndexError(f"{funcname}(): player {pl} has no strategy labelled '{st}'")
             elif isinstance(st, Strategy):
+                if st.game != self:
+                    raise MismatchError(f"{funcname}(): {argname} must be composed of "
+                                        f"strategies from the same game")
                 try:
                     cont[pl] = list(player.strategies).index(st)
                 except ValueError:
-                    raise IndexError(f"Provided strategy '{st}' not available to player")
+                    raise IndexError(
+                        f"{funcname}(): strategy '{st}' not available to player {pl}"
+                    )
             else:
-                raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
-        return self._get_contingency(*tuple(cont))
+                raise TypeError(
+                    f"{funcname}(): {argname} must contain ints, strategy labels, or strategies"
+                )
+        return cont
 
     def _fill_strategy_profile(self,
                                profile: MixedStrategyProfile,
@@ -1361,6 +1381,34 @@ class Game:
                     if not (deref(profile.profile)
                             .RemoveStrategy(cython.cast(Strategy, strategy).strategy)):
                         raise ValueError("attempted to remove the last strategy for player")
+        return profile
+
+    def behavior_support_profile(
+            self, actions: typing.Callable | None = None
+    ) -> BehaviorSupportProfile:
+        """Create a new `BehaviorSupportProfile` on the game.
+
+        Parameters
+        ----------
+        actions : function, optional
+            By default the support profile contains all actions at all information
+            sets. If specified, only actions for which the supplied function returns
+            `True` are included.
+
+        Returns
+        -------
+        BehaviorSupportProfile
+        """
+        profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
+        if actions is not None:
+            for infoset in self.infosets:
+                for action in infoset.actions:
+                    if not actions(action):
+                        if not (deref(profile.profile)
+                                .RemoveAction(cython.cast(Action, action).action)):
+                            raise ValueError(
+                                "attempted to remove the last action at an information set"
+                            )
         return profile
 
     @cython.cfunc
@@ -2625,6 +2673,100 @@ class Game:
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
         self.game.deref().SetPlayers(c_labels)
+
+    def make_outcome(self,
+                     nodes,
+                     payoffs: typing.Mapping,
+                     label: str) -> Outcome:
+        """Create an outcome with `payoffs` and `label` and attach it at `nodes`.
+
+        For an extensive game, `nodes` is a ``Node`` or an iterable of nodes.  For a
+        strategic game, `nodes` is a pure-strategy contingency — a sequence giving one
+        strategy per player, each a ``Strategy`` or a strategy label — or an iterable
+        of such contingencies.
+
+        Any outcome all of whose references are among `nodes` is absorbed by the
+        operation: it is removed from the game, and `label` may reuse its label.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        nodes : Node, contingency, or iterable of these
+            Where to attach the new outcome.  Nonempty; each node or contingency may
+            be referenced only once.
+        payoffs : Mapping
+            A complete mapping from the game's players (or their labels) to payoffs.
+            Every player must be present; zeroes must be given explicitly.
+        label : str
+            The label of the new outcome; must be nonempty and, after the operation,
+            unique within the game.
+
+        Returns
+        -------
+        Outcome
+            A reference to the newly-created outcome.
+
+        Raises
+        ------
+        MismatchError
+            If any node, strategy, or player is from a different game.
+        ValueError
+            If `nodes` is empty or contains a repeat; if `payoffs` is not a complete
+            mapping over exactly the game's players; or if `label` is empty or is held
+            by an outcome that is not absorbed by the operation.
+        UndefinedOperationError
+            If the game is in action-graph representation, where outcomes are not
+            represented explicitly.
+        """
+        if self.game.deref().IsAgg():
+            raise UndefinedOperationError(
+                "make_outcome(): operation not defined for games in action-graph representation"
+            )
+        if not hasattr(payoffs, "items"):
+            raise TypeError(
+                f"make_outcome(): payoffs must be a mapping, not {payoffs.__class__.__name__}"
+            )
+        resolved_payoffs = {}
+        for player, value in payoffs.items():
+            resolved = cython.cast(Player, self._resolve_player(player, "make_outcome", "payoffs"))
+            if resolved in resolved_payoffs:
+                raise ValueError("make_outcome(): each player may appear only once in payoffs")
+            resolved_payoffs[resolved] = value
+        if set(resolved_payoffs) != set(self.players):
+            raise ValueError(
+                "make_outcome(): payoffs must be specified for each player of the game"
+            )
+        c_payoffs = stdvector[c_Number]()
+        for player in self.players:
+            c_payoffs.push_back(_to_number(resolved_payoffs[player]))
+        if self.is_tree:
+            resolved_nodes = self._resolve_nodes(nodes, "make_outcome")
+            c_nodes = stdvector[c_GameNode]()
+            for n in resolved_nodes:
+                c_nodes.push_back(cython.cast(Node, n).node)
+            return Outcome.wrap(
+                self.game.deref().MakeOutcome(c_nodes, c_payoffs, label.encode("utf-8"))
+            )
+        try:
+            entries = list(nodes)
+        except TypeError:
+            raise TypeError(
+                "make_outcome(): nodes must be a contingency or an iterable of contingencies"
+            ) from None
+        if entries and all(isinstance(e, (Strategy, str, int)) for e in entries):
+            entries = [entries]
+        players = list(self.players)
+        c_contingencies = stdvector[stdvector[c_GameStrategy]]()
+        for entry in entries:
+            c_one = stdvector[c_GameStrategy]()
+            for pl, index in enumerate(self._resolve_contingency(entry, "make_outcome", "nodes")):
+                strategy = list(players[pl].strategies)[index]
+                c_one.push_back(cython.cast(Strategy, strategy).strategy)
+            c_contingencies.push_back(c_one)
+        return Outcome.wrap(
+            self.game.deref().MakeOutcome(c_contingencies, c_payoffs, label.encode("utf-8"))
+        )
 
     def add_outcome(self,
                     label: str,

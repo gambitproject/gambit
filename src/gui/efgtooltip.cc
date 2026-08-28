@@ -3,7 +3,8 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/efgtooltip.cc
-// Popups for editing a node's outcome and for showing hover information
+// Popups for editing a node's outcome, appending a move at a node, and for showing hover
+// information
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,21 +21,46 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+#include <memory>
 #include <vector>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/popupwin.h>
+#include <wx/spinctrl.h>
+#include <wx/scrolwin.h>
+#include <wx/statbmp.h>
+#include <wx/statline.h>
 
 #include "games.h"
 
+#include "editlabel.h"
 #include "efgdisplay.h"
 #include "valnumber.h"
 
 namespace Gambit::GUI {
 
-class OutcomeEditorPopup : public wxPopupTransientWindow {
+namespace {
+const wxColour kInvalidLabelBg(255, 220, 220);
+// Logical (pre-FromDIP) cap on a scrollable row grid's height, past which it scrolls instead of
+// growing the dialog further -- roughly six rows at the row height these grids use. Shared by
+// OutcomeEditorPopup's payoff grid and AppendMovePopup's action grid.
+constexpr int kMaxGridHeightDIP = 200;
+} // namespace
+
+// Floating window for viewing/editing a node's outcome -- its label and one payoff per player --
+// opened by double-clicking the outcome/payoff area of a node (efgnodemenu.cc's
+// OnLeftDoubleClick). Built to the same architecture and conventions as AppendMovePopup below: a
+// wxDialog, shown via Show() rather than ShowModal(), for the keyboard-focus reasons explained on
+// AppendMovePopup's own declaration -- this class is the one that ran into that problem first (as
+// a wxPopupTransientWindow), which is what AppendMovePopup's comment refers to when it says it
+// started out "matching OutcomeEditorPopup". Commits the same way too: Enter, or losing window
+// activation, commits; Escape cancels; and a short one-shot timer defers the initial
+// Show()/SetFocus() past the double-click's own event handling, the same race AppendMovePopup
+// defers past a closing wxMenu for.
+class OutcomeEditorPopup : public wxDialog {
 public:
   OutcomeEditorPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
 
@@ -42,22 +68,45 @@ public:
   bool Commit();
   void Cancel();
 
-protected:
-  void OnDismiss() override;
-
 private:
-  struct ValidationResult {
-    bool ok{true};
-    wxString message;
-    wxTextCtrl *ctrl{nullptr};
+  // One payoff field per player; the row count never changes once built (it's fixed by the
+  // number of players in the game), so unlike AppendMovePopup's action rows, there's no
+  // add/remove/rebuild machinery here -- just the one grid, built once.
+  struct Row {
+    wxStaticBitmap *swatch{nullptr};
+    wxStaticText *nameText{nullptr};
+    wxTextCtrl *payoffCtrl{nullptr};
+    std::unique_ptr<wxString> payoffValue; // backing store for NumberValidator; heap-stable
+                                           // across Row moves within m_payoffRows
   };
 
   void BuildControls();
   void LoadValues();
   void PositionPopup();
   void OnKeyDown(wxKeyEvent &p_event);
+  // Fires when this window gains or loses activation -- losing it (the user clicked the tree
+  // canvas, another window, or another app) commits, the same way AppendMovePopup does. Gaining
+  // activation is ignored.
+  void OnActivate(wxActivateEvent &p_event);
+  void OnDismiss();
+  // BeginEdit() is called directly from OnLeftDoubleClick (efgnodemenu.cc), still running as
+  // part of that mouse event's own dispatch; showing and focusing this window synchronously
+  // there can lose a focus race the same way AppendMovePopup's menu-close race can. A short
+  // one-shot timer reliably lands after it's done.
+  void OnOpenTimer(wxTimerEvent &p_event);
 
-  ValidationResult ValidatePayoffs(std::vector<wxString> &p_payoffs);
+  // Checks the label field for being non-empty and not matching any of the game's other
+  // outcomes (GameOutcome::NewOutcome() rejects an empty or duplicate label outright, so an
+  // outcome not yet attached to a node would otherwise fail at commit with no earlier warning),
+  // colouring it like EditMoveDialog's infoset-label field and returning a description of the
+  // problem found, or an empty string if it's valid.
+  wxString ValidateLabel();
+  // Checks every payoff field for being a valid number, colouring each offending field's
+  // background (like AppendMovePopup's ValidateProbabilities) and returning a description of the
+  // first problem found, or an empty string if all are valid. Runs on every keystroke (see
+  // UpdateValidation), not just on commit, so the highlighting is never stale.
+  wxString ValidatePayoffs();
+  void UpdateValidation();
   void ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl);
   void ClearValidationFailure();
   void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
@@ -68,10 +117,24 @@ private:
   GameNode m_node;
 
   wxPanel *m_contentPanel;
-  wxTextCtrl *m_labelCtrl;
+  // Shaded strip holding the outcome label field, divided from the payoff grid below by a
+  // wxStaticLine -- the same header/white-list treatment EditMoveDialog and AppendMovePopup give
+  // their own header field(s) and action/row lists (see BuildControls).
+  wxPanel *m_headerPanel;
+  LabelTextCtrl *m_labelCtrl;
+  // The label field's background before any validation failure has tinted it -- like
+  // EditMoveDialog's m_infosetLabelDefaultBg, the colour ValidateLabel() restores it to once
+  // it's valid again.
+  wxColour m_labelDefaultBg;
+  // Scrolls once the payoff list grows past kMaxGridHeightDIP, rather than growing the dialog
+  // (and the screen it's anchored to) without bound -- relevant for games with many players.
+  wxScrolledWindow *m_gridScroller{nullptr};
   wxStaticText *m_errorText;
-  wxFlexGridSizer *m_gridSizer;
-  std::vector<wxTextCtrl *> m_payoffCtrls;
+  std::vector<Row> m_payoffRows;
+  // A freshly created payoff field's background, captured the first time BuildControls creates
+  // one; the colour ValidatePayoffs() restores a field to once it's valid again.
+  wxColour m_defaultPayoffBg;
+  wxTimer m_openTimer;
 
   int m_initialPlayer{0};
   bool m_cancelled{false};
@@ -82,102 +145,141 @@ private:
 
 OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner,
                                        const std::shared_ptr<GameDocument> &p_doc)
-  : wxPopupTransientWindow(p_owner, wxBORDER_NONE), m_owner(p_owner), m_doc(p_doc),
-    m_contentPanel(nullptr), m_labelCtrl(nullptr), m_errorText(nullptr)
+  : wxDialog(p_owner, wxID_ANY, _("Edit outcome"), wxDefaultPosition, wxDefaultSize, wxCAPTION),
+    m_owner(p_owner), m_doc(p_doc), m_contentPanel(nullptr), m_headerPanel(nullptr),
+    m_labelCtrl(nullptr), m_errorText(nullptr)
 {
-  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
-
   BuildControls();
 
   Bind(wxEVT_CHAR_HOOK, &OutcomeEditorPopup::OnKeyDown, this);
+  Bind(wxEVT_ACTIVATE, &OutcomeEditorPopup::OnActivate, this);
+
+  m_openTimer.SetOwner(this);
+  Bind(wxEVT_TIMER, &OutcomeEditorPopup::OnOpenTimer, this);
 }
 
 void OutcomeEditorPopup::BuildControls()
 {
-  auto *popupSizer = new wxBoxSizer(wxVERTICAL);
-
   m_contentPanel = new wxPanel(this);
   m_contentPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
   auto *outerSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *heading = new wxStaticText(m_contentPanel, wxID_ANY, _("Outcome"));
+  // Header: a shaded strip holding the outcome label field -- the same treatment EditMoveDialog
+  // gives its own "Information set label" field and AppendMovePopup gives its header sentence.
+  m_headerPanel = new wxPanel(m_contentPanel);
+  m_headerPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
-  wxFont headingFont = heading->GetFont();
-  headingFont.SetWeight(wxFONTWEIGHT_BOLD);
-  headingFont.SetPointSize(headingFont.GetPointSize() + 1);
-  heading->SetFont(headingFont);
-
-  outerSizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
-
-  auto *labelSizer = new wxFlexGridSizer(2, FromDIP(7), FromDIP(12));
-  labelSizer->AddGrowableCol(1, 1);
-
-  labelSizer->Add(new wxStaticText(m_contentPanel, wxID_ANY, _("Label")), 0,
-                  wxALIGN_CENTER_VERTICAL);
-
-  m_labelCtrl = new wxTextCtrl(m_contentPanel, wxID_ANY);
+  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
+  labelSizer->Add(new wxStaticText(m_headerPanel, wxID_STATIC, _("Outcome label")), 0,
+                  wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(7));
+  m_labelCtrl = new LabelTextCtrl(m_headerPanel, wxID_ANY, wxEmptyString);
   m_labelCtrl->SetMinSize(wxSize(FromDIP(180), -1));
+  m_labelDefaultBg = m_labelCtrl->GetBackgroundColour();
+  m_labelCtrl->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_event) {
+    UpdateValidation();
+    p_event.Skip();
+  });
+  m_labelCtrl->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent &p_event) {
+    UpdateValidation();
+    p_event.Skip();
+  });
   labelSizer->Add(m_labelCtrl, 1, wxEXPAND);
 
-  outerSizer->Add(labelSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+  auto *headerBorderSizer = new wxBoxSizer(wxVERTICAL);
+  headerBorderSizer->Add(labelSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+  m_headerPanel->SetSizer(headerBorderSizer);
+  outerSizer->Add(m_headerPanel, 0, wxEXPAND);
 
-  auto *payoffHeading = new wxStaticText(m_contentPanel, wxID_ANY, _("Payoffs"));
+  outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
-  wxFont payoffHeadingFont = payoffHeading->GetFont();
-  payoffHeadingFont.SetWeight(wxFONTWEIGHT_BOLD);
-  payoffHeading->SetFont(payoffHeadingFont);
+  m_gridScroller = new wxScrolledWindow(m_contentPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                        wxVSCROLL | wxTAB_TRAVERSAL);
+  m_gridScroller->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+  m_gridScroller->SetScrollRate(0, FromDIP(10));
 
-  outerSizer->Add(payoffHeading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
-
-  auto *payoffSizer = new wxFlexGridSizer(2, FromDIP(7), FromDIP(12));
-  payoffSizer->AddGrowableCol(1, 1);
+  // Three columns rather than ActionPanel's/AppendMovePopup's two: a player-colour swatch, like
+  // EditMoveDialog's player combo box and AppendMovePopup's header sentence use, ahead of the
+  // name -- rather than tinting the name text itself, which is a different window's convention
+  // (NodeInfoPopup's read-only hover tooltip), not a data-entry dialog's.
+  auto *gridSizer = new wxFlexGridSizer(3, FromDIP(5), FromDIP(10));
+  gridSizer->AddGrowableCol(2, 1);
 
   const Game game = m_doc->GetGame();
 
-  for (size_t player = 1; player <= m_doc->GetGame()->NumPlayers(); ++player) {
+  for (size_t player = 1; player <= game->NumPlayers(); ++player) {
     const GamePlayer gamePlayer = game->GetPlayer(player);
 
-    payoffSizer->Add(
-        new wxStaticText(m_contentPanel, wxID_ANY, wxString::FromUTF8(gamePlayer->GetLabel())), 0,
-        wxALIGN_CENTER_VERTICAL);
+    Row row;
+    row.swatch = new wxStaticBitmap(m_gridScroller, wxID_ANY,
+                                    MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(gamePlayer)));
+    gridSizer->Add(row.swatch, 0, wxALIGN_CENTER_VERTICAL);
 
-    auto *payoffCtrl = new wxTextCtrl(m_contentPanel, wxID_ANY);
+    row.nameText =
+        new wxStaticText(m_gridScroller, wxID_ANY, wxString::FromUTF8(gamePlayer->GetLabel()));
+    wxFont nameFont = row.nameText->GetFont();
+    nameFont.SetWeight(wxFONTWEIGHT_BOLD);
+    row.nameText->SetFont(nameFont);
+    gridSizer->Add(row.nameText, 0, wxALIGN_CENTER_VERTICAL);
 
-    payoffCtrl->SetValidator(NumberValidator(nullptr));
-    payoffCtrl->SetMinSize(wxSize(FromDIP(100), -1));
+    // Unbounded, unlike ActionPanel's chance-probability fields (which pass Rational(0)/
+    // Rational(1) here too): a payoff can be any rational, positive or negative. The backing
+    // wxString must be heap-stable and non-null -- NumberValidator::TransferToWindow() fails
+    // unconditionally when it's null, which is harmless under the old wxPopupTransientWindow
+    // (which never ran the InitDialog/TransferDataToWindow cycle) but surfaces as a "could not
+    // transfer data to window" message under wxDialog's Show(), which does.
+    row.payoffValue = std::make_unique<wxString>(wxT("0"));
+    row.payoffCtrl = new wxTextCtrl(m_gridScroller, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                                    wxDefaultSize, 0, NumberValidator(row.payoffValue.get()));
+    row.payoffCtrl->SetMinSize(wxSize(FromDIP(100), -1));
+    if (m_payoffRows.empty()) {
+      m_defaultPayoffBg = row.payoffCtrl->GetBackgroundColour();
+    }
+    row.payoffCtrl->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_event) {
+      UpdateValidation();
+      p_event.Skip();
+    });
+    gridSizer->Add(row.payoffCtrl, 1, wxEXPAND);
 
-    payoffSizer->Add(payoffCtrl, 1, wxEXPAND);
-    m_payoffCtrls.push_back(payoffCtrl);
+    m_payoffRows.push_back(std::move(row));
   }
 
-  outerSizer->Add(payoffSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, FromDIP(12));
+  m_gridScroller->SetSizer(gridSizer);
+  const int naturalHeight = gridSizer->CalcMin().GetHeight();
+  m_gridScroller->SetMinSize(wxSize(-1, std::min(naturalHeight, FromDIP(kMaxGridHeightDIP))));
+  m_gridScroller->FitInside();
 
-  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(12));
+
+  outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
+
+  m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
-
   outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
 
   m_contentPanel->SetSizer(outerSizer);
 
-  popupSizer->Add(m_contentPanel, 1, wxEXPAND | wxALL, FromDIP(1));
-
-  SetSizerAndFit(popupSizer);
+  auto *frameSizer = new wxBoxSizer(wxVERTICAL);
+  frameSizer->Add(m_contentPanel, 1, wxEXPAND);
+  SetSizerAndFit(frameSizer);
 }
 
 void OutcomeEditorPopup::LoadValues()
 {
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
-  if (!outcome) {
-    m_labelCtrl->Clear();
-
-    for (auto *ctrl : m_payoffCtrls) {
-      ctrl->SetValue(wxT("0"));
+  if (!outcome || outcome->IsNull()) {
+    // GameOutcome::NewOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
+    // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
+    // opens already showing that as an error the user has to notice and fix before they can
+    // accept anything else.
+    m_labelCtrl->SetValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
+    for (auto &row : m_payoffRows) {
+      *row.payoffValue = wxT("0");
+      row.payoffCtrl->SetValue(*row.payoffValue);
     }
-
     return;
   }
 
@@ -185,10 +287,16 @@ void OutcomeEditorPopup::LoadValues()
 
   const Game game = m_doc->GetGame();
 
-  for (size_t player = 1; player <= m_payoffCtrls.size(); ++player) {
+  for (size_t player = 1; player <= m_payoffRows.size(); ++player) {
     const std::string payoff = outcome->GetPayoff<std::string>(game->GetPlayer(player));
-
-    m_payoffCtrls[player - 1]->SetValue(wxString(payoff.c_str(), *wxConvCurrent));
+    Row &row = m_payoffRows[player - 1];
+    // Kept in sync with the control's own displayed text (rather than left to
+    // NumberValidator::TransferFromWindow(), which this dialog never calls) so that if wx's
+    // InitDialog handling ever calls TransferToWindow() on a later Show(), it finds the value
+    // this dialog actually intends to display rather than a stale one from construction or the
+    // previous node edited.
+    *row.payoffValue = wxString(payoff.c_str(), *wxConvCurrent);
+    row.payoffCtrl->SetValue(*row.payoffValue);
   }
 }
 
@@ -205,7 +313,10 @@ void OutcomeEditorPopup::PositionPopup()
 
   const wxPoint screenPoint = m_owner->ClientToScreen(wxPoint(clientX, clientY));
 
-  Position(screenPoint, wxSize(FromDIP(8), FromDIP(8)));
+  // wxDialog has no wxPopupWindowBase-style Position() that avoids screen edges; a plain
+  // SetPosition() is fine here since the popup opens just below/right of the node like before
+  // (see AppendMovePopup::PositionPopup for the same tradeoff).
+  SetPosition(screenPoint);
 }
 
 void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
@@ -217,15 +328,30 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
   m_committing = false;
   m_restoringAfterFailedCommit = false;
 
+  // Like AppendMovePopup's "Append move"/"Insert move" title switch: which verb applies depends
+  // on state BeginEdit() only just received, not anything fixed at construction.
+  SetTitle(!m_node->GetOutcome()->IsNull() ? _("Edit outcome") : _("New outcome"));
+
   LoadValues();
-  ClearValidationFailure();
+  UpdateValidation(); // also does the Fit()/PositionPopup() a plain node change still needs
+  m_contentPanel->Layout();
   Fit();
   PositionPopup();
 
-  Popup();
+  // See OnOpenTimer's declaration for why Show()/SetFocus() are deferred via a timer rather than
+  // done directly here.
+  m_openTimer.StartOnce(60);
+}
 
-  if (m_initialPlayer > 0 && m_initialPlayer <= static_cast<int>(m_payoffCtrls.size())) {
-    wxTextCtrl *ctrl = m_payoffCtrls[m_initialPlayer - 1];
+void OutcomeEditorPopup::OnOpenTimer(wxTimerEvent &)
+{
+  if (!m_node) {
+    return; // superseded by a Cancel()/Commit() (or another BeginEdit) before this fired
+  }
+  Show();
+
+  if (m_initialPlayer > 0 && m_initialPlayer <= static_cast<int>(m_payoffRows.size())) {
+    wxTextCtrl *ctrl = m_payoffRows[m_initialPlayer - 1].payoffCtrl;
     ctrl->SetFocus();
     ctrl->SelectAll();
   }
@@ -233,6 +359,14 @@ void OutcomeEditorPopup::BeginEdit(const GameNode &p_node, int p_initialPlayer)
     m_labelCtrl->SetFocus();
     m_labelCtrl->SetInsertionPointEnd();
   }
+}
+
+void OutcomeEditorPopup::OnActivate(wxActivateEvent &p_event)
+{
+  if (!p_event.GetActive()) {
+    OnDismiss();
+  }
+  p_event.Skip();
 }
 
 void OutcomeEditorPopup::OnDismiss()
@@ -276,17 +410,41 @@ void OutcomeEditorPopup::Cancel()
   ClearValidationFailure();
 
   m_cancelled = true;
-  Dismiss();
+  Hide();
 }
 
-OutcomeEditorPopup::ValidationResult
-OutcomeEditorPopup::ValidatePayoffs(std::vector<wxString> &p_payoffs)
+wxString OutcomeEditorPopup::ValidateLabel()
 {
-  p_payoffs.clear();
-  p_payoffs.reserve(m_payoffCtrls.size());
+  const wxString value = m_labelCtrl->GetValue();
+  bool invalid = value.empty();
 
-  for (size_t player = 1; player <= m_payoffCtrls.size(); ++player) {
-    wxTextCtrl *ctrl = m_payoffCtrls[player - 1];
+  if (!invalid) {
+    // The outcome currently attached to m_node (if any) keeps its own label unchanged, rather
+    // than being flagged a duplicate of itself.
+    const GameOutcome current = m_node ? m_node->GetOutcome() : nullptr;
+    for (const auto &outcome : m_doc->GetGame()->GetOutcomes()) {
+      if (outcome != current && wxString::FromUTF8(outcome->GetLabel()) == value) {
+        invalid = true;
+        break;
+      }
+    }
+  }
+
+  m_labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_labelDefaultBg);
+  m_labelCtrl->Refresh();
+
+  if (!invalid) {
+    return wxEmptyString;
+  }
+  return value.empty() ? _("Outcome label cannot be empty.") : _("Outcome label must be unique.");
+}
+
+wxString OutcomeEditorPopup::ValidatePayoffs()
+{
+  wxString message;
+
+  for (size_t player = 1; player <= m_payoffRows.size(); ++player) {
+    wxTextCtrl *ctrl = m_payoffRows[player - 1].payoffCtrl;
     wxString value = ctrl->GetValue();
 
     if (value.EndsWith(wxT("/"))) {
@@ -295,20 +453,45 @@ OutcomeEditorPopup::ValidatePayoffs(std::vector<wxString> &p_payoffs)
       ctrl->SetInsertionPointEnd();
     }
 
+    bool invalid = false;
     try {
       lexical_cast<Rational>(value.ToStdString());
     }
     catch (const std::exception &) {
-      return {false,
-              wxString::Format(_("Payoff for player %lu is not a valid number."),
-                               static_cast<unsigned long>(player)),
-              ctrl};
+      invalid = true;
     }
 
-    p_payoffs.push_back(value);
+    ctrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultPayoffBg);
+    ctrl->Refresh();
+
+    if (invalid && message.empty()) {
+      message = wxString::Format(_("Payoff for player %lu is not a valid number."),
+                                 static_cast<unsigned long>(player));
+    }
   }
 
-  return {};
+  return message;
+}
+
+void OutcomeEditorPopup::UpdateValidation()
+{
+  wxString message = ValidateLabel();
+  const wxString payoffMessage = ValidatePayoffs(); // always run, to keep every field's
+                                                    // highlighting current, not just the first
+  if (message.empty()) {
+    message = payoffMessage;
+  }
+  if (message.empty()) {
+    ClearValidationFailure();
+  }
+  else {
+    m_errorText->SetLabel(message);
+    m_errorText->Wrap(FromDIP(260));
+    m_errorText->Show();
+    m_contentPanel->Layout();
+  }
+  Fit();
+  PositionPopup();
 }
 
 bool OutcomeEditorPopup::Commit()
@@ -319,22 +502,32 @@ bool OutcomeEditorPopup::Commit()
 
   m_committing = true;
 
-  std::vector<wxString> payoffs;
-  const ValidationResult validation = ValidatePayoffs(payoffs);
-
-  if (!validation.ok) {
-    ShowValidationFailure(validation.message, validation.ctrl);
-    RestoreAfterFailedCommit(validation.ctrl);
+  UpdateValidation();
+  if (!m_errorText->GetLabel().empty()) {
+    wxBell();
+    // UpdateValidation() just recoloured every field; m_labelCtrl's own background reflects
+    // whether it was the invalid one, without re-running ValidateLabel() a second time here.
+    wxTextCtrl *ctrl = (m_labelCtrl->GetBackgroundColour() == kInvalidLabelBg)
+                           ? m_labelCtrl
+                           : (m_payoffRows.empty() ? nullptr : m_payoffRows.front().payoffCtrl);
+    RestoreAfterFailedCommit(ctrl);
     m_committing = false;
     return false;
   }
 
+  std::vector<wxString> payoffs;
+  payoffs.reserve(m_payoffRows.size());
+  for (auto &row : m_payoffRows) {
+    payoffs.push_back(row.payoffCtrl->GetValue());
+  }
+
   try {
-    m_doc->DoSetOutcomeData(m_node, m_labelCtrl->GetValue(), payoffs);
+    m_doc->DoSetOutcomeData(m_node, m_labelCtrl->GetNormalizedValue(), payoffs);
   }
   catch (const std::exception &ex) {
-    ShowValidationFailure(wxString::FromUTF8(ex.what()), m_labelCtrl);
-    RestoreAfterFailedCommit(m_labelCtrl);
+    wxTextCtrl *ctrl = m_payoffRows.empty() ? nullptr : m_payoffRows.front().payoffCtrl;
+    ShowValidationFailure(wxString::FromUTF8(ex.what()), ctrl);
+    RestoreAfterFailedCommit(ctrl);
     m_committing = false;
     return false;
   }
@@ -342,7 +535,7 @@ bool OutcomeEditorPopup::Commit()
   ClearValidationFailure();
 
   m_dismissing = true;
-  Dismiss();
+  Hide();
   m_dismissing = false;
   m_node = nullptr;
 
@@ -405,14 +598,759 @@ void OutcomeEditorPopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
     PositionPopup();
 
     if (!IsShown()) {
-      Popup();
+      Show();
     }
 
-    wxTextCtrl *ctrl = p_invalidCtrl ? p_invalidCtrl : m_labelCtrl;
-    ctrl->SetFocus();
-    ctrl->SelectAll();
+    if (p_invalidCtrl) {
+      p_invalidCtrl->SetFocus();
+      p_invalidCtrl->SelectAll();
+    }
   });
 }
+
+//--------------------------------------------------------------------------
+//                        class AppendMovePopup
+//--------------------------------------------------------------------------
+
+// Floating window for appending a fresh move at a terminal node, opened as soon as a player is
+// picked from the node menu's "Insert move for"/"Assign this move to" submenu (efgnodemenu.cc).
+// Grows its action-label list either by tabbing off the last row (which appends a new one) or
+// via the count field; the two are kept in sync. Enter accepts the panel from any field;
+// commits the same way on losing activation (clicking elsewhere); Escape cancels.
+//
+// This started out as a wxPopupTransientWindow (matching OutcomeEditorPopup), then a plain
+// wxFrame with wxNO_BORDER, then a wxMiniFrame with a tiny caption -- none of the three ever
+// reliably received real keyboard focus on macOS (typing produced the system's unhandled-key
+// beep or nothing at all; Escape, bound at the window's own top level, had no effect either),
+// regardless of how Show()/SetFocus() were sequenced. Every one of those is a window class this
+// app had never actually shown non-modally before. wxDialog is the one class already proven,
+// everywhere else in this app, to reliably take keyboard focus for its children -- every other
+// dialog in src/gui relies on exactly that. The only twist here is calling Show() instead of
+// ShowModal(), which changes whether the parent is blocked, not whether the window can become
+// key -- that's a property of being an activatable top-level window, not of modality.
+class AppendMovePopup : public wxDialog {
+public:
+  AppendMovePopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);
+
+  // Appends a fresh move for p_player at the terminal node p_node.
+  void BeginAppend(const GameNode &p_node, const GamePlayer &p_player);
+  // Inserts a move for p_player prior to the non-terminal node p_node -- p_node and everything
+  // below it becomes the new move's first action. Otherwise identical to BeginAppend: same
+  // popup, same growable action list, same validation: only the verb in the header sentence,
+  // the dialog title, and which GameDocument method Commit() ultimately calls differ.
+  void BeginInsert(const GameNode &p_node, const GamePlayer &p_player);
+  bool Commit();
+  void Cancel();
+
+private:
+  struct Row {
+    wxString label;
+    wxString prob; // only meaningful when m_isChance
+    wxTextCtrl *labelCtrl{nullptr};
+    wxTextCtrl *probCtrl{nullptr};
+  };
+
+  void BuildControls();
+  // Shared guts of BeginAppend()/BeginInsert().
+  void Begin(const GameNode &p_node, const GamePlayer &p_player, bool p_isInsert);
+  // Rebuilds the row grid's controls from m_rows -- called whenever the row count changes.
+  void RebuildGrid();
+  // Snapshots whatever's typed in the live controls into m_rows, then grows or shrinks m_rows
+  // to p_count (new rows get a numbered placeholder label and, for chance, a recomputed
+  // uniform probability) and rebuilds. Shrinking trims from the bottom unconditionally, even
+  // if a trimmed row already had a typed label -- this is all pre-commit, so there's nothing
+  // to preserve carefully.
+  void SetRowCount(int p_count);
+  void PositionPopup();
+  void OnKeyDown(wxKeyEvent &p_event);
+  // Fires when this window gains or loses activation -- losing it (the user clicked the tree
+  // canvas, another window, or another app) commits, the same way OutcomeEditorPopup commits
+  // on OnDismiss(). Gaining activation is ignored.
+  void OnActivate(wxActivateEvent &p_event);
+  // Commits, unless this deactivation is the one Cancel()/Commit() themselves triggered by
+  // hiding the window (m_dismissing/m_restoringAfterFailedCommit) or the user just cancelled
+  // (m_cancelled).
+  void OnDismiss();
+  // BeginAppend is called from OnSetPlayerMenu (efgnodemenu.cc), itself a wxMenu item handler
+  // still running while the menu's own native close sequence is unwinding, which ends by
+  // restoring activation to the tree canvas; showing and focusing this window synchronously
+  // there can still lose that race. A short one-shot timer reliably lands after it's done.
+  void OnOpenTimer(wxTimerEvent &p_event);
+  // Bound to every row field. Tab falling off the grid's true last field grows the list by one
+  // row and focuses it; every other field's Tab is left to native focus traversal, which
+  // already does the right thing. Enter is handled globally instead (see OnKeyDown) -- it
+  // accepts the whole panel regardless of which field it's pressed in.
+  void OnFieldKeyDown(wxKeyEvent &p_event, wxTextCtrl *p_ctrl);
+  void OnCountChanged(wxCommandEvent &p_event);
+
+  // Checks every row's label for being empty or a duplicate of another row's, colouring each
+  // offending field's background (like EditMoveDialog's ActionPanel) and returning a
+  // description of the first problem found, or an empty string if all are valid. A pure check
+  // would leave the fields uncoloured until a commit was attempted; this runs on every
+  // keystroke instead (see UpdateValidation) so the highlighting is never stale.
+  wxString ValidateLabels();
+  // Chance moves only. Parses every row's probability field into p_probs and checks the
+  // resulting distribution (via ValidateDistribution), colouring offending fields the same way
+  // ValidateLabels() does and returning a description of the first problem found, or an empty
+  // string if the distribution is valid -- in which case p_probs holds the parsed values.
+  // Leaves p_probs empty on any failure.
+  wxString ValidateProbabilities(std::vector<Number> &p_probs);
+  // Refreshes the error text/highlighting from ValidateLabels() (and, for chance moves,
+  // ValidateProbabilities()) -- called after every row edit and every row-count change, not
+  // just when a commit is attempted, so an invalid label or probability is flagged immediately
+  // rather than only when the user tries to leave.
+  void UpdateValidation();
+  void ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl);
+  void ClearValidationFailure();
+  void RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl);
+
+  EfgDisplay *m_owner;
+  std::shared_ptr<GameDocument> m_doc;
+
+  GameNode m_node;
+  GamePlayer m_player;
+  bool m_isChance{false};
+  // True for an insert (m_node and everything below it becomes the new move's first action),
+  // false for an append (m_node is an empty terminal node). Set by Begin(); read by Commit()
+  // to decide between DoInsertMove/DoAppendMove, and by RebuildGrid() for the header sentence.
+  bool m_isInsert{false};
+
+  wxPanel *m_contentPanel;
+  // Shaded strip holding the "Append/Insert move for <player> with <count> actions" sentence,
+  // divided from the action list below by a wxStaticLine (see BuildControls).
+  wxPanel *m_headerPanel;
+  wxStaticText *m_verbText; // "Append move for" or "Insert move for", per m_isInsert
+  wxStaticBitmap *m_playerSwatch;
+  wxStaticText *m_playerNameText;
+  wxSpinCtrl *m_countCtrl;
+  // Scrolls once the row list grows past kMaxGridHeight, rather than growing the dialog (and
+  // the screen it's anchored to) without bound.
+  wxScrolledWindow *m_gridScroller{nullptr};
+  wxBoxSizer *m_gridContainer{nullptr};
+  wxStaticText *m_hintText;
+  wxStaticText *m_errorText;
+  std::vector<Row> m_rows;
+  // A freshly created LabelTextCtrl's background, captured the first time RebuildGrid creates
+  // one; the colour ValidateLabels() restores a row to once it's no longer empty/duplicate.
+  wxColour m_defaultLabelBg;
+  wxTimer m_openTimer;
+
+  bool m_cancelled{false};
+  bool m_dismissing{false};
+  bool m_committing{false};
+  bool m_restoringAfterFailedCommit{false};
+};
+
+AppendMovePopup::AppendMovePopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc)
+  : wxDialog(p_owner, wxID_ANY, _("Append move"), wxDefaultPosition, wxDefaultSize, wxCAPTION),
+    m_owner(p_owner), m_doc(p_doc), m_contentPanel(nullptr), m_headerPanel(nullptr),
+    m_verbText(nullptr), m_playerSwatch(nullptr), m_playerNameText(nullptr), m_countCtrl(nullptr),
+    m_hintText(nullptr), m_errorText(nullptr)
+{
+  BuildControls();
+
+  Bind(wxEVT_CHAR_HOOK, &AppendMovePopup::OnKeyDown, this);
+  Bind(wxEVT_ACTIVATE, &AppendMovePopup::OnActivate, this);
+
+  m_openTimer.SetOwner(this);
+  Bind(wxEVT_TIMER, &AppendMovePopup::OnOpenTimer, this);
+}
+
+void AppendMovePopup::BuildControls()
+{
+  m_contentPanel = new wxPanel(this);
+  m_contentPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+
+  auto *outerSizer = new wxBoxSizer(wxVERTICAL);
+
+  // Header: a shaded strip, divided from the action list below, whose contents read as one
+  // sentence -- "Append move for <swatch> <player> with <count> actions" -- rather than as
+  // separate label/field rows.
+  m_headerPanel = new wxPanel(m_contentPanel);
+  m_headerPanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+
+  // A plain (non-wrapping) horizontal sizer, deliberately: wxWrapSizer's reported minimum
+  // width is just enough for its widest single item, since it exists to shrink onto multiple
+  // lines. That meant this sentence's wrap point tracked whatever width the row grid happened
+  // to need, not the sentence's own content -- unpredictable as the player name or count digit
+  // width changed. A non-wrapping sizer reports its true, one-line width as its minimum, so
+  // Fit() below sizes the whole dialog to comfortably fit the sentence on one line every time.
+  auto *sentenceSizer = new wxBoxSizer(wxHORIZONTAL);
+  m_verbText = new wxStaticText(m_headerPanel, wxID_ANY, _("Append move for"));
+  sentenceSizer->Add(m_verbText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  m_playerSwatch = new wxStaticBitmap(m_headerPanel, wxID_ANY, wxNullBitmap);
+  sentenceSizer->Add(m_playerSwatch, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  m_playerNameText = new wxStaticText(m_headerPanel, wxID_ANY, wxEmptyString);
+  wxFont nameFont = m_playerNameText->GetFont();
+  nameFont.SetWeight(wxFONTWEIGHT_BOLD);
+  m_playerNameText->SetFont(nameFont);
+  sentenceSizer->Add(m_playerNameText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("with")), 0,
+                     wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  m_countCtrl = new wxSpinCtrl(m_headerPanel, wxID_ANY, wxT("2"), wxDefaultPosition,
+                               wxSize(FromDIP(55), -1), wxSP_ARROW_KEYS, 1, 10000, 2);
+  sentenceSizer->Add(m_countCtrl, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+
+  sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("actions")), 0,
+                     wxALIGN_CENTER_VERTICAL);
+
+  m_countCtrl->Bind(wxEVT_SPINCTRL, &AppendMovePopup::OnCountChanged, this);
+  m_countCtrl->Bind(wxEVT_TEXT_ENTER, &AppendMovePopup::OnCountChanged, this);
+  m_countCtrl->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent &p_event) {
+    SetRowCount(m_countCtrl->GetValue());
+    p_event.Skip();
+  });
+
+  auto *headerBorderSizer = new wxBoxSizer(wxVERTICAL);
+  headerBorderSizer->Add(sentenceSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+  m_headerPanel->SetSizer(headerBorderSizer);
+  outerSizer->Add(m_headerPanel, 0, wxEXPAND);
+
+  outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
+
+  m_gridScroller = new wxScrolledWindow(m_contentPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                        wxVSCROLL | wxTAB_TRAVERSAL);
+  m_gridScroller->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+  m_gridScroller->SetScrollRate(0, FromDIP(10));
+  m_gridContainer = new wxBoxSizer(wxVERTICAL);
+  m_gridScroller->SetSizer(m_gridContainer);
+  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(12));
+
+  outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
+
+  m_hintText =
+      new wxStaticText(m_contentPanel, wxID_ANY, _("Tab past the last action to add another"));
+  m_hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+  wxFont hintFont = m_hintText->GetFont();
+  hintFont.SetPointSize(hintFont.GetPointSize() - 1);
+  m_hintText->SetFont(hintFont);
+  outerSizer->Add(m_hintText, 0, wxALL, FromDIP(10));
+
+  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+  m_errorText->SetForegroundColour(*wxRED);
+  m_errorText->Wrap(FromDIP(260));
+  m_errorText->Hide();
+  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+
+  m_contentPanel->SetSizer(outerSizer);
+
+  auto *frameSizer = new wxBoxSizer(wxVERTICAL);
+  frameSizer->Add(m_contentPanel, 1, wxEXPAND);
+  SetSizerAndFit(frameSizer);
+}
+
+void AppendMovePopup::RebuildGrid()
+{
+  m_gridContainer->Clear(true); // destroys the previous row controls
+
+  const int numColumns = m_isChance ? 2 : 1;
+  auto *gridSizer = new wxFlexGridSizer(numColumns, FromDIP(5), FromDIP(10));
+  gridSizer->AddGrowableCol(0, 1);
+
+  gridSizer->Add(new wxStaticText(m_gridScroller, wxID_STATIC, _("Label")), 0,
+                 wxALIGN_CENTER_VERTICAL);
+  if (m_isChance) {
+    gridSizer->Add(new wxStaticText(m_gridScroller, wxID_STATIC, _("Probability")), 0,
+                   wxALIGN_CENTER_VERTICAL);
+  }
+
+  for (size_t i = 0; i < m_rows.size(); i++) {
+    Row &row = m_rows[i];
+    const bool isLastRow = (i + 1 == m_rows.size());
+    // Only the grid's true last field needs wxTE_PROCESS_TAB, so that a Tab press there
+    // reaches OnFieldKeyDown instead of being consumed by native focus traversal (which is
+    // what was making Tab silently jump back up to the count field). Every other field's Tab
+    // already does the right thing -- moves to the next field -- without any help.
+    const bool labelIsLastField = isLastRow && !m_isChance;
+
+    row.labelCtrl = new LabelTextCtrl(m_gridScroller, wxID_ANY, row.label, wxDefaultPosition,
+                                      wxDefaultSize, labelIsLastField ? wxTE_PROCESS_TAB : 0);
+    row.labelCtrl->SetMinSize(wxSize(FromDIP(160), -1));
+    if (i == 0) {
+      m_defaultLabelBg = row.labelCtrl->GetBackgroundColour();
+    }
+    row.labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
+      if (i < m_rows.size()) {
+        m_rows[i].label = m_rows[i].labelCtrl->GetValue();
+      }
+      UpdateValidation();
+      p_event.Skip();
+    });
+    row.labelCtrl->Bind(wxEVT_KEY_DOWN, [this, ctrl = row.labelCtrl](wxKeyEvent &p_event) {
+      OnFieldKeyDown(p_event, ctrl);
+    });
+    gridSizer->Add(row.labelCtrl, 1, wxEXPAND);
+
+    if (m_isChance) {
+      row.probCtrl = new wxTextCtrl(m_gridScroller, wxID_ANY, row.prob, wxDefaultPosition,
+                                    wxDefaultSize, isLastRow ? wxTE_PROCESS_TAB : 0);
+      row.probCtrl->SetMinSize(wxSize(FromDIP(80), -1));
+      row.probCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
+        if (i < m_rows.size()) {
+          m_rows[i].prob = m_rows[i].probCtrl->GetValue();
+        }
+        UpdateValidation();
+        p_event.Skip();
+      });
+      row.probCtrl->Bind(wxEVT_KEY_DOWN, [this, ctrl = row.probCtrl](wxKeyEvent &p_event) {
+        OnFieldKeyDown(p_event, ctrl);
+      });
+      gridSizer->Add(row.probCtrl, 0, wxEXPAND);
+    }
+  }
+
+  m_gridContainer->Add(gridSizer, 1, wxEXPAND);
+
+  // Recomputed on every rebuild, not just once: with the row count changing dynamically (unlike
+  // EditMoveDialog's ActionPanel, which sets this once at construction and otherwise leaves
+  // sizing to the user via wxRESIZE_BORDER), the popup should still shrink-to-fit for a
+  // handful of rows and only clamp -- rather than keep growing -- once the list would push the
+  // dialog past kMaxGridHeightDIP.
+  const int naturalHeight = m_gridContainer->CalcMin().GetHeight();
+  m_gridScroller->SetMinSize(wxSize(-1, std::min(naturalHeight, FromDIP(kMaxGridHeightDIP))));
+  m_gridScroller->FitInside();
+
+  m_contentPanel->Layout();
+}
+
+void AppendMovePopup::SetRowCount(int p_count)
+{
+  p_count = std::max(1, p_count);
+
+  // Snapshot whatever's currently typed before the row controls (about to be rebuilt, or
+  // trimmed away) are torn down.
+  for (auto &row : m_rows) {
+    if (row.labelCtrl) {
+      row.label = row.labelCtrl->GetValue();
+    }
+    if (row.probCtrl) {
+      row.prob = row.probCtrl->GetValue();
+    }
+  }
+
+  const bool hadExistingRows = !m_rows.empty();
+
+  // For a chance move, a newly added row's default probability is whatever's still needed to
+  // bring the *existing* rows up to summing to one (or zero, if they already sum to one or
+  // more) -- not a uniform recompute of every row, which would silently overwrite whatever was
+  // already typed into rows that aren't changing. The one exception is populating the panel
+  // for the first time (no existing rows to take a share from at all), which still defaults to
+  // a uniform split, same as before.
+  Rational remaining(1);
+  if (m_isChance && hadExistingRows) {
+    for (const auto &row : m_rows) {
+      try {
+        remaining -= static_cast<Rational>(Number(row.prob.ToStdString()));
+      }
+      catch (const std::exception &) {
+        // Not parseable (yet) -- contributes nothing to the running sum, since there's no
+        // sensible number to subtract.
+      }
+    }
+  }
+
+  if (p_count < static_cast<int>(m_rows.size())) {
+    m_rows.resize(p_count); // trim from the bottom, unconditionally -- see SetRowCount's header
+  }
+  else {
+    for (int i = static_cast<int>(m_rows.size()); i < p_count; i++) {
+      Row row;
+      row.label = wxString::Format(wxT("%d"), i + 1);
+      if (m_isChance && hadExistingRows) {
+        const Rational share = (remaining > Rational(0)) ? remaining : Rational(0);
+        row.prob = wxString::FromUTF8(static_cast<std::string>(Number(share)));
+        remaining -= share;
+      }
+      m_rows.push_back(std::move(row));
+    }
+
+    if (m_isChance && !hadExistingRows) {
+      const wxString uniform = wxString::FromUTF8(
+          static_cast<std::string>(Number(Rational(1, static_cast<int>(m_rows.size())))));
+      for (auto &row : m_rows) {
+        row.prob = uniform;
+      }
+    }
+  }
+
+  RebuildGrid();
+
+  if (m_countCtrl->GetValue() != p_count) {
+    m_countCtrl->SetValue(p_count);
+  }
+
+  UpdateValidation(); // also does the Fit()/PositionPopup() a plain row-count change still needs
+}
+
+void AppendMovePopup::OnCountChanged(wxCommandEvent &p_event)
+{
+  SetRowCount(m_countCtrl->GetValue());
+  p_event.Skip();
+}
+
+void AppendMovePopup::OnFieldKeyDown(wxKeyEvent &p_event, wxTextCtrl *p_ctrl)
+{
+  // Enter now accepts the whole panel (see OnKeyDown) rather than acting per-field, so this
+  // only needs to handle Tab falling off the grid's true last field.
+  if (p_event.GetKeyCode() == WXK_TAB) {
+    wxTextCtrl *const lastField = m_isChance ? m_rows.back().probCtrl : m_rows.back().labelCtrl;
+    if (p_ctrl == lastField) {
+      SetRowCount(static_cast<int>(m_rows.size()) + 1);
+      m_rows.back().labelCtrl->SetFocus();
+      m_rows.back().labelCtrl->SelectAll();
+      return;
+    }
+  }
+  p_event.Skip(); // not the grid's last field -- native Tab traversal already does the right thing
+}
+
+void AppendMovePopup::PositionPopup()
+{
+  auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
+  if (!entry) {
+    return;
+  }
+
+  int clientX, clientY;
+  m_owner->CalcScrolledPosition(m_owner->LayoutToDevice(entry->GetX() + 20),
+                                m_owner->LayoutToDevice(entry->GetY()), &clientX, &clientY);
+
+  const wxPoint screenPoint = m_owner->ClientToScreen(wxPoint(clientX, clientY));
+
+  // wxFrame has no wxPopupWindowBase-style Position() that avoids screen edges; a plain
+  // SetPosition() is fine here since the popup opens just below/right of the node like before.
+  SetPosition(screenPoint);
+}
+
+void AppendMovePopup::BeginAppend(const GameNode &p_node, const GamePlayer &p_player)
+{
+  Begin(p_node, p_player, false);
+}
+
+void AppendMovePopup::BeginInsert(const GameNode &p_node, const GamePlayer &p_player)
+{
+  Begin(p_node, p_player, true);
+}
+
+void AppendMovePopup::Begin(const GameNode &p_node, const GamePlayer &p_player, bool p_isInsert)
+{
+  m_node = p_node;
+  m_player = p_player;
+  m_isChance = p_player->IsChance();
+  m_isInsert = p_isInsert;
+  m_cancelled = false;
+  m_dismissing = false;
+  m_committing = false;
+  m_restoringAfterFailedCommit = false;
+
+  SetTitle(p_isInsert ? _("Insert move") : _("Append move"));
+  m_verbText->SetLabel(p_isInsert ? _("Insert move for") : _("Append move for"));
+
+  wxString label = wxString::FromUTF8(p_player->GetLabel());
+  if (label.empty()) {
+    label = m_isChance ? wxString(_("Chance"))
+                       : wxString::Format(_("Player %d"), p_player->GetNumber());
+  }
+  m_playerNameText->SetLabel(label);
+  m_playerSwatch->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(p_player)));
+  m_headerPanel->Layout();
+
+  m_rows.clear();
+  SetRowCount(2); // also runs UpdateValidation(), which clears any stale error/highlighting
+
+  m_contentPanel->Layout();
+  Fit();
+  PositionPopup();
+
+  // See OnOpenTimer's declaration for why Show()/SetFocus() are deferred via a timer rather
+  // than done directly here.
+  m_openTimer.StartOnce(60);
+}
+
+void AppendMovePopup::OnOpenTimer(wxTimerEvent &)
+{
+  if (!m_node) {
+    return; // superseded by a Cancel()/Commit() (or another BeginAppend) before this fired
+  }
+  Show();
+  m_rows[0].labelCtrl->SetFocus();
+  m_rows[0].labelCtrl->SelectAll();
+}
+
+void AppendMovePopup::OnActivate(wxActivateEvent &p_event)
+{
+  if (!p_event.GetActive()) {
+    OnDismiss();
+  }
+  p_event.Skip();
+}
+
+void AppendMovePopup::OnDismiss()
+{
+  if (m_dismissing || m_restoringAfterFailedCommit) {
+    return;
+  }
+
+  if (m_cancelled) {
+    m_cancelled = false;
+    m_node = nullptr;
+    return;
+  }
+
+  Commit();
+}
+
+void AppendMovePopup::OnKeyDown(wxKeyEvent &p_event)
+{
+  switch (p_event.GetKeyCode()) {
+  case WXK_ESCAPE:
+    Cancel();
+    return;
+
+  case WXK_RETURN:
+  case WXK_NUMPAD_ENTER:
+    // Accepts the panel regardless of which field has focus -- Tab (OnFieldKeyDown) is the
+    // one that grows the list; Enter always means "I'm done."
+    Commit();
+    return;
+
+  default:
+    p_event.Skip();
+  }
+}
+
+void AppendMovePopup::Cancel()
+{
+  if (!m_node) {
+    return;
+  }
+
+  ClearValidationFailure();
+
+  m_cancelled = true;
+  Hide();
+}
+
+wxString AppendMovePopup::ValidateLabels()
+{
+  wxString message;
+  for (size_t i = 0; i < m_rows.size(); i++) {
+    const wxString value = m_rows[i].labelCtrl->GetValue();
+    bool invalid = value.empty();
+    for (size_t j = 0; !invalid && j < m_rows.size(); j++) {
+      if (j != i && m_rows[j].labelCtrl->GetValue() == value) {
+        invalid = true;
+      }
+    }
+
+    m_rows[i].labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultLabelBg);
+    m_rows[i].labelCtrl->Refresh();
+
+    if (invalid && message.empty()) {
+      message = value.empty() ? _("Action labels cannot be empty.")
+                              : _("Action labels must be unique within the information set.");
+    }
+  }
+  return message;
+}
+
+wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
+{
+  p_probs.clear();
+
+  wxString message;
+  bool allParsed = true;
+  for (auto &row : m_rows) {
+    bool invalid = false;
+    try {
+      p_probs.emplace_back(row.probCtrl->GetValue().ToStdString());
+    }
+    catch (const std::exception &) {
+      invalid = true;
+      allParsed = false;
+    }
+    row.probCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultLabelBg);
+    row.probCtrl->Refresh();
+    if (invalid && message.empty()) {
+      message = _("Probabilities must be valid numbers.");
+    }
+  }
+
+  if (!allParsed) {
+    p_probs.clear();
+    return message;
+  }
+
+  try {
+    ValidateDistribution(p_probs);
+  }
+  catch (const std::exception &) {
+    for (auto &row : m_rows) {
+      row.probCtrl->SetBackgroundColour(kInvalidLabelBg);
+      row.probCtrl->Refresh();
+    }
+    p_probs.clear();
+    return _("Probabilities must be nonnegative numbers summing to one.");
+  }
+
+  return wxEmptyString;
+}
+
+void AppendMovePopup::UpdateValidation()
+{
+  wxString message = ValidateLabels();
+  if (m_isChance) {
+    std::vector<Number> probs;
+    const wxString probError = ValidateProbabilities(probs);
+    if (message.empty()) {
+      message = probError;
+    }
+  }
+  if (message.empty()) {
+    ClearValidationFailure();
+  }
+  else {
+    m_errorText->SetLabel(message);
+    m_errorText->Wrap(FromDIP(260));
+    m_errorText->Show();
+    m_contentPanel->Layout();
+  }
+  Fit();
+  PositionPopup();
+}
+
+bool AppendMovePopup::Commit()
+{
+  if (!m_node || m_committing) {
+    return false;
+  }
+
+  m_committing = true;
+
+  UpdateValidation();
+  if (!m_errorText->GetLabel().empty()) {
+    wxBell();
+    wxTextCtrl *ctrl = m_rows.empty() ? nullptr : m_rows.front().labelCtrl;
+    RestoreAfterFailedCommit(ctrl);
+    m_committing = false;
+    return false;
+  }
+
+  std::vector<std::string> labels;
+  for (auto &row : m_rows) {
+    labels.push_back(row.labelCtrl->GetValue().ToStdString(wxConvUTF8));
+  }
+
+  std::vector<Number> probs;
+  if (m_isChance) {
+    // UpdateValidation() above already ran this and found nothing wrong, but re-run it rather
+    // than trust that nothing changed in between -- this is also what actually produces the
+    // parsed probs DoAppendMove needs, which UpdateValidation() itself discards.
+    const wxString probError = ValidateProbabilities(probs);
+    if (!probError.empty()) {
+      wxBell();
+      RestoreAfterFailedCommit(m_rows.back().probCtrl);
+      m_committing = false;
+      return false;
+    }
+  }
+
+  try {
+    if (m_isInsert) {
+      m_doc->DoInsertMove(m_node, m_player, labels, probs);
+    }
+    else {
+      m_doc->DoAppendMove(m_node, m_player, labels, probs);
+    }
+  }
+  catch (const std::exception &ex) {
+    wxTextCtrl *ctrl = m_rows.empty() ? nullptr : m_rows.front().labelCtrl;
+    ShowValidationFailure(wxString::FromUTF8(ex.what()), ctrl);
+    RestoreAfterFailedCommit(ctrl);
+    m_committing = false;
+    return false;
+  }
+
+  ClearValidationFailure();
+
+  m_dismissing = true;
+  Hide();
+  m_dismissing = false;
+  m_node = nullptr;
+
+  m_committing = false;
+  return true;
+}
+
+void AppendMovePopup::ShowValidationFailure(const wxString &p_message, wxTextCtrl *p_ctrl)
+{
+  wxBell();
+
+  if (m_errorText) {
+    m_errorText->SetLabel(p_message);
+    m_errorText->Wrap(FromDIP(260));
+    m_errorText->Show();
+  }
+
+  if (m_contentPanel) {
+    m_contentPanel->Layout();
+  }
+
+  Fit();
+  PositionPopup();
+
+  if (p_ctrl) {
+    p_ctrl->SetFocus();
+    p_ctrl->SelectAll();
+  }
+}
+
+void AppendMovePopup::ClearValidationFailure()
+{
+  if (!m_errorText) {
+    return;
+  }
+
+  m_errorText->SetLabel(wxEmptyString);
+  m_errorText->Hide();
+
+  if (m_contentPanel) {
+    m_contentPanel->Layout();
+  }
+}
+
+void AppendMovePopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
+{
+  if (m_restoringAfterFailedCommit) {
+    return;
+  }
+
+  m_restoringAfterFailedCommit = true;
+
+  CallAfter([this, p_invalidCtrl]() {
+    m_restoringAfterFailedCommit = false;
+
+    if (!m_node) {
+      return;
+    }
+
+    PositionPopup();
+
+    if (!IsShown()) {
+      Show();
+    }
+
+    if (p_invalidCtrl) {
+      p_invalidCtrl->SetFocus();
+      p_invalidCtrl->SelectAll();
+    }
+  });
+}
+
 //--------------------------------------------------------------------------
 //                        class NodeInfoPopup
 //--------------------------------------------------------------------------
@@ -581,6 +1519,7 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
 void EfgDisplay::InitPopups()
 {
   m_outcomeEditor = new OutcomeEditorPopup(this, m_doc);
+  m_appendMoveEditor = new AppendMovePopup(this, m_doc);
   m_nodeInfoPopup = new NodeInfoPopup(this, m_doc);
 }
 
@@ -589,11 +1528,24 @@ void EfgDisplay::PostPendingChanges()
   if (m_outcomeEditor->IsShown()) {
     m_outcomeEditor->Commit();
   }
+  if (m_appendMoveEditor->IsShown()) {
+    m_appendMoveEditor->Commit();
+  }
 }
 
 void EfgDisplay::BeginEditOutcome(const GameNode &p_node, int p_initialPlayer)
 {
   m_outcomeEditor->BeginEdit(p_node, p_initialPlayer);
+}
+
+void EfgDisplay::BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player)
+{
+  m_appendMoveEditor->BeginAppend(p_node, p_player);
+}
+
+void EfgDisplay::BeginInsertMove(const GameNode &p_node, const GamePlayer &p_player)
+{
+  m_appendMoveEditor->BeginInsert(p_node, p_player);
 }
 
 void EfgDisplay::DismissNodeInfo()

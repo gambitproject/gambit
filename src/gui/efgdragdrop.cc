@@ -86,7 +86,7 @@ bool TreeDropTarget::OnDropOutcome(const GameNode &p_node, const wxString &p_tex
   p_text.Right(p_text.Length() - 1).ToLong(&n);
 
   const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || srcNode == p_node || !srcNode->GetOutcome()) {
+  if (!srcNode || srcNode == p_node || srcNode->GetOutcome()->IsNull()) {
     return false;
   }
 
@@ -296,7 +296,7 @@ bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &
 
 bool EfgDisplay::CanDropOutcomeOn(const GameNode &p_target, const GameNode &p_source) const
 {
-  return p_target && p_source && p_target != p_source && p_source->GetOutcome();
+  return p_target && p_source && p_target != p_source && !p_source->GetOutcome()->IsNull();
 }
 
 bool EfgDisplay::ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
@@ -372,7 +372,7 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       return;
     }
 
-    if ((hit.region == Outcome || hit.region == Payoff) && hit.node->GetOutcome()) {
+    if ((hit.region == Outcome || hit.region == Payoff) && !hit.node->GetOutcome()->IsNull()) {
       wxString label;
       label << "O" << hit.node->GetNumber();
       wxTextDataObject textData(label);

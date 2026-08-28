@@ -1,0 +1,20 @@
+/* SVG */
+static const char *const newtree_svg =
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" "
+    "stroke=\"currentColor\" "
+    "stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\">"
+    "<path d=\"M11.19 5.14 7.76 9.94\"/>"
+    "<path d=\"M12.81 5.14 16.24 9.94\"/>"
+    "<path d=\"M6.53 12.21 3.9 18.98\"/>"
+    "<path d=\"M7.41 12.23 9.65 18.96\"/>"
+    "<path d=\"M16.59 12.23 14.35 18.96\"/>"
+    "<path d=\"M17.47 12.21 20.1 18.98\"/>"
+    "<path d=\"M8.3 11h7.4\" stroke-width=\"1.4\" stroke-dasharray=\"1.6 1.6\"/>"
+    "<circle cx=\"12\" cy=\"4\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"7\" cy=\"11\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"17\" cy=\"11\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"3.5\" cy=\"20\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"10\" cy=\"20\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"14\" cy=\"20\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>"
+    "<circle cx=\"20.5\" cy=\"20\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>"
+    "</svg>";

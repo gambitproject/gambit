@@ -268,6 +268,7 @@ void PlayerPanel::Rebuild()
 
   const int activeCount = ActiveCount();
   const wxSize buttonSize(FromDIP(28), -1);
+  const int buttonGap = FromDIP(2);
 
   for (size_t i = 0; i < m_rows.size(); i++) {
     Row &row = m_rows[i];
@@ -318,14 +319,14 @@ void PlayerPanel::Rebuild()
       row.upButton->Enable(i > 0);
       row.upButton->Bind(wxEVT_BUTTON,
                          [this, i](wxCommandEvent &) { MovePlayerUp(static_cast<int>(i)); });
-      buttonSizer->Add(row.upButton, 0, wxLEFT, 2);
+      buttonSizer->Add(row.upButton, 0, wxLEFT, buttonGap);
 
       row.downButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2193), wxDefaultPosition, buttonSize);
       row.downButton->Enable(i + 1 < m_rows.size());
       row.downButton->Bind(wxEVT_BUTTON,
                            [this, i](wxCommandEvent &) { MovePlayerDown(static_cast<int>(i)); });
-      buttonSizer->Add(row.downButton, 0, wxLEFT, 2);
+      buttonSizer->Add(row.downButton, 0, wxLEFT, buttonGap);
     }
     else {
       // Keep the delete/restore button aligned under its counterpart in other rows, in place
@@ -334,8 +335,8 @@ void PlayerPanel::Rebuild()
       // them dangling.
       row.upButton = nullptr;
       row.downButton = nullptr;
-      buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
-      buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
+      buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
+      buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
     }
 
     const wxString blockedReason = row.isDeleted ? wxString() : BlockedDeleteReason(row);
@@ -359,7 +360,7 @@ void PlayerPanel::Rebuild()
     row.deleteButton->Enable(canDelete);
     row.deleteButton->Bind(wxEVT_BUTTON,
                            [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
-    buttonSizer->Add(row.deleteButton, 0, wxLEFT, 2);
+    buttonSizer->Add(row.deleteButton, 0, wxLEFT, buttonGap);
 
     gridSizer->Add(buttonSizer, 0, wxALIGN_CENTER_VERTICAL);
   }
@@ -374,10 +375,10 @@ void PlayerPanel::Rebuild()
   addButton->SetToolTip(_("Add player"));
   addButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { AddPlayer(); });
   auto *addSizer = new wxBoxSizer(wxHORIZONTAL);
-  addSizer->Add(addButton, 0, wxLEFT, 2);
+  addSizer->Add(addButton, 0, wxLEFT, buttonGap);
   gridSizer->Add(addSizer, 0, wxALIGN_CENTER_VERTICAL);
 
-  m_topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
+  m_topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, FromDIP(5));
   FitInside();
   Layout();
   m_rebuilding = false;
@@ -553,6 +554,8 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *notebook = new wxNotebook(this, wxID_ANY);
@@ -562,20 +565,20 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
 
   auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Title")), 0,
-                  wxALL | wxALIGN_CENTER, 5);
+                  wxALL | wxALIGN_CENTER, S);
   m_title =
       new wxTextCtrl(generalPanel, wxID_ANY, wxString::FromUTF8(m_doc->GetGame()->GetTitle()),
-                     wxDefaultPosition, wxSize(400, -1));
-  titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, 5);
+                     wxDefaultPosition, wxSize(FromDIP(400), -1));
+  titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, S);
   generalSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
 
   auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Comment")), 0,
-                    wxALL | wxALIGN_CENTER, 5);
+                    wxALL | wxALIGN_CENTER, S);
   m_comment = new wxTextCtrl(generalPanel, wxID_ANY,
                              wxString::FromUTF8(m_doc->GetGame()->GetDescription()),
-                             wxDefaultPosition, wxSize(400, -1), wxTE_MULTILINE);
-  commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
+                             wxDefaultPosition, wxSize(FromDIP(400), -1), wxTE_MULTILINE);
+  commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, S);
   generalSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
 
   auto *boxSizer =
@@ -583,33 +586,33 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
 
   boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC,
                                  wxString(_("Filename: ")) + m_doc->GetFilename()),
-                0, wxALL, 5);
+                0, wxALL, S);
 
   const Game game = m_doc->GetGame();
   if (game->IsConstSum()) {
     boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("This is a constant-sum game")), 0,
-                  wxALL, 5);
+                  wxALL, S);
   }
   else {
     boxSizer->Add(
         new wxStaticText(generalPanel, wxID_STATIC, _("This is not a constant-sum game")), 0,
-        wxALL, 5);
+        wxALL, S);
   }
 
   if (game->IsTree()) {
     if (game->IsPerfectRecall()) {
       boxSizer->Add(
           new wxStaticText(generalPanel, wxID_STATIC, _("This is a game of perfect recall")), 0,
-          wxALL, 5);
+          wxALL, S);
     }
     else {
       boxSizer->Add(
           new wxStaticText(generalPanel, wxID_STATIC, _("This is not a game of perfect recall")),
-          0, wxALL, 5);
+          0, wxALL, S);
     }
   }
 
-  generalSizer->Add(boxSizer, 0, wxALL | wxEXPAND, 5);
+  generalSizer->Add(boxSizer, 0, wxALL | wxEXPAND, S);
   generalPanel->SetSizer(generalSizer);
   notebook->AddPage(generalPanel, _("General"));
 
@@ -633,25 +636,20 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
   playersPanel->SetSizer(playersSizer);
   notebook->AddPage(playersPanel, _("Players"));
 
-  topSizer->Add(notebook, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(notebook, 1, wxALL | wxEXPAND, S);
 
   m_errorText = new wxStaticText(this, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
-  topSizer->Add(m_errorText, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 5);
+  topSizer->Add(m_errorText, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
+    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  }
 
   SetSizer(topSizer);
-  topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-
-  wxTopLevelWindowBase::Layout();
+  SetSize(GetBestSize());
+  SetMinSize(GetSize());
   CenterOnParent();
 
   UpdateValidation();

@@ -157,10 +157,12 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("enummixed");
         }
         else if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
-          return prefix +
-                 wxString::Format("enumpoly -d 10 -e %d -m %.17g", method.stopAfter,
-                                  method.maxRegret) +
-                 strategic;
+          wxString command = wxString::Format("enumpoly -d 10 -m %.17g", method.maxRegret);
+          if (method.stopAfter.has_value()) {
+            command += wxString::Format(" -e %llu",
+                                        static_cast<unsigned long long>(method.stopAfter.value()));
+          }
+          return prefix + command + strategic;
         }
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
           return prefix + wxString::Format("gnm -d 10 -n %d -m %.17g -c %d -f %d -i %d",
@@ -175,8 +177,12 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + wxT("lp") + strategic;
         }
         else if constexpr (std::is_same_v<Method, LCPNashSpec>) {
-          return prefix + wxString::Format("lcp -e %d -r %d", method.stopAfter, method.maxDepth) +
-                 strategic;
+          wxString command = wxString::Format("lcp -r %d", method.maxDepth);
+          if (method.stopAfter.has_value()) {
+            command += wxString::Format(" -e %llu",
+                                        static_cast<unsigned long long>(method.stopAfter.value()));
+          }
+          return prefix + command + strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
           return prefix + wxString::Format("liap -d 10 -n %d -i %d -m %.17g",
@@ -244,7 +250,7 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
   return std::visit(
       []<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
-          if (method.stopAfter == 1) {
+          if (method.stopAfter.has_value() && method.stopAfter.value() == 1) {
             return wxString::Format(" (stop after one equilibrium; maximum regret %.4g)",
                                     method.maxRegret);
           }
@@ -292,8 +298,12 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
 } // namespace
 
 NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
-  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition), m_doc(p_doc)
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_doc(p_doc)
 {
+  const int S = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   if (m_doc->GetGame()->NumPlayers() == 2) {
@@ -313,7 +323,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
 
   Connect(m_countChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
           wxCommandEventHandler(NashChoiceDialog::OnCount));
-  topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, 5);
+  topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, S);
 
   if (p_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
     wxString methodChoices[] = {s_recommended, s_lp, s_simpdiv, s_logit, s_enumpoly};
@@ -326,13 +336,13 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
         new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, methodChoices);
   }
   m_methodChoice->SetSelection(0);
-  topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, 5);
+  topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, S);
 
   if (m_doc->GetGame()->IsTree()) {
     wxString repChoices[] = {wxT("using the extensive game"), wxT("using the strategic game")};
     m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
     m_repChoice->SetSelection(0);
-    topSizer->Add(m_repChoice, 0, wxALL | wxEXPAND, 5);
+    topSizer->Add(m_repChoice, 0, wxALL | wxEXPAND, S);
 
     // We only need to respond to changes in method when we have an
     // extensive game
@@ -345,12 +355,9 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
 
   UpdateRepresentationChoice();
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
+    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  }
 
   SetSizer(topSizer);
   topSizer->Fit(this);

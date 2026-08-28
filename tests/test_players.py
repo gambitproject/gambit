@@ -212,11 +212,13 @@ def _tag_contingencies(game: gbt.Game) -> None:
     can be recomputed from its strategies' labels after the game is mutated.
     """
     players = list(game.players)
-    for contingency in game.contingencies:
-        outcome = game[contingency]
+    for n, contingency in enumerate(game.contingencies, start=1):
         strategies = [list(p.strategies)[i] for p, i in zip(players, contingency, strict=True)]
-        for pl_index, (player, strategy) in enumerate(zip(players, strategies, strict=True)):
-            outcome[player] = int(f"{pl_index}{strategy.label}")
+        payoffs = {
+            player: int(f"{pl_index}{strategy.label}")
+            for pl_index, (player, strategy) in enumerate(zip(players, strategies, strict=True))
+        }
+        game.make_outcome(tuple(strategies), payoffs, f"c{n}")
 
 
 def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
