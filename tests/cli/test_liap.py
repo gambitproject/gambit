@@ -89,8 +89,14 @@ def test_agent_flag_reports_behavior_form_on_a_tree_game(
 ):
     start_file = tmp_path / "start.csv"
     start_file.write_text("0.5,0.5,0.3,0.3,0.4,0.5,0.5\n")
+    # This starting point sits close enough to a flat spot in the Lyapunov function
+    # (the "y"/"z" actions are payoff-irrelevant ties) that whether minimization
+    # reaches the default 1e-4 maxregret within maxiter is sensitive to
+    # platform-dependent floating-point rounding; loosen -m so the test checks CLI
+    # plumbing rather than exact convergence behavior.
     result = cli_runner.invoke(
-        liap.main, ["-q", "-A", "-s", str(start_file)], input=efg_asymmetric_tree_text
+        liap.main, ["-q", "-A", "-m", "0.01", "-s", str(start_file)],
+        input=efg_asymmetric_tree_text,
     )
     assert result.exit_code == 0
     lines = result.stdout.strip().splitlines()
@@ -104,7 +110,8 @@ def test_agent_flag_starting_file_accepts_exact_fractions(
     start_file = tmp_path / "start.csv"
     start_file.write_text("1/2,1/2,3/10,3/10,2/5,1/2,1/2\n")
     result = cli_runner.invoke(
-        liap.main, ["-q", "-A", "-s", str(start_file)], input=efg_asymmetric_tree_text
+        liap.main, ["-q", "-A", "-m", "0.01", "-s", str(start_file)],
+        input=efg_asymmetric_tree_text,
     )
     assert result.exit_code == 0
     lines = result.stdout.strip().splitlines()
