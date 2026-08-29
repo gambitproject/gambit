@@ -141,7 +141,7 @@ class StrategySupportProfile:
         """
         resolved_player: Player = self.game.players[player]
         strategies = tuple(
-            Strategy.wrap(s).label
+            s.deref().GetLabel().decode("utf-8")
             for s in deref(self.profile).GetStrategies(resolved_player.player)
         )
         return StrategySupport.wrap(resolved_player, strategies)
@@ -161,7 +161,7 @@ class StrategySupportProfile:
         Every entry of `strategies` must be one of the player's strategy labels, and
         at least one must be given.
         """
-        labels = {s.label for s in player.strategies}
+        labels = set(player.strategies)
         given = set(strategies)
         unknown = given - labels
         if unknown:
@@ -171,14 +171,17 @@ class StrategySupportProfile:
         if not given:
             raise ValueError("a support must contain at least one strategy for the player")
         self._ensure_unshared()
+        game: Game = cython.cast(Game, player.game)
         # Strategies to keep are added first, so that a subsequent removal is never asked
         # to remove the last remaining strategy for the player.
         for s in player.strategies:
-            if s.label in given:
-                deref(self.profile).AddStrategy(cython.cast(Strategy, s).strategy)
+            if s in given:
+                deref(self.profile).AddStrategy(game._resolve_strategy(player, s, "_set_support"))
         for s in player.strategies:
-            if s.label not in given:
-                deref(self.profile).RemoveStrategy(cython.cast(Strategy, s).strategy)
+            if s not in given:
+                deref(self.profile).RemoveStrategy(
+                    game._resolve_strategy(player, s, "_set_support")
+                )
 
     def __setitem__(self, player: str, strategies: typing.Iterable[str]) -> None:
         """Sets the support for the player with label `player` to exactly the given
@@ -255,11 +258,10 @@ class StrategySupportProfile:
             If no player in the game has the label `player`, or the player has no
             strategy with the label `strategy`.
         """
-        resolved_player: Player = self.game.players[player]
-        resolved_strategy: Strategy = resolved_player.strategies[strategy]
-        return deref(self.profile).IsDominated(
-            cython.cast(Strategy, resolved_strategy).strategy, strict, external
-        )
+        game: Game = cython.cast(Game, self.game)
+        resolved_player: Player = game.players[player]
+        handle = game._resolve_strategy(resolved_player, strategy, "is_dominated", "strategy")
+        return deref(self.profile).IsDominated(handle, strict, external)
 
 
 def _undominated_strategies_solve(

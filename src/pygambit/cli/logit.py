@@ -72,7 +72,7 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
     frequencies = game.mixed_strategy_profile(rational=False)
     it = iter(values)
     for player in game.players:
-        frequencies[player.label] = {s.label: next(it) for s in player.strategies}
+        frequencies[player.label] = {s: next(it) for s in player.strategies}
     return frequencies
 
 

@@ -79,32 +79,6 @@ def test_resolve_outcome_invalid(game: gbt.Game, outcome: str, exception: BaseEx
         games.read_from_file("sample_extensive_game.efg"),
     ]
 )
-def test_resolve_strategy(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.strategies,
-                            lambda label, fn: game._resolve_strategy(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,strategy,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "doesntexist", KeyError),
-    ]
-)
-def test_resolve_strategy_invalid(
-        game: gbt.Game, strategy: str, exception: BaseException
-) -> None:
-    with pytest.raises(exception):
-        game._resolve_strategy(strategy, "test_resolve_strategy_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
 def test_resolve_node(game: gbt.Game) -> None:
     _test_valid_resolutions(game.nodes,
                             lambda label, fn: game._resolve_node(label, fn))
