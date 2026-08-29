@@ -63,7 +63,6 @@ doc = [
     "pyyaml",
     "sphinxcontrib-bibtex",
     "myst-parser",
-    "gtdraw",
 ]
 
 [project.urls]

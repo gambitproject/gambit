@@ -189,10 +189,13 @@ Use `pip` to install from the **root directory of the source tree**:
    python -m venv venv
    source venv/bin/activate
    python -m pip install ".[test,doc]"
+   pip install gtdraw
 
 .. tip::
 
-   The "test" and "doc" optional dependencies are useful for developers wishing to run the test suite or build this documentation locally.
+   The "test" and "doc" optional dependencies are useful for developers wishing to run the test suite or build this documentation locally. `gtdraw <https://github.com/gambitproject/gtdraw>`_, used to
+   draw game trees in the tutorials and the games catalog, is installed separately rather than as
+   part of the "doc" extra, since it is not needed by the installed `pygambit` package itself.
 
 
 Once installed, simply ``import pygambit`` in your Python shell or
