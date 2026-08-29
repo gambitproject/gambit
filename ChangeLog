@@ -25,6 +25,14 @@
 - `Game.new_table` no longer creates an outcome for every contingency; a new strategic game has no outcomes,
   and every contingency is initially null. Outcomes are created as they are needed;
   games built by `Game.from_arrays` and `Game.from_dict` are unaffected.  (#1061)
+- Tutorial notebooks that use `gtdraw` to draw game trees now degrade gracefully if it isn't
+  installed: the drawing cells print a short note instead of raising `ImportError`, so the rest
+  of the tutorial (which doesn't otherwise depend on `gtdraw`) still runs. `gtdraw` depends on a
+  LaTeX installation, so this lets the tutorials be run without that heavier local setup.
+
+### Removed
+- `gtdraw` is no longer part of the `doc` optional-dependency group. Install it separately
+  (`pip install gtdraw`) to run tutorials locally or build the documentation.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 
