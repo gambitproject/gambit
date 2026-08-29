@@ -448,7 +448,8 @@ def games(
             return False
         if n_players is not None and len(game.players) != n_players:
             return False
-        return not (n_strategies is not None and len(game.strategies) != n_strategies)
+        total_strategies = sum(len(list(p.strategies)) for p in game.players)
+        return not (n_strategies is not None and total_strategies != n_strategies)
 
     def append_record(
         slug: str,

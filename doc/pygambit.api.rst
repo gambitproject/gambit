@@ -19,7 +19,6 @@ Representation of games
    Node
    Infoset
    Action
-   Strategy
    Subgame
 
 
@@ -109,12 +108,13 @@ Information about the game
    Game.outcomes
    Game.min_payoff
    Game.max_payoff
-   Game.strategies
    Game.root
    Game.actions
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.get_outcome
+   Game.get_payoffs
    Game.subgames
    Game.minimal_subgame
 
@@ -191,16 +191,6 @@ Information about the game
    Action.precedes
    Action.prob
    Action.plays
-
-.. autosummary::
-
-   :toctree: api/
-
-   Strategy.label
-   Strategy.game
-   Strategy.player
-   Strategy.number
-   Strategy.action
 
 .. autosummary::
 

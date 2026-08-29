@@ -31,7 +31,7 @@ def test_getitem_rejects_non_str():
 
 def test_predicate_construction():
     game = games.read_from_file("mixed_strategy.nfg")
-    profile = game.strategy_support_profile(lambda x: x.label != "3")
+    profile = game.strategy_support_profile(lambda player, label: label != "3")
     assert set(profile["Player 1"]) == {"1", "2"}
     assert set(profile["Player 2"]) == {"1", "2"}
 
@@ -39,7 +39,7 @@ def test_predicate_construction():
 def test_predicate_construction_error():
     game = games.read_from_file("mixed_strategy.nfg")
     with pytest.raises(ValueError):
-        game.strategy_support_profile(lambda x: x.player.label != "Player 1")
+        game.strategy_support_profile(lambda player, label: player.label != "Player 1")
 
 
 def test_iter_yields_one_support_per_player():
@@ -118,7 +118,7 @@ def test_is_dominated_unknown_strategy():
 
 def test_restrict():
     game = games.read_from_file("mixed_strategy.nfg")
-    profile = game.strategy_support_profile(lambda x: x.label != "3")
+    profile = game.strategy_support_profile(lambda player, label: label != "3")
     restricted = profile.restrict()
     assert len(restricted.players["Player 1"].strategies) == 2
     assert len(restricted.players["Player 2"].strategies) == 2
@@ -132,4 +132,4 @@ def test_undominated():
         if new_profile == profile:
             break
         profile = new_profile
-    assert profile == game.strategy_support_profile(lambda x: x.label == "1")
+    assert profile == game.strategy_support_profile(lambda player, label: label == "1")

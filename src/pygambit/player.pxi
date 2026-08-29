@@ -132,7 +132,13 @@ class PlayerActions:
 
 @cython.cclass
 class PlayerStrategies:
-    """The set of strategies available to a player."""
+    """The labels of the strategies available to a player.
+
+    .. versionchanged:: 17.0.0
+        Iterates over strategy labels (``str``) rather than ``Strategy`` objects;
+        indexing by label is no longer supported (a label is already in hand once
+        iterated) -- use ``in`` to test membership.
+    """
     player = cython.declare(c_GamePlayer)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -152,35 +158,15 @@ class PlayerStrategies:
         """The number of strategies for the player in the game."""
         return self.player.deref().GetStrategies().size()
 
-    def __iter__(self) -> typing.Iterator[Strategy]:
+    def __iter__(self) -> typing.Iterator[str]:
         for strategy in self.player.deref().GetStrategies():
-            yield Strategy.wrap(strategy)
+            yield strategy.deref().GetLabel().decode("utf-8")
 
-    def __getitem__(self, label: str) -> Strategy:
-        """Returns the player's strategy with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the strategy to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the player has no strategy with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one of the player's strategies
-            has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a strategy by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Player", "strategy", "strategies")
+    def __contains__(self, label: str) -> bool:
+        return any(
+            strategy.deref().GetLabel().decode("utf-8") == label
+            for strategy in self.player.deref().GetStrategies()
+        )
 
 
 @cython.cclass

@@ -47,8 +47,8 @@ def test_logit_estimate_strategy_rational_and_float_data_agree():
     for player in game.players:
         for strategy in player.strategies:
             assert (
-                rational_result.profile[player.label][strategy.label]
-                == pytest.approx(float_result.profile[player.label][strategy.label])
+                rational_result.profile[player.label][strategy]
+                == pytest.approx(float_result.profile[player.label][strategy])
             )
 
 
