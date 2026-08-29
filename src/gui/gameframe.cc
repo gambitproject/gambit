@@ -55,6 +55,7 @@
 #include "dlnash.h"
 #include "dllogit.h"
 #include "dlabout.h"
+#include "dlpreferences.h"
 
 #include "dlefglayout.h"
 #include "dlefglegend.h"
@@ -227,6 +228,7 @@ EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
 EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
 EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
 EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
+EVT_MENU(wxID_PREFERENCES, GameFrame::OnPrefs)
 EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
 EVT_MENU(GBT_MENU_VIEW_ZOOMIN, GameFrame::OnViewZoom)
 EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, GameFrame::OnViewZoom)
@@ -335,7 +337,7 @@ void GameFrame::OnUpdate()
   }
 
   if (m_doc->IsModified()) {
-    SetTitle(GetTitle() + wxT(" (unsaved changes)"));
+    SetTitle(GetTitle() + _(" (unsaved changes)"));
   }
 
   wxMenuBar *menuBar = GetMenuBar();
@@ -381,6 +383,12 @@ const wxSize TOOLBAR_ICON_SIZE(24, 24);
 
 void GameFrame::MakeMenus()
 {
+  // A re-entrant call (e.g. language switch) must unregister the outgoing File
+  // menu from the MRU history before SetMenuBar() destroys it.
+  if (wxMenuBar *oldBar = GetMenuBar()) {
+    wxGetApp().RemoveMenu(oldBar->GetMenu(0));
+  }
+
   auto *fileMenu = new wxMenu;
 
   auto *fileNewMenu = new wxMenu;
@@ -425,6 +433,8 @@ void GameFrame::MakeMenus()
   editMenu->Append(wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"));
   editMenu->AppendSeparator();
   editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
+  editMenu->AppendSeparator();
+  editMenu->Append(wxID_PREFERENCES, _("&Preferences"), _("Set preferences"));
 
   auto *viewMenu = new wxMenu;
   viewMenu->Append(GBT_MENU_VIEW_PROFILES, _("&Profiles"), _("Display/hide profiles window"),
@@ -444,7 +454,7 @@ void GameFrame::MakeMenus()
   viewMenu->AppendSeparator();
 
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
-                   wxT("Display the reduced strategic representation ") wxT("of the game"), true);
+                   _("Display the reduced strategic representation of the game"), true);
   if (!m_doc->GetGame()->IsTree()) {
     viewMenu->Check(GBT_MENU_VIEW_STRATEGIC, true);
     viewMenu->Enable(GBT_MENU_VIEW_STRATEGIC, false);
@@ -485,7 +495,15 @@ void GameFrame::MakeMenus()
 
 void GameFrame::MakeToolbar()
 {
-  wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
+  // A re-entrant call (e.g. a language switch) must not destroy and
+  // recreate the toolbar: Destroy() is deferred, so CreateToolBar() would reuse
+  // a native HWND that is still pending deletion, crashing on the second call.
+  // Instead, reuse the existing toolbar and rebuild its contents in place.
+  wxToolBar *toolBar = GetToolBar();
+  if (toolBar == nullptr) {
+    toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
+  }
+  toolBar->ClearTools();
   toolBar->SetMargins(2, 2);
   toolBar->SetToolBitmapSize(wxSize(24, 24));
 
@@ -531,6 +549,15 @@ void GameFrame::MakeToolbar()
 
   toolBar->Realize();
   toolBar->SetRows(1);
+}
+
+void GameFrame::Retranslate()
+{
+  MakeMenus();
+  MakeToolbar();
+  OnUpdate();
+  Layout();
+  Refresh();
 }
 
 //----------------------------------------------------------------------
@@ -778,10 +805,10 @@ void GameFrame::OnFileExportPS(wxCommandEvent &)
   wxPostScriptDC dc(printData);
   dc.SetBackgroundMode(wxTRANSPARENT);
   if (m_efgPanel && m_efgPanel->IsShown()) {
-    dc.StartDoc(_T("Gambit extensive game"));
+    dc.StartDoc(_("Gambit extensive game"));
   }
   else {
-    dc.StartDoc(_T("Gambit strategic game"));
+    dc.StartDoc(_("Gambit strategic game"));
   }
   dc.StartPage();
   if (m_efgPanel && m_efgPanel->IsShown()) {
@@ -939,20 +966,22 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
   if (m_efgPanel->IsShown()) {
     // We are switching to strategic view
     if (!m_doc->GetGame()->IsPerfectRecall()) {
-      wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                       wxT("Computing the reduced strategic representation ")
-                           wxT("of this game is not supported."),
-                   wxT("Show strategic game"), wxOK);
+      wxMessageBox(_("This is not a game of perfect recall.\n"
+                     "Computing the reduced strategic representation "
+                     "of this game is not supported."),
+                   _("Show strategic game"), wxOK);
       return;
     }
 
     if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
         !m_nfgPanel && contingencies >= 50000) {
       wxString msg;
-      msg << "This game has " << contingencies << " contingencies in strategic form.\n"
-          << "Performance in browsing strategic form will be poor,\n"
-          << "and may render the program nonresponsive.\n"
-          << "Do you wish to continue?";
+      msg = wxString::Format(
+          _("This game has %llu contingencies in strategic form.\n"
+            "Performance in browsing strategic form will be poor,\n"
+            "and may render the program nonresponsive.\n"
+            "Do you wish to continue?"),
+          static_cast<unsigned long long>(contingencies));
 
       if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxICON_WARNING,
                        this) != wxOK) {
@@ -1024,6 +1053,16 @@ void GameFrame::OnFormatLabels(wxCommandEvent &)
   }
 }
 
+void GameFrame::OnPrefs(wxCommandEvent &)
+{
+  PreferencesDialog dialog(this);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+  // Apply the new language (rebuilds menus/toolbar/labels).
+  Retranslate();
+}
+
 void GameFrame::OnFormatFonts(wxCommandEvent &)
 {
   wxFontData data;
@@ -1057,9 +1096,9 @@ extern void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<Game
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
-    wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                     wxT("Computing Nash equilibria of this game ") wxT("is not supported."),
-                 wxT("Show strategic game"), wxOK);
+    wxMessageBox(_("This is not a game of perfect recall.\n"
+                   "Computing Nash equilibria of this game is not supported."),
+                 _("Show strategic game"), wxOK);
     return;
   }
 
@@ -1070,10 +1109,12 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
       if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
           contingencies >= 50000) {
         wxString msg;
-        msg << "This game has " << contingencies << " contingencies in strategic form.\n"
-            << "Performance in solving strategic form will be poor,\n"
-            << "and may render the program nonresponsive.\n"
-            << "Do you wish to continue?";
+        msg = wxString::Format(
+            _("This game has %d contingencies in strategic form.\n"
+              "Performance in solving strategic form will be poor,\n"
+              "and may render the program nonresponsive.\n"
+              "Do you wish to continue?"),
+            contingencies);
 
         if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
                          this) != wxOK) {
@@ -1100,10 +1141,9 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
-    wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                     wxT("Computing quantal response equilibria of this game ")
-                         wxT("is not supported."),
-                 wxT("Show strategic game"), wxOK);
+    wxMessageBox(_("This is not a game of perfect recall.\n"
+                   "Computing quantal response equilibria of this game is not supported."),
+                 _("Show strategic game"), wxOK);
     return;
   }
 

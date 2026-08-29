@@ -343,7 +343,7 @@ void PlayerPanel::Rebuild()
     const bool canDelete = row.isDeleted || (blockedReason.empty() && activeCount > 1);
 
     row.deleteButton =
-        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
+        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar('X'),
                      wxDefaultPosition, buttonSize);
     if (row.isDeleted) {
       row.deleteButton->SetToolTip(_("Restore player"));

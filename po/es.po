@@ -1,0 +1,162 @@
+# Spanish translations for Gambit.
+# Copyright (C) 2026 The Gambit Project
+# This file is distributed under the same license as the Gambit package.
+# Fernando P. <fernando@example.org>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Gambit\n"
+"Report-Msgid-Bugs-To: https://github.com/gambitproject/gambit\n"
+"POT-Creation-Date: 2026-08-29 00:00+0000\n"
+"PO-Revision-Date: 2026-08-29 00:00+0000\n"
+"Last-Translator: Fernando P. <fernando@example.org>\n"
+"Language-Team: Spanish <es@li.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Main menu bar
+msgid "&File"
+msgstr "&Archivo"
+
+msgid "&Edit"
+msgstr "&Editar"
+
+msgid "&View"
+msgstr "&Ver"
+
+msgid "&Format"
+msgstr "&Formato"
+
+msgid "&Tools"
+msgstr "&Herramientas"
+
+msgid "&Help"
+msgstr "&Ayuda"
+
+#. File menu
+msgid "&Extensive game"
+msgstr "Juego &extensivo"
+
+msgid "&Strategic game"
+msgstr "Juego &estratégico"
+
+msgid "&New"
+msgstr "&Nuevo"
+
+msgid "&Open\tCtrl-O"
+msgstr "&Abrir\tCtrl-O"
+
+msgid "&Save\tCtrl-S"
+msgstr "&Guardar\tCtrl-S"
+
+msgid "Save &as\tShift-Ctrl-S"
+msgstr "Guardar &como\tShift-Ctrl-S"
+
+msgid "&Export"
+msgstr "&Exportar"
+
+msgid "Page Se&tup"
+msgstr "Configur&ación de página"
+
+msgid "Print Pre&view"
+msgstr "&Vista preliminar"
+
+msgid "&Print\tCtrl-P"
+msgstr "&Imprimir\tCtrl-P"
+
+msgid "&Close\tCtrl-W"
+msgstr "&Cerrar\tCtrl-W"
+
+msgid "E&xit\tCtrl-Q"
+msgstr "&Salir\tCtrl-Q"
+
+#. Edit menu
+msgid "&Undo\tCtrl-Z"
+msgstr "&Deshacer\tCtrl-Z"
+
+msgid "&Redo\tShift-Ctrl-Z"
+msgstr "&Rehacer\tShift-Ctrl-Z"
+
+msgid "&Game"
+msgstr "&Juego"
+
+msgid "&Preferences"
+msgstr "&Preferencias"
+
+#. View menu
+msgid "&Profiles"
+msgstr "&Perfiles"
+
+msgid "Zoom &In\tCtrl-+"
+msgstr "A&mpliar\tCtrl-+"
+
+msgid "Zoom &Out\tCtrl--"
+msgstr "&Reducir\tCtrl--"
+
+msgid "&Actual Size\tCtrl-0"
+msgstr "Tamaño &real\tCtrl-0"
+
+msgid "Zoom to &Fit"
+msgstr "Ajustar a la &ventana"
+
+msgid "La&bels"
+msgstr "&Etiquetas"
+
+msgid "&Font"
+msgstr "&Fuente"
+
+msgid "&Layout"
+msgstr "&Diseño"
+
+#. Tools menu
+msgid "&Dominance"
+msgstr "&Dominancia"
+
+msgid "&Equilibrium"
+msgstr "&Equilibrio"
+
+msgid "&QRE"
+msgstr "&QRE"
+
+#. Help menu / dialogs
+msgid "&About Gambit"
+msgstr "&Acerca de Gambit"
+
+msgid "Welcome to Gambit"
+msgstr "Bienvenido a Gambit"
+
+msgid "Preferences"
+msgstr "Preferencias"
+
+msgid "Language:"
+msgstr "Idioma:"
+
+msgid "Appearance:"
+msgstr "Apariencia:"
+
+msgid "System (default)"
+msgstr "Sistema (predeterminado)"
+
+msgid "English"
+msgstr "Inglés"
+
+msgid "Spanish"
+msgstr "Español"
+
+msgid "French"
+msgstr "Francés"
+
+msgid "Light"
+msgstr "Claro"
+
+msgid "Dark"
+msgstr "Oscuro"
+
+msgid "OK"
+msgstr "Aceptar"
+
+msgid "Cancel"
+msgstr "Cancelar"

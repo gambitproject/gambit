@@ -145,6 +145,27 @@ AC_SUBST(WX_LIBS)
 AC_SUBST(WX_LIBS_STATIC)
 AC_SUBST(WX_CXXFLAGS)
 
+dnl---------------------------------------
+dnl Checking for gettext tools & locale dir
+dnl---------------------------------------
+AC_ARG_VAR([LOCALEDIR], [Directory for installed locale data files])
+test -n "$LOCALEDIR" || LOCALEDIR='${datadir}/locale'
+AC_SUBST(LOCALEDIR)
+
+AC_CHECK_PROG([MSGFMT], [msgfmt], [msgfmt])
+if test -n "$MSGFMT"; then
+  AM_CONDITIONAL([HAVE_MSGFMT], [true])
+else
+  AM_CONDITIONAL([HAVE_MSGFMT], [false])
+fi
+
+AC_CHECK_PROG([XGETTEXT], [xgettext], [xgettext])
+if test -n "$XGETTEXT"; then
+  AM_CONDITIONAL([HAVE_XGETTEXT], [true])
+else
+  AM_CONDITIONAL([HAVE_XGETTEXT], [false])
+fi
+
 
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
