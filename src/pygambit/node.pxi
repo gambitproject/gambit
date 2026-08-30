@@ -251,7 +251,7 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(node.prior_action.number)
+            path.append(cython.cast(Action, node.prior_action).action.deref().GetNumber() - 1)
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
@@ -351,6 +351,25 @@ class Node:
         return self.event.members
 
     @property
+    def actions(self) -> InfosetActions:
+        """The set of actions available at the node's current information set or
+        event, whichever applies.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        AttributeError
+            If this node currently belongs to no information set or event (a
+            terminal node).
+        """
+        infoset: Infoset = self.infoset
+        if infoset:
+            return infoset._action_objects()
+        event: Event = self.event
+        return event._action_objects()
+
+    @property
     def player(self) -> NodePlayer:
         """The player associated with this node: the one who makes the decision, if this is
         a personal node, or the chance player, if this is an event.
@@ -396,10 +415,6 @@ class Node:
             The action object, or None if the player has not moved previously
             on the path to this node.
         .. versionadded:: 16.5.0
-
-        See Also
-        --------
-        Infoset.own_prior_actions
         """
         if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
             return Action.wrap(self.node.deref().GetOwnPriorAction())

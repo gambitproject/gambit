@@ -136,7 +136,12 @@ def test_resolve_infoset_invalid(game: gbt.Game, infoset: str, exception: BaseEx
     ]
 )
 def test_resolve_action(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.actions,
+    all_actions = [
+        a for player in game.players
+        for node in game.get_infosets(player.label)
+        for a in node.actions
+    ]
+    _test_valid_resolutions(all_actions,
                             lambda label, fn: game._resolve_action(label, fn))
 
 

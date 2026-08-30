@@ -363,62 +363,6 @@ class GamePlayers:
 
 
 @cython.cclass
-class GameActions:
-    """Represents the set of all actions in a game."""
-    game = cython.declare(Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameActions outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: Game) -> GameActions:
-        obj: GameActions = GameActions.__new__(GameActions)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameActions(game={self.game})"
-
-    def __len__(self) -> int:
-        return sum(
-            len(node.infoset.actions)
-            for player in self.game.players
-            for node in self.game.get_infosets(player.label)
-        )
-
-    def __iter__(self) -> typing.Iterator[Action]:
-        for player in self.game.players:
-            for node in self.game.get_infosets(player.label):
-                yield from node.infoset.actions
-
-    def __getitem__(self, label: str) -> Action:
-        """Returns the action with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the action to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no action in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one action has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an action by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "action", "actions")
-
-
-@cython.cclass
 class Game:
     """A game, the fundamental unit of analysis in game theory.
 
@@ -692,21 +636,6 @@ class Game:
     @description.setter
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
-
-    @property
-    def actions(self) -> GameActions:
-        """The set of actions available in the game.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-        return GameActions.wrap(self)
 
     def get_infosets(self, player: str) -> list[Node]:
         """Returns a snapshot of the information sets belonging to the personal
@@ -1239,7 +1168,7 @@ class Game:
                         f"actions for infoset {infoset} for {p}"
                     )
                 profile[node] = {
-                    a.label: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)
+                    a: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)
                 }
         return profile
 
@@ -1325,7 +1254,7 @@ class Game:
                         alpha=[1 for action in infoset.actions], seed=gen
                     ).rvs(size=1)[0]
                     profile[node] = dict(
-                        zip((a.label for a in infoset.actions), weights, strict=True)
+                        zip(infoset.actions, weights, strict=True)
                     )
             return profile
         elif denom < 1:
@@ -1346,7 +1275,7 @@ class Game:
                         [denom + k]
                     )
                     distribution = {
-                        a.label: Rational(hi - lo - 1, denom)
+                        a: Rational(hi - lo - 1, denom)
                         for a, hi, lo in zip(
                             infoset.actions, sample[1:], sample[:-1], strict=True
                         )
@@ -1391,8 +1320,9 @@ class Game:
         ----------
         actions : function, optional
             By default the support profile contains all actions at all information
-            sets. If specified, only actions for which the supplied function returns
-            `True` are included.
+            sets. If specified, called as ``actions(node, action)`` for each action at
+            each information set, where ``node`` is a representative node of the
+            information set; only actions for which it returns `True` are included.
 
         Returns
         -------
@@ -1402,8 +1332,8 @@ class Game:
         if actions is not None:
             for player in self.players:
                 for node in self.get_infosets(player.label):
-                    for action in node.infoset.actions:
-                        if not actions(action):
+                    for action in node.actions:
+                        if not actions(node, action):
                             if not (deref(profile.profile)
                                     .RemoveAction(cython.cast(Action, action).action)):
                                 raise ValueError(
@@ -1855,7 +1785,8 @@ class Game:
             If `action` is an empty `str` or all spaces
         """
         if isinstance(action, Action):
-            if action.infoset.game != self:
+            action_handle: c_GameAction = cython.cast(Action, action).action
+            if Game.wrap(action_handle.deref().GetInfoset().deref().GetGame()) != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return action
         elif isinstance(action, str):
@@ -1864,7 +1795,12 @@ class Game:
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
             try:
-                return self.actions[action]
+                return _resolve_by_label(
+                    [a for player in self.players
+                     for node in self.get_infosets(player.label)
+                     for a in node.actions],
+                    action, "Game", "action", "actions"
+                )
             except KeyError:
                 raise KeyError(f"{funcname}(): no action with label '{action}'")
         raise TypeError(
@@ -2290,7 +2226,7 @@ class Game:
             raise TypeError("set_move_actions(): actions must be an iterable of str")
         if not labels:
             raise UndefinedOperationError("set_move_actions(): `actions` must be a nonempty list")
-        current = [action.label for action in resolved_infoset.actions]
+        current = list(resolved_infoset.actions)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_move_actions(): the information set has duplicate action labels, "
@@ -2384,7 +2320,7 @@ class Game:
             raise UndefinedOperationError(
                 "set_event_actions(): `probs` must be a nonempty mapping"
             )
-        current = [action.label for action in resolved_event.actions]
+        current = list(resolved_event.actions)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_event_actions(): the information set has duplicate action labels, "
@@ -2469,8 +2405,8 @@ class Game:
                 "make_event(): all nodes must be nonterminal"
             )
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        action_labels = [a.label for a in (resolved_node.infoset or resolved_node.event).actions]
-        if any([a.label for a in (n.infoset or n.event).actions] != action_labels
+        action_labels = list((resolved_node.infoset or resolved_node.event).actions)
+        if any(list((n.infoset or n.event).actions) != action_labels
                for n in resolved_nodes[1:]):
             raise ValueError(
                 "make_event(): all nodes must have the same actions, "
@@ -2534,7 +2470,7 @@ class Game:
                 f"relabel_actions(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = [action.label for action in resolved_infoset.actions]
+        current = list(resolved_infoset.actions)
         c_labels = stdmap[string, string]()
         for old, new in labels.items():
             if not isinstance(old, str) or not isinstance(new, str):

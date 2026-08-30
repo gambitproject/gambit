@@ -273,7 +273,7 @@ class BehaviorSupportProfile:
         Every entry of `actions` must be one of the information set's action labels, and
         at least one must be given.
         """
-        labels = {a.label for a in infoset.actions}
+        labels = set(infoset.actions)
         given = set(actions)
         unknown = given - labels
         if unknown:
@@ -286,10 +286,11 @@ class BehaviorSupportProfile:
         # Actions to keep are added first, so that a subsequent removal is never asked
         # to remove the last remaining action at the information set. (Unlike
         # RemoveStrategy, RemoveAction does not itself guard against emptying its scope.)
-        for a in infoset.actions:
+        action_objects = cython.cast(_InfosetOrEvent, infoset)._action_objects()
+        for a in action_objects:
             if a.label in given:
                 deref(self.profile).AddAction(cython.cast(Action, a).action)
-        for a in infoset.actions:
+        for a in action_objects:
             if a.label not in given:
                 deref(self.profile).RemoveAction(cython.cast(Action, a).action)
 

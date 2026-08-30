@@ -22,7 +22,14 @@
 
 @cython.cclass
 class Action:
-    """A choice available at an ``Infoset`` in a ``Game``."""
+    """A choice available at an information set or event in a ``Game``.
+
+    .. versionchanged:: 17.0.0
+        Stripped down to only ``label`` and ``prob``; an action is identified purely by
+        its label within its information set or event, and no longer carries its own
+        identity beyond that. Use ``Node.actions`` to look up the action available at a
+        node's information set or event.
+    """
     action = cython.declare(c_GameAction)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -36,10 +43,7 @@ class Action:
         return obj
 
     def __repr__(self) -> str:
-        if self.label:
-            return f"Action(infoset={self.infoset or self.event}, label='{self.label}')"
-        else:
-            return f"Action(infoset={self.infoset or self.event}, number={self.number})"
+        return f"Action(label='{self.label}')"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -49,26 +53,6 @@ class Action:
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
-
-    @property
-    def number(self) -> int:
-        """Returns the number of the action at its information set.
-        Actions are numbered starting with 0.
-        """
-        return self.action.deref().GetNumber() - 1
-
-    def precedes(self, node: Node) -> bool:
-        """Returns whether `node` precedes this action in the
-        extensive game.
-
-        Raises
-        ------
-        MismatchError
-            If `node` is not in the same game as the action.
-        """
-        if (self.infoset or self.event).game != node.game:
-            raise MismatchError("precedes() requires a node from the same game as the action")
-        return self.action.deref().Precedes(cython.cast(Node, node).node)
 
     @property
     def label(self) -> str:
@@ -86,22 +70,6 @@ class Action:
         return self.action.deref().GetLabel().decode("utf-8")
 
     @property
-    def infoset(self) -> Infoset:
-        """Get the personal player's information set to which the action belongs.
-        Falsy if the action instead belongs to a chance event; see `event`.
-        """
-        return Infoset.wrap(self.action.deref().GetInfoset().deref().GetMember(1))
-
-    @property
-    def event(self) -> Event:
-        """Get the chance event to which the action belongs. Falsy if the action
-        instead belongs to a personal player's information set; see `infoset`.
-
-        .. versionadded:: 17.0.0
-        """
-        return Event.wrap(self.action.deref().GetInfoset().deref().GetMember(1))
-
-    @property
     def prob(self) -> decimal.Decimal | Rational:
         """
         Get the probability a chance action is played.
@@ -111,7 +79,7 @@ class Action:
         UndefinedOperationError
             If the action does not belong to the chance player.
         """
-        if not self.event:
+        if not self.action.deref().GetInfoset().deref().IsChanceInfoset():
             raise UndefinedOperationError(
                 "action probabilities are only defined at events"
             )
@@ -123,12 +91,3 @@ class Action:
             return decimal.Decimal(py_string.decode("ascii"))
         else:
             return Rational(py_string.decode("ascii"))
-
-    @property
-    def plays(self) -> list[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
-        """
-        return [
-            Node.wrap(n) for n in
-            self.action.deref().GetInfoset().deref().GetGame().deref().GetPlays(self.action)
-        ]

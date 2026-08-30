@@ -200,14 +200,17 @@ class Sequence:
         return ret
 
     @property
-    def actions(self) -> list[Action]:
-        """Get the collection of actions defining this sequence.
+    def actions(self) -> tuple[str, ...]:
+        """The labels of the actions defining this sequence, in order.
 
-        Returns the empty list for the root sequence of the player.
+        Returns the empty tuple for the root sequence of the player.
+
+        .. versionchanged:: 17.0.0
+            Returns bare labels rather than ``Action`` objects.
         """
-        actions: list[Action] = []
+        labels: list[str] = []
         seq = self.sequence
         while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
-            actions.insert(0, Action.wrap(seq.deref().GetAction()))
+            labels.insert(0, seq.deref().GetAction().deref().GetLabel().decode("utf-8"))
             seq = seq.deref().GetParent()
-        return actions
+        return tuple(labels)

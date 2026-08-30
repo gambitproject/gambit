@@ -235,33 +235,20 @@ class _InfosetOrEvent:
         return resolved.deref().GetGame().deref().IsAbsentMinded(resolved)
 
     @property
-    def actions(self) -> InfosetActions:
-        """The set of actions at the information set."""
-        return InfosetActions.wrap(self._resolve())
+    def actions(self) -> list[str]:
+        """The labels of the actions available at the information set, in order.
 
-    @property
-    def own_prior_actions(self) -> list[Action | None]:
-        """The set of actions taken by the player immediately preceding the member nodes
-        in the information set.
-
-        Returns
-        -------
-        list of Action or None
-            A list containing Action objects. If a node in the information set
-            is reached without the player having moved previously, None will be
-            included in the list.
-        .. versionadded:: 16.5.0
-
-        See Also
-        --------
-        Node.own_prior_action
+        .. versionchanged:: 17.0.0
+            Returns bare labels rather than ``Action`` objects; use ``Node.actions``
+            for the richer, indexable collection.
         """
-        c_actions: stdset[c_GameAction] = self._resolve().deref().GetOwnPriorActions()
+        return [a.label for a in InfosetActions.wrap(self._resolve())]
 
-        return [
-            Action.wrap(action) if action != cython.cast(c_GameAction, NULL) else None
-            for action in c_actions
-        ]
+    @cython.cfunc
+    def _action_objects(self) -> InfosetActions:
+        """Internal: the ``Action`` objects at the information set, for callers that
+        need the resolved objects rather than bare labels."""
+        return InfosetActions.wrap(self._resolve())
 
     @property
     def members(self) -> InfosetMembers:
@@ -276,15 +263,6 @@ class _InfosetOrEvent:
     def player(self) -> Player:
         """The player who has the move at this information set."""
         return Player.wrap(self._resolve().deref().GetPlayer())
-
-    @property
-    def plays(self) -> list[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
-        """
-        resolved: c_GameInfoset = self._resolve()
-        return [
-            Node.wrap(n) for n in resolved.deref().GetGame().deref().GetPlays(resolved)
-        ]
 
 
 @cython.cclass

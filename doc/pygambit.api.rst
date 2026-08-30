@@ -110,7 +110,6 @@ Information about the game
    Game.min_payoff
    Game.max_payoff
    Game.root
-   Game.actions
    Game.get_infosets
    Game.get_events
    Game.nodes
@@ -127,7 +126,6 @@ Information about the game
    Player.number
    Player.game
    Player.strategies
-   Player.actions
    Player.is_chance
    Player.min_payoff
    Player.max_payoff
@@ -157,6 +155,7 @@ Information about the game
    Node.infoset
    Node.event
    Node.members
+   Node.actions
    Node.player
    Node.is_successor_of
    Node.plays
@@ -181,8 +180,6 @@ Information about the game
    Infoset.actions
    Infoset.members
    Infoset.precedes
-   Infoset.plays
-   Infoset.own_prior_actions
 
 .. autosummary::
 
@@ -195,19 +192,13 @@ Information about the game
    Event.actions
    Event.members
    Event.precedes
-   Event.plays
-   Event.own_prior_actions
 
 .. autosummary::
 
    :toctree: api/
 
    Action.label
-   Action.infoset
-   Action.event
-   Action.precedes
    Action.prob
-   Action.plays
 
 .. autosummary::
 
