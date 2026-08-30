@@ -103,7 +103,7 @@ def efg_asymmetric_tree_text() -> str:
     game.append_move(right, "2", ["p", "q"])
     for node in left.children:
         payoff = [1, 1] if node.prior_action.label == "x" else [0, 0]
-        game.set_outcome(node, game.add_outcome(node.prior_action.label, payoff))
+        game.make_outcome(node, {"1": payoff[0], "2": payoff[1]}, node.prior_action.label)
     for node in right.children:
-        game.set_outcome(node, game.add_outcome(node.prior_action.label, [0, 0]))
+        game.make_outcome(node, {"1": 0, "2": 0}, node.prior_action.label)
     return game.to_efg()

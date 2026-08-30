@@ -2743,89 +2743,69 @@ class Game:
             self.game.deref().MakeOutcome(c_contingencies, c_payoffs, label.encode("utf-8"))
         )
 
-    def add_outcome(self,
-                    label: str,
-                    payoffs: list | None = None) -> Outcome:
-        """Add a new outcome to the game.
+    def make_outcome_null(self, location) -> None:
+        """Reset the outcome at `location` to the null outcome.
 
-        .. versionchanged:: 16.7.0
-            A label is now required and must be nonempty and unique among the
-            game's outcomes.
+        For an extensive game, `location` is a ``Node`` or an iterable of nodes.  For a
+        strategic game, `location` is a pure-strategy contingency — a complete mapping
+        from the game's players' labels to strategy labels — or an iterable of such
+        contingencies.
+
+        Any outcome all of whose references are among `location` is removed from the game.
+
+        .. versionadded:: 17.0.0
 
         Parameters
         ----------
-        label : str
-            The label for the outcome.  Must be nonempty and not already in use
-            by another outcome in the game.
-        payoffs : list, optional
-            The payoffs of the outcome to each player.
+        location : Node, contingency, or iterable of these
+            The nodes or contingencies to reset to the null outcome.  Nonempty; each
+            node or contingency may be referenced only once.
 
         Raises
         ------
+        MismatchError
+            If any node is from a different game.
         ValueError
-            If `payoffs` is specified but is not the same length as the number of players
-            in the game, or if `label` is empty or already in use by another outcome.
-
-        Returns
-        -------
-        Outcome
-            A reference to the newly-created outcome.
+            If `location` is empty or contains a repeat, or if a contingency does not
+            specify exactly one strategy for each player.
+        UndefinedOperationError
+            If the game is in action-graph representation, where outcomes are not
+            represented explicitly.
         """
-        if payoffs is not None:
-            if len(payoffs) != len(self.players):
-                raise ValueError("add_outcome(): number of payoffs must equal number of players")
-        else:
-            payoffs = [0 for _ in self.players]
-        c = Outcome.wrap(self.game.deref().NewOutcome(label.encode("utf-8")))
-        for player, payoff in zip(self.players, payoffs, strict=True):
-            c[player] = payoff
-        return c
-
-    def delete_outcome(self, outcome: Outcome | str) -> None:
-        """Delete an outcome from the game.
-
-        If this game is an extensive game, any
-        node at which this outcome is attached has its outcome reset to null.  If this game
-        is a strategic game, any contingency at which this outcome is attached as its outcome
-        reset to null.
-
-        Parameters
-        ----------
-        outcome : Outcome or str
-            The outcome to delete from the game
-
-        Raises
-        ------
-        MismatchError
-            If `outcome` is an `Outcome` from another game.
-        """
-        resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "delete_outcome"))
-        self.game.deref().DeleteOutcome(resolved_outcome.outcome)
-
-    def set_outcome(self, node: Node | str,
-                    outcome: Outcome | str | None) -> None:
-        """Set `outcome` to be the outcome at `node`.  If `outcome` is None, the
-        outcome at `node` is unset.
-
-        Parameters
-        ----------
-        node : Node or str
-            The node to set the outcome at
-        outcome : Outcome or str or None
-            The outcome to assign to the node
-
-        Raises
-        ------
-        MismatchError
-            If `node` is a `Node` from a different game, or `outcome` is an
-            `Outcome` from a different game.
-        """
-        resolved_node = cython.cast(Node, self._resolve_node(node, "set_outcome"))
-        if outcome is None:
-            self.game.deref().SetOutcome(resolved_node.node, cython.cast(c_GameOutcome, NULL))
+        if self.game.deref().IsAgg():
+            raise UndefinedOperationError(
+                "make_outcome_null(): operation not defined for games in "
+                "action-graph representation"
+            )
+        if self.is_tree:
+            resolved_nodes = self._resolve_nodes(location, "make_outcome_null")
+            c_nodes = stdvector[c_GameNode]()
+            for n in resolved_nodes:
+                c_nodes.push_back(cython.cast(Node, n).node)
+            self.game.deref().MakeOutcomeNull(c_nodes)
             return
-        resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
-        self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
+        if isinstance(location, collections.abc.Mapping):
+            entries = [location]
+        else:
+            try:
+                entries = list(location)
+            except TypeError:
+                raise TypeError(
+                    "make_outcome_null(): location must be a contingency or an "
+                    "iterable of contingencies"
+                ) from None
+        c_contingencies = stdvector[stdvector[c_GameStrategy]]()
+        for entry in entries:
+            resolved = self._resolve_contingency(entry, "make_outcome_null", "location")
+            c_one = stdvector[c_GameStrategy]()
+            for player in self.players:
+                resolved_player: Player = cython.cast(Player, player)
+                c_one.push_back(
+                    self._resolve_strategy(resolved_player, resolved[resolved_player],
+                                           "make_outcome_null")
+                )
+            c_contingencies.push_back(c_one)
+        self.game.deref().MakeOutcomeNull(c_contingencies)
 
     def relabel_strategies(self,
                            player: Player | str,

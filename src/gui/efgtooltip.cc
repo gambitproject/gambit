@@ -96,7 +96,7 @@ private:
   void OnOpenTimer(wxTimerEvent &p_event);
 
   // Checks the label field for being non-empty and not matching any of the game's other
-  // outcomes (GameOutcome::NewOutcome() rejects an empty or duplicate label outright, so an
+  // outcomes (GameRep::MakeOutcome() rejects an empty or duplicate label outright, so an
   // outcome not yet attached to a node would otherwise fail at commit with no earlier warning),
   // colouring it like EditMoveDialog's infoset-label field and returning a description of the
   // problem found, or an empty string if it's valid.
@@ -271,7 +271,7 @@ void OutcomeEditorPopup::LoadValues()
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
   if (!outcome || outcome->IsNull()) {
-    // GameOutcome::NewOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
+    // GameRep::MakeOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
     // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
     // opens already showing that as an error the user has to notice and fix before they can
     // accept anything else.

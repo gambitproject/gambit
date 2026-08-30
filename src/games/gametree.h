@@ -68,6 +68,10 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
+  /// Returns the subset of p_covered no longer referenced by any node outside p_selected.
+  std::set<const GameOutcomeRep *>
+  ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
+                          const std::set<const GameOutcomeRep *> &p_covered) const;
   //@}
 
   /// @name Managing the representation
@@ -138,8 +142,6 @@ public:
   GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
 
-  void DeleteOutcome(const GameOutcome &) override;
-
   /// @name Writing data files
   //@{
   void WriteEfgFile(std::ostream &, const GameNode &p_node = nullptr) const override;
@@ -179,6 +181,7 @@ public:
   void DeleteTree(GameNode) override;
   GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
                           const std::string &) override;
+  void MakeOutcomeNull(const std::vector<GameNode> &) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
   void Reveal(GameInfoset, GamePlayer) override;
@@ -188,8 +191,6 @@ public:
   void SetMoveActions(const GameInfoset &, const std::vector<std::string> &) override;
   void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
                        const std::vector<Number> &) override;
-  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
-
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
   std::vector<GameNode> GetPlays(GameAction action) const override;

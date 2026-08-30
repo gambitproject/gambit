@@ -71,7 +71,6 @@ Transforming game information structure
    :toctree: api/
 
    Game.make_infoset
-   Game.make_outcome
    Game.make_event
    Game.relabel_actions
    Game.set_move_actions
@@ -87,11 +86,10 @@ Transforming game components
 
    Game.relabel_players
    Game.set_players
-   Game.add_outcome
-   Game.delete_outcome
-   Game.set_outcome
    Game.relabel_strategies
    Game.set_strategies
+   Game.make_outcome
+   Game.make_outcome_null
 
 
 Information about the game

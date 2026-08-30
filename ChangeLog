@@ -23,6 +23,9 @@
   is found or another solver event is emitted.
 - Added `Game.make_outcome`, which creates an outcome with the given payoffs and attaches it to a
   set of nodes (extensive) or contingencies (strategic) in a single operation.  (#1061)
+- Added `Game.make_outcome_null`, which resets a set of nodes (extensive) or contingencies
+  (strategic) to the null outcome, removing the previously-attached outcome if this was its
+  last reference.  (#1061)
 - Added `MixedStrategyProfile.as_float` and `MixedBehaviorProfile.as_float`, converting a
   rational-precision profile to floating-point precision.  `liap_solve`, `liap_agent_solve`,
   `logit_estimate`, `ipa_solve`, and `gnm_solve` now also accept a rational-precision profile
@@ -68,6 +71,9 @@
   LaTeX installation, so this lets the tutorials be run without that heavier local setup.
 
 ### Removed
+- `Game.add_outcome`, `Game.delete_outcome`, and `Game.set_outcome` have been removed; use
+  `Game.make_outcome`/`Game.make_outcome_null`, which create-and-attach or reset an outcome in
+  a single operation and never leave an unattached outcome in the game.  (#1061)
 - `gtdraw` is no longer part of the `doc` optional-dependency group. Install it separately
   (`pip install gtdraw`) to run tutorials locally or build the documentation.
 - `Game.contingencies` now yields contingencies as a mapping from player label to strategy

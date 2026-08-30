@@ -681,8 +681,6 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
   GameOutcomeRep *m_outcome;
   std::vector<std::shared_ptr<GameNodeRep>> m_children;
 
-  void DeleteOutcome(GameOutcomeRep *outc);
-
 public:
   using Children = ElementCollection<GameNode, GameNodeRep>;
 
@@ -1337,11 +1335,6 @@ public:
   {
     throw UndefinedException();
   }
-  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
-  {
-    throw UndefinedException();
-  }
-
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
@@ -1434,8 +1427,6 @@ public:
   {
     return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
   }
-  /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome(const std::string &p_label) { throw UndefinedException(); }
   /// Creates an outcome with the given payoffs and label for the specified nodes.
   virtual GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
                                   const std::string &)
@@ -1448,8 +1439,13 @@ public:
   {
     throw UndefinedException();
   }
-  /// Deletes the specified outcome from the game
-  virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
+  /// Resets the outcome at the specified nodes to the null outcome.
+  virtual void MakeOutcomeNull(const std::vector<GameNode> &) { throw UndefinedException(); }
+  /// Resets the outcome at the specified contingencies to the null outcome.
+  virtual void MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Nodes

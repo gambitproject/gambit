@@ -5,15 +5,6 @@ import pygambit as gbt
 from . import games
 
 
-@pytest.mark.parametrize(
-    "game", [gbt.Game.new_table([2, 2]), gbt.Game.new_tree()]
-)
-def test_outcome_add(game: gbt.Game):
-    outcome_count = len(game.outcomes)
-    game.add_outcome(label="new outcome")
-    assert len(game.outcomes) == outcome_count + 1
-
-
 def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(game.root, "Alice", ["U", "M", "D"])
@@ -56,6 +47,17 @@ def test_make_outcome_label_of_partially_covered_outcome_refused():
     assert len(game.outcomes) == 1
 
 
+@pytest.mark.parametrize("bad_label", ["", "win"])
+def test_make_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str):
+    game = gbt.Game.new_tree(players=["A", "B"])
+    game.append_move(game.root, "A", ["win", "lose"])
+    win_node, lose_node = game.root.children
+    game.make_outcome(win_node, {"A": 1, "B": 2}, "win")
+    with pytest.raises(ValueError):
+        game.make_outcome(lose_node, {"A": 3, "B": 4}, bad_label)
+    assert [o.label for o in game.outcomes] == ["win"]
+
+
 def test_make_outcome_incomplete_payoffs_raises():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(game.root, "Alice", ["U", "D"])
@@ -72,13 +74,56 @@ def test_make_outcome_payoffs_naming_player_twice_raises():
                           {"Alice": 1, alice: 2, "Bob": 0}, "w")
 
 
-@pytest.mark.parametrize(
-    "game", [gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])]
-)
-def test_outcome_delete(game: gbt.Game):
+def test_make_outcome_null_resets_given_nodes_to_null():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    game.make_outcome([up, middle], {"Alice": 1, "Bob": -1}, "shared")
+    game.make_outcome_null(up)
+    assert not up.outcome
+    assert middle.outcome
+    assert not down.outcome
+
+
+def test_make_outcome_null_resets_given_contingencies_to_null():
+    game = gbt.Game.new_table([2, 2])
+    game.make_outcome(
+        [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
+    )
+    game.make_outcome_null({"1": "1", "2": "1"})
+    assert not game.get_outcome({"1": "1", "2": "1"})
+    assert game.get_outcome({"1": "2", "2": "2"})
+
+
+def test_make_outcome_null_removes_fully_orphaned_outcome():
+    game = gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
     outcome_count = len(game.outcomes)
-    game.delete_outcome(next(iter(game.outcomes)))
+    p1, p2 = game.players
+    s1 = next(iter(p1.strategies))
+    s2 = next(iter(p2.strategies))
+    game.make_outcome_null({p1.label: s1, p2.label: s2})
     assert len(game.outcomes) == outcome_count - 1
+
+
+def test_make_outcome_null_keeps_partially_referenced_outcome():
+    game = gbt.Game.new_tree(["Alice"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    game.make_outcome([up, middle], {"Alice": 1}, "shared")
+    outcome_count = len(game.outcomes)
+    game.make_outcome_null(up)
+    assert len(game.outcomes) == outcome_count
+    assert middle.outcome
+
+
+def test_make_outcome_null_on_already_null_node_is_a_no_op():
+    game = gbt.Game.new_tree(["Alice"])
+    game.append_move(game.root, "Alice", ["U", "D"])
+    up, _ = game.root.children
+    outcome_count = len(game.outcomes)
+    game.make_outcome_null(up)
+    assert outcome_count == len(game.outcomes)
+    assert not up.outcome
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
@@ -125,12 +170,6 @@ def test_outcome_index_unmatched_label(game: gbt.Game):
         _ = game.outcomes["not an outcome"]
 
 
-def test_add_outcome_requires_label():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(TypeError):
-        game.add_outcome([0, 0])
-
-
 @pytest.mark.parametrize(
     "game", [gbt.Game.new_table([2, 2])]
 )
@@ -154,19 +193,12 @@ def test_outcome_payoff_by_player_label():
     assert out2["dan"] == 4
 
 
-@pytest.mark.parametrize("bad_label", ["", "win"])
-def test_add_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str):
-    game = gbt.Game.new_tree(players=["A", "B"])
-    game.add_outcome("win", [1, 2])
-    with pytest.raises(ValueError):
-        game.add_outcome(bad_label, [3, 4])
-    assert [o.label for o in game.outcomes] == ["win"]
-
-
 def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
     game = gbt.Game.new_tree(players=["A", "B"])
-    game.add_outcome("win", [1, 2])
-    outcome = game.add_outcome("lose", [0, 0])
+    game.append_move(game.root, "A", ["win", "lose"])
+    win_node, lose_node = game.root.children
+    game.make_outcome(win_node, {"A": 1, "B": 2}, "win")
+    outcome = game.make_outcome(lose_node, {"A": 0, "B": 0}, "lose")
     with pytest.raises(ValueError):
         outcome.label = "win"
     assert outcome.label == "lose"
