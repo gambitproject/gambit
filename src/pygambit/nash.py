@@ -698,8 +698,8 @@ def ipa_solve(
         game = perturbation
         perturbation = game.mixed_strategy_profile(rational=False)
         for player in game.players:
-            strategies = list(player.strategies)
-            perturbation[player.label] = {
+            strategies = game.get_strategies(player)
+            perturbation[player] = {
                 s: (1.0 if s == strategies[0] else 0.0) for s in strategies
             }
     elif isinstance(perturbation, libgbt.MixedStrategyProfile):
@@ -817,8 +817,8 @@ GNMTerminationEvent], None], optional
         game = perturbation
         perturbation = game.mixed_strategy_profile(rational=False)
         for player in game.players:
-            strategies = list(player.strategies)
-            perturbation[player.label] = {
+            strategies = game.get_strategies(player)
+            perturbation[player] = {
                 s: (1.0 if s == strategies[0] else 0.0) for s in strategies
             }
     elif isinstance(perturbation, libgbt.MixedStrategyProfile):

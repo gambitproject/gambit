@@ -34,8 +34,8 @@ def test_infoset_label_unicode_accepted(label):
 
 def test_infoset_label_duplicate_within_player_raises_valueerror():
     game = games.read_from_file("subgames.efg")
-    player = next(p for p in game.players if len(game.get_infosets(p.label)) >= 2)
-    first, second = (n.infoset for n in itertools.islice(game.get_infosets(player.label), 2))
+    player = next(p for p in game.players if len(game.get_infosets(p)) >= 2)
+    first, second = (n.infoset for n in itertools.islice(game.get_infosets(player), 2))
     first.label = "shared"
     with pytest.raises(ValueError):
         second.label = "shared"
@@ -59,7 +59,7 @@ def test_make_infoset_change_player_keeps_label():
     game = games.read_from_file("basic_extensive_game.efg")
     _, p2, *_ = game.players
     members = list(game.root.infoset.members)
-    game.make_infoset(members, p2.label, "moved")
+    game.make_infoset(members, p2, "moved")
     assert game.root.infoset.player == p2
     assert game.root.infoset.label == "moved"
     assert list(game.root.infoset.members) == members
@@ -78,7 +78,7 @@ def test_make_infoset_terminal_node_raises():
     game = games.read_from_file("basic_extensive_game.efg")
     terminal = game.root.children["U1"].children["U2"].children["U3"]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_infoset([terminal], game.root.player.label)
+        game.make_infoset([terminal], game.root.player)
 
 
 def test_make_infoset_converts_chance_node():
@@ -86,7 +86,7 @@ def test_make_infoset_converts_chance_node():
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
     personal = next(n for n in game.nodes if not n.is_terminal and n.infoset)
-    game.make_infoset([chance_node], personal.infoset.player.label)
+    game.make_infoset([chance_node], personal.infoset.player)
     assert not chance_node.event
     assert chance_node.infoset
     assert chance_node.infoset.player == personal.infoset.player
@@ -107,14 +107,14 @@ def test_make_infoset_empty_nodes_raises():
     """`nodes` must be nonempty."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.make_infoset([], game.root.player.label)
+        game.make_infoset([], game.root.player)
 
 
 def test_make_infoset_repeated_node_raises():
     """Each node may be referenced only once."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.make_infoset([game.root, game.root], game.root.player.label)
+        game.make_infoset([game.root, game.root], game.root.player)
 
 
 def test_make_infoset_strategic_game_raises():
@@ -360,7 +360,7 @@ def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
         for path in test_case.expected_am_paths
         }
     actual_infosets = {
-        n.infoset for p in game.players for n in game.get_infosets(p.label)
+        n.infoset for p in game.players for n in game.get_infosets(p)
         if n.infoset.is_absent_minded
     }
 
@@ -445,12 +445,12 @@ def test_make_infoset_across_different_source_players():
     game.append_move(game.root.children["b"], "3", ["a", "b"])   # player 3
     n2 = game.root.children["a"]
     n3 = game.root.children["b"]
-    assert n2.infoset.player == game.players["2"]
-    assert n3.infoset.player == game.players["3"]
+    assert n2.infoset.player == "2"
+    assert n3.infoset.player == "3"
     game.make_infoset([n2, n3], "1")
     assert n2.infoset == n3.infoset
-    assert n2.infoset.player == game.players["1"]
-    assert n3.infoset.player == game.players["1"]
+    assert n2.infoset.player == "1"
+    assert n3.infoset.player == "1"
 
 
 def test_infoset_proxy_reresolves_after_split():
@@ -460,7 +460,7 @@ def test_infoset_proxy_reresolves_after_split():
     node = game.root.children["U1"]
     proxy = node.infoset
     assert len(proxy.members) == 2
-    game.make_infoset(node, node.player.label)
+    game.make_infoset(node, node.player)
     assert list(proxy.members) == [node]
 
 
@@ -477,13 +477,6 @@ def test_reveal_splits_infoset_by_action():
     assert len(game.get_infosets("Alice")) == n_alice
 
 
-def test_reveal_chance_player_raises():
-    """`player` must be a personal player; revealing to chance is not well-defined."""
-    game = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.reveal(game.root, game.players.chance)
-
-
 def test_reveal_absent_minded_infoset_raises():
     """Revealing the move at an absent-minded infoset is rejected (17.0)."""
     game = gbt.Game.new_tree(players=["Driver", "2"])
@@ -494,11 +487,3 @@ def test_reveal_absent_minded_infoset_raises():
     game.append_move(mid.children["Continue"], "2", ["l", "r"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.reveal(game.root, "2")
-
-
-def test_reveal_mismatch_raises():
-    """`infoset` and `player` must belong to this game."""
-    game1 = games.read_from_file("stripped_down_poker.efg")
-    game2 = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.reveal(game1.root, next(iter(game2.players)))

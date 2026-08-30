@@ -39,7 +39,7 @@ class StrategySupport:
         labels. Iterates over strategy labels (``str``) rather than ``Strategy``
         objects.
     """
-    _player = cython.declare(Player)
+    _player = cython.declare(str)
     _strategies = cython.declare(tuple)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -47,14 +47,14 @@ class StrategySupport:
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: Player, strategies: tuple) -> StrategySupport:
+    def wrap(player: str, strategies: tuple) -> StrategySupport:
         obj: StrategySupport = StrategySupport.__new__(StrategySupport)
         obj._player = player
         obj._strategies = strategies
         return obj
 
     @property
-    def player(self) -> Player:
+    def player(self) -> str:
         return self._player
 
     def __repr__(self) -> str:
@@ -122,7 +122,7 @@ class StrategySupportProfile:
             The player's strategy support specified in the profile
         """
         for player in self.game.players:
-            yield self[player.label]
+            yield self[player]
 
     def __getitem__(self, player: str) -> StrategySupport:
         """Return a `StrategySupport` representing the labels of the strategies in the
@@ -139,12 +139,15 @@ class StrategySupportProfile:
         KeyError
             If no player in the game has the label `player`.
         """
-        resolved_player: Player = self.game.players[player]
+        game: Game = self.game
+        resolved_player: c_GamePlayer = game._resolve_player(
+            player, "StrategySupportProfile.__getitem__"
+        )
         strategies = tuple(
             s.deref().GetLabel().decode("utf-8")
-            for s in deref(self.profile).GetStrategies(resolved_player.player)
+            for s in deref(self.profile).GetStrategies(resolved_player)
         )
-        return StrategySupport.wrap(resolved_player, strategies)
+        return StrategySupport.wrap(player, strategies)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -155,13 +158,15 @@ class StrategySupportProfile:
             self.profile = make_shared[c_StrategySupportProfile](deref(self.profile))
 
     @cython.cfunc
-    def _set_support(self, player: Player, strategies: object) -> cython.void:
+    def _set_support(self, player: str, strategies: object) -> cython.void:
         """Validates and sets the whole support for player.
 
         Every entry of `strategies` must be one of the player's strategy labels, and
         at least one must be given.
         """
-        labels = set(player.strategies)
+        game: Game = self.game
+        player_strategies = game.get_strategies(player)
+        labels = set(player_strategies)
         given = set(strategies)
         unknown = given - labels
         if unknown:
@@ -171,13 +176,12 @@ class StrategySupportProfile:
         if not given:
             raise ValueError("a support must contain at least one strategy for the player")
         self._ensure_unshared()
-        game: Game = cython.cast(Game, player.game)
         # Strategies to keep are added first, so that a subsequent removal is never asked
         # to remove the last remaining strategy for the player.
-        for s in player.strategies:
+        for s in player_strategies:
             if s in given:
                 deref(self.profile).AddStrategy(game._resolve_strategy(player, s, "_set_support"))
-        for s in player.strategies:
+        for s in player_strategies:
             if s not in given:
                 deref(self.profile).RemoveStrategy(
                     game._resolve_strategy(player, s, "_set_support")
@@ -206,8 +210,7 @@ class StrategySupportProfile:
             If any entry of `strategies` is not one of the player's strategy labels,
             or if `strategies` is empty.
         """
-        resolved_player: Player = self.game.players[player]
-        self._set_support(resolved_player, strategies)
+        self._set_support(player, strategies)
 
     def copy(self) -> StrategySupportProfile:
         """Creates a copy of the support profile.
@@ -258,9 +261,8 @@ class StrategySupportProfile:
             If no player in the game has the label `player`, or the player has no
             strategy with the label `strategy`.
         """
-        game: Game = cython.cast(Game, self.game)
-        resolved_player: Player = game.players[player]
-        handle = game._resolve_strategy(resolved_player, strategy, "is_dominated", "strategy")
+        game: Game = self.game
+        handle = game._resolve_strategy(player, strategy, "is_dominated", "strategy")
         return deref(self.profile).IsDominated(handle, strict, external)
 
 

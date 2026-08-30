@@ -307,7 +307,15 @@ class GameOutcomes:
 
 @cython.cclass
 class GamePlayers:
-    """Represents a collection of players in a game."""
+    """The labels of the (personal) players in a game.
+
+    .. versionchanged:: 17.0.0
+        Iterates over player labels (``str``) rather than ``Player`` objects;
+        indexing by label is no longer supported (a label is already in hand once
+        iterated) -- use ``in`` to test membership.  The chance player is no longer
+        exposed here (it never was included in iteration); the ``Infoset``/``Event``
+        split on ``Node`` already distinguishes personal from chance nodes.
+    """
     game = cython.declare(c_Game)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -327,39 +335,15 @@ class GamePlayers:
         """Returns the number of players in the game."""
         return self.game.deref().NumPlayers()
 
-    def __iter__(self) -> typing.Iterator[Player]:
+    def __iter__(self) -> typing.Iterator[str]:
         for player in self.game.deref().GetPlayers():
-            yield Player.wrap(player)
+            yield player.deref().GetLabel().decode("utf-8")
 
-    def __getitem__(self, label: str) -> Player:
-        """Returns the player with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the player to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no player in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one player has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a player by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "player", "players")
-
-    @property
-    def chance(self) -> Player:
-        """Returns the chance player associated with the game."""
-        return Player.wrap(self.game.deref().GetChance())
+    def __contains__(self, label: str) -> bool:
+        return any(
+            player.deref().GetLabel().decode("utf-8") == label
+            for player in self.game.deref().GetPlayers()
+        )
 
 
 @cython.cclass
@@ -479,7 +463,7 @@ class Game:
         g = Game.wrap(NewTable(list(shape), False))
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
-            contingency = {p.label: str(i + 1) for p, i in zip(players, profile, strict=True)}
+            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
             outcome = g.get_outcome(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
@@ -506,20 +490,21 @@ class Game:
         arrays = []
 
         players = list(self.players)
-        shape = tuple(len(player.strategies) for player in players)
+        player_strategies = {player: self.get_strategies(player) for player in players}
+        shape = tuple(len(player_strategies[player]) for player in players)
         for player in players:
             array = np.zeros(shape=shape, dtype=object)
             for profile in itertools.product(*(range(s) for s in shape)):
                 contingency = {
-                    p.label: list(p.strategies)[i]
+                    p: player_strategies[p][i]
                     for p, i in zip(players, profile, strict=True)
                 }
                 payoffs = self.get_payoffs(contingency)
                 try:
-                    array[profile] = dtype(payoffs[player.label])
+                    array[profile] = dtype(payoffs[player])
                 except (ValueError, TypeError, IndexError, KeyError):
                     raise ValueError(
-                        f"Payoff '{payoffs[player.label]}' cannot be "
+                        f"Payoff '{payoffs[player]}' cannot be "
                         f"converted to requested type '{dtype}'"
                         ) from None
             arrays.append(array)
@@ -563,11 +548,11 @@ class Game:
         shape = arrays[0].shape
         g = Game.wrap(NewTable(list(shape), False))
         g.relabel_players(
-            {player.label: label for player, label in zip(g.players, payoffs, strict=True)}
+            {player: label for player, label in zip(g.players, payoffs, strict=True)}
         )
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
-            contingency = {p.label: str(i + 1) for p, i in zip(players, profile, strict=True)}
+            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
             outcome = g.get_outcome(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
@@ -662,10 +647,10 @@ class Game:
         Raises
         ------
         UndefinedOperationError
-            If the game does not have a tree representation, or if `player` is the
-            chance player; use `get_events` for the chance player's events.
+            If the game does not have a tree representation.
         KeyError
-            If no player in the game has label `player`.
+            If no player in the game has label `player`; the chance player has no
+            label reachable this way -- use `get_events` for its events.
         ValueError
             If `player` is an empty string or all whitespace.
         """
@@ -673,15 +658,10 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        resolved_player = cython.cast(Player, self._resolve_player(player, "get_infosets"))
-        if resolved_player.is_chance:
-            raise UndefinedOperationError(
-                "get_infosets(): `player` must be a personal player; "
-                "use get_events() for the chance player's events"
-            )
+        resolved_player = self._resolve_player(player, "get_infosets")
         return [
             Node.wrap(infoset.deref().GetMember(1))
-            for infoset in resolved_player.player.deref().GetInfosets()
+            for infoset in resolved_player.deref().GetInfosets()
         ]
 
     def get_events(self) -> list[Node]:
@@ -714,6 +694,116 @@ class Game:
             Node.wrap(event.deref().GetMember(1))
             for event in self.game.deref().GetChance().deref().GetInfosets()
         ]
+
+    def get_strategies(self, player: str) -> list[str]:
+        """Returns a snapshot of the labels of the strategies belonging to `player`.
+
+        This is a materialized snapshot, not a live view: it reflects the game's
+        state at the moment of the call, and does not change if the game is
+        subsequently mutated.
+
+        Parameters
+        ----------
+        player : str
+            The label of the player whose strategies to return.
+
+        Returns
+        -------
+        list of str
+            The labels of `player`'s strategies, in order.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+        """
+        resolved_player = self._resolve_player(player, "get_strategies")
+        return [
+            s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
+        ]
+
+    def get_sequences(self, player: str) -> list[Sequence]:
+        """Returns a snapshot of the sequences belonging to `player`.
+
+        This is a materialized snapshot, not a live view: it reflects the game's
+        state at the moment of the call, and does not change if the game is
+        subsequently mutated.
+
+        Parameters
+        ----------
+        player : str
+            The label of the player whose sequences to return.
+
+        Returns
+        -------
+        list of Sequence
+            `player`'s sequences.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+        """
+        resolved_player = self._resolve_player(player, "get_sequences")
+        return [Sequence.wrap(s) for s in resolved_player.deref().GetSequences()]
+
+    def get_min_payoff(self, player: str) -> Rational:
+        """Returns the smallest payoff for `player` in any play of the game.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : str
+            The label of the player.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+
+        See Also
+        --------
+        Game.get_max_payoff
+        Game.min_payoff
+        """
+        resolved_player = self._resolve_player(player, "get_min_payoff")
+        return rat_to_py(self.game.deref().GetPlayerMinPayoff(resolved_player))
+
+    def get_max_payoff(self, player: str) -> Rational:
+        """Returns the largest payoff for `player` in any play of the game.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : str
+            The label of the player.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+
+        See Also
+        --------
+        Game.get_min_payoff
+        Game.max_payoff
+        """
+        resolved_player = self._resolve_player(player, "get_max_payoff")
+        return rat_to_py(self.game.deref().GetPlayerMaxPayoff(resolved_player))
 
     @property
     def players(self) -> GamePlayers:
@@ -791,7 +881,7 @@ class Game:
         See Also
         --------
         Game.max_payoff
-        Player.min_payoff
+        Game.get_min_payoff
         """
         return rat_to_py(self.game.deref().GetMinPayoff())
 
@@ -806,7 +896,7 @@ class Game:
         See Also
         --------
         Game.min_payoff
-        Player.max_payoff
+        Game.get_max_payoff
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
@@ -893,13 +983,13 @@ class Game:
             raise UndefinedOperationError(
                 "get_behavior(): only defined for games with a tree representation"
             )
-        resolved_player = cython.cast(Player, self.players[player])
-        self._resolve_strategy(resolved_player, strategy, "get_behavior")  # validate eagerly
-        return StrategyBehavior.wrap(self, resolved_player.label, strategy)
+        self._resolve_strategy(player, strategy, "get_behavior")  # validate eagerly
+        return StrategyBehavior.wrap(self, player, strategy)
 
     def _resolve_contingency(self, contingency: typing.Any, funcname: str,
                              argname: str = "contingency") -> dict:
-        """Resolve a pure-strategy contingency to a dict from ``Player`` to strategy label.
+        """Resolve a pure-strategy contingency to a dict from player label to strategy
+        label.
 
         `contingency` must be a complete mapping from the game's players' labels to the
         label of the strategy played by that player.  Each strategy label is validated
@@ -915,11 +1005,10 @@ class Game:
                     f"{funcname}(): {argname} keys must be player labels (str), "
                     f"not {player_label.__class__.__name__}"
                 )
-            player = cython.cast(Player, self.players[player_label])
-            if player in resolved:
+            if player_label in resolved:
                 raise ValueError(f"{funcname}(): each player may appear only once in {argname}")
-            self._resolve_strategy(player, strategy_label, funcname, argname)
-            resolved[player] = strategy_label
+            self._resolve_strategy(player_label, strategy_label, funcname, argname)
+            resolved[player_label] = strategy_label
         if set(resolved) != set(self.players):
             raise ValueError(
                 f"{funcname}(): {argname} must specify exactly one strategy "
@@ -929,15 +1018,14 @@ class Game:
 
     @cython.cfunc
     def _make_pure_strategy_profile(self, resolved: dict) -> shared_ptr[c_PureStrategyProfile]:
-        """Build a C++ pure-strategy profile from a dict mapping ``Player`` to strategy
-        label."""
+        """Build a C++ pure-strategy profile from a dict mapping player label to
+        strategy label."""
         psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
             self.game.deref().NewPureStrategyProfile()
         )
-        for player in self.players:
-            resolved_player: Player = cython.cast(Player, player)
+        for player_label in self.players:
             handle = self._resolve_strategy(
-                resolved_player, resolved[resolved_player], "_make_pure_strategy_profile"
+                player_label, resolved[player_label], "_make_pure_strategy_profile"
             )
             deref(deref(psp).deref()).SetStrategy(handle)
         return psp
@@ -1018,9 +1106,10 @@ class Game:
         resolved = self._resolve_contingency(contingency, "get_payoffs")
         psp = self._make_pure_strategy_profile(resolved)
         values = {}
-        for p in self.players:
-            player = cython.cast(Player, p)
-            values[player.label] = rat_to_py(deref(deref(psp).deref()).GetPayoff(player.player))
+        for player in self.players:
+            values[player] = rat_to_py(
+                deref(deref(psp).deref()).GetPayoff(self._resolve_player(player, "get_payoffs"))
+            )
         return PayoffVector(values)
 
     def _fill_strategy_profile(self,
@@ -1033,12 +1122,13 @@ class Game:
         if len(data) != len(self.players):
             raise ValueError("Number of elements does not match number of players")
         for (p, d) in zip(self.players, data, strict=True):
-            if len(p.strategies) != len(d):
+            strategies = self.get_strategies(p)
+            if len(strategies) != len(d):
                 raise ValueError(
                     f"Number of elements does not match number of strategies for {p}"
                 )
-            profile[p.label] = {
-                s: typefunc(v) for s, v in zip(p.strategies, d, strict=True)
+            profile[p] = {
+                s: typefunc(v) for s, v in zip(strategies, d, strict=True)
             }
         return profile
 
@@ -1115,12 +1205,13 @@ class Game:
         if denom is None:
             profile = self.mixed_strategy_profile()
             for player in self.players:
+                strategies = self.get_strategies(player)
                 weights = scipy.stats.dirichlet(
-                    alpha=[1 for _ in player.strategies],
+                    alpha=[1 for _ in strategies],
                     seed=gen
                 ).rvs(size=1)[0]
-                profile[player.label] = dict(
-                    zip(player.strategies, weights, strict=True)
+                profile[player] = dict(
+                    zip(strategies, weights, strict=True)
                 )
             return profile
         elif denom < 1:
@@ -1128,7 +1219,8 @@ class Game:
         else:
             profile = self.mixed_strategy_profile(rational=True)
             for player in self.players:
-                k = len(player.strategies)
+                strategies = self.get_strategies(player)
+                k = len(strategies)
                 sample = (
                     [0] +
                     sorted(
@@ -1139,12 +1231,12 @@ class Game:
                 distribution = {
                     strategy: Rational(hi - lo - 1, denom)
                     for strategy, (hi, lo) in zip(
-                        player.strategies,
+                        strategies,
                         zip(sample[1:], sample[:-1], strict=True),
                         strict=True
                     )
                 }
-                profile[player.label] = distribution
+                profile[player] = distribution
             return profile
 
     def _fill_behavior_profile(self,
@@ -1157,7 +1249,7 @@ class Game:
         if len(data) != len(self.players):
             raise ValueError("Number of elements does not match number of players")
         for (p, d) in zip(self.players, data):
-            p_infosets = self.get_infosets(p.label)
+            p_infosets = self.get_infosets(p)
             if len(p_infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
             for (node, v) in zip(p_infosets, d, strict=True):
@@ -1248,7 +1340,7 @@ class Game:
         if denom is None:
             profile = self.mixed_behavior_profile()
             for player in self.players:
-                for node in self.get_infosets(player.label):
+                for node in self.get_infosets(player):
                     infoset = node.infoset
                     weights = scipy.stats.dirichlet(
                         alpha=[1 for action in infoset.actions], seed=gen
@@ -1262,7 +1354,7 @@ class Game:
         else:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
-                for node in self.get_infosets(player.label):
+                for node in self.get_infosets(player):
                     infoset = node.infoset
                     k = len(infoset.actions)
                     sample = (
@@ -1302,7 +1394,7 @@ class Game:
         profile = StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](self.game))
         if strategies is not None:
             for player in self.players:
-                for label in player.strategies:
+                for label in self.get_strategies(player):
                     if not strategies(player, label):
                         handle = self._resolve_strategy(
                             player, label, "strategy_support_profile"
@@ -1331,7 +1423,7 @@ class Game:
         profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
         if actions is not None:
             for player in self.players:
-                for node in self.get_infosets(player.label):
+                for node in self.get_infosets(player):
                     infoset_handle: c_GameInfoset = cython.cast(Infoset, node.infoset)._resolve()
                     for action in infoset_handle.deref().GetActions():
                         if not actions(node, action.deref().GetLabel().decode("utf-8")):
@@ -1460,40 +1552,36 @@ class Game:
         """
         return self._to_format(WriteLaTeXFile, filepath_or_buffer)
 
-    def _resolve_player(self,
-                        player: typing.Any, funcname: str, argname: str = "player") -> Player:
-        """Resolve an attempt to reference a player of the game.
-        ...
+    @cython.cfunc
+    def _resolve_player(
+        self, player: typing.Any, funcname: str, argname: str = "player"
+    ) -> c_GamePlayer:
+        """Resolve `label` to the C++ handle of one of the game's (personal) players.
+
+        Not part of the public API -- used internally to bridge a player label to
+        the underlying C++ object without ever constructing a Python wrapper for it.
+
+        Raises
+        ------
+        KeyError
+            If no player has label `player`.
         TypeError
-            If `player` is not a `Player`, `NodePlayer`, or a `str`
+            If `player` is not a `str`.
         ValueError
-            If `player` is an empty `str` or is a `NodePlayer` that resolves to no player
-            (terminal node).
+            If `player` is an empty string or all spaces.
         """
-        if isinstance(player, NodePlayer):
-            resolved = cython.cast(NodePlayer, player)._resolve()
-            if resolved is None:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to no player "
-                    f"(the node is terminal)"
-                )
-            player = resolved
-        if isinstance(player, Player):
-            if player.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return player
-        elif isinstance(player, str):
-            if not player.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return self.players[player]
-            except KeyError:
-                raise KeyError(f"{funcname}(): no player with label '{player}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Player or str, not {player.__class__.__name__}"
-        )
+        if not isinstance(player, str):
+            raise TypeError(
+                f"{funcname}(): {argname} must be str, not {player.__class__.__name__}"
+            )
+        if not player.strip():
+            raise ValueError(
+                f"{funcname}(): {argname} cannot be an empty string or all spaces"
+            )
+        for p in self.game.deref().GetPlayers():
+            if p.deref().GetLabel().decode("utf-8") == player:
+                return p
+        raise KeyError(f"{funcname}(): no player with label '{player}'")
 
     def _resolve_outcome(self,
                          outcome: typing.Any, funcname: str, argname: str = "outcome") -> Outcome:
@@ -1546,7 +1634,7 @@ class Game:
         )
 
     @cython.cfunc
-    def _resolve_strategy(self, player: Player, label, funcname: str,
+    def _resolve_strategy(self, player: str, label, funcname: str,
                           argname: str = "strategy") -> c_GameStrategy:
         """Resolve `label` to the C++ handle of one of `player`'s strategies.
 
@@ -1556,7 +1644,7 @@ class Game:
         Raises
         ------
         KeyError
-            If `player` has no strategy with label `label`.
+            If no player has label `player`, or `player` has no strategy with label `label`.
         TypeError
             If `label` is not a `str`.
         ValueError
@@ -1569,11 +1657,12 @@ class Game:
             )
         if not label.strip():
             raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
-        for strategy in player.player.deref().GetStrategies():
+        resolved_player: c_GamePlayer = self._resolve_player(player, funcname, "player")
+        for strategy in resolved_player.deref().GetStrategies():
             if strategy.deref().GetLabel().decode("utf-8") == label:
                 return strategy
         raise KeyError(
-            f"{funcname}(): player '{player.label}' has no strategy with label '{label}'"
+            f"{funcname}(): player '{player}' has no strategy with label '{label}'"
         )
 
     def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
@@ -1781,7 +1870,7 @@ class Game:
         return probs
 
     def append_move(self, nodes: Node | NodeReferenceSet,
-                    player: Player | str,
+                    player: str,
                     actions: list[str]) -> None:
         """Add a move for `player` at terminal `nodes`.  All elements of `nodes` become part of
         a new information set, with actions labeled according to `actions`.
@@ -1791,21 +1880,16 @@ class Game:
         Raises
         ------
         UndefinedOperationError
-            If `nodes` are not all terminal, `actions` is empty, or `player` is the
-            chance player.
+            If `nodes` are not all terminal, or `actions` is empty.
         MismatchError
-            If an element from `nodes` is a `Node` from a different game,
-            or `player` is a `Player` from a different game.
+            If an element from `nodes` is a `Node` from a different game.
+        KeyError
+            If no player in the game has label `player`.
         ValueError
             If `nodes` has duplicated elements, or is empty; or if `actions` contains
             an empty or a duplicated label.
         """
-        resolved_player = cython.cast(Player, self._resolve_player(player, "append_move"))
-        if resolved_player.is_chance:
-            raise UndefinedOperationError(
-                "append_move(): `player` must be a personal player; "
-                "use append_event() to add a chance move"
-            )
+        resolved_player = self._resolve_player(player, "append_move")
         if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
         if any(not label for label in actions):
@@ -1820,7 +1904,7 @@ class Game:
         c_actions = stdvector[string]()
         for label in actions:
             c_actions.push_back(label.encode("utf-8"))
-        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, c_actions)
+        self.game.deref().AppendMove(resolved_node.node, resolved_player, c_actions)
         resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset._resolve())
@@ -1916,7 +2000,7 @@ class Game:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_event._resolve())
 
     def insert_move(self, node: Node | str,
-                    player: Player | str, actions: list[str]) -> None:
+                    player: str, actions: list[str]) -> None:
         """Insert a move for `player` prior to the node `node`, with actions labeled
         according to `actions`.  `node` becomes the first child of the newly-inserted node.
 
@@ -1925,20 +2009,16 @@ class Game:
         Raises
         ------
         UndefinedOperationError
-            If `actions` is empty, or `player` is the chance player.
+            If `actions` is empty.
         MismatchError
-            If `node` is a `Node` from a different game, or `player` is a `Player` from a
-            different game.
+            If `node` is a `Node` from a different game.
+        KeyError
+            If no player in the game has label `player`.
         ValueError
             If `actions` contains an empty or a duplicated label.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_move"))
-        resolved_player = cython.cast(Player, self._resolve_player(player, "insert_move"))
-        if resolved_player.is_chance:
-            raise UndefinedOperationError(
-                "insert_move(): `player` must be a personal player; "
-                "use insert_event() to insert a chance move"
-            )
+        resolved_player = self._resolve_player(player, "insert_move")
         if not actions:
             raise UndefinedOperationError("insert_move(): `actions` must be a nonempty list")
         if any(not label for label in actions):
@@ -1948,7 +2028,7 @@ class Game:
         c_actions = stdvector[string]()
         for label in actions:
             c_actions.push_back(label.encode("utf-8"))
-        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, c_actions)
+        self.game.deref().InsertMove(resolved_node.node, resolved_player, c_actions)
 
     def insert_infoset(self, node: Node | str,
                        infoset: NodeReference) -> None:
@@ -2495,7 +2575,7 @@ class Game:
                 "make_infoset(): operation only defined for games with a tree representation"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_infoset")
-        resolved_player = cython.cast(Player, self._resolve_player(player, "make_infoset"))
+        resolved_player = self._resolve_player(player, "make_infoset")
         for n in resolved_nodes:
             if n.is_terminal:
                 raise UndefinedOperationError(
@@ -2504,12 +2584,11 @@ class Game:
         c_nodes = stdvector[c_GameNode]()
         for n in resolved_nodes:
             c_nodes.push_back(cython.cast(Node, n).node)
-        self.game.deref().MakeInfoset(c_nodes, resolved_player.player,
-                                      (label or "").encode())
+        self.game.deref().MakeInfoset(c_nodes, resolved_player, (label or "").encode())
 
     def reveal(self,
                infoset: NodeReference,
-               player: Player | str) -> None:
+               player: str) -> None:
         """Reveals the move made at the information set or event `infoset` to `player`.
 
         Revealing the move modifies all subsequent information sets for `player` such
@@ -2527,31 +2606,28 @@ class Game:
         infoset : Node or str
             A node belonging to the information set or event of the move to reveal
             to the player, or such a node's label.
-        player : Player or str
-            The player to which to reveal the move at this information set.
+        player : str
+            The label of the player to which to reveal the move at this information set.
 
         Raises
         ------
         MismatchError
-            If `infoset` is a `Node` from a different game, or
-            `player` is a `Player` from a different game.
+            If `infoset` is a `Node` from a different game.
+        KeyError
+            If no player in the game has label `player`.
         UndefinedOperationError
-            If `infoset` is absent-minded, or if `player` is the chance player.
+            If `infoset` is absent-minded.
         """
         resolved_infoset = cython.cast(
             _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "reveal")
         )
-        resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
-        if resolved_player.is_chance:
-            raise UndefinedOperationError(
-                "reveal(): `player` must be a personal player"
-            )
+        resolved_player = self._resolve_player(player, "reveal")
         if resolved_infoset.is_absent_minded:
             raise UndefinedOperationError(
                 "reveal(): revealing the move at an absent-minded information set "
                 "is not well-defined"
             )
-        self.game.deref().Reveal(resolved_infoset._resolve(), resolved_player.player)
+        self.game.deref().Reveal(resolved_infoset._resolve(), resolved_player)
 
     def set_players(self,
                     players: list[str],
@@ -2610,7 +2686,7 @@ class Game:
                 raise TypeError("set_players(): players must be an iterable of str")
         if not labels:
             raise UndefinedOperationError("set_players(): `players` must be a nonempty list")
-        current = [player.label for player in self.players]
+        current = list(self.players)
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_players(): the game has duplicate player labels, "
@@ -2626,13 +2702,12 @@ class Game:
                 f"every outcome; pass drop=True to confirm"
             )
         for label in missing:
-            resolved = self.players[label]
-            if self.is_tree and len(self.get_infosets(resolved.label)) > 0:
+            if self.is_tree and len(self.get_infosets(label)) > 0:
                 raise UndefinedOperationError(
                     f"set_players(): player '{label}' has decisions in the game "
                     f"and cannot be deleted"
                 )
-            if not self.is_tree and len(resolved.strategies) != 1:
+            if not self.is_tree and len(self.get_strategies(label)) != 1:
                 raise UndefinedOperationError(
                     f"set_players(): player '{label}' has more than one strategy "
                     f"and cannot be deleted"
@@ -2678,8 +2753,7 @@ class Game:
         Raises
         ------
         MismatchError
-            If any node is from a different game, or `payoffs` names a `Player` from a
-            different game.
+            If any node is from a different game.
         ValueError
             If `location` is empty or contains a repeat; if `payoffs` is not a complete
             mapping over exactly the game's players; if a contingency does not specify
@@ -2699,10 +2773,10 @@ class Game:
             )
         resolved_payoffs = {}
         for player, value in payoffs.items():
-            resolved = cython.cast(Player, self._resolve_player(player, "make_outcome", "payoffs"))
-            if resolved in resolved_payoffs:
+            self._resolve_player(player, "make_outcome", "payoffs")
+            if player in resolved_payoffs:
                 raise ValueError("make_outcome(): each player may appear only once in payoffs")
-            resolved_payoffs[resolved] = value
+            resolved_payoffs[player] = value
         if set(resolved_payoffs) != set(self.players):
             raise ValueError(
                 "make_outcome(): payoffs must be specified for each player of the game"
@@ -2733,10 +2807,8 @@ class Game:
             resolved = self._resolve_contingency(entry, "make_outcome", "location")
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
-                resolved_player: Player = cython.cast(Player, player)
                 c_one.push_back(
-                    self._resolve_strategy(resolved_player, resolved[resolved_player],
-                                           "make_outcome")
+                    self._resolve_strategy(player, resolved[player], "make_outcome")
                 )
             c_contingencies.push_back(c_one)
         return Outcome.wrap(
@@ -2799,16 +2871,14 @@ class Game:
             resolved = self._resolve_contingency(entry, "make_outcome_null", "location")
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
-                resolved_player: Player = cython.cast(Player, player)
                 c_one.push_back(
-                    self._resolve_strategy(resolved_player, resolved[resolved_player],
-                                           "make_outcome_null")
+                    self._resolve_strategy(player, resolved[player], "make_outcome_null")
                 )
             c_contingencies.push_back(c_one)
         self.game.deref().MakeOutcomeNull(c_contingencies)
 
     def relabel_strategies(self,
-                           player: Player | str,
+                           player: str,
                            labels: typing.Mapping[str, str],
                            strict: bool = True) -> None:
         """Simultaneously reassign the labels of `player`'s strategies.
@@ -2822,9 +2892,8 @@ class Game:
 
         Parameters
         ----------
-        player : Player or str
-            The player whose strategies to relabel.  If a string is passed, the player
-            is determined by finding the player with that label, if any.
+        player : str
+            The label of the player whose strategies to relabel.
         labels : Mapping[str, str]
             A mapping from current strategy labels to replacement labels.  Entries
             whose key equals their value are ignored.
@@ -2835,10 +2904,8 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `player` is a `Player` from a different game.
         KeyError
-            If `player` is a string matching no player; or, when `strict` is `True`,
+            If no player in the game has label `player`; or, when `strict` is `True`,
             if a key of `labels` matches no strategy of `player`.
         TypeError
             If `labels` is not a mapping, or any key or value is not a string.
@@ -2858,13 +2925,15 @@ class Game:
             raise UndefinedOperationError(
                 "Relabelling strategies is only applicable to games in strategic form"
             )
-        resolved_player = cython.cast(Player, self._resolve_player(player, "relabel_strategies"))
+        resolved_player = self._resolve_player(player, "relabel_strategies")
         if not hasattr(labels, "items"):
             raise TypeError(
                 f"relabel_strategies(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = list(resolved_player.strategies)
+        current = [
+            s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
+        ]
         c_labels = stdmap[string, string]()
         for old, new in labels.items():
             if not isinstance(old, str) or not isinstance(new, str):
@@ -2883,10 +2952,10 @@ class Game:
             c_labels[old.encode("utf-8")] = new.encode("utf-8")
         if c_labels.empty():
             return
-        self.game.deref().RelabelStrategies(resolved_player.player, c_labels)
+        self.game.deref().RelabelStrategies(resolved_player, c_labels)
 
     def set_strategies(self,
-                       player: Player | str,
+                       player: str,
                        strategies: list[str],
                        drop: bool = False,
                        add: bool = True) -> None:
@@ -2908,8 +2977,8 @@ class Game:
 
         Parameters
         ----------
-        player : Player or str
-            The player whose strategies to set.
+        player : str
+            The label of the player whose strategies to set.
         strategies : list of str
             The labels of the strategies the player is to have, in order.  Must be
             nonempty and without duplicates; each label must be a valid, nonempty label.
@@ -2922,10 +2991,8 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `player` is a `Player` from a different game.
         KeyError
-            If `player` is a string matching no player.
+            If no player in the game has label `player`.
         TypeError
             If `strategies` is a string, or not an iterable of strings.
         UndefinedOperationError
@@ -2943,7 +3010,7 @@ class Game:
             raise UndefinedOperationError(
                 "Setting strategies is only applicable to games in strategic form"
             )
-        resolved_player = cython.cast(Player, self._resolve_player(player, "set_strategies"))
+        resolved_player = self._resolve_player(player, "set_strategies")
         if isinstance(strategies, str) or not hasattr(strategies, "__iter__"):
             raise TypeError("set_strategies(): strategies must be an iterable of str")
         labels = list(strategies)
@@ -2952,7 +3019,9 @@ class Game:
                 raise TypeError("set_strategies(): strategies must be an iterable of str")
         if not labels:
             raise UndefinedOperationError("set_strategies(): `strategies` must be a nonempty list")
-        current = list(resolved_player.strategies)
+        current = [
+            s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
+        ]
         if len(set(current)) != len(current):
             raise ValueError(
                 "set_strategies(): the player has duplicate strategy labels, "
@@ -2970,7 +3039,7 @@ class Game:
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
-        self.game.deref().SetStrategies(resolved_player.player, c_labels)
+        self.game.deref().SetStrategies(resolved_player, c_labels)
 
     def relabel_players(self,
                         labels: typing.Mapping[str, str],
@@ -3017,8 +3086,11 @@ class Game:
                 f"relabel_players(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = [player.label for player in self.players]
-        chance_label = self.players.chance.label if self.is_tree else None
+        current = list(self.players)
+        chance_label = (
+            self.game.deref().GetChance().deref().GetLabel().decode("utf-8")
+            if self.is_tree else None
+        )
         c_labels = stdmap[string, string]()
         for old, new in labels.items():
             if not isinstance(old, str) or not isinstance(new, str):

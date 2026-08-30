@@ -18,12 +18,12 @@ def _table_game(payoffs: dict, title: str) -> gbt.Game:
     game = gbt.Game.new_table([2, 2])
     game.title = title
     p1, p2 = game.players
-    s1a, s1b = p1.strategies
-    s2a, s2b = p2.strategies
+    s1a, s1b = game.get_strategies(p1)
+    s2a, s2b = game.get_strategies(p2)
     strategies = {"a": s1a, "b": s1b, "A": s2a, "B": s2b}
     for (row, col), (v1, v2) in payoffs.items():
         game.make_outcome(
-            {p1.label: strategies[row], p2.label: strategies[col]}, {p1: v1, p2: v2}, f"{row}{col}"
+            {p1: strategies[row], p2: strategies[col]}, {p1: v1, p2: v2}, f"{row}{col}"
         )
     return game
 

@@ -66,9 +66,8 @@ class StrategyBehavior:
     def _action_at(self, infoset: Infoset) -> str | None:
         """The label of the action prescribed by the strategy at `infoset`, or None
         if unreachable."""
-        player = cython.cast(Player, self._game.players[self._player_label])
         handle = self._game._resolve_strategy(
-            player, self._strategy_label, "StrategyBehavior"
+            self._player_label, self._strategy_label, "StrategyBehavior"
         )
         action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset)._resolve())
         if not action:
@@ -84,7 +83,7 @@ class StrategyBehavior:
                 raise MismatchError("StrategyBehavior: key must be part of the same game")
         else:
             infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
-        if infoset.player.label != self._player_label:
+        if infoset.player != self._player_label:
             raise ValueError(
                 f"Player '{self._player_label}' does not have the move at {infoset}."
             )
@@ -148,7 +147,7 @@ class StrategyBehavior:
 
 @cython.cclass
 class Sequence:
-    """A sequence ``Player`` in a ``Game``.
+    """A sequence for a player in a ``Game``.
 
     .. versionadded:: 16.7.0
     """
@@ -165,7 +164,7 @@ class Sequence:
         return obj
 
     def __repr__(self) -> str:
-        return f"Sequence(player={self.player}, actions={self.actions})"
+        return f"Sequence(player='{self.player}', actions={self.actions})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -182,9 +181,9 @@ class Sequence:
         return Game.wrap(self.sequence.deref().GetPlayer().deref().GetGame())
 
     @property
-    def player(self) -> Player:
-        """The player to which the sequence belongs."""
-        return Player.wrap(self.sequence.deref().GetPlayer())
+    def player(self) -> str:
+        """The label of the player to which the sequence belongs."""
+        return self.sequence.deref().GetPlayer().deref().GetLabel().decode("utf-8")
 
     @property
     def parent(self) -> Sequence | None:
@@ -197,7 +196,7 @@ class Sequence:
     def children(self) -> list[Sequence]:
         """The immediate children (successors) of the sequence."""
         ret: list[Sequence] = []
-        for seq in self.player.sequences:
+        for seq in self.game.get_sequences(self.player):
             if seq.parent == self:
                 ret.append(seq)
         return ret

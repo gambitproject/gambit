@@ -102,7 +102,7 @@ NFG 1 R "Prisoner's <Dilemma> & test" { "Alice" "Bob" }
     game = gbt.read_gbt(game_path)
 
     assert game.title == "Prisoner's <Dilemma> & test"
-    assert [player.label for player in game.players] == ["Alice", "Bob"]
+    assert list(game.players) == ["Alice", "Bob"]
 
 
 def test_read_gbt_rejects_malformed_xml(tmp_path):
@@ -160,7 +160,7 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 def test_write_html():
     game = gbt.Game.new_table([2, 2])
     alice, bob = game.players
-    game.relabel_players({alice.label: "Alice", bob.label: "Bob"})
+    game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
     assert "Alice" in serialized_game
@@ -170,7 +170,7 @@ def test_write_html():
 def test_write_latex():
     game = gbt.Game.new_table([2, 2], title="Game title")
     alice, bob = game.players
-    game.relabel_players({alice.label: "Alice", bob.label: "Bob"})
+    game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_latex()
     assert "\\begin{game}" in serialized_game
     assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game

@@ -204,12 +204,12 @@ def render_profile_csv(
         values = [
             prob
             for player in profile.game.players
-            for _infoset, action in profile[player.label]
+            for _infoset, action in profile[player]
             for _label, prob in action
         ]
     else:
         values = [
-            prob for player in profile.game.players for _label, prob in profile[player.label]
+            prob for player in profile.game.players for _label, prob in profile[player]
         ]
     return ",".join([label, *(format_value(v, decimals, fixed, as_float) for v in values)])
 
@@ -230,13 +230,13 @@ def render_support_csv(
                 for action in action_support.infoset.actions
             )
             for player in support.game.players
-            for action_support in support[player.label]
+            for action_support in support[player]
         ]
     else:
         fields = [
             "".join(
-                "1" if strategy in support[player.label] else "0"
-                for strategy in player.strategies
+                "1" if strategy in support[player] else "0"
+                for strategy in support.game.get_strategies(player)
             )
             for player in support.game.players
         ]
@@ -264,13 +264,13 @@ def _name_or_number(obj) -> str:
 
 def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
     lines = []
-    for player in profile.game.players:
-        lines.append(f"Strategy profile for player {player.number + 1}:")
+    for number, player in enumerate(profile.game.players, start=1):
+        lines.append(f"Strategy profile for player {number}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
-        probs = profile[player.label]
-        values = profile.strategy_values[player.label]
-        for strategy in player.strategies:
+        probs = profile[player]
+        values = profile.strategy_values[player]
+        for strategy in profile.game.get_strategies(player):
             prob = format_value(probs[strategy], decimals)
             value = format_value(values[strategy], decimals)
             lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
@@ -282,11 +282,11 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
-    for player in profile.game.players:
-        lines.append(f"Behavior profile for player {player.number + 1}:")
+    for number, player in enumerate(profile.game.players, start=1):
+        lines.append(f"Behavior profile for player {number}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, mixed_action in profile[player.label]:
+        for infoset, mixed_action in profile[player]:
             infoset_name = _name_or_number(infoset)
             values = action_values[next(iter(infoset.members))]
             for action in infoset.actions:
@@ -300,7 +300,7 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append("")
         lines.append("Infoset    Node       Belief        Prob")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, _mixed_action in profile[player.label]:
+        for infoset, _mixed_action in profile[player]:
             infoset_name = _name_or_number(infoset)
             for node in infoset.members:
                 node_name = _name_or_number(node)
@@ -324,7 +324,9 @@ def read_strategy_profiles_csv(
     Values are parsed as exact rationals; a method which requires floating-point
     starting points converts the result via `~MixedStrategyProfile.as_float`.
     """
-    strategies = [strategy for player in game.players for strategy in player.strategies]
+    strategies = [
+        strategy for player in game.players for strategy in game.get_strategies(player)
+    ]
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
         line = line.strip()
@@ -337,7 +339,7 @@ def read_strategy_profiles_csv(
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
         profile = game.mixed_strategy_profile(rational=True)
         for player in game.players:
-            profile[player.label] = {s: next(values) for s in player.strategies}
+            profile[player] = {s: next(values) for s in game.get_strategies(player)}
         profiles.append(profile)
     return profiles
 
@@ -354,7 +356,7 @@ def read_behavior_profiles_csv(
     count = sum(
         len(node.infoset.actions)
         for player in game.players
-        for node in game.get_infosets(player.label)
+        for node in game.get_infosets(player)
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -368,7 +370,7 @@ def read_behavior_profiles_csv(
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
-            for node in game.get_infosets(player.label):
+            for node in game.get_infosets(player):
                 profile[node] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles

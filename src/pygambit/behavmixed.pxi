@@ -233,7 +233,7 @@ class MixedBehavior:
         and can no longer be assigned into. Set a player's whole behavior via
         ``MixedBehaviorProfile.__setitem__`` instead.
     """
-    _player = cython.declare(Player)
+    _player = cython.declare(str)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -241,15 +241,15 @@ class MixedBehavior:
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: Player, values: dict) -> MixedBehavior:
+    def wrap(player: str, values: dict) -> MixedBehavior:
         obj: MixedBehavior = MixedBehavior.__new__(MixedBehavior)
         obj._player = player
         obj._values = values
         return obj
 
     @property
-    def player(self) -> Player:
-        """The player for whom this mixed behavior strategy is defined."""
+    def player(self) -> str:
+        """The label of the player for whom this mixed behavior strategy is defined."""
         return self._player
 
     def __repr__(self) -> str:
@@ -316,7 +316,7 @@ class MixedBehavior:
         infoset = cython.cast(Infoset, index.infoset)
         if not infoset:
             raise ValueError("node is terminal, has no information set")
-        if infoset.player != self.player:
+        if infoset.player != self._player:
             raise MismatchError("node must belong to this player")
         return self._values[infoset]
 
@@ -348,14 +348,14 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player.label: self[player.label] for player in self.game.players})
+        return str({player: self[player] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + player.label + "}:" +
-                self[player.label]._repr_latex_().replace("$", "")
+                r"\text{" + player + "}:" +
+                self[player]._repr_latex_().replace("$", "")
                 for player in self.game.players
             ) +
             r"\right\}$"
@@ -381,7 +381,7 @@ class MixedBehaviorProfile:
             The player's mixed behavior specified in the profile
         """
         for player in self.game.players:
-            yield self[player.label]
+            yield self[player]
 
     def __getitem__(self, index: typing.Any) -> MixedBehavior | MixedAction:
         """Access a component of the mixed behavior profile specified by `index`.
@@ -412,12 +412,11 @@ class MixedBehaviorProfile:
         if isinstance(index, Node):
             return self._mixed_action_at(self._resolve_infoset_for_node(index))
         if isinstance(index, str):
-            resolved_player = self.game._resolve_player(index, "__getitem__")
             values = {
                 node.infoset: self._mixed_action_at(node.infoset)
-                for node in self.game.get_infosets(resolved_player.label)
+                for node in self.game.get_infosets(index)
             }
-            return MixedBehavior.wrap(resolved_player, values)
+            return MixedBehavior.wrap(index, values)
         raise TypeError(
             f"profile index must be str or Node, not {index.__class__.__name__}"
         )
@@ -448,7 +447,7 @@ class MixedBehaviorProfile:
     def _all_infosets(self) -> typing.Iterator[Infoset]:
         """Iterates over every information set and event in the game."""
         for player in self.game.players:
-            for node in self.game.get_infosets(player.label):
+            for node in self.game.get_infosets(player):
                 yield node.infoset
         for node in self.game.get_events():
             yield node.event
@@ -458,7 +457,7 @@ class MixedBehaviorProfile:
         player, excluding the chance player's.
         """
         for player in self.game.players:
-            for node in self.game.get_infosets(player.label):
+            for node in self.game.get_infosets(player):
                 yield node.infoset
 
     @cython.cfunc
@@ -643,7 +642,7 @@ class MixedBehaviorProfile:
         well-defined payoff; ``self.game.players`` already excludes it.
         """
         self._check_validity()
-        return PayoffVector({p.label: self._payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._payoff(p) for p in self.game.players})
 
     @property
     def node_values(self) -> NodeValuesVector:
@@ -652,7 +651,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return NodeValuesVector({
-            p.label: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
+            p: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
             for p in self.game.players
         })
 
@@ -968,8 +967,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
             return float(Rational(normalized))
 
-    def _payoff(self, player: Player) -> float:
-        return deref(self.profile).GetPayoff(player.player)
+    def _payoff(self, player: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        return deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff"))
 
     def _belief(self, node: Node) -> float:
         cdef optional[double] value = deref(self.profile).GetBeliefProb(node.node)
@@ -989,8 +989,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             return value.value()
         return None
 
-    def _node_value(self, player: Player, node: Node) -> float:
-        return deref(self.profile).GetPayoff(player.player, node.node)
+    def _node_value(self, player: str, node: Node) -> float:
+        game: Game = cython.cast(Game, self.game)
+        resolved_player = game._resolve_player(player, "_node_value")
+        return deref(self.profile).GetPayoff(resolved_player, node.node)
 
     @cython.cfunc
     def _action_value(self, action: c_GameAction) -> object:
@@ -1098,8 +1100,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _to_prob(self, value: typing.Any) -> Rational:
         return Rational(_to_number_string(value))
 
-    def _payoff(self, player: Player) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player))
+    def _payoff(self, player: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        return rat_to_py(deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff")))
 
     def _belief(self, node: Node) -> Rational:
         cdef optional[c_Rational] value = deref(self.profile).GetBeliefProb(node.node)
@@ -1119,8 +1122,10 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
             return rat_to_py(value.value())
         return None
 
-    def _node_value(self, player: Player, node: Node) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
+    def _node_value(self, player: str, node: Node) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        resolved_player = game._resolve_player(player, "_node_value")
+        return rat_to_py(deref(self.profile).GetPayoff(resolved_player, node.node))
 
     @cython.cfunc
     def _action_value(self, action: c_GameAction) -> object:
@@ -1161,7 +1166,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
-            for node in self.game.get_infosets(player.label):
+            for node in self.game.get_infosets(player):
                 infoset = node.infoset
                 profile._setprob_infoset(
                     infoset,
