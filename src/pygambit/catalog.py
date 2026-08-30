@@ -427,7 +427,7 @@ def games(
         if n_infosets is not None:
             if not game.is_tree:
                 return False
-            if len(game.infosets) != n_infosets:
+            if sum(len(game.get_infosets(p.label)) for p in game.players) != n_infosets:
                 return False
         if is_const_sum is not None and game.is_const_sum != is_const_sum:
             return False

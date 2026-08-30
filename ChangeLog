@@ -1,6 +1,17 @@
 ## [17.0.0-beta.1] - unreleased
 
 ### Added
+- Added `Game.get_infosets(player)`, returning a materialized list of one representative
+  `Node` per information set belonging to `player`, replacing `Player.infosets`/`Game.infosets`.
+  `player` must be a personal player; use `Game.get_events()` for the chance player's events.
+- Added `Game.get_events()`, returning a materialized list of one representative `Node` per
+  chance event in the game.
+- Added `Event`, the chance-event counterpart to `Infoset`: a lazy, node-anchored view of the
+  chance player's information partition.  Added `Node.event` and `Action.event` alongside the
+  existing `Node.infoset`/`Action.infoset`, which are now specific to personal players' information
+  sets; each is falsy when it does not apply to a given node or action.
+- Added `Node.members`, the set of nodes belonging to the same information set or event as `Node`,
+  equivalent to `Node.infoset.members`/`Node.event.members`, whichever applies.
 - Added `BehaviorSupportProfile` to `pygambit`.
 - Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
   is found or another solver event is emitted.
@@ -17,6 +28,14 @@
   contingency, for a game in any representation.
 
 ### Changed
+- `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed
+  by anchoring on a representative member node rather than carrying independent identity, and is
+  now specific to personal players; see `Event` for the chance player.  `Infoset.is_chance` has
+  been removed, as `Infoset` is never chance; test truthiness of `Node.infoset`/`Node.event` (or
+  `Action.infoset`/`Action.event`) instead.
+  `Game.append_infoset`, `Game.insert_infoset`, `Game.set_move_actions`, `Game.set_event_actions`,
+  `Game.relabel_actions`, `Game.reveal`, and `Game.minimal_subgame` now identify an information
+  set or event via a member `Node` (or its label) rather than an `Infoset` object.
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
   The `gambit-convert` utility has been removed.
 - Refreshed GUI icons and standardised dialog layout and formatting
@@ -57,6 +76,9 @@
   `Player.strategies`; a `Strategy` object carried no information a label didn't already
   carry, now that strategy labels are unique within a player.  `GameStrategyRep` in the C++
   core is unaffected by this change (a separate, later piece of work).
+
+### Removed
+- Removed `Player.infosets` and `Game.infosets`; use `Game.get_infosets(player)` instead.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 

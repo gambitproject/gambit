@@ -18,17 +18,11 @@ def test_strategic_game_player_actions():
         _ = player.actions
 
 
-def test_strategic_game_infosets():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.infosets
-
-
-def test_strategic_game_player_infosets():
+def test_strategic_game_get_infosets():
     game = gbt.Game.new_table([2, 2])
     player, _ = game.players
     with pytest.raises(gbt.UndefinedOperationError):
-        _ = player.infosets
+        _ = game.get_infosets(player.label)
 
 
 def test_strategic_game_root():

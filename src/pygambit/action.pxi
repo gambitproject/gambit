@@ -37,9 +37,9 @@ class Action:
 
     def __repr__(self) -> str:
         if self.label:
-            return f"Action(infoset={self.infoset}, label='{self.label}')"
+            return f"Action(infoset={self.infoset or self.event}, label='{self.label}')"
         else:
-            return f"Action(infoset={self.infoset}, number={self.number})"
+            return f"Action(infoset={self.infoset or self.event}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -66,7 +66,7 @@ class Action:
         MismatchError
             If `node` is not in the same game as the action.
         """
-        if self.infoset.game != node.game:
+        if (self.infoset or self.event).game != node.game:
             raise MismatchError("precedes() requires a node from the same game as the action")
         return self.action.deref().Precedes(cython.cast(Node, node).node)
 
@@ -87,8 +87,19 @@ class Action:
 
     @property
     def infoset(self) -> Infoset:
-        """Get the information set to which the action belongs."""
-        return Infoset.wrap(self.action.deref().GetInfoset())
+        """Get the personal player's information set to which the action belongs.
+        Falsy if the action instead belongs to a chance event; see `event`.
+        """
+        return Infoset.wrap(self.action.deref().GetInfoset().deref().GetMember(1))
+
+    @property
+    def event(self) -> Event:
+        """Get the chance event to which the action belongs. Falsy if the action
+        instead belongs to a personal player's information set; see `infoset`.
+
+        .. versionadded:: 17.0.0
+        """
+        return Event.wrap(self.action.deref().GetInfoset().deref().GetMember(1))
 
     @property
     def prob(self) -> decimal.Decimal | Rational:
@@ -100,7 +111,7 @@ class Action:
         UndefinedOperationError
             If the action does not belong to the chance player.
         """
-        if not self.infoset.is_chance:
+        if not self.event:
             raise UndefinedOperationError(
                 "action probabilities are only defined at events"
             )

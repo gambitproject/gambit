@@ -352,7 +352,9 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(list(infoset.actions)) for player in game.players for infoset in player.infosets
+        len(list(node.infoset.actions))
+        for player in game.players
+        for node in game.get_infosets(player.label)
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -366,8 +368,7 @@ def read_behavior_profiles_csv(
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
-            for infoset in player.infosets:
-                node = next(iter(infoset.members))
-                profile[node] = {a.label: next(values) for a in infoset.actions}
+            for node in game.get_infosets(player.label):
+                profile[node] = {a.label: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles
