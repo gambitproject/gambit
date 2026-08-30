@@ -96,10 +96,8 @@ def create_efg_corresponding_to_bimatrix_game_arrays(
     g.append_move(g.root, "1", actions1)
     g.append_move(g.root.children, "2", actions2)
     for i, j in itertools.product(range(m), range(n)):
-        g.set_outcome(
-            g.root.children[str(i)].children[str(j)],
-            g.add_outcome(f"({i},{j})", [A[i, j], B[i, j]]),
-        )
+        node = g.root.children[str(i)].children[str(j)]
+        g.make_outcome(node, {"1": A[i, j], "2": B[i, j]}, f"({i},{j})")
     return g
 
 
@@ -136,10 +134,9 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     g = create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
     if variant == "missing term outcome":
-        g.delete_outcome(g.root.children["0"].children["1"].outcome)
+        g.make_outcome_null(g.root.children["0"].children["1"])
     elif variant == "with neutral outcome":
-        neutral = g.add_outcome("neutral", [0, 0])
-        g.set_outcome(g.root.children["0"], neutral)
+        g.make_outcome(g.root.children["0"], {"1": 0, "2": 0}, "neutral")
 
     return g
 
@@ -168,32 +165,29 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     deals = ["King", "Queen"]
     g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
 
-    ante_outcome = g.add_outcome("Ante", [-1, -1])
-    g.set_outcome(g.root, ante_outcome)
-
-    alice_folds_outcome = g.add_outcome("Alice Folds", [0, 2])
-    alice_bets_outcome = g.add_outcome("Alice Bets", [-1, 0])
-    bob_folds_outcome = g.add_outcome("Bob Folds", [3, 0])
-    bob_calls_and_wins_outcome = g.add_outcome("Bob Calls and Wins", [0, 3])
-    bob_calls_and_loses_outcome = g.add_outcome("Bob Calls and Loses", [4, -1])
-
     for node in g.root.children:
         g.append_move(node, player="Alice", actions=["Bet", "Fold"])
-        g.set_outcome(node.children["Fold"], alice_folds_outcome)
-        g.set_outcome(node.children["Bet"], alice_bets_outcome)
 
     alice_bets_nodes = [
         g.root.children["King"].children["Bet"],
         g.root.children["Queen"].children["Bet"],
     ]
     g.append_move(alice_bets_nodes, player="Bob", actions=["Call", "Fold"])
-    for node in alice_bets_nodes:
-        g.set_outcome(node.children["Fold"], bob_folds_outcome)
 
+    g.make_outcome(g.root, {"Alice": -1, "Bob": -1}, "Ante")
+    g.make_outcome(
+        [node.children["Fold"] for node in g.root.children], {"Alice": 0, "Bob": 2}, "Alice Folds"
+    )
+    g.make_outcome(
+        [node.children["Bet"] for node in g.root.children], {"Alice": -1, "Bob": 0}, "Alice Bets"
+    )
+    g.make_outcome(
+        [node.children["Fold"] for node in alice_bets_nodes], {"Alice": 3, "Bob": 0}, "Bob Folds"
+    )
     bob_calls_and_loses_node = g.root.children["King"].children["Bet"].children["Call"]
-    g.set_outcome(bob_calls_and_loses_node, bob_calls_and_loses_outcome)
+    g.make_outcome(bob_calls_and_loses_node, {"Alice": 4, "Bob": -1}, "Bob Calls and Loses")
     bob_calls_and_wins_node = g.root.children["Queen"].children["Bet"].children["Call"]
-    g.set_outcome(bob_calls_and_wins_node, bob_calls_and_wins_outcome)
+    g.make_outcome(bob_calls_and_wins_node, {"Alice": 0, "Bob": 3}, "Bob Calls and Wins")
     return g
 
 
@@ -295,17 +289,19 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
 
         return tuple(payoffs.values())
 
-    # create 4 possible outcomes just once
-    payoffs_to_outcomes = {
-        (1, -1): g.add_outcome("Alice wins 1", [1, -1]),
-        (2, -2): g.add_outcome("Alice wins 2", [2, -2]),
-        (-1, 1): g.add_outcome("Bob wins 1", [-1, 1]),
-        (-2, 2): g.add_outcome("BOb wins 2", [-2, 2]),
+    # group terminal nodes by their payoffs, so each of the 4 possible outcomes is created once
+    payoff_labels = {
+        (1, -1): "Alice wins 1",
+        (2, -2): "Alice wins 2",
+        (-1, 1): "Bob wins 1",
+        (-2, 2): "BOb wins 2",
     }
-
+    nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
     for term_node in [n for n in g.nodes if n.is_terminal]:
-        outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
-        g.set_outcome(term_node, outcome)
+        nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
+
+    for payoffs, nodes in nodes_by_payoff.items():
+        g.make_outcome(nodes, {"Alice": payoffs[0], "Bob": payoffs[1]}, payoff_labels[payoffs])
 
     return g
 
@@ -316,37 +312,22 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
     """
     g = _create_kuhn_poker_efg_without_outcomes()
 
-    ante_outcome = g.add_outcome("Ante", [-1, -1])
-    g.set_outcome(g.root, ante_outcome)
-
-    outcomes_dict = dict()
+    # each outcome's payoffs, keyed by the same labels used below; collected up front so each
+    # outcome can be created once, attached to every node (terminal or not) that shares it.
+    payoffs_by_key = {"Ante": (-1, -1)}
     for player in ["Alice", "Bob"]:
-        # non-terminal outcomes for betting
-        payoffs = [-1, 0] if player == "Alice" else [0, -1]
-        tmp = f"{player} bets"
-        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
+        payoffs_by_key[f"{player} bets"] = (-1, 0) if player == "Alice" else (0, -1)
+        payoffs_by_key[f"{player} wins showdown for pot of 2"] = (
+            (2, 0) if player == "Alice" else (0, 2)
+        )
+        payoffs_by_key[f"{player} folds"] = (0, 3) if player == "Alice" else (3, 0)
+        payoffs_by_key[f"{player} calls and wins"] = (3, 0) if player == "Alice" else (0, 3)
+        payoffs_by_key[f"{player} calls and loses"] = (-1, 4) if player == "Alice" else (4, -1)
 
-        # terminal outcomes for showdown after both check (pot of 2)
-        payoffs = [2, 0] if player == "Alice" else [0, 2]
-        tmp = f"{player} wins showdown for pot of 2"
-        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
+    nodes_by_key = {key: [] for key in payoffs_by_key}
+    nodes_by_key["Ante"].append(g.root)
 
-        # terminal outcomes after a player folds (pot of 3)
-        payoffs = [0, 3] if player == "Alice" else [3, 0]
-        tmp = f"{player} folds"
-        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
-
-        # terminal outcomes after a player calls and wins: bet first (-1) then win pot (4)
-        payoffs = [3, 0] if player == "Alice" else [0, 3]
-        tmp = f"{player} calls and wins"
-        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
-
-        # terminal outcomes after a player calls and loses: bet first (-1) then lose pot (4)
-        payoffs = [-1, 4] if player == "Alice" else [4, -1]
-        tmp = f"{player} calls and loses"
-        outcomes_dict[tmp] = g.add_outcome(tmp, payoffs)
-
-    def add_outcomes(term_node):
+    def collect_nodes(term_node):
         def get_path(node):
             path = []
             while node.parent:
@@ -362,26 +343,32 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         if label == "Check":  # Alice checks
             n, label = path.pop()
             if label == "Check":  # Bob checks
-                g.set_outcome(n, outcomes_dict[f"{winner} wins showdown for pot of 2"])
+                nodes_by_key[f"{winner} wins showdown for pot of 2"].append(n)
             else:  # Bob bets
-                g.set_outcome(n, outcomes_dict["Bob bets"])
+                nodes_by_key["Bob bets"].append(n)
                 n, label = path.pop()
                 if label == "Fold":  # Alice folds
-                    g.set_outcome(n, outcomes_dict["Alice folds"])
+                    nodes_by_key["Alice folds"].append(n)
                 else:  # Alice calls
                     tmp = "wins" if winner == "Alice" else "loses"
-                    g.set_outcome(n, outcomes_dict[f"Alice calls and {tmp}"])
+                    nodes_by_key[f"Alice calls and {tmp}"].append(n)
         else:  # Alice bets
-            g.set_outcome(n, outcomes_dict["Alice bets"])
+            nodes_by_key["Alice bets"].append(n)
             n, label = path.pop()
             if label == "Fold":  # Bob
-                g.set_outcome(n, outcomes_dict["Bob folds"])
+                nodes_by_key["Bob folds"].append(n)
             else:  # Bob calls
                 tmp = "wins" if winner == "Bob" else "loses"
-                g.set_outcome(n, outcomes_dict[f"Bob calls and {tmp}"])
+                nodes_by_key[f"Bob calls and {tmp}"].append(n)
 
     for term_node in [n for n in g.nodes if n.is_terminal]:
-        add_outcomes(term_node)
+        collect_nodes(term_node)
+
+    for key, nodes in nodes_by_key.items():
+        # the same non-terminal node is revisited once per terminal descendant walked above
+        deduped_nodes = list(dict.fromkeys(nodes))
+        alice_payoff, bob_payoff = payoffs_by_key[key]
+        g.make_outcome(deduped_nodes, {"Alice": alice_payoff, "Bob": bob_payoff}, key)
 
     return g
 
@@ -454,16 +441,22 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(g.root.children["Trust"].children["Honor"], g.add_outcome("Trustworthy", [1, 1]))
+    g.make_outcome(
+        g.root.children["Trust"].children["Honor"], {"Buyer": 1, "Seller": 1}, "Trustworthy"
+    )
     if unique_NE_variant:
-        g.set_outcome(
-            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", ["1/2", 2])
+        g.make_outcome(
+            g.root.children["Trust"].children["Abuse"],
+            {"Buyer": "1/2", "Seller": 2},
+            "Untrustworthy",
         )
     else:
-        g.set_outcome(
-            g.root.children["Trust"].children["Abuse"], g.add_outcome("Untrustworthy", [-1, 2])
+        g.make_outcome(
+            g.root.children["Trust"].children["Abuse"],
+            {"Buyer": -1, "Seller": 2},
+            "Untrustworthy",
         )
-    g.set_outcome(g.root.children["Not trust"], g.add_outcome("Opt-out", [0, 0]))
+    g.make_outcome(g.root.children["Not trust"], {"Buyer": 0, "Seller": 0}, "Opt-out")
     return g
 
 
@@ -580,12 +573,16 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
-            g.set_outcome(current_node.children["Take"], g.add_outcome(f"take_{t}", payoffs))
+            g.make_outcome(
+                current_node.children["Take"], {"1": payoffs[0], "2": payoffs[1]}, f"take_{t}"
+            )
             if t == self.N - 1:  # for last round, push payoffs
                 payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
                 if current_player == "2":
                     payoffs.reverse()
-                g.set_outcome(current_node.children["Push"], g.add_outcome(f"push_{t}", payoffs))
+                g.make_outcome(
+                    current_node.children["Push"], {"1": payoffs[0], "2": payoffs[1]}, f"push_{t}"
+                )
             current_node = current_node.children["Push"]
             current_player = "2" if current_player == "1" else "1"
         return g
@@ -706,8 +703,8 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
     def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
-            g.set_outcome(
-                node, g.add_outcome(f"leaf_{len(list(g.outcomes))}", [0] * self.n_players)
+            g.make_outcome(
+                node, {str(p): 0 for p in self.players}, f"leaf_{len(list(g.outcomes))}"
             )
         else:
             current_player = str(whose_turn + 1)

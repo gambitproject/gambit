@@ -325,8 +325,6 @@ cdef extern from "games/game.h":
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
         Outcomes GetOutcomes() except +
-        c_GameOutcome NewOutcome(string) except +ValueError
-        void DeleteOutcome(c_GameOutcome) except +
 
         int NumNodes() except +
         int NumNonterminalNodes() except +
@@ -373,12 +371,13 @@ cdef extern from "games/game.h":
                                   string) except +ValueError
         c_GameOutcome MakeOutcome(stdvector[stdvector[c_GameStrategy]], stdvector[c_Number],
                                   string) except +ValueError
+        void MakeOutcomeNull(stdvector[c_GameNode]) except +ValueError
+        void MakeOutcomeNull(stdvector[stdvector[c_GameStrategy]]) except +ValueError
         void Reveal(c_GameInfoset, c_GamePlayer) except +
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
         void SetEventActions(c_GameInfoset, stdvector[string],
                              stdvector[c_Number]) except +ValueError
-        void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
                                 string) except +ValueError
 
@@ -398,7 +397,6 @@ cdef extern from "games/stratpure.h":
         void SetStrategy(c_GameStrategy) except +
 
         c_GameOutcome GetOutcome() except +
-        void SetOutcome(c_GameOutcome) except +
 
         c_Rational GetPayoff(c_GamePlayer) except +
 

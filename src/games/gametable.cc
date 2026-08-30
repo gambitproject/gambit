@@ -42,7 +42,6 @@ protected:
 public:
   explicit TablePureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
   GameOutcome GetOutcome() const override;
-  void SetOutcome(GameOutcome p_outcome) override;
   Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };
@@ -59,12 +58,6 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 {
   return dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index)->shared_from_this();
-}
-
-void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
-{
-  dynamic_cast<GameTableRep &>(*m_game).m_results[m_index] =
-      p_outcome ? p_outcome.get() : m_game->m_nullOutcome.get();
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
@@ -481,20 +474,11 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 //                        GameTableRep: Outcomes
 //------------------------------------------------------------------------
 
-GameOutcome
-GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contingencies,
-                          const std::vector<Number> &p_payoffs, const std::string &p_label)
+std::set<long> GameTableRep::ResolveContingencies(
+    const std::vector<std::vector<GameStrategy>> &p_contingencies) const
 {
-  if (p_contingencies.empty()) {
-    throw ValueException("At least one contingency must be specified");
-  }
-  if (p_payoffs.size() != m_players.size()) {
-    throw ValueException("A payoff must be specified for each player");
-  }
   const auto &strides = m_pureStrategies.m_strides;
-  // `covered` collects the candidates for absorption.
   std::set<long> selected;
-  std::set<const GameOutcomeRep *> covered;
   for (const auto &contingency : p_contingencies) {
     if (contingency.size() != m_players.size()) {
       throw ValueException("Each contingency must give one strategy per player");
@@ -512,20 +496,44 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
     if (!selected.insert(index).second) {
       throw ValueException("Each contingency may be referenced only once");
     }
-    if (!m_results[index]->IsNull()) {
-      covered.insert(m_results[index]);
-    }
   }
+  return selected;
+}
+
+std::set<const GameOutcomeRep *>
+GameTableRep::ComputeAbsorbedOutcomes(const std::set<long> &p_selected,
+                                      const std::set<const GameOutcomeRep *> &p_covered) const
+{
   std::set<const GameOutcomeRep *> absorbed;
-  if (!covered.empty()) {
-    // A candidate survives absorption if some cell outside the selection still references it.
-    absorbed = covered;
+  if (!p_covered.empty()) {
+    absorbed = p_covered;
     for (size_t index = 0; index < m_results.size() && !absorbed.empty(); index++) {
-      if (!selected.contains(static_cast<long>(index))) {
+      if (!p_selected.contains(static_cast<long>(index))) {
         absorbed.erase(m_results[index]);
       }
     }
   }
+  return absorbed;
+}
+
+GameOutcome
+GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contingencies,
+                          const std::vector<Number> &p_payoffs, const std::string &p_label)
+{
+  if (p_contingencies.empty()) {
+    throw ValueException("At least one contingency must be specified");
+  }
+  if (p_payoffs.size() != m_players.size()) {
+    throw ValueException("A payoff must be specified for each player");
+  }
+  const auto selected = ResolveContingencies(p_contingencies);
+  std::set<const GameOutcomeRep *> covered;
+  for (const auto index : selected) {
+    if (!m_results[index]->IsNull()) {
+      covered.insert(m_results[index]);
+    }
+  }
+  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
   CheckOutcomeLabel(p_label, absorbed);
 
   IncrementVersion();
@@ -543,14 +551,27 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
   return outcome;
 }
 
-void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
+void GameTableRep::MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &p_contingencies)
 {
-  if (p_outcome->IsNull()) {
-    throw UndefinedException("The null outcome cannot be deleted");
+  if (p_contingencies.empty()) {
+    throw ValueException("At least one contingency must be specified");
   }
+  const auto selected = ResolveContingencies(p_contingencies);
+  std::set<const GameOutcomeRep *> covered;
+  for (const auto index : selected) {
+    if (!m_results[index]->IsNull()) {
+      covered.insert(m_results[index]);
+    }
+  }
+  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+
   IncrementVersion();
-  std::replace(m_results.begin(), m_results.end(), p_outcome.get(), m_nullOutcome.get());
-  EraseOutcomes({p_outcome.get()});
+  for (const auto index : selected) {
+    m_results[index] = m_nullOutcome.get();
+  }
+  if (!absorbed.empty()) {
+    EraseOutcomes(absorbed);
+  }
 }
 
 //------------------------------------------------------------------------

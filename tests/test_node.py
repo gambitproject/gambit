@@ -49,11 +49,11 @@ def test_get_outcome():
     assert not game.root.outcome
 
 
-def test_set_outcome_null():
-    """Setting an outcome to null leaves the node's outcome view falsy."""
+def test_make_outcome_null():
+    """Resetting a node's outcome to null leaves the node's outcome view falsy."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"].children["U2"].children["U3"]
-    game.set_outcome(node, None)
+    game.make_outcome_null(node)
     assert not node.outcome
 
 
