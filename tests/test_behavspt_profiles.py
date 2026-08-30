@@ -75,7 +75,7 @@ def test_getitem_infoset_wrong_game():
 
 def test_predicate_construction():
     game = games.read_from_file("mixed_behavior_game.efg")
-    profile = game.behavior_support_profile(lambda node, a: a.label != "D1")
+    profile = game.behavior_support_profile(lambda node, a: a != "D1")
     infoset = _find_infoset(game, "Infoset 1:1")
     assert set(profile[infoset]) == {"U1"}
 

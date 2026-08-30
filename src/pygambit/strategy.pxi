@@ -26,7 +26,7 @@ class StrategyBehavior:
 
     The keys of the mapping are the information sets of the strategy's player at
     which the strategy prescribes an action; an unreachable information set is not a key.
-    The corresponding values are the prescribed ``Action`` objects.
+    The corresponding values are the labels of the prescribed actions.
     Iteration yields the keys in the player's information set order.
 
     .. versionadded:: 17.0.0
@@ -63,8 +63,9 @@ class StrategyBehavior:
         """The label of the strategy of which this is the behavior."""
         return self._strategy_label
 
-    def _action_at(self, infoset: Infoset) -> Action | None:
-        """The action prescribed by the strategy at `infoset`, or None if unreachable."""
+    def _action_at(self, infoset: Infoset) -> str | None:
+        """The label of the action prescribed by the strategy at `infoset`, or None
+        if unreachable."""
         player = cython.cast(Player, self._game.players[self._player_label])
         handle = self._game._resolve_strategy(
             player, self._strategy_label, "StrategyBehavior"
@@ -72,7 +73,7 @@ class StrategyBehavior:
         action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset)._resolve())
         if not action:
             return None
-        return Action.wrap(action)
+        return action.deref().GetLabel().decode("utf-8")
 
     def _resolve_key(self, key: Infoset | str) -> Infoset:
         """Resolve `key` to an information set at which the player has the move."""
@@ -89,8 +90,9 @@ class StrategyBehavior:
             )
         return infoset
 
-    def __getitem__(self, key: Infoset | str) -> Action:
-        """Return the action prescribed at the information set referenced by `key`.
+    def __getitem__(self, key: Infoset | str) -> str:
+        """Return the label of the action prescribed at the information set
+        referenced by `key`.
 
         Raises
         ------
@@ -108,8 +110,9 @@ class StrategyBehavior:
             )
         return action
 
-    def get(self, key: Infoset | str, default: typing.Any = None) -> Action | None:
-        """Return the action prescribed at `key`, or `default` if none is prescribed."""
+    def get(self, key: Infoset | str, default: typing.Any = None) -> str | None:
+        """Return the label of the action prescribed at `key`, or `default` if none
+        is prescribed."""
         infoset = self._resolve_key(key)
         action = self._action_at(infoset)
         return default if action is None else action
@@ -134,12 +137,12 @@ class StrategyBehavior:
         """The information sets at which the strategy prescribes an action."""
         return list(self)
 
-    def values(self) -> list[Action]:
-        """The prescribed actions, in the order of `keys`."""
+    def values(self) -> list[str]:
+        """The labels of the prescribed actions, in the order of `keys`."""
         return [self._action_at(infoset) for infoset in self]
 
-    def items(self) -> list[tuple[Infoset, Action]]:
-        """(information set, action) pairs, in the order of `keys`."""
+    def items(self) -> list[tuple[Infoset, str]]:
+        """(information set, action label) pairs, in the order of `keys`."""
         return [(infoset, self._action_at(infoset)) for infoset in self]
 
 

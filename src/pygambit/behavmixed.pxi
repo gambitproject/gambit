@@ -461,15 +461,28 @@ class MixedBehaviorProfile:
             for node in self.game.get_infosets(player.label):
                 yield node.infoset
 
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value: typing.Any) -> cython.void:
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        raise NotImplementedError
+
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
-        return MixedAction.wrap(
-            infoset,
-            {
-                a.label: self._getprob_action(a)
-                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
-            }
-        )
+        values: dict = {}
+        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
+            values[a.deref().GetLabel().decode("utf-8")] = self._getprob_action(a)
+        return MixedAction.wrap(infoset, values)
 
     def _setprob_infoset(
         self, infoset: Infoset, distribution: collections.abc.Mapping, sparse: bool
@@ -505,8 +518,8 @@ class MixedBehaviorProfile:
             raise ValueError("a mixed action's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed action's weights must not all be zero")
-        for a in cython.cast(_InfosetOrEvent, infoset)._action_objects():
-            self._setprob_action(a, values[a.label])
+        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
+            self._setprob_action(a, values[a.deref().GetLabel().decode("utf-8")])
 
     def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed action at the information set containing `index`.
@@ -676,8 +689,8 @@ class MixedBehaviorProfile:
         self._check_validity()
         return ActionValuesVector({
             infoset: ActionValueVector({
-                a.label: self._action_value(a)
-                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+                a.deref().GetLabel().decode("utf-8"): self._action_value(a)
+                for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
             })
             for infoset in self._personal_infosets()
         })
@@ -758,8 +771,8 @@ class MixedBehaviorProfile:
         self._check_validity()
         return ActionRegretsVector({
             infoset: ActionRegretVector({
-                a.label: self._action_regret(a)
-                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+                a.deref().GetLabel().decode("utf-8"): self._action_regret(a)
+                for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
             })
             for infoset in self._personal_infosets()
         })
@@ -930,8 +943,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset._resolve())
 
-    def _getprob_action(self, index: Action) -> float:
-        return deref(self.profile).getaction(index.action)
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        return deref(self.profile).getaction(index)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -941,9 +955,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value) -> None:
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value) -> cython.void:
         self._ensure_unshared()
-        setitem_mbpd_action(deref(self.profile), index.action, value)
+        setitem_mbpd_action(deref(self.profile), index, value)
 
     def _to_prob(self, value: typing.Any) -> float:
         normalized = _to_number_string(value)
@@ -977,14 +992,16 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _node_value(self, player: Player, node: Node) -> float:
         return deref(self.profile).GetPayoff(player.player, node.node)
 
-    def _action_value(self, action: Action) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(action.action)
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        cdef optional[double] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return value.value()
         return None
 
-    def _action_regret(self, action: Action) -> float:
-        return deref(self.profile).GetRegret(action.action)
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        return deref(self.profile).GetRegret(action)
 
     def _infoset_regret(self, infoset: Infoset) -> float:
         return deref(self.profile).GetRegret(infoset._resolve())
@@ -1055,8 +1072,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _is_defined_at(self, infoset: Infoset) -> bool:
         return deref(self.profile).IsDefinedAt(infoset._resolve())
 
-    def _getprob_action(self, index: Action) -> Rational:
-        return rat_to_py(deref(self.profile).getaction(index.action))
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        return rat_to_py(deref(self.profile).getaction(index))
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -1066,14 +1084,15 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value: typing.Any) -> None:
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value: typing.Any) -> cython.void:
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError(
                 f"rational precision profile requires int or Fraction probability, "
                 f"not {value.__class__.__name__}"
             )
         self._ensure_unshared()
-        setitem_mbpr_action(deref(self.profile), index.action,
+        setitem_mbpr_action(deref(self.profile), index,
                             to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
@@ -1103,14 +1122,16 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _node_value(self, player: Player, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
 
-    def _action_value(self, action: Action) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action.action)
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return rat_to_py(value.value())
         return None
 
-    def _action_regret(self, action: Action) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(action.action))
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        return rat_to_py(deref(self.profile).GetRegret(action))
 
     def _infoset_regret(self, infoset: Infoset) -> Rational:
         return rat_to_py(deref(self.profile).GetRegret(infoset._resolve()))
@@ -1145,8 +1166,8 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
                 profile._setprob_infoset(
                     infoset,
                     {
-                        a.label: float(self._getprob_action(a))
-                        for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+                        a.deref().GetLabel().decode("utf-8"): float(self._getprob_action(a))
+                        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
                     },
                     sparse=True,
                 )

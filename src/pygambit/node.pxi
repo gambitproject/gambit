@@ -45,32 +45,31 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, action: str | Action) -> Node:
-        """Returns the successor node which is reached after `action` is played.
-
-        `action` may be an ``Action`` at this node's infoset, or its label.
+    def __getitem__(self, action: typing.Any) -> Node:
+        """Returns the successor node which is reached after the action labeled
+        `action` is played.
 
         Raises
         ------
         KeyError
-            If `action` is a string and no action with that label exists at the node's
-            infoset, or if the node is terminal.
+            If no action with that label exists at the node's infoset, or if the
+            node is terminal.
         ValueError
-            If `action` is an empty or all-whitespace string, or is an ``Action``
-            from a different infoset.
+            If `action` is an empty or all-whitespace string.
         TypeError
-            If `action` is not a ``str`` or an ``Action``.
+            If `action` is not a ``str``.
 
         .. versionchanged:: 16.5.0
             Previously indexing by string searched the labels of the child nodes,
             rather than referring to actions.  This implements the more natural
             interpretation that strings refer to action labels.
 
-            Relatedly, the collection can now be indexed by an Action object.
-
         .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; index by the ``Action`` taken, or its label.
-            A label matching no action now raises ``KeyError``.
+            Integer indexing is no longer supported; index by the action's label, or
+            iterate.  A label matching no action now raises ``KeyError``.
+
+        .. versionchanged:: 17.0.0
+            No longer indexable by an ``Action`` object, following its removal.
         """
         if isinstance(action, str):
             if not action.strip():
@@ -81,18 +80,12 @@ class NodeChildren:
                 if act.deref().GetLabel().decode("utf-8") == cython.cast(str, action):
                     return Node.wrap(self.parent.deref().GetChild(act))
             raise KeyError(f"No action with label '{action}' at node")
-        if isinstance(action, Action):
-            try:
-                return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
-            except IndexError:
-                raise ValueError("Action is from a different infoset than node") from None
         if isinstance(action, int):
             raise TypeError(
-                "node children cannot be indexed by position; index by the action taken "
-                "(an Action or its label), or iterate. "
-                "(Integer indexing was removed in 16.7.0.)"
+                "node children cannot be indexed by position; index by the action's "
+                "label, or iterate. (Integer indexing was removed in 16.7.0.)"
             )
-        raise TypeError(f"Index must be a str label or an Action, not {action.__class__.__name__}")
+        raise TypeError(f"Index must be a str label, not {action.__class__.__name__}")
 
 
 @cython.cclass
@@ -251,7 +244,9 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(cython.cast(Action, node.prior_action).action.deref().GetNumber() - 1)
+            path.append(
+                cython.cast(Node, node).node.deref().GetPriorAction().deref().GetNumber() - 1
+            )
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
@@ -351,9 +346,9 @@ class Node:
         return self.event.members
 
     @property
-    def actions(self) -> InfosetActions:
-        """The set of actions available at the node's current information set or
-        event, whichever applies.
+    def actions(self) -> list[str]:
+        """The labels of the actions available at the node's current information set
+        or event, whichever applies.
 
         .. versionadded:: 17.0.0
 
@@ -365,9 +360,33 @@ class Node:
         """
         infoset: Infoset = self.infoset
         if infoset:
-            return infoset._action_objects()
+            return infoset.actions
+        return self.event.actions
+
+    @property
+    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
+        """The probability of each action at the node's current chance event, keyed
+        by label.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the node does not currently belong to a chance event.
+        """
         event: Event = self.event
-        return event._action_objects()
+        if not event:
+            raise UndefinedOperationError(
+                "action probabilities are only defined at events"
+            )
+        resolved: c_GameInfoset = event._resolve()
+        result: dict = {}
+        for a in resolved.deref().GetActions():
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+                cython.cast(string, resolved.deref().GetActionProb(a))
+            )
+        return result
 
     @property
     def player(self) -> NodePlayer:
@@ -396,29 +415,46 @@ class Node:
         return None
 
     @property
-    def prior_action(self) -> Action | None:
-        """The action which leads to this node.
+    def prior_action(self) -> Branch | None:
+        """The branch -- the parent node and the label of the action taken from it --
+        which leads to this node.
 
         If this is the root node, None is returned.
+
+        .. versionchanged:: 17.0.0
+            Returns a `Branch` (the parent node and the action's label) rather than
+            an `Action` object, following its removal.
         """
-        if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetPriorAction())
+        prior: c_GameAction = self.node.deref().GetPriorAction()
+        if prior != cython.cast(c_GameAction, NULL):
+            return Branch(self.parent, prior.deref().GetLabel().decode("utf-8"))
         return None
 
     @property
-    def own_prior_action(self) -> Action | None:
-        """The last action taken by the node's owner before reaching this node.
+    def own_prior_action(self) -> Branch | None:
+        """The last branch -- the node and the label of the action taken there -- at
+        which the node's owner acted before reaching this node.
 
         Returns
         -------
-        Action or None
-            The action object, or None if the player has not moved previously
+        Branch or None
+            The node at which the node's owner last acted, paired with the label of
+            the action taken there, or None if the player has not moved previously
             on the path to this node.
+
         .. versionadded:: 16.5.0
+        .. versionchanged:: 17.0.0
+            Returns a `Branch` (the node and the action's label) rather than an
+            `Action` object, following its removal.
         """
-        if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetOwnPriorAction())
-        return None
+        prior: c_GameAction = self.node.deref().GetOwnPriorAction()
+        if not (prior != cython.cast(c_GameAction, NULL)):
+            return None
+        label = prior.deref().GetLabel().decode("utf-8")
+        cur: c_GameNode = self.node
+        while cur.deref().GetPriorAction() != prior:
+            cur = cur.deref().GetParent()
+        return Branch(Node.wrap(cur.deref().GetParent()), label)
 
     @property
     def prior_sibling(self) -> Node | None:

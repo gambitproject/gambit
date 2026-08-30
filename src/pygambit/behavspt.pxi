@@ -254,7 +254,8 @@ class BehaviorSupportProfile:
         """Returns a snapshot of the action support at infoset, as of now."""
         infoset_handle = cython.cast(Infoset, infoset)._resolve()
         actions = tuple(
-            Action.wrap(a).label for a in deref(self.profile).GetActions(infoset_handle)
+            a.deref().GetLabel().decode("utf-8")
+            for a in deref(self.profile).GetActions(infoset_handle)
         )
         return ActionSupport.wrap(infoset, actions)
 
@@ -286,13 +287,13 @@ class BehaviorSupportProfile:
         # Actions to keep are added first, so that a subsequent removal is never asked
         # to remove the last remaining action at the information set. (Unlike
         # RemoveStrategy, RemoveAction does not itself guard against emptying its scope.)
-        action_objects = cython.cast(_InfosetOrEvent, infoset)._action_objects()
-        for a in action_objects:
-            if a.label in given:
-                deref(self.profile).AddAction(cython.cast(Action, a).action)
-        for a in action_objects:
-            if a.label not in given:
-                deref(self.profile).RemoveAction(cython.cast(Action, a).action)
+        action_handles = cython.cast(Infoset, infoset)._resolve().deref().GetActions()
+        for a in action_handles:
+            if a.deref().GetLabel().decode("utf-8") in given:
+                deref(self.profile).AddAction(a)
+        for a in action_handles:
+            if a.deref().GetLabel().decode("utf-8") not in given:
+                deref(self.profile).RemoveAction(a)
 
     def __setitem__(self, infoset: typing.Any, actions: typing.Iterable[str]) -> None:
         """Sets the support at `infoset` to exactly the given actions.

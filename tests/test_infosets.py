@@ -124,16 +124,15 @@ def test_make_infoset_strategic_game_raises():
         game.make_infoset([], "1")
 
 
-def test_set_move_actions_add_preserves_existing_action_handles():
-    """New actions may be declared at any position; the existing Action objects
-    survive in declared order."""
+def test_set_move_actions_add_preserves_existing_action_order():
+    """New actions may be declared at any position; the existing actions' relative
+    order is preserved."""
     game = games.read_from_file("basic_extensive_game.efg")
-    actions = list(game.root.actions)
-    labels = [action.label for action in actions]
+    labels = list(game.root.actions)
     game.set_move_actions(game.root, labels + ["end"])
-    assert list(game.root.actions)[:-1] == actions
+    assert list(game.root.actions)[:-1] == labels
     game.set_move_actions(game.root, ["front"] + labels + ["end"])
-    assert list(game.root.actions)[1:-1] == actions
+    assert list(game.root.actions)[1:-1] == labels
 
 
 @pytest.mark.parametrize(
@@ -150,8 +149,9 @@ def test_make_event_sets_probabilities(inprobs, outprobs):
     """
     game = games.read_from_file("stripped_down_poker.efg")
     game.make_event([game.root], inprobs, "Deal")
+    probs = game.root.action_probs
     for action, prob in zip(game.root.actions, outprobs, strict=True):
-        assert action.prob == prob
+        assert probs[action] == prob
 
 
 def test_make_event_pools_nodes_from_different_infosets():
@@ -161,8 +161,7 @@ def test_make_event_pools_nodes_from_different_infosets():
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].event == nodes[1].event
     assert nodes[0].event
-    assert [a.prob for a in nodes[0].actions] == [gbt.Rational("1/4"),
-                                                  gbt.Rational("3/4")]
+    assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
     assert not game.get_infosets("Alice")
 
 
@@ -187,8 +186,7 @@ def test_make_event_converts_personal_node():
     )
     game.make_event([node], ["1/4", "3/4"])
     assert node.event
-    assert [a.prob for a in node.actions] == [gbt.Rational("1/4"),
-                                              gbt.Rational("3/4")]
+    assert list(node.action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
 
 
 def test_make_event_terminal_node_raises():
@@ -244,8 +242,7 @@ def test_make_event_label_reused_when_fully_absorbed():
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
     assert nodes[0].event == nodes[1].event
     assert nodes[0].event.label == "Coin"
-    assert [a.prob for a in nodes[0].actions] == [gbt.Rational("1/4"),
-                                                  gbt.Rational("3/4")]
+    assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
     assert [
         n.event.label for n in game.get_events()
     ].count("Coin") == 1

@@ -74,61 +74,6 @@ class InfosetMembers:
 
 
 @cython.cclass
-class InfosetActions:
-    """The set of actions which are available at an information set."""
-    infoset = cython.declare(c_GameInfoset)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create InfosetActions outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> InfosetActions:
-        obj: InfosetActions = InfosetActions.__new__(InfosetActions)
-        obj.infoset = infoset
-        return obj
-
-    def __repr__(self) -> str:
-        return (
-            f"InfosetActions(infoset={_wrap_infoset_or_event(self.infoset.deref().GetMember(1))})"
-        )
-
-    def __len__(self):
-        """The number of actions at the information set."""
-        return self.infoset.deref().GetActions().size()
-
-    def __iter__(self) -> typing.Iterator[Action]:
-        for action in self.infoset.deref().GetActions():
-            yield Action.wrap(action)
-
-    def __getitem__(self, label: str) -> Action:
-        """Returns the action at the information set with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the action to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the information set has no action with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one action at the information
-            set has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an action by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Infoset", "action", "actions")
-
-
-@cython.cclass
 class _InfosetOrEvent:
     """Shared implementation for `Infoset` and `Event`: a lazy, node-anchored view over
     an information set, filtered to whichever of the two subclasses' concept currently
@@ -239,16 +184,10 @@ class _InfosetOrEvent:
         """The labels of the actions available at the information set, in order.
 
         .. versionchanged:: 17.0.0
-            Returns bare labels rather than ``Action`` objects; use ``Node.actions``
-            for the richer, indexable collection.
+            Returns bare labels rather than ``Action`` objects, following its removal.
         """
-        return [a.label for a in InfosetActions.wrap(self._resolve())]
-
-    @cython.cfunc
-    def _action_objects(self) -> InfosetActions:
-        """Internal: the ``Action`` objects at the information set, for callers that
-        need the resolved objects rather than bare labels."""
-        return InfosetActions.wrap(self._resolve())
+        resolved: c_GameInfoset = self._resolve()
+        return [a.deref().GetLabel().decode("utf-8") for a in resolved.deref().GetActions()]
 
     @property
     def members(self) -> InfosetMembers:

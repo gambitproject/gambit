@@ -19,7 +19,7 @@ Representation of games
    Node
    Infoset
    Event
-   Action
+   Branch
    Subgame
 
 
@@ -156,6 +156,7 @@ Information about the game
    Node.event
    Node.members
    Node.actions
+   Node.action_probs
    Node.player
    Node.is_successor_of
    Node.plays
@@ -192,13 +193,6 @@ Information about the game
    Event.actions
    Event.members
    Event.precedes
-
-.. autosummary::
-
-   :toctree: api/
-
-   Action.label
-   Action.prob
 
 .. autosummary::
 

@@ -9,8 +9,8 @@ from . import games
 def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
-    game.relabel_actions(game.root, {action.label: label})
-    assert action.label == label
+    game.relabel_actions(game.root, {action: label})
+    assert label in game.root.actions
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
@@ -18,14 +18,14 @@ def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {action.label: label})
+        game.relabel_actions(game.root, {action: label})
 
 
 def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {action.label: ""})
+        game.relabel_actions(game.root, {action: ""})
 
 
 def test_relabel_actions_duplicate_raises_valueerror():
@@ -203,24 +203,26 @@ def test_set_event_actions_reorder_carries_probabilities():
     game = games.create_stripped_down_poker_efg()
     game.set_event_actions(game.root, {"King": "3/4", "Queen": "1/4"})
     game.set_event_actions(game.root, {"Queen": "1/4", "King": "3/4"})
-    assert [(a.label, a.prob) for a in game.root.actions] == [("Queen", gbt.Rational(1, 4)),
-                                                              ("King", gbt.Rational(3, 4))]
+    assert list(game.root.actions) == ["Queen", "King"]
+    assert game.root.action_probs == {"Queen": gbt.Rational(1, 4), "King": gbt.Rational(3, 4)}
 
 
 def test_set_event_actions_add_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     nodes_before = len(game.nodes)
     game.set_event_actions(game.root, {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
-    assert [(a.label, a.prob) for a in game.root.actions] == [("Jack", gbt.Rational(1, 2)),
-                                                              ("King", gbt.Rational(1, 4)),
-                                                              ("Queen", gbt.Rational(1, 4))]
+    assert list(game.root.actions) == ["Jack", "King", "Queen"]
+    assert game.root.action_probs == {
+        "Jack": gbt.Rational(1, 2), "King": gbt.Rational(1, 4), "Queen": gbt.Rational(1, 4)
+    }
     assert len(game.nodes) == nodes_before + 1
 
 
 def test_set_event_actions_drop_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     game.set_event_actions(game.root, {"King": 1}, drop=True)
-    assert [(a.label, a.prob) for a in game.root.actions] == [("King", 1)]
+    assert list(game.root.actions) == ["King"]
+    assert game.root.action_probs == {"King": 1}
 
 
 def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
@@ -292,11 +294,10 @@ def test_get_behavior_prescribed_action_defined(
     for action_label in infoset_path:
         node = node.children[action_label]
     infoset = node.infoset
-    expected_action = node.actions[expected_action_label]
 
     prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
 
-    assert prescribed_action == expected_action
+    assert prescribed_action == expected_action_label
 
 
 @pytest.mark.parametrize(
