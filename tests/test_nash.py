@@ -3210,8 +3210,8 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
                 for node in game.get_infosets(player.label):
                     for action in node.actions:
                         assert abs(
-                            _action_prob(eq, node, action.label)
-                            - _action_prob(expected, node, action.label)
+                            _action_prob(eq, node, action)
+                            - _action_prob(expected, node, action)
                         ) <= test_case.prob_tol
 
 
@@ -3262,7 +3262,7 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
             for node in game.get_infosets(p.label):
                 for a in node.actions:
                     if not abs(
-                        _action_prob(found, node, a.label) - _action_prob(candidate, node, a.label)
+                        _action_prob(found, node, a) - _action_prob(candidate, node, a)
                     ) <= TOL:
                         return False
         return True
@@ -3429,8 +3429,8 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
                 for node in game.get_infosets(player.label):
                     for action in node.actions:
                         assert abs(
-                            _action_prob(eq, node, action.label)
-                            - _action_prob(expected, node, action.label)
+                            _action_prob(eq, node, action)
+                            - _action_prob(expected, node, action)
                         ) <= test_case.prob_tol
 
 
@@ -3497,8 +3497,8 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
                 for node in game.get_infosets(player.label):
                     for action in node.actions:
                         assert abs(
-                            _action_prob(eq, node, action.label)
-                            - _action_prob(expected, node, action.label)
+                            _action_prob(eq, node, action)
+                            - _action_prob(expected, node, action)
                         ) <= test_case.prob_tol
 
 

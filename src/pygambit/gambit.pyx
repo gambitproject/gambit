@@ -101,7 +101,6 @@ def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural
 
 
 PlayerReference = Player | str
-ActionReference = Action | str
 NodeReference = Node | str
 NodeReferenceSet = typing.Iterable[NodeReference]
 

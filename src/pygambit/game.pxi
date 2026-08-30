@@ -1332,10 +1332,10 @@ class Game:
         if actions is not None:
             for player in self.players:
                 for node in self.get_infosets(player.label):
-                    for action in node.actions:
-                        if not actions(node, action):
-                            if not (deref(profile.profile)
-                                    .RemoveAction(cython.cast(Action, action).action)):
+                    infoset_handle: c_GameInfoset = cython.cast(Infoset, node.infoset)._resolve()
+                    for action in infoset_handle.deref().GetActions():
+                        if not actions(node, action.deref().GetLabel().decode("utf-8")):
+                            if not deref(profile.profile).RemoveAction(action):
                                 raise ValueError(
                                     "attempted to remove the last action at an information set"
                                 )
@@ -1758,53 +1758,6 @@ class Game:
         raise ValueError(
             f"{funcname}(): {argname} resolves to no information set "
             f"(the node is terminal)"
-        )
-
-    def _resolve_action(self,
-                        action: typing.Any, funcname: str, argname: str = "action") -> Action:
-        """Resolve an attempt to reference an action of the game.
-
-        Parameters
-        ----------
-        action : Any
-            An object to resolve as a reference to an action.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'action'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `action` is an `Action` from a different game.
-        KeyError
-            If `action` is a string and no action in the game has that label.
-        TypeError
-            If `action` is not an `Action` or a `str`
-        ValueError
-            If `action` is an empty `str` or all spaces
-        """
-        if isinstance(action, Action):
-            action_handle: c_GameAction = cython.cast(Action, action).action
-            if Game.wrap(action_handle.deref().GetInfoset().deref().GetGame()) != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return action
-        elif isinstance(action, str):
-            if not action.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return _resolve_by_label(
-                    [a for player in self.players
-                     for node in self.get_infosets(player.label)
-                     for a in node.actions],
-                    action, "Game", "action", "actions"
-                )
-            except KeyError:
-                raise KeyError(f"{funcname}(): no action with label '{action}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}"
         )
 
     def _resolve_probs(self,
@@ -2355,9 +2308,9 @@ class Game:
         converted, and the move is thereafter resolved by chance.  Nodes are removed from
         whatever information sets or events they currently belong to; any of those which
         retain members survive, keeping their labels, and those left with no members are deleted.
-        Any ``Infoset`` object, and any of its ``Action`` objects, referring to a deleted one
-        becomes invalid, and subsequent use raises ``RuntimeError``.
-        The resulting event is accessible as ``node.infoset`` for any node in `nodes`.
+        Any ``Infoset`` object referring to a deleted one becomes invalid, and subsequent use
+        raises ``RuntimeError``.
+        The resulting event is accessible as ``node.event`` for any node in `nodes`.
 
         The first node in `nodes` determines the action order of the event,
         and is the frame against which mapping keys in `probs` are resolved.

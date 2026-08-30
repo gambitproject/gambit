@@ -180,7 +180,7 @@ def test_game_get_payoffs_tree():
     alice = game.players["Alice"]
     infoset = game.root.infoset
     strategy = next(
-        s for s in alice.strategies if game.get_behavior("Alice", s).get(infoset).label == "a"
+        s for s in alice.strategies if game.get_behavior("Alice", s).get(infoset) == "a"
     )
     game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})
@@ -317,17 +317,10 @@ def _bob_response_infoset(g):
     )
 
 
-def _bob_response_node(g):
-    return next(
-        n for n in g.get_infosets("Bob") if n.infoset.label == "Bob's response"
-    )
-
-
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
     pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
-    pytest.param(lambda g: _bob_response_node(g).actions, id="NodeActions"),
     pytest.param(lambda g: _bob_response_infoset(g).members, id="InfosetMembers"),
 ]
 

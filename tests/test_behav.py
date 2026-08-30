@@ -1444,7 +1444,7 @@ def test_action_value_error_with_chance_player_action(game: gbt.Game, rational_f
 def _all_node_actions(game: gbt.Game) -> list[tuple[gbt.Node, str]]:
     """All (node, action label) pairs across every personal player's information sets."""
     return [
-        (node, action.label)
+        (node, action)
         for player in game.players
         for node in game.get_infosets(player.label)
         for action in node.actions
