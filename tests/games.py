@@ -12,19 +12,19 @@ import pygambit as gbt
 def all_infosets(game: gbt.Game) -> list[gbt.Infoset]:
     """All Infosets belonging to a personal player, across every player, in the
     canonical order `Game.infosets` used to yield before its removal (17.0.0)."""
-    return [n.infoset for p in game.players for n in game.get_infosets(p.label)]
+    return [n.infoset for p in game.players for n in game.get_infosets(p)]
 
 
-def player_infosets(player: gbt.Player) -> list[gbt.Infoset]:
+def player_infosets(game: gbt.Game, player: str) -> list[gbt.Infoset]:
     """All Infosets belonging to `player`, in canonical order, matching
     `Player.infosets` before its removal (17.0.0)."""
-    return [n.infoset for n in player.game.get_infosets(player.label)]
+    return [n.infoset for n in game.get_infosets(player)]
 
 
-def find_infoset(player: gbt.Player, label: str) -> gbt.Infoset:
+def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Infoset:
     """Find the Infoset belonging to `player` with the given label, matching
     `Player.infosets[label]` before its removal (17.0.0)."""
-    return next(i for i in player_infosets(player) if i.label == label)
+    return next(i for i in player_infosets(game, player) if i.label == label)
 
 
 def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Infoset:
@@ -546,7 +546,7 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
         game = cls(params)
         gbt_game = game.gbt_game()
         maps = [
-            [tuple(sig) if len(gbt_game.get_infosets(player.label)) > 0 else () for sig in sigs]
+            [tuple(sig) if len(gbt_game.get_infosets(player)) > 0 else () for sig in sigs]
             for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
         ]
         return (gbt_game, maps)
@@ -725,7 +725,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
                 left = n.children["L"]
                 g.make_infoset(
                     list(left.infoset.members) + [n.children["R"]],
-                    left.infoset.player.label,
+                    left.infoset.player,
                     left.infoset.label or None,
                 )
         return g

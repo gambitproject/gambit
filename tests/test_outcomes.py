@@ -65,13 +65,27 @@ def test_make_outcome_incomplete_payoffs_raises():
         game.make_outcome(next(iter(game.root.children)), {"Alice": 1}, "w")
 
 
+class _RepeatedEntryPayoffs:
+    """A Mapping-like object whose `.items()` may repeat a key.
+
+    Used to exercise `make_outcome`'s "named twice" check, which a plain
+    ``dict`` literal cannot: duplicate string keys collapse before the
+    dict is ever constructed.
+    """
+
+    def __init__(self, entries):
+        self._entries = entries
+
+    def items(self):
+        return self._entries
+
+
 def test_make_outcome_payoffs_naming_player_twice_raises():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(game.root, "Alice", ["U", "D"])
-    alice = game.players["Alice"]
+    payoffs = _RepeatedEntryPayoffs([("Alice", 1), ("Alice", 2), ("Bob", 0)])
     with pytest.raises(ValueError):
-        game.make_outcome(next(iter(game.root.children)),
-                          {"Alice": 1, alice: 2, "Bob": 0}, "w")
+        game.make_outcome(next(iter(game.root.children)), payoffs, "w")
 
 
 def test_make_outcome_null_resets_given_nodes_to_null():
@@ -99,9 +113,9 @@ def test_make_outcome_null_removes_fully_orphaned_outcome():
     game = gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
     outcome_count = len(game.outcomes)
     p1, p2 = game.players
-    s1 = next(iter(p1.strategies))
-    s2 = next(iter(p2.strategies))
-    game.make_outcome_null({p1.label: s1, p2.label: s2})
+    s1 = next(iter(game.get_strategies(p1)))
+    s2 = next(iter(game.get_strategies(p2)))
+    game.make_outcome_null({p1: s1, p2: s2})
     assert len(game.outcomes) == outcome_count - 1
 
 
@@ -181,7 +195,7 @@ def test_outcome_index_invalid_type(game: gbt.Game):
 def test_outcome_payoff_by_player_label():
     game = gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
     pl1, pl2 = list(game.players)
-    game.relabel_players({pl1.label: "joe", pl2.label: "dan"})
+    game.relabel_players({pl1: "joe", pl2: "dan"})
     out1, out2, *_ = list(game.outcomes)
     out1["joe"] = 1
     out1["dan"] = 2

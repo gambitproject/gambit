@@ -80,8 +80,8 @@ def test_relabel_actions_scope_is_the_information_set():
     and free to take the same new label.
     """
     game = games.create_stripped_down_poker_efg()
-    king = games.find_infoset(game.players["Alice"], "Alice has King")
-    queen = games.find_infoset(game.players["Alice"], "Alice has Queen")
+    king = games.find_infoset(game, "Alice", "Alice has King")
+    queen = games.find_infoset(game, "Alice", "Alice has Queen")
     game.relabel_actions(next(iter(king.members)), {"Bet": "Raise"})
     assert list(king.actions) == ["Raise", "Fold"]
     assert list(queen.actions) == ["Bet", "Fold"]
@@ -104,7 +104,7 @@ def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
 
 def test_set_move_actions_drop_shrinks_actions_and_children():
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     action_count = len(infoset.actions)
     remaining = list(infoset.actions)[1:]
@@ -115,7 +115,7 @@ def test_set_move_actions_drop_shrinks_actions_and_children():
 
 def test_set_move_actions_cannot_remove_the_only_action():
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     last = next(iter(infoset.actions))
     game.set_move_actions(node, [last], drop=True)
@@ -144,19 +144,19 @@ def test_set_move_actions_reorder_carries_subtrees():
 
 def test_set_move_actions_add_drop_and_reorder_together():
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     nodes_before = len(game.nodes)
     game.set_move_actions(node, ["Raise", "Fold"], drop=True)
     assert list(infoset.actions) == ["Raise", "Fold"]
     # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
     assert len(game.nodes) == nodes_before - 3 + 1
-    assert len(games.find_infoset(game.players["Bob"], "Bob's response").members) == 1
+    assert len(games.find_infoset(game, "Bob", "Bob's response").members) == 1
 
 
 def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     before = game.to_efg()
     with pytest.raises(ValueError):
@@ -179,7 +179,7 @@ def test_set_move_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
     """Duplicate, empty, and invalid labels in `actions` are rejected in C++,
     after the Python guards pass; the game must be unmodified by the failure."""
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     before = game.to_efg()
     with pytest.raises(ValueError):
@@ -242,7 +242,7 @@ def test_set_event_actions_raises_at_a_move():
     """`set_event_actions` is only for an event; `set_move_actions` is the corresponding
     operation for a personal player's move."""
     game = games.create_stripped_down_poker_efg()
-    infoset = games.find_infoset(game.players["Alice"], "Alice has King")
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
     with pytest.raises(ValueError):
         game.set_event_actions(next(iter(infoset.members)), {"Bet": 1})
 
@@ -348,8 +348,7 @@ def test_get_behavior_raises_value_error_for_wrong_player(
     Verify `Game.get_behavior`'s result raises ValueError when the infoset belongs
     to a different player than the strategy.
     """
-    player = game.players[player_label]
-    behavior = game.get_behavior(player_label, next(iter(player.strategies)))
+    behavior = game.get_behavior(player_label, next(iter(game.get_strategies(player_label))))
     node = game.root
     for action_label in other_infoset_path:
         node = node.children[action_label]

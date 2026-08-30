@@ -8,7 +8,7 @@ from . import games
 def _find_infoset(game, label):
     """Find the Infoset with the given label, searching across all players."""
     for player in game.players:
-        for node in game.get_infosets(player.label):
+        for node in game.get_infosets(player):
             if node.infoset.label == label:
                 return node.infoset
     raise KeyError(label)
@@ -46,7 +46,7 @@ def test_getitem_by_player_label():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.behavior_support_profile()
     support = profile["Player 1"]
-    assert support.player == game.players["Player 1"]
+    assert support.player == "Player 1"
     infoset = _find_infoset(game, "Infoset 1:1")
     assert set(support[infoset]) == {"U1", "D1"}
 
@@ -91,7 +91,7 @@ def test_iter_yields_one_support_per_player():
     profile = game.behavior_support_profile()
     supports = list(profile)
     assert len(supports) == len(game.players)
-    assert {s.player.label for s in supports} == {p.label for p in game.players}
+    assert {s.player for s in supports} == set(game.players)
 
 
 def test_behaviorsupport_iter():

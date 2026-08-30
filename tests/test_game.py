@@ -16,8 +16,8 @@ def test_from_arrays():
     game = gbt.Game.from_arrays(m, m.transpose())
     pl1, pl2 = game.players
     assert len(game.players) == 2
-    assert len(pl1.strategies) == 2
-    assert len(pl2.strategies) == 2
+    assert len(game.get_strategies(pl1)) == 2
+    assert len(game.get_strategies(pl2)) == 2
 
 
 def test_empty_array_to_arrays():
@@ -91,10 +91,10 @@ def test_from_dict():
     game = gbt.Game.from_dict({"a": m, "b": m.transpose()})
     pl1, pl2 = game.players
     assert len(game.players) == 2
-    assert len(pl1.strategies) == 2
-    assert len(pl2.strategies) == 2
-    assert pl1.label == "a"
-    assert pl2.label == "b"
+    assert len(game.get_strategies(pl1)) == 2
+    assert len(game.get_strategies(pl2)) == 2
+    assert pl1 == "a"
+    assert pl2 == "b"
 
 
 def test_game_get_outcome():
@@ -106,10 +106,10 @@ def test_game_get_outcome():
 def test_game_get_outcome_by_relabeled_strategies():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    game.relabel_strategies(pl1, {next(iter(pl1.strategies)): "defect"})
-    game.relabel_strategies(pl2, {next(iter(pl2.strategies)): "cooperate"})
-    game.make_outcome({pl1.label: "defect", pl2.label: "cooperate"}, {"1": 0, "2": 0}, "corner")
-    assert game.get_outcome({pl1.label: "defect", pl2.label: "cooperate"}) == \
+    game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
+    game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
+    game.make_outcome({pl1: "defect", pl2: "cooperate"}, {"1": 0, "2": 0}, "corner")
+    assert game.get_outcome({pl1: "defect", pl2: "cooperate"}) == \
         next(iter(game.outcomes))
 
 
@@ -146,17 +146,10 @@ def test_game_get_outcome_unknown_strategy_label_raises():
 def test_game_get_outcome_unmatched_label_after_relabel_raises():
     game = gbt.Game.new_table([2, 2])
     pl1, pl2 = game.players
-    game.relabel_strategies(pl1, {next(iter(pl1.strategies)): "defect"})
-    game.relabel_strategies(pl2, {next(iter(pl2.strategies)): "cooperate"})
+    game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
+    game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
     with pytest.raises(KeyError):
-        _ = game.get_outcome({pl1.label: "defect", pl2.label: "defect"})
-
-
-def test_game_get_outcome_player_object_key_raises():
-    game = gbt.Game.new_table([2, 2])
-    pl1, pl2 = game.players
-    with pytest.raises(TypeError):
-        _ = game.get_outcome({pl1: "1", pl2.label: "1"})
+        _ = game.get_outcome({pl1: "defect", pl2: "defect"})
 
 
 def test_game_get_outcome_tree_raises():
@@ -177,10 +170,10 @@ def test_game_get_payoffs():
 def test_game_get_payoffs_tree():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(game.root, "Alice", ["a", "b"])
-    alice = game.players["Alice"]
     infoset = game.root.infoset
     strategy = next(
-        s for s in alice.strategies if game.get_behavior("Alice", s).get(infoset) == "a"
+        s for s in game.get_strategies("Alice")
+        if game.get_behavior("Alice", s).get(infoset) == "a"
     )
     game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})
@@ -191,7 +184,7 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
     game = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    distribution = {s: 0 for s in player.strategies}
+    distribution = {s: 0 for s in game.get_strategies(player)}
     next(iter(game.outcomes))[player] = 3
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -214,11 +207,11 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(player.label, distribution)
+            profile.__setitem__(player, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_mixed_strategy(player.label, distribution)
+            profile.set_mixed_strategy(player, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(player.label)
+            profile.__getitem__(player)
 
 
 def test_mixed_strategy_profile_game_structure_changed_tree():
@@ -226,7 +219,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
     game.set_move_actions(game.root, ["D1"], drop=True)
-    distribution = {s: 0 for s in player.strategies}
+    distribution = {s: 0 for s in game.get_strategies(player)}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.as_behavior()
@@ -250,11 +243,11 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(player.label, distribution)
+            profile.__setitem__(player, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_mixed_strategy(player.label, distribution)
+            profile.set_mixed_strategy(player, distribution)
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(player.label)
+            profile.__getitem__(player)
 
 
 def test_mixed_behavior_profile_game_structure_changed():
@@ -320,7 +313,6 @@ def _bob_response_infoset(g):
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
-    pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
     pytest.param(lambda g: _bob_response_infoset(g).members, id="InfosetMembers"),
 ]
 

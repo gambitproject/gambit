@@ -31,30 +31,6 @@ def _test_valid_resolutions(collection: list, resolver: typing.Callable) -> None
         games.read_from_file("sample_extensive_game.efg"),
     ]
 )
-def test_resolve_player(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.players,
-                            lambda label, fn: game._resolve_player(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,player,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "random", KeyError),
-    ]
-)
-def test_resolve_player_invalid(game: gbt.Game, player: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_player(player, "test_resolve_player_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
 def test_resolve_outcome(game: gbt.Game) -> None:
     _test_valid_resolutions(game.outcomes,
                             lambda label, fn: game._resolve_outcome(label, fn))
@@ -107,7 +83,7 @@ def test_resolve_infoset(game: gbt.Game) -> None:
     """`_resolve_infoset` resolves a Node to the Infoset it belongs to, or a node's
     label to the same; any member node of an infoset resolves to an equal Infoset."""
     for player in game.players:
-        for node in game.get_infosets(player.label):
+        for node in game.get_infosets(player):
             resolved = game._resolve_infoset(node, "test")
             assert resolved == node.infoset
             if node.label:

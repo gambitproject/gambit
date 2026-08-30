@@ -35,6 +35,9 @@
   of a game in strategic (table) representation.
 - Added `Game.get_payoffs`, which returns the payoff to each player at a pure-strategy
   contingency, for a game in any representation.
+- Added `Game.get_strategies(player)`, `Game.get_sequences(player)`, `Game.get_min_payoff(player)`,
+  and `Game.get_max_payoff(player)`, replacing `Player.strategies`/`.sequences`/`.min_payoff`/
+  `.max_payoff` now that `Player` has been removed.
 
 ### Changed
 - `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed
@@ -53,6 +56,19 @@
 - `Game.behavior_support_profile`'s `actions` filter callable is now called as
   `actions(node, action)` (two positional arguments, where `node` is a representative node of
   the information set and `action` is the action's label) rather than with a single `Action`.
+- `Node.player` now returns the player's label (`str`), or `None` at a terminal node, directly
+  rather than a lazy `NodePlayer` proxy object. `Infoset.player`/`Event.player`/`Sequence.player`
+  now likewise return a label (`str`) rather than a `Player` object.
+- `StrategySupport.player`, `BehaviorSupport.player`, `MixedStrategy.player`, and
+  `MixedBehavior.player` now return a label (`str`) rather than a `Player` object.
+- `Game.players` now iterates player labels (`str`) rather than `Player` objects; indexing by
+  label is no longer supported (a label is already in hand once iterated) -- use `in` to test
+  membership.
+- `Game.append_move`, `Game.insert_move`, `Game.reveal`, `Game.relabel_strategies`, and
+  `Game.set_strategies` now take `player` as a label (`str`) rather than accepting a `Player`
+  object.
+- `Game.strategy_support_profile`'s `strategies` filter callable's `player` argument is now a
+  label (`str`) rather than a `Player` object.
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
   The `gambit-convert` utility has been removed.
 - Refreshed GUI icons and standardised dialog layout and formatting
@@ -78,11 +94,16 @@
   (`pip install gtdraw`) to run tutorials locally or build the documentation.
 - `Game.contingencies` now yields contingencies as a mapping from player label to strategy
   label, rather than a list of per-player strategy indices.
-- `Player.strategies` now iterates strategy labels (`str`) rather than `Strategy` objects;
-  indexing by label is no longer supported (a label is already in hand once iterated) -- use
-  `in` to test membership.
 - `Game.strategy_support_profile`'s `strategies` filter callable is now called as
   `strategies(player, label)` (two positional arguments) rather than with a single `Strategy`.
+- Removed `Player`. Players are now identified purely by label (`str`), as returned by iterating
+  `Game.players`. `Player.strategies`/`.sequences`/`.min_payoff`/`.max_payoff` are replaced by
+  `Game.get_strategies`/`Game.get_sequences`/`Game.get_min_payoff`/`Game.get_max_payoff`;
+  `Player.number` had no remaining use once labels are unambiguous (recover via
+  `list(game.players).index(label)` if truly needed); `Player.is_chance` and `Game.players.chance`
+  are removed outright, with no replacement -- test `Node.event`/`Node.infoset` truthiness
+  instead. `GamePlayerRep` in the C++ core is unaffected by this change (a separate, later piece
+  of work).
 - `Game.get_behavior`'s `player` and `strategy` parameters are now labels (`str`) rather than
   accepting a `Player`/`Strategy` object; `StrategyBehavior.player`/`.strategy` now return
   labels rather than `Player`/`Strategy` objects.

@@ -100,7 +100,6 @@ def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural
     return matches[0]
 
 
-PlayerReference = Player | str
 NodeReference = Node | str
 NodeReferenceSet = typing.Iterable[NodeReference]
 
@@ -192,7 +191,6 @@ class NodeIndexedVector(_LabeledVector):
 include "action.pxi"
 include "infoset.pxi"
 include "strategy.pxi"
-include "player.pxi"
 include "outcome.pxi"
 include "node.pxi"
 include "stratspt.pxi"

@@ -65,7 +65,7 @@ def test_catalog_games_filter_n_actions(all_games):
         n_game_actions = sum(
             len(node.infoset.actions)
             for player in g.players
-            for node in g.get_infosets(player.label)
+            for node in g.get_infosets(player)
         )
         assert n_game_actions == 2
 
@@ -87,7 +87,7 @@ def test_catalog_games_filter_n_infosets(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert sum(len(g.get_infosets(p.label)) for p in g.players) == 2
+        assert sum(len(g.get_infosets(p)) for p in g.players) == 2
 
 
 def test_catalog_games_filter_is_const_sum(all_games):
@@ -168,7 +168,7 @@ def test_catalog_games_filter_n_strategies(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert sum(len(list(p.strategies)) for p in g.players) == 4
+        assert sum(len(g.get_strategies(p)) for p in g.players) == 4
 
 
 def test_catalog_games_filter_bad_filter():

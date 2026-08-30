@@ -13,7 +13,7 @@ def _asymmetric_poker_behavior_data() -> gbt.MixedBehaviorProfile:
     game = games.create_stripped_down_poker_efg()
     data = game.mixed_behavior_profile(rational=False)
     for player in game.players:
-        for infoset in games.player_infosets(player):
+        for infoset in games.player_infosets(game, player):
             node = next(iter(infoset.members))
             data[node] = {a: float(i + 2) for i, a in enumerate(infoset.actions)}
     return data
@@ -45,10 +45,10 @@ def test_logit_estimate_strategy_rational_and_float_data_agree():
 
     assert rational_result.lam == pytest.approx(float_result.lam)
     for player in game.players:
-        for strategy in player.strategies:
+        for strategy in game.get_strategies(player):
             assert (
-                rational_result.profile[player.label][strategy]
-                == pytest.approx(float_result.profile[player.label][strategy])
+                rational_result.profile[player][strategy]
+                == pytest.approx(float_result.profile[player][strategy])
             )
 
 
@@ -73,7 +73,7 @@ def test_logit_estimate_behavior_completes(use_empirical: bool, local_max: bool)
     result = gbt.qre.logit_estimate(data, use_empirical=use_empirical, local_max=local_max)
     assert isinstance(result.profile, gbt.MixedBehaviorProfileDouble)
     for player in data.game.players:
-        for infoset in games.player_infosets(player):
+        for infoset in games.player_infosets(data.game, player):
             node = next(iter(infoset.members))
             probs = dict(result.profile[node])
             assert probs.keys() == set(infoset.actions)

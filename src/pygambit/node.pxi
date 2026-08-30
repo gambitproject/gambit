@@ -151,79 +151,6 @@ class NodeOutcome:
 
 
 @cython.cclass
-class NodePlayer:
-    """The player associated with a node: the one who makes the decision, if the node
-    is personal, or the chance player, if the node is an event.
-
-    A lazy, node-anchored view: holds the node and resolves its player on each access,
-    so the value reflects the current state of the game even after the game is mutated.
-
-    .. versionadded:: 16.7.0
-    """
-    node = cython.declare(c_GameNode)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a NodePlayer outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(node: c_GameNode) -> NodePlayer:
-        obj: NodePlayer = NodePlayer.__new__(NodePlayer)
-        obj.node = node
-        return obj
-
-    @cython.cfunc
-    def _resolve(self) -> Player:
-        if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
-            return Player.wrap(self.node.deref().GetPlayer())
-        return None
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(f"'NodePlayer' object has no attribute '{name}'")
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                f"node has no player (terminal node); cannot access '{name}'"
-            )
-        return getattr(resolved, name)
-
-    @property
-    def label(self):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no player (terminal node); cannot access 'label'")
-        return resolved.label
-
-    @label.setter
-    def label(self, value):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no player (terminal node); cannot set 'label'")
-        resolved.label = value
-
-    def __repr__(self) -> str:
-        resolved = self._resolve()
-        return repr(resolved) if resolved is not None else "None"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        mine = self._resolve()
-        if isinstance(other, NodePlayer):
-            other = cython.cast(NodePlayer, other)._resolve()
-        if mine is None or other is None:
-            return mine is None and other is None
-        return mine == other
-
-    def __bool__(self) -> bool:
-        return self._resolve() is not None
-
-    def __hash__(self) -> int:
-        # Hash by the resolved player (transitional).
-        resolved = self._resolve()
-        return hash(resolved) if resolved is not None else 0
-
-
-@cython.cclass
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
@@ -389,20 +316,21 @@ class Node:
         return result
 
     @property
-    def player(self) -> NodePlayer:
-        """The player associated with this node: the one who makes the decision, if this is
-        a personal node, or the chance player, if this is an event.
+    def player(self) -> str | None:
+        """The label of the player associated with this node: the one who makes the
+        decision, if this is a personal node, or the chance player, if this is an
+        event.
 
-        Returns a lazy, node-anchored view resolved on each access, so the value reflects
-        the current state of the game even if the game is mutated after this property is read.
-        For a terminal node, which has no player, the view is falsy and equals ``None``.
-        At a chance node the view resolves to the chance player (``is_chance`` is ``True``).
+        `None` for a terminal node, which has no player.
 
-        .. versionchanged:: 16.7.0
-            Now returns a lazily-evaluated, node-anchored view rather than capturing the
-            player at the time of access.
+        .. versionchanged:: 17.0.0
+            Returns the player's label (or `None`) directly, rather than a lazy,
+            node-anchored view.
         """
-        return NodePlayer.wrap(self.node)
+        player: c_GamePlayer = self.node.deref().GetPlayer()
+        if not (player != cython.cast(c_GamePlayer, NULL)):
+            return None
+        return player.deref().GetLabel().decode("utf-8")
 
     @property
     def parent(self) -> Node | None:

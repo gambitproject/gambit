@@ -14,7 +14,6 @@ Representation of games
    :toctree: api/
 
    Game
-   Player
    Outcome
    Node
    Infoset
@@ -107,27 +106,19 @@ Information about the game
    Game.outcomes
    Game.min_payoff
    Game.max_payoff
+   Game.get_min_payoff
+   Game.get_max_payoff
    Game.root
    Game.get_infosets
    Game.get_events
+   Game.get_strategies
+   Game.get_sequences
    Game.nodes
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs
    Game.subgames
    Game.minimal_subgame
-
-.. autosummary::
-   :toctree: api/
-
-   Player.label
-   Player.number
-   Player.game
-   Player.strategies
-   Player.is_chance
-   Player.min_payoff
-   Player.max_payoff
-   Player.sequences
 
 .. autosummary::
    :toctree: api/

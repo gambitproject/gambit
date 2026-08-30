@@ -78,7 +78,7 @@ class BehaviorSupport:
     does not reflect later changes to the profile. The player is accessible via
     `player`.
     """
-    _player = cython.declare(Player)
+    _player = cython.declare(str)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -86,15 +86,15 @@ class BehaviorSupport:
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: Player, values: dict) -> BehaviorSupport:
+    def wrap(player: str, values: dict) -> BehaviorSupport:
         obj: BehaviorSupport = BehaviorSupport.__new__(BehaviorSupport)
         obj._player = player
         obj._values = values
         return obj
 
     @property
-    def player(self) -> Player:
-        """The player for whom this behavior support is defined."""
+    def player(self) -> str:
+        """The label of the player for whom this behavior support is defined."""
         return self._player
 
     def __repr__(self) -> str:
@@ -120,8 +120,7 @@ class BehaviorSupport:
         support : ActionSupport
             The support at an information set belonging to the player
         """
-        for node in self.player.game.get_infosets(self.player.label):
-            yield self[node.infoset]
+        yield from self._values.values()
 
     def __getitem__(self, infoset: Infoset) -> ActionSupport:
         """Returns the action support at `infoset`.
@@ -136,7 +135,7 @@ class BehaviorSupport:
         MismatchError
             If `infoset` does not belong to this player.
         """
-        if infoset.player != self.player:
+        if infoset.player != self._player:
             raise MismatchError("infoset must belong to this player")
         return self._values[infoset]
 
@@ -186,7 +185,7 @@ class BehaviorSupportProfile:
             The player's behavior support specified in the profile
         """
         for player in self.game.players:
-            yield self[player.label]
+            yield self[player]
 
     def __getitem__(self, index: typing.Any) -> BehaviorSupport | ActionSupport:
         """Access a component of the support profile specified by `index`.
@@ -220,12 +219,11 @@ class BehaviorSupportProfile:
                 raise MismatchError("infoset must be part of the same game")
             return self._action_support_at(resolved_infoset)
         if isinstance(index, str):
-            resolved_player: Player = self.game.players[index]
             values = {
                 node.infoset: self._action_support_at(node.infoset)
-                for node in self.game.get_infosets(resolved_player.label)
+                for node in self.game.get_infosets(index)
             }
-            return BehaviorSupport.wrap(resolved_player, values)
+            return BehaviorSupport.wrap(index, values)
         raise TypeError(
             f"profile index must be str, Node, or Infoset, not {index.__class__.__name__}"
         )

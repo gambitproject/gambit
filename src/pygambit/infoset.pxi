@@ -199,9 +199,9 @@ class _InfosetOrEvent:
         return InfosetMembers.wrap(self._resolve())
 
     @property
-    def player(self) -> Player:
-        """The player who has the move at this information set."""
-        return Player.wrap(self._resolve().deref().GetPlayer())
+    def player(self) -> str:
+        """The label of the player who has the move at this information set."""
+        return self._resolve().deref().GetPlayer().deref().GetLabel().decode("utf-8")
 
 
 @cython.cclass
