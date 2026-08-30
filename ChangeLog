@@ -7,11 +7,14 @@
 - Added `Game.get_events()`, returning a materialized list of one representative `Node` per
   chance event in the game.
 - Added `Event`, the chance-event counterpart to `Infoset`: a lazy, node-anchored view of the
-  chance player's information partition.  Added `Node.event` and `Action.event` alongside the
-  existing `Node.infoset`/`Action.infoset`, which are now specific to personal players' information
-  sets; each is falsy when it does not apply to a given node or action.
+  chance player's information partition.  Added `Node.event` alongside the existing
+  `Node.infoset`, which is now specific to personal players' information sets; each is falsy
+  when it does not apply to a given node.
 - Added `Node.members`, the set of nodes belonging to the same information set or event as `Node`,
   equivalent to `Node.infoset.members`/`Node.event.members`, whichever applies.
+- Added `Node.actions`, the set of actions available at the node's current information set or
+  event, whichever applies; supports lookup by label, unlike the plain label list returned by
+  `Infoset.actions`/`Event.actions`.
 - Added `BehaviorSupportProfile` to `pygambit`.
 - Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
   is found or another solver event is emitted.
@@ -31,11 +34,21 @@
 - `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed
   by anchoring on a representative member node rather than carrying independent identity, and is
   now specific to personal players; see `Event` for the chance player.  `Infoset.is_chance` has
-  been removed, as `Infoset` is never chance; test truthiness of `Node.infoset`/`Node.event` (or
-  `Action.infoset`/`Action.event`) instead.
+  been removed, as `Infoset` is never chance; test truthiness of `Node.infoset`/`Node.event`
+  instead.
   `Game.append_infoset`, `Game.insert_infoset`, `Game.set_move_actions`, `Game.set_event_actions`,
   `Game.relabel_actions`, `Game.reveal`, and `Game.minimal_subgame` now identify an information
   set or event via a member `Node` (or its label) rather than an `Infoset` object.
+- `Infoset.actions`/`Event.actions` now return the plain labels (`list[str]`) of the actions at
+  the information set or event, rather than `Action` objects; use `Node.actions` for the
+  indexable collection of `Action` objects.
+- `Action` is stripped down to just `label` and `prob`; `Action.number`, `Action.precedes`,
+  `Action.infoset`, `Action.event`, and `Action.plays` are removed, as is `Infoset.own_prior_actions`
+  and `Infoset.plays` (subsumed by the existing `Node.own_prior_action`/`Node.plays`) and
+  `Sequence.actions`, which now returns a `tuple[str, ...]` of labels rather than `Action` objects.
+- `Game.behavior_support_profile`'s `actions` filter callable is now called as
+  `actions(node, action)` (two positional arguments, where `node` is a representative node of
+  the information set) rather than with a single `Action`.
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
   The `gambit-convert` utility has been removed.
 - Refreshed GUI icons and standardised dialog layout and formatting
@@ -66,8 +79,6 @@
 - `Game.get_behavior`'s `player` and `strategy` parameters are now labels (`str`) rather than
   accepting a `Player`/`Strategy` object; `StrategyBehavior.player`/`.strategy` now return
   labels rather than `Player`/`Strategy` objects.
-
-### Removed
 - Removed `Game.__getitem__`, replaced by `Game.get_outcome`/`Game.get_payoffs`.
 - Removed `Game.strategies`; iterate `Game.players` and each player's `strategies` instead.
 - Removed `Strategy.action`; use `Game.get_behavior(player, strategy)[infoset]` (or `.get`),
@@ -76,9 +87,14 @@
   `Player.strategies`; a `Strategy` object carried no information a label didn't already
   carry, now that strategy labels are unique within a player.  `GameStrategyRep` in the C++
   core is unaffected by this change (a separate, later piece of work).
-
-### Removed
 - Removed `Player.infosets` and `Game.infosets`; use `Game.get_infosets(player)` instead.
+- Removed `Game.actions`/`Player.actions`; the total count/collection of actions across a
+  game or player is now most directly available by iterating `Game.get_infosets(player)` and
+  each node's `Node.actions`.
+- Removed `Action.number`, `Action.precedes`, `Action.infoset`, `Action.event`, and
+  `Action.plays`, and `Infoset.own_prior_actions`/`Infoset.plays` (and their `Event` mirrors);
+  `Action` now carries only `label` and `prob`, always used in a context (a `Node` or
+  `Infoset`/`Event`) that already supplies what these removed accessors reported.
 
 ## [17.0.0-alpha.2] - 2026-08-21
 

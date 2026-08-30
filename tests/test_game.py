@@ -317,13 +317,17 @@ def _bob_response_infoset(g):
     )
 
 
+def _bob_response_node(g):
+    return next(
+        n for n in g.get_infosets("Bob") if n.infoset.label == "Bob's response"
+    )
+
+
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
-    pytest.param(lambda g: g.actions, id="GameActions"),
     pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
-    pytest.param(lambda g: g.players["Alice"].actions, id="PlayerActions"),
-    pytest.param(lambda g: _bob_response_infoset(g).actions, id="InfosetActions"),
+    pytest.param(lambda g: _bob_response_node(g).actions, id="NodeActions"),
     pytest.param(lambda g: _bob_response_infoset(g).members, id="InfosetMembers"),
 ]
 

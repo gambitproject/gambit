@@ -156,7 +156,7 @@ def test_get_parent():
 def test_get_prior_action():
     """Test to ensure that we can retrieve the prior action for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].prior_action == game.root.infoset.actions["U1"]
+    assert game.root.children["U1"].prior_action == game.root.actions["U1"]
     assert game.root.prior_action is None
 
 
@@ -477,6 +477,15 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
             assert actual_path == expected_path_for_key[key]
 
 
+def _find_owning_infoset(game: gbt.Game, owner: gbt.Node, action: gbt.Action) -> gbt.Node:
+    """Find the representative node of the information set that `action` belongs to,
+    among the information sets belonging to `owner`'s player."""
+    for candidate in game.get_infosets(owner.player.label):
+        if action in candidate.actions:
+            return candidate
+    raise ValueError("action not found at any of owner's information sets")
+
+
 @pytest.mark.parametrize("game_file, expected_node_data", [
     (
         "binary_3_levels_generic_payoffs.efg",
@@ -552,10 +561,13 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
         else:
             # Only collect data for non-terminal nodes
             opa = node.own_prior_action
-            details = (
-                (opa.infoset.player.label, opa.infoset.number, opa.label)
-                if opa is not None else None
-            )
+            if opa is not None:
+                owning_infoset = _find_owning_infoset(game, node, opa)
+                details = (
+                    owning_infoset.infoset.player.label, owning_infoset.infoset.number, opa.label
+                )
+            else:
+                details = None
             actual_node_data.append((_get_path_of_action_labels(node), details))
 
     assert actual_node_data == expected_node_data
@@ -872,8 +884,7 @@ def test_append_move_labels_list_of_nodes():
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
 
-    for action1, action2 in zip(node1.infoset.actions, node2.infoset.actions, strict=True):
-        assert action1.label == action2.label
+    assert node1.infoset.actions == node2.infoset.actions
 
 
 def test_append_move_node_list_with_non_terminal_node():
@@ -975,7 +986,7 @@ def test_append_event_sets_distribution():
     game = games.read_from_file("sample_extensive_game.efg")
     node = game.root.children["1"].children["1"]
     game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.event.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+    assert [a.prob for a in node.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
 
 def test_append_event_error_actions_empty():
@@ -1051,7 +1062,7 @@ def test_insert_event_actions_labeled():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
     game.insert_event(node, ["Up", "Down"], [gbt.Rational(1, 2)] * 2)
-    assert [a.label for a in node.parent.event.actions] == ["Up", "Down"]
+    assert [a.label for a in node.parent.actions] == ["Up", "Down"]
     assert node.parent.event
 
 
@@ -1060,7 +1071,7 @@ def test_insert_event_sets_distribution():
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root
     game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.parent.event.actions] == [
+    assert [a.prob for a in node.parent.actions] == [
         gbt.Rational(1, 4), gbt.Rational(3, 4)
     ]
 
@@ -1197,7 +1208,7 @@ def test_len_after_set_move_actions_add():
     initial_number_of_nodes = len(game.nodes)
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
-    labels = [action.label for action in infoset_to_modify.actions]
+    labels = list(infoset_to_modify.actions)
     game.set_move_actions(game.root.children["L"], labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
@@ -1206,12 +1217,12 @@ def test_len_after_set_move_actions_drop():
     """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
-    action_to_drop = game.root.infoset.actions["L"]
+    action_to_drop = game.root.actions["L"]
     nodes_to_delete = sum(
         _count_subtree_nodes(member.children[action_to_drop.label], True)
-        for member in action_to_drop.infoset.members
+        for member in game.root.infoset.members
     )
-    remaining = [a.label for a in game.root.infoset.actions if a.label != "L"]
+    remaining = [a for a in game.root.infoset.actions if a != "L"]
     game.set_move_actions(game.root, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
@@ -1235,7 +1246,7 @@ def test_insert_move_actions_labeled():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
     game.insert_move(node, game.players["Player 2"], ["Up", "Down"])
-    assert [a.label for a in node.parent.infoset.actions] == ["Up", "Down"]
+    assert list(node.parent.infoset.actions) == ["Up", "Down"]
 
 
 def test_len_after_insert_infoset():
@@ -1301,7 +1312,7 @@ def test_node_children_action():
     The RHS reaches the child positionally -- cf. `test_node_children_action_label()`.
     """
     game = games.read_from_file("stripped_down_poker.efg")
-    assert game.root.children[game.root.event.actions["King"]] == list(game.root.children)[0]
+    assert game.root.children[game.root.actions["King"]] == list(game.root.children)[0]
 
 
 def test_node_children_empty_label():
@@ -1332,7 +1343,7 @@ def test_node_children_rejects_int():
 def test_node_children_other_infoset_action():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children["King"].infoset.actions["Bet"]]
+        _ = game.root.children[game.root.children["King"].actions["Bet"]]
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)

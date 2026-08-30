@@ -464,7 +464,11 @@ class MixedBehaviorProfile:
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
         return MixedAction.wrap(
-            infoset, {a.label: self._getprob_action(a) for a in infoset.actions}
+            infoset,
+            {
+                a.label: self._getprob_action(a)
+                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+            }
         )
 
     def _setprob_infoset(
@@ -482,7 +486,7 @@ class MixedBehaviorProfile:
                 f"a mixed action must be set from a Mapping from action label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = {a.label for a in infoset.actions}
+        labels = set(infoset.actions)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -501,7 +505,7 @@ class MixedBehaviorProfile:
             raise ValueError("a mixed action's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed action's weights must not all be zero")
-        for a in infoset.actions:
+        for a in cython.cast(_InfosetOrEvent, infoset)._action_objects():
             self._setprob_action(a, values[a.label])
 
     def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
@@ -671,7 +675,10 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionValuesVector({
-            infoset: ActionValueVector({a.label: self._action_value(a) for a in infoset.actions})
+            infoset: ActionValueVector({
+                a.label: self._action_value(a)
+                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+            })
             for infoset in self._personal_infosets()
         })
 
@@ -750,7 +757,10 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionRegretsVector({
-            infoset: ActionRegretVector({a.label: self._action_regret(a) for a in infoset.actions})
+            infoset: ActionRegretVector({
+                a.label: self._action_regret(a)
+                for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+            })
             for infoset in self._personal_infosets()
         })
 
@@ -1134,7 +1144,10 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
                 infoset = node.infoset
                 profile._setprob_infoset(
                     infoset,
-                    {a.label: float(self._getprob_action(a)) for a in infoset.actions},
+                    {
+                        a.label: float(self._getprob_action(a))
+                        for a in cython.cast(_InfosetOrEvent, infoset)._action_objects()
+                    },
                     sparse=True,
                 )
         return profile

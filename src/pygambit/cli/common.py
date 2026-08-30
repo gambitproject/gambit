@@ -226,7 +226,7 @@ def render_support_csv(
     if isinstance(support, gbt.BehaviorSupportProfile):
         fields = [
             "".join(
-                "1" if action.label in action_support else "0"
+                "1" if action in action_support else "0"
                 for action in action_support.infoset.actions
             )
             for player in support.game.players
@@ -290,11 +290,11 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
             infoset_name = _name_or_number(infoset)
             values = action_values[next(iter(infoset.members))]
             for action in infoset.actions:
-                prob = mixed_action[action.label]
-                value = values[action.label]
+                prob = mixed_action[action]
+                value = values[action]
                 value_text = format_value(value, decimals) if value is not None else ""
                 lines.append(
-                    f"{infoset_name:>7}    {_name_or_number(action):>7}   "
+                    f"{infoset_name:>7}    {action:>7}   "
                     f"{format_value(prob, decimals):>11}   {value_text:>11}"
                 )
         lines.append("")
@@ -352,7 +352,7 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(list(node.infoset.actions))
+        len(node.infoset.actions)
         for player in game.players
         for node in game.get_infosets(player.label)
     )
@@ -369,6 +369,6 @@ def read_behavior_profiles_csv(
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for node in game.get_infosets(player.label):
-                profile[node] = {a.label: next(values) for a in node.infoset.actions}
+                profile[node] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles

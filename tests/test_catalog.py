@@ -55,13 +55,19 @@ def test_catalog_games(game_slugs, all_games):
 
 
 def test_catalog_games_filter_n_actions(all_games):
-    """Test games() function can filter on length of gbt.Game attribute 'actions'"""
+    """Test games() function can filter on the total number of actions across
+    the game's personal players' information sets"""
     filtered_games = gbt.catalog.games(n_actions=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.actions) == 2
+        n_game_actions = sum(
+            len(node.infoset.actions)
+            for player in g.players
+            for node in g.get_infosets(player.label)
+        )
+        assert n_game_actions == 2
 
 
 def test_catalog_games_filter_n_contingencies(all_games):

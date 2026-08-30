@@ -75,7 +75,7 @@ def test_getitem_infoset_wrong_game():
 
 def test_predicate_construction():
     game = games.read_from_file("mixed_behavior_game.efg")
-    profile = game.behavior_support_profile(lambda a: a.label != "D1")
+    profile = game.behavior_support_profile(lambda node, a: a.label != "D1")
     infoset = _find_infoset(game, "Infoset 1:1")
     assert set(profile[infoset]) == {"U1"}
 
@@ -83,7 +83,7 @@ def test_predicate_construction():
 def test_predicate_construction_error():
     game = games.read_from_file("mixed_behavior_game.efg")
     with pytest.raises(ValueError):
-        game.behavior_support_profile(lambda a: a.infoset.label != "Infoset 1:1")
+        game.behavior_support_profile(lambda node, a: node.infoset.label != "Infoset 1:1")
 
 
 def test_iter_yields_one_support_per_player():

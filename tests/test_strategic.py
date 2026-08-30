@@ -5,19 +5,6 @@ import pygambit as gbt
 from . import games
 
 
-def test_strategic_game_actions():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.actions
-
-
-def test_strategic_game_player_actions():
-    game = gbt.Game.new_table([2, 2])
-    player, _ = game.players
-    with pytest.raises(gbt.UndefinedOperationError):
-        _ = player.actions
-
-
 def test_strategic_game_get_infosets():
     game = gbt.Game.new_table([2, 2])
     player, _ = game.players
