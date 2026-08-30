@@ -69,14 +69,20 @@ class StrategyBehavior:
         handle = self._game._resolve_strategy(
             player, self._strategy_label, "StrategyBehavior"
         )
-        action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset).infoset)
+        action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset)._resolve())
         if not action:
             return None
         return Action.wrap(action)
 
     def _resolve_key(self, key: Infoset | str) -> Infoset:
         """Resolve `key` to an information set at which the player has the move."""
-        infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
+        infoset: Infoset
+        if isinstance(key, Infoset):
+            infoset = key
+            if infoset.game != self._game:
+                raise MismatchError("StrategyBehavior: key must be part of the same game")
+        else:
+            infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
         if infoset.player.label != self._player_label:
             raise ValueError(
                 f"Player '{self._player_label}' does not have the move at {infoset}."
@@ -116,8 +122,8 @@ class StrategyBehavior:
         return self._action_at(infoset) is not None
 
     def __iter__(self) -> typing.Iterator[Infoset]:
-        player = self._game.players[self._player_label]
-        for infoset in player.infosets:
+        for node in self._game.get_infosets(self._player_label):
+            infoset = node.infoset
             if self._action_at(infoset) is not None:
                 yield infoset
 

@@ -225,7 +225,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    game.set_move_actions(game.root.infoset, ["D1"], drop=True)
+    game.set_move_actions(game.root, ["D1"], drop=True)
     distribution = {s: 0 for s in player.strategies}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -260,8 +260,8 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
 def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
-    game.set_move_actions(game.root.infoset, ["D1"], drop=True)
-    infoset = next(iter(game.infosets))
+    game.set_move_actions(game.root, ["D1"], drop=True)
+    infoset = game.root
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.action_regrets
@@ -311,18 +311,20 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.__getitem__(game.root)
 
 
+def _bob_response_infoset(g):
+    return next(
+        n.infoset for n in g.get_infosets("Bob") if n.infoset.label == "Bob's response"
+    )
+
+
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
-    pytest.param(lambda g: g.infosets, id="GameInfosets"),
     pytest.param(lambda g: g.actions, id="GameActions"),
     pytest.param(lambda g: g.players["Alice"].strategies, id="PlayerStrategies"),
-    pytest.param(lambda g: g.players["Alice"].infosets, id="PlayerInfosets"),
     pytest.param(lambda g: g.players["Alice"].actions, id="PlayerActions"),
-    pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].actions,
-                 id="InfosetActions"),
-    pytest.param(lambda g: g.players["Bob"].infosets["Bob's response"].members,
-                 id="InfosetMembers"),
+    pytest.param(lambda g: _bob_response_infoset(g).actions, id="InfosetActions"),
+    pytest.param(lambda g: _bob_response_infoset(g).members, id="InfosetMembers"),
 ]
 
 

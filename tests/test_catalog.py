@@ -75,13 +75,13 @@ def test_catalog_games_filter_n_contingencies(all_games):
 
 
 def test_catalog_games_filter_n_infosets(all_games):
-    """Test games() function can filter on length of gbt.Game attribute 'infosets'"""
+    """Test games() function can filter on the number of information sets in the game"""
     filtered_games = gbt.catalog.games(n_infosets=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.infosets) == 2
+        assert sum(len(g.get_infosets(p.label)) for p in g.players) == 2
 
 
 def test_catalog_games_filter_is_const_sum(all_games):

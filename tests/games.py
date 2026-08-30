@@ -8,6 +8,31 @@ import numpy as np
 
 import pygambit as gbt
 
+
+def all_infosets(game: gbt.Game) -> list[gbt.Infoset]:
+    """All Infosets belonging to a personal player, across every player, in the
+    canonical order `Game.infosets` used to yield before its removal (17.0.0)."""
+    return [n.infoset for p in game.players for n in game.get_infosets(p.label)]
+
+
+def player_infosets(player: gbt.Player) -> list[gbt.Infoset]:
+    """All Infosets belonging to `player`, in canonical order, matching
+    `Player.infosets` before its removal (17.0.0)."""
+    return [n.infoset for n in player.game.get_infosets(player.label)]
+
+
+def find_infoset(player: gbt.Player, label: str) -> gbt.Infoset:
+    """Find the Infoset belonging to `player` with the given label, matching
+    `Player.infosets[label]` before its removal (17.0.0)."""
+    return next(i for i in player_infosets(player) if i.label == label)
+
+
+def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Infoset:
+    """Find the Infoset with the given label, searching across all (personal)
+    players, matching `Game.infosets[label]` before its removal (17.0.0)."""
+    return next(i for i in all_infosets(game) if i.label == label)
+
+
 # Label-validation fixtures.
 # VALID: accepted by the C++ validator (IsValidLabel in src/games/game.h), including
 #        well-formed UTF-8 text (#862, 17.0.0). A single Unicode whitespace character
@@ -528,7 +553,7 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
         game = cls(params)
         gbt_game = game.gbt_game()
         maps = [
-            [tuple(sig) if len(player.infosets) > 0 else () for sig in sigs]
+            [tuple(sig) if len(gbt_game.get_infosets(player.label)) > 0 else () for sig in sigs]
             for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
         ]
         return (gbt_game, maps)

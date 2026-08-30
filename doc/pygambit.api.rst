@@ -18,6 +18,7 @@ Representation of games
    Outcome
    Node
    Infoset
+   Event
    Action
    Subgame
 
@@ -110,7 +111,8 @@ Information about the game
    Game.max_payoff
    Game.root
    Game.actions
-   Game.infosets
+   Game.get_infosets
+   Game.get_events
    Game.nodes
    Game.contingencies
    Game.get_outcome
@@ -125,7 +127,6 @@ Information about the game
    Player.number
    Player.game
    Player.strategies
-   Player.infosets
    Player.actions
    Player.is_chance
    Player.min_payoff
@@ -154,6 +155,8 @@ Information about the game
    Node.prior_sibling
    Node.next_sibling
    Node.infoset
+   Node.event
+   Node.members
    Node.player
    Node.is_successor_of
    Node.plays
@@ -173,7 +176,6 @@ Information about the game
 
    Infoset.label
    Infoset.game
-   Infoset.is_chance
    Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
@@ -186,8 +188,23 @@ Information about the game
 
    :toctree: api/
 
+   Event.label
+   Event.game
+   Event.is_absent_minded
+   Event.player
+   Event.actions
+   Event.members
+   Event.precedes
+   Event.plays
+   Event.own_prior_actions
+
+.. autosummary::
+
+   :toctree: api/
+
    Action.label
    Action.infoset
+   Action.event
    Action.precedes
    Action.prob
    Action.plays

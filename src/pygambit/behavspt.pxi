@@ -120,8 +120,8 @@ class BehaviorSupport:
         support : ActionSupport
             The support at an information set belonging to the player
         """
-        for infoset in self.player.infosets:
-            yield self[infoset]
+        for node in self.player.game.get_infosets(self.player.label):
+            yield self[node.infoset]
 
     def __getitem__(self, infoset: Infoset) -> ActionSupport:
         """Returns the action support at `infoset`.
@@ -193,22 +193,24 @@ class BehaviorSupportProfile:
 
         Parameters
         ----------
-        index : str or Infoset
+        index : str, Node, or Infoset
             The part of the profile to return:
 
             * If `index` is a ``str``, returns a ``BehaviorSupport`` over the player's
               information sets. The player is determined by finding the player with
               that label, if any.
-            * If `index` is an ``Infoset`` (or the value of a node's ``infoset``
-              property), returns an ``ActionSupport`` over the actions in the support
-              at the information set.
+            * If `index` is a ``Node`` or an ``Infoset`` (e.g. one obtained from
+              iterating a ``BehaviorSupport``), returns an ``ActionSupport`` over the
+              actions in the support at the information set.
 
         Raises
         ------
         TypeError
-            If `index` is not a ``str`` or an ``Infoset``.
+            If `index` is not a ``str``, a ``Node``, or an ``Infoset``.
         MismatchError
-            If `index` is an ``Infoset`` from a different game.
+            If `index` is a ``Node`` or ``Infoset`` from a different game.
+        ValueError
+            If `index` is a terminal ``Node``, which belongs to no information set.
         KeyError
             If `index` is a ``str`` and no player in the game has that label.
         """
@@ -220,21 +222,28 @@ class BehaviorSupportProfile:
         if isinstance(index, str):
             resolved_player: Player = self.game.players[index]
             values = {
-                infoset: self._action_support_at(infoset) for infoset in resolved_player.infosets
+                node.infoset: self._action_support_at(node.infoset)
+                for node in self.game.get_infosets(resolved_player.label)
             }
             return BehaviorSupport.wrap(resolved_player, values)
         raise TypeError(
-            f"profile index must be str or Infoset, not {index.__class__.__name__}"
+            f"profile index must be str, Node, or Infoset, not {index.__class__.__name__}"
         )
 
     @cython.cfunc
     def _resolve_infoset_arg(self, index: object) -> object:
-        """Resolves index to an Infoset if it is one (or a NodeInfoset, which resolves
-        via the node it was fetched from), or returns None if index is neither.
+        """Resolves index to the Infoset it identifies if it is a Node or an Infoset,
+        or returns None if index is neither (e.g. a player label str).
         """
-        if isinstance(index, NodeInfoset):
-            resolved = cython.cast(NodeInfoset, index)._resolve()
-            if resolved is None:
+        if isinstance(index, Node):
+            node = cython.cast(Node, index)
+            resolved = cython.cast(Infoset, node.infoset)
+            if not resolved:
+                if node.event:
+                    raise ValueError(
+                        "index resolves to a chance event; a behavior support is only "
+                        "defined for a personal player's information sets"
+                    )
                 raise ValueError("index resolves to no information set (the node is terminal)")
             return resolved
         if isinstance(index, Infoset):
@@ -243,7 +252,7 @@ class BehaviorSupportProfile:
 
     def _action_support_at(self, infoset: Infoset) -> ActionSupport:
         """Returns a snapshot of the action support at infoset, as of now."""
-        infoset_handle = cython.cast(Infoset, infoset).infoset
+        infoset_handle = cython.cast(Infoset, infoset)._resolve()
         actions = tuple(
             Action.wrap(a).label for a in deref(self.profile).GetActions(infoset_handle)
         )
@@ -289,9 +298,10 @@ class BehaviorSupportProfile:
 
         Parameters
         ----------
-        infoset : Infoset
-            The information set whose support is to be set. The value of a node's
-            ``infoset`` property is also accepted.
+        infoset : Node or Infoset
+            A node belonging to the information set whose support is to be set, or
+            the information set itself (e.g. one obtained from iterating a
+            ``BehaviorSupport``).
         actions : Iterable[str]
             The labels of the actions which should be in the support at the
             information set. Every other action at the information set is removed
@@ -300,16 +310,19 @@ class BehaviorSupportProfile:
         Raises
         ------
         TypeError
-            If `infoset` is not an ``Infoset``.
+            If `infoset` is not a ``Node`` or an ``Infoset``.
         MismatchError
-            If `infoset` is an `Infoset` from a different game.
+            If `infoset` is a `Node` or `Infoset` from a different game.
         ValueError
             If any entry of `actions` is not one of the information set's action
-            labels, or if `actions` is empty.
+            labels, or if `actions` is empty; or if `infoset` is a terminal node,
+            which belongs to no information set.
         """
         resolved_infoset = self._resolve_infoset_arg(infoset)
         if resolved_infoset is None:
-            raise TypeError(f"profile index must be Infoset, not {infoset.__class__.__name__}")
+            raise TypeError(
+                f"profile index must be Node or Infoset, not {infoset.__class__.__name__}"
+            )
         if resolved_infoset.game != self.game:
             raise MismatchError("infoset must be part of the same game")
         self._set_support(resolved_infoset, actions)
@@ -325,22 +338,29 @@ class BehaviorSupportProfile:
         """
         return BehaviorSupportProfile.wrap(self.profile)
 
-    def is_reachable(self, infoset: InfosetReference) -> bool:
+    def is_reachable(self, infoset: typing.Any) -> bool:
         """Returns whether `infoset` can be reached under this support, i.e. whether
         there is some path of play consistent with the support that reaches it.
 
         Parameters
         ----------
-        infoset : Infoset or str
-            The information set to check. If a string is passed, the information set
-            is determined by finding the information set with that label, if any.
+        infoset : Node, str, or Infoset
+            A node belonging to the information set to check, such a node's label, or
+            the information set itself (e.g. one obtained from iterating a
+            ``BehaviorSupport``).
 
         Raises
         ------
         MismatchError
-            If `infoset` is an `Infoset` from a different game.
+            If `infoset` is a `Node` or `Infoset` from a different game.
         KeyError
-            If `infoset` is a string and no information set in the game has that label.
+            If `infoset` is a string and no node in the game has that label.
         """
-        resolved_infoset = self.game._resolve_infoset(infoset, "is_reachable")
-        return deref(self.profile).IsReachable(cython.cast(Infoset, resolved_infoset).infoset)
+        resolved_infoset: Infoset
+        if isinstance(infoset, Infoset):
+            resolved_infoset = infoset
+            if resolved_infoset.game != self.game:
+                raise MismatchError("is_reachable(): infoset must be part of the same game")
+        else:
+            resolved_infoset = self.game._resolve_infoset(infoset, "is_reachable")
+        return deref(self.profile).IsReachable(resolved_infoset._resolve())

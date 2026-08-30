@@ -23,62 +23,6 @@ import cython
 
 
 @cython.cclass
-class PlayerInfosets:
-    """The set of information sets belonging to a player: decisions for a personal
-    player, or events for the chance player.
-    """
-    player = cython.declare(c_GamePlayer)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create PlayerInfosets outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(player: c_GamePlayer) -> PlayerInfosets:
-        obj: PlayerInfosets = PlayerInfosets.__new__(PlayerInfosets)
-        obj.player = player
-        return obj
-
-    def __repr__(self) -> str:
-        return f"PlayerInfosets(player={Player.wrap(self.player)})"
-
-    def __len__(self) -> int:
-        """The number of information sets belonging to the player."""
-        return self.player.deref().GetInfosets().size()
-
-    def __iter__(self) -> typing.Iterator[Infoset]:
-        for infoset in self.player.deref().GetInfosets():
-            yield Infoset.wrap(infoset)
-
-    def __getitem__(self, label: str) -> Infoset:
-        """Returns the player's information set with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the infoset to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the player has no information set with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one of the player's
-            information sets has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an information set by its label,
-            or iterate over the collection.  String lookup now requires an exact match of the
-            label; previously, leading/trailing whitespace was stripped from `label` before
-            comparison.
-        """
-        return _resolve_by_label(self, label, "Player", "infoset", "infosets")
-
-
-@cython.cclass
 class PlayerActions:
     """Represents the set of all actions available to a player at some information set."""
     player = cython.declare(Player)
@@ -97,11 +41,14 @@ class PlayerActions:
         return f"PlayerActions(player={self.player})"
 
     def __len__(self) -> int:
-        return sum(len(s.actions) for s in self.player.infosets)
+        return sum(
+            len(node.infoset.actions)
+            for node in self.player.game.get_infosets(self.player.label)
+        )
 
     def __iter__(self) -> typing.Iterator[Action]:
-        for infoset in self.player.infosets:
-            yield from infoset.actions
+        for node in self.player.game.get_infosets(self.player.label):
+            yield from node.infoset.actions
 
     def __getitem__(self, label: str) -> Action:
         """Returns the player's action with text label `label`.
@@ -268,25 +215,6 @@ class Player:
     def sequences(self) -> PlayerSequences:
         """Returns the collection of sequences belonging to the player."""
         return PlayerSequences.wrap(self.player)
-
-    @property
-    def infosets(self) -> PlayerInfosets:
-        """Returns the set of information sets belonging to the player: decisions for
-        a personal player, or events for the chance player.
-
-        The iteration order of information sets is the order in which they
-        are encountered in the pre-order depth first traversal of the game tree.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.game.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-        return PlayerInfosets.wrap(self.player)
 
     @property
     def actions(self) -> PlayerActions:

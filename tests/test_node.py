@@ -19,10 +19,11 @@ def test_get_infoset():
 
 
 def test_infoset_equality_is_symmetric():
-    """A node-anchored infoset proxy and the resolved Infoset compare equal from either side."""
+    """A node-anchored infoset proxy and a separately-constructed Infoset compare
+    equal from either side."""
     game = games.read_from_file("basic_extensive_game.efg")
     proxy = game.root.infoset
-    infoset = next(iter(game.infosets))
+    infoset = game.get_infosets(game.root.player.label)[0].infoset
     assert proxy == infoset
     assert infoset == proxy
 
@@ -469,10 +470,11 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
         for path, keys in test_case.differences.items()
         for key in keys
     }
-    for infoset in game.infosets:
-        key = (infoset.player.label, infoset.number)
-        actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(infoset).root))
-        assert actual_path == expected_path_for_key[key]
+    for player in game.players:
+        for node in game.get_infosets(player.label):
+            key = (node.infoset.player.label, node.infoset.number)
+            actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(node).root))
+            assert actual_path == expected_path_for_key[key]
 
 
 @pytest.mark.parametrize("game_file, expected_node_data", [
@@ -619,7 +621,7 @@ def test_append_move_error_infoset_mismatch():
     game1 = gbt.Game.new_tree()
     game2 = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.MismatchError):
-        game1.append_infoset(game1.root, game2.root.infoset)
+        game1.append_infoset(game1.root, game2.root)
 
 
 def test_append_move_error_empty_label():
@@ -801,7 +803,7 @@ def test_append_move_creates_single_infoset_list_of_nodes():
              game.root.children["1"].children["1"],
              game.root.children["1"].children["2"]]
     game.append_move(nodes, "Player 3", ["B", "F"])
-    assert len(game.players["Player 3"].infosets) == 1
+    assert len(game.get_infosets("Player 3")) == 1
 
 
 def test_append_move_same_infoset_list_of_nodes():
@@ -925,7 +927,7 @@ def test_append_infoset_node_list_with_non_terminal_node():
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_infoset(
             [game.root.children["2"], game.root.children["1"].children["2"]],
-            seed_node.infoset
+            seed_node
         )
 
 
@@ -942,7 +944,7 @@ def test_append_infoset_node_list_with_duplicate_node():
             [game.root.children["1"].children["2"],
              game.root.children["2"].children["1"],
              game.root.children["1"].children["2"]],
-            seed_node.infoset
+            seed_node
         )
 
 
@@ -955,7 +957,7 @@ def test_append_infoset_node_list_is_empty():
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
-        game.append_infoset([], seed_node.infoset)
+        game.append_infoset([], seed_node)
 
 
 def test_append_event_creates_single_event_list_of_nodes():
@@ -964,8 +966,8 @@ def test_append_event_creates_single_event_list_of_nodes():
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_event([node1, node2], ["a", "b"], [gbt.Rational(1, 2)] * 2)
-    assert node1.infoset == node2.infoset
-    assert node1.infoset.is_chance
+    assert node1.event == node2.event
+    assert node1.event
 
 
 def test_append_event_sets_distribution():
@@ -973,7 +975,7 @@ def test_append_event_sets_distribution():
     game = games.read_from_file("sample_extensive_game.efg")
     node = game.root.children["1"].children["1"]
     game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.infoset.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+    assert [a.prob for a in node.event.actions] == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
 
 def test_append_event_error_actions_empty():
@@ -1049,8 +1051,8 @@ def test_insert_event_actions_labeled():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
     game.insert_event(node, ["Up", "Down"], [gbt.Rational(1, 2)] * 2)
-    assert [a.label for a in node.parent.infoset.actions] == ["Up", "Down"]
-    assert node.parent.infoset.is_chance
+    assert [a.label for a in node.parent.event.actions] == ["Up", "Down"]
+    assert node.parent.event
 
 
 def test_insert_event_sets_distribution():
@@ -1058,7 +1060,7 @@ def test_insert_event_sets_distribution():
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root
     game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
-    assert [a.prob for a in node.parent.infoset.actions] == [
+    assert [a.prob for a in node.parent.event.actions] == [
         gbt.Rational(1, 4), gbt.Rational(3, 4)
     ]
 
@@ -1184,7 +1186,7 @@ def test_len_after_append_infoset():
     number_of_infoset_actions = len(infoset_to_modify.actions)
     terminal_node_to_add = game.root.children["L"].children["L"].children["l"]
 
-    game.append_infoset(terminal_node_to_add, infoset_to_modify)
+    game.append_infoset(terminal_node_to_add, member_node)
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
@@ -1196,7 +1198,7 @@ def test_len_after_set_move_actions_add():
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
     labels = [action.label for action in infoset_to_modify.actions]
-    game.set_move_actions(infoset_to_modify, labels + ["new"])
+    game.set_move_actions(game.root.children["L"], labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
 
@@ -1210,7 +1212,7 @@ def test_len_after_set_move_actions_drop():
         for member in action_to_drop.infoset.members
     )
     remaining = [a.label for a in game.root.infoset.actions if a.label != "L"]
-    game.set_move_actions(game.root.infoset, remaining, drop=True)
+    game.set_move_actions(game.root, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 
@@ -1246,7 +1248,7 @@ def test_len_after_insert_infoset():
     node_to_insert_above = game.root.children["L"].children["R"]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
-    game.insert_infoset(node_to_insert_above, infoset_to_modify)
+    game.insert_infoset(node_to_insert_above, game.root.children["L"])
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
@@ -1299,7 +1301,7 @@ def test_node_children_action():
     The RHS reaches the child positionally -- cf. `test_node_children_action_label()`.
     """
     game = games.read_from_file("stripped_down_poker.efg")
-    assert game.root.children[game.root.infoset.actions["King"]] == list(game.root.children)[0]
+    assert game.root.children[game.root.event.actions["King"]] == list(game.root.children)[0]
 
 
 def test_node_children_empty_label():

@@ -36,8 +36,9 @@ class InfosetIndexedVector(_LabeledVector):
     _label_kind = "information set"
 
     def __getitem__(self, node: Node) -> typing.Any:
-        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
-        if infoset is None:
+        resolved_node = cython.cast(Node, node)
+        infoset = resolved_node.infoset or resolved_node.event
+        if not infoset:
             raise ValueError("node is terminal, has no information set")
         try:
             return self._values[infoset]
@@ -312,8 +313,8 @@ class MixedBehavior:
         ValueError
             If `index` is a terminal node, which belongs to no information set.
         """
-        infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-        if infoset is None:
+        infoset = cython.cast(Infoset, index.infoset)
+        if not infoset:
             raise ValueError("node is terminal, has no information set")
         if infoset.player != self.player:
             raise MismatchError("node must belong to this player")
@@ -413,7 +414,8 @@ class MixedBehaviorProfile:
         if isinstance(index, str):
             resolved_player = self.game._resolve_player(index, "__getitem__")
             values = {
-                infoset: self._mixed_action_at(infoset) for infoset in resolved_player.infosets
+                node.infoset: self._mixed_action_at(node.infoset)
+                for node in self.game.get_infosets(resolved_player.label)
             }
             return MixedBehavior.wrap(resolved_player, values)
         raise TypeError(
@@ -421,28 +423,43 @@ class MixedBehaviorProfile:
         )
 
     def _resolve_infoset_for_node(self, node: Node) -> Infoset:
-        """Resolves the information set containing node.
+        """Resolves the personal player's information set containing node.
 
         Raises
         ------
         MismatchError
             If `node` belongs to a different game.
         ValueError
-            If `node` is terminal, and so belongs to no information set.
+            If `node` resolves to a chance event, or is terminal, and so belongs to
+            no personal player's information set.
         """
         if node.game != self.game:
             raise MismatchError("node must belong to this game")
-        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
-        if infoset is None:
+        infoset = cython.cast(Infoset, node.infoset)
+        if not infoset:
+            if node.event:
+                raise ValueError(
+                    "node belongs to a chance event, not a personal player's "
+                    "information set"
+                )
             raise ValueError("node is terminal, has no information set")
         return infoset
 
     def _all_infosets(self) -> typing.Iterator[Infoset]:
-        """Iterates over every information set in the game, including the chance
-        player's, which ``self.game.infosets`` excludes.
+        """Iterates over every information set and event in the game."""
+        for player in self.game.players:
+            for node in self.game.get_infosets(player.label):
+                yield node.infoset
+        for node in self.game.get_events():
+            yield node.event
+
+    def _personal_infosets(self) -> typing.Iterator[Infoset]:
+        """Iterates over every information set in the game belonging to a personal
+        player, excluding the chance player's.
         """
-        yield from self.game.infosets
-        yield from self.game.players.chance.infosets
+        for player in self.game.players:
+            for node in self.game.get_infosets(player.label):
+                yield node.infoset
 
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
         """Returns a snapshot of the mixed action at infoset, as of now."""
@@ -580,23 +597,22 @@ class MixedBehaviorProfile:
         infoset = self._resolve_infoset_for_node(index)
         self._setprob_infoset(infoset, distribution, sparse=sparse)
 
-    def is_defined_at(self, infoset: InfosetReference) -> bool:
+    def is_defined_at(self, infoset: NodeReference) -> bool:
         """Returns whether the profile has probabilities defined at the information set.
         A profile can be well-defined if probabilities are not specified at some information sets,
         as long as those information sets are reached with zero probability.
 
         Parameters
         ----------
-        infoset : Infoset or str
-            The information set to check.  If a string is passed, the
-            information set is determined by finding the information set with that label, if any.
+        infoset : Node or str
+            A node belonging to the information set to check, or such a node's label.
 
         Raises
         ------
         MismatchError
-            If `infoset` is an ``Infoset`` from a different game.
+            If `infoset` is a ``Node`` from a different game.
         KeyError
-            If `infoset` is a string and no information set in the game has that label.
+            If `infoset` is a string and no node in the game has that label.
         """
         self._check_validity()
         return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
@@ -637,7 +653,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetValueVector({
-            infoset: self._infoset_value(infoset) for infoset in self.game.infosets
+            infoset: self._infoset_value(infoset) for infoset in self._personal_infosets()
         })
 
     @property
@@ -656,7 +672,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return ActionValuesVector({
             infoset: ActionValueVector({a.label: self._action_value(a) for a in infoset.actions})
-            for infoset in self.game.infosets
+            for infoset in self._personal_infosets()
         })
 
     @property
@@ -725,7 +741,7 @@ class MixedBehaviorProfile:
         always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded (``self.game.infosets`` already excludes them).
+        information sets are excluded.
 
         See Also
         --------
@@ -735,7 +751,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return ActionRegretsVector({
             infoset: ActionRegretVector({a.label: self._action_regret(a) for a in infoset.actions})
-            for infoset in self.game.infosets
+            for infoset in self._personal_infosets()
         })
 
     @property
@@ -749,7 +765,7 @@ class MixedBehaviorProfile:
         By convention, the regret is always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded (``self.game.infosets`` already excludes them).
+        information sets are excluded.
 
         See Also
         --------
@@ -758,7 +774,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetRegretVector({
-            infoset: self._infoset_regret(infoset) for infoset in self.game.infosets
+            infoset: self._infoset_regret(infoset) for infoset in self._personal_infosets()
         })
 
     def agent_max_regret(self) -> ProfileDType:
@@ -902,7 +918,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return deref(self.profile).BehaviorProfileLength()
 
     def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset.infoset)
+        return deref(self.profile).IsDefinedAt(infoset._resolve())
 
     def _getprob_action(self, index: Action) -> float:
         return deref(self.profile).getaction(index.action)
@@ -939,11 +955,11 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> float:
         return deref(self.profile).GetRealizProb(node.node)
 
-    def _infoset_prob(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetInfosetProb(infoset.infoset)
+    def _infoset_prob(self, infoset: _InfosetOrEvent) -> float:
+        return deref(self.profile).GetInfosetProb(infoset._resolve())
 
     def _infoset_value(self, infoset: Infoset) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(infoset.infoset)
+        cdef optional[double] value = deref(self.profile).GetPayoff(infoset._resolve())
         if value.has_value():
             return value.value()
         return None
@@ -961,7 +977,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return deref(self.profile).GetRegret(action.action)
 
     def _infoset_regret(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetRegret(infoset.infoset)
+        return deref(self.profile).GetRegret(infoset._resolve())
 
     def _agent_max_regret(self) -> float:
         return deref(self.profile).GetAgentMaxRegret()
@@ -1027,7 +1043,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return deref(self.profile).BehaviorProfileLength()
 
     def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset.infoset)
+        return deref(self.profile).IsDefinedAt(infoset._resolve())
 
     def _getprob_action(self, index: Action) -> Rational:
         return rat_to_py(deref(self.profile).getaction(index.action))
@@ -1065,11 +1081,11 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetRealizProb(node.node))
 
-    def _infoset_prob(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetInfosetProb(infoset.infoset))
+    def _infoset_prob(self, infoset: _InfosetOrEvent) -> Rational:
+        return rat_to_py(deref(self.profile).GetInfosetProb(infoset._resolve()))
 
     def _infoset_value(self, infoset: Infoset) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(infoset.infoset)
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(infoset._resolve())
         if value.has_value():
             return rat_to_py(value.value())
         return None
@@ -1087,7 +1103,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return rat_to_py(deref(self.profile).GetRegret(action.action))
 
     def _infoset_regret(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(infoset.infoset))
+        return rat_to_py(deref(self.profile).GetRegret(infoset._resolve()))
 
     def _agent_max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentMaxRegret())
@@ -1114,7 +1130,8 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
-            for infoset in player.infosets:
+            for node in self.game.get_infosets(player.label):
+                infoset = node.infoset
                 profile._setprob_infoset(
                     infoset,
                     {a.label: float(self._getprob_action(a)) for a in infoset.actions},

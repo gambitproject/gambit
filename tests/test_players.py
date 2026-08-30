@@ -185,7 +185,7 @@ def test_extensive_game_set_players_add():
     game.set_players(["Alice"])
     pl1 = next(iter(game.players))
     assert len(game.players) == 1
-    assert len(pl1.infosets) == 0
+    assert len(game.get_infosets(pl1.label)) == 0
     assert len(pl1.strategies) == 1
 
 
@@ -322,7 +322,9 @@ def test_player_sequence_count():
     """Test the identity that the number of sequences is the number of actions plus one."""
     game = gbt.catalog.load("books/myerson1991/fig2_1")
     for player in game.players:
-        action_count = sum(len(infoset.actions) for infoset in player.infosets)
+        action_count = sum(
+            len(node.infoset.actions) for node in game.get_infosets(player.label)
+        )
         assert len(player.sequences) == action_count + 1
 
 
@@ -331,7 +333,11 @@ def test_player_sequence_actions():
     player = game.players["Alice"]
     sequences = set(tuple(seq.actions) for seq in player.sequences)
     reference = (
-        set((action, ) for infoset in player.infosets for action in infoset.actions) |
+        set(
+            (action, )
+            for node in game.get_infosets(player.label)
+            for action in node.infoset.actions
+        ) |
         {tuple()}
     )
     assert sequences == reference

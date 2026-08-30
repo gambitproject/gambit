@@ -104,8 +104,16 @@ def test_resolve_node_invalid(game: gbt.Game, node: str, exception: BaseExceptio
     ]
 )
 def test_resolve_infoset(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.infosets,
-                            lambda label, fn: game._resolve_infoset(label, fn))
+    """`_resolve_infoset` resolves a Node to the Infoset it belongs to, or a node's
+    label to the same; any member node of an infoset resolves to an equal Infoset."""
+    for player in game.players:
+        for node in game.get_infosets(player.label):
+            resolved = game._resolve_infoset(node, "test")
+            assert resolved == node.infoset
+            if node.label:
+                assert game._resolve_infoset(node.label, "test") == node.infoset
+            for member in node.infoset.members:
+                assert game._resolve_infoset(member, "test") == node.infoset
 
 
 @pytest.mark.parametrize(
