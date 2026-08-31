@@ -3072,7 +3072,7 @@ class NodeCoordinates:
 
 
 @cython.cfunc
-def _layout_tree(game: Game) -> dict[GameNode, NodeCoordinates]:
+def _layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     layout = CreateLayout(game.game)
     data = {}
     for node in game.nodes:
@@ -3082,5 +3082,5 @@ def _layout_tree(game: Game) -> dict[GameNode, NodeCoordinates]:
     return data
 
 
-def layout_tree(game: Game) -> dict[GameNode, dict]:
+def layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     return _layout_tree(game)
