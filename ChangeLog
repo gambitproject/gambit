@@ -11,6 +11,7 @@
   `logit_estimate`, `ipa_solve`, and `gnm_solve` now also accept a rational-precision profile
   directly (as a starting point or perturbation vector), converting it internally.
   (#721, #458)
+- In the GUI, computed strategy and behaviour profiles can now be sorted by probability (#1077)
 
 ### Changed
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
