@@ -8,7 +8,6 @@ import itertools
 import pathlib
 import string
 import subprocess
-import sys
 import typing
 
 import pygambit as gbt
@@ -279,21 +278,3 @@ def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
         for support in gbt.nash.possible_nash_supports(game)
         for eqm in _solve_support(support, phcpack_path, maxregret, negtol)
     ]
-
-
-def _read_game(fn: str) -> gbt.Game:
-    for reader in [gbt.read_efg, gbt.read_nfg, gbt.read_agg]:
-        try:
-            return reader(fn)
-        except Exception:
-            pass
-    raise OSError(f"Unable to read or parse {fn}")
-
-
-def main():
-    game = _read_game(sys.argv[1])
-    phcpack_solve(game, "./phc", maxregret=1.0e-6)
-
-
-if __name__ == "__main__":
-    main()
