@@ -309,7 +309,21 @@ When making a new release of Gambit, follow these steps:
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
-   The Windows ``.msi`` installer is the one exception: Windows Installer's ``ProductVersion``
+   .. note::
+
+      The C++ build is the one case that does *not* pick up the change automatically.
+      ``configure.ac`` embeds the version via ``AC_INIT`` at *autoconf-generation* time,
+      not at ``./configure``-run time, so the version baked into the ``configure`` script
+      (and from there into ``make dist`` tarball names, ``Makefile``, and the compiled
+      binaries) stays stale until ``configure`` is regenerated. Autoconf's own
+      ``autom4te.cache`` can also serve a stale cached expansion even when you do
+      regenerate, since it isn't aware that ``configure.ac`` depends on the contents of
+      ``GAMBIT_VERSION``. After editing ``GAMBIT_VERSION``, always force a full
+      regeneration before building or running ``make dist``::
+
+          rm -rf autom4te.cache && autoreconf -fi
+
+   The Windows ``.msi`` installer is another exception: Windows Installer's ``ProductVersion``
    must be a plain numeric ``major.minor.build`` triple.  So, ``configure.ac`` derives a separate
    ``GAMBIT_MSI_VERSION`` for ``gambit.wxs`` instead of substituting ``GAMBIT_VERSION`` directly.
    The build field is banded by release stage so that alpha < beta < rc < the final release of
