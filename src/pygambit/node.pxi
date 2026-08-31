@@ -275,8 +275,8 @@ class Node:
         return Event.wrap(self.node)
 
     @property
-    def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set or event to which
+    def members(self) -> list[Node]:
+        """The nodes which are members of the information set or event to which
         this node currently belongs -- whichever applies. Equivalent to
         ``self.infoset.members`` or ``self.event.members``, whichever is not falsy;
         unlike those, this is well-defined regardless of which currently applies.

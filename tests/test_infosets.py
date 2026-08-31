@@ -464,18 +464,18 @@ def test_infoset_proxy_reresolves_after_split():
     assert list(proxy.members) == [node]
 
 
-def test_infoset_members_view_reresolves_after_split():
-    """A `members` view, like the `Infoset`/`Event` it came from, is anchored on its
-    owner rather than snapshotting the information set at the time it was obtained:
-    holding onto it across a mutation still reflects the owner's current state."""
+def test_infoset_members_is_a_plain_snapshot_list():
+    """`members` returns a plain `list`, not a lazily-resolved view: it supports
+    integer indexing, and a list obtained before a mutation keeps reflecting the
+    information set as it was at the time, rather than tracking its owner."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"]
-    other = [n for n in node.infoset.members if n != node][0]
-    members_view = node.infoset.members
-    assert len(members_view) == 2
+    members = node.infoset.members
+    assert isinstance(members, list)
+    assert node in (members[0], members[1])
     game.make_infoset(node, node.player)
-    assert list(members_view) == [node]
-    assert other not in members_view
+    assert len(members) == 2
+    assert list(node.infoset.members) == [node]
 
 
 def test_reveal_splits_infoset_by_action():
