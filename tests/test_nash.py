@@ -3660,3 +3660,22 @@ def test_logit_solve_lambda_error_with_invalid_max_accel():
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0)
     with pytest.raises(ValueError, match="at least 1.0"):
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0.1)
+
+
+def test_logit_solve_branch_and_lambda_on_extensive_game():
+    """`logit_solve_branch`/`logit_solve_lambda`, on a tree game with `use_strategic`
+    left at its default `False`, dispatch to the behavior-form (`LogitQREMixedBehaviorProfile`)
+    code path rather than the strategy-form one exercised by the other tests in this module."""
+    game = games.create_stripped_down_poker_efg()
+    branch = gbt.qre.logit_solve_branch(game, maxregret=0.01, first_step=0.1, max_accel=1.1)
+    assert len(branch) > 0
+    assert all(isinstance(p, gbt.LogitQREMixedBehaviorProfile) for p in branch)
+
+    events = []
+    lam_results = gbt.qre.logit_solve_lambda(
+        game, lam=[0.5, 1.0], first_step=0.1, max_accel=1.1,
+        event_callback=lambda ev: events.append(ev),
+    )
+    assert [p.lam for p in lam_results] == pytest.approx([0.5, 1.0])
+    assert all(isinstance(p, gbt.LogitQREMixedBehaviorProfile) for p in lam_results)
+    assert len(events) > 0
