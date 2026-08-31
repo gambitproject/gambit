@@ -1583,56 +1583,6 @@ class Game:
                 return p
         raise KeyError(f"{funcname}(): no player with label '{player}'")
 
-    def _resolve_outcome(self,
-                         outcome: typing.Any, funcname: str, argname: str = "outcome") -> Outcome:
-        """Resolve an attempt to reference an outcome of the game.
-
-        Parameters
-        ----------
-        outcome : Any
-            An object to resolve as a reference to an outcome.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'outcome'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `outcome` is an `Outcome` from a different game.
-        KeyError
-            If `outcome` is a string and no outcome in the game has that label.
-        TypeError
-            If `outcome` is not an `Outcome`, `NodeOutcome`, or a `str`
-        ValueError
-            If `outcome` is an empty `str` or all spaces, or is a `NodeOutcome` that
-            resolves to no outcome (no outcome is attached to its node).
-        """
-        if isinstance(outcome, NodeOutcome):
-            resolved = cython.cast(NodeOutcome, outcome)._resolve()
-            if resolved is None:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to no outcome "
-                    f"(no outcome is attached to the node)"
-                )
-            outcome = resolved
-        if isinstance(outcome, Outcome):
-            if outcome.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return outcome
-        elif isinstance(outcome, str):
-            if not outcome.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return self.outcomes[outcome]
-            except KeyError:
-                raise KeyError(f"{funcname}(): no outcome with label '{outcome}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
-        )
-
     @cython.cfunc
     def _resolve_strategy(self, player: str, label, funcname: str,
                           argname: str = "strategy") -> c_GameStrategy:
