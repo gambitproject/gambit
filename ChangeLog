@@ -1,4 +1,4 @@
-## [17.0.0-beta.1] - unreleased
+## [17.0.0-alpha.3] - 2026-08-31
 
 ### Added
 - Added `Game.get_infosets(player)`, returning a materialized list of one representative
