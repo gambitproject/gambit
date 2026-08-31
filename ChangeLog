@@ -38,6 +38,7 @@
 - Added `Game.get_strategies(player)`, `Game.get_sequences(player)`, `Game.get_min_payoff(player)`,
   and `Game.get_max_payoff(player)`, replacing `Player.strategies`/`.sequences`/`.min_payoff`/
   `.max_payoff` now that `Player` has been removed.
+- In the GUI, computed strategy and behaviour profiles can now be sorted by probability (#1077)
 
 ### Changed
 - `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed

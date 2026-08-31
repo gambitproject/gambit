@@ -431,6 +431,10 @@ gambit_SOURCES = \
 	src/gui/nfgprofile.h \
 	src/gui/nfgtable.cc \
 	src/gui/nfgtable.h \
+	src/gui/profilelabels.cc \
+	src/gui/profilelabels.h \
+	src/gui/profilesort.cc \
+	src/gui/profilesort.h \
 	src/gui/renratio.cc \
 	src/gui/renratio.h \
 	src/gui/style.cc \
