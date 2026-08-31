@@ -22,12 +22,14 @@
 """Provides support for level-k/cognitive hierarchy modeling
 """
 
+import dataclasses
 import math
 
+import numpy
 import scipy.optimize
 import scipy.stats
 
-from .profiles import Solution
+import pygambit.gambit as libgbt
 
 
 def logit_br(game, profile, lam):
@@ -45,27 +47,20 @@ def logit_br(game, profile, lam):
     return br
 
 
-class CognitiveHierarchyProfile(Solution):
+@dataclasses.dataclass(frozen=True)
+class CognitiveHierarchyProfile:
     """Container class representing a CH solution.
     """
-    def __init__(self, tau, lam, profile):
-        Solution.__init__(self, profile)
-        self._tau = tau
-        self._lam = lam
+    tau: float
+    lam: float
+    profile: libgbt.MixedStrategyProfileDouble
+    logL: float | None = None
 
     def __repr__(self):
         return (
             f"<CognitiveHierarchyProfile for "
-            f"tau={self._tau}, lam={self._lam}: {self._profile}>"
+            f"tau={self.tau}, lam={self.lam}: {self.profile}>"
         )
-
-    @property
-    def tau(self):
-        return self._tau
-
-    @property
-    def lam(self):
-        return self._lam
 
 
 def compute_coghier(game, tau, lam):
@@ -109,16 +104,16 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
             penalty += tau*tau
             tau = 0.0
         profile = compute_coghier(game, tau, lam)
-        logL = log_like(profile, data)
+        logL = log_like(profile.profile, data)
         return penalty - logL
 
     results = []
-    for lam in scipy.linspace(min_lam, max_lam, grid_size):
+    for lam in numpy.linspace(min_lam, max_lam, grid_size):
         if verbose:
             print(f"Searching lambda={lam:.3f}")
-        for tau in scipy.linspace(min_tau, max_tau, grid_size):
+        for tau in numpy.linspace(min_tau, max_tau, grid_size):
             profile = compute_coghier(game, tau, lam)
-            profile.logL = log_like(profile, data)
+            profile = dataclasses.replace(profile, logL=log_like(profile.profile, data))
             results.append(profile)
         results.sort(key=lambda x: x.logL)
         results = results[:sample_cands]
@@ -136,7 +131,7 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
                                      disp=0)
         end_tau, end_lam = list(params)
         profile = compute_coghier(game, end_tau, end_lam)
-        profile.logL = log_like(profile, data)
+        profile = dataclasses.replace(profile, logL=log_like(profile.profile, data))
         results.append(profile)
         if verbose:
             print(f"{profile.tau:f},{profile.lam:f},{profile.logL:f}")
