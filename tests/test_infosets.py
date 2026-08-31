@@ -464,6 +464,20 @@ def test_infoset_proxy_reresolves_after_split():
     assert list(proxy.members) == [node]
 
 
+def test_infoset_members_view_reresolves_after_split():
+    """A `members` view, like the `Infoset`/`Event` it came from, is anchored on its
+    owner rather than snapshotting the information set at the time it was obtained:
+    holding onto it across a mutation still reflects the owner's current state."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    other = [n for n in node.infoset.members if n != node][0]
+    members_view = node.infoset.members
+    assert len(members_view) == 2
+    game.make_infoset(node, node.player)
+    assert list(members_view) == [node]
+    assert other not in members_view
+
+
 def test_reveal_splits_infoset_by_action():
     """Revealing the deal to Bob separates his single infoset into per-card
     singletons; the other player's structure is untouched."""

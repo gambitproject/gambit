@@ -21,59 +21,6 @@
 #
 
 @cython.cclass
-class InfosetMembers:
-    """The set of nodes which are members of an information set."""
-    infoset = cython.declare(c_GameInfoset)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create InfosetMembers outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> InfosetMembers:
-        obj: InfosetMembers = InfosetMembers.__new__(InfosetMembers)
-        obj.infoset = infoset
-        return obj
-
-    def __repr__(self) -> str:
-        return (
-            f"InfosetMembers(infoset={_wrap_infoset_or_event(self.infoset.deref().GetMember(1))})"
-        )
-
-    def __len__(self) -> int:
-        return self.infoset.deref().GetMembers().size()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        for member in self.infoset.deref().GetMembers():
-            yield Node.wrap(member)
-
-    def __getitem__(self, label: str) -> Node:
-        """Returns the member node with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the member node to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the information set has no member with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one member has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a member by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Infoset", "member", "members")
-
-
-@cython.cclass
 class _InfosetOrEvent:
     """Shared implementation for `Infoset` and `Event`: a lazy, node-anchored view over
     an information set, filtered to whichever of the two subclasses' concept currently
@@ -196,12 +143,72 @@ class _InfosetOrEvent:
         The iteration order of information set members is the order in which they
         are encountered in the pre-order depth first traversal of the game tree.
         """
-        return InfosetMembers.wrap(self._resolve())
+        self._resolve()
+        return InfosetMembers.wrap(self)
 
     @property
     def player(self) -> str:
         """The label of the player who has the move at this information set."""
         return self._resolve().deref().GetPlayer().deref().GetLabel().decode("utf-8")
+
+
+@cython.cclass
+class InfosetMembers:
+    """The set of nodes which are members of an information set.
+
+    A lazy, owner-anchored view: holds the `Infoset`/`Event` it was accessed from and
+    resolves the information set on each access, so the value reflects the current
+    state of the game even if the game is mutated after this view is obtained.
+    """
+    owner = cython.declare(_InfosetOrEvent)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create InfosetMembers outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(owner: _InfosetOrEvent) -> InfosetMembers:
+        obj: InfosetMembers = InfosetMembers.__new__(InfosetMembers)
+        obj.owner = owner
+        return obj
+
+    def __repr__(self) -> str:
+        return (
+            f"InfosetMembers(infoset="
+            f"{_wrap_infoset_or_event(self.owner._resolve().deref().GetMember(1))})"
+        )
+
+    def __len__(self) -> int:
+        return self.owner._resolve().deref().GetMembers().size()
+
+    def __iter__(self) -> typing.Iterator[Node]:
+        for member in self.owner._resolve().deref().GetMembers():
+            yield Node.wrap(member)
+
+    def __getitem__(self, label: str) -> Node:
+        """Returns the member node with text label `label`.
+
+        Parameters
+        ----------
+        label : str
+            The text label of the member node to return.  Lookup is by exact match;
+            leading/trailing whitespace is stripped from `label`.
+
+        Raises
+        ------
+        KeyError
+            If the information set has no member with label `label`.
+        ValueError
+            If `label` is empty or all whitespace, or if more than one member has label `label`.
+        TypeError
+            If `label` is not a string.
+
+        .. versionchanged:: 16.7.0
+            Integer indexing is no longer supported; reference a member by its label, or iterate
+            over the collection.  String lookup now requires an exact match of the label;
+            previously, leading/trailing whitespace was stripped from `label` before comparison.
+        """
+        return _resolve_by_label(self, label, "Infoset", "member", "members")
 
 
 @cython.cclass
