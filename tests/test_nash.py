@@ -3679,3 +3679,44 @@ def test_logit_solve_branch_and_lambda_on_extensive_game():
     assert [p.lam for p in lam_results] == pytest.approx([0.5, 1.0])
     assert all(isinstance(p, gbt.LogitQREMixedBehaviorProfile) for p in lam_results)
     assert len(events) > 0
+
+
+def test_lp_solve_reports_use_strategic_for_native_strategic_game():
+    """A game that is natively strategic (`is_tree` is False) is always solved on the
+    strategic representation, regardless of the `use_strategic` argument -- the
+    reported `use_strategic` on the result must reflect that, not just echo the
+    argument as passed."""
+    game = games.read_from_file("const_sum_game.nfg")
+    assert not game.is_tree
+    res = gbt.nash.lp_solve(game, use_strategic=False)
+    assert res.use_strategic is True
+
+
+def test_enumpoly_solve_phcpack_reports_use_strategic_true(monkeypatch):
+    """`enumpoly_solve(..., phcpack_path=...)` always solves on the strategic
+    representation (enforced by the check just above the PHCpack call) -- the
+    reported `use_strategic` must say so, not hardcode a stale `False`."""
+    import pathlib
+
+    game = gbt.Game.new_table([2, 2])
+    game.make_outcome({"1": "1", "2": "1"}, {"1": 1, "2": -1}, "a")
+    game.make_outcome({"1": "1", "2": "2"}, {"1": -1, "2": 1}, "b")
+    game.make_outcome({"1": "2", "2": "1"}, {"1": -1, "2": 1}, "c")
+    game.make_outcome({"1": "2", "2": "2"}, {"1": 1, "2": -1}, "d")
+    phc_output = (
+        "THE SOLUTIONS :\n\n"
+        "solution 1 :\n"
+        " a0 :  5.0E-01 0.0E+00\n"
+        " a1 :  5.0E-01 0.0E+00\n"
+        " b0 :  5.0E-01 0.0E+00\n"
+        " b1 :  5.0E-01 0.0E+00\n"
+        "TIMING INFORMATION\n"
+    )
+
+    def _fake_run(cmd, **kwargs):
+        pathlib.Path(cmd[3]).write_text(phc_output)
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr("pygambit.nashphc.subprocess.run", _fake_run)
+    res = gbt.nash.enumpoly_solve(game, phcpack_path="./phc")
+    assert res.use_strategic is True
