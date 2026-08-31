@@ -411,6 +411,51 @@ def _compute_relabeling(
     return remap
 
 
+def _resolve_infoset_or_event_kind(
+    this: object, other: object, this_bare: str, this_full: str, other_full: str,
+    funcname: str, argname: str
+) -> object:
+    """Shared error-raising shape for `_resolve_infoset`/`_resolve_event`: `this` is
+    the already-resolved `Infoset`/`Event` of the desired kind, falsy if the
+    anchoring node's partition element is not of that kind; `other` is the opposite
+    kind, consulted only to raise a more specific error when `this` does not apply.
+    """
+    if not this:
+        if other:
+            raise ValueError(f"{funcname}(): {argname} resolves to {other_full}, not {this_full}")
+        raise ValueError(
+            f"{funcname}(): {argname} resolves to no {this_bare} (the node is terminal)"
+        )
+    return this
+
+
+def _dirichlet_distribution(items: list, gen: object) -> dict:
+    """A uniform-random probability distribution over `items` (a flat Dirichlet(1,...,1)
+    draw), keyed by item, as `float`. Shared by `random_strategy_profile`/
+    `random_behavior_profile`'s `denom=None` case.
+    """
+    weights = scipy.stats.dirichlet(alpha=[1 for _ in items], seed=gen).rvs(size=1)[0]
+    return dict(zip(items, weights, strict=True))
+
+
+def _grid_distribution(items: list, denom: int, gen: object) -> dict:
+    """A uniform-random probability distribution over `items`, restricted to the grid
+    with denominator `denom` (a uniformly-random composition of `denom` into
+    `len(items)` nonnegative parts), keyed by item, as `Rational`. Shared by
+    `random_strategy_profile`/`random_behavior_profile`'s `denom` grid case.
+    """
+    k = len(items)
+    sample = (
+        [0] +
+        sorted((gen or np.random).choice(np.arange(1, denom + k), size=k - 1, replace=False)) +
+        [denom + k]
+    )
+    return {
+        item: Rational(hi - lo - 1, denom)
+        for item, (hi, lo) in zip(items, zip(sample[1:], sample[:-1], strict=True), strict=True)
+    }
+
+
 @cython.cclass
 class Game:
     """A game, the fundamental unit of analysis in game theory.
@@ -1270,38 +1315,14 @@ class Game:
         if denom is None:
             profile = self.mixed_strategy_profile()
             for player in self.players:
-                strategies = self.get_strategies(player)
-                weights = scipy.stats.dirichlet(
-                    alpha=[1 for _ in strategies],
-                    seed=gen
-                ).rvs(size=1)[0]
-                profile[player] = dict(
-                    zip(strategies, weights, strict=True)
-                )
+                profile[player] = _dirichlet_distribution(self.get_strategies(player), gen)
             return profile
         elif denom < 1:
             raise ValueError("random_strategy_profile(): denom must be positive")
         else:
             profile = self.mixed_strategy_profile(rational=True)
             for player in self.players:
-                strategies = self.get_strategies(player)
-                k = len(strategies)
-                sample = (
-                    [0] +
-                    sorted(
-                        (gen or np.random).choice(np.arange(1, denom+k), size=k-1, replace=False)
-                    ) +
-                    [denom + k]
-                )
-                distribution = {
-                    strategy: Rational(hi - lo - 1, denom)
-                    for strategy, (hi, lo) in zip(
-                        strategies,
-                        zip(sample[1:], sample[:-1], strict=True),
-                        strict=True
-                    )
-                }
-                profile[player] = distribution
+                profile[player] = _grid_distribution(self.get_strategies(player), denom, gen)
             return profile
 
     def _fill_behavior_profile(self,
@@ -1406,13 +1427,7 @@ class Game:
             profile = self.mixed_behavior_profile()
             for player in self.players:
                 for node in self.get_infosets(player):
-                    infoset = node.infoset
-                    weights = scipy.stats.dirichlet(
-                        alpha=[1 for action in infoset.actions], seed=gen
-                    ).rvs(size=1)[0]
-                    profile[node] = dict(
-                        zip(infoset.actions, weights, strict=True)
-                    )
+                    profile[node] = _dirichlet_distribution(node.infoset.actions, gen)
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1420,24 +1435,7 @@ class Game:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
                 for node in self.get_infosets(player):
-                    infoset = node.infoset
-                    k = len(infoset.actions)
-                    sample = (
-                        [0] +
-                        sorted(
-                            (gen or np.random).choice(
-                                np.arange(1, denom+k), size=k-1, replace=False
-                            )
-                        ) +
-                        [denom + k]
-                    )
-                    distribution = {
-                        a: Rational(hi - lo - 1, denom)
-                        for a, hi, lo in zip(
-                            infoset.actions, sample[1:], sample[:-1], strict=True
-                        )
-                    }
-                    profile[node] = distribution
+                    profile[node] = _grid_distribution(node.infoset.actions, denom, gen)
             return profile
 
     def strategy_support_profile(
@@ -1766,18 +1764,11 @@ class Game:
             information set, or to no information set at all (the node is terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
-        resolved = cython.cast(Infoset, resolved_node.infoset)
-        if not resolved:
-            if resolved_node.event:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to a chance event, "
-                    f"not a personal player's information set"
-                )
-            raise ValueError(
-                f"{funcname}(): {argname} resolves to no information set "
-                f"(the node is terminal)"
-            )
-        return resolved
+        return cython.cast(Infoset, _resolve_infoset_or_event_kind(
+            resolved_node.infoset, resolved_node.event,
+            "information set", "a personal player's information set", "a chance event",
+            funcname, argname
+        ))
 
     def _resolve_event(self,
                        event: typing.Any, funcname: str, argname: str = "event") -> Event:
@@ -1806,18 +1797,11 @@ class Game:
             chance event, or to no event at all (the node is terminal).
         """
         resolved_node = self._resolve_node(event, funcname, argname)
-        resolved = cython.cast(Event, resolved_node.event)
-        if not resolved:
-            if resolved_node.infoset:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to a personal player's "
-                    f"information set, not a chance event"
-                )
-            raise ValueError(
-                f"{funcname}(): {argname} resolves to no event "
-                f"(the node is terminal)"
-            )
-        return resolved
+        return cython.cast(Event, _resolve_infoset_or_event_kind(
+            resolved_node.event, resolved_node.infoset,
+            "event", "a chance event", "a personal player's information set",
+            funcname, argname
+        ))
 
     def _resolve_infoset_or_event(self,
                                   infoset: typing.Any,
@@ -2689,6 +2673,40 @@ class Game:
             c_labels.push_back(label.encode("utf-8"))
         self.game.deref().SetPlayers(c_labels)
 
+    def _resolve_outcome_location(self, location, funcname: str) -> tuple:
+        """Resolve `location` for `make_outcome`/`make_outcome_null`: for a tree game,
+        into a list of `Node`; for a strategic game, into a list of pure-strategy
+        contingencies (each a mapping from player label to strategy label).
+
+        Returns (is_tree, resolved).
+
+        Raises
+        ------
+        MismatchError
+            If any node is from a different game.
+        TypeError
+            If `location` is not a contingency or an iterable of contingencies
+            (strategic game only).
+        ValueError
+            If `location` is empty or contains a repeat, or (strategic game only) if
+            a contingency does not specify exactly one strategy for each player.
+        """
+        if self.is_tree:
+            return True, self._resolve_nodes(location, funcname)
+        if isinstance(location, collections.abc.Mapping):
+            entries = [location]
+        else:
+            try:
+                entries = list(location)
+            except TypeError:
+                raise TypeError(
+                    f"{funcname}(): location must be a contingency or an "
+                    f"iterable of contingencies"
+                ) from None
+        return False, [
+            self._resolve_contingency(entry, funcname, "location") for entry in entries
+        ]
+
     def make_outcome(self,
                      location,
                      payoffs: typing.Mapping,
@@ -2756,31 +2774,20 @@ class Game:
         c_payoffs = stdvector[c_Number]()
         for player in self.players:
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
-        if self.is_tree:
-            resolved_nodes = self._resolve_nodes(location, "make_outcome")
+        is_tree, resolved = self._resolve_outcome_location(location, "make_outcome")
+        if is_tree:
             c_nodes = stdvector[c_GameNode]()
-            for n in resolved_nodes:
+            for n in resolved:
                 c_nodes.push_back(cython.cast(Node, n).node)
             return Outcome.wrap(
                 self.game.deref().MakeOutcome(c_nodes, c_payoffs, label.encode("utf-8"))
             )
-        if isinstance(location, collections.abc.Mapping):
-            entries = [location]
-        else:
-            try:
-                entries = list(location)
-            except TypeError:
-                raise TypeError(
-                    "make_outcome(): location must be a contingency or an "
-                    "iterable of contingencies"
-                ) from None
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
-        for entry in entries:
-            resolved = self._resolve_contingency(entry, "make_outcome", "location")
+        for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
                 c_one.push_back(
-                    self._resolve_strategy(player, resolved[player], "make_outcome")
+                    self._resolve_strategy(player, contingency[player], "make_outcome")
                 )
             c_contingencies.push_back(c_one)
         return Outcome.wrap(
@@ -2821,30 +2828,19 @@ class Game:
                 "make_outcome_null(): operation not defined for games in "
                 "action-graph representation"
             )
-        if self.is_tree:
-            resolved_nodes = self._resolve_nodes(location, "make_outcome_null")
+        is_tree, resolved = self._resolve_outcome_location(location, "make_outcome_null")
+        if is_tree:
             c_nodes = stdvector[c_GameNode]()
-            for n in resolved_nodes:
+            for n in resolved:
                 c_nodes.push_back(cython.cast(Node, n).node)
             self.game.deref().MakeOutcomeNull(c_nodes)
             return
-        if isinstance(location, collections.abc.Mapping):
-            entries = [location]
-        else:
-            try:
-                entries = list(location)
-            except TypeError:
-                raise TypeError(
-                    "make_outcome_null(): location must be a contingency or an "
-                    "iterable of contingencies"
-                ) from None
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
-        for entry in entries:
-            resolved = self._resolve_contingency(entry, "make_outcome_null", "location")
+        for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
                 c_one.push_back(
-                    self._resolve_strategy(player, resolved[player], "make_outcome_null")
+                    self._resolve_strategy(player, contingency[player], "make_outcome_null")
                 )
             c_contingencies.push_back(c_one)
         self.game.deref().MakeOutcomeNull(c_contingencies)
