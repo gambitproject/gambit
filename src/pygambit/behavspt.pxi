@@ -24,49 +24,24 @@ from cython.operator cimport dereference as deref
 
 
 @cython.cclass
-class ActionSupport:
+class ActionSupport(_LabelSet):
     """A set of actions at a specified information set in a `BehaviorSupportProfile`.
 
     An immutable snapshot taken from a ``BehaviorSupportProfile`` at retrieval time: it
     does not reflect later changes to the profile. The information set is accessible
     via `infoset`.
     """
-    _infoset = cython.declare(Infoset)
-    _actions = cython.declare(tuple)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create an ActionSupport outside a Game.")
-
     @staticmethod
     @cython.cfunc
     def wrap(infoset: Infoset, actions: tuple) -> ActionSupport:
         obj: ActionSupport = ActionSupport.__new__(ActionSupport)
-        obj._infoset = infoset
-        obj._actions = actions
+        obj._owner = infoset
+        obj._labels = actions
         return obj
 
     @property
     def infoset(self) -> Infoset:
-        return self._infoset
-
-    def __repr__(self) -> str:
-        return str(list(self._actions))
-
-    def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, (set, frozenset, list, tuple)):
-            return set(self._actions) == set(other)
-        if not isinstance(other, ActionSupport) or self.infoset != other.infoset:
-            return False
-        return set(self._actions) == set(cython.cast(ActionSupport, other)._actions)
-
-    def __len__(self) -> int:
-        return len(self._actions)
-
-    def __iter__(self) -> typing.Generator[str, None, None]:
-        yield from self._actions
-
-    def __contains__(self, label: str) -> bool:
-        return label in self._actions
+        return self._owner
 
 
 @cython.cclass

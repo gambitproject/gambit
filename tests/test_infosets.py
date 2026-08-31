@@ -464,6 +464,20 @@ def test_infoset_proxy_reresolves_after_split():
     assert list(proxy.members) == [node]
 
 
+def test_infoset_members_is_a_plain_snapshot_list():
+    """`members` returns a plain `list`, not a lazily-resolved view: it supports
+    integer indexing, and a list obtained before a mutation keeps reflecting the
+    information set as it was at the time, rather than tracking its owner."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    members = node.infoset.members
+    assert isinstance(members, list)
+    assert node in (members[0], members[1])
+    game.make_infoset(node, node.player)
+    assert len(members) == 2
+    assert list(node.infoset.members) == [node]
+
+
 def test_reveal_splits_infoset_by_action():
     """Revealing the deal to Bob separates his single infoset into per-card
     singletons; the other player's structure is untouched."""

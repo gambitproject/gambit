@@ -21,59 +21,6 @@
 #
 
 @cython.cclass
-class InfosetMembers:
-    """The set of nodes which are members of an information set."""
-    infoset = cython.declare(c_GameInfoset)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create InfosetMembers outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> InfosetMembers:
-        obj: InfosetMembers = InfosetMembers.__new__(InfosetMembers)
-        obj.infoset = infoset
-        return obj
-
-    def __repr__(self) -> str:
-        return (
-            f"InfosetMembers(infoset={_wrap_infoset_or_event(self.infoset.deref().GetMember(1))})"
-        )
-
-    def __len__(self) -> int:
-        return self.infoset.deref().GetMembers().size()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        for member in self.infoset.deref().GetMembers():
-            yield Node.wrap(member)
-
-    def __getitem__(self, label: str) -> Node:
-        """Returns the member node with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the member node to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the information set has no member with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one member has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a member by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Infoset", "member", "members")
-
-
-@cython.cclass
 class _InfosetOrEvent:
     """Shared implementation for `Infoset` and `Event`: a lazy, node-anchored view over
     an information set, filtered to whichever of the two subclasses' concept currently
@@ -190,13 +137,19 @@ class _InfosetOrEvent:
         return [a.deref().GetLabel().decode("utf-8") for a in resolved.deref().GetActions()]
 
     @property
-    def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set.
+    def members(self) -> list[Node]:
+        """The nodes which are members of the information set.
 
-        The iteration order of information set members is the order in which they
-        are encountered in the pre-order depth first traversal of the game tree.
+        The order of information set members is the order in which they are
+        encountered in the pre-order depth first traversal of the game tree.
+
+        .. versionchanged:: 17.0.0
+            Returns a plain ``list`` rather than a lazily-resolved collection; a
+            member is no longer accessible by label, following the removal of
+            ``Action``/``Strategy`` label-indexed collections elsewhere in the API.
         """
-        return InfosetMembers.wrap(self._resolve())
+        resolved: c_GameInfoset = self._resolve()
+        return [Node.wrap(member) for member in resolved.deref().GetMembers()]
 
     @property
     def player(self) -> str:
@@ -265,12 +218,3 @@ class Event(_InfosetOrEvent):
         if resolved != cython.cast(c_GameInfoset, NULL) and not resolved.deref().IsChanceInfoset():
             return cython.cast(c_GameInfoset, NULL)
         return resolved
-
-
-@cython.cfunc
-def _wrap_infoset_or_event(node: c_GameNode) -> object:
-    """Wraps `node` as an `Infoset` or `Event`, whichever currently applies; only
-    valid to call when `node` is known to belong to one or the other (not terminal)."""
-    if node.deref().GetInfoset().deref().IsChanceInfoset():
-        return Event.wrap(node)
-    return Infoset.wrap(node)

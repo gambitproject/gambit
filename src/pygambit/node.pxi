@@ -20,6 +20,28 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+Branch = collections.namedtuple("Branch", ["node", "label"])
+Branch.__doc__ = """The action labeled `label`, taken at `node`.
+
+Returned by `Node.prior_action` and `Node.own_prior_action`; `node` is the node at
+which the action was taken (not the node it leads to), so ``branch.node.actions``
+and, for a chance event, ``branch.node.action_probs[branch.label]`` are always
+well-defined.
+
+.. versionadded:: 17.0.0
+"""
+
+
+@cython.cfunc
+def _decode_prob(py_string: string) -> object:
+    """Internal: decode a probability formatted by the C++ core as ``Decimal`` or
+    ``Rational``, matching whichever representation was used to specify it."""
+    if "." in py_string.decode("ascii"):
+        return decimal.Decimal(py_string.decode("ascii"))
+    else:
+        return Rational(py_string.decode("ascii"))
+
+
 @cython.cclass
 class NodeChildren:
     """The set of nodes which are direct descendants of a node."""
@@ -253,8 +275,8 @@ class Node:
         return Event.wrap(self.node)
 
     @property
-    def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set or event to which
+    def members(self) -> list[Node]:
+        """The nodes which are members of the information set or event to which
         this node currently belongs -- whichever applies. Equivalent to
         ``self.infoset.members`` or ``self.event.members``, whichever is not falsy;
         unlike those, this is well-defined regardless of which currently applies.

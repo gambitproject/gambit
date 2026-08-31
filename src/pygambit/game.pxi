@@ -26,324 +26,10 @@ import pathlib
 
 import cython
 import numpy as np
-import scipy.stats
 
 import pygambit.gameiter
 
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
-ctypedef c_Game (*GameParser)(const string &) except +IOError
-
-
-@cython.cfunc
-def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
-              parser: GameParser):
-
-    g = cython.declare(Game)
-    if isinstance(filepath_or_buffer, io.TextIOBase):
-        data = filepath_or_buffer.read().encode("utf-8")
-    elif isinstance(filepath_or_buffer, io.IOBase):
-        data = filepath_or_buffer.read()
-    else:
-        with open(filepath_or_buffer, "rb") as f:
-            data = f.read()
-    try:
-        g = Game.wrap(parser(data))
-    except Exception as exc:
-        raise ValueError(f"Parse error in game file: {exc}") from None
-    return g
-
-
-def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
-    """Construct a game from its serialised representation in a GBT file.
-
-    Parameters
-    ----------
-    filepath_or_buffer : str, pathlib.Path or io.IOBase
-        The path to the file containing the game representation or file-like object
-
-    Returns
-    -------
-    Game
-        A game constructed from the representation in the file.
-
-    Raises
-    ------
-    IOError
-        If the file cannot be opened or read
-    ValueError
-        If the contents of the file are not a valid game representation.
-
-    See Also
-    --------
-    read_efg, read_nfg, read_agg, read_bagg
-    """
-    return read_game(filepath_or_buffer, parser=ParseGbtGame)
-
-
-def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
-    """Construct a game from its serialised representation in an EFG file.
-
-    Parameters
-    ----------
-    filepath_or_buffer : str, pathlib.Path or io.IOBase
-        The path to the file containing the game representation or file-like object
-
-    Returns
-    -------
-    Game
-        A game constructed from the representation in the file.
-
-    Raises
-    ------
-    IOError
-        If the file cannot be opened or read
-    ValueError
-        If the contents of the file are not a valid game representation.
-
-    See Also
-    --------
-    read_gbt, read_nfg, read_agg, read_bagg
-    """
-    return read_game(filepath_or_buffer, parser=ParseEfgGame)
-
-
-def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
-    """Construct a game from its serialised representation in a NFG file.
-
-    Parameters
-    ----------
-    filepath_or_buffer : str, pathlib.Path or io.IOBase
-        The path to the file containing the game representation or file-like object
-
-    Returns
-    -------
-    Game
-        A game constructed from the representation in the file.
-
-    Raises
-    ------
-    IOError
-        If the file cannot be opened or read
-    ValueError
-        If the contents of the file are not a valid game representation.
-
-    See Also
-    --------
-    read_gbt, read_efg, read_agg, read_bagg
-    """
-    return read_game(filepath_or_buffer, parser=ParseNfgGame)
-
-
-def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
-    """Construct a game from its serialised representation in an AGG file.
-
-    Parameters
-    ----------
-    filepath_or_buffer : str, pathlib.Path or io.IOBase
-        The path to the file containing the game representation or file-like object
-
-    Returns
-    -------
-    Game
-        A game constructed from the representation in the file.
-
-    Raises
-    ------
-    IOError
-        If the file cannot be opened or read
-    ValueError
-        If the contents of the file are not a valid game representation.
-
-    See Also
-    --------
-    read_gbt, read_efg, read_nfg, read_bagg
-    """
-    return read_game(filepath_or_buffer, parser=ParseAggGame)
-
-
-def read_bagg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
-    """Construct a game from its serialised representation in a BAGG file.
-
-    Parameters
-    ----------
-    filepath_or_buffer : str, pathlib.Path or io.IOBase
-        The path to the file containing the game representation or file-like object
-
-    Returns
-    -------
-    Game
-        A game constructed from the representation in the file.
-
-    Raises
-    ------
-    IOError
-        If the file cannot be opened or read
-    ValueError
-        If the contents of the file are not a valid game representation.
-
-    See Also
-    --------
-    read_gbt, read_efg, read_nfg, read_agg
-    """
-    return read_game(filepath_or_buffer, parser=ParseBaggGame)
-
-
-@cython.cclass
-class GameNodes:
-    """Represents the set of nodes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameNodes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameNodes:
-        obj: GameNodes = GameNodes.__new__(GameNodes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameNodes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of nodes in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().NumNodes()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        """Iterate over the game nodes in the depth-first traversal order."""
-        if not self.game.deref().IsTree():
-            return
-
-        for node in self.game.deref().GetNodes():
-            yield Node.wrap(node)
-
-
-@cython.cclass
-class GameSubgames:
-    """Represents the set of subgames in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameSubgames outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameSubgames:
-        obj: GameSubgames = GameSubgames.__new__(GameSubgames)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameSubgames(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of subgames in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().GetSubgames().size()
-
-    def __iter__(self) -> typing.Iterator[Subgame]:
-        """Iterate over the game subgames in postorder."""
-        if not self.game.deref().IsTree():
-            return
-        for subgame in self.game.deref().GetSubgames():
-            yield Subgame.wrap(subgame)
-
-
-@cython.cclass
-class GameOutcomes:
-    """Represents the set of outcomes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameOutcomes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameOutcomes:
-        obj: GameOutcomes = GameOutcomes.__new__(GameOutcomes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameOutcomes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of outcomes in the game."""
-        return self.game.deref().GetOutcomes().size()
-
-    def __iter__(self) -> typing.Iterator[Outcome]:
-        for outcome in self.game.deref().GetOutcomes():
-            yield Outcome.wrap(outcome)
-
-    def __getitem__(self, label: str) -> Outcome:
-        """Returns the outcome with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the outcome to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no outcome in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one outcome has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an outcome by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "outcome", "outcomes")
-
-
-@cython.cclass
-class GamePlayers:
-    """The labels of the (personal) players in a game.
-
-    .. versionchanged:: 17.0.0
-        Iterates over player labels (``str``) rather than ``Player`` objects;
-        indexing by label is no longer supported (a label is already in hand once
-        iterated) -- use ``in`` to test membership.  The chance player is no longer
-        exposed here (it never was included in iteration); the ``Infoset``/``Event``
-        split on ``Node`` already distinguishes personal from chance nodes.
-    """
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GamePlayers outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GamePlayers:
-        obj: GamePlayers = GamePlayers.__new__(GamePlayers)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GamePlayers(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """Returns the number of players in the game."""
-        return self.game.deref().NumPlayers()
-
-    def __iter__(self) -> typing.Iterator[str]:
-        for player in self.game.deref().GetPlayers():
-            yield player.deref().GetLabel().decode("utf-8")
-
-    def __contains__(self, label: str) -> bool:
-        return any(
-            player.deref().GetLabel().decode("utf-8") == label
-            for player in self.game.deref().GetPlayers()
-        )
 
 
 @cython.cclass
@@ -1205,38 +891,14 @@ class Game:
         if denom is None:
             profile = self.mixed_strategy_profile()
             for player in self.players:
-                strategies = self.get_strategies(player)
-                weights = scipy.stats.dirichlet(
-                    alpha=[1 for _ in strategies],
-                    seed=gen
-                ).rvs(size=1)[0]
-                profile[player] = dict(
-                    zip(strategies, weights, strict=True)
-                )
+                profile[player] = _dirichlet_distribution(self.get_strategies(player), gen)
             return profile
         elif denom < 1:
             raise ValueError("random_strategy_profile(): denom must be positive")
         else:
             profile = self.mixed_strategy_profile(rational=True)
             for player in self.players:
-                strategies = self.get_strategies(player)
-                k = len(strategies)
-                sample = (
-                    [0] +
-                    sorted(
-                        (gen or np.random).choice(np.arange(1, denom+k), size=k-1, replace=False)
-                    ) +
-                    [denom + k]
-                )
-                distribution = {
-                    strategy: Rational(hi - lo - 1, denom)
-                    for strategy, (hi, lo) in zip(
-                        strategies,
-                        zip(sample[1:], sample[:-1], strict=True),
-                        strict=True
-                    )
-                }
-                profile[player] = distribution
+                profile[player] = _grid_distribution(self.get_strategies(player), denom, gen)
             return profile
 
     def _fill_behavior_profile(self,
@@ -1341,13 +1003,7 @@ class Game:
             profile = self.mixed_behavior_profile()
             for player in self.players:
                 for node in self.get_infosets(player):
-                    infoset = node.infoset
-                    weights = scipy.stats.dirichlet(
-                        alpha=[1 for action in infoset.actions], seed=gen
-                    ).rvs(size=1)[0]
-                    profile[node] = dict(
-                        zip(infoset.actions, weights, strict=True)
-                    )
+                    profile[node] = _dirichlet_distribution(node.infoset.actions, gen)
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1355,24 +1011,7 @@ class Game:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
                 for node in self.get_infosets(player):
-                    infoset = node.infoset
-                    k = len(infoset.actions)
-                    sample = (
-                        [0] +
-                        sorted(
-                            (gen or np.random).choice(
-                                np.arange(1, denom+k), size=k-1, replace=False
-                            )
-                        ) +
-                        [denom + k]
-                    )
-                    distribution = {
-                        a: Rational(hi - lo - 1, denom)
-                        for a, hi, lo in zip(
-                            infoset.actions, sample[1:], sample[:-1], strict=True
-                        )
-                    }
-                    profile[node] = distribution
+                    profile[node] = _grid_distribution(node.infoset.actions, denom, gen)
             return profile
 
     def strategy_support_profile(
@@ -1583,56 +1222,6 @@ class Game:
                 return p
         raise KeyError(f"{funcname}(): no player with label '{player}'")
 
-    def _resolve_outcome(self,
-                         outcome: typing.Any, funcname: str, argname: str = "outcome") -> Outcome:
-        """Resolve an attempt to reference an outcome of the game.
-
-        Parameters
-        ----------
-        outcome : Any
-            An object to resolve as a reference to an outcome.
-        funcname : str
-            The name of the function to raise any exception on behalf of.
-        argname : str, default 'outcome'
-            The name of the argument being checked
-
-        Raises
-        ------
-        MismatchError
-            If `outcome` is an `Outcome` from a different game.
-        KeyError
-            If `outcome` is a string and no outcome in the game has that label.
-        TypeError
-            If `outcome` is not an `Outcome`, `NodeOutcome`, or a `str`
-        ValueError
-            If `outcome` is an empty `str` or all spaces, or is a `NodeOutcome` that
-            resolves to no outcome (no outcome is attached to its node).
-        """
-        if isinstance(outcome, NodeOutcome):
-            resolved = cython.cast(NodeOutcome, outcome)._resolve()
-            if resolved is None:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to no outcome "
-                    f"(no outcome is attached to the node)"
-                )
-            outcome = resolved
-        if isinstance(outcome, Outcome):
-            if outcome.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return outcome
-        elif isinstance(outcome, str):
-            if not outcome.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            try:
-                return self.outcomes[outcome]
-            except KeyError:
-                raise KeyError(f"{funcname}(): no outcome with label '{outcome}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}"
-        )
-
     @cython.cfunc
     def _resolve_strategy(self, player: str, label, funcname: str,
                           argname: str = "strategy") -> c_GameStrategy:
@@ -1751,18 +1340,11 @@ class Game:
             information set, or to no information set at all (the node is terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
-        resolved = cython.cast(Infoset, resolved_node.infoset)
-        if not resolved:
-            if resolved_node.event:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to a chance event, "
-                    f"not a personal player's information set"
-                )
-            raise ValueError(
-                f"{funcname}(): {argname} resolves to no information set "
-                f"(the node is terminal)"
-            )
-        return resolved
+        return cython.cast(Infoset, _resolve_infoset_or_event_kind(
+            resolved_node.infoset, resolved_node.event,
+            "information set", "a personal player's information set", "a chance event",
+            funcname, argname
+        ))
 
     def _resolve_event(self,
                        event: typing.Any, funcname: str, argname: str = "event") -> Event:
@@ -1791,18 +1373,11 @@ class Game:
             chance event, or to no event at all (the node is terminal).
         """
         resolved_node = self._resolve_node(event, funcname, argname)
-        resolved = cython.cast(Event, resolved_node.event)
-        if not resolved:
-            if resolved_node.infoset:
-                raise ValueError(
-                    f"{funcname}(): {argname} resolves to a personal player's "
-                    f"information set, not a chance event"
-                )
-            raise ValueError(
-                f"{funcname}(): {argname} resolves to no event "
-                f"(the node is terminal)"
-            )
-        return resolved
+        return cython.cast(Event, _resolve_infoset_or_event_kind(
+            resolved_node.event, resolved_node.infoset,
+            "event", "a chance event", "a personal player's information set",
+            funcname, argname
+        ))
 
     def _resolve_infoset_or_event(self,
                                   infoset: typing.Any,
@@ -2260,22 +1835,10 @@ class Game:
         if not labels:
             raise UndefinedOperationError("set_move_actions(): `actions` must be a nonempty list")
         current = list(resolved_infoset.actions)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_move_actions(): the information set has duplicate action labels, "
-                "so matching by label is not well-defined"
-            )
-        current_set = set(current)
-        declared = set(labels)
-        added = [label for label in labels if label not in current_set]
-        missing = [label for label in current if label not in declared]
-        if added and not add:
-            raise ValueError(f"set_move_actions(): would create new actions {added}")
-        if missing and not drop:
-            raise ValueError(
-                f"set_move_actions(): would delete actions {missing} and the subtrees they "
-                f"lead to; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_move_actions",
+            "information set", "action", "actions", "the subtrees they lead to"
+        )
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
@@ -2354,22 +1917,10 @@ class Game:
                 "set_event_actions(): `probs` must be a nonempty mapping"
             )
         current = list(resolved_event.actions)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_event_actions(): the information set has duplicate action labels, "
-                "so matching by label is not well-defined"
-            )
-        current_set = set(current)
-        declared = set(labels)
-        added = [label for label in labels if label not in current_set]
-        missing = [label for label in current if label not in declared]
-        if added and not add:
-            raise ValueError(f"set_event_actions(): would create new actions {added}")
-        if missing and not drop:
-            raise ValueError(
-                f"set_event_actions(): would delete actions {missing} and the subtrees they "
-                f"lead to; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_event_actions",
+            "information set", "action", "actions", "the subtrees they lead to"
+        )
         c_labels = stdvector[string]()
         c_probs = stdvector[c_Number]()
         for label in labels:
@@ -2504,24 +2055,15 @@ class Game:
                 f"not {labels.__class__.__name__}"
             )
         current = list(resolved_infoset.actions)
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_actions(): labels must map str to str")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_actions(): label '{old}' is ambiguous at this information set"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_actions(): no action with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_actions", "action", strict,
+            "at this information set"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelActions(resolved_infoset._resolve(), c_labels)
 
     def make_infoset(self,
@@ -2687,20 +2229,10 @@ class Game:
         if not labels:
             raise UndefinedOperationError("set_players(): `players` must be a nonempty list")
         current = list(self.players)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_players(): the game has duplicate player labels, "
-                "so matching by label is not well-defined"
-            )
-        added = [label for label in labels if label not in current]
-        if added and not add:
-            raise ValueError(f"set_players(): would create new players {added}")
-        missing = [label for label in current if label not in labels]
-        if missing and not drop:
-            raise ValueError(
-                f"set_players(): would delete players {missing} and their payoffs at "
-                f"every outcome; pass drop=True to confirm"
-            )
+        _, missing = _reconcile_labels(
+            current, labels, add, drop, "set_players",
+            "game", "player", "players", "their payoffs at every outcome"
+        )
         for label in missing:
             if self.is_tree and len(self.get_infosets(label)) > 0:
                 raise UndefinedOperationError(
@@ -2716,6 +2248,40 @@ class Game:
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
         self.game.deref().SetPlayers(c_labels)
+
+    def _resolve_outcome_location(self, location, funcname: str) -> tuple:
+        """Resolve `location` for `make_outcome`/`make_outcome_null`: for a tree game,
+        into a list of `Node`; for a strategic game, into a list of pure-strategy
+        contingencies (each a mapping from player label to strategy label).
+
+        Returns (is_tree, resolved).
+
+        Raises
+        ------
+        MismatchError
+            If any node is from a different game.
+        TypeError
+            If `location` is not a contingency or an iterable of contingencies
+            (strategic game only).
+        ValueError
+            If `location` is empty or contains a repeat, or (strategic game only) if
+            a contingency does not specify exactly one strategy for each player.
+        """
+        if self.is_tree:
+            return True, self._resolve_nodes(location, funcname)
+        if isinstance(location, collections.abc.Mapping):
+            entries = [location]
+        else:
+            try:
+                entries = list(location)
+            except TypeError:
+                raise TypeError(
+                    f"{funcname}(): location must be a contingency or an "
+                    f"iterable of contingencies"
+                ) from None
+        return False, [
+            self._resolve_contingency(entry, funcname, "location") for entry in entries
+        ]
 
     def make_outcome(self,
                      location,
@@ -2784,31 +2350,20 @@ class Game:
         c_payoffs = stdvector[c_Number]()
         for player in self.players:
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
-        if self.is_tree:
-            resolved_nodes = self._resolve_nodes(location, "make_outcome")
+        is_tree, resolved = self._resolve_outcome_location(location, "make_outcome")
+        if is_tree:
             c_nodes = stdvector[c_GameNode]()
-            for n in resolved_nodes:
+            for n in resolved:
                 c_nodes.push_back(cython.cast(Node, n).node)
             return Outcome.wrap(
                 self.game.deref().MakeOutcome(c_nodes, c_payoffs, label.encode("utf-8"))
             )
-        if isinstance(location, collections.abc.Mapping):
-            entries = [location]
-        else:
-            try:
-                entries = list(location)
-            except TypeError:
-                raise TypeError(
-                    "make_outcome(): location must be a contingency or an "
-                    "iterable of contingencies"
-                ) from None
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
-        for entry in entries:
-            resolved = self._resolve_contingency(entry, "make_outcome", "location")
+        for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
                 c_one.push_back(
-                    self._resolve_strategy(player, resolved[player], "make_outcome")
+                    self._resolve_strategy(player, contingency[player], "make_outcome")
                 )
             c_contingencies.push_back(c_one)
         return Outcome.wrap(
@@ -2849,30 +2404,19 @@ class Game:
                 "make_outcome_null(): operation not defined for games in "
                 "action-graph representation"
             )
-        if self.is_tree:
-            resolved_nodes = self._resolve_nodes(location, "make_outcome_null")
+        is_tree, resolved = self._resolve_outcome_location(location, "make_outcome_null")
+        if is_tree:
             c_nodes = stdvector[c_GameNode]()
-            for n in resolved_nodes:
+            for n in resolved:
                 c_nodes.push_back(cython.cast(Node, n).node)
             self.game.deref().MakeOutcomeNull(c_nodes)
             return
-        if isinstance(location, collections.abc.Mapping):
-            entries = [location]
-        else:
-            try:
-                entries = list(location)
-            except TypeError:
-                raise TypeError(
-                    "make_outcome_null(): location must be a contingency or an "
-                    "iterable of contingencies"
-                ) from None
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
-        for entry in entries:
-            resolved = self._resolve_contingency(entry, "make_outcome_null", "location")
+        for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
             for player in self.players:
                 c_one.push_back(
-                    self._resolve_strategy(player, resolved[player], "make_outcome_null")
+                    self._resolve_strategy(player, contingency[player], "make_outcome_null")
                 )
             c_contingencies.push_back(c_one)
         self.game.deref().MakeOutcomeNull(c_contingencies)
@@ -2934,24 +2478,15 @@ class Game:
         current = [
             s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
         ]
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_strategies(): labels must map str to str")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_strategies(): label '{old}' is ambiguous for this player"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_strategies(): no strategy with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_strategies", "strategy", strict,
+            "for this player"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelStrategies(resolved_player, c_labels)
 
     def set_strategies(self,
@@ -3022,20 +2557,10 @@ class Game:
         current = [
             s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
         ]
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_strategies(): the player has duplicate strategy labels, "
-                "so matching by label is not well-defined"
-            )
-        added = [label for label in labels if label not in current]
-        if added and not add:
-            raise ValueError(f"set_strategies(): would create new strategies {added}")
-        missing = [label for label in current if label not in labels]
-        if missing and not drop:
-            raise ValueError(
-                f"set_strategies(): would delete strategies {missing} and the outcomes "
-                f"at their contingencies; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_strategies",
+            "player", "strategy", "strategies", "the outcomes at their contingencies"
+        )
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
@@ -3091,26 +2616,16 @@ class Game:
             self.game.deref().GetChance().deref().GetLabel().decode("utf-8")
             if self.is_tree else None
         )
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_players(): labels must map str to str")
-            if old == chance_label:
-                raise ValueError("relabel_players(): the chance player's label is reserved")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_players(): label '{old}' is ambiguous in this game"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_players(): no player with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_players", "player", strict,
+            "in this game", reserved=chance_label,
+            reserved_desc="the chance player's label is reserved"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelPlayers(c_labels)
 
 
@@ -3122,7 +2637,7 @@ class NodeCoordinates:
 
 
 @cython.cfunc
-def _layout_tree(game: Game) -> dict[GameNode, NodeCoordinates]:
+def _layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     layout = CreateLayout(game.game)
     data = {}
     for node in game.nodes:
@@ -3132,5 +2647,5 @@ def _layout_tree(game: Game) -> dict[GameNode, NodeCoordinates]:
     return data
 
 
-def layout_tree(game: Game) -> dict[GameNode, dict]:
+def layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     return _layout_tree(game)

@@ -304,16 +304,9 @@ def test_mixed_behavior_profile_game_structure_changed():
             profile.__getitem__(game.root)
 
 
-def _bob_response_infoset(g):
-    return next(
-        n.infoset for n in g.get_infosets("Bob") if n.infoset.label == "Bob's response"
-    )
-
-
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
     pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
-    pytest.param(lambda g: _bob_response_infoset(g).members, id="InfosetMembers"),
 ]
 
 

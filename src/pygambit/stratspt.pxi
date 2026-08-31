@@ -26,7 +26,43 @@ from libcpp.memory cimport unique_ptr
 
 
 @cython.cclass
-class StrategySupport:
+class _LabelSet:
+    """Shared implementation for `StrategySupport` and `ActionSupport`: an immutable
+    snapshot of a set of labels (strategies, or actions at an information set) taken
+    from a support profile at retrieval time, together with the owner (a player label,
+    or an information set) the labels belong to.
+
+    Not exported; only `StrategySupport` and `ActionSupport` are part of the public API.
+    """
+    _owner = cython.declare(object)
+    _labels = cython.declare(tuple)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError(f"Cannot create an {type(self).__name__} outside a Game.")
+
+    def __repr__(self) -> str:
+        return str(list(self._labels))
+
+    def __eq__(self, other: typing.Any) -> bool:
+        if isinstance(other, (set, frozenset, list, tuple)):
+            return set(self._labels) == set(other)
+        if (not isinstance(other, type(self)) or
+                self._owner != cython.cast(_LabelSet, other)._owner):
+            return False
+        return set(self._labels) == set(cython.cast(_LabelSet, other)._labels)
+
+    def __len__(self) -> int:
+        return len(self._labels)
+
+    def __iter__(self) -> typing.Generator[str, None, None]:
+        yield from self._labels
+
+    def __contains__(self, label: str) -> bool:
+        return label in self._labels
+
+
+@cython.cclass
+class StrategySupport(_LabelSet):
     """The labels of the strategies for a specified player in a
     `StrategySupportProfile`.
 
@@ -39,42 +75,17 @@ class StrategySupport:
         labels. Iterates over strategy labels (``str``) rather than ``Strategy``
         objects.
     """
-    _player = cython.declare(str)
-    _strategies = cython.declare(tuple)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a StrategySupport outside a Game.")
-
     @staticmethod
     @cython.cfunc
     def wrap(player: str, strategies: tuple) -> StrategySupport:
         obj: StrategySupport = StrategySupport.__new__(StrategySupport)
-        obj._player = player
-        obj._strategies = strategies
+        obj._owner = player
+        obj._labels = strategies
         return obj
 
     @property
     def player(self) -> str:
-        return self._player
-
-    def __repr__(self) -> str:
-        return str(list(self._strategies))
-
-    def __eq__(self, other: typing.Any) -> bool:
-        if isinstance(other, (set, frozenset, list, tuple)):
-            return set(self._strategies) == set(other)
-        if not isinstance(other, StrategySupport) or self.player != other.player:
-            return False
-        return set(self._strategies) == set(cython.cast(StrategySupport, other)._strategies)
-
-    def __len__(self) -> int:
-        return len(self._strategies)
-
-    def __iter__(self) -> typing.Generator[str, None, None]:
-        yield from self._strategies
-
-    def __contains__(self, label: str) -> bool:
-        return label in self._strategies
+        return self._owner
 
 
 @cython.cclass

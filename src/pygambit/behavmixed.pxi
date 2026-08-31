@@ -460,20 +460,117 @@ class MixedBehaviorProfile:
             for node in self.game.get_infosets(player):
                 yield node.infoset
 
+    # The public API above is implemented once here and dispatches to the hooks below,
+    # each of which is implemented by a concrete dtype-specific subclass
+    # (MixedBehaviorProfileDouble/MixedBehaviorProfileRational).
+
+    def _check_validity(self) -> None:
+        """Raises GameStructureChangedError if the game has structurally changed since
+        this profile was created.
+        """
+        raise NotImplementedError
+
+    @property
+    def _game(self) -> Game:
+        """The game on which this profile is defined."""
+        raise NotImplementedError
+
     @cython.cfunc
     def _getprob_action(self, index: c_GameAction) -> object:
+        """Returns the probability with which action `index` is played."""
         raise NotImplementedError
 
     @cython.cfunc
     def _setprob_action(self, index: c_GameAction, value: typing.Any) -> cython.void:
+        """Sets the probability with which action `index` is played."""
+        raise NotImplementedError
+
+    def _to_prob(self, value: typing.Any) -> ProfileDType:
+        """Coerces value (int, float, str, Decimal, or Rational) into this profile's
+        native probability type.
+        """
+        raise NotImplementedError
+
+    def _is_defined_at(self, infoset: Infoset) -> bool:
+        """Returns whether the profile specifies a probability distribution at infoset."""
+        raise NotImplementedError
+
+    def _payoff(self, player: str) -> ProfileDType:
+        """Returns the expected payoff to player."""
+        raise NotImplementedError
+
+    def _belief(self, node: Node) -> ProfileDType | None:
+        """Returns the belief probability of reaching node, conditional on play having
+        reached its information set; None if the information set is unreached.
+        """
+        raise NotImplementedError
+
+    def _realiz_prob(self, node: Node) -> ProfileDType:
+        """Returns the probability that play reaches node."""
+        raise NotImplementedError
+
+    def _infoset_prob(self, infoset: _InfosetOrEvent) -> ProfileDType:
+        """Returns the probability that play reaches infoset."""
+        raise NotImplementedError
+
+    def _infoset_value(self, infoset: Infoset) -> ProfileDType | None:
+        """Returns the expected payoff to the player owning infoset, conditional on
+        reaching it; None if it is unreached.
+        """
+        raise NotImplementedError
+
+    def _node_value(self, player: str, node: Node) -> ProfileDType:
+        """Returns the expected payoff to player, conditional on reaching node."""
         raise NotImplementedError
 
     @cython.cfunc
     def _action_value(self, action: c_GameAction) -> object:
+        """Returns the expected payoff to playing action, conditional on reaching its
+        information set; None if the information set is unreached.
+        """
         raise NotImplementedError
 
     @cython.cfunc
     def _action_regret(self, action: c_GameAction) -> object:
+        """Returns the regret to playing action."""
+        raise NotImplementedError
+
+    def _infoset_regret(self, infoset: Infoset) -> ProfileDType:
+        """Returns the regret of the player owning infoset for their behavior at it."""
+        raise NotImplementedError
+
+    def _agent_max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player at any information set."""
+        raise NotImplementedError
+
+    def _max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player over their whole strategy."""
+        raise NotImplementedError
+
+    def _agent_liap_value(self) -> ProfileDType:
+        """Returns the agent-form Lyapunov value of the profile."""
+        raise NotImplementedError
+
+    def _liap_value(self) -> ProfileDType:
+        """Returns the Lyapunov value of the profile."""
+        raise NotImplementedError
+
+    def _copy(self) -> MixedBehaviorProfile:
+        """Creates a copy of the profile."""
+        raise NotImplementedError
+
+    def _as_strategy(self) -> MixedStrategyProfile:
+        """Creates the equivalent mixed strategy profile."""
+        raise NotImplementedError
+
+    def _as_float(self) -> MixedBehaviorProfileDouble:
+        """Creates a floating-point copy of the profile."""
+        raise NotImplementedError
+
+    def _normalize(self) -> MixedBehaviorProfile:
+        """Creates a copy of the profile, normalized so each information set's action
+        probabilities sum to one.
+        """
         raise NotImplementedError
 
     def _mixed_action_at(self, infoset: Infoset) -> MixedAction:

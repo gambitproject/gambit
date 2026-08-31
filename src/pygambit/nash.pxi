@@ -200,10 +200,8 @@ cdef public string InvokeLogitStrategyEventCallback(
 cdef public string InvokeLogitBehaviorEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedBehaviorProfile]
 ):
-    ret = LogitQREMixedBehaviorProfile()
-    ret.thisptr = qre
     try:
-        callback(ret)
+        callback(LogitQREMixedBehaviorProfile.wrap(qre))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -810,11 +808,17 @@ def _logit_strategy_branch(game: Game,
 class LogitQREMixedBehaviorProfile:
     thisptr = cython.declare(shared_ptr[c_LogitQREMixedBehaviorProfile])
 
-    def __init__(self, game=None):
-        if game is not None:
-            self.thisptr = make_shared[c_LogitQREMixedBehaviorProfile](
-                cython.cast(Game, game).game
-            )
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a LogitQREMixedBehaviorProfile outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(profile: shared_ptr[c_LogitQREMixedBehaviorProfile]) -> LogitQREMixedBehaviorProfile:
+        obj: LogitQREMixedBehaviorProfile = (
+            LogitQREMixedBehaviorProfile.__new__(LogitQREMixedBehaviorProfile)
+        )
+        obj.thisptr = profile
+        return obj
 
     def __repr__(self):
         return f"LogitQREMixedBehaviorProfile(lam={self.lam},profile={self.profile})"
@@ -856,12 +860,12 @@ def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,
     """Estimate QRE corresponding to mixed behavior profile using
     maximum likelihood along the principal branch.
     """
-    ret = LogitQREMixedBehaviorProfile(profile.game)
-    ret.thisptr = LogitBehaviorEstimateWrapper(
-        profile.profile, local_max, first_step, max_accel,
-        MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+    return LogitQREMixedBehaviorProfile.wrap(
+        LogitBehaviorEstimateWrapper(
+            profile.profile, local_max, first_step, max_accel,
+            MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+        )
     )
-    return ret
 
 
 def _logit_behavior_lambda(game: Game,
@@ -876,15 +880,11 @@ def _logit_behavior_lambda(game: Game,
         iter(lam)
     except TypeError:
         lam = [lam]
-    ret = []
-    for profile in LogitBehaviorAtLambdaWrapper(
-        game.game, lam, first_step, max_accel,
-        MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
-    ):
-        qre = LogitQREMixedBehaviorProfile()
-        qre.thisptr = profile
-        ret.append(qre)
-    return ret
+    return [LogitQREMixedBehaviorProfile.wrap(profile)
+            for profile in LogitBehaviorAtLambdaWrapper(
+                game.game, lam, first_step, max_accel,
+                MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+            )]
 
 
 def _logit_behavior_branch(game: Game,
@@ -892,9 +892,4 @@ def _logit_behavior_branch(game: Game,
                            first_step: float,
                            max_accel: float):
     solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    ret = []
-    for profile_ptr in make_list_of_pointer(solns):
-        p = LogitQREMixedBehaviorProfile()
-        p.thisptr = profile_ptr
-        ret.append(p)
-    return ret
+    return [LogitQREMixedBehaviorProfile.wrap(profile) for profile in make_list_of_pointer(solns)]

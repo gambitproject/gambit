@@ -31,30 +31,6 @@ def _test_valid_resolutions(collection: list, resolver: typing.Callable) -> None
         games.read_from_file("sample_extensive_game.efg"),
     ]
 )
-def test_resolve_outcome(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.outcomes,
-                            lambda label, fn: game._resolve_outcome(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,outcome,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "nosuchoutcome", KeyError),
-    ]
-)
-def test_resolve_outcome_invalid(game: gbt.Game, outcome: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_outcome(outcome, "test_resolve_outcome_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
 def test_resolve_node(game: gbt.Game) -> None:
     _test_valid_resolutions(game.nodes,
                             lambda label, fn: game._resolve_node(label, fn))

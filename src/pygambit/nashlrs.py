@@ -6,7 +6,6 @@ from __future__ import annotations
 import itertools
 import pathlib
 import subprocess
-import sys
 
 import pygambit as gbt
 import pygambit.util as util
@@ -53,25 +52,3 @@ def lrsnash_solve(game: gbt.Game,
         if result.returncode != 0:
             raise ValueError(f"PHC run failed with return code {result.returncode}")
         return _parse_lrs_output(game, result.stdout)
-
-
-def _read_game(fn: str) -> gbt.Game:
-    for reader in [gbt.read_efg, gbt.read_nfg, gbt.read_agg]:
-        try:
-            return reader(fn)
-        except Exception:
-            pass
-    raise OSError(f"Unable to read or parse {fn}")
-
-
-def main():
-    game = _read_game(sys.argv[1])
-    eqa = lrsnash_solve(game, "./lrsnash")
-    for eqm in eqa:
-        print("NE," +
-              ",".join(str(eqm[player][strat])
-                       for player in game.players for strat in game.get_strategies(player)))
-
-
-if __name__ == "__main__":
-    main()
