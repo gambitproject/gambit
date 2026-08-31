@@ -29,6 +29,7 @@ import pathlib
 import sys
 
 import click
+import numpy as np
 
 import pygambit as gbt
 
@@ -105,6 +106,22 @@ def print_banner(description: str, extra_lines: tuple[str, ...] = ()) -> None:
     )
     click.echo("This is free software, distributed under the GNU GPL", err=True)
     click.echo(err=True)
+
+
+def load_game(
+    quiet: bool,
+    description: str,
+    file: str | None,
+    prog_name: str,
+    extra_lines: tuple[str, ...] = (),
+) -> gbt.Game:
+    """Standard tool startup, shared by every `gambit-*` CLI tool's `main()`: print
+    the banner (see `print_banner`) unless `quiet`, then read the game from `file`
+    (or standard input).
+    """
+    if not quiet:
+        print_banner(description, extra_lines)
+    return read_game(open_game_file(file, prog_name))
 
 
 def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> callable:
@@ -374,3 +391,58 @@ def read_behavior_profiles_csv(
                 profile[node] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles
+
+
+def _validate_random_start_options(
+    n: int | None, seed: int | None, start_file: str | None
+) -> None:
+    """Shared validation for the `-n`/`-R`/`-s` starting-point options common to
+    gambit-gnm, gambit-ipa, and gambit-liap: `-n` and `-s` are mutually exclusive,
+    and `-R` requires `-n`.
+    """
+    if n is not None and start_file is not None:
+        raise ValueError("The -n and -s options are mutually exclusive.")
+    if seed is not None and n is None:
+        raise ValueError("The -R option requires -n.")
+
+
+def resolve_strategy_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedStrategyProfile]:
+    """Resolve strategy starting points for a `-n`/`-R`/`-s`-style tool: read from
+    `start_file` if given, otherwise `n` uniform-random draws (`default_count` if `n`
+    is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, and
+    gambit-liap's non-agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_strategy_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_strategy_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]
+
+
+def resolve_behavior_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedBehaviorProfile]:
+    """Behavior-profile counterpart to `resolve_strategy_starts`; see there for the
+    shared `-n`/`-R`/`-s` semantics. Used by gambit-liap's agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_behavior_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_behavior_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]

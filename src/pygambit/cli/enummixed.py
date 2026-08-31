@@ -29,9 +29,7 @@ import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_game,
+    load_game,
     render_profile_csv,
     version_option,
 )
@@ -61,9 +59,7 @@ PROG_NAME = "gambit-enummixed"
 @version_option(DESCRIPTION)
 @handle_errors
 def main(file: str | None, decimals: int | None, cliques: bool, quiet: bool) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION)
-    game = read_game(open_game_file(file, PROG_NAME))
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     rational = decimals is None
 
     def render(profile) -> None:

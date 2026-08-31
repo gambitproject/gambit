@@ -38,9 +38,7 @@ import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_game,
+    load_game,
     render_profile_csv,
     render_support_csv,
     validate_stop_after,
@@ -113,9 +111,7 @@ def main(
     quiet: bool,
     verbose: bool,
 ) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION)
-    game = read_game(open_game_file(file, PROG_NAME))
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     if not game.is_perfect_recall:
         raise ValueError("Computing equilibria of games with imperfect recall is not supported.")
 
