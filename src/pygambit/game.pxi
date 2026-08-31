@@ -346,6 +346,71 @@ class GamePlayers:
         )
 
 
+def _reconcile_labels(
+    current: list, labels: list, add: bool, drop: bool, funcname: str,
+    owner_noun: str, item_singular: str, item_plural: str, consequence: str
+) -> tuple:
+    """Shared add/drop reconciliation for a "set the collection to be `labels`,
+    matching by label" operation (`set_move_actions`/`set_event_actions`/
+    `set_players`/`set_strategies`): determines which of `labels` are new
+    (`added`) and which of `current` are missing from `labels` (`missing`).
+
+    Raises ValueError if `current` has duplicate labels (matching by label is then
+    ill-defined), or if a nonempty `added`/`missing` is not confirmed by `add`/`drop`.
+    """
+    if len(set(current)) != len(current):
+        raise ValueError(
+            f"{funcname}(): the {owner_noun} has duplicate {item_singular} labels, "
+            f"so matching by label is not well-defined"
+        )
+    current_set = set(current)
+    declared = set(labels)
+    added = [label for label in labels if label not in current_set]
+    missing = [label for label in current if label not in declared]
+    if added and not add:
+        raise ValueError(f"{funcname}(): would create new {item_plural} {added}")
+    if missing and not drop:
+        raise ValueError(
+            f"{funcname}(): would delete {item_plural} {missing} and {consequence}; "
+            f"pass drop=True to confirm"
+        )
+    return added, missing
+
+
+def _compute_relabeling(
+    current: list, labels: typing.Mapping, funcname: str, item_noun: str, strict: bool,
+    ambiguous_desc: str, reserved: str | None = None, reserved_desc: str = ""
+) -> dict:
+    """Shared validation for a "simultaneously reassign labels" operation
+    (`relabel_actions`/`relabel_strategies`/`relabel_players`): validates `labels`
+    (a mapping from current label to replacement) against `current`, and returns
+    a plain `dict` of only the entries that are a real, confirmed relabeling
+    (unknown keys dropped when not `strict`; no-op entries where key equals value
+    are dropped unconditionally).
+
+    Raises TypeError if `labels` is not a str-to-str mapping; KeyError if `strict`
+    and a key of `labels` matches no current label; ValueError if a key matches
+    `reserved`, or matches more than one current label.
+    """
+    remap = {}
+    for old, new in labels.items():
+        if not isinstance(old, str) or not isinstance(new, str):
+            raise TypeError(f"{funcname}(): labels must map str to str")
+        if reserved is not None and old == reserved:
+            raise ValueError(f"{funcname}(): {reserved_desc}")
+        matches = current.count(old)
+        if matches > 1:
+            raise ValueError(f"{funcname}(): label '{old}' is ambiguous {ambiguous_desc}")
+        if matches == 0:
+            if strict:
+                raise KeyError(f"{funcname}(): no {item_noun} with label '{old}'")
+            continue
+        if new == old:
+            continue
+        remap[old] = new
+    return remap
+
+
 @cython.cclass
 class Game:
     """A game, the fundamental unit of analysis in game theory.
@@ -2210,22 +2275,10 @@ class Game:
         if not labels:
             raise UndefinedOperationError("set_move_actions(): `actions` must be a nonempty list")
         current = list(resolved_infoset.actions)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_move_actions(): the information set has duplicate action labels, "
-                "so matching by label is not well-defined"
-            )
-        current_set = set(current)
-        declared = set(labels)
-        added = [label for label in labels if label not in current_set]
-        missing = [label for label in current if label not in declared]
-        if added and not add:
-            raise ValueError(f"set_move_actions(): would create new actions {added}")
-        if missing and not drop:
-            raise ValueError(
-                f"set_move_actions(): would delete actions {missing} and the subtrees they "
-                f"lead to; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_move_actions",
+            "information set", "action", "actions", "the subtrees they lead to"
+        )
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
@@ -2304,22 +2357,10 @@ class Game:
                 "set_event_actions(): `probs` must be a nonempty mapping"
             )
         current = list(resolved_event.actions)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_event_actions(): the information set has duplicate action labels, "
-                "so matching by label is not well-defined"
-            )
-        current_set = set(current)
-        declared = set(labels)
-        added = [label for label in labels if label not in current_set]
-        missing = [label for label in current if label not in declared]
-        if added and not add:
-            raise ValueError(f"set_event_actions(): would create new actions {added}")
-        if missing and not drop:
-            raise ValueError(
-                f"set_event_actions(): would delete actions {missing} and the subtrees they "
-                f"lead to; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_event_actions",
+            "information set", "action", "actions", "the subtrees they lead to"
+        )
         c_labels = stdvector[string]()
         c_probs = stdvector[c_Number]()
         for label in labels:
@@ -2454,24 +2495,15 @@ class Game:
                 f"not {labels.__class__.__name__}"
             )
         current = list(resolved_infoset.actions)
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_actions(): labels must map str to str")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_actions(): label '{old}' is ambiguous at this information set"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_actions(): no action with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_actions", "action", strict,
+            "at this information set"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelActions(resolved_infoset._resolve(), c_labels)
 
     def make_infoset(self,
@@ -2637,20 +2669,10 @@ class Game:
         if not labels:
             raise UndefinedOperationError("set_players(): `players` must be a nonempty list")
         current = list(self.players)
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_players(): the game has duplicate player labels, "
-                "so matching by label is not well-defined"
-            )
-        added = [label for label in labels if label not in current]
-        if added and not add:
-            raise ValueError(f"set_players(): would create new players {added}")
-        missing = [label for label in current if label not in labels]
-        if missing and not drop:
-            raise ValueError(
-                f"set_players(): would delete players {missing} and their payoffs at "
-                f"every outcome; pass drop=True to confirm"
-            )
+        _, missing = _reconcile_labels(
+            current, labels, add, drop, "set_players",
+            "game", "player", "players", "their payoffs at every outcome"
+        )
         for label in missing:
             if self.is_tree and len(self.get_infosets(label)) > 0:
                 raise UndefinedOperationError(
@@ -2884,24 +2906,15 @@ class Game:
         current = [
             s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
         ]
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_strategies(): labels must map str to str")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_strategies(): label '{old}' is ambiguous for this player"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_strategies(): no strategy with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_strategies", "strategy", strict,
+            "for this player"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelStrategies(resolved_player, c_labels)
 
     def set_strategies(self,
@@ -2972,20 +2985,10 @@ class Game:
         current = [
             s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
         ]
-        if len(set(current)) != len(current):
-            raise ValueError(
-                "set_strategies(): the player has duplicate strategy labels, "
-                "so matching by label is not well-defined"
-            )
-        added = [label for label in labels if label not in current]
-        if added and not add:
-            raise ValueError(f"set_strategies(): would create new strategies {added}")
-        missing = [label for label in current if label not in labels]
-        if missing and not drop:
-            raise ValueError(
-                f"set_strategies(): would delete strategies {missing} and the outcomes "
-                f"at their contingencies; pass drop=True to confirm"
-            )
+        _reconcile_labels(
+            current, labels, add, drop, "set_strategies",
+            "player", "strategy", "strategies", "the outcomes at their contingencies"
+        )
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
@@ -3041,26 +3044,16 @@ class Game:
             self.game.deref().GetChance().deref().GetLabel().decode("utf-8")
             if self.is_tree else None
         )
-        c_labels = stdmap[string, string]()
-        for old, new in labels.items():
-            if not isinstance(old, str) or not isinstance(new, str):
-                raise TypeError("relabel_players(): labels must map str to str")
-            if old == chance_label:
-                raise ValueError("relabel_players(): the chance player's label is reserved")
-            matches = current.count(old)
-            if matches > 1:
-                raise ValueError(
-                    f"relabel_players(): label '{old}' is ambiguous in this game"
-                )
-            if matches == 0:
-                if strict:
-                    raise KeyError(f"relabel_players(): no player with label '{old}'")
-                continue
-            if new == old:
-                continue
-            c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        if c_labels.empty():
+        remap = _compute_relabeling(
+            current, labels, "relabel_players", "player", strict,
+            "in this game", reserved=chance_label,
+            reserved_desc="the chance player's label is reserved"
+        )
+        if not remap:
             return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelPlayers(c_labels)
 
 
