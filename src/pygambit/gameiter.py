@@ -27,16 +27,16 @@ Iterator tools over games in pure Python.
 class Contingencies:
     """
     An object representing the contingencies of strategies in a strategic game.
-    Contingencies may be restricted by specifying the strategies of any number
-    of players via calls to __getitem__.
+    Contingencies may be restricted to a single strategy for one or more players via
+    repeated calls to __getitem__, each specifying a (player, strategy label) pair.
     """
     def __init__(self, game, cont=None):
         self.game = game
         self.cont = cont if cont is not None else {}
 
-    def __getitem__(self, strategy):
+    def __getitem__(self, key):
+        player, strategy = key
         cont = dict(self.cont)
-        player = [p for p in self.game.players if strategy in p.strategies][0]
         cont[player] = strategy
         return Contingencies(self.game, cont)
 
@@ -44,16 +44,15 @@ class Contingencies:
         ncont = 1
         for player in self.game.players:
             if player not in self.cont:
-                ncont *= len(player.strategies)
+                ncont *= len(self.game.get_strategies(player))
         return ncont
 
     def __iter__(self):
         if len(self.cont) == len(self.game.players):
-            yield [list(player.strategies).index(self.cont[player])
-                   for player in self.game.players]
+            yield {player: self.cont[player] for player in self.game.players}
         else:
             players = list(self.game.players)
             nextpl = min(pl for (pl, player) in enumerate(players)
                          if player not in self.cont)
-            for strategy in players[nextpl].strategies:
-                yield from self[strategy]
+            for strategy in self.game.get_strategies(players[nextpl]):
+                yield from self[players[nextpl], strategy]

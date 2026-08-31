@@ -22,6 +22,7 @@ Currently supported representations are:
    .. code-block:: bash
 
       pip install -e ".[doc]"
+      pip install gtdraw
 
 1. **Create or edit a game file:**
 

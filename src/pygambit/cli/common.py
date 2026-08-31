@@ -29,6 +29,7 @@ import pathlib
 import sys
 
 import click
+import numpy as np
 
 import pygambit as gbt
 
@@ -105,6 +106,22 @@ def print_banner(description: str, extra_lines: tuple[str, ...] = ()) -> None:
     )
     click.echo("This is free software, distributed under the GNU GPL", err=True)
     click.echo(err=True)
+
+
+def load_game(
+    quiet: bool,
+    description: str,
+    file: str | None,
+    prog_name: str,
+    extra_lines: tuple[str, ...] = (),
+) -> gbt.Game:
+    """Standard tool startup, shared by every `gambit-*` CLI tool's `main()`: print
+    the banner (see `print_banner`) unless `quiet`, then read the game from `file`
+    (or standard input).
+    """
+    if not quiet:
+        print_banner(description, extra_lines)
+    return read_game(open_game_file(file, prog_name))
 
 
 def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> callable:
@@ -204,12 +221,12 @@ def render_profile_csv(
         values = [
             prob
             for player in profile.game.players
-            for _infoset, action in profile[player.label]
+            for _infoset, action in profile[player]
             for _label, prob in action
         ]
     else:
         values = [
-            prob for player in profile.game.players for _label, prob in profile[player.label]
+            prob for player in profile.game.players for _label, prob in profile[player]
         ]
     return ",".join([label, *(format_value(v, decimals, fixed, as_float) for v in values)])
 
@@ -226,17 +243,17 @@ def render_support_csv(
     if isinstance(support, gbt.BehaviorSupportProfile):
         fields = [
             "".join(
-                "1" if action.label in action_support else "0"
+                "1" if action in action_support else "0"
                 for action in action_support.infoset.actions
             )
             for player in support.game.players
-            for action_support in support[player.label]
+            for action_support in support[player]
         ]
     else:
         fields = [
             "".join(
-                "1" if strategy.label in support[player.label] else "0"
-                for strategy in player.strategies
+                "1" if strategy in support[player] else "0"
+                for strategy in support.game.get_strategies(player)
             )
             for player in support.game.players
         ]
@@ -264,17 +281,16 @@ def _name_or_number(obj) -> str:
 
 def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
     lines = []
-    for player in profile.game.players:
-        lines.append(f"Strategy profile for player {player.number + 1}:")
+    for number, player in enumerate(profile.game.players, start=1):
+        lines.append(f"Strategy profile for player {number}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
-        probs = profile[player.label]
-        values = profile.strategy_values[player.label]
-        for strategy in player.strategies:
-            name = _name_or_number(strategy)
-            prob = format_value(probs[strategy.label], decimals)
-            value = format_value(values[strategy.label], decimals)
-            lines.append(f"{name:>8}    {prob:>10}   {value:>11}")
+        probs = profile[player]
+        values = profile.strategy_values[player]
+        for strategy in profile.game.get_strategies(player):
+            prob = format_value(probs[strategy], decimals)
+            value = format_value(values[strategy], decimals)
+            lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
 
 
@@ -283,25 +299,25 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
-    for player in profile.game.players:
-        lines.append(f"Behavior profile for player {player.number + 1}:")
+    for number, player in enumerate(profile.game.players, start=1):
+        lines.append(f"Behavior profile for player {number}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, mixed_action in profile[player.label]:
+        for infoset, mixed_action in profile[player]:
             infoset_name = _name_or_number(infoset)
             values = action_values[next(iter(infoset.members))]
             for action in infoset.actions:
-                prob = mixed_action[action.label]
-                value = values[action.label]
+                prob = mixed_action[action]
+                value = values[action]
                 value_text = format_value(value, decimals) if value is not None else ""
                 lines.append(
-                    f"{infoset_name:>7}    {_name_or_number(action):>7}   "
+                    f"{infoset_name:>7}    {action:>7}   "
                     f"{format_value(prob, decimals):>11}   {value_text:>11}"
                 )
         lines.append("")
         lines.append("Infoset    Node       Belief        Prob")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, _mixed_action in profile[player.label]:
+        for infoset, _mixed_action in profile[player]:
             infoset_name = _name_or_number(infoset)
             for node in infoset.members:
                 node_name = _name_or_number(node)
@@ -325,7 +341,9 @@ def read_strategy_profiles_csv(
     Values are parsed as exact rationals; a method which requires floating-point
     starting points converts the result via `~MixedStrategyProfile.as_float`.
     """
-    strategies = [strategy for player in game.players for strategy in player.strategies]
+    strategies = [
+        strategy for player in game.players for strategy in game.get_strategies(player)
+    ]
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
         line = line.strip()
@@ -338,7 +356,7 @@ def read_strategy_profiles_csv(
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
         profile = game.mixed_strategy_profile(rational=True)
         for player in game.players:
-            profile[player.label] = {s.label: next(values) for s in player.strategies}
+            profile[player] = {s: next(values) for s in game.get_strategies(player)}
         profiles.append(profile)
     return profiles
 
@@ -353,7 +371,9 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(list(infoset.actions)) for player in game.players for infoset in player.infosets
+        len(node.infoset.actions)
+        for player in game.players
+        for node in game.get_infosets(player)
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -367,8 +387,62 @@ def read_behavior_profiles_csv(
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
-            for infoset in player.infosets:
-                node = next(iter(infoset.members))
-                profile[node] = {a.label: next(values) for a in infoset.actions}
+            for node in game.get_infosets(player):
+                profile[node] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles
+
+
+def _validate_random_start_options(
+    n: int | None, seed: int | None, start_file: str | None
+) -> None:
+    """Shared validation for the `-n`/`-R`/`-s` starting-point options common to
+    gambit-gnm, gambit-ipa, and gambit-liap: `-n` and `-s` are mutually exclusive,
+    and `-R` requires `-n`.
+    """
+    if n is not None and start_file is not None:
+        raise ValueError("The -n and -s options are mutually exclusive.")
+    if seed is not None and n is None:
+        raise ValueError("The -R option requires -n.")
+
+
+def resolve_strategy_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedStrategyProfile]:
+    """Resolve strategy starting points for a `-n`/`-R`/`-s`-style tool: read from
+    `start_file` if given, otherwise `n` uniform-random draws (`default_count` if `n`
+    is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, and
+    gambit-liap's non-agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_strategy_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_strategy_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]
+
+
+def resolve_behavior_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedBehaviorProfile]:
+    """Behavior-profile counterpart to `resolve_strategy_starts`; see there for the
+    shared `-n`/`-R`/`-s` semantics. Used by gambit-liap's agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_behavior_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_behavior_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]

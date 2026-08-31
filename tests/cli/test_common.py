@@ -166,6 +166,6 @@ class TestRenderSupportCsv:
         game = gbt.read_nfg(io.BytesIO(nfg_matching_pennies_text.encode()))
         support = game.strategy_support_profile()
         p1 = next(iter(game.players))
-        first_strategy = next(iter(p1.strategies))
-        support[p1.label] = [first_strategy.label]
+        first_strategy = next(iter(game.get_strategies(p1)))
+        support[p1] = [first_strategy]
         assert common.render_support_csv(support, "candidate") == "candidate,10,11"

@@ -412,32 +412,6 @@ std::set<GameAction> GameInfosetRep::GetOwnPriorActions() const
   return m_game->GetOwnPriorActions(std::const_pointer_cast<GameInfosetRep>(shared_from_this()));
 }
 
-void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
-{
-  m_game->IncrementVersion();
-  if (outc == m_outcome) {
-    m_outcome = m_game->m_nullOutcome.get();
-  }
-  for (auto child : m_children) {
-    child->DeleteOutcome(outc);
-  }
-}
-
-void GameTreeRep::SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
-{
-  if (p_node->m_game != this) {
-    throw MismatchException();
-  }
-  if (p_outcome && p_outcome->m_game != this) {
-    throw MismatchException();
-  }
-  if (const auto newOutcome = p_outcome ? p_outcome.get_shared().get() : m_nullOutcome.get();
-      newOutcome != p_node->m_outcome) {
-    p_node->m_outcome = newOutcome;
-    IncrementVersion();
-  }
-}
-
 bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 {
   auto *n = const_cast<GameNodeRep *>(this);
@@ -1833,6 +1807,25 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   return plays;
 }
 
+std::set<const GameOutcomeRep *>
+GameTreeRep::ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
+                                     const std::set<const GameOutcomeRep *> &p_covered) const
+{
+  std::set<const GameOutcomeRep *> absorbed;
+  if (!p_covered.empty()) {
+    absorbed = p_covered;
+    for (const auto &node : GetNodes()) {
+      if (absorbed.empty()) {
+        break;
+      }
+      if (!p_selected.contains(node.get())) {
+        absorbed.erase(node->m_outcome);
+      }
+    }
+  }
+  return absorbed;
+}
+
 GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
                                      const std::vector<Number> &p_payoffs,
                                      const std::string &p_label)
@@ -1856,18 +1849,7 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
       covered.insert(node->m_outcome);
     }
   }
-  std::set<const GameOutcomeRep *> absorbed;
-  if (!covered.empty()) {
-    absorbed = covered;
-    for (const auto &node : GetNodes()) {
-      if (absorbed.empty()) {
-        break;
-      }
-      if (!selected.contains(node.get())) {
-        absorbed.erase(node->m_outcome);
-      }
-    }
-  }
+  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
   CheckOutcomeLabel(p_label, absorbed);
 
   IncrementVersion();
@@ -1885,14 +1867,33 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
   return outcome;
 }
 
-void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
+void GameTreeRep::MakeOutcomeNull(const std::vector<GameNode> &p_nodes)
 {
-  if (p_outcome->IsNull()) {
-    throw UndefinedException("The null outcome cannot be deleted");
+  if (p_nodes.empty()) {
+    throw ValueException("At least one node must be specified");
   }
+  std::set<GameNodeRep *> selected;
+  std::set<const GameOutcomeRep *> covered;
+  for (const auto &node : p_nodes) {
+    if (node->m_game != this) {
+      throw MismatchException();
+    }
+    if (!selected.insert(node.get()).second) {
+      throw ValueException("Each node may be referenced only once");
+    }
+    if (!node->m_outcome->IsNull()) {
+      covered.insert(node->m_outcome);
+    }
+  }
+  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+
   IncrementVersion();
-  m_root->DeleteOutcome(p_outcome.get());
-  EraseOutcomes({p_outcome.get()});
+  for (auto *node : selected) {
+    node->m_outcome = m_nullOutcome.get();
+  }
+  if (!absorbed.empty()) {
+    EraseOutcomes(absorbed);
+  }
 }
 
 //------------------------------------------------------------------------
@@ -2046,7 +2047,6 @@ protected:
 public:
   TreePureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
   GameOutcome GetOutcome() const override;
-  void SetOutcome(GameOutcome p_outcome) override { throw UndefinedException(); }
   Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };

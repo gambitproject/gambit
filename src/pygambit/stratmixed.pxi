@@ -72,7 +72,7 @@ class MixedStrategy:
         and can no longer be assigned into. Set a player's whole distribution via
         ``MixedStrategyProfile.__setitem__`` instead.
     """
-    _player = cython.declare(Player)
+    _player = cython.declare(str)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -80,15 +80,15 @@ class MixedStrategy:
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: Player, values: dict) -> MixedStrategy:
+    def wrap(player: str, values: dict) -> MixedStrategy:
         obj: MixedStrategy = MixedStrategy.__new__(MixedStrategy)
         obj._player = player
         obj._values = values
         return obj
 
     @property
-    def player(self) -> Player:
-        """The player for whom this mixed strategy is defined."""
+    def player(self) -> str:
+        """The label of the player for whom this mixed strategy is defined."""
         return self._player
 
     def __repr__(self) -> str:
@@ -189,14 +189,14 @@ class MixedStrategyProfile:
         raise ValueError("Cannot create a MixedStrategyProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player.label: self[player.label] for player in self.game.players})
+        return str({player: self[player] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + player.label + "}:" +
-                self[player.label]._repr_latex_().replace("$", "")
+                r"\text{" + player + "}:" +
+                self[player]._repr_latex_().replace("$", "")
                 for player in self.game.players
             ) +
             r"\right\}$"
@@ -222,7 +222,7 @@ class MixedStrategyProfile:
             The player's mixed strategy specified in the profile
         """
         for player in self.game.players:
-            yield self[player.label]
+            yield self[player]
 
     def __getitem__(self, player: str) -> MixedStrategy:
         """Returns a snapshot of the mixed strategy for the player with label `player`,
@@ -241,12 +241,14 @@ class MixedStrategyProfile:
             If `player` is not a str.
         """
         self._check_validity()
-        resolved_player = self.game._resolve_player(player, "__getitem__")
-        values = {s.label: self._getprob_strategy(s) for s in resolved_player.strategies}
-        return MixedStrategy.wrap(resolved_player, values)
+        values = {
+            s: self._getprob_strategy(player, s)
+            for s in self.game.get_strategies(player)
+        }
+        return MixedStrategy.wrap(player, values)
 
     def _setprob_player(
-        self, player: Player, distribution: collections.abc.Mapping, sparse: bool
+        self, player: str, distribution: collections.abc.Mapping, sparse: bool
     ) -> None:
         """Validates and sets the whole mixed strategy for player.
 
@@ -261,7 +263,8 @@ class MixedStrategyProfile:
                 f"a mixed strategy must be set from a Mapping from strategy label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = {s.label for s in player.strategies}
+        strategies = self.game.get_strategies(player)
+        labels = set(strategies)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -280,8 +283,8 @@ class MixedStrategyProfile:
             raise ValueError("a mixed strategy's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed strategy's weights must not all be zero")
-        for s in player.strategies:
-            self._setprob_strategy(s, values[s.label])
+        for s in strategies:
+            self._setprob_strategy(player, s, values[s])
 
     def __setitem__(self, player: str, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed strategy for the player with label `player`.
@@ -319,8 +322,9 @@ class MixedStrategyProfile:
             defaulting omitted ones to zero.
         """
         self._check_validity()
-        resolved_player = self.game._resolve_player(player, "__setitem__")
-        self._setprob_player(resolved_player, distribution, sparse=True)
+        game: Game = self.game
+        game._resolve_player(player, "__setitem__")  # validate eagerly
+        self._setprob_player(player, distribution, sparse=True)
 
     def set_mixed_strategy(
         self, player: str, distribution: collections.abc.Mapping, sparse: bool = False
@@ -365,8 +369,9 @@ class MixedStrategyProfile:
         __setitem__
         """
         self._check_validity()
-        resolved_player = self.game._resolve_player(player, "set_mixed_strategy")
-        self._setprob_player(resolved_player, distribution, sparse=sparse)
+        game: Game = self.game
+        game._resolve_player(player, "set_mixed_strategy")  # validate eagerly
+        self._setprob_player(player, distribution, sparse=sparse)
 
     @property
     def payoffs(self) -> PayoffVector:
@@ -374,7 +379,7 @@ class MixedStrategyProfile:
         the profile.
         """
         self._check_validity()
-        return PayoffVector({p.label: self._payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._payoff(p) for p in self.game.players})
 
     @property
     def strategy_values(self) -> StrategyValuesVector:
@@ -383,7 +388,9 @@ class MixedStrategyProfile:
         """
         self._check_validity()
         return StrategyValuesVector({
-            p.label: StrategyValueVector({s.label: self._strategy_value(s) for s in p.strategies})
+            p: StrategyValueVector({
+                s: self._strategy_value(p, s) for s in self.game.get_strategies(p)
+            })
             for p in self.game.players
         })
 
@@ -403,9 +410,9 @@ class MixedStrategyProfile:
         """
         self._check_validity()
         return StrategyRegretsVector({
-            p.label: StrategyRegretVector(
-                {s.label: self._strategy_regret(s) for s in p.strategies}
-            )
+            p: StrategyRegretVector({
+                s: self._strategy_regret(p, s) for s in self.game.get_strategies(p)
+            })
             for p in self.game.players
         })
 
@@ -420,7 +427,7 @@ class MixedStrategyProfile:
         max_regret
         """
         self._check_validity()
-        return PlayerRegretVector({p.label: self._player_regret(p) for p in self.game.players})
+        return PlayerRegretVector({p: self._player_regret(p) for p in self.game.players})
 
     def max_regret(self) -> ProfileDType:
         """Returns the maximum regret of any player.
@@ -534,12 +541,12 @@ class MixedStrategyProfile:
         """The game on which this profile is defined."""
         raise NotImplementedError
 
-    def _getprob_strategy(self, strategy: Strategy) -> ProfileDType:
-        """Returns the probability with which strategy is played."""
+    def _getprob_strategy(self, player: str, label: str) -> ProfileDType:
+        """Returns the probability with which player's strategy `label` is played."""
         raise NotImplementedError
 
-    def _setprob_strategy(self, strategy: Strategy, value: typing.Any) -> None:
-        """Sets the probability with which strategy is played."""
+    def _setprob_strategy(self, player: str, label: str, value: typing.Any) -> None:
+        """Sets the probability with which player's strategy `label` is played."""
         raise NotImplementedError
 
     def _to_prob(self, value: typing.Any) -> ProfileDType:
@@ -548,19 +555,19 @@ class MixedStrategyProfile:
         """
         raise NotImplementedError
 
-    def _payoff(self, player: Player) -> ProfileDType:
+    def _payoff(self, player: str) -> ProfileDType:
         """Returns the expected payoff to player."""
         raise NotImplementedError
 
-    def _strategy_value(self, strategy: Strategy) -> ProfileDType:
-        """Returns the expected payoff to playing strategy."""
+    def _strategy_value(self, player: str, label: str) -> ProfileDType:
+        """Returns the expected payoff to playing player's strategy `label`."""
         raise NotImplementedError
 
-    def _strategy_regret(self, strategy: Strategy) -> ProfileDType:
-        """Returns the regret to playing strategy."""
+    def _strategy_regret(self, player: str, label: str) -> ProfileDType:
+        """Returns the regret to playing player's strategy `label`."""
         raise NotImplementedError
 
-    def _player_regret(self, player: Player) -> ProfileDType:
+    def _player_regret(self, player: str) -> ProfileDType:
         """Returns the regret of player for playing their mixed strategy."""
         raise NotImplementedError
 
@@ -611,8 +618,10 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
     def __len__(self) -> int:
         return len(self.game.players)
 
-    def _getprob_strategy(self, strategy: Strategy) -> float:
-        return deref(self.profile).getitem_strategy(strategy.strategy)
+    def _getprob_strategy(self, player: str, label: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_getprob_strategy")
+        return deref(self.profile).getitem_strategy(handle)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -622,9 +631,11 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedStrategyProfile[double]](deref(self.profile))
 
-    def _setprob_strategy(self, strategy: Strategy, value) -> None:
+    def _setprob_strategy(self, player: str, label: str, value) -> None:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_setprob_strategy")
         self._ensure_unshared()
-        setitem_mspd_strategy(deref(self.profile), strategy.strategy, value)
+        setitem_mspd_strategy(deref(self.profile), handle, value)
 
     def _to_prob(self, value: typing.Any) -> float:
         normalized = _to_number_string(value)
@@ -634,17 +645,23 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
             return float(Rational(normalized))
 
-    def _payoff(self, player: Player) -> float:
-        return deref(self.profile).GetPayoff(player.player)
+    def _payoff(self, player: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        return deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff"))
 
-    def _strategy_value(self, strategy: Strategy) -> float:
-        return deref(self.profile).GetPayoff(strategy.strategy)
+    def _strategy_value(self, player: str, label: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_strategy_value")
+        return deref(self.profile).GetPayoff(handle)
 
-    def _strategy_regret(self, strategy: Strategy) -> float:
-        return deref(self.profile).GetRegret(strategy.strategy)
+    def _strategy_regret(self, player: str, label: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_strategy_regret")
+        return deref(self.profile).GetRegret(handle)
 
-    def _player_regret(self, player: Player) -> float:
-        return deref(self.profile).GetRegret(player.player)
+    def _player_regret(self, player: str) -> float:
+        game: Game = cython.cast(Game, self.game)
+        return deref(self.profile).GetRegret(game._resolve_player(player, "_player_regret"))
 
     def _max_regret(self) -> float:
         return deref(self.profile).GetMaxRegret()
@@ -703,8 +720,10 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
     def __len__(self) -> int:
         return len(self.game.players)
 
-    def _getprob_strategy(self, strategy: Strategy) -> Rational:
-        return rat_to_py(deref(self.profile).getitem_strategy(strategy.strategy))
+    def _getprob_strategy(self, player: str, label: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_getprob_strategy")
+        return rat_to_py(deref(self.profile).getitem_strategy(handle))
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -714,28 +733,37 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedStrategyProfile[c_Rational]](deref(self.profile))
 
-    def _setprob_strategy(self, strategy: Strategy, value) -> None:
+    def _setprob_strategy(self, player: str, label: str, value) -> None:
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("probability should be int or Fraction instance; received {}"
                             .format(value.__class__.__name__))
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_setprob_strategy")
         self._ensure_unshared()
-        setitem_mspr_strategy(deref(self.profile), strategy.strategy,
+        setitem_mspr_strategy(deref(self.profile), handle,
                               to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
         return Rational(_to_number_string(value))
 
-    def _payoff(self, player: Player) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player))
+    def _payoff(self, player: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        return rat_to_py(deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff")))
 
-    def _strategy_value(self, strategy: Strategy) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(strategy.strategy))
+    def _strategy_value(self, player: str, label: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_strategy_value")
+        return rat_to_py(deref(self.profile).GetPayoff(handle))
 
-    def _strategy_regret(self, strategy: Strategy) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(strategy.strategy))
+    def _strategy_regret(self, player: str, label: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        handle = game._resolve_strategy(player, label, "_strategy_regret")
+        return rat_to_py(deref(self.profile).GetRegret(handle))
 
-    def _player_regret(self, player: Player) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(player.player))
+    def _player_regret(self, player: str) -> Rational:
+        game: Game = cython.cast(Game, self.game)
+        resolved_player = game._resolve_player(player, "_player_regret")
+        return rat_to_py(deref(self.profile).GetRegret(resolved_player))
 
     def _max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetMaxRegret())
@@ -762,8 +790,9 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
     def _as_float(self) -> MixedStrategyProfileDouble:
         profile: MixedStrategyProfileDouble = self.game.mixed_strategy_profile()
         for player in self.game.players:
-            profile[player.label] = {
-                s.label: float(self._getprob_strategy(s)) for s in player.strategies
+            profile[player] = {
+                s: float(self._getprob_strategy(player, s))
+                for s in self.game.get_strategies(player)
             }
         return profile
 

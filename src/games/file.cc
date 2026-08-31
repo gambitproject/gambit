@@ -493,26 +493,30 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
     }
   }
   NormalizeLabelStrings(labels);
-  std::map<int, GameOutcome> created;
-  auto label_it = labels.begin();
-  for (size_t i = 0; i < records.m_labels.size(); ++i) {
-    if (!referenced.contains(static_cast<int>(i) + 1)) {
-      continue;
+  std::map<int, std::string> labelById;
+  {
+    auto label_it = labels.begin();
+    for (size_t i = 0; i < records.m_labels.size(); ++i) {
+      if (referenced.contains(static_cast<int>(i) + 1)) {
+        labelById.emplace(static_cast<int>(i) + 1, *label_it++);
+      }
     }
-    auto outcome = p_nfg->NewOutcome(*label_it++);
-    auto player_it = p_nfg->GetPlayers().begin();
-    for (const auto &payoff : records.m_payoffs[i]) {
-      outcome->SetPayoff(*player_it, payoff);
-      ++player_it;
-    }
-    created.emplace(static_cast<int>(i) + 1, outcome);
   }
-  // Second pass: attach.
+  // Second pass: group each referenced contingency by the outcome id attached to it.
+  std::map<int, std::vector<std::vector<GameStrategy>>> contingenciesById;
   auto id_it = ids.begin();
   for (const auto &profile : StrategyContingencies(p_nfg)) {
     if (const int outcomeId = *id_it++) {
-      profile->SetOutcome(created.at(outcomeId));
+      std::vector<GameStrategy> strategies;
+      strategies.reserve(p_nfg->NumPlayers());
+      for (const auto &player : p_nfg->GetPlayers()) {
+        strategies.push_back(profile->GetStrategy(player));
+      }
+      contingenciesById[outcomeId].push_back(strategies);
     }
+  }
+  for (const auto &[outcomeId, contingencies] : contingenciesById) {
+    p_nfg->MakeOutcome(contingencies, records.m_payoffs[outcomeId - 1], labelById.at(outcomeId));
   }
 }
 
@@ -580,7 +584,7 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
 
 /// An outcome definition encountered during the parse.  Outcomes are not
 /// created until the whole tree has been read, so that their labels can be
-/// normalized in one pass before creation, as NewOutcome enforces
+/// normalized in one pass before creation, as MakeOutcome enforces
 /// the label requirements at creation time.
 struct OutcomeRecord {
   std::string m_label;
@@ -688,7 +692,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
 
 /// Create the game's outcomes from the definitions buffered during the parse.
 /// Labels are normalized in first-occurrence order before creation, so that
-/// the label requirements enforced by NewOutcome (nonempty, unique) are
+/// the label requirements enforced by MakeOutcome (nonempty, unique) are
 /// satisfied; this matches the treatment of outcome labels read from .nfg
 /// files, and produces the same labels the previous post-parse normalization
 /// pass produced.
@@ -699,20 +703,21 @@ void CreateOutcomes(const Game &p_game, const TreeData &p_treeData)
     labels.push_back(p_treeData.m_outcomeRecords.at(id).m_label);
   }
   NormalizeLabelStrings(labels);
-
-  std::map<int, GameOutcome> created;
-  auto label_it = labels.begin();
-  for (const int id : p_treeData.m_outcomeOrder) {
-    auto outcome = p_game->NewOutcome(*label_it++);
-    auto player_it = p_game->GetPlayers().begin();
-    for (const auto &payoff : p_treeData.m_outcomeRecords.at(id).m_payoffs) {
-      outcome->SetPayoff(*player_it, payoff);
-      ++player_it;
+  std::map<int, std::string> labelById;
+  {
+    auto label_it = labels.begin();
+    for (const int id : p_treeData.m_outcomeOrder) {
+      labelById.emplace(id, *label_it++);
     }
-    created.emplace(id, outcome);
   }
+
+  std::map<int, std::vector<GameNode>> nodesById;
   for (const auto &[node, id] : p_treeData.m_nodeOutcomes) {
-    p_game->SetOutcome(node, created.at(id));
+    nodesById[id].push_back(node);
+  }
+  for (const int id : p_treeData.m_outcomeOrder) {
+    p_game->MakeOutcome(nodesById.at(id), p_treeData.m_outcomeRecords.at(id).m_payoffs,
+                        labelById.at(id));
   }
 }
 

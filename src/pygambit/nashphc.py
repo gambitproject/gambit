@@ -8,7 +8,6 @@ import itertools
 import pathlib
 import string
 import subprocess
-import sys
 import typing
 
 import pygambit as gbt
@@ -118,43 +117,67 @@ def _run_phc(phcpack_path: pathlib.Path | str, equations: list[str]) -> list[dic
 
 # Use this table to assign letters to player strategy variables
 # Skip 'e', 'i', and 'j', because PHC doesn't allow these in variable names.
-_playerletters = [c for c in string.ascii_lowercase if c != ["e", "i", "j"]]
+_playerletters = [c for c in string.ascii_lowercase if c not in ("e", "i", "j")]
+
+
+def _strategy_index(game: gbt.Game, player: str, label: str) -> int:
+    """The index of the strategy labeled `label` within `player`'s full strategy list.
+
+    This is the basis of the PHC variable-naming scheme (player letter + this index),
+    which must stay stable across supports, so it is always computed against the full
+    list of the player's strategies, never a support-restricted subset.
+    """
+    return game.get_strategies(player).index(label)
 
 
 def _contingencies(
         support: gbt.StrategySupportProfile,
-        skip_player: gbt.Player
-) -> typing.Generator[list[gbt.Strategy], None, None]:
-    """Generate all contingencies of strategies in `support` for all players
-    except player `skip_player`.
+        skip_player: str
+) -> typing.Generator[list[str | None], None, None]:
+    """Generate all contingencies of strategy labels in `support` for all players
+    except player `skip_player`, whose entry is `None`.
     """
+    game = support.game
     for profile in itertools.product(
-        *[[strategy for strategy in player.strategies if strategy in support]
+        *[[strategy for strategy in game.get_strategies(player) if strategy in support[player]]
           if player != skip_player else [None]
-          for player in support.game.players]
+          for player in game.players]
     ):
         yield list(profile)
 
 
-def _equilibrium_equations(support: gbt.StrategySupportProfile, player: gbt.Player) -> list:
+def _equilibrium_equations(support: gbt.StrategySupportProfile, player: str) -> list:
     """Generate the equations that the strategy of `player` must satisfy in any
     totally-mixed equilibrium on `support`.
     """
-    payoffs = {strategy: [] for strategy in player.strategies if strategy in support}
+    game = support.game
+    players = list(game.players)
+    player_index = {p: i for i, p in enumerate(players)}
+    player_support = support[player]
+    payoffs = {
+        strategy: [] for strategy in game.get_strategies(player) if strategy in player_support
+    }
 
-    strategies = list(support[player])
+    strategies = list(player_support)
     for profile in _contingencies(support, player):
-        contingency = "*".join(f"{_playerletters[strat.player.number]}{strat.number}"
-                               for strat in profile if strat is not None)
+        contingency = "*".join(
+            f"{_playerletters[player_index[p]]}{_strategy_index(game, p, strat)}"
+            for p, strat in zip(players, profile, strict=True) if strat is not None
+        )
         for strategy in strategies:
-            profile[player.number] = strategy
-            if support.game[profile][player] != 0:
-                payoffs[strategy].append(f"({support.game[profile][player]}*{contingency})")
+            profile[player_index[player]] = strategy
+            payoff_vec = game.get_payoffs(
+                {p: strat for p, strat in zip(players, profile, strict=True)}
+            )
+            if payoff_vec[player] != 0:
+                payoffs[strategy].append(f"({payoff_vec[player]}*{contingency})")
 
     payoffs = {s: "+".join(v) for s, v in payoffs.items()}
     equations = [f"({payoffs[strategies[0]]})-({payoffs[s]})" for s in strategies[1:]]
-    equations.append("+".join(_playerletters[player.number] + str(strat.number)
-                              for strat in strategies) + "-1")
+    equations.append(
+        "+".join(_playerletters[player_index[player]] + str(_strategy_index(game, player, s))
+                 for s in strategies) + "-1"
+    )
     return equations
 
 
@@ -162,27 +185,32 @@ def _is_nash(profile: gbt.MixedStrategyProfile, maxregret: float, negtol: float)
     """Check if the profile is an (approximate) Nash equilibrium, allowing a maximum
     regret of `maxregret` and a tolerance of (small) negative probabilities of `negtol`."""
     for player in profile.game.players:
-        for strategy in player.strategies:
-            if profile[strategy] < -negtol:
+        for strategy in profile.game.get_strategies(player):
+            if profile[player][strategy] < -negtol:
                 return False
     return profile.max_regret() < maxregret
 
 
 def _solution_to_profile(game: gbt.Game, entry: dict) -> gbt.MixedStrategyProfileDouble:
     profile = game.mixed_strategy_profile()
-    for player in game.players:
-        playerchar = _playerletters[player.number]
-        for strategy in player.strategies:
+    for i, player in enumerate(game.players):
+        playerchar = _playerletters[i]
+        distribution = {}
+        for j, strategy in enumerate(game.get_strategies(player)):
             try:
-                profile[strategy] = entry["vars"][playerchar + str(strategy.number)].real
+                distribution[strategy] = entry["vars"][playerchar + str(j)].real
             except KeyError:
-                profile[strategy] = 0.0
+                distribution[strategy] = 0.0
+        profile[player] = distribution
     return profile
 
 
 def _format_support(support, label: str) -> str:
-    strings = ["".join(str(int(strategy in support)) for strategy in player.strategies)
-               for player in support.game.players]
+    game = support.game
+    strings = [
+        "".join(str(int(strategy in support[player])) for strategy in game.get_strategies(player))
+        for player in game.players
+    ]
     return label + "," + ",".join(strings)
 
 
@@ -191,19 +219,24 @@ def _format_profile(profile: gbt.MixedStrategyProfileDouble, label: str,
     """Render the mixed strategy profile `profile` to a one-line string with the given
     `label`.
     """
+    game = profile.game
     return (f"{label}," +
-            ",".join(["{p:.{decimals}f}".format(p=profile[s], decimals=decimals)
-                      for player in profile.game.players for s in player.strategies]))
+            ",".join(["{p:.{decimals}f}".format(p=profile[player][s], decimals=decimals)
+                      for player in game.players for s in game.get_strategies(player)]))
 
 
 def _profile_from_support(support: gbt.StrategySupportProfile) -> gbt.MixedStrategyProfileDouble:
     """Construct a mixed strategy profile corresponding to the (pure strategy) equilibrium
     on `support`.
     """
-    profile = support.game.mixed_strategy_profile()
-    for player in support.game.players:
-        for strategy in player.strategies:
-            profile[strategy] = 1.0 if strategy in support else 0.0
+    game = support.game
+    profile = game.mixed_strategy_profile()
+    for player in game.players:
+        player_support = support[player]
+        profile[player] = {
+            strategy: (1.0 if strategy in player_support else 0.0)
+            for strategy in game.get_strategies(player)
+        }
     return profile
 
 
@@ -245,21 +278,3 @@ def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
         for support in gbt.nash.possible_nash_supports(game)
         for eqm in _solve_support(support, phcpack_path, maxregret, negtol)
     ]
-
-
-def _read_game(fn: str) -> gbt.Game:
-    for reader in [gbt.read_efg, gbt.read_nfg, gbt.read_agg]:
-        try:
-            return reader(fn)
-        except Exception:
-            pass
-    raise OSError(f"Unable to read or parse {fn}")
-
-
-def main():
-    game = _read_game(sys.argv[1])
-    phcpack_solve(game, "./phc", maxregret=1.0e-6)
-
-
-if __name__ == "__main__":
-    main()

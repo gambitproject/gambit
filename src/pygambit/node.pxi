@@ -20,6 +20,28 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+Branch = collections.namedtuple("Branch", ["node", "label"])
+Branch.__doc__ = """The action labeled `label`, taken at `node`.
+
+Returned by `Node.prior_action` and `Node.own_prior_action`; `node` is the node at
+which the action was taken (not the node it leads to), so ``branch.node.actions``
+and, for a chance event, ``branch.node.action_probs[branch.label]`` are always
+well-defined.
+
+.. versionadded:: 17.0.0
+"""
+
+
+@cython.cfunc
+def _decode_prob(py_string: string) -> object:
+    """Internal: decode a probability formatted by the C++ core as ``Decimal`` or
+    ``Rational``, matching whichever representation was used to specify it."""
+    if "." in py_string.decode("ascii"):
+        return decimal.Decimal(py_string.decode("ascii"))
+    else:
+        return Rational(py_string.decode("ascii"))
+
+
 @cython.cclass
 class NodeChildren:
     """The set of nodes which are direct descendants of a node."""
@@ -45,32 +67,31 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, action: str | Action) -> Node:
-        """Returns the successor node which is reached after `action` is played.
-
-        `action` may be an ``Action`` at this node's infoset, or its label.
+    def __getitem__(self, action: typing.Any) -> Node:
+        """Returns the successor node which is reached after the action labeled
+        `action` is played.
 
         Raises
         ------
         KeyError
-            If `action` is a string and no action with that label exists at the node's
-            infoset, or if the node is terminal.
+            If no action with that label exists at the node's infoset, or if the
+            node is terminal.
         ValueError
-            If `action` is an empty or all-whitespace string, or is an ``Action``
-            from a different infoset.
+            If `action` is an empty or all-whitespace string.
         TypeError
-            If `action` is not a ``str`` or an ``Action``.
+            If `action` is not a ``str``.
 
         .. versionchanged:: 16.5.0
             Previously indexing by string searched the labels of the child nodes,
             rather than referring to actions.  This implements the more natural
             interpretation that strings refer to action labels.
 
-            Relatedly, the collection can now be indexed by an Action object.
-
         .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; index by the ``Action`` taken, or its label.
-            A label matching no action now raises ``KeyError``.
+            Integer indexing is no longer supported; index by the action's label, or
+            iterate.  A label matching no action now raises ``KeyError``.
+
+        .. versionchanged:: 17.0.0
+            No longer indexable by an ``Action`` object, following its removal.
         """
         if isinstance(action, str):
             if not action.strip():
@@ -81,97 +102,12 @@ class NodeChildren:
                 if act.deref().GetLabel().decode("utf-8") == cython.cast(str, action):
                     return Node.wrap(self.parent.deref().GetChild(act))
             raise KeyError(f"No action with label '{action}' at node")
-        if isinstance(action, Action):
-            try:
-                return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
-            except IndexError:
-                raise ValueError("Action is from a different infoset than node") from None
         if isinstance(action, int):
             raise TypeError(
-                "node children cannot be indexed by position; index by the action taken "
-                "(an Action or its label), or iterate. "
-                "(Integer indexing was removed in 16.7.0.)"
+                "node children cannot be indexed by position; index by the action's "
+                "label, or iterate. (Integer indexing was removed in 16.7.0.)"
             )
-        raise TypeError(f"Index must be a str label or an Action, not {action.__class__.__name__}")
-
-
-@cython.cclass
-class NodeInfoset:
-    """The infoset to which a node currently belongs.
-
-    A lazy, node-anchored view: holds the node and resolves its infoset on each access,
-    so the value reflects the current state of the game even after the game is mutated.
-
-    .. versionadded:: 16.7.0
-    """
-    node = cython.declare(c_GameNode)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a NodeInfoset outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(node: c_GameNode) -> NodeInfoset:
-        obj: NodeInfoset = NodeInfoset.__new__(NodeInfoset)
-        obj.node = node
-        return obj
-
-    @cython.cfunc
-    def _resolve(self) -> Infoset:
-        if self.node.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
-            return None
-        return Infoset.wrap(self.node.deref().GetInfoset())
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(f"'NodeInfoset' object has no attribute '{name}'")
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                f"node's infoset is currently None (terminal node); "
-                f"cannot access '{name}'"
-            )
-        return getattr(resolved, name)
-
-    @property
-    def label(self):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                "node's infoset is currently None (terminal node); "
-                "cannot access 'label'"
-            )
-        return resolved.label
-
-    @label.setter
-    def label(self, value):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                "node's infoset is currently None (terminal node); "
-                "cannot set 'label'"
-            )
-        resolved.label = value
-
-    def __repr__(self) -> str:
-        resolved = self._resolve()
-        return repr(resolved) if resolved is not None else "None"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        mine = self._resolve()
-        if isinstance(other, NodeInfoset):
-            other = cython.cast(NodeInfoset, other)._resolve()
-        if mine is None or other is None:
-            return mine is None and other is None
-        return mine == other
-
-    def __bool__(self) -> bool:
-        return self._resolve() is not None
-
-    def __hash__(self) -> int:
-        # Hash by the resolved infoset (transitional).
-        resolved = self._resolve()
-        return hash(resolved) if resolved is not None else 0
+        raise TypeError(f"Index must be a str label, not {action.__class__.__name__}")
 
 
 @cython.cclass
@@ -237,79 +173,6 @@ class NodeOutcome:
 
 
 @cython.cclass
-class NodePlayer:
-    """The player associated with a node: the one who makes the decision, if the node
-    is personal, or the chance player, if the node is an event.
-
-    A lazy, node-anchored view: holds the node and resolves its player on each access,
-    so the value reflects the current state of the game even after the game is mutated.
-
-    .. versionadded:: 16.7.0
-    """
-    node = cython.declare(c_GameNode)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a NodePlayer outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(node: c_GameNode) -> NodePlayer:
-        obj: NodePlayer = NodePlayer.__new__(NodePlayer)
-        obj.node = node
-        return obj
-
-    @cython.cfunc
-    def _resolve(self) -> Player:
-        if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
-            return Player.wrap(self.node.deref().GetPlayer())
-        return None
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(f"'NodePlayer' object has no attribute '{name}'")
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError(
-                f"node has no player (terminal node); cannot access '{name}'"
-            )
-        return getattr(resolved, name)
-
-    @property
-    def label(self):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no player (terminal node); cannot access 'label'")
-        return resolved.label
-
-    @label.setter
-    def label(self, value):
-        resolved = self._resolve()
-        if resolved is None:
-            raise AttributeError("node has no player (terminal node); cannot set 'label'")
-        resolved.label = value
-
-    def __repr__(self) -> str:
-        resolved = self._resolve()
-        return repr(resolved) if resolved is not None else "None"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        mine = self._resolve()
-        if isinstance(other, NodePlayer):
-            other = cython.cast(NodePlayer, other)._resolve()
-        if mine is None or other is None:
-            return mine is None and other is None
-        return mine == other
-
-    def __bool__(self) -> bool:
-        return self._resolve() is not None
-
-    def __hash__(self) -> int:
-        # Hash by the resolved player (transitional).
-        resolved = self._resolve()
-        return hash(resolved) if resolved is not None else 0
-
-
-@cython.cclass
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
@@ -330,7 +193,9 @@ class Node:
         path = []
         node = self
         while node.parent:
-            path.append(node.prior_action.number)
+            path.append(
+                cython.cast(Node, node).node.deref().GetPriorAction().deref().GetNumber() - 1
+            )
             node = node.parent
         return f"Node(game={self.game}, path={path})"
 
@@ -381,32 +246,113 @@ class Node:
         return Game.wrap(self.node.deref().GetGame())
 
     @property
-    def infoset(self) -> NodeInfoset:
-        """The infoset to which this node currently belongs.
+    def infoset(self) -> Infoset:
+        """The personal player's information set to which this node currently belongs.
 
         Returns a lazy, node-anchored view resolved on each access, so the value reflects
         the current state of the game even if the game is mutated after this property is read.
-        For a terminal node, which belongs to no infoset, the view is falsy and equals ``None``.
+        For a node that does not currently belong to a personal player's information set
+        (a terminal node, or a chance event -- see `event`), the view is falsy and equals
+        ``None``.
 
         .. versionchanged:: 16.7.0
+        .. versionchanged:: 17.0.0
+            No longer resolves to the chance player's events; see `event`.
         """
-        return NodeInfoset.wrap(self.node)
+        return Infoset.wrap(self.node)
 
     @property
-    def player(self) -> NodePlayer:
-        """The player associated with this node: the one who makes the decision, if this is
-        a personal node, or the chance player, if this is an event.
+    def event(self) -> Event:
+        """The chance event to which this node currently belongs.
 
         Returns a lazy, node-anchored view resolved on each access, so the value reflects
         the current state of the game even if the game is mutated after this property is read.
-        For a terminal node, which has no player, the view is falsy and equals ``None``.
-        At a chance node the view resolves to the chance player (``is_chance`` is ``True``).
+        For a node that is not currently a chance event (a terminal node, or a personal
+        player's information set -- see `infoset`), the view is falsy and equals ``None``.
 
-        .. versionchanged:: 16.7.0
-            Now returns a lazily-evaluated, node-anchored view rather than capturing the
-            player at the time of access.
+        .. versionadded:: 17.0.0
         """
-        return NodePlayer.wrap(self.node)
+        return Event.wrap(self.node)
+
+    @property
+    def members(self) -> list[Node]:
+        """The nodes which are members of the information set or event to which
+        this node currently belongs -- whichever applies. Equivalent to
+        ``self.infoset.members`` or ``self.event.members``, whichever is not falsy;
+        unlike those, this is well-defined regardless of which currently applies.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        AttributeError
+            If this node currently belongs to no information set or event (a terminal
+            node).
+        """
+        infoset: Infoset = self.infoset
+        if infoset:
+            return infoset.members
+        return self.event.members
+
+    @property
+    def actions(self) -> list[str]:
+        """The labels of the actions available at the node's current information set
+        or event, whichever applies.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        AttributeError
+            If this node currently belongs to no information set or event (a
+            terminal node).
+        """
+        infoset: Infoset = self.infoset
+        if infoset:
+            return infoset.actions
+        return self.event.actions
+
+    @property
+    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
+        """The probability of each action at the node's current chance event, keyed
+        by label.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the node does not currently belong to a chance event.
+        """
+        event: Event = self.event
+        if not event:
+            raise UndefinedOperationError(
+                "action probabilities are only defined at events"
+            )
+        resolved: c_GameInfoset = event._resolve()
+        result: dict = {}
+        for a in resolved.deref().GetActions():
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+                cython.cast(string, resolved.deref().GetActionProb(a))
+            )
+        return result
+
+    @property
+    def player(self) -> str | None:
+        """The label of the player associated with this node: the one who makes the
+        decision, if this is a personal node, or the chance player, if this is an
+        event.
+
+        `None` for a terminal node, which has no player.
+
+        .. versionchanged:: 17.0.0
+            Returns the player's label (or `None`) directly, rather than a lazy,
+            node-anchored view.
+        """
+        player: c_GamePlayer = self.node.deref().GetPlayer()
+        if not (player != cython.cast(c_GamePlayer, NULL)):
+            return None
+        return player.deref().GetLabel().decode("utf-8")
 
     @property
     def parent(self) -> Node | None:
@@ -419,33 +365,46 @@ class Node:
         return None
 
     @property
-    def prior_action(self) -> Action | None:
-        """The action which leads to this node.
+    def prior_action(self) -> Branch | None:
+        """The branch -- the parent node and the label of the action taken from it --
+        which leads to this node.
 
         If this is the root node, None is returned.
+
+        .. versionchanged:: 17.0.0
+            Returns a `Branch` (the parent node and the action's label) rather than
+            an `Action` object, following its removal.
         """
-        if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetPriorAction())
+        prior: c_GameAction = self.node.deref().GetPriorAction()
+        if prior != cython.cast(c_GameAction, NULL):
+            return Branch(self.parent, prior.deref().GetLabel().decode("utf-8"))
         return None
 
     @property
-    def own_prior_action(self) -> Action | None:
-        """The last action taken by the node's owner before reaching this node.
+    def own_prior_action(self) -> Branch | None:
+        """The last branch -- the node and the label of the action taken there -- at
+        which the node's owner acted before reaching this node.
 
         Returns
         -------
-        Action or None
-            The action object, or None if the player has not moved previously
+        Branch or None
+            The node at which the node's owner last acted, paired with the label of
+            the action taken there, or None if the player has not moved previously
             on the path to this node.
-        .. versionadded:: 16.5.0
 
-        See Also
-        --------
-        Infoset.own_prior_actions
+        .. versionadded:: 16.5.0
+        .. versionchanged:: 17.0.0
+            Returns a `Branch` (the node and the action's label) rather than an
+            `Action` object, following its removal.
         """
-        if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
-            return Action.wrap(self.node.deref().GetOwnPriorAction())
-        return None
+        prior: c_GameAction = self.node.deref().GetOwnPriorAction()
+        if not (prior != cython.cast(c_GameAction, NULL)):
+            return None
+        label = prior.deref().GetLabel().decode("utf-8")
+        cur: c_GameNode = self.node
+        while cur.deref().GetPriorAction() != prior:
+            cur = cur.deref().GetParent()
+        return Branch(Node.wrap(cur.deref().GetParent()), label)
 
     @property
     def prior_sibling(self) -> Node | None:

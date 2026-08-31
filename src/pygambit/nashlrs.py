@@ -6,21 +6,27 @@ from __future__ import annotations
 import itertools
 import pathlib
 import subprocess
-import sys
 
 import pygambit as gbt
 import pygambit.util as util
 
 
 def _generate_lrs_input(game: gbt.Game) -> str:
-    s = f"{len(game.players[0].strategies)} {len(game.players[1].strategies)}\n\n"
-    for st1 in game.players[0].strategies:
-        s += " ".join(str(gbt.Rational(game[st1, st2][game.players[0]]))
-                      for st2 in game.players[1].strategies) + "\n"
+    p1, p2 = game.players
+    s1 = game.get_strategies(p1)
+    s2 = game.get_strategies(p2)
+    s = f"{len(s1)} {len(s2)}\n\n"
+    for st1 in s1:
+        s += " ".join(
+            str(game.get_payoffs({p1: st1, p2: st2})[p1])
+            for st2 in s2
+        ) + "\n"
     s += "\n"
-    for st1 in game.players[0].strategies:
-        s += " ".join(str(gbt.Rational(game[st1, st2][game.players[1]]))
-                      for st2 in game.players[1].strategies) + "\n"
+    for st1 in s1:
+        s += " ".join(
+            str(game.get_payoffs({p1: st1, p2: st2})[p2])
+            for st2 in s2
+        ) + "\n"
     return s
 
 
@@ -46,24 +52,3 @@ def lrsnash_solve(game: gbt.Game,
         if result.returncode != 0:
             raise ValueError(f"PHC run failed with return code {result.returncode}")
         return _parse_lrs_output(game, result.stdout)
-
-
-def _read_game(fn: str) -> gbt.Game:
-    for reader in [gbt.read_efg, gbt.read_nfg, gbt.read_agg]:
-        try:
-            return reader(fn)
-        except Exception:
-            pass
-    raise OSError(f"Unable to read or parse {fn}")
-
-
-def main():
-    game = _read_game(sys.argv[1])
-    eqa = lrsnash_solve(game, "./lrsnash")
-    for eqm in eqa:
-        print("NE," +
-              ",".join(str(eqm[strat]) for player in game.players for strat in player.strategies))
-
-
-if __name__ == "__main__":
-    main()
