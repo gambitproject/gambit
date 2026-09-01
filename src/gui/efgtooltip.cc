@@ -832,7 +832,7 @@ void AppendMovePopup::BuildControls()
 
   m_hintText = new wxStaticText(
       m_contentPanel, wxID_ANY,
-      _("Tab past the last action to add another\nEscape cancels and closes this window. Enter "
+      _("Tab past the last action to add another.\nEscape cancels and closes this window. Enter "
         "accepts."));
   m_hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   wxFont hintFont = m_hintText->GetFont();
