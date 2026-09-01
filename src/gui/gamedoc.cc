@@ -22,9 +22,10 @@
 
 #include <sstream>
 #include <fstream>
+#include <set>
 
-#include "gambit.h"
-#include "core/tinyxml.h" // for XML parser for LoadDocument()
+#include "games.h"
+#include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()
 #include "gamedoc.h"
@@ -156,45 +157,40 @@ bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanElim
 
 int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
-void AnalysisWorkspace::Save(std::ostream &p_file) const
+std::vector<LegacyWorkspaceFile::Analysis> AnalysisWorkspace::Save() const
 {
-  std::for_each(m_profiles.begin(), m_profiles.end(),
-                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+  std::vector<LegacyWorkspaceFile::Analysis> result;
+  for (const auto &analysis : m_profiles) {
+    result.push_back(analysis->Save());
+  }
+  return result;
 }
 
-bool AnalysisWorkspace::Load(TiXmlNode *p_game)
+bool AnalysisWorkspace::Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses)
 {
   m_stratSupports.Reset();
 
   m_profiles.clear();
 
-  for (TiXmlNode *analysis = p_game->FirstChild("analysis"); analysis;
-       analysis = analysis->NextSibling()) {
-    const char *type = analysis->ToElement()->Attribute("type");
-    // const char *rep = analysis->ToElement()->Attribute("rep");
-    if (type && !strcmp(type, "list")) {
-      // Read in a list of profiles
-      // We need to try to guess whether the profiles are float or rational
-      bool isFloat = false;
-      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
-           profile = profile->NextSiblingElement()) {
-        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
-            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
-          isFloat = true;
-          break;
-        }
+  for (const auto &analysis : p_analyses) {
+    // We need to try to guess whether the profiles are float or rational
+    bool isFloat = false;
+    for (const auto &profile : analysis.profiles) {
+      if (profile.probabilities.find('.') != std::string::npos ||
+          profile.probabilities.find('e') != std::string::npos) {
+        isFloat = true;
+        break;
       }
-
-      if (isFloat) {
-        auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-      else {
-        auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
+    }
+    if (isFloat) {
+      auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
+    }
+    else {
+      auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
     }
   }
 
@@ -208,129 +204,72 @@ bool AnalysisWorkspace::Load(TiXmlNode *p_game)
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_workspaceModified(false),
-    m_workspace(this)
+  : m_game(p_game), m_gameModified(false), m_workspaceModified(false), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
-
-  std::ostringstream s;
-  SaveWorkspace(s);
+  ResetUndoHistory();
 }
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadWorkspace(const wxString &p_filename)
+GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 {
-  TiXmlDocument doc(p_filename.mb_str());
-  if (!doc.LoadFile()) {
-    // Some error occurred.  Do something smart later.
-    return false;
+  std::ifstream input(p_filename.mb_str());
+  if (!input) {
+    return {LoadResult::OpenFailed, nullptr};
   }
 
-  TiXmlNode *docroot = doc.FirstChild("gambit:document");
-
-  if (!docroot) {
-    // This is an "old-style" file that didn't have a proper root.
-    docroot = &doc;
-  }
-
-  TiXmlNode *game = docroot->FirstChild("game");
-  if (!game) {
-    // There ought to be at least one game child.  If not... umm...
-    return false;
-  }
-
-  TiXmlNode *efgfile = game->FirstChild("efgfile");
-  if (efgfile) {
-    try {
-      std::istringstream s(efgfile->FirstChild()->Value());
-      m_game = ReadGame(s);
-    }
-    catch (...) {
-      return false;
+  // First, see whether this is a Gambit workspace (.gbt) file.
+  try {
+    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
+    std::istringstream game_text(workspace.game);
+    auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
+    if (doc->m_workspace.Load(workspace.analyses)) {
+      doc->m_style.Load(workspace);
+      doc->SetFilename(p_filename);
+      doc->ResetUndoHistory();
+      return {LoadResult::Success, doc};
     }
   }
+  catch (const std::exception &) {
+    // Not a recognized (or not fully valid) workspace file; fall through to
+    // try it as a bare game file instead.
+  }
 
-  TiXmlNode *nfgfile = game->FirstChild("nfgfile");
-  if (nfgfile) {
-    try {
-      std::istringstream s(nfgfile->FirstChild()->Value());
-      m_game = ReadGame(s);
+  // Not a (valid) workspace -- try reading it as a bare .efg/.nfg file.
+  input.clear();
+  input.seekg(0);
+  try {
+    const Game game = ReadGame(input);
+    if (game->IsAgg()) {
+      return {LoadResult::UnsupportedRepresentation, nullptr};
     }
-    catch (...) {
-      return false;
-    }
+    auto doc = std::make_shared<GameDocument>(game);
+    doc->SetFilename(p_filename);
+    return {LoadResult::Success, doc};
   }
-
-  if (!efgfile && !nfgfile) {
-    // No game representation... punt!
-    return false;
+  catch (const InvalidFileException &) {
+    return {LoadResult::ParseFailed, nullptr};
   }
-
-  if (!m_workspace.Load(game)) {
-    return false;
-  }
-
-  TiXmlNode *colors = docroot->FirstChild("colors");
-  if (colors) {
-    m_style.SetColorXML(colors);
-  }
-  TiXmlNode *font = docroot->FirstChild("font");
-  if (font) {
-    m_style.SetFontXML(font);
-  }
-  TiXmlNode *layout = docroot->FirstChild("autolayout");
-  if (layout) {
-    m_style.SetLayoutXML(layout);
-  }
-  TiXmlNode *labels = docroot->FirstChild("labels");
-  if (labels) {
-    m_style.SetLabelXML(labels);
-  }
-  TiXmlNode *numbers = docroot->FirstChild("numbers");
-  if (numbers) {
-    int numDecimals = 4;
-    numbers->ToElement()->QueryIntAttribute("decimals", &numDecimals);
-    m_style.SetNumDecimals(numDecimals);
-  }
-
-  return true;
 }
 
 void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
-  p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-
-  p_file << "<gambit:document xmlns:gambit=\"http://gambit.sourceforge.net/\" version=\"0.1\">\n";
-
-  p_file << m_style.GetColorXML();
-  p_file << m_style.GetFontXML();
-
-  if (m_game->IsTree()) {
-    p_file << m_style.GetLayoutXML();
-    p_file << m_style.GetLabelXML();
+  LegacyWorkspaceFile workspace;
+  m_style.Save(workspace);
+  workspace.game_format = m_game->IsTree() ? "efg" : "nfg";
+  if (!m_game->IsTree()) {
+    workspace.layout.reset();
+    workspace.labels.reset();
   }
-
-  p_file << "<numbers decimals=\"" << m_style.NumDecimals() << "\"/>\n";
-
-  p_file << "<game>\n";
-
-  if (m_game->IsTree()) {
-    p_file << "<efgfile>\n";
-    m_game->Write(p_file, "efg");
-    p_file << "</efgfile>\n";
+  std::ostringstream game_text;
+  m_game->Write(game_text, workspace.game_format);
+  workspace.game = game_text.str();
+  if (!workspace.game.empty() && workspace.game.back() == '\n') {
+    workspace.game.pop_back();
   }
-  else {
-    p_file << "<nfgfile>\n";
-    m_game->Write(p_file, "nfg");
-    p_file << "</nfgfile>\n";
-  }
-
-  m_workspace.Save(p_file);
-
-  p_file << "</game>\n";
-
-  p_file << "</gambit:document>\n";
+  workspace.analyses = m_workspace.Save();
+  Gambit::WriteLegacyWorkspace(p_file, workspace);
 }
 
 void GameDocument::NotifyChanged(GameModificationType p_modifications)
@@ -343,12 +282,61 @@ void GameDocument::NotifyChanged(GameModificationType p_modifications)
                       GameModificationType::GameForm | GameModificationType::GamePayoffs)) {
     m_workspace.ResetForGameChange();
   }
+  if (p_modifications != GameModificationType::None) {
+    m_redoList.clear();
+    std::ostringstream s;
+    SaveWorkspace(s);
+    m_undoList.push_back(s.str());
+  }
   UpdateViews();
 }
 
 void GameDocument::UpdateViews()
 {
   std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
+}
+
+void GameDocument::ResetUndoHistory()
+{
+  m_undoList.clear();
+  m_redoList.clear();
+  std::ostringstream s;
+  SaveWorkspace(s);
+  m_undoList.push_back(s.str());
+}
+
+void GameDocument::RestoreSnapshot(const std::string &p_snapshot)
+{
+  std::istringstream input(p_snapshot);
+  const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
+  std::istringstream game_text(workspace.game);
+  m_game = ReadGame(game_text);
+  m_workspace.Load(workspace.analyses);
+  m_style.Load(workspace);
+}
+
+void GameDocument::Undo()
+{
+  if (!CanUndo()) {
+    return;
+  }
+  m_redoList.push_back(m_undoList.back());
+  m_undoList.pop_back();
+  RestoreSnapshot(m_undoList.back());
+  m_gameModified = m_workspaceModified = true;
+  UpdateViews();
+}
+
+void GameDocument::Redo()
+{
+  if (!CanRedo()) {
+    return;
+  }
+  m_undoList.push_back(m_redoList.back());
+  m_redoList.pop_back();
+  RestoreSnapshot(m_undoList.back());
+  m_gameModified = m_workspaceModified = true;
+  UpdateViews();
 }
 
 void GameDocument::PostPendingChanges()
@@ -396,11 +384,7 @@ void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_prof
   NotifyChanged(GameModificationType::Workspace);
 }
 
-void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
-{
-  p_list.AddOutput(p_output);
-  NotifyChanged(GameModificationType::Workspace);
-}
+void GameDocument::DoAnalysisOutputChanged() { NotifyChanged(GameModificationType::Workspace); }
 
 void GameDocument::DoSelectEquilibriumOutput(int p_index)
 {
@@ -430,12 +414,6 @@ void GameDocument::DoPreviousDominanceLevel()
 void GameDocument::DoTopDominanceLevel()
 {
   m_workspace.TopDominanceLevel();
-  UpdateViews();
-}
-
-void GameDocument::SetSelectNode(GameNode p_node)
-{
-  m_selectNode = p_node;
   UpdateViews();
 }
 
@@ -479,67 +457,139 @@ void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoNewPlayer()
+GamePlayer GameDocument::DoAddPlayer()
 {
-  const GamePlayer player = m_game->NewPlayer();
-  player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
-  if (!m_game->IsTree()) {
-    player->GetStrategy(1)->SetLabel("1");
+  std::set<std::string> playerLabels;
+  std::vector<std::string> labels;
+  for (const auto &player : m_game->GetPlayers()) {
+    playerLabels.insert(player->GetLabel());
+    labels.push_back(player->GetLabel());
+  }
+
+  int number = m_game->NumPlayers() + 1;
+  while (playerLabels.contains("Player " + lexical_cast<std::string>(number))) {
+    number++;
+  }
+  labels.push_back("Player " + lexical_cast<std::string>(number));
+
+  m_game->SetPlayers(labels);
+  NotifyChanged(GameModificationType::GameForm);
+  return m_game->GetPlayers().back();
+}
+
+void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_labels)
+{
+  m_game->RelabelPlayers(p_labels);
+  NotifyChanged(GameModificationType::GameLabels);
+}
+
+void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels)
+{
+  // Phase 1: structure (which players exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetPlayers(p_stableLabels);
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelPlayers(relabels);
   }
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
+void GameDocument::DoSetStrategies(GamePlayer p_player,
+                                   const std::vector<std::string> &p_stableLabels,
+                                   const std::vector<std::string> &p_labels)
 {
-  p_player->SetLabel(p_label.ToStdString());
-  NotifyChanged(GameModificationType::GameLabels);
-}
+  // Phase 1: structure (which strategies exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  m_game->SetStrategies(p_player, p_stableLabels);
 
-void GameDocument::DoNewStrategy(GamePlayer p_player)
-{
-  m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelStrategies(p_player, relabels);
+  }
   NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
-{
-  m_game->DeleteStrategy(p_strategy);
-  NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
-{
-  p_strategy->SetLabel(p_label.ToStdString());
-  NotifyChanged(GameModificationType::GameLabels);
 }
 
 void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
-  p_infoset->SetLabel(p_label.ToStdString());
+  p_infoset->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
+void GameDocument::DoRelabelActions(GameInfoset p_infoset,
+                                    const std::map<std::string, std::string> &p_labels)
 {
-  p_action->SetLabel(p_label.ToStdString());
+  m_game->RelabelActions(p_infoset, p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
+void GameDocument::DoSetActions(GameInfoset p_infoset,
+                                const std::vector<std::string> &p_stableLabels,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  m_game->SetChanceProbs(p_infoset, p_probs);
-  NotifyChanged(GameModificationType::GamePayoffs);
+  // Phase 1: structure (which actions exist, and in what order), resolved purely from
+  // p_stableLabels -- untouched by any pending rename in p_labels.
+  if (p_infoset->IsChanceInfoset()) {
+    m_game->SetEventActions(p_infoset, p_stableLabels, p_probs);
+  }
+  else {
+    m_game->SetMoveActions(p_infoset, p_stableLabels);
+  }
+
+  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
+  // a deletion in phase 1 is available for reuse here.
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  if (!relabels.empty()) {
+    m_game->RelabelActions(p_infoset, relabels);
+  }
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  m_game->SetInfoset(p_node, p_infoset);
+  if (p_node->GetInfoset() == p_infoset) {
+    return;
+  }
+  std::vector<GameNode> nodes(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  nodes.push_back(p_node);
+  m_game->MakeInfoset(nodes, p_infoset->GetPlayer(), p_infoset->GetLabel());
   NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
-  m_game->LeaveInfoset(p_node);
+  const GameInfoset infoset = p_node->GetInfoset();
+  if (!infoset) {
+    return;
+  }
+  std::vector<GameNode> members(infoset->GetMembers().begin(), infoset->GetMembers().end());
+  if (members.size() == 1) {
+    // Already a singleton: a no-op that keeps the infoset's identity and label.
+    return;
+  }
+  m_game->MakeInfoset({p_node}, infoset->GetPlayer(), "");
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -549,19 +599,9 @@ void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertAction(GameNode p_node)
-{
-  if (!p_node || !p_node->GetInfoset()) {
-    return;
-  }
-  const GameAction action = m_game->InsertAction(p_node->GetInfoset());
-  action->SetLabel(std::to_string(action->GetNumber()));
-  NotifyChanged(GameModificationType::GameForm);
-}
-
 void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
-  p_node->SetLabel(p_label.ToStdString());
+  p_node->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
@@ -571,15 +611,29 @@ void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
+void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  m_game->InsertMove(p_node, p_player, p_actions, true);
+  if (p_player->IsChance()) {
+    m_game->AppendEvent(p_node, p_labels, p_probs);
+  }
+  else {
+    m_game->AppendMove(p_node, p_player, p_labels);
+  }
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+                                const std::vector<std::string> &p_labels,
+                                const std::vector<Number> &p_probs)
 {
-  m_game->InsertMove(p_node, p_infoset);
+  if (p_player->IsChance()) {
+    m_game->InsertEvent(p_node, p_labels, p_probs);
+  }
+  else {
+    m_game->InsertMove(p_node, p_player, p_labels);
+  }
   NotifyChanged(GameModificationType::GameForm);
 }
 
@@ -612,37 +666,74 @@ void GameDocument::DoDeleteTree(GameNode p_node)
 
 void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
+  if (p_player->IsChance() || p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_infoset, p_player);
-    NotifyChanged(GameModificationType::GameForm);
+    return;
   }
+  if (p_infoset->GetPlayer() == p_player) {
+    return;
+  }
+  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  m_game->MakeInfoset(members, p_player, p_infoset->GetLabel());
+  NotifyChanged(GameModificationType::GameForm);
 }
 
 void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
-  if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
-    // Currently don't support switching nodes to/from chance player
-    m_game->SetPlayer(p_node->GetInfoset(), p_player);
-    NotifyChanged(GameModificationType::GameForm);
+  DoSetPlayer(p_node->GetInfoset(), p_player);
+}
+
+std::string GenerateOutcomeLabel(const Game &p_game)
+{
+  std::set<std::string> outcomeLabels;
+  for (const auto &outcome : p_game->GetOutcomes()) {
+    outcomeLabels.insert(outcome->GetLabel());
   }
+  int outc = p_game->GetOutcomes().size() + 1;
+  while (outcomeLabels.contains("Outcome " + std::to_string(outc))) {
+    outc++;
+  }
+  return "Outcome " + std::to_string(outc);
 }
 
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->SetOutcome(p_node, m_game->NewOutcome());
+  m_game->MakeOutcome({p_node}, std::vector<Number>(m_game->NumPlayers(), Number()),
+                      GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
-  p_profile->SetOutcome(m_game->NewOutcome());
+  std::vector<GameStrategy> strategies;
+  strategies.reserve(m_game->NumPlayers());
+  for (const auto &player : m_game->GetPlayers()) {
+    strategies.push_back(p_profile->GetStrategy(player));
+  }
+  m_game->MakeOutcome({strategies}, std::vector<Number>(m_game->NumPlayers(), Number()),
+                      GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  m_game->SetOutcome(p_node, p_outcome);
+  if (!p_outcome) {
+    m_game->MakeOutcomeNull({p_node});
+  }
+  else {
+    std::vector<GameNode> members{p_node};
+    for (const auto &node : m_game->GetNodes()) {
+      if (node != p_node && node->GetOutcome() == p_outcome) {
+        members.push_back(node);
+      }
+    }
+    std::vector<Number> payoffs;
+    payoffs.reserve(m_game->NumPlayers());
+    for (const auto &player : m_game->GetPlayers()) {
+      payoffs.emplace_back(p_outcome->GetPayoff<std::string>(player));
+    }
+    m_game->MakeOutcome(members, payoffs, p_outcome->GetLabel());
+  }
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
@@ -664,12 +755,12 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     parsedPayoffs.push_back(lexical_cast<Rational>(value.ToStdString()));
   }
 
-  const std::string label = p_label.ToStdString();
+  const std::string label = p_label.ToStdString(wxConvUTF8);
   GameOutcome outcome = p_node->GetOutcome();
 
-  bool changed = !outcome;
+  bool changed = outcome->IsNull();
 
-  if (outcome) {
+  if (!outcome->IsNull()) {
     changed = outcome->GetLabel() != label;
 
     if (!changed) {
@@ -687,15 +778,20 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
     return;
   }
 
-  if (!outcome) {
-    outcome = GetGame()->NewOutcome();
-    GetGame()->SetOutcome(p_node, outcome);
+  if (outcome->IsNull()) {
+    std::vector<Number> payoffs;
+    payoffs.reserve(p_payoffs.size());
+    for (const auto &value : p_payoffs) {
+      payoffs.emplace_back(value.ToStdString());
+    }
+    m_game->MakeOutcome({p_node}, payoffs, label);
   }
-
-  outcome->SetLabel(label);
-
-  for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
-    outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
+  else {
+    outcome->SetLabel(label);
+    for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
+      outcome->SetPayoff(GetGame()->GetPlayer(player),
+                         Number(p_payoffs[player - 1].ToStdString()));
+    }
   }
 
   NotifyChanged(GameModificationType::GamePayoffs);
@@ -703,21 +799,55 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
 
 void GameDocument::DoRemoveOutcome(GameNode p_node)
 {
-  if (!p_node || !p_node->GetOutcome()) {
+  if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
   }
-  m_game->SetOutcome(p_node, nullptr);
+  m_game->MakeOutcomeNull({p_node});
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
+void GameDocument::DoRemoveOutcome(const PureStrategyProfile &p_profile)
 {
-  const GameOutcome outcome = m_game->NewOutcome();
-  outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
-  for (const auto &player : m_game->GetPlayers()) {
-    outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
+  if (p_profile->GetOutcome()->IsNull()) {
+    return;
   }
-  m_game->SetOutcome(p_node, outcome);
+  std::vector<GameStrategy> strategies;
+  strategies.reserve(m_game->NumPlayers());
+  for (const auto &player : m_game->GetPlayers()) {
+    strategies.push_back(p_profile->GetStrategy(player));
+  }
+  m_game->MakeOutcomeNull({strategies});
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
+                                 const std::vector<Number> &p_payoffs, const std::string &p_label)
+{
+  std::vector<std::vector<GameStrategy>> contingencies;
+  contingencies.reserve(p_profiles.size());
+  for (const auto &profile : p_profiles) {
+    std::vector<GameStrategy> strategies;
+    strategies.reserve(m_game->NumPlayers());
+    for (const auto &player : m_game->GetPlayers()) {
+      strategies.push_back(profile->GetStrategy(player));
+    }
+    contingencies.push_back(strategies);
+  }
+  m_game->MakeOutcome(contingencies, p_payoffs, p_label);
+  NotifyChanged(GameModificationType::GamePayoffs);
+}
+
+void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                                    const std::vector<wxString> &p_payoffs)
+{
+  if (p_payoffs.size() != m_game->NumPlayers()) {
+    throw std::invalid_argument("Incorrect number of payoff values");
+  }
+  p_outcome->SetLabel(p_label.ToStdString(wxConvUTF8));
+  for (size_t index = 0; index < p_payoffs.size(); ++index) {
+    p_outcome->SetPayoff(m_game->GetPlayer(static_cast<int>(index) + 1),
+                         Number(p_payoffs[index].ToStdString()));
+  }
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 

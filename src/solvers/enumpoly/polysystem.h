@@ -20,8 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLYSYSTEM_H
-#define POLYSYSTEM_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_POLYSYSTEM_H
+#define GAMBIT_SOLVERS_ENUMPOLY_POLYSYSTEM_H
+
+#include <list>
+#include <memory>
 
 #include "poly.h"
 
@@ -50,10 +53,6 @@ public:
   bool operator==(const PolynomialSystem<T> &rhs) const
   {
     return m_space == rhs.m_space && m_system == rhs.m_system;
-  }
-  bool operator!=(const PolynomialSystem<T> &rhs) const
-  {
-    return m_space != rhs.m_space || m_system != rhs.m_system;
   }
   void push_back(const Polynomial<T> &x) { m_system.push_back(x); }
   void push_back(const PolynomialSystem<T> &x)
@@ -109,4 +108,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // POLYSYSTEM_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_POLYSYSTEM_H

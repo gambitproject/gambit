@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gambit/writer.h
+// FILE: src/games/writer.h
 // Classes for writing out games to various formats
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_WRITER_H
-#define LIBGAMBIT_WRITER_H
+#ifndef GAMBIT_GAMES_WRITER_H
+#define GAMBIT_GAMES_WRITER_H
 
 #include <string>
 
@@ -92,4 +92,4 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_WRITER_H
+#endif // GAMBIT_GAMES_WRITER_H

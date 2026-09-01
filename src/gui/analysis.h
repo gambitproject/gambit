@@ -23,7 +23,11 @@
 #ifndef GAMBIT_GUI_ANALYSIS_H
 #define GAMBIT_GUI_ANALYSIS_H
 
-class TiXmlNode;
+#include <optional>
+#include <type_traits>
+
+#include "games/workspace.h"
+#include "nashspec.h"
 
 //
 // This file contains classes which manage the output of analysis tools.
@@ -41,6 +45,7 @@ class AnalysisOutput {
 protected:
   GameDocument *m_doc;
   wxString m_label, m_description, m_command;
+  std::optional<NashComputationSpec> m_computation;
 
 public:
   /// @name Lifecycle
@@ -71,6 +76,15 @@ public:
   /// Set the command used to generate the list
   void SetCommand(const wxString &p_command) { m_command = p_command; }
 
+  /// Get the typed specification used to generate the list, if available
+  const std::optional<NashComputationSpec> &GetComputationSpec() const { return m_computation; }
+
+  /// Set the typed specification used to generate the list
+  void SetComputationSpec(const NashComputationSpec &p_computation)
+  {
+    m_computation = p_computation;
+  }
+
   /// The number of profiles in the list
   virtual int NumProfiles() const = 0;
 
@@ -82,6 +96,9 @@ public:
 
   /// Are these behavior or strategy profiles natively?
   virtual bool IsBehavior() const = 0;
+
+  /// Are these profiles computed in floating-point (as opposed to exact rational) precision?
+  virtual bool IsFloatingPoint() const = 0;
 
   //@}
 
@@ -98,13 +115,20 @@ public:
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
-  virtual void AddOutput(const wxString &) = 0;
+  /// Compare the probability of an action in two profiles, for ordering
+  /// them; negative, zero, or positive as the probability in p_left is less
+  /// than, equal to, or greater than that in p_right.  Probabilities are
+  /// compared in the type the profiles are stored in, so that exact
+  /// representations are ordered exactly.  A profile which does not define
+  /// behavior at the action's information set orders after those which do.
+  virtual int CompareActionProb(int p_action, int p_left, int p_right) const = 0;
+  /// Compare the probability of a strategy in two profiles, as above
+  virtual int CompareStrategyProb(int p_strategy, int p_left, int p_right) const = 0;
 
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
-  /// Write a profile list to XML savefile
-  virtual void Save(std::ostream &) const = 0;
+  virtual LegacyWorkspaceFile::Analysis Save() const = 0;
 };
 
 //!
@@ -140,6 +164,9 @@ public:
   /// Are these behavior or strategy profiles natively?
   bool IsBehavior() const override { return m_isBehav; }
 
+  /// Are these profiles computed in floating-point (as opposed to exact rational) precision?
+  bool IsFloatingPoint() const override { return std::is_same_v<T, double>; }
+
   /// The number of profiles in the list
   int NumProfiles() const override;
 
@@ -156,6 +183,8 @@ public:
   std::string GetActionProb(int p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
+  int CompareActionProb(int p_action, int p_left, int p_right) const override;
+  int CompareStrategyProb(int p_strategy, int p_left, int p_right) const override;
 
   /// Get the index of the currently selected profile
   int GetCurrent() const override { return m_current; }
@@ -169,7 +198,8 @@ public:
   //! @name Adding profiles to the list
   //!
   //@{
-  void AddOutput(const wxString &) override;
+  void AddProfile(const MixedStrategyProfile<T> &);
+  void AddProfile(const MixedBehaviorProfile<T> &);
   /// Map all behavior profiles to corresponding mixed profiles
   void BuildNfg() override;
 
@@ -181,11 +211,16 @@ public:
   //! @name Saving and loading profile lists
   //!
   //@{
-  /// Build a profile list from XML savefile
-  void Load(TiXmlNode *analysis);
-  /// Write a profile list to XML savefile
-  void Save(std::ostream &) const override;
+  void Load(const LegacyWorkspaceFile::Analysis &p_analysis);
+  LegacyWorkspaceFile::Analysis Save() const override;
   //@}
+
+private:
+  /// The probability of an action in a profile, empty if the profile does
+  /// not define behavior at the action's information set
+  std::optional<T> GetActionProbEntry(int p_action, int p_index) const;
+  /// The probability of a strategy in a profile
+  std::optional<T> GetStrategyProbEntry(int p_strategy, int p_index) const;
 };
 
 } // namespace Gambit::GUI

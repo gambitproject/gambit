@@ -26,6 +26,7 @@
 #include <memory>
 
 #include "game.h"
+#include "stratspt.h"
 
 namespace Gambit {
 
@@ -82,9 +83,6 @@ public:
 
   /// Get the outcome that results from the profile
   virtual GameOutcome GetOutcome() const = 0;
-
-  /// Set the outcome that results from the profile
-  virtual void SetOutcome(GameOutcome p_outcome) = 0;
 
   /// Get the payoff to the player resulting from the profile
   virtual Rational GetPayoff(const GamePlayer &p_player) const = 0;
@@ -182,8 +180,6 @@ public:
       }
       return m_profile.operator->() == other.m_profile.operator->();
     }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
 
     PureStrategyProfile &operator*() { return m_profile; }
     const PureStrategyProfile &operator*() const { return m_profile; }

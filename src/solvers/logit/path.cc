@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/logit/path.cc
+// FILE: src/solvers/logit/path.cc
 // Implementation of generic smooth path-following algorithm.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <cmath>
 #include <algorithm> // for std::max
 
-#include "gambit.h"
+#include "games.h"
 #include "path.h"
 
 namespace Gambit {
@@ -125,13 +125,12 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
-TracePathResult
-PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-                      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                      Vector<double> &x, TraceDirection p_direction, size_t p_trackingIndex,
-                      TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
-                      CriterionFunctionType p_criterion,
-                      CriterionBracketFunctionType p_criterionBracket) const
+TracePathResult PathTracer::TracePath(
+    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
+    TraceDirection p_direction, size_t p_trackingIndex, TerminationFunctionType p_terminate,
+    CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
+    CriterionBracketFunctionType p_criterionBracket, const CancelToken &p_cancel) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
   const double c_maxDist = 0.4;  // maximal distance to curve
@@ -167,6 +166,8 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   }
 
   while (!p_terminate(x)) {
+    p_cancel.Check();
+
     bool accept = true;
 
     if (std::abs(h) <= c_hmin) {

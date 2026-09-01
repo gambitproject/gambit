@@ -66,18 +66,10 @@ class GameFrame final : public wxFrame, public GameView {
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
-  void OnEditInsertMove(wxCommandEvent &);
-  void OnEditInsertAction(wxCommandEvent &);
-  void OnEditDeleteTree(wxCommandEvent &);
-  void OnEditDeleteParent(wxCommandEvent &);
-  void OnEditRemoveOutcome(wxCommandEvent &);
-  void OnEditReveal(wxCommandEvent &);
+  void OnEditUndo(wxCommandEvent &);
+  void OnEditRedo(wxCommandEvent &);
 
-  void OnEditNode(wxCommandEvent &);
-  void OnEditMove(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
-
-  void OnEditNewPlayer(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewZoom(wxCommandEvent &);
@@ -85,8 +77,6 @@ class GameFrame final : public wxFrame, public GameView {
 
   void OnFormatLayout(wxCommandEvent &);
   void OnFormatLabels(wxCommandEvent &);
-  void OnFormatDecimalsAdd(wxCommandEvent &);
-  void OnFormatDecimalsDelete(wxCommandEvent &);
   void OnFormatFonts(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
@@ -108,7 +98,7 @@ class GameFrame final : public wxFrame, public GameView {
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  GameFrame(wxWindow *p_parent, GameDocument *p_doc);
+  GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~GameFrame() override;
 
   DECLARE_EVENT_TABLE()

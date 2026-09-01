@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametable.h
+// FILE: src/games/gametable.h
 // Declaration of strategic game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMETABLE_H
-#define GAMETABLE_H
+#ifndef GAMBIT_GAMES_GAMETABLE_H
+#define GAMBIT_GAMES_GAMETABLE_H
 
 #include "gameexpl.h"
 
@@ -40,7 +40,18 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void RebuildTable(const std::vector<long> &old_radices);
+  /// Rebuild the outcome table after the strategies of p_player have changed.
+  /// p_oldToNew maps old strategy indices to new index, or to -1 if the strategy was removed.
+  void RebuildTable(const std::vector<long> &old_radices, long p_player,
+                    const std::vector<long> &p_oldToNew);
+  /// Resolves p_contingencies to the flat m_results indices they refer to, validating that each
+  /// contingency gives exactly one strategy per player and is referenced only once.
+  std::set<long>
+  ResolveContingencies(const std::vector<std::vector<GameStrategy>> &p_contingencies) const;
+  /// Returns the subset of p_covered no longer referenced by any contingency outside p_selected.
+  std::set<const GameOutcomeRep *>
+  ComputeAbsorbedOutcomes(const std::set<long> &p_selected,
+                          const std::set<const GameOutcomeRep *> &p_covered) const;
   //@}
 
 public:
@@ -49,6 +60,9 @@ public:
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
   explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+  GameOutcome MakeOutcome(const std::vector<std::vector<GameStrategy>> &,
+                          const std::vector<Number> &, const std::string &) override;
+  void MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &) override;
   Game Copy() const override;
   //@}
 
@@ -75,8 +89,7 @@ public:
   //@{
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
-  /// Creates a new player in the game, with no moves
-  GamePlayer NewPlayer() override;
+  void SetPlayers(const std::vector<std::string> &) override;
   //@}
 
   /// @name Nodes
@@ -89,30 +102,16 @@ public:
   size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   //@}
 
-  /// @name Outcomes
-  //@{
-  /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override;
-  //@}
-
   /// @name Strategies
   //@{
-  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
-  void DeleteStrategy(const GameStrategy &p_strategy) override;
+  void RelabelStrategies(const GamePlayer &, const std::map<std::string, std::string> &) override;
+  void SetStrategies(const GamePlayer &, const std::vector<std::string> &) override;
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a file in .nfg outcome format
   void WriteNfgFile(std::ostream &) const override;
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
-  //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
@@ -125,4 +124,4 @@ public:
 
 } // namespace Gambit
 
-#endif // GAMETABLE_H
+#endif // GAMBIT_GAMES_GAMETABLE_H

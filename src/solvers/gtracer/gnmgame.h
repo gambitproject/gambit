@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/gnmgame.h
+// FILE: src/solvers/gtracer/gnmgame.h
 // Definition of basic game representation class in Gametracer
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -22,8 +22,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_GNMGAME_H
-#define GAMBIT_GTRACER_GNMGAME_H
+#ifndef GAMBIT_SOLVERS_GTRACER_GNMGAME_H
+#define GAMBIT_SOLVERS_GTRACER_GNMGAME_H
 
 #include "cmatrix.h"
 
@@ -119,4 +119,4 @@ protected:
 
 } // end namespace Gambit::gametracer
 
-#endif // GAMBIT_GTRACER_GNMGAME_H
+#endif // GAMBIT_SOLVERS_GTRACER_GNMGAME_H

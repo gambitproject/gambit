@@ -20,12 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GAMES_TREELAYOUT_H
-#define GAMBIT_GAMES_TREELAYOUT_H
+#ifndef GAMBIT_GAMES_LAYOUT_H
+#define GAMBIT_GAMES_LAYOUT_H
 
 #include <map>
 
-#include "gambit.h"
 #include "game.h"
 
 namespace Gambit {
@@ -34,7 +33,6 @@ struct LayoutEntry {
   friend class Layout;
   double m_offset{-1};        // Cartesian coordinates of node
   int m_level, m_sublevel{0}; // depth of the node in tree
-  bool m_inSupport{true};
 
   explicit LayoutEntry(int p_level) : m_level(p_level) {}
 };
@@ -65,7 +63,7 @@ public:
   double GetMaxOffset() const { return m_maxOffset; }
 };
 
-inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
+[[nodiscard]] inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
 {
   auto layout = std::make_shared<Layout>(p_game);
   layout->LayoutTree(p_game);
@@ -74,4 +72,4 @@ inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
 
 } // namespace Gambit
 
-#endif // GAMBIT_GAMES_TREELAYOUT_H
+#endif // GAMBIT_GAMES_LAYOUT_H

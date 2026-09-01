@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/file.cc
+// FILE: src/games/file.cc
 // Parser for reading game savefiles
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,18 +20,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cctype>
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <algorithm>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameagg.h"
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
 
 using namespace Gambit;
+
+// std::isspace/std::isdigit are undefined behavior when given a (possibly
+// negative) plain `char` other than EOF; a UTF-8 continuation or lead byte
+// has the high bit set and so is negative on a platform with signed char.
+// These wrappers convert to `unsigned char` first, restricting the check to
+// the ASCII whitespace/digit characters that terminate lexer tokens.
+bool IsAsciiSpace(char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; }
+bool IsAsciiDigit(char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; }
 
 using GameFileToken = enum {
   TOKEN_NUMBER = 0,
@@ -120,7 +130,7 @@ GameFileToken GameFileLexer::GetNextToken()
     return (m_lastToken = TOKEN_EOF);
   }
 
-  while (isspace(c)) {
+  while (IsAsciiSpace(c)) {
     ReadChar(c);
     if (m_file.eof()) {
       return (m_lastToken = TOKEN_EOF);
@@ -139,12 +149,12 @@ GameFileToken GameFileLexer::GetNextToken()
   else if (c == ',') {
     return (m_lastToken = TOKEN_COMMA);
   }
-  else if (isdigit(c) || c == '-' || c == '+') {
+  else if (IsAsciiDigit(c) || c == '-' || c == '+') {
     std::string buf;
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -157,7 +167,7 @@ GameFileToken GameFileLexer::GetNextToken()
     if (c == '.') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -165,12 +175,12 @@ GameFileToken GameFileLexer::GetNextToken()
       if (c == 'e' || c == 'E') {
         buf += c;
         ReadChar(c);
-        if (c != '+' && c != '-' && !isdigit(c)) {
+        if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
           OnParseError("Invalid Token +/-");
         }
         buf += c;
         ReadChar(c);
-        while (!m_file.eof() && isdigit(c)) {
+        while (!m_file.eof() && IsAsciiDigit(c)) {
           buf += c;
           ReadChar(c);
         }
@@ -183,7 +193,7 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == '/') {
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -194,12 +204,12 @@ GameFileToken GameFileLexer::GetNextToken()
     else if (c == 'e' || c == 'E') {
       buf += c;
       ReadChar(c);
-      if (c != '+' && c != '-' && !isdigit(c)) {
+      if (c != '+' && c != '-' && !IsAsciiDigit(c)) {
         OnParseError("Invalid Token +/-");
       }
       buf += c;
       ReadChar(c);
-      while (!m_file.eof() && isdigit(c)) {
+      while (!m_file.eof() && IsAsciiDigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -218,7 +228,7 @@ GameFileToken GameFileLexer::GetNextToken()
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && isdigit(c)) {
+    while (!m_file.eof() && IsAsciiDigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -240,7 +250,7 @@ GameFileToken GameFileLexer::GetNextToken()
       if (a == '\n') {
         IncreaseLine();
       }
-    } while (!m_file.eof() && isspace(a));
+    } while (!m_file.eof() && IsAsciiSpace(a));
 
     if (a == '\"') {
       bool lastslash = false;
@@ -275,14 +285,14 @@ GameFileToken GameFileLexer::GetNextToken()
         if (a == '\n') {
           IncreaseLine();
         }
-      } while (!isspace(a));
+      } while (!IsAsciiSpace(a));
     }
 
     return (m_lastToken = TOKEN_TEXT);
   }
 
   m_lastText = "";
-  while (!m_file.eof() && !isspace(c)) {
+  while (!m_file.eof() && !IsAsciiSpace(c)) {
     m_lastText += c;
     ReadChar(c);
   }
@@ -317,6 +327,53 @@ public:
     return m_players[p_player - 1].m_strategies[p_strategy];
   }
 };
+
+/// Normalizes labels in place so the resulting set is distinct and nonempty:
+/// empty labels are given a suffix and repeated labels are de-duplicated by
+/// appending "_n", choosing the next n not already present in the scope.
+/// `p_get(element)` reads an element's label and `p_set(element, label)`
+/// writes it, so this works both on a container of game objects (via GetLabel/SetLabel)
+/// and on a container of raw label strings (read/write the string directly).
+template <class Container, class Getter, class Setter>
+void NormalizeLabels(Container &&p_container, Getter p_get, Setter p_set)
+{
+  // NOLINTBEGIN(misc-const-correctness)
+  std::map<std::string, std::size_t> counts;
+  std::set<std::string> used;
+  // NOLINTEND(misc-const-correctness)
+  for (auto &&element : p_container) {
+    counts[p_get(element)] += 1;
+    used.insert(p_get(element));
+  }
+  // NOLINTBEGIN(misc-const-correctness)
+  std::map<std::string, std::size_t> visited;
+  // NOLINTEND(misc-const-correctness)
+  for (auto &&element : p_container) {
+    const auto label = p_get(element);
+    // A special case: If only one label is the empty string we still want to
+    // convert it to "_1"
+    if (counts[label] == 1 && label != "") {
+      continue;
+    }
+    // Generate the next "label_n" that is not already used in this scope, so
+    // that e.g. {"x", "x", "x_1"} does not renumber to a duplicate "x_1".
+    std::string candidate;
+    do {
+      const auto index = ++visited[label];
+      candidate = label + "_" + std::to_string(index);
+    } while (used.contains(candidate));
+    used.insert(candidate);
+    p_set(element, candidate);
+  }
+}
+
+/// Normalizes a list of raw label strings.
+template <class Container> void NormalizeLabelStrings(Container &p_labels)
+{
+  NormalizeLabels(
+      p_labels, [](const std::string &s) { return s; },
+      [](std::string &s, const std::string &v) { s = v; });
+}
 
 void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 {
@@ -384,39 +441,82 @@ void ParseNfgHeader(GameFileLexer &p_state, TableFileGame &p_data)
   }
 }
 
-void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
+struct NfgOutcomeRecords {
+  std::vector<std::string> m_labels;
+  std::vector<std::vector<Number>> m_payoffs;
+};
+
+NfgOutcomeRecords ReadOutcomeList(GameFileLexer &p_parser, const Game &p_nfg)
 {
   auto players = p_nfg->GetPlayers();
   p_parser.GetNextToken();
 
+  // Buffer raw labels + payoffs; which records become outcomes depends on the index table
+  NfgOutcomeRecords records;
+
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
-    auto outcome = p_nfg->NewOutcome();
-    outcome->SetLabel(p_parser.GetLastText());
+    records.m_labels.push_back(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    for (auto player : players) {
+    std::vector<Number> payoffs;
+    for (size_t i = 0; i < players.size(); ++i) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-      outcome->SetPayoff(player, Number(p_parser.GetLastText()));
+      payoffs.emplace_back(p_parser.GetLastText());
       p_parser.AcceptNextToken(TOKEN_COMMA);
     }
+    records.m_payoffs.push_back(payoffs);
+
     p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_parser.GetNextToken();
   }
-
   p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_parser.GetNextToken();
+  return records;
 }
 
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
-  ReadOutcomeList(p_parser, p_nfg);
-  for (const auto &profile : StrategyContingencies(p_nfg)) {
+  const auto records = ReadOutcomeList(p_parser, p_nfg);
+  // First pass: the outcome id at each contingency, in iteration order.
+  std::vector<int> ids;
+  for ([[maybe_unused]] const auto &profile : StrategyContingencies(p_nfg)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
-    if (const int outcomeId = std::stoi(p_parser.GetLastText())) {
-      profile->SetOutcome(p_nfg->GetOutcome(outcomeId));
-    }
+    ids.push_back(std::stoi(p_parser.GetLastText()));
     p_parser.GetNextToken();
+  }
+  const std::set<int> referenced(ids.begin(), ids.end());
+  std::vector<std::string> labels;
+  for (size_t i = 0; i < records.m_labels.size(); ++i) {
+    if (referenced.contains(static_cast<int>(i) + 1)) {
+      labels.push_back(records.m_labels[i]);
+    }
+  }
+  NormalizeLabelStrings(labels);
+  std::map<int, std::string> labelById;
+  {
+    auto label_it = labels.begin();
+    for (size_t i = 0; i < records.m_labels.size(); ++i) {
+      if (referenced.contains(static_cast<int>(i) + 1)) {
+        labelById.emplace(static_cast<int>(i) + 1, *label_it++);
+      }
+    }
+  }
+  // Second pass: group each referenced contingency by the outcome id attached to it.
+  std::map<int, std::vector<std::vector<GameStrategy>>> contingenciesById;
+  auto id_it = ids.begin();
+  for (const auto &profile : StrategyContingencies(p_nfg)) {
+    if (const int outcomeId = *id_it++) {
+      std::vector<GameStrategy> strategies;
+      strategies.reserve(p_nfg->NumPlayers());
+      for (const auto &player : p_nfg->GetPlayers()) {
+        strategies.push_back(profile->GetStrategy(player));
+      }
+      contingenciesById[outcomeId].push_back(strategies);
+    }
+  }
+  for (const auto &[outcomeId, contingencies] : contingenciesById) {
+    p_nfg->MakeOutcome(contingencies, records.m_payoffs[outcomeId - 1], labelById.at(outcomeId));
   }
 }
 
@@ -442,11 +542,30 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   nfg->SetTitle(p_data.m_title);
   nfg->SetDescription(p_data.m_comment);
 
+  std::vector<std::string> playerLabels;
   for (auto player : nfg->GetPlayers()) {
-    player->SetLabel(p_data.GetPlayer(player->GetNumber()));
+    playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
+  }
+  NormalizeLabelStrings(playerLabels);
+  std::map<std::string, std::string> playerRelabels;
+  size_t playerIndex = 0;
+  for (auto player : nfg->GetPlayers()) {
+    playerRelabels[player->GetLabel()] = playerLabels[playerIndex++];
+  }
+  nfg->RelabelPlayers(playerRelabels);
+
+  for (auto player : nfg->GetPlayers()) {
+    std::vector<std::string> strategyLabels;
     for (auto strategy : player->GetStrategies()) {
-      strategy->SetLabel(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
+      strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
+    NormalizeLabelStrings(strategyLabels);
+    std::map<std::string, std::string> labels;
+    size_t index = 0;
+    for (auto strategy : player->GetStrategies()) {
+      labels[strategy->GetLabel()] = strategyLabels[index++];
+    }
+    nfg->RelabelStrategies(player, labels);
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
@@ -463,48 +582,67 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
 //                  Temporary representation classes
 //=========================================================================
 
+/// An outcome definition encountered during the parse.  Outcomes are not
+/// created until the whole tree has been read, so that their labels can be
+/// normalized in one pass before creation, as MakeOutcome enforces
+/// the label requirements at creation time.
+struct OutcomeRecord {
+  std::string m_label;
+  std::vector<Number> m_payoffs;
+};
+
 class TreeData {
 public:
-  std::map<int, GameOutcome> m_outcomeMap;
+  std::map<int, OutcomeRecord> m_outcomeRecords;
+  /// Outcome ids in order of first occurrence in the file; determines the
+  /// creation order (and hence numbering) of the outcomes, matching the
+  /// order in which the previous implementation created them.
+  std::vector<int> m_outcomeOrder;
+  /// Deferred node-to-outcome attachments, replayed after outcomes are created.
+  std::vector<std::pair<GameNode, int>> m_nodeOutcomes;
   std::map<int, std::map<int, GameInfoset>> m_infosetMap;
 };
 
 void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
+  // Buffer the raw player labels so they can be normalized (made unique and nonempty)
+  // before the player objects are created.
+  // NOLINTBEGIN(misc-const-correctness)
+  std::vector<std::string> player_labels;
+  // NOLINTEND(misc-const-correctness)
   while (p_state.GetNextToken() == TOKEN_TEXT) {
-    p_game->NewPlayer()->SetLabel(p_state.GetLastText());
+    player_labels.push_back(p_state.GetLastText());
   }
   p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
+  NormalizeLabelStrings(player_labels);
+  if (!player_labels.empty()) {
+    p_game->SetPlayers(player_labels);
+  }
 }
 
 void CheckOutcomeDefinition(const GameFileLexer &p_state, int p_outcomeId,
-                            const GameOutcome &p_outcome, const std::string &p_label,
-                            const GameRep::Players &p_players,
+                            const OutcomeRecord &p_record, const std::string &p_label,
                             const std::vector<Number> &p_payoffs)
 {
-  if (p_outcome->GetLabel() != p_label) {
+  if (p_record.m_label != p_label) {
     p_state.OnParseError("Outcome label does not match previous definition "
                          "(outcome " +
                          std::to_string(p_outcomeId) + ")");
   }
-
-  if (p_players.size() != p_payoffs.size()) {
+  if (p_record.m_payoffs.size() != p_payoffs.size()) {
     p_state.OnParseError("Outcome payoff count mismatch "
                          "(outcome " +
                          std::to_string(p_outcomeId) + ")");
   }
-
-  auto player_it = p_players.begin();
-  for (const auto &payoff : p_payoffs) {
-    if (p_outcome->GetPayoff<std::string>(*player_it) !=
-        static_cast<const std::string &>(payoff)) {
+  for (size_t i = 0; i < p_payoffs.size(); ++i) {
+    if (static_cast<const std::string &>(p_record.m_payoffs[i]) !=
+        static_cast<const std::string &>(p_payoffs[i])) {
       p_state.OnParseError("Outcome payoffs do not match previous definition "
                            "(outcome " +
-                           std::to_string(p_outcomeId) + ", player " +
-                           std::to_string((*player_it)->GetNumber()) + ")");
+                           std::to_string(p_outcomeId) + ", player " + std::to_string(i + 1) +
+                           ")");
     }
-    ++player_it;
   }
 }
 
@@ -532,32 +670,54 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
 
-    GameOutcome outcome;
-    if (!contains(p_treeData.m_outcomeMap, outcomeId)) {
-      outcome = p_game->NewOutcome();
-      p_treeData.m_outcomeMap[outcomeId] = outcome;
-      outcome->SetLabel(label);
-      auto player_it = p_game->GetPlayers().begin();
-      for (const auto &payoff : payoffs) {
-        outcome->SetPayoff(*player_it, payoff);
-        ++player_it;
-      }
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
+      p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
+      p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
     else {
-      outcome = p_treeData.m_outcomeMap.at(outcomeId);
-      CheckOutcomeDefinition(p_state, outcomeId, outcome, label, p_game->GetPlayers(), payoffs);
+      CheckOutcomeDefinition(p_state, outcomeId, p_treeData.m_outcomeRecords.at(outcomeId), label,
+                             payoffs);
     }
-    p_game->SetOutcome(p_node, outcome);
+    p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
   }
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
-    try {
-      p_game->SetOutcome(p_node, p_treeData.m_outcomeMap.at(outcomeId));
-    }
-    catch (std::out_of_range) {
+    if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
       p_state.OnParseError("Outcome not defined");
     }
+    p_treeData.m_nodeOutcomes.emplace_back(p_node, outcomeId);
+  }
+}
+
+/// Create the game's outcomes from the definitions buffered during the parse.
+/// Labels are normalized in first-occurrence order before creation, so that
+/// the label requirements enforced by MakeOutcome (nonempty, unique) are
+/// satisfied; this matches the treatment of outcome labels read from .nfg
+/// files, and produces the same labels the previous post-parse normalization
+/// pass produced.
+void CreateOutcomes(const Game &p_game, const TreeData &p_treeData)
+{
+  std::vector<std::string> labels;
+  for (const int id : p_treeData.m_outcomeOrder) {
+    labels.push_back(p_treeData.m_outcomeRecords.at(id).m_label);
+  }
+  NormalizeLabelStrings(labels);
+  std::map<int, std::string> labelById;
+  {
+    auto label_it = labels.begin();
+    for (const int id : p_treeData.m_outcomeOrder) {
+      labelById.emplace(id, *label_it++);
+    }
+  }
+
+  std::map<int, std::vector<GameNode>> nodesById;
+  for (const auto &[node, id] : p_treeData.m_nodeOutcomes) {
+    nodesById[id].push_back(node);
+  }
+  for (const int id : p_treeData.m_outcomeOrder) {
+    p_game->MakeOutcome(nodesById.at(id), p_treeData.m_outcomeRecords.at(id).m_payoffs,
+                        labelById.at(id));
   }
 }
 
@@ -572,14 +732,21 @@ void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, con
                          ")");
   }
 
+  // The infoset's actual labels are normalized at creation (see ParseNode/ParsePersonalNode),
+  // so a later restatement of the same infoset must be normalized the same way before
+  // comparing, or a file that consistently repeats a duplicate/empty action label would be
+  // (incorrectly) rejected as inconsistent.
+  auto normalized_labels = p_labels;
+  NormalizeLabelStrings(normalized_labels);
+
   const auto &actions = p_infoset->GetActions();
-  if (actions.size() != p_labels.size()) {
+  if (actions.size() != normalized_labels.size()) {
     p_state.OnParseError("Infoset action count mismatch "
                          "(player " +
                          std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
                          ")");
   }
-  auto label_it = p_labels.begin();
+  auto label_it = normalized_labels.begin();
   for (auto action : actions) {
     if (action->GetLabel() != *label_it) {
       p_state.OnParseError("Infoset action labels do not match previous definition "
@@ -640,15 +807,13 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
+      auto normalized_labels = action_labels;
+      NormalizeLabelStrings(normalized_labels);
+      infoset = p_game->AppendEvent(
+          p_node, std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()),
+          std::vector<Number>(probs.begin(), probs.end()));
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
-      p_game->SetChanceProbs(infoset, probs);
     }
     else {
       CheckInfosetActions(p_state, 0, infosetId, infoset, label, action_labels);
@@ -697,17 +862,16 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_game->AppendMove(p_node, player, action_labels.size());
+      auto normalized_labels = action_labels;
+      NormalizeLabelStrings(normalized_labels);
+      infoset = p_game->AppendMove(
+          p_node, player,
+          std::vector<std::string>(normalized_labels.begin(), normalized_labels.end()));
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
-      auto action_label = action_labels.begin();
-      for (auto action : infoset->GetActions()) {
-        action->SetLabel(*action_label);
-        ++action_label;
-      }
     }
     else {
-      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
+      CheckInfosetActions(p_state, playerId, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }
@@ -750,98 +914,29 @@ void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p
 
 } // end of anonymous namespace
 
-#include "core/tinyxml.h"
+#include "workspace.h"
 
 namespace Gambit {
 
-class GameXMLSavefile {
-private:
-  TiXmlDocument doc;
-
-public:
-  explicit GameXMLSavefile(const std::string &p_xml);
-  ~GameXMLSavefile() = default;
-
-  Game GetGame() const;
-};
-
-GameXMLSavefile::GameXMLSavefile(const std::string &p_xml)
-{
-  doc.Parse(p_xml.c_str());
-  if (doc.Error()) {
-    throw InvalidFileException("Not a valid XML document");
-  }
-}
-
-Game GameXMLSavefile::GetGame() const
-{
-  const TiXmlNode *docroot = doc.FirstChild("gambit:document");
-  if (!docroot) {
-    throw InvalidFileException("Not a Gambit game savefile document");
-  }
-
-  const TiXmlNode *game = docroot->FirstChild("game");
-  if (!game) {
-    throw InvalidFileException("No game representation found in document");
-  }
-
-  const TiXmlNode *efgfile = game->FirstChild("efgfile");
-  if (efgfile) {
-    std::istringstream s(efgfile->FirstChild()->Value());
-    return ReadGame(s);
-  }
-
-  const TiXmlNode *nfgfile = game->FirstChild("nfgfile");
-  if (nfgfile) {
-    std::istringstream s(nfgfile->FirstChild()->Value());
-    return ReadGame(s);
-  }
-
-  throw InvalidFileException("No game representation found in document");
-}
-
-template <class C> void NormalizeLabels(C &&p_container)
-{
-  // NOLINTBEGIN(misc-const-correctness)
-  std::map<std::string, std::size_t> counts;
-  // NOLINTEND(misc-const-correctness)
-  for (const auto &element : p_container) {
-    counts[element->GetLabel()] += 1;
-  }
-  // NOLINTBEGIN(misc-const-correctness)
-  std::map<std::string, std::size_t> visited;
-  // NOLINTEND(misc-const-correctness)
-  for (auto element : p_container) {
-    const auto label = element->GetLabel();
-    // A special case: If only one label is the empty string we still want to
-    // convert it to "_1"
-    if (counts[label] == 1 && label != "") {
-      continue;
-    }
-    const auto index = ++visited[label];
-    element->SetLabel(label + "_" + std::to_string(index));
-  }
-}
-
 void NormalizeGameLabels(const Game &p_game)
 {
-  NormalizeLabels(p_game->GetPlayers());
-  NormalizeLabels(p_game->GetOutcomes());
-  if (p_game->IsTree()) {
-    for (const auto &player : p_game->GetPlayersWithChance()) {
-      for (const auto &infoset : player->GetInfosets()) {
-        NormalizeLabels(infoset->GetActions());
-      }
-    }
-  }
-  else {
-    for (const auto &player : p_game->GetPlayers()) {
-      NormalizeLabels(player->GetStrategies());
-    }
-  }
+  const auto get_label = [](const auto &e) { return e->GetLabel(); };
+  const auto set_label = [](const auto &e, const std::string &s) { e->SetLabel(s); };
+  const auto relabel_player = [&p_game](const auto &e, const std::string &s) {
+    p_game->RelabelPlayers({{e->GetLabel(), s}});
+  };
+  NormalizeLabels(p_game->GetPlayers(), get_label, relabel_player);
+  NormalizeLabels(p_game->GetOutcomes(), get_label, set_label);
+  // Action labels are not normalized here: for tree games, ParseNode/ParsePersonalNode
+  // already normalize each infoset's actions individually, at creation, from the raw
+  // labels as parsed (see there for why the raw labels must be kept around too).
+  // Strategy labels are not normalized here either: every strategic-form construction
+  // path (BuildNfg via RelabelStrategies, and the "1".."N" numbering GameAGGRep/
+  // GameBAGGRep assign directly) already guarantees unique, nonempty labels per player
+  // by the time a game reaches here.
 }
 
-Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadEfgFile(std::istream &p_stream)
 {
   GameFileLexer parser(p_stream);
 
@@ -869,42 +964,62 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  if (p_normalizeLabels) {
-    NormalizeGameLabels(game);
-  }
+  CreateOutcomes(game, treeData);
+  NormalizeGameLabels(game);
   return game;
 }
 
-Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadNfgFile(std::istream &p_stream)
 {
   GameFileLexer parser(p_stream);
   TableFileGame data;
   ParseNfgHeader(parser, data);
+  // Normalize player and strategy labels on the raw lists before the game is
+  // built, so labels are unique and nonempty at construction.
+  for (auto &player : data.m_players) {
+    NormalizeLabelStrings(player.m_strategies);
+  }
+  {
+    // NOLINTBEGIN(misc-const-correctness)
+    std::vector<std::string> player_labels;
+    // NOLINTEND(misc-const-correctness)
+    for (const auto &player : data.m_players) {
+      player_labels.push_back(player.m_name);
+    }
+    NormalizeLabelStrings(player_labels);
+    auto label_it = player_labels.begin();
+    for (auto &player : data.m_players) {
+      player.m_name = *label_it;
+      ++label_it;
+    }
+  }
   auto game = BuildNfg(parser, data);
-  if (p_normalizeLabels) {
-    NormalizeGameLabels(game);
-  }
+  NormalizeGameLabels(game);
   return game;
 }
 
-Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadGbtFile(std::istream &p_stream)
 {
-  std::stringstream buffer;
-  buffer << p_stream.rdbuf();
-  auto game = GameXMLSavefile(buffer.str()).GetGame();
-  if (p_normalizeLabels) {
+  try {
+    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(p_stream);
+    std::istringstream game_text(workspace.game);
+    auto game = ReadGame(game_text);
     NormalizeGameLabels(game);
+    return game;
   }
-  return game;
+  catch (const InvalidFileException &) {
+    throw;
+  }
+  catch (const std::runtime_error &) {
+    throw InvalidFileException("Not a valid .gbt document");
+  }
 }
 
-Game ReadAggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadAggFile(std::istream &p_stream)
 {
   try {
     auto game = std::make_shared<GameAGGRep>(agg::AGG::makeAGG(p_stream));
-    if (p_normalizeLabels) {
-      NormalizeGameLabels(game);
-    }
+    NormalizeGameLabels(game);
     return game;
   }
   catch (std::runtime_error &ex) {
@@ -912,13 +1027,11 @@ Game ReadAggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   }
 }
 
-Game ReadBaggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+Game ReadBaggFile(std::istream &p_stream)
 {
   try {
     auto game = std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(p_stream));
-    if (p_normalizeLabels) {
-      NormalizeGameLabels(game);
-    }
+    NormalizeGameLabels(game);
     return game;
   }
   catch (std::runtime_error &ex) {
@@ -926,7 +1039,7 @@ Game ReadBaggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   }
 }
 
-Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
+Game ReadGame(std::istream &p_file)
 {
   std::stringstream buffer;
   buffer << p_file.rdbuf();
@@ -947,10 +1060,10 @@ Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
     }
     buffer.seekg(0, std::ios::beg);
     if (parser.GetLastText() == "NFG") {
-      return ReadNfgFile(buffer, p_normalizeLabels);
+      return ReadNfgFile(buffer);
     }
     if (parser.GetLastText() == "EFG") {
-      return ReadEfgFile(buffer, p_normalizeLabels);
+      return ReadEfgFile(buffer);
     }
     if (parser.GetLastText() == "#AGG") {
       return ReadAggFile(buffer);

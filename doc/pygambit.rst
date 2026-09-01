@@ -6,11 +6,13 @@ PyGambit
 
 See installation instructions in the :ref:`install` section.
 
-
 For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving games.
 All of these tutorials assume a basic knowledge of programming in Python.
 
 You can run the tutorials interactively as Jupyter notebooks, see :ref:`local_tutorials`.
+
+Installing PyGambit also installs Gambit's :ref:`command-line tools <command-line>`
+for computing Nash equilibria from the shell or from scripts.
 
 New user tutorials
 ------------------

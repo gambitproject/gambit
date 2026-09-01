@@ -29,6 +29,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define GAMBIT_CORE_RATIONAL_H
 
 #include <cmath>
+#include <compare>
+#include <string>
+
+#include "util.h"
 
 #include "integer.h"
 
@@ -57,11 +61,11 @@ public:
   Rational &operator=(const Rational &y);
 
   bool operator==(const Rational &y) const;
-  bool operator!=(const Rational &y) const;
   bool operator<(const Rational &y) const;
   bool operator<=(const Rational &y) const;
   bool operator>(const Rational &y) const;
   bool operator>=(const Rational &y) const;
+  std::strong_ordering operator<=>(const Rational &y) const;
 
   Rational operator+(const Rational &y) const;
   Rational operator-(const Rational &y) const;

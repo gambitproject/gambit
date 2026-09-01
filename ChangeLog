@@ -1,4 +1,284 @@
-## [16.7.0] - unreleased
+## [17.0.0-alpha.3] - 2026-08-31
+
+### Added
+- Added `Game.get_infosets(player)`, returning a materialized list of one representative
+  `Node` per information set belonging to `player`, replacing `Player.infosets`/`Game.infosets`.
+  `player` must be a personal player; use `Game.get_events()` for the chance player's events.
+- Added `Game.get_events()`, returning a materialized list of one representative `Node` per
+  chance event in the game.
+- Added `Event`, the chance-event counterpart to `Infoset`: a lazy, node-anchored view of the
+  chance player's information partition.  Added `Node.event` alongside the existing
+  `Node.infoset`, which is now specific to personal players' information sets; each is falsy
+  when it does not apply to a given node.
+- Added `Node.members`, the set of nodes belonging to the same information set or event as `Node`,
+  equivalent to `Node.infoset.members`/`Node.event.members`, whichever applies.
+- Added `Node.actions`, the labels of the actions available at the node's current information
+  set or event, whichever applies (equivalent to `Node.infoset.actions`/`Node.event.actions`).
+- Added `Node.action_probs`, the probability of each action at the node's current chance event,
+  keyed by label.
+- Added `Branch`, a `(node, label)` pair returned by `Node.prior_action`/`Node.own_prior_action`,
+  replacing `Action`.
+- Added `BehaviorSupportProfile` to `pygambit`.
+- Added callback functions to Nash solvers, allowing calling code to take actions when an equilibrium
+  is found or another solver event is emitted.
+- Added `Game.make_outcome`, which creates an outcome with the given payoffs and attaches it to a
+  set of nodes (extensive) or contingencies (strategic) in a single operation.  (#1061)
+- Added `Game.make_outcome_null`, which resets a set of nodes (extensive) or contingencies
+  (strategic) to the null outcome, removing the previously-attached outcome if this was its
+  last reference.  (#1061)
+- Added `MixedStrategyProfile.as_float` and `MixedBehaviorProfile.as_float`, converting a
+  rational-precision profile to floating-point precision.  `liap_solve`, `liap_agent_solve`,
+  `logit_estimate`, `ipa_solve`, and `gnm_solve` now also accept a rational-precision profile
+  directly (as a starting point or perturbation vector), converting it internally.
+  (#721, #458)
+- Added `Game.get_outcome`, which returns the `Outcome` attached to a pure-strategy contingency
+  of a game in strategic (table) representation.
+- Added `Game.get_payoffs`, which returns the payoff to each player at a pure-strategy
+  contingency, for a game in any representation.
+- Added `Game.get_strategies(player)`, `Game.get_sequences(player)`, `Game.get_min_payoff(player)`,
+  and `Game.get_max_payoff(player)`, replacing `Player.strategies`/`.sequences`/`.min_payoff`/
+  `.max_payoff` now that `Player` has been removed.
+- In the GUI, computed strategy and behaviour profiles can now be sorted by probability (#1077)
+
+### Changed
+- `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed
+  by anchoring on a representative member node rather than carrying independent identity, and is
+  now specific to personal players; see `Event` for the chance player.  `Infoset.is_chance` has
+  been removed, as `Infoset` is never chance; test truthiness of `Node.infoset`/`Node.event`
+  instead.
+  `Game.append_infoset`, `Game.insert_infoset`, `Game.set_move_actions`, `Game.set_event_actions`,
+  `Game.relabel_actions`, `Game.reveal`, and `Game.minimal_subgame` now identify an information
+  set or event via a member `Node` (or its label) rather than an `Infoset` object.
+- `Infoset.actions`/`Event.actions`/`Node.actions` now return the plain labels (`list[str]`) of
+  the actions at the information set or event, rather than `Action` objects.
+- `Sequence.actions` now returns a `tuple[str, ...]` of labels rather than `Action` objects.
+- `Node.prior_action`/`Node.own_prior_action` now return a `Branch` (a `(node, label)` pair)
+  rather than an `Action`.
+- `Game.behavior_support_profile`'s `actions` filter callable is now called as
+  `actions(node, action)` (two positional arguments, where `node` is a representative node of
+  the information set and `action` is the action's label) rather than with a single `Action`.
+- `Node.player` now returns the player's label (`str`), or `None` at a terminal node, directly
+  rather than a lazy `NodePlayer` proxy object. `Infoset.player`/`Event.player`/`Sequence.player`
+  now likewise return a label (`str`) rather than a `Player` object.
+- `StrategySupport.player`, `BehaviorSupport.player`, `MixedStrategy.player`, and
+  `MixedBehavior.player` now return a label (`str`) rather than a `Player` object.
+- `Game.players` now iterates player labels (`str`) rather than `Player` objects; indexing by
+  label is no longer supported (a label is already in hand once iterated) -- use `in` to test
+  membership.
+- `Game.append_move`, `Game.insert_move`, `Game.reveal`, `Game.relabel_strategies`, and
+  `Game.set_strategies` now take `player` as a label (`str`) rather than accepting a `Player`
+  object.
+- `Game.strategy_support_profile`'s `strategies` filter callable's `player` argument is now a
+  label (`str`) rather than a `Player` object.
+- Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
+  The `gambit-convert` utility has been removed.
+- Refreshed GUI icons and standardised dialog layout and formatting
+- Improved installers for Windows, and disk-image "installer" for MacOS
+- Revised `StrategySupportProfile` to expose a slimmer set of operations, and
+  implement `StrategySupport` as an immutable snapshot.
+- Absent outcomes are now represented by a per-game null outcome rather than by a null reference.
+  Two null outcomes always compare unequal (cf. missing values in `pandas`).  Null outcomes do not appear when
+  iterating over a game's outcomes, and assigning a payoff to one raises `UndefinedOperationError`. (#1061)
+- `Game.new_table` no longer creates an outcome for every contingency; a new strategic game has no outcomes,
+  and every contingency is initially null. Outcomes are created as they are needed;
+  games built by `Game.from_arrays` and `Game.from_dict` are unaffected.  (#1061)
+- Tutorial notebooks that use `gtdraw` to draw game trees now degrade gracefully if it isn't
+  installed: the drawing cells print a short note instead of raising `ImportError`, so the rest
+  of the tutorial (which doesn't otherwise depend on `gtdraw`) still runs. `gtdraw` depends on a
+  LaTeX installation, so this lets the tutorials be run without that heavier local setup.
+
+### Removed
+- `Game.add_outcome`, `Game.delete_outcome`, and `Game.set_outcome` have been removed; use
+  `Game.make_outcome`/`Game.make_outcome_null`, which create-and-attach or reset an outcome in
+  a single operation and never leave an unattached outcome in the game.  (#1061)
+- `gtdraw` is no longer part of the `doc` optional-dependency group. Install it separately
+  (`pip install gtdraw`) to run tutorials locally or build the documentation.
+- `Game.contingencies` now yields contingencies as a mapping from player label to strategy
+  label, rather than a list of per-player strategy indices.
+- `Game.strategy_support_profile`'s `strategies` filter callable is now called as
+  `strategies(player, label)` (two positional arguments) rather than with a single `Strategy`.
+- Removed `Player`. Players are now identified purely by label (`str`), as returned by iterating
+  `Game.players`. `Player.strategies`/`.sequences`/`.min_payoff`/`.max_payoff` are replaced by
+  `Game.get_strategies`/`Game.get_sequences`/`Game.get_min_payoff`/`Game.get_max_payoff`;
+  `Player.number` had no remaining use once labels are unambiguous (recover via
+  `list(game.players).index(label)` if truly needed); `Player.is_chance` and `Game.players.chance`
+  are removed outright, with no replacement -- test `Node.event`/`Node.infoset` truthiness
+  instead. `GamePlayerRep` in the C++ core is unaffected by this change (a separate, later piece
+  of work).
+- `Game.get_behavior`'s `player` and `strategy` parameters are now labels (`str`) rather than
+  accepting a `Player`/`Strategy` object; `StrategyBehavior.player`/`.strategy` now return
+  labels rather than `Player`/`Strategy` objects.
+- Removed `Game.__getitem__`, replaced by `Game.get_outcome`/`Game.get_payoffs`.
+- Removed `Game.strategies`; iterate `Game.players` and each player's `strategies` instead.
+- Removed `Strategy.action`; use `Game.get_behavior(player, strategy)[infoset]` (or `.get`),
+  already the documented fuller form of the same lookup.
+- Removed `Strategy`. Strategies are now identified purely by label (`str`), as returned by
+  `Player.strategies`; a `Strategy` object carried no information a label didn't already
+  carry, now that strategy labels are unique within a player.  `GameStrategyRep` in the C++
+  core is unaffected by this change (a separate, later piece of work).
+- Removed `Player.infosets` and `Game.infosets`; use `Game.get_infosets(player)` instead.
+- Removed `Game.actions`/`Player.actions`; the total count/collection of actions across a
+  game or player is now most directly available by iterating `Game.get_infosets(player)` and
+  each node's `Node.actions`.
+- Removed `Action`. Actions are now identified purely by label (`str`), as returned by
+  `Node.actions`/`Infoset.actions`/`Event.actions`; use `Node.action_probs` for chance-event
+  action probabilities, previously `Action.prob`, and `Node.prior_action`/`Node.own_prior_action`'s
+  `Branch` in place of an `Action` reached via a node. `StrategyBehavior`'s prescribed actions
+  are likewise now labels rather than `Action` objects.  Also removed
+  `Infoset.own_prior_actions`/`Infoset.plays` (and their `Event` mirrors), subsumed by the
+  existing `Node.own_prior_action`/`Node.plays`.
+
+## [17.0.0-alpha.2] - 2026-08-21
+
+### Added
+- Undo/redo support has been re-enabled in the graphical interface.
+- Added `Game.relabel_strategies`, which simultaneously reassigns the labels of a player's strategies.  (#1047)
+- Added `Game.set_strategies`, which declares the ordered list of a player's strategies in a game in strategic form,
+  matching by label.  (#1056)
+- `gambit-ipa` now supports verbose output via the `-V` flag, reporting on intermediate progress. (#501)
+- Added `-R` option to `gambit-liap`, `gambit-simpdiv`, `gambit-ipa`, and `gambit-gnm` to reproducibly seed
+  random starting point generation. (#448)
+- Added `Game.relabel_players`, which simultaneously reassigns the labels of the game's players.  (#1058)
+- Added `max_rectangles` to `enumpoly_solve` (and `-r` to `gambit-enumpoly`), bounding the number
+  of cells examined when searching for equilibria on a single support. (#1055)
+- Added `Game.set_players`, which declares the ordered list of the game's players, matching by label. (#1059)
+
+### Fixed
+- `MixedStrategy.__eq__` raised `AttributeError` when comparing two `MixedStrategy` instances
+  directly (as opposed to a `MixedStrategy` and a plain `Mapping`), because it read a Cython
+  ``cdef``-declared attribute off `other` without first casting it to `MixedStrategy`.
+- Numerical data in action graph games is now read with exact precision, to match other game formats.  (#879)
+- `enumpoly_solve` correctly handles failed perturbations at singular Jacobians (#591)
+- `enumpoly_solve` iterates sequences of actions in a deterministic order, pre-empting the
+  possibility of equilibria being found in orders that differ across runs. (#1016)
+- Improved the numerical stability of `enumpoly_solve` handling less-well-conditioned systems.  (#1055)
+
+### Changed
+- `MixedStrategyProfile` and `MixedBehaviorProfile` objects are now treated as products of
+  distributions.  Computed quantities (payoffs, probabilities, and so on) are returned as
+  labeled vectors/mappings of values, rather than individual values per object.
+- All long-running calculations are now done in a thread in the GUI process, rather than calling the
+  command-line executables as external processes. (#990)
+- When displaying a strategic form, the graphical interface preserves decimal payoffs when those are
+  what are specified in the game, whenever possible.  (#867)
+- The GUI's strategic game table gained an "Edit strategies" dialog, opened by clicking any of a
+  player's strategy labels, supporting adding, deleting, reordering, and renaming that player's
+  strategies in one operation. The "+" toolbar icon for adding a strategy, and the strategy
+  label's right-click "Delete strategy" menu, are removed, superseded by the dialog. (#1056)
+
+### Removed
+- Assigning to `Strategy.label` has been removed; use `Game.relabel_strategies`, which enforces
+  nonempty, unique labels.  (#1047)
+- `Game.add_strategy` and `Game.delete_strategy` have been removed; use `Game.set_strategies`,
+  specifying the labels of the strategies the player is to have.  (#1056)
+- Assigning to `Player.label` has been removed; use `Game.relabel_players`, which enforces
+  nonempty, unique labels.  (#1058)
+- `Game.add_player` has been removed; use `Game.set_players`, specifying the labels
+  of the players.  (#1059)
+
+
+## [17.0.0-alpha.1] - 2026-08-13
+
+### Added
+- Added `Game.make_infoset`, forming a collection of personal decision nodes into a single
+  information set; the primitive operation for editing information structures.  (#999)
+- Added `Game.make_event`, which forms a collection of nodes into a single event with a
+  specified probability distribution over its actions. (#1009)
+- Added `Game.append_event` and `Game.insert_event`, the chance-move counterparts of
+  `Game.append_move` and `Game.insert_move`: they add a brand-new chance move at a terminal
+  node or before an existing node respectively, requiring the probability distribution over
+  its actions to be specified up front, just as `Game.make_event` does.  (#999)
+- `Game.get_behavior` returns a map-like view of the actions a reduced strategy prescribes at its player's
+  information sets; the unreachable information sets are absent.  (#1002)
+- Added `Game.set_move_actions` and `Game.set_event_actions`, declaring the ordered action list
+  of a move or an event (respectively) in a single operation: a label matching a current action
+  keeps its subtree, an unmatched current label is dropped (with confirmation), and an unmatched
+  new label creates a fresh action; listing the current labels in a new order reorders the
+  actions and their subtrees together.  (#1040)
+
+### Changed
+- Adopted the C++20 standard; build system now enforces exactly C++20 (not a minimum) (cf. #1027)
+- Game object labels may now be any well-formed UTF-8 text, not just printable ASCII; a label must
+  still not contain control characters, begin/end with whitespace, or contain two consecutive
+  whitespace characters -- where "whitespace" means any Unicode space separator (e.g. U+00A0
+  NO-BREAK SPACE), not just the ASCII space.  A game's title and description have no such
+  printable-character or spacing restriction, but must also be well-formed UTF-8.  In `pygambit`,
+  labels/title/description are now encoded/decoded as UTF-8 rather than ASCII.  (#862)
+- `lcp_solve` no longer silently absorbs internal exceptions if they occur, but instead these propagate out
+  to match the behaviour of all other Nash equilibrium solvers.  (#996)
+- `gnm_solve` executes callback when equilibrium is found rather than emitting all equilibria at the end of
+  the run.  (#998)
+- Implemented bespoke XML parser that handles the subset in the de-facto legacy XML workbook .gbt format;
+  removes dependency on tinyxml.  (#897)
+- Reduced strategies of extensive games are now labelled by sequential per-player integers ("1", "2", ...)
+  in the deterministic order in which they are generated, matching the labelling of strategies in strategic games.
+- Enumeration of candidate supports for a totally-mixed Nash equilibrium is now done by a
+  lazy generator algorithm rather than materialising all as a single list up front.
+- `Game.reveal` now raises at absent-minded information sets; previously the result was undefined.
+  The C++ `Game::Reveal` now enforces this too, since it is the single implementation shared by
+  `Game.reveal` and the GUI's reveal-action command (previously each had its own copy of the
+  algorithm, and only the Python one checked for absent-mindedness).  In the GUI, the Reveal menu
+  item (both the Edit menu and the node's context menu) is now disabled at an absent-minded
+  information set, rather than letting the action be attempted and rejected.  (#999)
+- The GUI's infoset editing actions (assigning a node to an infoset, leaving an infoset) now enforce
+  the same rules as `Game.make_infoset`, e.g. matching action labels rather than just a matching
+  count; assigning a terminal node to an infoset now raises rather than silently doing nothing.
+  (#999)
+- `Game.append_move` and `Game.insert_move` now require `player` to be a personal player;
+  previously passing the chance player would silently create a new chance move with an
+  unrequested uniform distribution, bypassing the validation that `Game.make_event` (and now
+  `Game.append_event`/`Game.insert_event`) otherwise enforce for chance moves.  In the GUI, the
+  "Insert Move" dialog and the chance-token drag-and-drop action still create a chance move
+  with a uniform default when creating a fresh move, but now do so through `Game::InsertEvent`;
+  collecting the actual distribution at creation time in the GUI is left as a separate piece
+  of UX work.  (#999)
+- `Game.reveal` now requires `player` to be a personal player; previously passing the chance
+  player was either a silent no-op or raised an uninformative `RuntimeError`, depending on the
+  game's structure, rather than a proper `UndefinedOperationError`.  (#999)
+- `Game.make_infoset` now accepts nodes belonging to a chance event, converting them to
+  personal decision nodes and discarding their probabilities; previously only personal decision
+  nodes were accepted.  This matches `Game.make_event`, which has always accepted personal
+  decision nodes and converted them to a chance event.  (#999)
+- The GUI's "Move properties" dialog is renamed "Edit move", and now supports adding, deleting,
+  and reordering the actions at a move directly. The standalone "Insert action" menu command is
+  removed, superseded by the dialog.  (#1040)
+
+### Fixed
+- Converting a behavior profile to a strategy profile, and computing pure-strategy payoffs
+  no longer inserts spurious entries into a strategy's internal action map.
+
+### Removed
+- `Game.set_player` has been removed; use `Game.make_infoset`, specifying the members of the
+  information set and the new player.  (#999)
+- `Game.set_infoset` has been removed; use `Game.make_infoset`, specifying the members of the
+  target information set together with the node to add.  (#999)
+- `Game.leave_infoset` has been removed; use `Game.make_infoset` with a single node, specifying
+  the current label if it should be retained.  (#999)
+- `Game.sort_infosets` has been removed; it was deprecated in 16.5.0, as the iteration order of
+  information sets and their members is now maintained automatically.  (#999)
+- Assigning to `Action.label` has been removed; use `Game.relabel_actions`, which enforces
+  nonempty, unique labels.  (#1026)
+- `Game.set_chance_probs` has been removed; use `Game.make_event`, which expresses a change of
+  probabilities as forming the nodes of the event with the required distribution.  (#1009)
+- `Game.add_action` and `Game.delete_action` have been removed; use `Game.set_move_actions`
+  or `Game.set_event_actions`.  (#1040)
+- The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
+  removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
+  only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
+  calls directly.  `Game::Reveal` is kept, as a composite operation genuinely useful in its own
+  right, but is now implemented once in C++ rather than duplicated in `pygambit` and the GUI.
+  (#999)
+- The C++ `Game` interface's `SetChanceProbs` method has been removed, along with the
+  stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
+  `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
+  now builds the equivalent `MakeEvent` call directly.  (#999)
+- The C++ `Game` interface's `InsertAction`, `DeleteAction`, and `NormalizeChanceProbs` methods
+  have been removed; they were subsumed by `SetMoveActions`/`SetEventActions`, and by this point
+  were used only in support of `pygambit`'s `add_action`/`delete_action` and the GUI's "Insert
+  action" command, which now build the equivalent `SetMoveActions`/`SetEventActions` call
+  directly.  (#1040)
+
+## [16.7.0] - 2026-07-11
 
 ### Added
 - Added `Player.sequences` as the collection of sequences available to a player.
@@ -25,6 +305,9 @@
 - Corrected calculation of total number of actions for a player in `pygambit` (#938)
 - Corrected a regression in action graph games that left the internal data structure not fully initialised,
   leading to segmentation faults.
+- Corrected handling of malformed AGG/BAGG files: files with an invalid or degenerate header
+  (for example a wrong file type, or a header declaring zero players) are now rejected with a
+  `ValueError` instead of causing a segmentation fault while constructing the game.
 
 ### Changed
 - Added a new welcome/landing window on launching the GUI without a game.  This has the effect of
@@ -39,6 +322,9 @@
 - In `pygambit`, indexing game object collections by integer position has been removed.  (#942)
 - Validity of game object labels is enforced (printable ASCII and spaces only, no leading/trailing or
   double spaces); invalid labels raise `ValueError` in `pygambit`. (#944)
+- Nonempty labels are now required for all players, outcomes, actions, and strategies.
+  Labels must be unique within the game for players and outcomes, within the player for
+  strategies, and within the information set for actions.
 - Refined and clarified the graphical interface's handling (and persisting) of "workspaces", and
   improved warning messages on closing windows for games or workspaces with unsaved changes.
 - In `pygambit`, the `.outcome`, `.player`, and `.infoset` attributes are now treated as predicates

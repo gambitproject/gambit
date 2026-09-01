@@ -167,16 +167,11 @@ public:
   }
 
   bool operator==(const Vector &v) const { return m_data == v.m_data; }
-  bool operator!=(const Vector &v) const { return m_data != v.m_data; }
 
   /// Tests if all components of the vector are equal to a constant c
   bool operator==(const T &c) const
   {
     return std::all_of(m_data.begin(), m_data.end(), [&c](const T &v) { return v == c; });
-  }
-  bool operator!=(const T &c) const
-  {
-    return std::any_of(m_data.begin(), m_data.end(), [&c](const T &v) { return v != c; });
   }
 
   /// The square of the Euclidean norm of the vector

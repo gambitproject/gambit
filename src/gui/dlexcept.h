@@ -24,15 +24,16 @@
 #define DLEXCEPT_H
 
 #include <wx/wx.h>
+#include <wx/richmsgdlg.h>
 
 namespace Gambit::GUI {
 
 // A general-purpose dialog box to display the description of an internal exception.
-class ExceptionDialog final : public wxMessageDialog {
+class ExceptionDialog final : public wxRichMessageDialog {
 public:
   ExceptionDialog(wxWindow *p_parent, const std::string &p_message)
-    : wxMessageDialog(p_parent, wxString(p_message.c_str(), *wxConvCurrent),
-                      wxT("Internal exception in Gambit"), wxICON_ERROR | wxCANCEL)
+    : wxRichMessageDialog(p_parent, wxString(p_message.c_str(), *wxConvCurrent),
+                          wxT("Internal exception in Gambit"), wxOK | wxCENTRE | wxICON_ERROR)
   {
   }
 };

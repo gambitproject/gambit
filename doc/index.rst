@@ -69,7 +69,7 @@ construction and analysis of finite extensive and strategic games.
    .. grid-item-card:: 💻 Command-line interface
       :columns: 3
 
-      Use Gambit's command-line tools for scripting.
+      Run equilibrium calculations from the command-line.
 
       .. button-ref:: command-line
          :ref-type: ref

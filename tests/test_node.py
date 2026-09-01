@@ -19,10 +19,11 @@ def test_get_infoset():
 
 
 def test_infoset_equality_is_symmetric():
-    """A node-anchored infoset proxy and the resolved Infoset compare equal from either side."""
+    """A node-anchored infoset proxy and a separately-constructed Infoset compare
+    equal from either side."""
     game = games.read_from_file("basic_extensive_game.efg")
     proxy = game.root.infoset
-    infoset = next(iter(game.infosets))
+    infoset = game.get_infosets(game.root.player)[0].infoset
     assert proxy == infoset
     assert infoset == proxy
 
@@ -34,7 +35,7 @@ def test_node_infoset_truthiness():
     terminal = game.root.children["U1"].children["D2"].children["U3"]
     proxy = terminal.infoset
     assert not proxy
-    game.append_move(terminal, game.players["Player 1"], ["a", "b"])
+    game.append_move(terminal, "Player 1", ["a", "b"])
     assert proxy
 
 
@@ -48,11 +49,11 @@ def test_get_outcome():
     assert not game.root.outcome
 
 
-def test_set_outcome_null():
-    """Setting an outcome to null leaves the node's outcome view falsy."""
+def test_make_outcome_null():
+    """Resetting a node's outcome to null leaves the node's outcome view falsy."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"].children["U2"].children["U3"]
-    game.set_outcome(node, None)
+    game.make_outcome_null(node)
     assert not node.outcome
 
 
@@ -61,7 +62,7 @@ def test_node_outcome_subscript_tracks_mutation():
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"].children["D2"].children["U3"]
     proxy = node.outcome
-    player = game.players["Player 1"]
+    player = "Player 1"
     proxy[player] = 7
     assert node.outcome[player] == 7
 
@@ -76,28 +77,58 @@ def test_outcome_equality_is_symmetric():
     assert outcome == proxy
 
 
+def test_null_outcome_label_is_none():
+    """The blessed nullity idiom: a node with no outcome has `outcome.label is None`."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.root.outcome.label is None
+
+
+def test_null_outcome_compares_unequal_to_itself():
+    """Null outcomes are unequal to everything, including another view of the same
+    node's outcome; equality must not short-circuit on node identity."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert (game.root.outcome == game.root.outcome) is False
+
+
+def test_null_outcome_reads_zero_payoffs():
+    """Reading a payoff through an unset node reports zero to every player of the game."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    for player in game.players:
+        assert game.root.outcome[player] == 0
+
+
+def test_null_outcome_payoff_write_raises():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.root.outcome["Player 1"] = 1
+
+
+def test_null_outcome_label_write_raises():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.root.outcome.label = "Outcome 4"
+
+
+def test_null_outcome_number_is_none():
+    """The null outcome is not a member of the game's outcomes, so it has no number.
+    -1 would be a valid index and would silently resolve to the last real outcome."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.root.outcome.number is None
+
+
 def test_get_player():
     """Test to ensure that we can retrieve a player for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.player == game.players["Player 1"]
+    assert game.root.player == "Player 1"
     assert not game.root.children["U1"].children["D2"].children["U3"].player
 
 
-def test_player_equality_is_symmetric():
-    """A node-anchored player view and the resolved Player compare equal from either side."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    proxy = game.root.player
-    player = game.players["Player 1"]
-    assert proxy == player
-    assert player == proxy
-
-
 def test_node_player_resolves_chance():
-    """At a chance node the player view resolves to the chance player."""
+    """At a chance node, the player label is the chance player's."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root
-    assert chance_node.player.is_chance
-    assert chance_node.player == game.players.chance
+    assert chance_node.event
+    assert chance_node.player == "Chance"
 
 
 def test_get_game():
@@ -116,7 +147,7 @@ def test_get_parent():
 def test_get_prior_action():
     """Test to ensure that we can retrieve the prior action for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].prior_action == game.root.infoset.actions["U1"]
+    assert game.root.children["U1"].prior_action == gbt.Branch(game.root, "U1")
     assert game.root.prior_action is None
 
 
@@ -153,7 +184,7 @@ def test_is_successor_of():
     with pytest.raises(TypeError):
         game.root.is_successor_of("Test")
     with pytest.raises(TypeError):
-        game.root.is_successor_of(game.players["Player 1"])
+        game.root.is_successor_of("Player 1")
 
 
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
@@ -238,7 +269,7 @@ SUBGAME_ROOTS_CASES = [
             factory=functools.partial(
                 games.read_from_file,
                 "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
-            expected_paths=[[], ["1"], ["1", "1"], ["1", "1", "1"]]
+            expected_paths=[[], ["1_2"], ["1_2", "1_3", "1_2"], ["1_3", "1_2"]]
         ),
         id="overlapping_infosets_inside_subgames_and_Nature_move"
     ),
@@ -430,10 +461,11 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
         for path, keys in test_case.differences.items()
         for key in keys
     }
-    for infoset in game.infosets:
-        key = (infoset.player.label, infoset.number)
-        actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(infoset).root))
-        assert actual_path == expected_path_for_key[key]
+    for player in game.players:
+        for node in game.get_infosets(player):
+            key = (node.infoset.player, node.infoset.number)
+            actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(node).root))
+            assert actual_path == expected_path_for_key[key]
 
 
 @pytest.mark.parametrize("game_file, expected_node_data", [
@@ -511,10 +543,10 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
         else:
             # Only collect data for non-terminal nodes
             opa = node.own_prior_action
-            details = (
-                (opa.infoset.player.label, opa.infoset.number, opa.label)
-                if opa is not None else None
-            )
+            if opa is not None:
+                details = (opa.node.infoset.player, opa.node.infoset.number, opa.label)
+            else:
+                details = None
             actual_node_data.append((_get_path_of_action_labels(node), details))
 
     assert actual_node_data == expected_node_data
@@ -557,15 +589,7 @@ def test_append_move_error_player_actions():
     """Test to ensure there are actions when appending with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.append_move(game.root, game.players["Player 1"], [])
-
-
-def test_append_move_error_player_mismatch():
-    """Test to ensure the node and the player are from the same game"""
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.append_move(game1.root, game2.players["Player 1"], ["a"])
+        game.append_move(game.root, "Player 1", [])
 
 
 def test_append_move_error_infoset_mismatch():
@@ -573,32 +597,42 @@ def test_append_move_error_infoset_mismatch():
     game1 = gbt.Game.new_tree()
     game2 = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.MismatchError):
-        game1.append_infoset(game1.root, game2.root.infoset)
+        game1.append_infoset(game1.root, game2.root)
+
+
+def test_append_move_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.append_move(game.root, "Player 1", ["a", ""])
+
+
+def test_append_move_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.append_move(game.root, "Player 1", ["a", "a"])
 
 
 def test_insert_move_error_player_actions():
     """Test to ensure there are actions when inserting with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.insert_move(game.root, game.players["Player 1"], 0)
+        game.insert_move(game.root, "Player 1", [])
 
 
-def test_insert_move_error_player_mismatch():
-    """Test to ensure the node and the player are from the same game"""
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.insert_move(game1.root, game2.players["Player 1"], 1)
-
-
-def test_node_leave_infoset():
-    """A node-anchored infoset proxy is lazy: it re-resolves after the node leaves its infoset."""
+def test_insert_move_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
-    proxy = node.infoset
-    assert len(proxy.members) == 2
-    game.leave_infoset(node)
-    assert list(proxy.members) == [node]
+    with pytest.raises(ValueError):
+        game.insert_move(game.root, "Player 1", ["a", ""])
+
+
+def test_insert_move_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.insert_move(game.root, "Player 1", ["a", "a"])
 
 
 def test_node_infoset_becomes_null_when_truncated():
@@ -654,6 +688,8 @@ def _subtrees_equal(
     if n1 == recursion_stop_node:
         return n2.is_terminal
     if n1.is_terminal and n2.is_terminal:
+        if not n1.outcome and not n2.outcome:
+            return True
         return n1.outcome == n2.outcome
     if n1.is_terminal is not n2.is_terminal:
         return False
@@ -723,18 +759,18 @@ def test_node_move_across_games():
 def test_append_move_creates_single_infoset_list_of_nodes():
     """Test that appending a list of nodes creates a single infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     nodes = [game.root.children["2"].children["1"],
              game.root.children["1"].children["1"],
              game.root.children["1"].children["2"]]
     game.append_move(nodes, "Player 3", ["B", "F"])
-    assert len(game.players["Player 3"].infosets) == 1
+    assert len(game.get_infosets("Player 3")) == 1
 
 
 def test_append_move_same_infoset_list_of_nodes():
     """Test that nodes from a list of nodes are resolved in the same infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F"])
@@ -746,7 +782,7 @@ def test_append_move_actions_list_of_nodes():
     have the same actions.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
@@ -756,7 +792,7 @@ def test_append_move_actions_list_of_nodes():
 def test_append_move_actions_list_of_node_labels():
     """Test that nodes from a list of node labels are resolved correctly."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     node1.label = "0"
@@ -774,7 +810,7 @@ def test_append_move_actions_list_of_mixed_node_references():
     are resolved correctly.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
 
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
@@ -792,13 +828,12 @@ def test_append_move_labels_list_of_nodes():
     have the same labels per action.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     node1 = game.root.children["2"].children["1"]
     node2 = game.root.children["1"].children["1"]
     game.append_move([node1, node2], "Player 3", ["B", "F", "S"])
 
-    for action1, action2 in zip(node1.infoset.actions, node2.infoset.actions, strict=True):
-        assert action1.label == action2.label
+    assert node1.infoset.actions == node2.infoset.actions
 
 
 def test_append_move_node_list_with_non_terminal_node():
@@ -806,7 +841,7 @@ def test_append_move_node_list_with_non_terminal_node():
     of nodes that has a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_move(
             [game.root.children["2"], game.root.children["1"].children["2"]],
@@ -820,7 +855,7 @@ def test_append_move_node_list_with_duplicate_node_references():
     nodes with non-unique node references.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     node = game.root.children["1"].children["2"]
     node.label = "00"
     with pytest.raises(ValueError):
@@ -836,7 +871,7 @@ def test_append_move_node_list_is_empty():
     empty list of nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     with pytest.raises(ValueError):
         game.append_move([], "Player 3", ["B", "F"])
 
@@ -846,13 +881,13 @@ def test_append_infoset_node_list_with_non_terminal_node():
     a list of nodes that has a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_infoset(
             [game.root.children["2"], game.root.children["1"].children["2"]],
-            seed_node.infoset
+            seed_node
         )
 
 
@@ -861,7 +896,7 @@ def test_append_infoset_node_list_with_duplicate_node():
     with non-unique elements.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
@@ -869,7 +904,7 @@ def test_append_infoset_node_list_with_duplicate_node():
             [game.root.children["1"].children["2"],
              game.root.children["2"].children["1"],
              game.root.children["1"].children["2"]],
-            seed_node.infoset
+            seed_node
         )
 
 
@@ -878,11 +913,150 @@ def test_append_infoset_node_list_is_empty():
     empty list of nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.add_player("Player 3")
+    game.set_players(list(game.players) + ["Player 3"])
     seed_node = game.root.children["1"].children["1"]
     game.append_move(seed_node, "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
-        game.append_infoset([], seed_node.infoset)
+        game.append_infoset([], seed_node)
+
+
+def test_append_event_creates_single_event_list_of_nodes():
+    """Test that appending a list of nodes creates a single chance event."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    node1 = game.root.children["2"].children["1"]
+    node2 = game.root.children["1"].children["1"]
+    game.append_event([node1, node2], ["a", "b"], [gbt.Rational(1, 2)] * 2)
+    assert node1.event == node2.event
+    assert node1.event
+
+
+def test_append_event_sets_distribution():
+    """Test that the new event's actions carry the given probabilities."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    node = game.root.children["1"].children["1"]
+    game.append_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
+    assert list(node.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+
+
+def test_append_event_error_actions_empty():
+    """Test to ensure there are actions when appending an event."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["U2"].children["U3"]
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.append_event(terminal, [], [])
+
+
+def test_append_event_error_node_mismatch():
+    """Test to ensure the node is from this game."""
+    game1 = gbt.Game.new_tree()
+    game2 = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.MismatchError):
+        game1.append_event(game2.root, ["a", "b"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_append_event_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["U2"].children["U3"]
+    with pytest.raises(ValueError):
+        game.append_event(terminal, ["a", ""], [gbt.Rational(1, 2)] * 2)
+
+
+def test_append_event_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["U2"].children["U3"]
+    with pytest.raises(ValueError):
+        game.append_event(terminal, ["a", "a"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_append_event_error_node_list_with_non_terminal_node():
+    """Test that we get an UndefinedOperationError when the node list has a
+    non-terminal node.
+    """
+    game = games.read_from_file("sample_extensive_game.efg")
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.append_event(
+            [game.root.children["2"], game.root.children["1"].children["2"]],
+            ["a", "b"],
+            [gbt.Rational(1, 2)] * 2
+        )
+
+
+def test_append_event_error_node_list_with_duplicate_node_references():
+    """Test that we get a ValueError when the node list has non-unique node references."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    node = game.root.children["1"].children["2"]
+    with pytest.raises(ValueError):
+        game.append_event([node, node], ["a", "b"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_append_event_error_node_list_is_empty():
+    """Test that we get a ValueError when the node list is empty."""
+    game = games.read_from_file("sample_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.append_event([], ["a", "b"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_append_event_error_invalid_distribution():
+    """Test that a distribution which does not sum to one is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    terminal = game.root.children["U1"].children["U2"].children["U3"]
+    with pytest.raises(ValueError):
+        game.append_event(terminal, ["a", "b"], [gbt.Rational(1, 2), gbt.Rational(1, 3)])
+
+
+def test_insert_event_actions_labeled():
+    """Test that the inserted event's actions are labeled according to `actions`."""
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
+    node = game.root.children["L"].children["R"]
+    game.insert_event(node, ["Up", "Down"], [gbt.Rational(1, 2)] * 2)
+    assert list(node.parent.actions) == ["Up", "Down"]
+    assert node.parent.event
+
+
+def test_insert_event_sets_distribution():
+    """Test that the inserted event's actions carry the given probabilities."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root
+    game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
+    assert list(node.parent.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
+
+
+def test_insert_event_error_actions_empty():
+    """Test to ensure there are actions when inserting an event."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.insert_event(game.root, [], [])
+
+
+def test_insert_event_error_node_mismatch():
+    """Test to ensure the node is from this game."""
+    game1 = gbt.Game.new_tree()
+    game2 = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(gbt.MismatchError):
+        game1.insert_event(game2.root, ["a", "b"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_insert_event_error_empty_label():
+    """Test that an empty label in `actions` is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.insert_event(game.root, ["a", ""], [gbt.Rational(1, 2)] * 2)
+
+
+def test_insert_event_error_duplicate_label():
+    """Test that duplicated labels in `actions` are rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.insert_event(game.root, ["a", "a"], [gbt.Rational(1, 2)] * 2)
+
+
+def test_insert_event_error_invalid_distribution():
+    """Test that a distribution which does not sum to one is rejected."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.insert_event(game.root, ["a", "b"], [gbt.Rational(1, 2), gbt.Rational(1, 3)])
 
 
 def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:
@@ -951,7 +1125,7 @@ def test_len_after_append_move():
     initial_number_of_nodes = len(game.nodes)
 
     terminal_node = game.root.children["R"].children["L"].children["L"]  # the [1,1,0] terminal
-    player = game.players["Player 1"]
+    player = "Player 1"
     actions_to_add = ["T", "M", "B"]
 
     game.append_move(terminal_node, player, actions_to_add)
@@ -970,40 +1144,33 @@ def test_len_after_append_infoset():
     number_of_infoset_actions = len(infoset_to_modify.actions)
     terminal_node_to_add = game.root.children["L"].children["L"].children["l"]
 
-    game.append_infoset(terminal_node_to_add, infoset_to_modify)
+    game.append_infoset(terminal_node_to_add, member_node)
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
 
-def test_len_after_add_action():
-    """Verify `len(game.nodes)` is correct after `add_action`."""
+def test_len_after_set_move_actions_add():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` creates an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
-
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
-
-    game.add_action(infoset_to_modify)
-
+    labels = list(infoset_to_modify.actions)
+    game.set_move_actions(game.root.children["L"], labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
 
-def test_len_after_delete_action():
-    """Verify `len(game.nodes)` is correct after `delete_action`."""
+def test_len_after_set_move_actions_drop():
+    """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
-
-    action_to_delete = game.root.infoset.actions["L"]
-
-    # Deleting an action removes the subtree reached by that action at each
-    # member node of its information set.
+    action_to_drop = "L"
     nodes_to_delete = sum(
-        _count_subtree_nodes(member.children[action_to_delete.label], True)
-        for member in action_to_delete.infoset.members
+        _count_subtree_nodes(member.children[action_to_drop], True)
+        for member in game.root.infoset.members
     )
-
-    game.delete_action(action_to_delete)
-
+    remaining = [a for a in game.root.infoset.actions if a != "L"]
+    game.set_move_actions(game.root, remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 
@@ -1013,12 +1180,20 @@ def test_len_after_insert_move():
     initial_number_of_nodes = len(game.nodes)
 
     node_to_insert_above = game.root.children["L"].children["R"]  # the [1, 0] node
-    player = game.players["Player 2"]
-    num_actions_to_add = 3
+    player = "Player 2"
+    actions_to_add = ["a", "b", "c"]
 
-    game.insert_move(node_to_insert_above, player, num_actions_to_add)
+    game.insert_move(node_to_insert_above, player, actions_to_add)
 
-    assert len(game.nodes) == initial_number_of_nodes + num_actions_to_add
+    assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
+
+
+def test_insert_move_actions_labeled():
+    """Test that the inserted move's actions are labeled according to `actions`."""
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
+    node = game.root.children["L"].children["R"]
+    game.insert_move(node, "Player 2", ["Up", "Down"])
+    assert list(node.parent.infoset.actions) == ["Up", "Down"]
 
 
 def test_len_after_insert_infoset():
@@ -1031,7 +1206,7 @@ def test_len_after_insert_infoset():
     node_to_insert_above = game.root.children["L"].children["R"]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
-    game.insert_infoset(node_to_insert_above, infoset_to_modify)
+    game.insert_infoset(node_to_insert_above, game.root.children["L"])
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
@@ -1078,15 +1253,6 @@ def test_node_children_action_label():
     assert game.root.children["Queen"].children["Fold"] == list(root_children[1].children)[1]
 
 
-def test_node_children_action():
-    """Action lookup returns the correct child.
-
-    The RHS reaches the child positionally -- cf. `test_node_children_action_label()`.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    assert game.root.children[game.root.infoset.actions["King"]] == list(game.root.children)[0]
-
-
 def test_node_children_empty_label():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError, match="empty or all whitespace"):
@@ -1112,17 +1278,27 @@ def test_node_children_rejects_int():
         _ = game.root.children[0]
 
 
-def test_node_children_other_infoset_action():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children["King"].infoset.actions["Bet"]]
-
-
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_node_label_valid(label):
     game = games.read_from_file("basic_extensive_game.efg")
     game.root.label = label
     assert game.root.label == label
+
+
+def test_node_label_duplicate_raises_valueerror():
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = "shared"
+    with pytest.raises(ValueError):
+        game.root.children["U1"].label = "shared"
+
+
+def test_node_label_empty_is_allowed():
+    """Node labels may be empty (unlike outcomes/players); multiple empties coexist."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.root.label = ""
+    game.root.children["U1"].label = ""
+    assert game.root.label == ""
+    assert game.root.children["U1"].label == ""
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
@@ -1132,11 +1308,12 @@ def test_node_label_invalid_raises_valueerror(label):
         game.root.label = label
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_node_label_non_ascii_rejected(label):
+@pytest.mark.parametrize("label", games.UNICODE_LABELS)
+def test_node_label_unicode_accepted(label):
+    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(UnicodeEncodeError):
-        game.root.label = label
+    game.root.label = label
+    assert game.root.label == label
 
 
 @pytest.mark.parametrize(

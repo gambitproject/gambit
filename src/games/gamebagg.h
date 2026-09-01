@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gameagg.h
+// FILE: src/games/gamebagg.h
 // Declaration of the Bayesian action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMEBAGG_H
-#define GAMEBAGG_H
+#ifndef GAMBIT_GAMES_GAMEBAGG_H
+#define GAMBIT_GAMES_GAMEBAGG_H
 
+#include "games/game.h"
 #include "games/agg/bagg.h"
 
 namespace Gambit {
@@ -69,8 +70,6 @@ public:
   //@{
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
-  /// Creates a new player in the game, with no moves
-  GamePlayer NewPlayer() override { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
@@ -88,31 +87,22 @@ public:
   bool IsTree() const override { return false; }
   bool IsAgg() const override { return true; }
   bool IsPerfectRecall() const override { return true; }
-  bool IsConstSum() const override { throw UndefinedException(); }
+  bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
-  Rational GetMinPayoff() const override { return Rational(baggPtr->getMinPayoff()); }
+  Rational GetMinPayoff() const override { return baggPtr->getMinPayoff<Rational>(); }
   /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetPlayerMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
-  Rational GetMaxPayoff() const override { return Rational(baggPtr->getMaxPayoff()); }
+  Rational GetMaxPayoff() const override { return baggPtr->getMaxPayoff<Rational>(); }
   /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetPlayerMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
-  void WriteNfgFile(std::ostream &) const override { throw UndefinedException(); }
   virtual void WriteBaggFile(std::ostream &) const;
-  //@}
-
-  /// @name Modification
-  //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
-  {
-    throw UndefinedException();
-  }
   //@}
 };
 
@@ -121,16 +111,8 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .bagg format.
-inline Game ReadBaggFile(std::istream &in)
-{
-  try {
-    return std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(in));
-  }
-  catch (std::runtime_error &ex) {
-    throw InvalidFileException(ex.what());
-  }
-}
+[[nodiscard]] Game ReadBaggFile(std::istream &in);
 
 } // end namespace Gambit
 
-#endif // GAMEBAGG_H
+#endif // GAMBIT_GAMES_GAMEBAGG_H

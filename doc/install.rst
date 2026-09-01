@@ -100,12 +100,6 @@ The current stable release of Gambit is |release|.
 
        `./configure --prefix=/your/path/here`
 
-      .. warning::
-       The graphical interface relies on external calls to other
-       programs built in this process, especially for the computation of
-       equilibria.  It is strongly recommended that you install the Gambit
-       executables to a directory in your path!
-
 All past releases are available on the
 `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__.
 

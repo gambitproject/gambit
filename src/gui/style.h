@@ -23,12 +23,27 @@
 #ifndef STYLE_H
 #define STYLE_H
 
-#include "gambit.h"
-#include "core/tinyxml.h"
+#include <functional>
+
+#include "games/game.h"
+#include "games/workspace.h"
 
 class wxFont;
 
 namespace Gambit::GUI {
+
+// Forward-declared rather than included: gamedoc.h includes this header, so
+// including gamedoc.h here would be circular. Only a reference is needed at
+// this point; the label-generator methods that use it are implemented in
+// style.cc, which can include gamedoc.h freely.
+class AnalysisWorkspace;
+
+/// A function that computes a node's (or a branch's) label text. Callers
+/// (TreeLayout) don't need to know how many label styles exist or what each
+/// one means -- see TreeRenderConfig::GetNodeLabelGenerator/
+/// GetBranchLabelGenerator, which translate a style enum into one of these.
+using LabelGenerator = std::function<wxString(const GameNode &)>;
+
 enum NodeTokenStyle {
   GBT_NODE_TOKEN_LINE,
   GBT_NODE_TOKEN_BOX,
@@ -157,6 +172,11 @@ public:
   BranchLabelStyle GetBranchBelowLabel() const { return m_branchBelowLabel; }
   void SetBranchBelowLabel(BranchLabelStyle p_label) { m_branchBelowLabel = p_label; }
 
+  LabelGenerator GetNodeLabelGenerator(NodeLabelStyle p_which,
+                                       const AnalysisWorkspace &p_workspace) const;
+  LabelGenerator GetBranchLabelGenerator(BranchLabelStyle p_which,
+                                         const AnalysisWorkspace &p_workspace) const;
+
   // Fonts
   const wxFont &GetFont() const { return m_font; }
   void SetFont(const wxFont &p_font) { m_font = p_font; }
@@ -179,29 +199,14 @@ public:
   // Reset to the "factory" defaults
   void SetDefaults();
 
-  /// @name Reading and writing XML
-  //@{
-  /// Get the color settings as an XML entry
-  std::string GetColorXML() const;
-  /// Set the color settings from an XML entry
-  void SetColorXML(TiXmlNode *p_node);
-
-  /// Get the font settings as an XML entry
-  std::string GetFontXML() const;
-  /// Set the font settings from an XML entry
-  void SetFontXML(TiXmlNode *p_node);
-
-  /// Get the layout settings as an XML entry
-  std::string GetLayoutXML() const;
-  /// Set the layout settings from an XML entry
-  void SetLayoutXML(TiXmlNode *p_node);
-
-  /// Get the label settings as an XML entry
-  std::string GetLabelXML() const;
-  /// Set the label settings from an XML entry
-  void SetLabelXML(TiXmlNode *p_node);
-  //@}
+  /// Copy GUI presentation values to and from the neutral workspace representation.
+  void Save(LegacyWorkspaceFile &p_workspace) const;
+  void Load(const LegacyWorkspaceFile &p_workspace);
 };
+
+/// Builds a small solid-color square bitmap, e.g. for use as a player-color swatch
+/// on a menu item or button.
+wxBitmap MakeColorSwatch(const wxColour &p_color, int p_size = 16);
 
 } // namespace Gambit::GUI
 

@@ -49,6 +49,11 @@ def test_read_agg_invalid():
         gbt.read_agg(game_path)
 
 
+def test_read_agg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_agg(io.StringIO("0 0 0\n"))
+
+
 def test_read_bagg():
     game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
     game = gbt.read_bagg(game_path)
@@ -63,10 +68,49 @@ def test_read_bagg_invalid():
         gbt.read_bagg(game_path)
 
 
+def test_read_bagg_zero_header():
+    with pytest.raises(ValueError):
+        gbt.read_bagg(io.StringIO("0 0 0\n"))
+
+
 def test_read_gbt_invalid():
     game_path = os.path.join(
         "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
     )
+    with pytest.raises(ValueError):
+        gbt.read_gbt(game_path)
+
+
+def test_read_gbt_workspace(tmp_path):
+    game_path = tmp_path / "game.gbt"
+    game_path.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<gambit:document xmlns:gambit="http://gambit.sourceforge.net/" version="0.1">
+  <numbers decimals="4"/>
+  <game>
+    <nfgfile>
+NFG 1 R "Prisoner's <Dilemma> & test" { "Alice" "Bob" }
+{ { "Cooperate" "Defect" } { "Cooperate" "Defect" } }
+""
+3 3 0 5 5 0 1 1
+    </nfgfile>
+  </game>
+</gambit:document>
+"""
+    )
+
+    game = gbt.read_gbt(game_path)
+
+    assert game.title == "Prisoner's <Dilemma> & test"
+    assert list(game.players) == ["Alice", "Bob"]
+
+
+def test_read_gbt_rejects_malformed_xml(tmp_path):
+    game_path = tmp_path / "malformed.gbt"
+    game_path.write_text(
+        "<gambit:document><game><nfgfile>NFG 1 R</game></gambit:document>"
+    )
+
     with pytest.raises(ValueError):
         gbt.read_gbt(game_path)
 
@@ -87,8 +131,8 @@ def test_write_efg_as_nfg():
     result = """
 NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player 1" "Player 2" }
 
-{ { "1**111" "21*111" "221111" "222111" }
-{ "1**111" "21*111" "221111" "222111" }
+{ { "1" "2" "3" "4" }
+{ "1" "2" "3" "4" }
 }
 ""
 
@@ -116,8 +160,7 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 def test_write_html():
     game = gbt.Game.new_table([2, 2])
     alice, bob = game.players
-    alice.label = "Alice"
-    bob.label = "Bob"
+    game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
     assert "Alice" in serialized_game
@@ -127,8 +170,7 @@ def test_write_html():
 def test_write_latex():
     game = gbt.Game.new_table([2, 2], title="Game title")
     alice, bob = game.players
-    alice.label = "Alice"
-    bob.label = "Bob"
+    game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_latex()
     assert "\\begin{game}" in serialized_game
     assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game
@@ -147,17 +189,7 @@ def test_read_write_nfg():
     nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     serialized_nfg_game = nfg_game.to_nfg()
     deserialized_nfg_game = gbt.read_nfg(
-        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=False
+        io.BytesIO(serialized_nfg_game.encode())
     )
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game == double_serialized_nfg_game
-
-
-def test_read_write_nfg_normalize():
-    nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
-    serialized_nfg_game = nfg_game.to_nfg()
-    deserialized_nfg_game = gbt.read_nfg(
-        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=True
-    )
-    double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
-    assert serialized_nfg_game != double_serialized_nfg_game

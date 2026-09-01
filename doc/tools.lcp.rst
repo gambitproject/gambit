@@ -45,6 +45,14 @@ See the :ref:`algorithm description <lcp>` for full details.
    have been found. This has no effect when using the extensive representation
    of a game, in which case the method always only returns one equilibrium.
 
+.. cmdoption:: -r DEPTH
+
+   When working with the reduced strategic game and the number of equilibria
+   sought (via `-e`) is not 1, this switch instructs the program to terminate
+   the recursive search at depth DEPTH. This has no effect when using the
+   extensive representation of a game, in which case the method always only
+   returns one equilibrium.
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.

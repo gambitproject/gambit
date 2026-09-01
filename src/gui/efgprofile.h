@@ -26,9 +26,17 @@
 #include <wx/grid.h>
 
 #include "gamedoc.h"
+#include "profilelabels.h"
+#include "profilesort.h"
 
 namespace Gambit::GUI {
 class MixedBehaviorProfileList final : public wxGrid, public GameView {
+  /// The order in which the profiles are listed
+  ProfileSortOrder m_sortOrder;
+  /// Highlights the sorted column and the selected profile's row; owned by
+  /// the grid's table, which deletes it
+  ProfileLabelProvider *m_labels{nullptr};
+
   // Event handlers
   void OnLabelClick(wxGridEvent &);
   void OnCellClick(wxGridEvent &);
@@ -36,13 +44,14 @@ class MixedBehaviorProfileList final : public wxGrid, public GameView {
 
   void ResizeGrid(int p_rows, int p_cols);
   void UpdateLabels();
+  void UpdateHighlights();
   void UpdateCells();
 
   // Overriding GameView members
   void OnUpdate() override;
 
 public:
-  MixedBehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  MixedBehaviorProfileList(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~MixedBehaviorProfileList() override;
 };
 } // namespace Gambit::GUI

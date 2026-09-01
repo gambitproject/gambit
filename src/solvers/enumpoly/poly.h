@@ -20,10 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef POLY_H
-#define POLY_H
+#ifndef GAMBIT_SOLVERS_ENUMPOLY_POLY_H
+#define GAMBIT_SOLVERS_ENUMPOLY_POLY_H
 
-#include "gambit.h"
+#include <algorithm>
+#include <compare>
+#include <memory>
+
+#include "core/core.h"
 
 namespace Gambit {
 
@@ -92,21 +96,13 @@ public:
   {
     return m_space == y.m_space && m_components == y.m_components;
   }
-  bool operator!=(const ExponentVector &y) const
-  {
-    return m_space != y.m_space || m_components != y.m_components;
-  }
-
-  bool operator<(const ExponentVector &y) const
+  std::strong_ordering operator<=>(const ExponentVector &y) const
   {
     if (m_space != y.m_space) {
       throw std::logic_error("Cannot order exponent vectors from different spaces");
     }
-    return std::lexicographical_compare(begin(), end(), y.begin(), y.end());
+    return std::lexicographical_compare_three_way(begin(), end(), y.begin(), y.end());
   }
-  bool operator<=(const ExponentVector &y) const { return !(y < *this); }
-  bool operator>(const ExponentVector &y) const { return y < *this; }
-  bool operator>=(const ExponentVector &y) const { return !(*this < y); }
 
   ExponentVector operator+(const ExponentVector &v) const
   {
@@ -183,8 +179,6 @@ public:
 
   bool IsZero() const { return coef == static_cast<T>(0); }
   bool operator==(const Monomial &y) const { return (coef == y.coef && exps == y.exps); }
-  bool operator!=(const Monomial &y) const { return (coef != y.coef || exps != y.exps); }
-  bool operator<(const Monomial &y) const { return exps < y.exps; }
   Monomial operator*(const Monomial &y) const
   {
     if (GetSpace() != y.GetSpace()) {
@@ -349,11 +343,6 @@ public:
   {
     return m_space == p.m_space && m_terms == p.m_terms;
   }
-  bool operator!=(const Polynomial &p) const
-  {
-    return m_space != p.m_space || m_terms != p.m_terms;
-  }
-
   Polynomial pow(int exponent) const;
 
   //-------------
@@ -411,4 +400,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // POLY_H
+#endif // GAMBIT_SOLVERS_ENUMPOLY_POLY_H

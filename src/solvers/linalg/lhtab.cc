@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/lcp/lhtab.cc
+// FILE: src/solvers/linalg/lhtab.cc
 // Tableau class for Lemke-Howson algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,114 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "lhtab.imp"
+#include "lhtab.h"
+#include "games.h"
 
 namespace Gambit::linalg {
+
+//
+// General information
+//
+
+template <class T> int LHTableau<T>::GetLabel(int i) const
+{
+  if (m_tableau1.IsRowIndex(i)) {
+    return m_tableau1.GetLabel(i);
+  }
+  if (m_tableau2.IsRowIndex(i)) {
+    return m_tableau2.GetLabel(i);
+  }
+  return 0;
+}
+
+template <class T> int LHTableau<T>::GetPosition(int i) const
+{
+  if (m_tableau1.IsValidIndex(i)) {
+    return m_tableau1.GetPosition(i);
+  }
+  if (m_tableau2.IsValidIndex(i)) {
+    return m_tableau2.GetPosition(i);
+  }
+  return 0;
+}
+
+//
+// Pivoting operations
+//
+
+template <class T> void LHTableau<T>::Pivot(int outrow, int inlabel)
+{
+  if (!this->IsRowIndex(outrow)) {
+    throw typename LemkeTableau<T>::BadPivot();
+  }
+  if (m_tableau1.IsRowIndex(outrow)) {
+    m_tableau1.Pivot(outrow, inlabel);
+  }
+  if (m_tableau2.IsRowIndex(outrow)) {
+    m_tableau2.Pivot(outrow, inlabel);
+  }
+}
+
+//
+// Miscellaneous functions
+//
+
+template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetColumnBFS()
+{
+  m_tableau1.GetBasisVector(m_scratch1);
+  m_tableau2.GetBasisVector(m_scratch2);
+  for (int i = m_scratch1.front_index(); i <= m_scratch1.back_index(); i++) {
+    m_solution[i] = m_scratch1[i];
+  }
+  for (int i = m_scratch2.front_index(); i <= m_scratch2.back_index(); i++) {
+    m_solution[i] = m_scratch2[i];
+  }
+  BFS<T> cbfs;
+  for (int i = MinCol(); i <= MaxCol(); i++) {
+    if (IsMember(i)) {
+      cbfs.insert(i, m_solution[GetPosition(i)]);
+    }
+  }
+  return cbfs;
+}
+
+template <class T> int LHTableau<T>::PivotIn(int inlabel)
+{
+  const int outindex = ExitIndex(inlabel);
+  const int outlabel = GetLabel(outindex);
+  if (outlabel == 0) {
+    return 0;
+  }
+  Pivot(outindex, inlabel);
+  return outlabel;
+}
+
+template <class T> int LHTableau<T>::ExitIndex(int inlabel)
+{
+  if (m_tableau1.IsValidIndex(inlabel)) {
+    return m_tableau1.ExitIndex(inlabel);
+  }
+  if (m_tableau2.IsValidIndex(inlabel)) {
+    return m_tableau2.ExitIndex(inlabel);
+  }
+  return 0;
+}
+
+template <class T> int LHTableau<T>::LemkePath(int dup, const CancelToken &p_cancel)
+{
+  int enter, exit;
+  enter = dup;
+  if (IsMember(dup)) {
+    enter = -dup;
+  }
+  // Central loop - pivot until another CBFS is found
+  do {
+    p_cancel.Check();
+    exit = PivotIn(enter);
+    enter = -exit;
+  } while ((exit != dup) && (exit != -dup));
+  return 1;
+}
 
 template class LHTableau<double>;
 template class LHTableau<Rational>;

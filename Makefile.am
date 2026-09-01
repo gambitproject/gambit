@@ -20,60 +20,35 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-ACLOCAL_AMFLAGS = -I m4
-
 include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
+    build_support/GAMBIT_VERSION \
     build_support/msw/gambit.wxs.in \
+	build_support/msw/banner.bmp \
+	build_support/msw/dialog.bmp \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
-	src/labenski/README.txt \
-	src/labenski/doc/README-sheet.txt \
-	src/gui/bitmaps/about.xpm \
-	src/gui/bitmaps/adddecimal.xpm \
-	src/gui/bitmaps/calc.xpm \
-	src/gui/bitmaps/close.xpm \
-	src/gui/bitmaps/color.xpm \
-	src/gui/bitmaps/datasrc.xpm \
-	src/gui/bitmaps/deldecimal.xpm \
-	src/gui/bitmaps/dice.xpm \
-	src/gui/bitmaps/efg.ico \
-	src/gui/bitmaps/exit.xpm \
-	src/gui/bitmaps/font.xpm \
+	build_support/osx/dmg_background.tiff \
+	build_support/osx/make-dmg.sh \
+	src/gui/bitmaps/calc.h \
 	src/gui/bitmaps/gambitbig.xpm \
-	src/gui/bitmaps/gambit.bmp \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
-	src/gui/bitmaps/label.xpm \
-	src/gui/bitmaps/layout.xpm \
 	src/gui/bitmaps/move.xpm \
-	src/gui/bitmaps/newcol.xpm \
-	src/gui/bitmaps/newplayer.xpm \
-	src/gui/bitmaps/newrow.xpm \
-	src/gui/bitmaps/newtable.xpm \
-	src/gui/bitmaps/newtree.xpm \
-	src/gui/bitmaps/new.xpm \
-	src/gui/bitmaps/next.xpm \
-	src/gui/bitmaps/nfg.ico \
-	src/gui/bitmaps/open.xpm \
-	src/gui/bitmaps/person.xpm \
-	src/gui/bitmaps/preview.xpm \
-	src/gui/bitmaps/prev.xpm \
-	src/gui/bitmaps/print.xpm \
-	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/saveas.xpm \
-	src/gui/bitmaps/savedata.xpm \
-	src/gui/bitmaps/save.xpm \
-	src/gui/bitmaps/stop.xpm \
-	src/gui/bitmaps/table.xpm \
-	src/gui/bitmaps/tobegin.xpm \
-	src/gui/bitmaps/toend.xpm \
-	src/gui/bitmaps/tree.xpm \
-	src/gui/bitmaps/zoomfit.xpm \
-	src/gui/bitmaps/zoomin.xpm \
-	src/gui/bitmaps/zoomout.xpm \
-	src/gui/bitmaps/zoom1.xpm \
+	src/gui/bitmaps/newtable.h \
+	src/gui/bitmaps/newtree.h \
+	src/gui/bitmaps/next.h \
+	src/gui/bitmaps/open.h \
+	src/gui/bitmaps/prev.h \
+	src/gui/bitmaps/profiles.h \
+	src/gui/bitmaps/save.h \
+	src/gui/bitmaps/stop.h \
+	src/gui/bitmaps/table.h \
+	src/gui/bitmaps/tobegin.h \
+	src/gui/bitmaps/toend.h \
+	src/gui/bitmaps/undo.h \
+	src/gui/bitmaps/redo.h \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
 	contrib/games/2x2x2.efg \
@@ -196,7 +171,6 @@ EXTRA_DIST = \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
 	contrib/games/sh3.nfg \
-	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
@@ -206,13 +180,14 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/README.rst \
 	$(CATALOG_FILES)
 
 core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
+	src/core/cancel.h \
+	src/core/lazy.h \
 	src/core/vector.h \
 	src/core/segment.h \
 	src/core/recarray.h \
@@ -223,31 +198,10 @@ core_SOURCES = \
 	src/core/rational.h \
 	src/core/matrix.cc \
 	src/core/function.cc \
-	src/core/function.h \
-	src/core/tinyxml.cc \
-	src/core/tinyxmlerror.cc \
-	src/core/tinyxmlparser.cc \
-	src/core/tinyxml.h
-
-agg_SOURCES = \
-	src/games/gameagg.cc \
-	src/games/gameagg.h \
-	src/games/gamebagg.cc \
-	src/games/gamebagg.h \
-	src/games/agg/gray.h \
-	src/games/agg/agg.cc \
-    src/games/agg/agg.h \
-	src/games/agg/bagg.cc \
-	src/games/agg/bagg.h \
-	src/games/agg/proj_func.h \
-	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp \
-    src/games/agg/trie_map.cc
+	src/core/function.h
 
 game_SOURCES = \
-	src/gambit.h \
-	src/games/gameseq.cc \
-	src/games/gameseq.h \
+	src/games.h \
 	src/games/ndarray.h \
 	src/games/number.h \
 	src/games/gameobject.h \
@@ -265,39 +219,49 @@ game_SOURCES = \
 	src/games/behavpure.h \
 	src/games/behavmixed.cc \
 	src/games/behavmixed.h \
+	src/games/seqpure.cc \
+	src/games/seqpure.h \
+	src/games/seqmixed.h \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
 	src/games/file.cc \
+	src/games/workspace.cc \
+	src/games/workspace.h \
 	src/games/writer.cc \
 	src/games/writer.h \
 	src/games/layout.cc \
     src/games/layout.h \
-	${agg_SOURCES} \
-	src/games/nash.h
+	src/games/gameagg.cc \
+	src/games/gameagg.h \
+	src/games/gamebagg.cc \
+	src/games/gamebagg.h \
+	src/games/agg/gray.h \
+	src/games/agg/agg.cc \
+    src/games/agg/agg.h \
+	src/games/agg/bagg.cc \
+	src/games/agg/bagg.h \
+	src/games/agg/proj_func.h \
+	src/games/agg/trie_map.h \
+    src/games/agg/trie_map.imp \
+    src/games/agg/trie_map.cc
 
 linalg_SOURCES = \
-	src/solvers/linalg/btableau.h \
 	src/solvers/linalg/lpsolve.cc \
 	src/solvers/linalg/lpsolve.h \
-	src/solvers/linalg/lpsolve.imp \
 	src/solvers/linalg/lptab.cc \
 	src/solvers/linalg/lptab.h \
-	src/solvers/linalg/lptab.imp \
 	src/solvers/linalg/ludecomp.cc \
 	src/solvers/linalg/ludecomp.h \
-	src/solvers/linalg/ludecomp.imp \
 	src/solvers/linalg/tableau.h \
 	src/solvers/linalg/tableau.cc \
 	src/solvers/linalg/lemketab.cc \
 	src/solvers/linalg/lemketab.h \
-	src/solvers/linalg/lemketab.imp \
 	src/solvers/linalg/lhtab.cc \
 	src/solvers/linalg/lhtab.h \
-	src/solvers/linalg/lhtab.imp \
-	src/solvers/linalg/vertenum.h \
-	src/solvers/linalg/vertenum.imp
+	src/solvers/linalg/vertenum.cc \
+	src/solvers/linalg/vertenum.h
 
 gtracer_SOURCES = \
 	src/solvers/gtracer/cmatrix.h \
@@ -319,60 +283,54 @@ hp_SOURCES = \
 	src/solvers/hp/hpsystem.h \
 	src/solvers/hp/hpsystem.cc
 
-if IS_WIN32
-AM_LDFLAGS = -static -static-libgcc -static-libstdc++
-endif
-
-bin_PROGRAMS = \
-	gambit-convert \
-	gambit-enummixed \
-	gambit-enumpoly \
-	gambit-enumpure \
-	gambit-gnm \
-	gambit-ipa \
-	gambit-lcp \
-	gambit-liap \
-	gambit-logit \
-	gambit-lp \
-	gambit-simpdiv
-
-if WITH_GUI
-bin_PROGRAMS += gambit
-endif
-
-# Read version from GAMBIT_VERSION file for use in compilation
-GAMBIT_VERSION = $(shell cat $(top_srcdir)/build_support/GAMBIT_VERSION)
-
-# Define VERSION for all C++ compilations and set include paths
-AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\"
-
-AM_CXXFLAGS = ${LLVM_CXXFLAGS}
-
-## Command-line tools
-
-gambit_convert_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/tools/convert/convert.cc
-
-gambit_enummixed_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/enummixed/clique.cc \
-	src/solvers/enummixed/clique.h \
-	src/solvers/enummixed/enummixed.cc \
-	src/solvers/enummixed/enummixed.h \
-	src/tools/util.h \
-	src/tools/enummixed/enummixed.cc
-
-gambit_nashsupport_SOURCES = \
+nashsupport_SOURCES = \
 	src/solvers/nashsupport/efgsupport.cc \
 	src/solvers/nashsupport/nfgsupport.cc \
 	src/solvers/nashsupport/nashsupport.h
 
-gambit_enumpoly_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
+bimatrix_SOURCES = \
+	${linalg_SOURCES} \
+	src/solvers/lp/lp.cc \
+	src/solvers/lp/lp.h \
+	src/solvers/lcp/efglcp.cc \
+	src/solvers/lcp/nfglcp.cc \
+	src/solvers/lcp/lcp.h \
+	src/solvers/enummixed/clique.cc \
+	src/solvers/enummixed/clique.h \
+	src/solvers/enummixed/enummixed.cc \
+	src/solvers/enummixed/enummixed.h
+
+gtracerlib_SOURCES = \
+	${gtracer_SOURCES} \
+	src/solvers/gnm/gnm.cc \
+	src/solvers/gnm/gnm.h \
+	src/solvers/ipa/ipa.cc \
+	src/solvers/ipa/ipa.h
+
+liap_SOURCES = \
+	src/solvers/liap/efgliap.cc \
+	src/solvers/liap/nfgliap.cc \
+	src/solvers/liap/liap.h
+
+logit_SOURCES = \
+	src/solvers/logit/logbehav.h \
+	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/path.cc \
+	src/solvers/logit/path.h \
+    src/solvers/logit/logit.h \
+	src/solvers/logit/efglogit.cc \
+	src/solvers/logit/nfglogit.cc
+
+simpdiv_SOURCES = \
+	src/solvers/simpdiv/simpdiv.cc \
+	src/solvers/simpdiv/simpdiv.h
+
+enumpoly_SOURCES = \
+	${nashsupport_SOURCES} \
 	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/lufactor.cc \
+	src/solvers/enumpoly/lufactor.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \
@@ -382,101 +340,47 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/polysolver.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
-	src/solvers/enumpoly/enumpoly.h \
-	src/tools/util.h \
-	src/tools/enumpoly/enumpoly.cc
+	src/solvers/enumpoly/enumpoly.h
 
-gambit_enumpure_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/enumpure/enumpure.h \
-	src/tools/util.h \
-	src/tools/enumpure/enumpure.cc
+noinst_HEADERS = src/gambit.h src/solvers.h src/solvers/nash.h src/solvers/enumpure/enumpure.h
 
-gambit_gnm_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${gtracer_SOURCES} \
-	src/solvers/gnm/gnm.cc \
-	src/solvers/gnm/gnm.h \
-	src/tools/gt/nfggt.cc \
-	src/tools/gt/nfggnm.cc
+if IS_WIN32
+AM_LDFLAGS = -static -static-libgcc -static-libstdc++
+endif
 
-gambit_ipa_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${gtracer_SOURCES} \
-	src/solvers/ipa/ipa.cc \
-	src/solvers/ipa/ipa.h \
-	src/tools/gt/nfggt.cc \
-	src/tools/util.h \
-	src/tools/gt/nfgipa.cc
+if WITH_GUI
+bin_PROGRAMS = gambit
+endif
 
-gambit_lcp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/lcp/efglcp.cc \
-	src/solvers/lcp/nfglcp.cc \
-	src/solvers/lcp/lcp.h \
-	src/tools/util.h \
-	src/tools/lcp/lcp.cc
+# Define VERSION for all C++ compilations and set include paths
+AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
 
-gambit_liap_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/liap/efgliap.cc \
-	src/solvers/liap/nfgliap.cc \
-	src/solvers/liap/liap.h \
-	src/tools/util.h \
-	src/tools/liap/liap.cc
+AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
-gambit_logit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.imp \
-	src/solvers/logit/path.cc \
-	src/solvers/logit/path.h \
-    src/solvers/logit/logit.h \
-	src/solvers/logit/efglogit.cc \
-	src/solvers/logit/nfglogit.cc \
-	src/tools/util.h \
-	src/tools/logit/logit.cc
+## Convenience libraries
+##
+## Every command-line tool and the GUI link against these instead of each
+## recompiling the same core/games/solver sources from scratch.
 
-gambit_lp_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	${linalg_SOURCES} \
-	src/solvers/lp/lp.cc \
-	src/solvers/lp/lp.h \
-	src/tools/util.h \
-	src/tools/lp/lp.cc
+noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
+	libliap.a liblogit.a libsimpdiv.a libenumpoly.a
 
-gambit_simpdiv_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/simpdiv/simpdiv.cc \
-	src/solvers/simpdiv/simpdiv.h \
-	src/tools/util.h \
-	src/tools/simpdiv/nfgsimpdiv.cc
+libcore_a_SOURCES = ${core_SOURCES}
+libgames_a_SOURCES = ${game_SOURCES}
+libbimatrix_a_SOURCES = ${bimatrix_SOURCES}
+libgtracer_a_SOURCES = ${gtracerlib_SOURCES}
+libliap_a_SOURCES = ${liap_SOURCES}
+liblogit_a_SOURCES = ${logit_SOURCES}
+libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
+libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
 
 gambit_SOURCES = \
-	${core_SOURCES} ${game_SOURCES} \
-	src/labenski/src/sheetatr.cpp \
-	src/labenski/src/sheet.cpp \
-	src/labenski/src/sheetedg.cpp \
-	src/labenski/src/sheetedt.cpp \
-	src/labenski/src/sheetren.cpp \
-	src/labenski/src/sheetsel.cpp \
-	src/labenski/src/sheetspt.cpp \
-	src/labenski/src/sheettbl.cpp \
-	src/labenski/include/wx/sheet/pairarr.h \
-	src/labenski/include/wx/sheet/sheetatr.h \
-	src/labenski/include/wx/sheet/sheetdef.h \
-	src/labenski/include/wx/sheet/sheetedg.h \
-	src/labenski/include/wx/sheet/sheetedt.h \
-	src/labenski/include/wx/sheet/sheet.h \
-	src/labenski/include/wx/sheet/sheetren.h \
-	src/labenski/include/wx/sheet/sheetsel.h \
-	src/labenski/include/wx/sheet/sheetspt.h \
-	src/labenski/include/wx/sheet/sheettbl.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
 	src/gui/app.h \
+	src/gui/editlabel.cc \
+	src/gui/editlabel.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
 	src/gui/dlabout.cc \
@@ -485,32 +389,34 @@ gambit_SOURCES = \
 	src/gui/dleditmove.h \
 	src/gui/dleditnode.cc \
 	src/gui/dleditnode.h \
+	src/gui/dleditstrategies.cc \
+	src/gui/dleditstrategies.h \
 	src/gui/dlefglayout.cc \
 	src/gui/dlefglayout.h \
 	src/gui/dlefglegend.cc \
 	src/gui/dlefglegend.h \
-	src/gui/dlefglogit.cc \
-	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
-	src/gui/dlinsertmove.cc \
-	src/gui/dlinsertmove.h \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
-	src/gui/dlnashmon.h \
+	src/gui/nashspec.cc \
+	src/gui/nashspec.h \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
-	src/gui/dlnfglogit.cc \
-	src/gui/dlnfglogit.h \
+	src/gui/dllogit.cc \
+	src/gui/dllogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
+	src/gui/efgdragdrop.cc \
 	src/gui/efglayout.cc \
 	src/gui/efglayout.h \
+	src/gui/efgnodemenu.cc \
 	src/gui/efgpanel.cc \
 	src/gui/efgpanel.h \
+	src/gui/efgtooltip.cc \
 	src/gui/efgprofile.cc \
 	src/gui/efgprofile.h \
 	src/gui/gamedoc.cc \
@@ -518,12 +424,18 @@ gambit_SOURCES = \
 	src/gui/gameframe.cc \
 	src/gui/gameframe.h \
 	src/gui/menuconst.h \
+	src/gui/nfgheadergrid.cc \
 	src/gui/nfgpanel.cc \
 	src/gui/nfgpanel.h \
+	src/gui/nfgpayoffgrid.cc \
 	src/gui/nfgprofile.cc \
 	src/gui/nfgprofile.h \
 	src/gui/nfgtable.cc \
 	src/gui/nfgtable.h \
+	src/gui/profilelabels.cc \
+	src/gui/profilelabels.h \
+	src/gui/profilesort.cc \
+	src/gui/profilesort.h \
 	src/gui/renratio.cc \
 	src/gui/renratio.h \
 	src/gui/style.cc \
@@ -535,14 +447,21 @@ gambit_SOURCES = \
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
-gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -I$(top_srcdir)/src/labenski/include
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
+
+gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
+	libsimpdiv.a libenumpoly.a libgames.a libcore.a
+
+gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
 
 if IS_WIN32
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
+gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 else
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS)
+gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
 endif
 
+src/gui/bitmaps/gambitrc.o: src/gui/bitmaps/gambitrc.rc
+	$(WINDRES) $(WX_CXXFLAGS) -I$(srcdir)/src/gui/bitmaps -o $@ $<
 
 osx-bundle:
 	make all
@@ -558,11 +477,7 @@ osx-bundle:
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
-	-rm -rf .dmg
-	-mkdir .dmg
-	cp -r Gambit.app .dmg
-	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
-	rm -rf .dmg
+	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg
 
 msw-msi:
 	-mkdir installer
@@ -571,7 +486,6 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"

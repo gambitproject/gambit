@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/gametree.h
+// FILE: src/games/gametree.h
 // Declaration of extensive game representation
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMETREE_H
-#define GAMETREE_H
+#ifndef GAMBIT_GAMES_GAMETREE_H
+#define GAMBIT_GAMES_GAMETREE_H
 
+#include "core/lazy.h"
 #include "gameexpl.h"
+#include "seqpure.h"
 #include <unordered_map>
 
 namespace Gambit {
@@ -40,15 +42,15 @@ class GameTreeRep final : public GameExplicitRep {
   };
 
 protected:
-  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false},
-      m_hasSequences{false};
+  mutable LazyAction m_nodeOrdering, m_infosetOrdering, m_strategies, m_sequences;
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
+  mutable LazyAction m_ownPriorActions;
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
-  mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
+  mutable Lazy<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
   mutable std::vector<std::pair<GameInfosetRep *, GameNodeRep *>> m_absentMindedReentries;
   // The subgames of the game, held in two synchronized forms:
@@ -57,19 +59,8 @@ protected:
   struct SubgameData {
     std::vector<GameNodeRep *> m_subgamePostorder;
     std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> m_subgameByRoot;
-    bool m_valid{false};
-
-    void Invalidate()
-    {
-      for (const auto &[node, subgame] : m_subgameByRoot) {
-        subgame->Invalidate();
-      }
-      m_subgamePostorder.clear();
-      m_subgameByRoot.clear();
-      m_valid = false;
-    }
   };
-  mutable SubgameData m_subgameData;
+  mutable Lazy<SubgameData> m_subgameData;
 
   /// @name Private auxiliary functions
   //@{
@@ -77,8 +68,10 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
-  /// Normalize the probability distribution of actions at a chance node
-  Game NormalizeChanceProbs(GameInfosetRep *);
+  /// Returns the subset of p_covered no longer referenced by any node outside p_selected.
+  std::set<const GameOutcomeRep *>
+  ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
+                          const std::set<const GameOutcomeRep *> &p_covered) const;
   //@}
 
   /// @name Managing the representation
@@ -86,20 +79,19 @@ protected:
   /// Jointly invalidates the ordering of the nodes and the ordering of the information sets.
   void InvalidateTreeOrdering() const
   {
-    m_nodesOrdered = false;
-    m_infosetsOrdered = false;
+    m_nodeOrdering.Invalidate();
+    m_infosetOrdering.Invalidate();
   }
-  void InvalidateInfosetOrdering() const { m_infosetsOrdered = false; }
+  void InvalidateInfosetOrdering() const { m_infosetOrdering.Invalidate(); }
   void EnsureNodeOrdering() const override;
   void EnsureInfosetOrdering() const override;
 
-  void BuildComputedValues() const override;
+  void EnsureStrategies() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
 
   void EnsureSequences() const override;
-  void BuildSequences(const GameNode &n,
-                      std::map<GamePlayer, GameSequence> &p_currentSequences) const;
+  void BuildSequences(const GameNode &n, PureSequenceProfile &p_currentSequences) const;
 
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameInfosetRep *, GameNodeRep *);
@@ -135,8 +127,7 @@ public:
   //@{
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { return m_chance->shared_from_this(); }
-  /// Creates a new player in the game, with no moves
-  GamePlayer NewPlayer() override;
+  void SetPlayers(const std::vector<std::string> &) override;
   //@}
 
   /// @name Nodes
@@ -150,8 +141,6 @@ public:
   /// Returns the last action taken by the node's owner before reaching this node
   GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
-
-  void DeleteOutcome(const GameOutcome &) override;
 
   /// @name Writing data files
   //@{
@@ -175,25 +164,33 @@ public:
 
   /// @name Modification
   //@{
-  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                         bool p_generateLabels = false) override;
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+                         const std::vector<std::string> &p_actions) override;
   GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
-                         bool p_generateLabels = false) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+                         const std::vector<std::string> &p_actions) override;
   GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
+  GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                          const std::vector<Number> &p_probs) override;
+  GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+                          const std::vector<Number> &p_probs) override;
   void CopyTree(GameNode dest, GameNode src) override;
   void MoveTree(GameNode dest, GameNode src) override;
   void DeleteParent(GameNode) override;
   void DeleteTree(GameNode) override;
-  void SetPlayer(GameInfoset, GamePlayer) override;
+  GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
+                          const std::string &) override;
+  void MakeOutcomeNull(const std::vector<GameNode> &) override;
+  GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
+                          const std::string &) override;
   void Reveal(GameInfoset, GamePlayer) override;
-  void SetInfoset(GameNode, GameInfoset) override;
-  GameInfoset LeaveInfoset(GameNode) override;
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
-  GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
-  void DeleteAction(GameAction) override;
-  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
-
+  GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
+                        const std::string &) override;
+  void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
+  void SetMoveActions(const GameInfoset &, const std::vector<std::string> &) override;
+  void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
+                       const std::vector<Number> &) override;
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
   std::vector<GameNode> GetPlays(GameAction action) const override;
@@ -211,10 +208,15 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
-  void BuildOwnPriorActions() const;
-  void BuildUnreachableNodes() const;
-  void EnsureSubgames() const;
-  void BuildSubgameRoots() const;
+  void EnsureOwnPriorActions() const;
+  const std::set<GameNodeRep *> &GetUnreachableNodes() const;
+  const SubgameData &GetSubgameData() const;
+  /// Shared implementation of SetMoveActions/SetEventActions: declares the ordered action
+  /// list of p_infoset, matching by label, and (for an event) the probability distribution
+  /// over them. Callers are responsible for validating p_probs and that p_infoset is of the
+  /// right kind (personal move or event) before calling this.
+  void DoSetActions(const GameInfoset &, const std::vector<std::string> &,
+                    const std::vector<Number> &);
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
@@ -240,4 +242,4 @@ private:
 
 } // namespace Gambit
 
-#endif // GAMETREE_H
+#endif // GAMBIT_GAMES_GAMETREE_H

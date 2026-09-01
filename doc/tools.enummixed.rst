@@ -20,16 +20,6 @@ See the :ref:`algorithm description <enummixed>` for full details.
    computation in floating-point, and expresses all output using decimal
    representations with the specified number of digits.
 
-.. cmdoption:: -D
-
-   Since all Nash equilibria involve only strategies which survive
-   iterative elimination of strictly dominated strategies, the program
-   carries out the elimination automatically prior to computation.
-   This is recommended, since it almost always results in superior
-   performance.
-   Specifying `-D` skips the elimination step and performs the
-   enumeration on the full game.
-
 .. cmdoption:: -c
 
    The program outputs the extreme equilibria as it finds them,

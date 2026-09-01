@@ -34,8 +34,6 @@ enum MenuItems {
   GBT_MENU_FILE_EXPORT_POSTSCRIPT = 1106,
   GBT_MENU_FILE_EXPORT_SVG = 1109,
 
-  GBT_MENU_EDIT_INSERT_MOVE = 1200,
-  GBT_MENU_EDIT_INSERT_ACTION = 1201,
   GBT_MENU_EDIT_DELETE_TREE = 1202,
   GBT_MENU_EDIT_DELETE_PARENT = 1203,
   GBT_MENU_EDIT_REMOVE_OUTCOME = 1204,
@@ -44,7 +42,13 @@ enum MenuItems {
   GBT_MENU_EDIT_NODE = 1420,
   GBT_MENU_EDIT_MOVE = 1421,
 
-  GBT_MENU_EDIT_NEWPLAYER = 1500,
+  // Reserves a block of IDs for the "Append/Insert move for" submenu on the node context
+  // menu, one per player (plus chance); see EfgDisplay::UpdateNewMoveMenu.
+  GBT_MENU_EDIT_NEW_MOVE_BASE = 1430,
+
+  // Reserves a block of IDs for the "Assign this move to" submenu on the node context menu,
+  // one per (non-chance) player; see EfgDisplay::UpdateReassignPlayerMenu.
+  GBT_MENU_EDIT_REASSIGN_PLAYER_BASE = 1500,
 
   GBT_MENU_VIEW_PROFILES = 1850,
   GBT_MENU_VIEW_ZOOMIN = 1601,
@@ -56,8 +60,6 @@ enum MenuItems {
   GBT_MENU_FORMAT_LAYOUT = 1620,
   GBT_MENU_FORMAT_LABELS = 1604,
   GBT_MENU_FORMAT_FONTS = 1612,
-  GBT_MENU_FORMAT_DECIMALS_ADD = 1622,
-  GBT_MENU_FORMAT_DECIMALS_DELETE = 1623,
 
   GBT_MENU_TOOLS_DOMINANCE = 1800,
   GBT_MENU_TOOLS_EQUILIBRIUM = 1801,

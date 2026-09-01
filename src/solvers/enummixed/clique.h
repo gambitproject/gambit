@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/src/enummixed/clique.h
+// FILE: src/solvers/enummixed/clique.h
 // Maximal cliques and connected components
 //
 // This program is free software; you can redistribute it and/or modify
@@ -175,11 +175,11 @@
 //    have to be updated.  Hence,  NOT and CAND are kept as
 //    separate sets  NOT1,  NOT2  and CAND1, CAND2.
 
-#ifndef GAMBIT_ENUMMIXED_CLIQUE_H
-#define GAMBIT_ENUMMIXED_CLIQUE_H
+#ifndef GAMBIT_SOLVERS_ENUMMIXED_CLIQUE_H
+#define GAMBIT_SOLVERS_ENUMMIXED_CLIQUE_H
 
 #include <cstdio>
-#include "gambit.h"
+#include "core/core.h"
 
 namespace Gambit::Nash {
 
@@ -204,7 +204,6 @@ public:
     explicit Edge(const int n1, const int n2) : node1(n1), node2(n2) {}
     ~Edge() = default;
     bool operator==(const Edge &y) const { return (node1 == y.node1 && node2 == y.node2); }
-    bool operator!=(const Edge &y) const { return !(*this == y); }
   };
 
   CliqueEnumerator(Array<Edge> &, int, int);
@@ -265,4 +264,4 @@ private:
 
 } // end namespace Gambit::Nash
 
-#endif // GAMBIT_ENUMMIXED_CLIQUE_H
+#endif // GAMBIT_SOLVERS_ENUMMIXED_CLIQUE_H

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/stratspt.cc
+// FILE: src/games/stratspt.cc
 // Implementation of strategy classes for normal forms
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "gametable.h"
 
 namespace Gambit {
@@ -34,7 +34,7 @@ namespace Gambit {
 
 StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_game)
 {
-  m_game->BuildComputedValues();
+  m_game->EnsureStrategies();
   for (const auto &player : m_game->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       m_support[player].push_back(strategy);

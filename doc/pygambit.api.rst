@@ -14,12 +14,11 @@ Representation of games
    :toctree: api/
 
    Game
-   Player
    Outcome
    Node
    Infoset
-   Action
-   Strategy
+   Event
+   Branch
    Subgame
 
 
@@ -54,8 +53,10 @@ Transforming game trees
 
    Game.append_move
    Game.append_infoset
+   Game.append_event
    Game.insert_move
    Game.insert_infoset
+   Game.insert_event
    Game.copy_tree
    Game.move_tree
    Game.delete_parent
@@ -68,12 +69,12 @@ Transforming game information structure
 .. autosummary::
    :toctree: api/
 
-   Game.set_player
-   Game.set_infoset
-   Game.leave_infoset
-   Game.set_chance_probs
+   Game.make_infoset
+   Game.make_event
+   Game.relabel_actions
+   Game.set_move_actions
+   Game.set_event_actions
    Game.reveal
-   Game.sort_infosets
 
 
 Transforming game components
@@ -82,12 +83,12 @@ Transforming game components
 .. autosummary::
    :toctree: api/
 
-   Game.add_player
-   Game.add_outcome
-   Game.delete_outcome
-   Game.set_outcome
-   Game.add_strategy
-   Game.delete_strategy
+   Game.relabel_players
+   Game.set_players
+   Game.relabel_strategies
+   Game.set_strategies
+   Game.make_outcome
+   Game.make_outcome_null
 
 
 Information about the game
@@ -105,28 +106,19 @@ Information about the game
    Game.outcomes
    Game.min_payoff
    Game.max_payoff
-   Game.strategies
+   Game.get_min_payoff
+   Game.get_max_payoff
    Game.root
-   Game.actions
-   Game.infosets
+   Game.get_infosets
+   Game.get_events
+   Game.get_strategies
+   Game.get_sequences
    Game.nodes
    Game.contingencies
+   Game.get_outcome
+   Game.get_payoffs
    Game.subgames
    Game.minimal_subgame
-
-.. autosummary::
-   :toctree: api/
-
-   Player.label
-   Player.number
-   Player.game
-   Player.strategies
-   Player.infosets
-   Player.actions
-   Player.is_chance
-   Player.min_payoff
-   Player.max_payoff
-   Player.sequences
 
 .. autosummary::
    :toctree: api/
@@ -150,6 +142,10 @@ Information about the game
    Node.prior_sibling
    Node.next_sibling
    Node.infoset
+   Node.event
+   Node.members
+   Node.actions
+   Node.action_probs
    Node.player
    Node.is_successor_of
    Node.plays
@@ -169,34 +165,23 @@ Information about the game
 
    Infoset.label
    Infoset.game
-   Infoset.is_chance
    Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
    Infoset.members
    Infoset.precedes
-   Infoset.plays
-   Infoset.own_prior_actions
 
 .. autosummary::
 
    :toctree: api/
 
-   Action.label
-   Action.infoset
-   Action.precedes
-   Action.prob
-   Action.plays
-
-.. autosummary::
-
-   :toctree: api/
-
-   Strategy.label
-   Strategy.game
-   Strategy.player
-   Strategy.number
-   Strategy.action
+   Event.label
+   Event.game
+   Event.is_absent_minded
+   Event.player
+   Event.actions
+   Event.members
+   Event.precedes
 
 .. autosummary::
 
@@ -217,12 +202,36 @@ Player behavior
    Game.mixed_behavior_profile
    Game.random_behavior_profile
    Game.strategy_support_profile
+   Game.behavior_support_profile
 
 
 Representation of strategic behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: pygambit.gambit
+
+
+Computed quantities
+....................
+
+.. autosummary::
+   :toctree: api/
+
+   PlayerIndexedVector
+   PlayerIndexedVector.__iter__
+   PlayerIndexedVector.__getitem__
+
+   StrategyIndexedVector
+   StrategyIndexedVector.__iter__
+   StrategyIndexedVector.__getitem__
+
+   NodeIndexedVector
+   NodeIndexedVector.__iter__
+   NodeIndexedVector.__getitem__
+
+   InfosetIndexedVector
+   InfosetIndexedVector.__iter__
+   InfosetIndexedVector.__getitem__
 
 
 Probability distributions over strategies
@@ -233,25 +242,31 @@ Probability distributions over strategies
 
    MixedStrategyProfile
    MixedStrategyProfile.game
-   MixedStrategyProfile.mixed_strategies
    MixedStrategyProfile.__iter__
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
-   MixedStrategyProfile.payoff
-   MixedStrategyProfile.strategy_value
-   MixedStrategyProfile.strategy_regret
-   MixedStrategyProfile.player_regret
-   MixedStrategyProfile.strategy_value_deriv
+   MixedStrategyProfile.set_mixed_strategy
+   MixedStrategyProfile.payoffs
+   MixedStrategyProfile.strategy_values
+   MixedStrategyProfile.strategy_regrets
+   MixedStrategyProfile.player_regrets
    MixedStrategyProfile.max_regret
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
+   MixedStrategyProfile.as_float
    MixedStrategyProfile.normalize
    MixedStrategyProfile.copy
 
    MixedStrategy
    MixedStrategy.__iter__
    MixedStrategy.__getitem__
-   MixedStrategy.__setitem__
+
+   PayoffVector
+   PlayerRegretVector
+   StrategyValueVector
+   StrategyRegretVector
+   StrategyValuesVector
+   StrategyRegretsVector
 
 
 Probability distributions over behavior
@@ -262,39 +277,98 @@ Probability distributions over behavior
 
    MixedBehaviorProfile
    MixedBehaviorProfile.game
-   MixedBehaviorProfile.mixed_behaviors
-   MixedBehaviorProfile.mixed_actions
    MixedBehaviorProfile.__iter__
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
-   MixedBehaviorProfile.payoff
-   MixedBehaviorProfile.action_value
-   MixedBehaviorProfile.action_regret
-   MixedBehaviorProfile.infoset_value
-   MixedBehaviorProfile.infoset_regret
-   MixedBehaviorProfile.node_value
-   MixedBehaviorProfile.realiz_prob
-   MixedBehaviorProfile.infoset_prob
-   MixedBehaviorProfile.belief
+   MixedBehaviorProfile.set_mixed_action
+   MixedBehaviorProfile.payoffs
+   MixedBehaviorProfile.action_values
+   MixedBehaviorProfile.action_regrets
+   MixedBehaviorProfile.infoset_values
+   MixedBehaviorProfile.infoset_regrets
+   MixedBehaviorProfile.node_values
+   MixedBehaviorProfile.realiz_probs
+   MixedBehaviorProfile.infoset_probs
+   MixedBehaviorProfile.beliefs
    MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.max_regret
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
+   MixedBehaviorProfile.as_float
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy
 
    MixedBehavior
-   MixedBehavior.mixed_actions
    MixedBehavior.__iter__
    MixedBehavior.__getitem__
-   MixedBehavior.__setitem__
 
    MixedAction
    MixedAction.__iter__
    MixedAction.__getitem__
-   MixedAction.__setitem__
+
+   InfosetValueVector
+   InfosetRegretVector
+   InfosetProbVector
+   ActionValueVector
+   ActionRegretVector
+   ActionValuesVector
+   ActionRegretsVector
+   RealizProbVector
+   BeliefVector
+   NodeValueVector
+   NodeValuesVector
+
+
+Representation of supports
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: pygambit.gambit
+
+Subsets of strategies
+......................
+
+.. autosummary::
+   :toctree: api/
+
+   StrategySupportProfile
+   StrategySupportProfile.game
+   StrategySupportProfile.__iter__
+   StrategySupportProfile.__getitem__
+   StrategySupportProfile.__setitem__
+   StrategySupportProfile.copy
+   StrategySupportProfile.restrict
+   StrategySupportProfile.is_dominated
+
+   StrategySupport
+   StrategySupport.player
+   StrategySupport.__iter__
+   StrategySupport.__contains__
+
+Subsets of actions
+...................
+
+.. autosummary::
+   :toctree: api/
+
+   BehaviorSupportProfile
+   BehaviorSupportProfile.game
+   BehaviorSupportProfile.__iter__
+   BehaviorSupportProfile.__getitem__
+   BehaviorSupportProfile.__setitem__
+   BehaviorSupportProfile.copy
+   BehaviorSupportProfile.is_reachable
+
+   BehaviorSupport
+   BehaviorSupport.player
+   BehaviorSupport.__iter__
+   BehaviorSupport.__getitem__
+
+   ActionSupport
+   ActionSupport.infoset
+   ActionSupport.__iter__
+   ActionSupport.__contains__
 
 
 Computation on supports

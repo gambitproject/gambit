@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/liap/efgliap.h
+// FILE: src/solvers/liap/liap.h
 // Compute Nash equilibria by minimizing Liapunov function on extensive game
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,21 +20,45 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_NASH_LIAP_H
-#define GAMBIT_NASH_LIAP_H
+#ifndef GAMBIT_SOLVERS_LIAP_LIAP_H
+#define GAMBIT_SOLVERS_LIAP_LIAP_H
 
-#include "games/nash.h"
+#include <variant>
+#include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
+template <class Profile> struct LiapStartEvent {
+  const Profile &profile;
+};
+
+template <class Profile> struct LiapEndEvent {
+  const Profile &profile;
+  double regret;
+};
+
+template <class Profile>
+using LiapEvent = std::variant<LiapStartEvent<Profile>, LiapEndEvent<Profile>>;
+
+template <class Profile>
+using LiapEventCallbackType = std::function<void(const LiapEvent<Profile> &)>;
+
+template <class Profile> void NullLiapEventCallback(const LiapEvent<Profile> &) {}
+
 std::list<MixedBehaviorProfile<double>>
 LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-               BehaviorCallbackType<double> p_callback = NullBehaviorCallback<double>);
+               BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
+               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent =
+                   NullLiapEventCallback<MixedBehaviorProfile<double>>,
+               const CancelToken &p_cancel = CancelToken());
 
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
+                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent =
+                      NullLiapEventCallback<MixedStrategyProfile<double>>,
+                  const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 
-#endif // GAMBIT_NASH_LIAP_H
+#endif // GAMBIT_SOLVERS_LIAP_LIAP_H

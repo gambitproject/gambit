@@ -289,7 +289,8 @@ std::istream &operator>>(std::istream &f, Rational &y)
   while (isspace(ch)) {
     f.get(ch);
     if (f.eof() || f.bad()) {
-      throw ValueException();
+      f.setstate(std::ios::failbit);
+      return f;
     }
   }
 
@@ -426,11 +427,6 @@ bool Rational::operator==(const Rational &y) const
   return compare(num, y.num) == 0 && compare(den, y.den) == 0;
 }
 
-bool Rational::operator!=(const Rational &y) const
-{
-  return compare(num, y.num) != 0 || compare(den, y.den) != 0;
-}
-
 bool Rational::operator<(const Rational &y) const { return compare(*this, y) < 0; }
 
 bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <= 0; }
@@ -438,6 +434,11 @@ bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <=
 bool Rational::operator>(const Rational &y) const { return compare(*this, y) > 0; }
 
 bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >= 0; }
+
+std::strong_ordering Rational::operator<=>(const Rational &y) const
+{
+  return compare(*this, y) <=> 0;
+}
 
 void Rational::negate() { num.negate(); }
 

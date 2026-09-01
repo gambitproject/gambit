@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/tools/enummixed/clique.cc
+// FILE: src/solvers/enummixed/clique.cc
 // Maximal cliques and solution components via von Stengel's algorithm
 //
 // This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 //
 
 #include "clique.h"
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit::Nash {
 

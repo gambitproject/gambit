@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //                          Albert Xin Jiang <albertjiang@gmail.com>
 //
-// FILE: src/libagg/trie_map.imp
+// FILE: src/games/agg/trie_map.imp
 // Trie with STL-like interfaces
 //
 // This program is free software; you can redistribute it and/or modify
@@ -207,7 +207,7 @@ void trie_map<V>::square(trie_map<V> &dest, size_t keylen, std::vector<projtype>
           }
           v.second = (V)((*p1).second * (*p2).second);
           if (p1 != p2) {
-            v.second *= 2;
+            v.second *= (V)2;
           }
           dest += v;
         }
@@ -234,7 +234,7 @@ template <class V> void trie_map<V>::square(size_t keylen, std::vector<projtype>
           }
           v.second = (V)((*p1).second * (*p2).second);
           if (p1 != p2) {
-            v.second *= 2;
+            v.second *= (V)2;
           }
           (*this) += v;
         }
@@ -443,7 +443,7 @@ template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> 
     throw std::runtime_error(str.str());
   }
   if (ptr->val->second < (V)0) {
-    ptr->val->second = 0;
+    ptr->val->second = (V)0;
   }
 }
 

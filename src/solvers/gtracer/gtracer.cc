@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/gtracer.cc
+// FILE: src/solvers/gtracer/gtracer.cc
 // Top-level include file for Gametracer embedding in Gambit
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -24,14 +24,14 @@
 
 #include <algorithm>
 #include "gtracer.h"
-#include "gambit.h"
+#include "games.h"
 
 namespace Gambit::gametracer {
 
 std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 {
-  if (p_game->IsAgg()) {
-    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
+  if (auto *aggGame = dynamic_cast<GameAGGRep *>(p_game.get())) {
+    return std::shared_ptr<gnmgame>(new aggame(*aggGame));
   }
   const Rational maxPay = p_game->GetMaxPayoff();
   const Rational minPay = p_game->GetMinPayoff();

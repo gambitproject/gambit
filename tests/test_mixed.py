@@ -1,5 +1,4 @@
 import typing
-from itertools import product
 
 import pytest
 
@@ -16,11 +15,23 @@ P3 = "Player 3"
 
 def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_flag: bool):
     """Set the action probabilities in a strategy profile called ```profile``` according to a
-    list with probabilities in the order of ```profile.game.strategies```
+    list with probabilities in the order of each player's strategies, in player order.
     """
-    for strategy, p in zip(profile.game.strategies, probs, strict=True):
-        # assumes rationals given as strings
-        profile[strategy] = gbt.Rational(p) if rational_flag else p
+    # assumes rationals given as strings
+    convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
+    game = profile.game
+    total_strategies = sum(len(game.get_strategies(p)) for p in game.players)
+    if len(probs) != total_strategies:
+        raise ValueError("probs must have one entry per strategy in the game")
+    offset = 0
+    for player in game.players:
+        strategies = game.get_strategies(player)
+        k = len(strategies)
+        profile[player] = {
+            s: convert(p)
+            for s, p in zip(strategies, probs[offset:offset + k], strict=True)
+        }
+        offset += k
 
 
 @pytest.mark.parametrize(
@@ -53,9 +64,11 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     ],
 )
 def test_normalize_zero_value_error(game, profile_data, rational_flag):
-    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    """A profile with an all-zero distribution for some player can no longer even be
+    constructed: assignment now validates this, so normalize() no longer needs to.
+    """
     with pytest.raises(ValueError, match="zero"):
-        profile.normalize()
+        game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
 
 @pytest.mark.parametrize(
@@ -90,9 +103,11 @@ def test_normalize_zero_value_error(game, profile_data, rational_flag):
     ],
 )
 def test_normalize_neg_entry_value_error(game, profile_data, rational_flag):
-    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    """A profile with a negative weight for some player can no longer even be constructed:
+    assignment now validates this, so normalize() no longer needs to.
+    """
     with pytest.raises(ValueError, match="negative"):
-        profile.normalize()
+        game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
 
 @pytest.mark.parametrize(
@@ -143,25 +158,23 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", True, "7/9"),
         ###############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
-        ###############################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "12", 0.15, False),
-        (games.create_stripped_down_poker_efg(), "21", 0.99, False),
-        (games.create_stripped_down_poker_efg(), "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "12", "3/4", True),
-        (games.create_stripped_down_poker_efg(), "21", "7/9", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", False, 0.25),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", True, "1/4"),
     ],
 )
 def test_set_and_get_probability_by_strategy_label(
     game: gbt.Game, strategy_label: str, rational_flag: bool, prob: float | str
 ):
-    profile = game.mixed_strategy_profile(rational=rational_flag)
+    """A single strategy's probability can be set and read via a whole-player
+    distribution, keyed by strategy label.
+    """
     prob = gbt.Rational(prob) if rational_flag else prob
-    profile[strategy_label] = prob
-    assert profile[strategy_label] == prob
+    profile = game.mixed_strategy_profile(rational=rational_flag)
+    player = next(p for p in game.players if strategy_label in game.get_strategies(p))
+    profile[player] = {
+        s: (prob if s == strategy_label else 0) for s in game.get_strategies(player)
+    }
+    assert profile[player][strategy_label] == prob
 
 
 @pytest.mark.parametrize(
@@ -188,8 +201,114 @@ def test_set_and_get_probabilities_by_player_label(
 ):
     profile_data = [gbt.Rational(p) for p in profile_data] if rational_flag else profile_data
     profile = game.mixed_strategy_profile(rational=rational_flag)
-    profile[player_label] = profile_data
-    assert profile[player_label] == profile_data
+    expected = dict(zip(game.get_strategies(player_label), profile_data, strict=True))
+    profile[player_label] = expected
+    assert profile[player_label] == expected
+
+
+def test_setitem_allows_sparse_distribution():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    profile[P1] = {"1": 1}
+    assert profile[P1] == {"1": 1, "2": 0, "3": 0, "4": 0}
+
+
+def test_set_strategy_sparse_matches_setitem():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    sparse_profile = game.mixed_strategy_profile()
+    sparse_profile.set_mixed_strategy(P1, {"1": 1}, sparse=True)
+    setitem_profile = game.mixed_strategy_profile()
+    setitem_profile[P1] = {"1": 1}
+    assert sparse_profile[P1] == setitem_profile[P1]
+
+
+def test_set_strategy_defaults_to_requiring_every_label():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    with pytest.raises(ValueError, match="exactly one weight"):
+        profile.set_mixed_strategy(P1, {"1": 1})
+
+
+@pytest.mark.parametrize("sparse", [False, True])
+def test_setitem_and_set_strategy_reject_unknown_strategy_label(sparse: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    with pytest.raises(ValueError, match="not a strategy label"):
+        profile.set_mixed_strategy(P1, {"not-a-strategy": 1}, sparse=sparse)
+    with pytest.raises(ValueError, match="not a strategy label"):
+        profile[P1] = {"not-a-strategy": 1}
+
+
+def test_setitem_empty_distribution_is_all_zero_error():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    with pytest.raises(ValueError, match="zero"):
+        profile[P1] = {}
+
+
+@pytest.mark.parametrize("sparse", [False, True])
+def test_setitem_and_set_strategy_reject_non_mapping(sparse: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    with pytest.raises(TypeError, match="Mapping"):
+        profile.set_mixed_strategy(P1, [1, 0, 0, 0], sparse=sparse)
+    with pytest.raises(TypeError, match="Mapping"):
+        profile[P1] = [1, 0, 0, 0]
+
+
+@pytest.mark.parametrize("sparse", [False, True])
+def test_setitem_and_set_strategy_reject_uncoercible_weight(sparse: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    full_distribution = {"1": "abc", "2": 0, "3": 0, "4": 0}
+    with pytest.raises(ValueError, match="convert"):
+        profile.set_mixed_strategy(P1, full_distribution, sparse=sparse)
+    with pytest.raises(ValueError, match="convert"):
+        profile[P1] = full_distribution
+
+
+def test_setitem_sparse_rejects_negative_weight():
+    """Negativity is checked even for weights given under a sparse distribution."""
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    with pytest.raises(ValueError, match="negative"):
+        profile[P1] = {"1": -1}
+
+
+@pytest.mark.parametrize("sparse", [False, True])
+def test_indexing_rejects_non_string_player(sparse: bool):
+    """MixedStrategyProfile's indexing accepts only str player labels."""
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    player = 42
+    with pytest.raises(TypeError):
+        profile[player]
+    with pytest.raises(TypeError):
+        profile[player] = {"1": 1}
+    with pytest.raises(TypeError):
+        profile.set_mixed_strategy(player, {"1": 1}, sparse=sparse)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_copy_mutating_copy_does_not_affect_original(rational_flag: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    original = game.mixed_strategy_profile(rational=rational_flag)
+    original_before = dict(original[P1])
+    copy = original.copy()
+    copy[P1] = {"1": 1}
+    assert dict(original[P1]) == original_before
+    assert dict(copy[P1]) == {"1": 1, "2": 0, "3": 0, "4": 0}
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_copy_mutating_original_does_not_affect_copy(rational_flag: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    original = game.mixed_strategy_profile(rational=rational_flag)
+    copy = original.copy()
+    copy_before = dict(copy[P1])
+    original[P1] = {"1": 1}
+    assert dict(copy[P1]) == copy_before
+    assert dict(original[P1]) == {"1": 1, "2": 0, "3": 0, "4": 0}
 
 
 @pytest.mark.parametrize(
@@ -198,14 +317,14 @@ def test_set_and_get_probabilities_by_player_label(
         ##############################################################################
         # stripped-down poker efg
         # Player 1
-        (games.create_stripped_down_poker_efg(), "Alice", "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "12", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "21", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "22", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "Alice", "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "12", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "21", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "22", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "1", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "2", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "3", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "4", 0.25, False),
+        (games.create_stripped_down_poker_efg(), "Alice", "1", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "2", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "3", "1/4", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "4", "1/4", True),
         # Player 2
         (games.create_stripped_down_poker_efg(), "Bob", "1", 0.5, False),
         (games.create_stripped_down_poker_efg(), "Bob", "2", 0.5, False),
@@ -232,10 +351,10 @@ def test_profile_indexing_by_player_and_strategy_label_reference(
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), "Bob", "11", True),
         (games.create_stripped_down_poker_efg(), "Bob", "11", False),
-        (games.create_stripped_down_poker_efg(), "Alice", "1", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "1", False),
-        (games.create_stripped_down_poker_efg(), "Alice", "2", True),
-        (games.create_stripped_down_poker_efg(), "Alice", "2", False),
+        (games.create_stripped_down_poker_efg(), "Alice", "99", True),
+        (games.create_stripped_down_poker_efg(), "Alice", "99", False),
+        (games.create_stripped_down_poker_efg(), "Bob", "99", True),
+        (games.create_stripped_down_poker_efg(), "Bob", "99", False),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_outcome.nfg"), P1, "2-1", True),
@@ -251,106 +370,26 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(
 
 
 @pytest.mark.parametrize(
-    "game,strategy_label,rational_flag,error,message",
+    "game,label,rational_flag",
     [
         ##############################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), "13", True, KeyError, "player or strategy"),
+        # stripped-down poker efg: not a label of anything in the game
+        (games.create_stripped_down_poker_efg(), "13", True),
+        (games.create_stripped_down_poker_efg(), "13", False),
         ##############################################################################
-        # coordination 4x4 nfg payoff version (default strategy labels created with duplicates)
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "1",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "2",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "3",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "4",
-            True,
-            ValueError,
-            "multiple strategies",
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            "5",
-            True,
-            KeyError,
-            "player or strategy",
-        ),
+        # coordination 4x4 nfg outcome version: a strategy label, not a player label
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", False),
     ],
 )
-def test_profile_indexing_by_invalid_strategy_label(
-    game: gbt.Game,
-    strategy_label: str,
-    rational_flag: bool,
-    error: ValueError | KeyError,
-    message: str | None,
+def test_profile_indexing_by_invalid_player_label(
+    game: gbt.Game, label: str, rational_flag: bool
 ):
-    """Check that we get a ValueError for an ambigious strategy label and a KeyError for one that
-    is neither a player or strategy label in the game
+    """MixedStrategyProfile.__getitem__ only resolves player labels; anything else, including a
+    strategy label, raises KeyError.
     """
-    with pytest.raises(error, match=message):
-        game.mixed_strategy_profile(rational=rational_flag)[strategy_label]
-
-
-def test_profile_indexing_by_player_and_duplicate_strategy_label():
-    game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
-    profile = game.mixed_strategy_profile()
-    with pytest.raises(ValueError):
-        profile["Dan"]["defect"]
-
-
-@pytest.mark.parametrize(
-    "game,strategy_label,prob,rational_flag",
-    [
-        ###########################################################################
-        # stripped-down poker efg
-        # Player 1
-        (games.create_stripped_down_poker_efg(), "11", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "12", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "21", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "22", 0.25, False),
-        (games.create_stripped_down_poker_efg(), "11", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "12", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "21", "1/4", True),
-        (games.create_stripped_down_poker_efg(), "22", "1/4", True),
-        # Player 2
-        (games.create_stripped_down_poker_efg(), "1", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "2", 0.5, False),
-        (games.create_stripped_down_poker_efg(), "1", "1/2", True),
-        (games.create_stripped_down_poker_efg(), "2", "1/2", True),
-        ############################################################################
-        # coordination 4x4 nfg outcome version with strategy labels
-        # Player 1
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
-        # Player 2
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", "1/4", True),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", 0.25, False),
-    ],
-)
-def test_profile_indexing_by_strategy_label_reference(
-    game: gbt.Game, strategy_label: str, prob: str | float, rational_flag: bool
-):
-    profile = game.mixed_strategy_profile(rational=rational_flag)
-    prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[strategy_label] == prob
+    with pytest.raises(KeyError):
+        game.mixed_strategy_profile(rational=rational_flag)[label]
 
 
 @pytest.mark.parametrize(
@@ -394,149 +433,8 @@ def test_profile_indexing_by_player_label_reference(
     profile = game.mixed_strategy_profile(rational=rational_flag)
     if rational_flag:
         strategy_data = [gbt.Rational(prob) for prob in strategy_data]
-    assert profile[player_label] == strategy_data
-
-
-@pytest.mark.parametrize(
-    "game,rational_flag,profile_data,label,payoff",
-    [
-        #########################################################################
-        # zero matrix nfg
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, None, "Joe", 0),
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, None, "Joe", 0),
-        #########################################################################
-        # coordination 4x4 nfg
-        (games.read_from_file("coordination_4x4_payoff.nfg"), False, None, P1, 0.25),
-        (games.read_from_file("coordination_4x4_payoff.nfg"), True, None, P1, "1/4"),
-        (games.read_from_file("coordination_4x4_payoff.nfg"), False, None, P2, 0.25),
-        (games.read_from_file("coordination_4x4_payoff.nfg"), True, None, P2, "1/4"),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            False,
-            [[1, 0, 0, 0], [1, 0, 0, 0]],
-            P1,
-            1,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            True,
-            [[1, 0, 0, 0], [1, 0, 0, 0]],
-            P1,
-            1,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            False,
-            [[1, 0, 0, 0], [1, 0, 0, 0]],
-            P2,
-            1,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            True,
-            [[1, 0, 0, 0], [1, 0, 0, 0]],
-            P2,
-            1,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            False,
-            [[1, 0, 0, 0], [0, 1, 0, 0]],
-            P1,
-            0,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            True,
-            [[1, 0, 0, 0], [0, 1, 0, 0]],
-            P1,
-            0,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            False,
-            [[1, 0, 0, 0], [0, 1, 0, 0]],
-            P2,
-            0,
-        ),
-        (
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            True,
-            [[1, 0, 0, 0], [0, 1, 0, 0]],
-            P2,
-            0,
-        ),
-        #########################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), False, None, "Alice", -0.25),
-        (games.create_stripped_down_poker_efg(), False, None, "Bob", 0.25),
-        (games.create_stripped_down_poker_efg(), True, None, "Alice", "-1/4"),
-        (games.create_stripped_down_poker_efg(), True, None, "Bob", "1/4"),
-        # Bet/Call
-        (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Alice", 0),
-        (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Bob", 0),
-        (games.create_stripped_down_poker_efg(), True, [[1, 0, 0, 0], [1, 0]], "Alice", 0),
-        (games.create_stripped_down_poker_efg(), True, [[1, 0, 0, 0], [1, 0]], "Bob", 0),
-        # Fold/Fold for player 1 (player 2's strategy is payoff-irrelevant)
-        (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Alice", -1),
-        (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Bob", 1),
-        (games.create_stripped_down_poker_efg(), True, [[0, 0, 0, 1], [1, 0]], "Alice", -1),
-        (games.create_stripped_down_poker_efg(), True, [[0, 0, 0, 1], [1, 0]], "Bob", 1),
-        (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Alice", -1),
-        (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Bob", 1),
-        (
-            games.create_stripped_down_poker_efg(),
-            True,
-            [[0, 0, 0, 1], ["1/2", "1/2"]],
-            "Alice",
-            -1,
-        ),
-        (games.create_stripped_down_poker_efg(), True, [[0, 0, 0, 1], ["1/2", "1/2"]], "Bob", 1),
-        #########################################################################
-        (games.read_from_file("mixed_behavior_game.efg"), False, None, P1, 3.0),
-        (games.read_from_file("mixed_behavior_game.efg"), False, None, P2, 3.0),
-        (games.read_from_file("mixed_behavior_game.efg"), False, None, P3, 3.25),
-        (games.read_from_file("mixed_behavior_game.efg"), True, None, P1, 3),
-        (games.read_from_file("mixed_behavior_game.efg"), True, None, P2, 3),
-        (games.read_from_file("mixed_behavior_game.efg"), True, None, P3, "13/4"),
-    ],
-)
-def test_payoff_by_label_reference(
-    game: gbt.Game, rational_flag: bool, profile_data: list, label: str, payoff: float | str
-):
-    payoff = gbt.Rational(payoff) if rational_flag else payoff
-    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
-    assert profile.payoff(label) == payoff
-
-
-@pytest.mark.parametrize(
-    "game,rational_flag,label,value",
-    [
-        ##############################################################################
-        # zero matrix nfg
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "cooperate", 0),
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "cooperate", 0),
-        ##############################################################################
-        # coordination 4x4 nfg
-        (games.read_from_file("coordination_4x4_outcome.nfg"), False, "1-1", 0.25),
-        (games.read_from_file("coordination_4x4_outcome.nfg"), True, "1-1", "1/4"),
-        ##############################################################################
-        # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), False, "11", 0.5),  # Bet/Bet
-        (games.create_stripped_down_poker_efg(), False, "12", 0.25),  # Bet King/Fold Queen
-        (games.create_stripped_down_poker_efg(), False, "21", -0.75),  # Fold King/Bet Queen
-        (games.create_stripped_down_poker_efg(), False, "22", -1),  # Fold/Fold
-        (games.create_stripped_down_poker_efg(), True, "11", "1/2"),
-        (games.create_stripped_down_poker_efg(), True, "12", "1/4"),
-        (games.create_stripped_down_poker_efg(), True, "21", "-3/4"),
-        (games.create_stripped_down_poker_efg(), True, "22", -1),
-    ],
-)
-def test_strategy_value_by_label_reference(
-    game: gbt.Game, rational_flag: bool, label: str, value: float | str
-):
-    value = gbt.Rational(value) if rational_flag else value
-    assert game.mixed_strategy_profile(rational=rational_flag).strategy_value(label) == value
+    expected = dict(zip(game.get_strategies(player_label), strategy_data, strict=True))
+    assert profile[player_label] == expected
 
 
 @pytest.mark.parametrize(
@@ -568,11 +466,38 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
         _ = game.mixed_strategy_profile(rational=rational_flag).as_behavior()
 
 
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_as_float_returns_double(rational_flag: bool):
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    result = game.mixed_strategy_profile(rational=rational_flag).as_float()
+    assert isinstance(result, gbt.MixedStrategyProfileDouble)
+
+
+def test_as_float_converts_rational_probabilities():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile(rational=True)
+    profile[P1] = {"1": "1/3", "2": "2/3", "3": 0, "4": 0}
+    result = profile.as_float()
+    assert result[P1] == {
+        "1": pytest.approx(1 / 3), "2": pytest.approx(2 / 3), "3": 0.0, "4": 0.0
+    }
+
+
+def test_as_float_is_independent_copy():
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile(rational=False)
+    result = profile.as_float()
+    assert result == profile
+    result[P1] = {"1": 1.0}
+    assert dict(profile[P1]) != dict(result[P1])
+
+
 @pytest.mark.parametrize(
     "game,profile_data,rational_flag,payoffs",
     [
         ###############################################################################
         # zero matrix nfg
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), None, False, (0, 0)),
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), None, True, (0, 0)),
         ###############################################################################
         # 4x4 coordination nfg
@@ -589,6 +514,30 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
             [["1/3", "1/3", 0, "1/3"], ["1/3", "1/3", "1/3", 0]],
             True,
             ("2/9", "2/9"),
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            False,
+            (1, 1),
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            True,
+            (1, 1),
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            False,
+            (0, 0),
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            True,
+            (0, 0),
         ),
         ###############################################################################
         # 2x2x2 nfg
@@ -616,6 +565,27 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
             True,
             ("1/2", 1, "-1/2"),
         ),
+        ###############################################################################
+        # stripped-down poker efg
+        (games.create_stripped_down_poker_efg(), None, False, (-0.25, 0.25)),
+        (games.create_stripped_down_poker_efg(), None, True, ("-1/4", "1/4")),
+        # Bet/Call
+        (games.create_stripped_down_poker_efg(), [[1, 0, 0, 0], [1, 0]], False, (0, 0)),
+        (games.create_stripped_down_poker_efg(), [[1, 0, 0, 0], [1, 0]], True, (0, 0)),
+        # Fold/Fold for player 1 (player 2's strategy is payoff-irrelevant)
+        (games.create_stripped_down_poker_efg(), [[0, 0, 0, 1], [1, 0]], False, (-1, 1)),
+        (games.create_stripped_down_poker_efg(), [[0, 0, 0, 1], [1, 0]], True, (-1, 1)),
+        (games.create_stripped_down_poker_efg(), [[0, 0, 0, 1], [0.5, 0.5]], False, (-1, 1)),
+        (
+            games.create_stripped_down_poker_efg(),
+            [[0, 0, 0, 1], ["1/2", "1/2"]],
+            True,
+            (-1, 1),
+        ),
+        ###############################################################################
+        # mixed behavior efg (3 players)
+        (games.read_from_file("mixed_behavior_game.efg"), None, False, (3.0, 3.0, 3.25)),
+        (games.read_from_file("mixed_behavior_game.efg"), None, True, (3, 3, "13/4")),
     ],
 )
 def test_payoffs_reference(
@@ -624,7 +594,7 @@ def test_payoffs_reference(
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     for payoff, player in zip(payoffs, profile.game.players, strict=True):
         payoff = gbt.Rational(payoff) if rational_flag else payoff
-        assert profile.payoff(player) == payoff
+        assert profile.payoffs[player] == payoff
 
 
 @pytest.mark.parametrize(
@@ -675,8 +645,28 @@ def test_payoffs_reference(
             ([0, 1], [0, 4], [0, 1]),
         ),
         ###############################################################################
+        # coordination 4x4 nfg, outcome-mapped version
+        (
+            games.read_from_file("coordination_4x4_outcome.nfg"),
+            None,
+            False,
+            ([0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]),
+        ),
+        (
+            games.read_from_file("coordination_4x4_outcome.nfg"),
+            None,
+            True,
+            (["1/4", "1/4", "1/4", "1/4"], ["1/4", "1/4", "1/4", "1/4"]),
+        ),
+        ###############################################################################
         # stripped-down poker efg
-        (games.create_stripped_down_poker_efg(), None, False, [(0.5, 0.25, -0.75, -1), (0.5, 0)]),
+        (games.create_stripped_down_poker_efg(), None, False, ((0.5, 0.25, -0.75, -1), (0.5, 0))),
+        (
+            games.create_stripped_down_poker_efg(),
+            None,
+            True,
+            (("1/2", "1/4", "-3/4", -1), ("1/2", 0)),
+        ),
     ],
 )
 def test_strategy_value_reference(
@@ -686,10 +676,10 @@ def test_strategy_value_reference(
     for strategy_values_for_player, player in zip(
         strategy_values, profile.game.players, strict=True
     ):
-        for i, s in enumerate(player.strategies):
+        for i, s in enumerate(profile.game.get_strategies(player)):
             sv = strategy_values_for_player[i]
             sv = gbt.Rational(sv) if rational_flag else sv
-            assert profile.strategy_value(s) == sv
+            assert profile.strategy_values[player][s] == sv
 
 
 @pytest.mark.parametrize(
@@ -821,13 +811,6 @@ def test_strategy_value_reference(
         (
             games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
             [[1, 0], [0, 1], [0, 1]],
-            9,
-            ZERO,
-            True,
-        ),  # 3^2
-        (
-            games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
-            [[1, 1], [1, 0], [0, 0]],
             9,
             ZERO,
             True,
@@ -1086,8 +1069,9 @@ def test_player_regret_max_regret_reference(
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     if rational_flag:
         player_regrets_exp = [gbt.Rational(r) for r in player_regrets_exp]
+    player_regrets = profile.player_regrets
     for p, r in zip(game.players, player_regrets_exp, strict=True):
-        assert abs(profile.player_regret(p) - r) <= tol
+        assert abs(player_regrets[p] - r) <= tol
     assert abs(profile.max_regret() - max(player_regrets_exp)) <= tol
 
 
@@ -1117,12 +1101,16 @@ def test_player_regret_max_regret_reference(
     ],
 )
 def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
-    profile = game.mixed_strategy_profile(rational=False)
+    profile = game.mixed_strategy_profile(rational=rational_flag)
+    strategy_values = profile.strategy_values
+    strategy_regrets = profile.strategy_regrets
     for player in game.players:
-        for strategy in player.strategies:
-            assert profile.strategy_regret(strategy) == (
-                max(profile.strategy_value(s) for s in player.strategies)
-                - profile.strategy_value(strategy)
+        player_strategy_values = strategy_values[player]
+        strategies = game.get_strategies(player)
+        for strategy in strategies:
+            assert strategy_regrets[player][strategy] == (
+                max(player_strategy_values[s] for s in strategies)
+                - player_strategy_values[strategy]
             )
 
 
@@ -1203,15 +1191,18 @@ def test_liap_value_consistency(
     game: gbt.Game, profile_data: list, tol: float | gbt.Rational, rational_flag: bool
 ):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    strategy_values = profile.strategy_values
+    payoffs = profile.payoffs
 
     assert (
         abs(
             profile.liap_value()
             - sum(
                 [
-                    max(profile.strategy_value(strategy) - profile.payoff(player), 0) ** 2
+                    max(strategy_values[player][strategy] - payoffs[player], 0)
+                    ** 2
                     for player in game.players
-                    for strategy in player.strategies
+                    for strategy in game.get_strategies(player)
                 ]
             )
         )
@@ -1296,16 +1287,18 @@ def test_player_regret_max_regret_consistency(
     game: gbt.Game, profile_data: list, tol: float | gbt.Rational, rational_flag: bool
 ):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    strategy_values = profile.strategy_values
+    payoffs = profile.payoffs
     player_regrets = []
     for p in game.players:
         p_regret = max(
             [
-                max(profile.strategy_value(strategy) - profile.payoff(p), 0)
-                for strategy in p.strategies
+                max(strategy_values[p][strategy] - payoffs[p], 0)
+                for strategy in game.get_strategies(p)
             ]
         )
         player_regrets.append(p_regret)
-        assert abs(profile.player_regret(p) - p_regret) <= tol
+        assert abs(profile.player_regrets[p] - p_regret) <= tol
     assert abs(profile.max_regret() - max(player_regrets)) <= tol
 
 
@@ -1393,19 +1386,23 @@ def test_linearity_payoff_property(
 
     profile_data = [
         [
-            alpha * profile1[strategy] + (1 - alpha) * profile2[strategy]
-            for strategy in player.strategies
+            alpha * profile1[player][strategy]
+            + (1 - alpha) * profile2[player][strategy]
+            for strategy in game.get_strategies(player)
         ]
         for player in game.players
     ]
     profile3 = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
+    payoffs1 = profile1.payoffs
+    payoffs2 = profile2.payoffs
+    payoffs3 = profile3.payoffs
     for player in game.players:
         assert (
             abs(
-                alpha * profile1.payoff(player)
-                + (1 - alpha) * profile2.payoff(player)
-                - profile3.payoff(player)
+                alpha * payoffs1[player]
+                + (1 - alpha) * payoffs2[player]
+                - payoffs3[player]
             )
             <= tol
         )
@@ -1484,19 +1481,153 @@ def test_payoff_and_strategy_value_consistency(
     game: gbt.Game, profile_data: list, tol: float | gbt.Rational, rational_flag: bool
 ):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    strategy_values = profile.strategy_values
+    payoffs = profile.payoffs
     for player in game.players:
+        player_strategy_values = strategy_values[player]
         assert (
             abs(
                 sum(
                     [
-                        profile[player][strategy] * profile.strategy_value(strategy)
-                        for strategy in player.strategies
+                        profile[player][strategy]
+                        * player_strategy_values[strategy]
+                        for strategy in game.get_strategies(player)
                     ]
                 )
-                - profile.payoff(player)
+                - payoffs[player]
             )
             <= tol
         )
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [
+        (games.read_from_file("coordination_4x4_payoff.nfg"), False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), True),
+        (games.create_stripped_down_poker_efg(), False),
+        (games.create_stripped_down_poker_efg(), True),
+    ],
+)
+def test_len_matches_iter_count(game: gbt.Game, rational_flag: bool):
+    """len() is the number of players (not the total strategy count across players),
+    and likewise for each player's MixedStrategy against their own strategies.
+    """
+    profile = game.mixed_strategy_profile(rational=rational_flag)
+    assert len(profile) == len(game.players)
+    assert len(profile) == len(list(profile))
+    for player in game.players:
+        mixed_strategy = profile[player]
+        assert len(mixed_strategy) == len(game.get_strategies(player))
+        assert len(mixed_strategy) == len(list(mixed_strategy))
+
+
+def test_mixed_strategy_equality():
+    # both players are uniform over 4 strategies: numerically identical, but distinct players
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile()
+    p1_strategy = profile[P1]
+    p2_strategy = profile[P2]
+
+    assert dict(p1_strategy) == dict(p2_strategy)
+    assert p1_strategy == {"1": 0.25, "2": 0.25, "3": 0.25, "4": 0.25}
+    assert p1_strategy == profile[P1]  # a fresh snapshot for the same player
+    assert p1_strategy != p2_strategy
+    assert p1_strategy != 42
+
+
+@pytest.mark.parametrize(
+    "game,profile_data,rational_flag",
+    [
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, True),
+        (games.create_stripped_down_poker_efg(), None, False),
+        (games.create_stripped_down_poker_efg(), None, True),
+    ],
+)
+def test_vectorized_quantities_consistency(game: gbt.Game, profile_data, rational_flag: bool):
+    """The vectorized payoffs/player_regrets/strategy_values/strategy_regrets properties
+    are mathematically consistent with each other (regret is the gap to the best
+    response), and carry their own type identity.
+    """
+    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+
+    payoffs = profile.payoffs
+    player_regrets = profile.player_regrets
+    strategy_values = profile.strategy_values
+    strategy_regrets = profile.strategy_regrets
+
+    assert isinstance(payoffs, gbt.PayoffVector)
+    assert isinstance(payoffs, gbt.PlayerIndexedVector)
+    assert isinstance(player_regrets, gbt.PlayerRegretVector)
+    assert isinstance(strategy_values, gbt.StrategyValuesVector)
+    assert isinstance(strategy_regrets, gbt.StrategyRegretsVector)
+
+    for player in game.players:
+        player_strategy_values = strategy_values[player]
+        player_strategy_regrets = strategy_regrets[player]
+        assert isinstance(player_strategy_values, gbt.StrategyValueVector)
+        assert isinstance(player_strategy_values, gbt.StrategyIndexedVector)
+        assert isinstance(player_strategy_regrets, gbt.StrategyRegretVector)
+
+        strategies = game.get_strategies(player)
+        best_response_value = max(player_strategy_values[s] for s in strategies)
+        assert player_regrets[player] == best_response_value - payoffs[player]
+        for strategy in strategies:
+            assert (
+                player_strategy_regrets[strategy]
+                == best_response_value - player_strategy_values[strategy]
+            )
+
+    # equal to an equivalent plain dict or same-type vector, but never to a vector of a
+    # different quantity, even where the underlying numbers happen to coincide
+    expected = {p: payoffs[p] for p in game.players}
+    assert payoffs == expected
+    assert payoffs == gbt.PayoffVector(expected)
+    assert payoffs != player_regrets
+    assert payoffs != gbt.PlayerRegretVector(expected)
+
+    with pytest.raises(KeyError):
+        payoffs["not a player label"]
+
+
+def test_repr_and_repr_latex_smoke():
+    """Smoke test against silent formatting regressions, not a public API guarantee."""
+    game = games.read_from_file("coordination_4x4_payoff.nfg")
+    profile = game.mixed_strategy_profile(rational=True)
+
+    assert repr(profile) == (
+        "{'Player 1': {'1': Rational(1, 4), '2': Rational(1, 4), '3': Rational(1, 4), "
+        "'4': Rational(1, 4)}, 'Player 2': {'1': Rational(1, 4), '2': Rational(1, 4), "
+        "'3': Rational(1, 4), '4': Rational(1, 4)}}"
+    )
+    assert profile._repr_latex_() == (
+        r"$\left\{\text{Player 1}:\left\{\text{1}:\frac{1}{4},\text{2}:\frac{1}{4},"
+        r"\text{3}:\frac{1}{4},\text{4}:\frac{1}{4}\right\},\text{Player 2}:"
+        r"\left\{\text{1}:\frac{1}{4},\text{2}:\frac{1}{4},\text{3}:\frac{1}{4},"
+        r"\text{4}:\frac{1}{4}\right\}\right\}$"
+    )
+
+    mixed_strategy = profile[P1]
+    assert repr(mixed_strategy) == (
+        "{'1': Rational(1, 4), '2': Rational(1, 4), '3': Rational(1, 4), '4': Rational(1, 4)}"
+    )
+    assert mixed_strategy._repr_latex_() == (
+        r"$\left\{\text{1}:\frac{1}{4},\text{2}:\frac{1}{4},"
+        r"\text{3}:\frac{1}{4},\text{4}:\frac{1}{4}\right\}$"
+    )
+
+    # a flat vector (one value per player, no nesting)
+    payoffs = profile.payoffs
+    assert repr(payoffs) == "{'Player 1': Rational(1, 4), 'Player 2': Rational(1, 4)}"
+    assert payoffs._repr_latex_() == (
+        r"$\left\{\text{Player 1}:\frac{1}{4},\text{Player 2}:\frac{1}{4}\right\}$"
+    )
+
+    # a float-valued profile's _repr_latex_ falls back to repr(), since plain floats
+    # (unlike Rational) don't know how to render themselves as LaTeX
+    float_strategy = game.mixed_strategy_profile(rational=False)[P1]
+    assert float_strategy._repr_latex_() == repr(float_strategy)
 
 
 @pytest.mark.parametrize(
@@ -1555,19 +1686,24 @@ def test_property_linearity_strategy_value(
 
     profile_data = [
         [
-            alpha * profile1[strategy] + (1 - alpha) * profile2[strategy]
-            for strategy in player.strategies
+            alpha * profile1[player][strategy]
+            + (1 - alpha) * profile2[player][strategy]
+            for strategy in game.get_strategies(player)
         ]
         for player in game.players
     ]
     profile3 = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
+    strategy_values1 = profile1.strategy_values
+    strategy_values2 = profile2.strategy_values
+    strategy_values3 = profile3.strategy_values
     for player in game.players:
-        for strategy in player.strategies:
-            convex_comb = alpha * profile1.strategy_value(strategy) + (
-                1 - alpha
-            ) * profile2.strategy_value(strategy)
-            assert abs(profile3.strategy_value(strategy) - convex_comb) <= tol
+        for strategy in game.get_strategies(player):
+            convex_comb = (
+                alpha * strategy_values1[player][strategy]
+                + (1 - alpha) * strategy_values2[player][strategy]
+            )
+            assert abs(strategy_values3[player][strategy] - convex_comb) <= tol
 
 
 def _get_answers_one_order(
@@ -1636,7 +1772,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_coord_doub",
         ),
@@ -1645,7 +1781,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_coord_rat",
         ),
@@ -1655,7 +1791,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_2x2x2_doub",
         ),
@@ -1664,7 +1800,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_2x2x2_rat",
         ),
@@ -1674,7 +1810,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_poker_doub",
         ),
@@ -1683,7 +1819,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, player: profile.payoff(player),
+            lambda profile, player: profile.payoffs[player],
             lambda game: game.players,
             id="payoffs_poker_rat",
         ),
@@ -1695,8 +1831,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_coord_doub",
         ),
         pytest.param(
@@ -1704,8 +1840,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_coord_rat",
         ),
         # 2x2x2 nfg
@@ -1714,8 +1850,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_2x2x2_doub",
         ),
         pytest.param(
@@ -1723,8 +1859,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_2x2x2_rat",
         ),
         # stripped-down poker
@@ -1733,8 +1869,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_poker_doub",
         ),
         pytest.param(
@@ -1742,8 +1878,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_regret(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_regrets[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="regret_poker_rat",
         ),
         #################################################################################
@@ -1754,8 +1890,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_coord_doub",
         ),
         pytest.param(
@@ -1763,8 +1899,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_coord_rat",
         ),
         # 2x2x2 nfg
@@ -1773,8 +1909,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_2x2x2_doub",
         ),
         pytest.param(
@@ -1782,8 +1918,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_2x2x2_rat",
         ),
         # stripped-down poker
@@ -1792,8 +1928,8 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_poker_doub",
         ),
         pytest.param(
@@ -1801,80 +1937,9 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             PROBS_1B_rat,
             PROBS_2B_rat,
             True,
-            lambda profile, strategy: profile.strategy_value(strategy),
-            lambda game: game.strategies,
+            lambda profile, strategy: profile.strategy_values[strategy[0]][strategy[1]],
+            lambda game: [(p, s) for p in game.players for s in game.get_strategies(p)],
             id="strat_value_poker_rat",
-        ),
-        #################################################################################
-        # strategy_value_deriv (for strategies * strategies)
-        # 4x4 coordination nfg
-        pytest.param(
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            PROBS_1A_doub,
-            PROBS_2A_doub,
-            False,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_coord_doub",
-        ),
-        pytest.param(
-            games.read_from_file("coordination_4x4_payoff.nfg"),
-            PROBS_1A_rat,
-            PROBS_2A_rat,
-            True,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_coord_rat",
-        ),
-        # 2x2x2 nfg
-        pytest.param(
-            games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
-            PROBS_1B_doub,
-            PROBS_2B_doub,
-            False,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_2x2x2_doub",
-        ),
-        pytest.param(
-            games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
-            PROBS_1B_rat,
-            PROBS_2B_rat,
-            True,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_2x2x2_rat",
-        ),
-        # stripped-down poker
-        pytest.param(
-            games.create_stripped_down_poker_efg(),
-            PROBS_1B_doub,
-            PROBS_2B_doub,
-            False,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_poker_doub",
-        ),
-        pytest.param(
-            games.create_stripped_down_poker_efg(),
-            PROBS_1B_rat,
-            PROBS_2B_rat,
-            True,
-            lambda profile, strat_pair: profile.strategy_value_deriv(
-                strategy=strat_pair[0], other=strat_pair[1]
-            ),
-            lambda game: list(product(game.strategies, game.strategies)),
-            id="strat_value_deriv_poker_rat",
         ),
         #################################################################################
         # liap_value (of profile, hence [1] for objects_to_test, any singleton collection would do)

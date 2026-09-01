@@ -245,11 +245,40 @@ Gambit is set up with `All Contributors <https://allcontributors.org/>`__ to rec
 
 You can see the list of contributors on the README page of the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__.
 
-To add a contributor, comment on a GitHub Issue or Pull Request, asking @all-contributors to add a contributor:
+To add a contributor, use the `All Contributors CLI <https://allcontributors.org/docs/en/cli/usage>`__.
+To keep the contributor table consistent, use one or more of the following contribution types
+(a subset of the full `emoji key <https://allcontributors.org/docs/en/emoji-key>`__):
 
- @all-contributors please add @<username> for <contributions>
+======================  ==================================================
+Type                    Description
+======================  ==================================================
+``code``                Code
+``doc``                 Documentation
+``bug``                 Bug reports
+``test``                Tests
+``research``            Research
+``maintenance``         Maintenance
+``infra``               Infrastructure (hosting, build tools, CI, etc.)
+``ideas``               Ideas, planning, & feedback
+``tutorial``            Tutorials
+``question``            Answering questions
+``review``              Reviewed pull requests
+``userTesting``         User testing
+======================  ==================================================
 
-Refer to the `emoji key <https://allcontributors.org/docs/en/emoji-key>`__ for a list of contribution types.
+For example, to credit a contributor for code and documentation:
+
+.. code-block:: bash
+
+   npx all-contributors-cli add <username> code,doc
+
+This updates ``.all-contributorsrc`` and regenerates the contributor table in the README automatically.
+
+From time to time, run the following to check whether any GitHub contributors are missing from the list:
+
+.. code-block:: bash
+
+   npx all-contributors-cli check
 
 Releases & maintenance branches
 -------------------------------
@@ -280,12 +309,41 @@ When making a new release of Gambit, follow these steps:
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
+   .. note::
+
+      The C++ build is the one case that does *not* pick up the change automatically.
+      ``configure.ac`` embeds the version via ``AC_INIT`` at *autoconf-generation* time,
+      not at ``./configure``-run time, so the version baked into the ``configure`` script
+      (and from there into ``make dist`` tarball names, ``Makefile``, and the compiled
+      binaries) stays stale until ``configure`` is regenerated. Autoconf's own
+      ``autom4te.cache`` can also serve a stale cached expansion even when you do
+      regenerate, since it isn't aware that ``configure.ac`` depends on the contents of
+      ``GAMBIT_VERSION``. After editing ``GAMBIT_VERSION``, always force a full
+      regeneration before building or running ``make dist``::
+
+          rm -rf autom4te.cache && autoreconf -fi
+
+   The Windows ``.msi`` installer is another exception: Windows Installer's ``ProductVersion``
+   must be a plain numeric ``major.minor.build`` triple.  So, ``configure.ac`` derives a separate
+   ``GAMBIT_MSI_VERSION`` for ``gambit.wxs`` instead of substituting ``GAMBIT_VERSION`` directly.
+   The build field is banded by release stage so that alpha < beta < rc < the final release of
+   the same version compares correctly to Windows Installer:
+
+   - ``X.Y.Z-alpha.N`` -> build ``0 + N``
+   - ``X.Y.Z-beta.N``  -> build ``10000 + N``
+   - ``X.Y.Z-rc.N``    -> build ``20000 + N``
+   - ``X.Y.Z`` (final) -> build ``60000``
+
+   ``CITATION.cff`` is the one file that does *not* read from ``GAMBIT_VERSION`` automatically.
+   Update its ``version`` and ``date-released`` fields by hand to match the new release.
+
 3. Update the ``ChangeLog`` file at the repository root with a summary of changes for this release.
    This file is the single source of truth for release notes — it is surfaced in the documentation
    (see :ref:`releases`) and used to populate the GitHub release automatically.
 
    The ``ChangeLog`` must follow the `Keep a Changelog <https://keepachangelog.com>`__ format:
-   version headers of the form ``## [X.Y.Z] - YYYY-MM-DD`` and subsections from
+   version headers of the form ``## [X.Y.Z] - YYYY-MM-DD`` (or
+   ``## [X.Y.Z-(alpha|beta|rc).W] - YYYY-MM-DD`` for prereleases) and subsections from
    ``Added``, ``Changed``, ``Deprecated``, ``Removed``, ``Fixed``, or ``Security``.
    The test suite enforces this format — any malformed entry will cause ``pytest`` to fail.
 
@@ -293,6 +351,9 @@ When making a new release of Gambit, follow these steps:
    extraction script from the repository root::
 
        python build_support/releases/extract_changelog.py X.Y.Z
+
+   For a prerelease, pass the complete version (for example,
+   ``X.Y.Z-rc.W``).
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
 
@@ -306,6 +367,8 @@ When making a new release of Gambit, follow these steps:
 6. Pushing the tag triggers the ``release.yml`` GitHub Actions workflow, which automatically
    reads the ``ChangeLog`` entry for the new version and creates the corresponding release on the
    `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__ with those notes.
+   Tags whose version contains ``-alpha``, ``-beta``, or ``-rc`` are marked as a GitHub prerelease
+   automatically, so they do not appear as the repository's "Latest release".
    No manual action is required.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.

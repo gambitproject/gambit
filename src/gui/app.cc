@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/gambit.cc
+// FILE: src/gui/app.cc
 // Implementation of main wxApp class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,16 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <fstream>
-
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/artprov.h>
 #include <wx/display.h>
 #include <wx/image.h>
 
-#include "gambit.h"
+#include "games.h"
 
 #include "app.h"
 #include "gameframe.h"
@@ -120,44 +119,94 @@ void Application::DismissSplash()
   m_splash = nullptr;
 }
 
+namespace {
+
+/// A simple single-button error notice, styled like GameFrame's CloseWarningDialog:
+/// an icon beside a bold headline, with supporting detail underneath.
+class FileErrorDialog final : public wxDialog {
+public:
+  FileErrorDialog(wxWindow *parent, const wxString &title, const wxString &headline,
+                  const wxString &detail)
+    : wxDialog(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
+               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+  {
+    auto *topSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto *contentSizer = new wxBoxSizer(wxHORIZONTAL);
+    contentSizer->Add(new wxStaticBitmap(this, wxID_ANY,
+                                         wxArtProvider::GetBitmap(wxART_ERROR, wxART_MESSAGE_BOX,
+                                                                  wxSize(32, 32))),
+                      0, wxALIGN_TOP | wxRIGHT, FromDIP(16));
+
+    auto *textSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto *headlineText = new wxStaticText(this, wxID_ANY, headline);
+    auto font = headlineText->GetFont();
+    font.SetWeight(wxFONTWEIGHT_BOLD);
+    headlineText->SetFont(font);
+    headlineText->Wrap(FromDIP(400));
+
+    auto *detailText = new wxStaticText(this, wxID_ANY, detail);
+    detailText->Wrap(FromDIP(400));
+
+    textSizer->Add(headlineText, 0, wxBOTTOM, FromDIP(8));
+    textSizer->Add(detailText, 0);
+
+    contentSizer->Add(textSizer, 1, wxEXPAND);
+
+    topSizer->Add(contentSizer, 1, wxEXPAND | wxALL, FromDIP(20));
+
+    auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto *okButton = new wxButton(this, wxID_OK, _("OK"));
+    buttonSizer->AddStretchSpacer();
+    buttonSizer->Add(okButton, 0);
+
+    topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(20));
+
+    SetSizerAndFit(topSizer);
+    SetMinSize(wxSize(FromDIP(420), -1));
+
+    SetEscapeId(wxID_OK);
+    SetAffirmativeId(wxID_OK);
+    okButton->SetDefault();
+    okButton->SetFocus();
+
+    CentreOnParent();
+  }
+};
+
+} // namespace
+
 AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
 {
-  std::ifstream infile(p_filename.mb_str());
-  if (!infile.good()) {
-    wxMessageBox(_("Gambit could not open file for reading:\n") + p_filename,
-                 _("Unable to open file"), wxOK | wxICON_ERROR, p_parent);
+  const auto [result, doc] = GameDocument::Load(p_filename);
+
+  switch (result) {
+  case GameDocument::LoadResult::OpenFailed:
+    FileErrorDialog(p_parent, _("Unable to open file"),
+                    _("Gambit could not open this file for reading."), p_filename)
+        .ShowModal();
     return AppLoadResult::OpenFailed;
-  }
 
-  auto *doc = new GameDocument(NewTree());
-  if (doc->LoadWorkspace(p_filename)) {
-    doc->SetFilename(p_filename);
-    m_fileHistory.AddFileToHistory(p_filename);
-    m_fileHistory.Save(*wxConfigBase::Get());
-    (void)new GameFrame(nullptr, doc);
-    return AppLoadResult::Success;
-  }
-  delete doc;
-
-  try {
-    const Game game = ReadGame(infile);
-    if (game->IsAgg()) {
-      wxMessageBox(_("Action graph games are not currently supported by the graphical interface"),
-                   _("Unsupported game representation"), wxOK | wxICON_ERROR, p_parent);
-      return AppLoadResult::UnsupportedRepresentation;
-    }
-
-    m_fileHistory.AddFileToHistory(p_filename);
-    m_fileHistory.Save(*wxConfigBase::Get());
-    doc = new GameDocument(game);
-    doc->SetFilename(p_filename);
-    (void)new GameFrame(nullptr, doc);
-    return AppLoadResult::Success;
-  }
-  catch (InvalidFileException &) {
-    wxMessageBox(_("File is not in a format Gambit recognizes:\n") + p_filename,
-                 _("Unable to read file"), wxOK | wxICON_ERROR, p_parent);
+  case GameDocument::LoadResult::ParseFailed:
+    FileErrorDialog(p_parent, _("Unable to read file"),
+                    _("File is not in a format Gambit recognizes."), p_filename)
+        .ShowModal();
     return AppLoadResult::ParseFailed;
+
+  case GameDocument::LoadResult::UnsupportedRepresentation:
+    FileErrorDialog(p_parent, _("Unsupported game representation"),
+                    _("Action graph games are not currently supported by the "
+                      "graphical interface."),
+                    p_filename)
+        .ShowModal();
+    return AppLoadResult::UnsupportedRepresentation;
+
+  case GameDocument::LoadResult::Success:
+    m_fileHistory.AddFileToHistory(p_filename);
+    m_fileHistory.Save(*wxConfigBase::Get());
+    (void)new GameFrame(nullptr, doc);
+    return AppLoadResult::Success;
   }
 }
 

@@ -24,46 +24,59 @@
 #ifndef GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 #define GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 
-#include "games/nash.h"
+#include <optional>
+#include <variant>
+
+#include "solvers/nash.h"
 #include "solvers/nashsupport/nashsupport.h"
 
 namespace Gambit::Nash {
 
-using EnumPolyMixedStrategyObserverFunctionType =
-    std::function<void(const MixedStrategyProfile<double> &)>;
+template <class Support> struct EnumPolyCandidateSupportEvent {
+  const Support &support;
+};
 
-inline void EnumPolyNullMixedStrategyObserver(const MixedStrategyProfile<double> &) {}
+template <class Support> struct EnumPolySingularSupportEvent {
+  const Support &support;
+};
 
-using EnumPolyStrategySupportObserverFunctionType =
-    std::function<void(const std::string &, const StrategySupportProfile &)>;
+/// Reported when the search for roots on a support exhausted its rectangle
+/// budget before completing.  Distinct from EnumPolySingularSupportEvent:
+/// this can happen even when the equilibria being sought are regular.
+template <class Support> struct EnumPolyBudgetExceededSupportEvent {
+  const Support &support;
+};
 
-inline void EnumPolyNullStrategySupportObserver(const std::string &,
-                                                const StrategySupportProfile &)
-{
-}
+template <class Support>
+using EnumPolyEvent =
+    std::variant<EnumPolyCandidateSupportEvent<Support>, EnumPolySingularSupportEvent<Support>,
+                 EnumPolyBudgetExceededSupportEvent<Support>>;
 
-std::list<MixedStrategyProfile<double>> EnumPolyStrategySolve(
-    const Game &p_game, int p_stopAfter, double p_maxregret,
-    EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
-    EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
+template <class Support>
+using EnumPolyEventCallbackType = std::function<void(const EnumPolyEvent<Support> &)>;
 
-using EnumPolyMixedBehaviorObserverFunctionType =
-    std::function<void(const MixedBehaviorProfile<double> &)>;
+template <class Support> void NullEnumPolyEventCallback(const EnumPolyEvent<Support> &) {}
 
-inline void EnumPolyNullMixedBehaviorObserver(const MixedBehaviorProfile<double> &) {}
+/// Default budget on the number of rectangles examined per support before
+/// giving up.  Ordinary supports need only a handful, leaving ample headroom
+/// for difficult-but-tractable ones while bounding the worst case.
+constexpr size_t kDefaultEnumPolyMaxRectangles = 20'000;
 
-using EnumPolyBehaviorSupportObserverFunctionType =
-    std::function<void(const std::string &, const BehaviorSupportProfile &)>;
+std::list<MixedStrategyProfile<double>>
+EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
+                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
+                      StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
+                          NullEnumPolyEventCallback<StrategySupportProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
-inline void EnumPolyNullBehaviorSupportObserver(const std::string &,
-                                                const BehaviorSupportProfile &)
-{
-}
-
-std::list<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(
-    const Game &, int p_stopAfter, double p_maxregret,
-    EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium = EnumPolyNullMixedBehaviorObserver,
-    EnumPolyBehaviorSupportObserverFunctionType p_onSupport = EnumPolyNullBehaviorSupportObserver);
+std::list<MixedBehaviorProfile<double>>
+EnumPolyBehaviorSolve(const Game &, std::optional<size_t> p_stopAfter, double p_maxregret,
+                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
+                      BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
+                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =
+                          NullEnumPolyEventCallback<BehaviorSupportProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

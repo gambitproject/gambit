@@ -6,7 +6,7 @@
 Compute equilibria of a game using polynomial systems of equations
 See the :ref:`algorithm description <enumpoly>` for full details.
 
-When the verbose switch `-v` is used, the program outputs each support
+When the verbose switch `-V` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
 list of binary strings, where each entry represents one player. The
 digit 1 represents a strategy which is present in the support, and the
@@ -16,12 +16,21 @@ support is printed with the label "candidate,".
 The approach of subdividing the space of totally mixed profiles assumes
 solutions to the system of equations and inequalities are isolated
 points.  In the case of degeneracies in the resulting system,
-When the verbose switch `-v` is used, these supports are identified on
+When the verbose switch `-V` is used, these supports are identified on
 standard output with the label "singular,".   This will occur
 if there is a positive-dimensional set of equilibria which all
 share the listed support.  However, the converse is not true:
 not all supports labeled as "singular" will necessarily be the
 support of some set of equilibria.
+
+Independently of degeneracy, the search on a single support can require
+examining an impractically large number of subdivided cells before it
+can either confirm or rule out an equilibrium.  To bound the time spent
+on any one support, the number of cells examined is capped (see
+:option:`gambit-enumpoly -r`).  When this limit is reached, the search for that support
+is abandoned, any equilibria already confirmed on it are still reported,
+and (in verbose mode) the support is identified with the label
+"budget-exceeded,".
 
 .. program:: gambit-enumpoly
 
@@ -33,13 +42,6 @@ support of some set of equilibria.
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
-
-.. cmdoption:: -H
-
-   By default, the program uses an enumeration method designed to
-   visit as few supports as possible in searching for all equilibria.
-   With this switch,  This switch only has an
-   effect when solving strategic games.
 
 .. cmdoption:: -S
 
@@ -62,16 +64,28 @@ support of some set of equilibria.
    By default, the program will search all support profiles.
    This switch instructs the program to terminate when EQA equilibria have been found.
 
+.. cmdoption:: -r RECTANGLES
+
+   .. versionadded:: 17.0.0
+
+   Specify the maximum number of cells to examine when searching for equilibria
+   on a single support, before giving up on that support (default 20000).  See
+   the :ref:`algorithm description <enumpoly>` for why this is necessary.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, supports are printed on
    standard output with the label "candidate" as they are considered, and
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
 
 Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
 "Selten's horse"::

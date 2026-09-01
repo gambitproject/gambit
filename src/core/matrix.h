@@ -41,10 +41,6 @@ public:
 ///
 /// @tparam T Scalar element type. Must support arithmetic operations,
 ///           comparison with zero, and abs(T).
-///
-/// @note Inverse and Determinant use legacy Gaussian elimination algorithms.
-///       They are known not to be numerically optimal for near-singular matrices.
-///       Current behaviour is temporarily preserved for historical compatibility.
 template <class T> class Matrix {
   RectArray<T> m_data;
 
@@ -113,9 +109,7 @@ public:
   /// Element-wise comparisons
   ///@{
   bool operator==(const Matrix &) const;
-  bool operator!=(const Matrix &M) const { return !(*this == M); }
   bool operator==(const T &) const;
-  bool operator!=(const T &c) const { return !(*this == c); }
   ///@}
 
   /// @name Arithmetic operators
@@ -207,8 +201,6 @@ public:
   /// @name Other operations
   ///@{
   Matrix Transpose() const;
-  Matrix Inverse() const;
-  T Determinant() const;
   ///@}
 };
 
@@ -412,158 +404,6 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
   }
 
   return tmp;
-}
-
-// ----------------------------------------------------------------------------
-// Implementation of additional operations
-// ----------------------------------------------------------------------------
-
-template <class T> Matrix<T> Matrix<T>::Inverse() const
-{
-  if (!IsSquare()) {
-    throw DimensionException();
-  }
-  const int rmin = MinRow();
-  const int rmax = MaxRow();
-  const int cmin = MinCol();
-  const int cmax = MaxCol();
-  using Gambit::abs;
-
-  Matrix copy(*this);
-  Matrix inv(rmin, rmax, cmin, cmax);
-
-  inv = T{0};
-
-  // initialize inverse matrix and prescale row vectors
-  for (int i = rmin; i <= rmax; ++i) {
-    auto copy_row = copy.m_data.GetRowView(i);
-    auto inv_row = inv.m_data.GetRowView(i);
-
-    T max = maximize_function(copy_row, [](const T &v) { return abs(v); });
-    if (max == T{0}) {
-      throw SingularMatrixException();
-    }
-    const T scale = T{1} / max;
-    for (auto &v : copy_row) {
-      v *= scale;
-    }
-    inv_row[i] = scale;
-  }
-
-  for (int i = cmin; i <= cmax; ++i) {
-    // find pivot row
-    auto col_i = copy.m_data.GetColumnView(i);
-    T max = abs(col_i[i]);
-    int row = i;
-    for (int j = i + 1; j <= rmax; ++j) {
-      const T v = abs(col_i[j]);
-      if (v > max) {
-        max = v;
-        row = j;
-      }
-    }
-
-    if (max <= T{0}) {
-      throw SingularMatrixException();
-    }
-
-    copy.SwitchRows(i, row);
-    inv.SwitchRows(i, row);
-    // scale pivot row
-    T factor = T{1} / copy(i, i);
-    auto copy_row = copy.m_data.GetRowView(i);
-    auto inv_row = inv.m_data.GetRowView(i);
-    auto copy_it = copy_row.begin();
-    auto inv_it = inv_row.begin();
-    for (; copy_it != copy_row.end(); ++copy_it, ++inv_it) {
-      *copy_it *= factor;
-      *inv_it *= factor;
-    }
-
-    // reduce other rows
-    auto pivot_copy_row = copy.m_data.GetRowView(i);
-    auto pivot_inv_row = inv.m_data.GetRowView(i);
-
-    for (int j = rmin; j <= rmax; ++j) {
-      if (j == i) {
-        continue;
-      }
-      auto row_copy = copy.m_data.GetRowView(j);
-      auto row_inv = inv.m_data.GetRowView(j);
-      const T mult = row_copy[i];
-      auto pivot_copy_it = pivot_copy_row.begin();
-      auto pivot_inv_it = pivot_inv_row.begin();
-      auto row_copy_it = row_copy.begin();
-      auto row_inv_it = row_inv.begin();
-
-      for (; pivot_copy_it != pivot_copy_row.end();
-           ++pivot_copy_it, ++pivot_inv_it, ++row_copy_it, ++row_inv_it) {
-        *row_copy_it -= (*pivot_copy_it) * mult;
-        *row_inv_it -= (*pivot_inv_it) * mult;
-      }
-    }
-  }
-
-  return inv;
-}
-
-template <class T> T Matrix<T>::Determinant() const
-{
-  if (!IsSquare()) {
-    throw DimensionException();
-  }
-  const int rmin = MinRow();
-  const int rmax = MaxRow();
-  using Gambit::abs;
-
-  Matrix M(*this);
-
-  for (int row = rmin; row <= rmax; ++row) {
-    // Experience (as of 3/22/99) suggests that, in the interest of
-    // numerical stability, it might be best to do Gaussian
-    // elimination with respect to the row (of those feasible)
-    // whose entry has the largest absolute value.
-    int swap_row = row;
-    T max = abs(M(row, row));
-    for (int i = row + 1; i <= rmax; ++i) {
-      const T v = abs(M(i, row));
-      if (v > max) {
-        max = v;
-        swap_row = i;
-      }
-    }
-
-    if (swap_row != row) {
-      M.SwitchRows(row, swap_row);
-      auto pivot_row = M.m_data.GetRowView(row);
-      for (auto &v : pivot_row) {
-        v = -v;
-      }
-    }
-
-    if (M(row, row) == T{0}) {
-      return T{0};
-    }
-    // now do row operations to clear the row'th column
-    // below the diagonal
-    auto pivot_row = M.m_data.GetRowView(row);
-    for (int row1 = row + 1; row1 <= rmax; ++row1) {
-      auto elim_row = M.m_data.GetRowView(row1);
-      const T factor = -elim_row[row] / pivot_row[row];
-      auto pivot_it = pivot_row.begin();
-      auto elim_it = elim_row.begin();
-      for (; pivot_it != pivot_row.end(); ++pivot_it, ++elim_it) {
-        *elim_it += (*pivot_it) * factor;
-      }
-    }
-  }
-
-  // finally we multiply the diagonal elements
-  T det = T{1};
-  for (int row = rmin; row <= rmax; ++row) {
-    det *= M(row, row);
-  }
-  return det;
 }
 
 // ----------------------------------------------------------------------------

@@ -6,6 +6,7 @@ NFG 1 R "2x2x2 game with 2 pure and 1 mixed equilibrium"
 - Pure strategies {a,b} encode if respective player is on left or right of the cut
 - The payoff to a player is the sum of their incident edges across the implied cut
 - Pure equilibrium iff local max cuts; in addition, uniform mixture is an equilibrium
+- In the mixed equilibrium all players mix strategies with equal probability (0.5, 0.5)
 - Equilibrium analysis for pure profiles:
     a a a:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
     b a a:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)

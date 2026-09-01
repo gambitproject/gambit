@@ -20,8 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import cython
-from cython.operator cimport dereference as deref
-from libcpp.memory cimport shared_ptr
 
 import typing
 
@@ -42,6 +40,8 @@ class Outcome:
         return obj
 
     def __repr__(self) -> str:
+        if self.outcome.deref().IsNull():
+            return f"Outcome(game={self.game}, label=None)"
         if self.label:
             return f"Outcome(game={self.game}, label='{self.label}')"
         else:
@@ -50,10 +50,18 @@ class Outcome:
     def __eq__(self, other: typing.Any):
         if not isinstance(other, Outcome):
             return NotImplemented
+        if (self.outcome.deref().IsNull()
+                or cython.cast(Outcome, other).outcome.deref().IsNull()):
+            # Null outcomes are not equal to anything, including themselves (cf. nan).
+            return False
         return self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
+
+    def __bool__(self) -> bool:
+        """``True`` for a real outcome; the null outcome is falsy."""
+        return not self.outcome.deref().IsNull()
 
     @property
     def game(self) -> Game:
@@ -61,141 +69,92 @@ class Outcome:
         return Game.wrap(self.outcome.deref().GetGame())
 
     @property
-    def label(self) -> str:
+    def label(self) -> str | None:
         """The text label associated with this outcome.
 
+        The null outcome's label is ``None``; testing ``outcome.label is None`` is the
+        idiomatic nullity check.
+
         .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
+            An outcome label must be nonempty and unique within the game; an empty or duplicate
+            label now raises ``ValueError``.
+
+        .. versionchanged:: 17.0.0
+            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
+            contain no control characters, and must not begin/end with whitespace or have
+            two consecutive whitespace characters.  "Whitespace" means any Unicode space
+            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
+            The null outcome resolves with label ``None``.
         """
-        return self.outcome.deref().GetLabel().decode("ascii")
+        if self.outcome.deref().IsNull():
+            return None
+        return self.outcome.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (outcome.label for outcome in self.game.outcomes):
-            warnings.warn("In a future version, outcomes must have unique labels",
-                          FutureWarning)
-        self.outcome.deref().SetLabel(value.encode("ascii"))
+        self.outcome.deref().SetLabel(value.encode("utf-8"))
 
     @property
-    def number(self) -> int:
+    def number(self) -> int | None:
         """Returns the number of the outcome in the game.
         Outcomes are numbered starting with 0.
+
+        The null outcome is not a member of the game's outcomes, so it has no number.
+
+        .. versionchanged:: 17.0.0
+            The null outcome resolves here with number ``None``.
         """
+        if self.outcome.deref().IsNull():
+            return None
         return self.outcome.deref().GetNumber() - 1
 
     def __getitem__(
-            self, player: Player | str
+            self, player: str
     ) -> decimal.Decimal | Rational:
         """The payoff to `player` at the outcome.
 
+        The null outcome reports a zero payoff to every player of its game.
+
         Raises
         ------
-        MismatchError
-            If `player` is a ``Player`` from a different game than the outcome.
+        KeyError
+            If no player of the outcome's game has label `player`.
         """
-        resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, "Outcome.__getitem__"))
+        game: Game = self.game
+        resolved_player: c_GamePlayer = game._resolve_player(player, "Outcome.__getitem__")
         payoff = (
-            self.outcome.deref().GetPayoff[string](resolved_player.player).decode("ascii")
+            self.outcome.deref().GetPayoff[string](resolved_player).decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
         else:
             return Rational(payoff)
 
-    def __setitem__(self, player: Player | str, value: typing.Any) -> None:
+    def __setitem__(self, player: str, value: typing.Any) -> None:
         """Set the payoff to `player` at the outcome.
 
         Parameters
         ----------
-        player : Player or str
-            A reference to the player for which to set the payoff.
+        player : str
+            The label of the player for which to set the payoff.
         value : Any
             The value of the payoff.  This can be any numeric type, or any object that
             has a string representation which can be interpreted as a number.
 
         Raises
         ------
-        MismatchError
-            If `player` is a ``Player`` from a different game than the outcome.
+        KeyError
+            If no player of the outcome's game has label `player`.
         ValueError
             If `value` cannot be interpreted as a number.
+        UndefinedOperationError
+            If this is the null outcome; payoffs cannot be set on it.
         """
-        resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, "Outcome.__setitem__"))
-        self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))
-
-
-@cython.cclass
-class DerivedGameOutcome:
-    """Represents an outcome in a strategic game derived from a game in another representation.
-    Such outcomes are one-to-one with the set of pure strategy profiles.
-    """
-    c_game = cython.declare(c_Game)
-    psp = cython.declare(shared_ptr[c_PureStrategyProfile])
-
-    def __init__(self):
-        raise ValueError("Cannot create an Outcome outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game, psp: shared_ptr[c_PureStrategyProfile]) -> DerivedGameOutcome:
-        obj: DerivedGameOutcome = DerivedGameOutcome.__new__(DerivedGameOutcome)
-        obj.c_game = game
-        obj.psp = psp
-        return obj
-
-    @property
-    def game(self) -> Game:
-        """Returns the game with which this outcome is associated."""
-        return Game.wrap(self.c_game)
-
-    def __repr__(self):
-        return f"<Outcome '{self.label}' in game '{self.game.title}'>"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, DerivedGameOutcome) and
-            deref(self.psp).deref() == deref(cython.cast(DerivedGameOutcome, other).psp).deref()
-        )
-
-    def __getitem__(self, player: Player | str) -> Rational:
-        """The payoff to `player` at the outcome.
-
-        Parameters
-        ----------
-        player : Player or str
-            A reference to the player to get the payoff for
-
-        Returns
-        -------
-        Rational
-            The expected payoff to the player.  Because this is calculated in a derived
-            strategic game, it will always be represented as a ``Rational`` even if
-            game data are represented as ``Decimal``.
-
-        Raises
-        ------
-        MismatchError
-            If `player` is a ``Player`` from a different game than the outcome.
-        """
-        resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, "Outcome.__getitem__"))
-        return rat_to_py(deref(deref(self.psp).deref()).GetPayoff(resolved_player.player))
-
-    def delete(self):
-        raise UndefinedOperationError("Cannot modify outcomes in a derived strategic game.")
-
-    @property
-    def label(self) -> str:
-        """The text label associated with this outcome."""
-        return "(%s)" % (
-            ",".join(
-                [deref(deref(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
-                 .deref().GetLabel().c_str().decode()
-                 for player in self.game.players]
+        if self.outcome.deref().IsNull():
+            raise UndefinedOperationError(
+                "Payoffs cannot be set on the null outcome; "
+                "use Game.make_outcome to create and attach an outcome"
             )
-        )
+        game: Game = self.game
+        resolved_player: c_GamePlayer = game._resolve_player(player, "Outcome.__setitem__")
+        self.outcome.deref().SetPayoff(resolved_player, _to_number(value))

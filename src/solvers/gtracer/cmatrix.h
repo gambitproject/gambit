@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: library/include/gtracer/cmatrix.h
+// FILE: src/solvers/gtracer/cmatrix.h
 // Definition of matrix classes for Gametracer
 // This file is based on GameTracer v0.2, which is
 // Copyright (c) 2002, Ben Blum and Christian Shelton
@@ -22,8 +22,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_GTRACER_CMATRIX_H
-#define GAMBIT_GTRACER_CMATRIX_H
+#ifndef GAMBIT_SOLVERS_GTRACER_CMATRIX_H
+#define GAMBIT_SOLVERS_GTRACER_CMATRIX_H
 
 #include <iostream>
 #include <cmath>
@@ -60,7 +60,6 @@ public:
     {
       return (m_vector == it.m_vector) && (m_index == it.m_index);
     }
-    bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
   class const_iterator {
@@ -87,7 +86,6 @@ public:
     {
       return (m_vector == it.m_vector) && (m_index == it.m_index);
     }
-    bool operator!=(const const_iterator &it) const { return !(*this == it); }
   };
 
   cvector() : m(1), x(new double[1]) {}
@@ -272,24 +270,6 @@ public:
       }
     }
     return true;
-  }
-
-  bool operator!=(const cvector &v) const
-  {
-    if (m != v.m) {
-      return true;
-    }
-    return memcmp(x, v.x, m * sizeof(double)) != 0;
-  }
-
-  bool operator!=(const double &a) const
-  {
-    for (int i = 0; i < m; i++) {
-      if (a != x[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   double norm2() const
@@ -689,24 +669,6 @@ public:
     return true;
   }
 
-  bool operator!=(const cmatrix &ma) const
-  {
-    if (ma.n != n || ma.m != m) {
-      return true;
-    }
-    return memcmp(ma.x, x, s * sizeof(double)) != 0;
-  }
-
-  bool operator!=(const double &a) const
-  {
-    for (int i = 0; i < s; i++) {
-      if (x[i] != a) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   // returns the square of the frobenius norm
   double norm2() const
   {
@@ -803,4 +765,4 @@ inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
 
 } // end namespace Gambit::gametracer
 
-#endif // GAMBIT_GTRACER_CMATRIX_H
+#endif // GAMBIT_SOLVERS_GTRACER_CMATRIX_H

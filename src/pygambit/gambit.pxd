@@ -3,11 +3,12 @@ from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
-from libcpp.set cimport set as stdset
+from libcpp.map cimport map as stdmap
 from libcpp.optional cimport optional
+from libcpp.pair cimport pair
 
 
-cdef extern from "gambit.h":
+cdef extern from "games.h":
     # We don't wrap anything from the basic header, but it ensures
     # it gets included in the output
     pass
@@ -98,15 +99,9 @@ cdef extern from "games/game.h":
         shared_ptr[c_PureStrategyProfileRep] deref "operator->"() except +
         c_PureStrategyProfile(c_PureStrategyProfile) except +
 
-    cdef cppclass c_PureBehaviorProfile "PureBehaviorProfile":
-        c_PureBehaviorProfile(c_Game) except +
-
     cdef cppclass c_GameStrategyRep "GameStrategyRep":
-        int GetNumber() except +
-        int GetId() except +
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
         c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameSequenceRep "GameSequenceRep":
@@ -120,7 +115,6 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         cppclass Actions:
@@ -150,7 +144,6 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +ValueError
 
-        c_GameAction GetAction(int) except +IndexError
         Actions GetActions() except +
         c_Number GetActionProb(c_GameAction) except +IndexError
 
@@ -159,7 +152,6 @@ cdef extern from "games/game.h":
 
         bint IsChanceInfoset() except +
         bint Precedes(c_GameNode) except +
-        stdset[c_GameAction] GetOwnPriorActions() except +
 
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
         cppclass Infosets:
@@ -197,19 +189,17 @@ cdef extern from "games/game.h":
         int IsChance() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +ValueError
 
-        c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
 
         Sequences GetSequences() except +
 
-        c_GameInfoset GetInfoset(int) except +IndexError
         Infosets GetInfosets() except +
 
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame() except +
         int GetNumber() except +
+        bool IsNull() except +
 
         string GetLabel() except +
         void SetLabel(string) except +ValueError
@@ -260,21 +250,10 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
-        cppclass InfosetCollection:
-            cppclass iterator:
-                c_GameInfoset operator *()
-                iterator operator++()
-                bint operator ==(iterator)
-                bint operator !=(iterator)
-            int size() except +
-            iterator begin() except +
-            iterator end() except +
-
         c_Game GetGame() except +
         c_GameNode GetRoot() except +
         c_GameSubgame GetParent() except +
         SubgameCollection GetChildren() except +
-        InfosetCollection GetSubgameDifference() except +
 
     cdef cppclass c_GameRep "GameRep":
         cppclass Players:
@@ -310,38 +289,31 @@ cdef extern from "games/game.h":
         bool IsAgg() except +
 
         string GetTitle() except +
-        void SetTitle(string) except +
+        void SetTitle(string) except +ValueError
 
         string GetDescription() except +
-        void SetDescription(string) except +
+        void SetDescription(string) except +ValueError
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError
         Players GetPlayers() except +
         c_GamePlayer GetChance() except +
-        c_GamePlayer NewPlayer() except +
+        void RelabelPlayers(stdmap[string, string]) except +ValueError
+        void SetPlayers(stdvector[string]) except +ValueError
 
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
         Outcomes GetOutcomes() except +
-        c_GameOutcome NewOutcome() except +
-        void DeleteOutcome(c_GameOutcome) except +
 
         int NumNodes() except +
-        int NumNonterminalNodes() except +
         c_GameNode GetRoot() except +
         Nodes GetNodes() except +
 
-        c_GameStrategy GetStrategy(int) except +IndexError
-        c_GameStrategy NewStrategy(c_GamePlayer, string) except +ValueError
-        void DeleteStrategy(c_GameStrategy) except +
+        void RelabelStrategies(c_GamePlayer, stdmap[string, string]) except +ValueError
+        void SetStrategies(c_GamePlayer, stdvector[string]) except +ValueError
         int MixedProfileLength() except +
 
-        c_GameInfoset GetInfoset(int) except +IndexError
         Array[int] NumInfosets() except +
-
-        c_GameAction GetAction(int) except +IndexError
-        int BehavProfileLength() except +
 
         bool IsConstSum() except +
         c_Rational GetMinPayoff() except +
@@ -354,22 +326,32 @@ cdef extern from "games/game.h":
         bool IsPerfectRecall() except +
         bool IsAbsentMinded(c_GameInfoset) except +
 
-        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
-        c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset InsertMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
         c_GameInfoset InsertMove(c_GameNode, c_GameInfoset) except +ValueError
+        c_GameInfoset AppendEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
+        c_GameInfoset InsertEvent(c_GameNode, stdvector[string],
+                                  stdvector[c_Number]) except +ValueError
         void CopyTree(c_GameNode dest, c_GameNode src) except +ValueError
         void MoveTree(c_GameNode dest, c_GameNode src) except +ValueError
         void DeleteParent(c_GameNode) except +
         void DeleteTree(c_GameNode) except +
-        void SetPlayer(c_GameInfoset, c_GamePlayer) except +
+        c_GameInfoset MakeInfoset(stdvector[c_GameNode], c_GamePlayer, string) except +ValueError
+        c_GameOutcome MakeOutcome(stdvector[c_GameNode], stdvector[c_Number],
+                                  string) except +ValueError
+        c_GameOutcome MakeOutcome(stdvector[stdvector[c_GameStrategy]], stdvector[c_Number],
+                                  string) except +ValueError
+        void MakeOutcomeNull(stdvector[c_GameNode]) except +ValueError
+        void MakeOutcomeNull(stdvector[stdvector[c_GameStrategy]]) except +ValueError
         void Reveal(c_GameInfoset, c_GamePlayer) except +
-        void SetInfoset(c_GameNode, c_GameInfoset) except +ValueError
-        c_GameInfoset LeaveInfoset(c_GameNode) except +
-        c_GameAction InsertAction(c_GameInfoset, c_GameAction) except +ValueError
-        void DeleteAction(c_GameAction) except +ValueError
-        void SetOutcome(c_GameNode, c_GameOutcome) except +
-        c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
+        void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
+        void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
+        void SetEventActions(c_GameInfoset, stdvector[string],
+                             stdvector[c_Number]) except +ValueError
+        c_GameInfoset MakeEvent(stdvector[c_GameNode], stdvector[c_Number],
+                                string) except +ValueError
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
@@ -377,8 +359,8 @@ cdef extern from "games/game.h":
         c_GameSubgame GetMinimalSubgame(c_GameInfoset) except +
         stdvector[c_GameSubgame] GetSubgames() except +
 
-    c_Game NewTree() except +
-    c_Game NewTable(stdvector[int]) except +
+    c_Game NewTree(stdvector[string]) except +ValueError
+    c_Game NewTable(stdvector[int], bool) except +
 
 
 cdef extern from "games/stratpure.h":
@@ -387,7 +369,6 @@ cdef extern from "games/stratpure.h":
         void SetStrategy(c_GameStrategy) except +
 
         c_GameOutcome GetOutcome() except +
-        void SetOutcome(c_GameOutcome) except +
 
         c_Rational GetPayoff(c_GamePlayer) except +
 
@@ -407,9 +388,7 @@ cdef extern from "games/stratmixed.h" namespace "Gambit":
         T GetRegret(c_GameStrategy) except +
         T GetRegret(c_GamePlayer) except +
         T GetMaxRegret() except +
-        T GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
         T GetLiapValue() except +
-        c_MixedStrategyProfile[T] ToFullSupport() except +
         c_MixedStrategyProfile(c_MixedStrategyProfile[T]) except +
 
 cdef extern from "games/behavmixed.h" namespace "Gambit":
@@ -463,6 +442,7 @@ cdef extern from "games/stratspt.h":
         int MixedProfileLength() except +
         int GetIndex(c_GameStrategy) except +
         bool IsSubsetOf(c_StrategySupportProfile) except +
+        void AddStrategy(c_GameStrategy) except +
         bool RemoveStrategy(c_GameStrategy) except +
         Support GetStrategies(c_GamePlayer) except +
         bool Contains(c_GameStrategy) except +
@@ -476,7 +456,29 @@ cdef extern from "games/stratspt.h":
 
 cdef extern from "games/behavspt.h":
     cdef cppclass c_BehaviorSupportProfile "BehaviorSupportProfile":
+        cppclass Support:
+            cppclass const_iterator:
+                c_GameAction operator *()
+                const_iterator operator++()
+                bint operator ==(const_iterator)
+                bint operator !=(const_iterator)
+            Support()
+            size_t size()
+            const_iterator begin() except +
+            const_iterator end() except +
+
         c_BehaviorSupportProfile(c_Game) except +
+        c_BehaviorSupportProfile(c_BehaviorSupportProfile) except +
+        bool operator ==(c_BehaviorSupportProfile) except +
+        bool operator !=(c_BehaviorSupportProfile) except +
+        c_Game GetGame() except +
+        size_t BehaviorProfileLength() except +
+        Support GetActions(c_GameInfoset) except +
+        bool HasAction(c_GameInfoset) except +
+        bool Contains(c_GameAction) except +
+        void AddAction(c_GameAction) except +
+        bool RemoveAction(c_GameAction) except +
+        bool IsReachable(c_GameInfoset) except +
 
 
 cdef extern from "games/layout.h":
@@ -488,11 +490,11 @@ cdef extern from "games/layout.h":
 
 
 cdef extern from "util.h":
-    c_Game ParseGbtGame(string, bint) except +IOError
-    c_Game ParseEfgGame(string, bint) except +IOError
-    c_Game ParseNfgGame(string, bint) except +IOError
-    c_Game ParseAggGame(string, bint) except +IOError
-    c_Game ParseBaggGame(string, bint) except +IOError
+    c_Game ParseGbtGame(string) except +IOError
+    c_Game ParseEfgGame(string) except +IOError
+    c_Game ParseNfgGame(string) except +IOError
+    c_Game ParseAggGame(string) except +IOError
+    c_Game ParseBaggGame(string) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError
@@ -540,63 +542,103 @@ cdef extern from "util.h":
     ) except +
 
 
+cdef extern from "callback.h":
+    cppclass StrategyCallbackType "Gambit::Nash::StrategyCallbackType"[T]:
+        pass
+    cppclass BehaviorCallbackType "Gambit::Nash::BehaviorCallbackType"[T]:
+        pass
+    cppclass LogitEventCallbackType "Gambit::LogitEventCallbackType"[T]:
+        pass
+    cppclass GNMEventCallbackType "Gambit::Nash::GNMEventCallbackType":
+        pass
+    cppclass LiapEventCallbackType "Gambit::Nash::LiapEventCallbackType"[T]:
+        pass
+    cppclass SimpdivEventCallbackType "Gambit::Nash::SimpdivEventCallbackType":
+        pass
+    cppclass IPAEventCallbackType "Gambit::Nash::IPAEventCallbackType":
+        pass
+    cppclass EnumPolyEventCallbackType "Gambit::Nash::EnumPolyEventCallbackType"[T]:
+        pass
+
+    StrategyCallbackType[T] MakeStrategyCallback[T](object)
+    BehaviorCallbackType[T] MakeBehaviorCallback[T](object)
+    LogitEventCallbackType[T] MakeLogitEventCallback[T](object)
+    GNMEventCallbackType MakeGNMEventCallback(object)
+    LiapEventCallbackType[T] MakeLiapEventCallback[T](object)
+    SimpdivEventCallbackType MakeSimpdivEventCallback(object)
+    IPAEventCallbackType MakeIPAEventCallback(object)
+    EnumPolyEventCallbackType[T] MakeEnumPolyEventCallback[T](object)
+
 cdef extern from "solvers/enumpure/enumpure.h":
-    stdlist[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(c_Game) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(
+            c_Game, StrategyCallbackType[c_Rational]
+    ) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(
+            c_Game, BehaviorCallbackType[c_Rational]
+    ) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    stdlist[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](
+            c_Game, StrategyCallbackType[T]
+    ) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
     stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
-            c_Game, int p_stopAfter, int p_maxDepth
+            c_Game, optional[size_t] p_stopAfter, int p_maxDepth, StrategyCallbackType[T]
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
-            c_Game, int p_stopAfter, int p_maxDepth
+            c_Game, BehaviorCallbackType[T]
     ) except +RuntimeError
 
 cdef extern from "solvers/lp/lp.h":
-    stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](
+            c_Game, StrategyCallbackType[T]
+    ) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](
+            c_Game, BehaviorCallbackType[T]
+    ) except +RuntimeError
 
 cdef extern from "solvers/liap/liap.h":
     stdlist[c_MixedStrategyProfile[double]] LiapStrategySolve(
-            c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN
+            c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN,
+            StrategyCallbackType[double], LiapEventCallbackType[c_MixedStrategyProfile[double]]
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] LiapAgentSolve(
-            c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN
+            c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN,
+            BehaviorCallbackType[double], LiapEventCallbackType[c_MixedBehaviorProfile[double]]
     ) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
     stdlist[c_MixedStrategyProfile[c_Rational]] SimpdivStrategySolve(
             c_MixedStrategyProfile[c_Rational] start, c_Rational p_maxregret, int p_gridResize,
-            int p_leashLength
+            int p_leashLength, StrategyCallbackType[c_Rational], SimpdivEventCallbackType
     ) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
     stdlist[c_MixedStrategyProfile[double]] IPAStrategySolve(
-            c_MixedStrategyProfile[double]
+            c_MixedStrategyProfile[double], StrategyCallbackType[double], IPAEventCallbackType
     ) except +RuntimeError
 
 cdef extern from "solvers/gnm/gnm.h":
     stdlist[c_MixedStrategyProfile[double]] GNMStrategySolve(
             c_MixedStrategyProfile[double], double p_endLambda, int p_steps,
-            int p_localNewtonInterval, int p_localNewtonMaxits
+            int p_localNewtonInterval, int p_localNewtonMaxits,
+            StrategyCallbackType[double], GNMEventCallbackType
     ) except +RuntimeError
 
 cdef extern from "solvers/nashsupport/nashsupport.h":
-    cdef cppclass c_PossibleNashStrategySupportsResult "PossibleNashStrategySupportsResult":
-        stdlist[c_StrategySupportProfile] m_supports
-    shared_ptr[c_PossibleNashStrategySupportsResult] PossibleNashStrategySupports(
-            c_Game
-    ) except +RuntimeError
+    cdef cppclass c_PossibleNashStrategySupports "PossibleNashStrategySupports":
+        c_PossibleNashStrategySupports(c_Game) except +
+        optional[c_StrategySupportProfile] Next() except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
     stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
-            c_Game, int, float
+            c_Game, optional[size_t], float, size_t,
+            StrategyCallbackType[double], EnumPolyEventCallbackType[c_StrategySupportProfile]
     ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
-            c_Game, int, float
+            c_Game, optional[size_t], float, size_t,
+            BehaviorCallbackType[double], EnumPolyEventCallbackType[c_BehaviorSupportProfile]
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/logit.h":
@@ -628,27 +670,36 @@ cdef extern from "solvers/hp/hp.h":
 
 
 cdef extern from "nash.h":
+    pair[
+        stdlist[c_MixedStrategyProfile[T]], stdlist[stdlist[c_MixedStrategyProfile[T]]]
+    ] EnumMixedStrategySolveCliquesWrapper[T](
+            c_Game, StrategyCallbackType[T]
+    ) except +RuntimeError
     stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
-            c_Game, double, double, double
+            c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
     stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
-            c_Game, stdlist[double], double, double
+            c_Game, stdlist[double], double, double,
+            LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
-            shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double
+            shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double,
+            LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
     stdlist[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
-            c_Game, double, double, double
+            c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
     stdlist[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(
-            c_Game, stdlist[double], double, double
+            c_Game, stdlist[double], double, double,
+            LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateWrapper(
-            shared_ptr[c_MixedStrategyProfile[double]], bool, double, double
+            shared_ptr[c_MixedStrategyProfile[double]], bool, double, double,
+            LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +

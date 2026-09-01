@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/renratio.h
-// Declaration of wxSheet renderer for rational numbers
+// Declaration of wxGrid renderer/editor for rational numbers
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,74 +23,51 @@
 #ifndef GAMBIT_GUI_RENRATIO_H
 #define GAMBIT_GUI_RENRATIO_H
 
-#include "wx/sheet/sheet.h" // the wxSheet widget
+#include <wx/grid.h>
 
 namespace Gambit::GUI {
-//
-// The below is taken from the implementation of
-// DECLARE_SHEETOBJREFDATA_COPY_CLASS in sheetdef.h.
-// We need to customise the Clone() declaration to have an 'override';
-// not every class which uses this DECLARE_ is overriding a Clone().
-// This inconsistency is a function of wxSheet being ~20 years old.
-#define DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(classname, basename)                            \
-  DECLARE_DYNAMIC_CLASS(classname)                                                                \
-public:                                                                                           \
-  basename *Clone() const override                                                                \
-  {                                                                                               \
-    classname *aclass = new classname();                                                          \
-    aclass->Copy(*((classname *)this));                                                           \
-    return (basename *)aclass;                                                                    \
-  }
 
-//
-// This class is based on the wxSheetCellStringRendererRefData implementation
-//
-class RationalRendererRefData final : public wxSheetCellRendererRefData {
+//!
+//! Renderer for payoff cells: draws values containing '/' as a stacked
+//! numerator/denominator fraction, everything else as plain text.
+//!
+class RationalCellRenderer : public wxGridCellStringRenderer {
 public:
-  RationalRendererRefData() = default;
+  RationalCellRenderer() = default;
 
-  // draw the string
-  void Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc, const wxRect &rect,
-            const wxSheetCoords &coords, bool isSelected) override;
+  void Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col,
+            bool isSelected) override;
+  wxSize GetBestSize(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, int row, int col) override;
 
-  // return the string extent
-  wxSize GetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                     const wxSheetCoords &coords) override;
+  wxGridCellRenderer *Clone() const override { return new RationalCellRenderer(); }
 
-  void DoDraw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc, const wxRect &rect,
-              const wxSheetCoords &coords, bool isSelected);
-
-  // set the text colours before drawing
-  void SetTextColoursAndFont(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                             bool isSelected);
-
-  // calc the string extent for given string/font
-  wxSize DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc, const wxString &text);
-
-  bool Copy(const RationalRendererRefData &other)
-  {
-    return wxSheetCellRendererRefData::Copy(other);
-  }
-
-  // NOLINTNEXTLINE(modernize-use-auto)
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(RationalRendererRefData, wxSheetCellRendererRefData)
+private:
+  static void SetTextColoursAndFont(wxGrid &grid, const wxGridCellAttr &attr, wxDC &dc,
+                                    bool isSelected);
+  static wxSize DoGetBestSize(wxGrid &grid, const wxGridCellAttr &attr, wxDC &dc,
+                              const wxString &text);
 };
 
-class RationalEditorRefData final : public wxSheetCellTextEditorRefData {
+//!
+//! Editor for payoff cells: restricts input to digits, a single decimal
+//! point, and a leading minus sign.
+//!
+class RationalCellEditor final : public wxGridCellTextEditor {
 public:
-  RationalEditorRefData() = default;
+  RationalCellEditor() = default;
 
-  void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *) override;
+  void Create(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler) override;
+  bool IsAcceptedKey(wxKeyEvent &event) override;
+  void StartingKey(wxKeyEvent &event) override;
 
-  /// Override basic text editor behavior to restrict input
-  bool IsAcceptedKey(wxKeyEvent &) override;
-  void StartingKey(wxKeyEvent &) override;
+  /// Centers the (single-line) text control vertically within the cell
+  /// rect rather than stretching it to fill the full height, which pins
+  /// the text to the top on cells taller than one line.
+  void SetSize(const wxRect &rect) override;
 
-  bool Copy(const RationalEditorRefData &other);
-
-  // NOLINTNEXTLINE(modernize-use-auto)
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(RationalEditorRefData, wxSheetCellTextEditorRefData)
+  wxGridCellEditor *Clone() const override { return new RationalCellEditor(); }
 };
+
 } // namespace Gambit::GUI
 
 #endif // GAMBIT_GUI_RENRATIO_H

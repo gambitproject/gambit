@@ -23,11 +23,12 @@
 #ifndef GAMBIT_GUI_GAMEDOC_H
 #define GAMBIT_GUI_GAMEDOC_H
 
-#include "gambit.h"
+#include <map>
+
+#include "games/behavspt.h"
+#include "games/stratspt.h"
 #include "style.h"
 #include "analysis.h"
-
-class TiXmlNode;
 
 namespace Gambit::GUI {
 
@@ -200,9 +201,15 @@ public:
   bool CanStrategyElim() const;
   int GetStrategyElimLevel() const;
 
-  void Save(std::ostream &) const;
-  bool Load(TiXmlNode *p_game);
+  std::vector<LegacyWorkspaceFile::Analysis> Save() const;
+  bool Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses);
 };
+
+// Generates a label guaranteed not to collide with any of p_game's current outcome labels, of
+// the form "Outcome N" -- GameRep::MakeOutcome() itself rejects an empty or duplicate label,
+// so callers that need to pre-fill a fresh outcome's label (rather than make the user type one
+// first) use this.
+std::string GenerateOutcomeLabel(const Game &p_game);
 
 class GameDocument {
   friend class GameView;
@@ -213,34 +220,46 @@ class GameDocument {
   void RemoveView(GameView *p_view)
   {
     m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
-    if (m_views.empty()) {
-      delete this;
-    }
   }
 
   Game m_game;
   wxString m_filename;
 
   TreeRenderConfig m_style;
-  GameNode m_selectNode;
   bool m_gameModified, m_workspaceModified;
 
   AnalysisWorkspace m_workspace;
 
+  std::list<std::string> m_undoList, m_redoList;
+
   void NotifyChanged(GameModificationType p_modifications);
   void UpdateViews();
 
+  /// Discard all undo/redo history, taking the current state as the new baseline
+  void ResetUndoHistory();
+  /// Replace the game, workspace, and style with those saved in a snapshot
+  /// previously produced by `SaveWorkspace`
+  void RestoreSnapshot(const std::string &p_snapshot);
+
 public:
   explicit GameDocument(Game p_game);
+  GameDocument(const GameDocument &) = delete;
+  GameDocument &operator=(const GameDocument &) = delete;
   ~GameDocument();
 
   //!
   //! @name Reading and writing savefiles
   //!
   //@{
-  /// Load workspace from the specified file (which should be a .gbt file)
-  /// Returns true if successful, false if error
-  bool LoadWorkspace(const wxString &p_filename);
+  enum class LoadResult { Success, OpenFailed, ParseFailed, UnsupportedRepresentation };
+  struct LoadOutcome {
+    LoadResult result;
+    std::shared_ptr<GameDocument> document; ///< non-null iff result == LoadResult::Success
+  };
+  /// Attempt to construct a document by reading `p_filename`, trying it first as a
+  /// Gambit workspace (.gbt) and then as a bare game (.efg/.nfg) file.
+  static LoadOutcome Load(const wxString &p_filename);
+
   void SaveWorkspace(std::ostream &) const;
   //@}
 
@@ -257,6 +276,17 @@ public:
   void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
 
   const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
+
+  //!
+  //! @name Undo/redo
+  //!
+  //@{
+  bool CanUndo() const { return m_undoList.size() > 1; }
+  void Undo();
+
+  bool CanRedo() const { return !m_redoList.empty(); }
+  void Redo();
+  //@}
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
@@ -275,9 +305,6 @@ public:
   void DoPreviousDominanceLevel();
   void DoTopDominanceLevel();
 
-  GameNode GetSelectNode() const { return m_selectNode; }
-  void SetSelectNode(GameNode);
-
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges();
 
@@ -295,22 +322,65 @@ public:
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
-  void DoNewPlayer();
-  void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);
-  void DoNewStrategy(GamePlayer p_player);
-  void DoDeleteStrategy(GameStrategy p_strategy);
-  void DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label);
+  /// Adds one player to the game, via `Game::SetPlayers`, labeled with the first unused
+  /// "Player N".
+  GamePlayer DoAddPlayer();
+  /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
+  void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
+  /// Declare the players of the game in a single operation, covering any combination of
+  /// adding, deleting, reordering, and relabeling players. Chance is not part of either list;
+  /// it is not affected by this operation.
+  ///
+  /// `p_stableLabels` identifies each player as it was before this edit (an existing player's
+  /// current label, or a placeholder for one newly created); `p_labels` is what that same
+  /// player, by position, is to be labeled after the edit.  Structure (which players exist,
+  /// and in what order) is resolved first, purely from `p_stableLabels`; labels are then
+  /// reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order means a rename
+  /// that reuses a label freed up by a simultaneous deletion never collides with the
+  /// not-yet-renamed original.
+  void DoSetPlayers(const std::vector<std::string> &p_stableLabels,
+                    const std::vector<std::string> &p_labels);
+  /// Declare the strategies of `p_player` in a single operation, covering any combination
+  /// of adding, deleting, reordering, and relabeling strategies.
+  ///
+  /// `p_stableLabels` identifies each strategy as it was before this edit (an existing
+  /// strategy's current label, or a placeholder for one newly created); `p_labels` is what
+  /// that same strategy, by position, is to be labeled after the edit.  Structure (which
+  /// strategies exist, and in what order) is resolved first, purely from `p_stableLabels`;
+  /// labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order
+  /// means a rename that reuses a label freed up by a simultaneous deletion never collides
+  /// with the not-yet-renamed original.
+  void DoSetStrategies(GamePlayer p_player, const std::vector<std::string> &p_stableLabels,
+                       const std::vector<std::string> &p_labels);
   void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
-  void DoSetActionLabel(GameAction p_action, const wxString &p_label);
-  void DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs);
+  void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
+  /// Declare the actions of `p_infoset` in a single operation, covering any combination
+  /// of adding, deleting, reordering, and relabeling actions.
+  ///
+  /// `p_stableLabels` identifies each action as it was before this edit (an existing
+  /// action's current label, or a placeholder for one newly created); `p_labels` is what
+  /// that same action, by position, is to be labeled after the edit.  Structure (which
+  /// actions exist, and in what order) is resolved first, purely from `p_stableLabels` and
+  /// `p_probs`; labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in
+  /// this order means a rename that reuses a label freed up by a simultaneous deletion
+  /// never collides with the not-yet-renamed original.
+  void DoSetActions(GameInfoset p_infoset, const std::vector<std::string> &p_stableLabels,
+                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
   void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
   void DoLeaveInfoset(GameNode p_node);
   void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
-  void DoInsertAction(GameNode p_node);
   void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
   void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
-  void DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions);
-  void DoInsertMove(GameNode p_node, GameInfoset p_infoset);
+  // Appends a fresh move for p_player at the terminal node p_node, with actions labeled per
+  // p_labels. p_probs gives the chance distribution when p_player is the chance player, and
+  // is ignored otherwise.
+  void DoAppendMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
+  // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
+  // and everything below it becomes the first action's subtree. p_probs gives the chance
+  // distribution when p_player is the chance player, and is ignored otherwise.
+  void DoInsertMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
+                    const std::vector<Number> &p_probs);
   void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
   void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
   void DoDeleteParent(GameNode p_node);
@@ -322,39 +392,46 @@ public:
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
+  void DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+                        const std::vector<wxString> &p_payoffs);
   void DoRemoveOutcome(GameNode p_node);
-  void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoRemoveOutcome(const PureStrategyProfile &p_profile);
+  void DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
+                     const std::vector<Number> &p_payoffs, const std::string &p_label);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
-  void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
+  void DoAnalysisOutputChanged();
 };
 
-inline GameDocument *NewTreeDocument()
+inline std::shared_ptr<GameDocument> NewTreeDocument()
 {
-  const Game efg = NewTree();
+  const Game efg = NewTree({"Player 1", "Player 2"});
   efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
-  return new GameDocument(efg);
+  return std::make_shared<GameDocument>(efg);
 }
 
-inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
+inline std::shared_ptr<GameDocument> NewTableDocument(const std::vector<int> &p_dim)
 {
   const Game nfg = NewTable(p_dim);
   nfg->SetTitle("Untitled Strategic Game");
+  std::map<std::string, std::string> labels;
   int pl = 1;
-  for (auto player : nfg->GetPlayers()) {
-    player->SetLabel("Player " + std::to_string(pl++));
+  for (const auto &player : nfg->GetPlayers()) {
+    labels[player->GetLabel()] = "Player " + std::to_string(pl++);
   }
-  return new GameDocument(nfg);
+  nfg->RelabelPlayers(labels);
+  return std::make_shared<GameDocument>(nfg);
 }
 
 class GameView {
 protected:
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
 
 public:
-  explicit GameView(GameDocument *p_doc) : m_doc(p_doc) { m_doc->AddView(this); }
+  explicit GameView(const std::shared_ptr<GameDocument> &p_doc) : m_doc(p_doc)
+  {
+    m_doc->AddView(this);
+  }
   virtual ~GameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;
@@ -362,7 +439,7 @@ public:
   /// Post any pending changes in the viewer to the document
   virtual void PostPendingChanges() {}
 
-  GameDocument *GetDocument() const { return m_doc; }
+  std::shared_ptr<GameDocument> GetDocument() const { return m_doc; }
 };
 
 } // namespace Gambit::GUI

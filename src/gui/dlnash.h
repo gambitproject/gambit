@@ -27,15 +27,18 @@
 
 namespace Gambit::GUI {
 class NashChoiceDialog final : public wxDialog {
-  GameDocument *m_doc;
+  std::shared_ptr<GameDocument> m_doc;
   wxChoice *m_countChoice, *m_methodChoice, *m_repChoice;
 
   // Event handlers
   void OnCount(wxCommandEvent &);
   void OnMethod(wxCommandEvent &);
+  void UpdateRepresentationChoice();
+
+  NashComputationSpec GetComputation() const;
 
 public:
-  NashChoiceDialog(wxWindow *, GameDocument *);
+  NashChoiceDialog(wxWindow *, const std::shared_ptr<GameDocument> &);
 
   std::shared_ptr<AnalysisOutput> GetCommand() const;
 

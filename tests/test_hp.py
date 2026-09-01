@@ -41,11 +41,10 @@ def create_hp_paper_example() -> gbt.MixedStrategyProfileDouble:
     game = create_hs_base_game()
     prior = game.mixed_strategy_profile()
     p1, p2 = list(game.players)
+    s1, s2 = list(game.get_strategies(p1)), list(game.get_strategies(p2))
 
-    prior[list(p1.strategies)[0]] = 0.5
-    prior[list(p1.strategies)[1]] = 0.5
-    prior[list(p2.strategies)[0]] = 2.0 / 3.0
-    prior[list(p2.strategies)[1]] = 1.0 / 3.0
+    prior[p1] = {s1[0]: 0.5, s1[1]: 0.5}
+    prior[p2] = {s2[0]: 2.0 / 3.0, s2[1]: 1.0 / 3.0}
 
     return prior
 
@@ -55,11 +54,10 @@ def create_hs_example_1() -> gbt.MixedStrategyProfileDouble:
     game = create_hs_base_game()
     prior = game.mixed_strategy_profile()
     p1, p2 = list(game.players)
+    s1, s2 = list(game.get_strategies(p1)), list(game.get_strategies(p2))
 
-    prior[list(p1.strategies)[0]] = 1.0 / 3.0
-    prior[list(p1.strategies)[1]] = 2.0 / 3.0
-    prior[list(p2.strategies)[0]] = 1.0 / 6.0
-    prior[list(p2.strategies)[1]] = 5.0 / 6.0
+    prior[p1] = {s1[0]: 1.0 / 3.0, s1[1]: 2.0 / 3.0}
+    prior[p2] = {s2[0]: 1.0 / 6.0, s2[1]: 5.0 / 6.0}
 
     return prior
 
@@ -69,11 +67,10 @@ def create_t0_degenerate_example() -> gbt.MixedStrategyProfileDouble:
     game = create_hs_base_game()
     prior = game.mixed_strategy_profile()
     p1, p2 = list(game.players)
+    s1, s2 = list(game.get_strategies(p1)), list(game.get_strategies(p2))
 
-    prior[list(p1.strategies)[0]] = 2.0 / 3.0
-    prior[list(p1.strategies)[1]] = 1.0 / 3.0
-    prior[list(p2.strategies)[0]] = 1.0 / 3.0
-    prior[list(p2.strategies)[1]] = 2.0 / 3.0
+    prior[p1] = {s1[0]: 2.0 / 3.0, s1[1]: 1.0 / 3.0}
+    prior[p2] = {s2[0]: 1.0 / 3.0, s2[1]: 2.0 / 3.0}
 
     return prior
 
@@ -119,8 +116,8 @@ def test_hp_strategy_solver(test_case: HPSolverTestCase, subtests) -> None:
 
     with subtests.test("strategy_profile matches expected"):
         for player in game.players:
-            for strategy in player.strategies:
-                assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+            for strategy in game.get_strategies(player):
+                assert abs(eq[player][strategy] - expected[player][strategy]) <= test_case.prob_tol
 
 
 @pytest.mark.nash

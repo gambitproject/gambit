@@ -23,7 +23,7 @@
 #include <iostream>
 #include <numeric>
 
-#include "gambit.h"
+#include "games.h"
 #include "gameexpl.h"
 
 namespace Gambit {
@@ -52,16 +52,6 @@ Rational GameExplicitRep::GetMaxPayoff() const
                          [this](const Rational &r, const GamePlayer &p) {
                            return std::max(r, GetPlayerMaxPayoff(p));
                          });
-}
-
-//------------------------------------------------------------------------
-//                      GameExplicitRep: Outcomes
-//------------------------------------------------------------------------
-
-GameOutcome GameExplicitRep::NewOutcome()
-{
-  m_outcomes.push_back(std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1));
-  return m_outcomes.back();
 }
 
 //------------------------------------------------------------------------

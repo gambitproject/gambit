@@ -31,80 +31,6 @@ def _test_valid_resolutions(collection: list, resolver: typing.Callable) -> None
         games.read_from_file("sample_extensive_game.efg"),
     ]
 )
-def test_resolve_player(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.players,
-                            lambda label, fn: game._resolve_player(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,player,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "random", KeyError),
-    ]
-)
-def test_resolve_player_invalid(game: gbt.Game, player: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_player(player, "test_resolve_player_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
-def test_resolve_outcome(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.outcomes,
-                            lambda label, fn: game._resolve_outcome(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,outcome,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "nosuchoutcome", KeyError),
-    ]
-)
-def test_resolve_outcome_invalid(game: gbt.Game, outcome: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_outcome(outcome, "test_resolve_outcome_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
-def test_resolve_strategy(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.strategies,
-                            lambda label, fn: game._resolve_strategy(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,strategy,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "doesntexist", KeyError),
-    ]
-)
-def test_resolve_strategy_invalid(
-        game: gbt.Game, strategy: str, exception: BaseException
-) -> None:
-    with pytest.raises(exception):
-        game._resolve_strategy(strategy, "test_resolve_strategy_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
 def test_resolve_node(game: gbt.Game) -> None:
     _test_valid_resolutions(game.nodes,
                             lambda label, fn: game._resolve_node(label, fn))
@@ -130,8 +56,16 @@ def test_resolve_node_invalid(game: gbt.Game, node: str, exception: BaseExceptio
     ]
 )
 def test_resolve_infoset(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.infosets,
-                            lambda label, fn: game._resolve_infoset(label, fn))
+    """`_resolve_infoset` resolves a Node to the Infoset it belongs to, or a node's
+    label to the same; any member node of an infoset resolves to an equal Infoset."""
+    for player in game.players:
+        for node in game.get_infosets(player):
+            resolved = game._resolve_infoset(node, "test")
+            assert resolved == node.infoset
+            if node.label:
+                assert game._resolve_infoset(node.label, "test") == node.infoset
+            for member in node.infoset.members:
+                assert game._resolve_infoset(member, "test") == node.infoset
 
 
 @pytest.mark.parametrize(
@@ -145,27 +79,3 @@ def test_resolve_infoset(game: gbt.Game) -> None:
 def test_resolve_infoset_invalid(game: gbt.Game, infoset: str, exception: BaseException) -> None:
     with pytest.raises(exception):
         game._resolve_infoset(infoset, "test_resolve_infoset_invalid")
-
-
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("sample_extensive_game.efg"),
-    ]
-)
-def test_resolve_action(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.actions,
-                            lambda label, fn: game._resolve_action(label, fn))
-
-
-@pytest.mark.parametrize(
-    "game,action,exception",
-    [
-        (games.read_from_file("sample_extensive_game.efg"), "", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), " ", ValueError),
-        (games.read_from_file("sample_extensive_game.efg"), "inaction", KeyError),
-    ]
-)
-def test_resolve_action_invalid(game: gbt.Game, action: str, exception: BaseException) -> None:
-    with pytest.raises(exception):
-        game._resolve_action(action, "test_resolve_action_invalid")

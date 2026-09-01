@@ -6,169 +6,263 @@ from . import games
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_set_action_label(label: str):
+def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.infoset.actions))
-    action.label = label
-    assert action.label == label
-
-
-def test_set_empty_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = ""
-
-
-def test_set_duplicate_action_futurewarning():
-    game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
-        next(iter(game.root.infoset.actions)).label = "Queen"
+    action = next(iter(game.root.actions))
+    game.relabel_actions(game.root, {action: label})
+    assert label in game.root.actions
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.infoset.actions))
+    action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        action.label = label
+        game.relabel_actions(game.root, {action: label})
 
 
-@pytest.mark.parametrize("label", games.NON_ASCII_LABELS)
-def test_action_label_non_ascii_rejected(label: str):
-    """ASCII-only for 16.7 (#944); Unicode deferred to #862 (17.0)."""
+def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.infoset.actions))
-    with pytest.raises(UnicodeEncodeError):
-        action.label = label
-
-
-@pytest.mark.parametrize(
-    "game,inprobs,outprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, 0.25], [0.75, 0.25]),
-        (
-            games.create_stripped_down_poker_efg(),
-            ["16/17", "1/17"],
-            [gbt.Rational("16/17"), gbt.Rational("1/17")],
-        ),
-    ],
-)
-def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
-    game.set_chance_probs(game.root.infoset, inprobs)
-    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
-        assert action.prob == prob
-
-
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.75, -0.10]),
-        (games.create_stripped_down_poker_efg(), [0.75, 0.40]),
-        (games.create_stripped_down_poker_efg(), ["foo", "bar"]),
-    ],
-)
-def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
+    action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        game.set_chance_probs(game.root.infoset, inprobs)
+        game.relabel_actions(game.root, {action: ""})
 
 
-@pytest.mark.parametrize(
-    "game,inprobs",
-    [
-        (games.create_stripped_down_poker_efg(), [0.25, 0.75, 0.25]),
-        (games.create_stripped_down_poker_efg(), [1.00]),
-    ],
-)
-def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
-    with pytest.raises(IndexError):
-        game.set_chance_probs(game.root.infoset, inprobs)
+def test_relabel_actions_duplicate_raises_valueerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root, {"King": "Queen"})
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_set_chance_personal(game: gbt.Game):
-    with pytest.raises(gbt.UndefinedOperationError):
-        personal_infoset = next(iter(game.players["Alice"].infosets))
-        game.set_chance_probs(personal_infoset, [0.75, 0.25])
+def test_relabel_actions_simultaneous_swap():
+    """Reassignment is simultaneous, so a swap is well-defined; applying the entries one
+    at a time would collide on the intermediate state.
+    """
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root, {"King": "Queen", "Queen": "King"})
+    assert list(game.root.event.actions) == ["Queen", "King"]
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_precedes(game: gbt.Game):
-    child = game.root.children["King"]
-    assert game.root.infoset.actions["King"].precedes(child)
-    assert not game.root.infoset.actions["Queen"].precedes(child)
+def test_relabel_actions_duplicate_targets_raises_valueerror():
+    """Both replacements are free of the actions left untouched but collide with each
+    other, so checking each against the untouched actions alone would let this through.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root, {"King": "Ace", "Queen": "Ace"})
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_precedes_nonnode(game: gbt.Game):
-    action = next(iter(game.root.infoset.actions))
+def test_relabel_actions_unknown_label_raises_keyerror():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(KeyError):
+        game.relabel_actions(game.root, {"Jack": "Ace"})
+
+
+def test_relabel_actions_unknown_label_not_strict_is_ignored():
+    game = games.create_stripped_down_poker_efg()
+    game.relabel_actions(game.root, {"Jack": "Ace", "King": "Ace"}, strict=False)
+    assert list(game.root.event.actions) == ["Ace", "Queen"]
+
+
+def test_relabel_actions_failure_leaves_game_unchanged():
+    """The whole mapping is validated before any label is written, so a mapping that
+    fails part way through leaves no partial reassignment behind.
+    """
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.relabel_actions(game.root, {"King": "Ace", "Queen": ""})
+    assert list(game.root.event.actions) == ["King", "Queen"]
+
+
+def test_relabel_actions_scope_is_the_information_set():
+    """Action labels are unique within an information set, not within a player: Alice's
+    two information sets both offer "Bet", and relabelling one leaves the other untouched
+    and free to take the same new label.
+    """
+    game = games.create_stripped_down_poker_efg()
+    king = games.find_infoset(game, "Alice", "Alice has King")
+    queen = games.find_infoset(game, "Alice", "Alice has Queen")
+    game.relabel_actions(next(iter(king.members)), {"Bet": "Raise"})
+    assert list(king.actions) == ["Raise", "Fold"]
+    assert list(queen.actions) == ["Bet", "Fold"]
+    game.relabel_actions(next(iter(queen.members)), {"Bet": "Raise"})
+    assert list(queen.actions) == ["Raise", "Fold"]
+
+
+def test_relabel_actions_not_a_mapping_raises_typeerror():
+    game = games.create_stripped_down_poker_efg()
     with pytest.raises(TypeError):
-        action.precedes(game)
+        game.relabel_actions(game.root, [("King", "Queen")])
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_personal(game: gbt.Game):
-    node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
-    action_count = len(node.infoset.actions)
-    game.delete_action(next(iter(node.infoset.actions)))
-    assert len(node.infoset.actions) == action_count - 1
+@pytest.mark.parametrize("labels", [{1: "Queen"}, {"King": 1}])
+def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(TypeError):
+        game.relabel_actions(game.root, labels)
+
+
+def test_set_move_actions_drop_shrinks_actions_and_children():
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    node = next(iter(infoset.members))
+    action_count = len(infoset.actions)
+    remaining = list(infoset.actions)[1:]
+    game.set_move_actions(node, remaining, drop=True)
+    assert len(infoset.actions) == action_count - 1
     assert len(node.children) == action_count - 1
 
 
-@pytest.mark.parametrize("game", [games.create_stripped_down_poker_efg()])
-def test_action_delete_last(game: gbt.Game):
-    infoset = game.players["Alice"].infosets["Alice has King"]
-    while len(infoset.actions) > 1:
-        game.delete_action(next(iter(infoset.actions)))
+def test_set_move_actions_cannot_remove_the_only_action():
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    node = next(iter(infoset.members))
+    last = next(iter(infoset.actions))
+    game.set_move_actions(node, [last], drop=True)
+    assert list(infoset.actions) == [last]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(infoset.actions)))
+        game.set_move_actions(node, [], drop=True)
 
 
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
-        games.create_stripped_down_poker_efg(),
-        games.read_from_file("chance_root_5_moves_no_nonterm_player_nodes.efg"),
-    ],
-)
-def test_action_delete_chance(game: gbt.Game):
-    """Test the renormalization of action probabilities when an action is deleted at a chance
-    node
-    """
-    chance_infoset = next(iter(game.players.chance.infosets))
-    while len(chance_infoset.actions) > 1:
-        old_probs = [a.prob for a in chance_infoset.actions]
-        game.delete_action(next(iter(chance_infoset.actions)))
-        new_probs = [a.prob for a in chance_infoset.actions]
-        assert sum(new_probs) == 1
-        if sum(old_probs[1:]) == 0:
-            for p in new_probs:
-                assert p == 1 / len(new_probs)
-        else:
-            for p1, p2 in zip(old_probs[1:], new_probs, strict=True):
-                if p1 == 0:
-                    assert p2 == 0
-                else:
-                    assert p2 == p1 / (1 - old_probs[0])
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.delete_action(next(iter(chance_infoset.actions)))
+def test_set_move_actions_reorder_carries_subtrees():
+    """Reordering three actions as a cycle moves every action to a new position.
+    Each action carries its whole subtree with it, at every member of the information set."""
+    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    game.append_move(game.root, "Bob", ["x", "y"])
+    game.append_move(list(game.root.children), "Alice", ["a", "b", "c"])
+    game.append_move([game.root.children["x"].children["a"],
+                      game.root.children["y"].children["b"]], "Bob", ["l", "r"])
+    infoset = game.root.children["x"].infoset
+    members = list(infoset.members)
+    children_before = [{label: member.children[label] for label in ("a", "b", "c")}
+                       for member in members]
+    game.set_move_actions(game.root.children["x"], ["c", "a", "b"])
+    assert list(infoset.actions) == ["c", "a", "b"]
+    for member, children in zip(members, children_before, strict=True):
+        assert list(member.children) == [children["c"], children["a"], children["b"]]
 
 
-def test_action_plays():
-    """Verify `action.plays` returns plays reachable from a given action."""
-    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
+def test_set_move_actions_add_drop_and_reorder_together():
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    node = next(iter(infoset.members))
+    nodes_before = len(game.nodes)
+    game.set_move_actions(node, ["Raise", "Fold"], drop=True)
+    assert list(infoset.actions) == ["Raise", "Fold"]
+    # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
+    assert len(game.nodes) == nodes_before - 3 + 1
+    assert len(games.find_infoset(game, "Bob", "Bob's response").members) == 1
 
-    def node_at(path: list[str]) -> gbt.Node:
-        node = game.root
-        for action_label in path:
-            node = node.children[action_label]
-        return node
 
-    test_action = node_at(["L"]).infoset.actions["R"]
+def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    node = next(iter(infoset.members))
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_move_actions(node, ["Bet"])
+    with pytest.raises(ValueError):
+        game.set_move_actions(node, ["Bet", "Fold", "Raise"], add=False)
+    assert game.to_efg() == before
 
-    expected_set_of_plays = {node_at(["R", "L", "R"]), node_at(["L", "R"])}
 
-    assert set(test_action.plays) == expected_set_of_plays
+def test_set_move_actions_raises_at_an_event():
+    """`set_move_actions` is only for a personal player's move; `set_event_actions` is the
+    corresponding operation for an event."""
+    game = games.create_stripped_down_poker_efg()
+    with pytest.raises(ValueError):
+        game.set_move_actions(game.root, ["King", "Queen"])
+
+
+@pytest.mark.parametrize("bad_labels", [["Bet", "Bet"], ["Bet", ""], ["Bet", " x"]])
+def test_set_move_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
+    """Duplicate, empty, and invalid labels in `actions` are rejected in C++,
+    after the Python guards pass; the game must be unmodified by the failure."""
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    node = next(iter(infoset.members))
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_move_actions(node, bad_labels, drop=True)
+    assert game.to_efg() == before
+
+
+def test_set_move_actions_absent_minded_drop_and_add():
+    """Dropping an action whose subtree contains another member of the same information
+    set deletes that member with the subtree."""
+    game = gbt.Game.new_tree(players=["Alice"])
+    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_infoset(game.root.children["a"], game.root)
+    game.set_move_actions(game.root, ["b", "c"], drop=True)
+    assert list(game.root.infoset.actions) == ["b", "c"]
+    assert len(game.root.infoset.members) == 1
+    assert len(game.nodes) == 3
+
+
+def test_set_event_actions_reorder_carries_probabilities():
+    game = games.create_stripped_down_poker_efg()
+    game.set_event_actions(game.root, {"King": "3/4", "Queen": "1/4"})
+    game.set_event_actions(game.root, {"Queen": "1/4", "King": "3/4"})
+    assert list(game.root.actions) == ["Queen", "King"]
+    assert game.root.action_probs == {"Queen": gbt.Rational(1, 4), "King": gbt.Rational(3, 4)}
+
+
+def test_set_event_actions_add_with_probs_mapping():
+    game = games.create_stripped_down_poker_efg()
+    nodes_before = len(game.nodes)
+    game.set_event_actions(game.root, {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
+    assert list(game.root.actions) == ["Jack", "King", "Queen"]
+    assert game.root.action_probs == {
+        "Jack": gbt.Rational(1, 2), "King": gbt.Rational(1, 4), "Queen": gbt.Rational(1, 4)
+    }
+    assert len(game.nodes) == nodes_before + 1
+
+
+def test_set_event_actions_drop_with_probs_mapping():
+    game = games.create_stripped_down_poker_efg()
+    game.set_event_actions(game.root, {"King": 1}, drop=True)
+    assert list(game.root.actions) == ["King"]
+    assert game.root.action_probs == {"King": 1}
+
+
+def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
+    game = games.create_stripped_down_poker_efg()
+    _ = game.root.event
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_event_actions(game.root, {"King": 1})
+    with pytest.raises(ValueError):
+        game.set_event_actions(
+            game.root, {"King": "1/2", "Queen": "1/4", "Jack": "1/4"}, add=False
+        )
+    assert game.to_efg() == before
+
+
+def test_set_event_actions_raises_at_a_move():
+    """`set_event_actions` is only for an event; `set_move_actions` is the corresponding
+    operation for a personal player's move."""
+    game = games.create_stripped_down_poker_efg()
+    infoset = games.find_infoset(game, "Alice", "Alice has King")
+    with pytest.raises(ValueError):
+        game.set_event_actions(next(iter(infoset.members)), {"Bet": 1})
+
+
+def test_set_event_actions_rejects_non_mapping_probs():
+    """`probs` must be a mapping: with no separate list of actions, there's nothing for a
+    plain sequence of probabilities to be paired with positionally."""
+    game = games.create_stripped_down_poker_efg()
+    before = game.to_efg()
+    with pytest.raises(TypeError):
+        game.set_event_actions(game.root, ["3/4", "1/4"])
+    assert game.to_efg() == before
+
+
+def test_set_event_actions_bad_distribution_raises_valueerror():
+    game = games.create_stripped_down_poker_efg()
+    before = game.to_efg()
+    with pytest.raises(ValueError):
+        game.set_event_actions(game.root, {"King": "3/4", "Queen": "3/4"})
+    assert game.to_efg() == before
 
 
 @pytest.mark.parametrize(
@@ -180,8 +274,8 @@ def test_action_plays():
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 2", "2", ["R"], "L"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "1", ["R", "L"], "R"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "2", ["R", "L"], "L"),
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1*", [], "R"),
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "21", [], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", [], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "2", [], "L"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "1", ["L"], "R"),
         (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "2", ["L"], "L"),
         (games.read_from_file("basic_extensive_game.efg"), "Player 1", "1", [], "U1"),
@@ -192,50 +286,45 @@ def test_action_plays():
         (games.read_from_file("basic_extensive_game.efg"), "Player 3", "2", ["U1", "U2"], "D3"),
     ],
 )
-def test_strategy_action_defined(
+def test_get_behavior_prescribed_action_defined(
     game, player_label, strategy_label, infoset_path, expected_action_label
 ):
-    """Verify `Strategy.action` retrieves the correct action for defined actions."""
-    player = game.players[player_label]
-    strategy = player.strategies[strategy_label]
+    """Verify `Game.get_behavior` retrieves the correct action for defined actions."""
     node = game.root
     for action_label in infoset_path:
         node = node.children[action_label]
     infoset = node.infoset
-    expected_action = infoset.actions[expected_action_label]
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
 
-    assert prescribed_action == expected_action
+    assert prescribed_action == expected_action_label
 
 
 @pytest.mark.parametrize(
     "game, player_label, strategy_label, infoset_label, infoset_path",
     [
-        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1*", None, ["L", "L"]),
-        (games.read_from_file("cent3.efg"), "Player 1", "1**111", "(1,3)", None),
-        (games.read_from_file("cent3.efg"), "Player 1", "1**111", "(1,5)", None),
-        (games.read_from_file("cent3.efg"), "Player 1", "21*111", "(1,5)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "1**111", "(2,4)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "1**111", "(2,4)", None),
-        (games.read_from_file("cent3.efg"), "Player 2", "21*111", "(2,5)", None),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", None, ["L", "L"]),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,3)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "2", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "2", "(2,5)", None),
     ],
 )
-def test_strategy_action_undefined_returns_none(
+def test_get_behavior_prescribed_action_undefined_returns_none(
     game, player_label, strategy_label, infoset_label, infoset_path
 ):
-    """Verify `Strategy.action` returns None when called on an unreached player's infoset"""
-    player = game.players[player_label]
-    strategy = player.strategies[strategy_label]
+    """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
     if infoset_label is not None:
-        infoset = game.infosets[infoset_label]
+        infoset = games.find_infoset_in_game(game, infoset_label)
     else:
         node = game.root
         for action_label in infoset_path:
             node = node.children[action_label]
         infoset = node.infoset
 
-    prescribed_action = strategy.action(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
 
     assert prescribed_action is None
 
@@ -252,37 +341,18 @@ def test_strategy_action_undefined_returns_none(
         (games.read_from_file("basic_extensive_game.efg"), "Player 3", []),
     ],
 )
-def test_strategy_action_raises_value_error_for_wrong_player(
+def test_get_behavior_raises_value_error_for_wrong_player(
     game, player_label, other_infoset_path
 ):
     """
-    Verify `Strategy.action` raises ValueError when the infoset belongs
+    Verify `Game.get_behavior`'s result raises ValueError when the infoset belongs
     to a different player than the strategy.
     """
-    player = game.players[player_label]
-    strategy = next(iter(player.strategies))
+    behavior = game.get_behavior(player_label, next(iter(game.get_strategies(player_label))))
     node = game.root
     for action_label in other_infoset_path:
         node = node.children[action_label]
     other_players_infoset = node.infoset
 
     with pytest.raises(ValueError):
-        strategy.action(other_players_infoset)
-
-
-def test_strategy_action_raises_error_for_strategic_game():
-    """Verify `Strategy.action` retrieves the action prescribed by the strategy"""
-    game_efg = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-    game_nfg = game_efg.from_arrays(game_efg.to_arrays()[0], game_efg.to_arrays()[1])
-    alice = next(iter(game_nfg.players))
-    strategy = next(iter(alice.strategies))
-    test_infoset = next(iter(game_efg.infosets))
-
-    with pytest.raises(gbt.UndefinedOperationError):
-        strategy.action(test_infoset)
-
-
-def test_player_actions_len():
-    game = games.create_stripped_down_poker_efg()
-    for player in game.players:
-        assert len(player.actions) == len(list(player.actions))
+        behavior.get(other_players_infoset)

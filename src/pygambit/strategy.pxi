@@ -21,116 +21,133 @@
 #
 
 @cython.cclass
-class Strategy:
-    """A plan of action for a ``Player`` in a ``Game``."""
-    strategy = cython.declare(c_GameStrategy)
+class StrategyBehavior:
+    """A read-only, map-like view of the actions prescribed by a reduced strategy.
+
+    The keys of the mapping are the information sets of the strategy's player at
+    which the strategy prescribes an action; an unreachable information set is not a key.
+    The corresponding values are the labels of the prescribed actions.
+    Iteration yields the keys in the player's information set order.
+
+    .. versionadded:: 17.0.0
+    """
+    _game = cython.declare(Game)
+    _player_label = cython.declare(str)
+    _strategy_label = cython.declare(str)
 
     def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a Strategy outside a Game.")
+        raise ValueError("Cannot create a StrategyBehavior outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(strategy: c_GameStrategy) -> Strategy:
-        obj: Strategy = Strategy.__new__(Strategy)
-        obj.strategy = strategy
+    def wrap(game: Game, player_label: str, strategy_label: str) -> StrategyBehavior:
+        obj: StrategyBehavior = StrategyBehavior.__new__(StrategyBehavior)
+        obj._game = game
+        obj._player_label = player_label
+        obj._strategy_label = strategy_label
         return obj
 
     def __repr__(self) -> str:
-        if self.label:
-            return f"Strategy(player={self.player}, label='{self.label}')"
-        else:
-            return f"Strategy(player={self.player}, number={self.number})"
-
-    def __eq__(self, other: typing.Any) -> bool:
         return (
-            isinstance(other, Strategy) and
-            self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
+            f"StrategyBehavior(player='{self._player_label}', "
+            f"strategy='{self._strategy_label}')"
         )
 
-    def __hash__(self) -> int:
-        return cython.cast(cython.long, self.strategy.deref())
+    @property
+    def player(self) -> str:
+        """The label of the player to which the strategy belongs."""
+        return self._player_label
 
     @property
-    def label(self) -> str:
-        """Get or set the text label associated with the strategy.
+    def strategy(self) -> str:
+        """The label of the strategy of which this is the behavior."""
+        return self._strategy_label
 
-        .. versionchanged:: 16.7.0
-            An invalid label now raises ``ValueError``: a label may contain only printable ASCII
-            characters and spaces, not begin/end with a space, nor have two consecutive spaces.
-        """
-        return self.strategy.deref().GetLabel().decode("ascii")
+    def _action_at(self, infoset: Infoset) -> str | None:
+        """The label of the action prescribed by the strategy at `infoset`, or None
+        if unreachable."""
+        handle = self._game._resolve_strategy(
+            self._player_label, self._strategy_label, "StrategyBehavior"
+        )
+        action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset)._resolve())
+        if not action:
+            return None
+        return action.deref().GetLabel().decode("utf-8")
 
-    @label.setter
-    def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (strategy.label for strategy in self.player.strategies):
-            warnings.warn("In a future version, strategies for a player must have unique labels",
-                          FutureWarning)
-        self.strategy.deref().SetLabel(value.encode("ascii"))
+    def _resolve_key(self, key: Infoset | str) -> Infoset:
+        """Resolve `key` to an information set at which the player has the move."""
+        infoset: Infoset
+        if isinstance(key, Infoset):
+            infoset = key
+            if infoset.game != self._game:
+                raise MismatchError("StrategyBehavior: key must be part of the same game")
+        else:
+            infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
+        if infoset.player != self._player_label:
+            raise ValueError(
+                f"Player '{self._player_label}' does not have the move at {infoset}."
+            )
+        return infoset
 
-    @property
-    def game(self) -> Game:
-        """The game to which the strategy belongs."""
-        return Game.wrap(self.strategy.deref().GetPlayer().deref().GetGame())
-
-    @property
-    def player(self) -> Player:
-        """The player to which the strategy belongs."""
-        return Player.wrap(self.strategy.deref().GetPlayer())
-
-    @property
-    def number(self) -> int:
-        """The number of the strategy."""
-        return self.strategy.deref().GetNumber() - 1
-
-    def action(self, infoset: Infoset | str) -> Action | None:
-        """Get the action prescribed by a strategy for a given information set.
-
-        .. versionadded:: 16.4.0
-
-        Parameters
-        ----------
-        infoset
-            The information set for which to find the prescribed action.
-            Can be an Infoset object or its string label.
-
-        Returns
-        -------
-        Action or None
-            The prescribed action or None if the strategy is not defined for this
-            information set, that is, the information set is unreachable under this strategy.
+    def __getitem__(self, key: Infoset | str) -> str:
+        """Return the label of the action prescribed at the information set
+        referenced by `key`.
 
         Raises
         ------
-        UndefinedOperationError
-            If the game is not an extensive-form (tree) game.
+        KeyError
+            If the strategy prescribes no action at the information set,
+            or if `key` is a string and no information set has that label.
         ValueError
-            If the information set belongs to a different player than the strategy.
+            If the information set belongs to a different player.
         """
-        if not self.game.is_tree:
-            raise UndefinedOperationError(
-                "Strategy.action is only defined for strategies in extensive-form games."
+        infoset = self._resolve_key(key)
+        action = self._action_at(infoset)
+        if action is None:
+            raise KeyError(
+                f"Strategy '{self._strategy_label}' prescribes no action at {infoset}."
             )
+        return action
 
-        resolved_infoset: Infoset = self.game._resolve_infoset(infoset, "Strategy.action")
+    def get(self, key: Infoset | str, default: typing.Any = None) -> str | None:
+        """Return the label of the action prescribed at `key`, or `default` if none
+        is prescribed."""
+        infoset = self._resolve_key(key)
+        action = self._action_at(infoset)
+        return default if action is None else action
 
-        if resolved_infoset.player != self.player:
-            raise ValueError(
-                f"Information set {resolved_infoset} belongs to player "
-                f"'{resolved_infoset.player.label}', but this strategy "
-                f"belongs to player '{self.player.label}'."
-            )
+    def __contains__(self, key: typing.Any) -> bool:
+        try:
+            infoset = self._resolve_key(key)
+        except (KeyError, ValueError, TypeError):
+            return False
+        return self._action_at(infoset) is not None
 
-        action: c_GameAction = self.strategy.deref().GetAction(resolved_infoset.infoset)
-        if not action:
-            return None
-        return Action.wrap(action)
+    def __iter__(self) -> typing.Iterator[Infoset]:
+        for node in self._game.get_infosets(self._player_label):
+            infoset = node.infoset
+            if self._action_at(infoset) is not None:
+                yield infoset
+
+    def __len__(self) -> int:
+        return sum(1 for _ in self)
+
+    def keys(self) -> list[Infoset]:
+        """The information sets at which the strategy prescribes an action."""
+        return list(self)
+
+    def values(self) -> list[str]:
+        """The labels of the prescribed actions, in the order of `keys`."""
+        return [self._action_at(infoset) for infoset in self]
+
+    def items(self) -> list[tuple[Infoset, str]]:
+        """(information set, action label) pairs, in the order of `keys`."""
+        return [(infoset, self._action_at(infoset)) for infoset in self]
 
 
 @cython.cclass
 class Sequence:
-    """A sequence ``Player`` in a ``Game``.
+    """A sequence for a player in a ``Game``.
 
     .. versionadded:: 16.7.0
     """
@@ -147,14 +164,9 @@ class Sequence:
         return obj
 
     def __repr__(self) -> str:
-        return f"Sequence(player={self.player}, actions={self.actions})"
+        return f"Sequence(player='{self.player}', actions={self.actions})"
 
     def __eq__(self, other: typing.Any) -> bool:
-        print("__eq__")
-        print(isinstance(other, Sequence))
-        print(type(other))
-        if isinstance(other, Sequence):
-            print(self.sequence.deref() == cython.cast(Sequence, other).sequence.deref())
         return (
             isinstance(other, Sequence) and
             self.sequence.deref() == cython.cast(Sequence, other).sequence.deref()
@@ -169,14 +181,13 @@ class Sequence:
         return Game.wrap(self.sequence.deref().GetPlayer().deref().GetGame())
 
     @property
-    def player(self) -> Player:
-        """The player to which the sequence belongs."""
-        return Player.wrap(self.sequence.deref().GetPlayer())
+    def player(self) -> str:
+        """The label of the player to which the sequence belongs."""
+        return self.sequence.deref().GetPlayer().deref().GetLabel().decode("utf-8")
 
     @property
     def parent(self) -> Sequence | None:
         """The parent (predecessor) of the sequence."""
-        print(self)
         if self.sequence.deref().GetParent() == cython.cast(c_GameSequence, NULL):
             return None
         return Sequence.wrap(self.sequence.deref().GetParent())
@@ -185,23 +196,23 @@ class Sequence:
     def children(self) -> list[Sequence]:
         """The immediate children (successors) of the sequence."""
         ret: list[Sequence] = []
-        print("Looking for children of", self)
-        for seq in self.player.sequences:
-            print("Sequence", seq)
-            print("Parent", seq.parent)
+        for seq in self.game.get_sequences(self.player):
             if seq.parent == self:
                 ret.append(seq)
         return ret
 
     @property
-    def actions(self) -> list[Action]:
-        """Get the collection of actions defining this sequence.
+    def actions(self) -> tuple[str, ...]:
+        """The labels of the actions defining this sequence, in order.
 
-        Returns the empty list for the root sequence of the player.
+        Returns the empty tuple for the root sequence of the player.
+
+        .. versionchanged:: 17.0.0
+            Returns bare labels rather than ``Action`` objects.
         """
-        actions: list[Action] = []
+        labels: list[str] = []
         seq = self.sequence
         while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
-            actions.insert(0, Action.wrap(seq.deref().GetAction()))
+            labels.insert(0, seq.deref().GetAction().deref().GetLabel().decode("utf-8"))
             seq = seq.deref().GetParent()
-        return actions
+        return tuple(labels)

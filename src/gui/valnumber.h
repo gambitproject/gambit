@@ -24,7 +24,7 @@
 #define GAMBIT_GUI_VALNUMBER_H
 
 #include <wx/validate.h>
-#include "gambit.h"
+#include "core/rational.h"
 
 namespace Gambit::GUI {
 class NumberValidator final : public wxValidator {
