@@ -259,6 +259,7 @@ void OutcomeEditorPopup::BuildControls()
   wxFont hintFont = hintText->GetFont();
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
   hintText->SetFont(hintFont);
+  hintText->Wrap(FromDIP(260));
   outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
 
   m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
