@@ -64,6 +64,13 @@ class GNMTerminationEvent:
 
 
 @dataclasses.dataclass(frozen=True)
+class HPStepEvent:
+    """Reports one point traced along the HP homotopy path."""
+    profile: MixedStrategyProfileDouble
+    t: float
+
+
+@dataclasses.dataclass(frozen=True)
 class LiapStartEvent:
     """Reports the starting point of a :ref:`Lyapunov function minimization <liap>` run."""
     profile: MixedStrategyProfileDouble | MixedBehaviorProfileDouble
@@ -202,6 +209,16 @@ cdef public string InvokeLogitBehaviorEventCallback(
 ):
     try:
         callback(LogitQREMixedBehaviorProfile.wrap(qre))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeHPStrategyEventCallback(
+        callback, profile: shared_ptr[c_MixedStrategyProfile[float]], t: float
+):
+    try:
+        callback(HPStepEvent(profile=MixedStrategyProfileDouble.wrap(profile), t=t))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -896,5 +913,9 @@ def _logit_behavior_branch(game: Game,
 
 
 def _hp_strategy_solve(
-                       prior: MixedStrategyProfileDouble) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(HPStrategySolve(deref(prior.profile)))
+        prior: MixedStrategyProfileDouble,
+        event_callback: object = None,
+) -> list[MixedStrategyProfileDouble]:
+    return _convert_mspd(HPStrategySolveWrapper(
+        deref(prior.profile), MakeHPEventCallback(event_callback)
+    ))

@@ -21,6 +21,7 @@
 //
 
 #include "solvers/enummixed/enummixed.h"
+#include "solvers/hp/hp.h"
 #include "solvers/logit/logit.h"
 #include "solvers/logit/path.h"
 
@@ -139,4 +140,11 @@ LogitStrategyEstimateWrapper(std::shared_ptr<MixedStrategyProfile<double>> p_fre
   return make_shared<LogitQREMixedStrategyProfile>(
       LogitStrategyEstimate(*p_frequencies, 1000000.0, PathTracer::TraceDirection::Positive,
                             p_stopAtLocal, p_firstStep, p_maxAccel, p_onEvent));
+}
+
+std::list<MixedStrategyProfile<double>>
+HPStrategySolveWrapper(const MixedStrategyProfile<double> &p_prior,
+                       Nash::HPEventCallbackType p_onEvent = Nash::NullHPEventCallback)
+{
+  return Nash::HPStrategySolve(p_prior, Nash::NullStrategyCallback<double>, p_onEvent);
 }

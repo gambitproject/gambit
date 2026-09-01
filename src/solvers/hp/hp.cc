@@ -20,17 +20,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hp.h"
 #include "solvers/hp/hpsystem.h"
 #include "solvers/logit/path.h"
 
-namespace Gambit {
+namespace Gambit::Nash {
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
+                StrategyCallbackType<double> p_onEquilibrium, HPEventCallbackType p_onEvent,
+                const CancelToken &p_cancel)
 {
-
   std::list<MixedStrategyProfile<double>> equilibria;
 
   HPEquationSystem system(p_prior);
@@ -43,30 +43,21 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior)
   auto criterion_function = [](const Vector<double> &point,
                                const Vector<double> &tangent) -> double { return point[1] - 1.0; };
 
-  const TracePathResult result = tracer.TracePath(
+  tracer.TracePath(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
       x, direction, tracking_index, termination_condition,
-      [&system](const Vector<double> &point) {
-        std::cout << "[Path Tracer Step] t = " << point[1];
-        std::cout << " | Alfas: ";
-        for (size_t i = 2; i <= 5; ++i) {
-          std::cout << point[i] << " ";
-        }
-        std::cout << "| Mu: " << point[6] << " " << point[7] << std::endl;
-
-        std::cout << "Full point vector in probabilities: ";
-        Vector<double> prob_vector = system.ExtractEquilibrium(point).GetProbVector();
-        for (size_t i = 1; i <= prob_vector.size(); ++i) {
-          std::cout << prob_vector[i] << " ";
-        }
-        std::cout << std::endl;
+      [&system, &p_onEvent](const Vector<double> &point) {
+        const MixedStrategyProfile<double> profile = system.ExtractEquilibrium(point);
+        p_onEvent(HPStepEvent{.profile = profile, .t = point[1]});
       },
-      criterion_function);
+      criterion_function, NullCriterionBracketFunction, p_cancel);
 
-  equilibria.push_back(system.ExtractEquilibrium(x));
+  const MixedStrategyProfile<double> equilibrium = system.ExtractEquilibrium(x);
+  p_onEquilibrium(equilibrium);
+  equilibria.push_back(equilibrium);
   return equilibria;
 }
-} // namespace Gambit
+} // namespace Gambit::Nash

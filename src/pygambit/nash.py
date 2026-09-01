@@ -1113,6 +1113,7 @@ None], optional
 
 def hp_solve(
         prior: libgbt.MixedStrategyProfileDouble,
+        event_callback: Callable[[libgbt.HPStepEvent], None] | None = None,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :cite:p:`HerPee01`
 
@@ -1124,12 +1125,19 @@ def hp_solve(
     prior : MixedStrategyProfileDouble
         The prior distribution over strategies.
 
+    event_callback : Callable[[HPStepEvent], None], optional
+        If specified, called with each point traced along the homotopy path,
+        and the homotopy parameter ``t`` at which it was reached, on the way
+        to the returned equilibrium.
+
+        .. versionadded:: 17.0.0
+
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    equilibria = libgbt._hp_strategy_solve(prior)
+    equilibria = libgbt._hp_strategy_solve(prior, event_callback)
     return NashComputationResult(
         game=prior.game,
         method="hp",

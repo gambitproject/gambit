@@ -20,14 +20,36 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef HP_H
-#define HP_H
+#ifndef GAMBIT_SOLVERS_HP_HP_H
+#define GAMBIT_SOLVERS_HP_HP_H
 
+#include <functional>
 #include <list>
+#include <variant>
 
-namespace Gambit {
+#include "solvers/nash.h"
+
+namespace Gambit::Nash {
+
+/// @brief Reports a point traced along the HP homotopy path, at homotopy parameter \p t
+struct HPStepEvent {
+  const MixedStrategyProfile<double> &profile;
+  double t;
+};
+
+using HPEvent = std::variant<HPStepEvent>;
+using HPEventCallbackType = std::function<void(const HPEvent &)>;
+
+inline void NullHPEventCallback(const HPEvent &) {}
+
+/// @brief Compute a Nash equilibrium of a game using the homotopy method of
+/// Herings and Peeters (2001)
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const MixedStrategyProfile<double> &p_prior);
-} // namespace Gambit
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
+                StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                HPEventCallbackType p_onEvent = NullHPEventCallback,
+                const CancelToken &p_cancel = CancelToken());
 
-#endif // HP_H
+} // namespace Gambit::Nash
+
+#endif // GAMBIT_SOLVERS_HP_HP_H
