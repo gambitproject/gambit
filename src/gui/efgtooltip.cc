@@ -253,8 +253,8 @@ void OutcomeEditorPopup::BuildControls()
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
-  auto *hintText = new wxStaticText(
-      m_contentPanel, wxID_STATIC, _("Escape cancels and closes this window. Enter accepts."));
+  auto *hintText = new wxStaticText(m_contentPanel, wxID_STATIC,
+                                    _("Escape cancels and closes this window. Enter accepts."));
   hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   wxFont hintFont = hintText->GetFont();
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
