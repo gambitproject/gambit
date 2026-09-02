@@ -595,6 +595,18 @@ class Game:
         """
         return [_history_of(node) for node in self.get_nodes(selector)]
 
+    def _group_nodes(self, grouped: GroupedSelector) -> dict:
+        """Internal: like `get_groups`, but keeps `Node` objects rather than
+        materializing each into a `History` -- used by mutation methods that
+        need to resolve straight back to concrete nodes, avoiding a
+        Node -> History -> Node round trip."""
+        result: dict = {}
+        for node in self.get_nodes(grouped.base):
+            view: HistoryView = HistoryView._wrap(node, _history_of(node))
+            key = grouped.key(view)
+            result.setdefault(key, []).append(node)
+        return result
+
     def get_groups(self, grouped: GroupedSelector) -> dict:
         """Evaluate a `.by(callable)`-built `GroupedSelector` against this
         game, returning a dict from each distinct key to the list of
@@ -602,13 +614,10 @@ class Game:
 
         .. versionadded:: 17.0.0
         """
-        result: dict = {}
-        for node in self.get_nodes(grouped.base):
-            history: tuple = _history_of(node)
-            view: HistoryView = HistoryView._wrap(node, history)
-            key = grouped.key(view)
-            result.setdefault(key, []).append(history)
-        return result
+        return {
+            key: [_history_of(node) for node in nodes]
+            for key, nodes in self._group_nodes(grouped).items()
+        }
 
     @property
     def is_const_sum(self) -> bool:
@@ -1369,7 +1378,12 @@ class Game:
         """Resolve an attempt to reference a subset of the nodes of the game of the game.
 
         See `_resolve_node` for details on functionality.
+
+        `nodes` may also be a `Selector` (an `H`-built expression), evaluated
+        against this game via `get_nodes` before the usual resolution.
         """
+        if isinstance(nodes, Selector):
+            nodes = self.get_nodes(nodes)
         resolved_nodes = [
             self._resolve_node(n, funcname, argname)
             for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, str)
@@ -1512,13 +1526,21 @@ class Game:
             raise IndexError(f"{funcname}(): must specify exactly one probability per action")
         return probs
 
-    def append_move(self, nodes: Node | NodeReferenceSet,
+    def append_move(self, nodes: Node | NodeReferenceSet | Selector | GroupedSelector,
                     player: str,
                     actions: list[str]) -> None:
         """Add a move for `player` at terminal `nodes`.  All elements of `nodes` become part of
         a new information set, with actions labeled according to `actions`.
 
         `player` must be a personal player; use `append_event` to add a chance move.
+
+        `nodes` may be a `Selector` (an `H`-built expression, evaluated against this
+        game and treated as a flat `NodeReferenceSet`) or a `GroupedSelector` (an
+        `H`-built `.by(...)` expression) -- in the latter case, one new information
+        set is created per distinct group, rather than one spanning every match.
+
+        .. versionchanged:: 17.0.0
+            `nodes` may now be a `Selector` or `GroupedSelector`.
 
         Raises
         ------
@@ -1532,6 +1554,10 @@ class Game:
             If `nodes` has duplicated elements, or is empty; or if `actions` contains
             an empty or a duplicated label.
         """
+        if isinstance(nodes, GroupedSelector):
+            for group in self._group_nodes(nodes).values():
+                self.append_move(group, player, actions)
+            return
         resolved_player = self._resolve_player(player, "append_move")
         if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
