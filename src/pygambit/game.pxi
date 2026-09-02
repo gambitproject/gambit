@@ -1358,6 +1358,17 @@ class Game:
             if node.game != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
+        elif isinstance(node, Selector):
+            resolved = self.get_nodes(node)
+            if len(resolved) != 1:
+                raise ValueError(
+                    f"{funcname}(): {argname} selector must resolve to exactly one "
+                    f"node, resolved to {len(resolved)}"
+                )
+            return resolved[0]
+        elif isinstance(node, tuple):
+            # A History -- the manual fallback: root-anchored, every step exact.
+            return self._resolve_node(Selector().path(*node), funcname, argname)
         elif isinstance(node, str):
             if not node.strip():
                 raise ValueError(
@@ -1386,7 +1397,7 @@ class Game:
             nodes = self.get_nodes(nodes)
         resolved_nodes = [
             self._resolve_node(n, funcname, argname)
-            for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, str)
+            for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, (str, tuple))
                       else [nodes])
         ]
         if not resolved_nodes:
