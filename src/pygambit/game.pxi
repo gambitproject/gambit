@@ -542,6 +542,55 @@ class Game:
             )
         return Node.wrap(self.game.deref().GetRoot())
 
+    def get_nodes(self, selector: Selector) -> list[Node]:
+        """Evaluate `selector` (an `H`-built expression) against this game.
+
+        First sketch of the `H` selector algebra's evaluator: interprets the
+        selector's ops in order, starting from the root, reusing `Node`'s
+        existing navigation (`.children`, `.plays`) rather than walking the
+        C++ tree directly. Returns raw `Node` objects for now -- a real
+        public version would wrap each result in a `.game`-free facade
+        instead, not yet built.
+
+        .. versionadded:: 17.0.0
+        """
+        current: list = [self.root]
+        for op in selector._ops:
+            if isinstance(op, _PathStep):
+                for step in op.steps:
+                    current = (
+                        [child for node in current for child in node.children]
+                        if step is Ellipsis
+                        else [node.children[step] for node in current]
+                    )
+            elif isinstance(op, _PlaysStep):
+                current = [play for node in current for play in node.plays]
+            else:
+                raise TypeError(f"get_nodes(): unknown selector op {op!r}")
+        return current
+
+    def get_histories(self, selector: Selector) -> list[tuple]:
+        """Evaluate `selector` (an `H`-built expression) against this game,
+        materializing each result as a `History` -- a plain tuple of action
+        labels from the root, carrying no reference to this game.
+
+        This is the public-facing counterpart to `get_nodes`: `get_nodes`
+        exists only as an internal sketch and is never meant to hand a `Node`
+        to calling code.
+
+        .. versionadded:: 17.0.0
+        """
+        result: list = []
+        for node in self.get_nodes(selector):
+            labels: list = []
+            current: Node = node
+            while current.parent is not None:
+                labels.append(current.prior_action.label)
+                current = current.parent
+            labels.reverse()
+            result.append(tuple(labels))
+        return result
+
     @property
     def is_const_sum(self) -> bool:
         """Whether the game is constant sum."""
