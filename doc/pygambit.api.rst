@@ -403,6 +403,7 @@ Computation of Nash equilibria
    simpdiv_solve
    ipa_solve
    gnm_solve
+   hp_solve
 
 
 Computation of quantal response equilibria
