@@ -104,6 +104,81 @@ class Selector:
         labels are exactly `labels`, whatever came before them."""
         return self._extend(_AfterStep(labels))
 
+    def by(self, key: typing.Callable) -> GroupedSelector:
+        """Partition this selection by `key`, called once per element with a
+        read-only `HistoryView` of it. Distinct return values become distinct
+        groups; game-neutral until evaluated, same as `Selector` itself."""
+        return GroupedSelector(self, key)
+
+
+class GroupedSelector:
+    """Result of `.by(callable)`.  Game-neutral until evaluated -- iterate
+    the evaluated result (`Game.get_groups`) as `(key, group)` pairs.  No
+    further chaining yet (`.plays`/`.after(...)` applied per-group) --
+    deferred until a concrete need for it shows up.
+
+    .. versionadded:: 17.0.0
+    """
+
+    def __init__(self, base: Selector, key: typing.Callable) -> None:
+        self.base = base
+        self.key = key
+
+    def __repr__(self) -> str:
+        return f"GroupedSelector(base={self.base!r}, key={self.key!r})"
+
+
+def _history_of(node: Node) -> tuple:
+    """The plain-tuple History for `node` -- walks back to the root via the
+    existing `Node.parent`/`.prior_action` navigation."""
+    labels: list = []
+    current: Node = node
+    while current.parent is not None:
+        labels.append(current.prior_action.label)
+        current = current.parent
+    labels.reverse()
+    return tuple(labels)
+
+
+class HistoryView:
+    """The object a `.by(callable)` key function actually receives.  Supports
+    plain sequence indexing/slicing like a `History` tuple, plus limited
+    game-aware navigation (`.last_action(player)`) -- but never exposes the
+    `Node`/game it's privately backed by.  Never returned to calling code
+    outside a `.by(callable)` call; not constructible directly.
+
+    .. versionadded:: 17.0.0
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a HistoryView directly.")
+
+    @staticmethod
+    def _wrap(node: Node, history: tuple) -> HistoryView:
+        obj: HistoryView = HistoryView.__new__(HistoryView)
+        obj._node = node
+        obj._history = history
+        return obj
+
+    def __repr__(self) -> str:
+        return f"HistoryView({self._history!r})"
+
+    def __len__(self) -> int:
+        return len(self._history)
+
+    def __getitem__(self, index: typing.Any) -> typing.Any:
+        return self._history[index]
+
+    def last_action(self, player: str) -> str | None:
+        """The label of the last action `player` took on the path to this
+        history, wherever it fell -- `None` if `player` hasn't acted yet."""
+        current: Node = self._node
+        while current.parent is not None:
+            if current.parent.player == player:
+                return current.prior_action.label
+            current = current.parent
+        return None
+
 
 class H:
     """Namespace of seed constructors for the node-selector algebra.  Not

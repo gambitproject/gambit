@@ -588,15 +588,21 @@ class Game:
 
         .. versionadded:: 17.0.0
         """
-        result: list = []
-        for node in self.get_nodes(selector):
-            labels: list = []
-            current: Node = node
-            while current.parent is not None:
-                labels.append(current.prior_action.label)
-                current = current.parent
-            labels.reverse()
-            result.append(tuple(labels))
+        return [_history_of(node) for node in self.get_nodes(selector)]
+
+    def get_groups(self, grouped: GroupedSelector) -> dict:
+        """Evaluate a `.by(callable)`-built `GroupedSelector` against this
+        game, returning a dict from each distinct key to the list of
+        Histories that produced it.
+
+        .. versionadded:: 17.0.0
+        """
+        result: dict = {}
+        for node in self.get_nodes(grouped.base):
+            history: tuple = _history_of(node)
+            view: HistoryView = HistoryView._wrap(node, history)
+            key = grouped.key(view)
+            result.setdefault(key, []).append(history)
         return result
 
     @property
