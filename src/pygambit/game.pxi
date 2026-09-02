@@ -553,6 +553,10 @@ class Game:
 
         By convention, games with a strategic representation have perfect recall as they
         are treated as simultaneous-move games.
+
+        See Also
+        --------
+        Game.has_perfect_recall
         """
         return self.game.deref().IsPerfectRecall()
 
