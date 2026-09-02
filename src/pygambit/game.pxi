@@ -554,8 +554,14 @@ class Game:
 
         .. versionadded:: 17.0.0
         """
-        current: list = [self.root]
+        current: list = None
         for op in selector._ops:
+            if isinstance(op, _AfterStep):
+                candidates = list(self.nodes) if current is None else current
+                current = [n for n in candidates if _matches_suffix(n, op.labels)]
+                continue
+            if current is None:
+                current = [self.root]
             if isinstance(op, _PathStep):
                 for step in op.steps:
                     current = (
@@ -567,6 +573,8 @@ class Game:
                 current = [play for node in current for play in node.plays]
             else:
                 raise TypeError(f"get_nodes(): unknown selector op {op!r}")
+        if current is None:
+            current = [self.root]
         return current
 
     def get_histories(self, selector: Selector) -> list[tuple]:
