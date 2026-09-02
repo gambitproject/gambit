@@ -48,19 +48,20 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
   labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, S);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, S);
 
+  const bool isChance = !p_node->IsTerminal() && p_node->GetInfoset()->IsChanceInfoset();
   auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
-  infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")), 0, wxALL | wxCENTER,
-                    S);
+  infosetSizer->Add(new wxStaticText(this, wxID_STATIC, isChance ? _("Event") : _("Infoset")), 0,
+                    wxALL | wxCENTER, S);
   m_infoset = new wxChoice(this, wxID_ANY);
   if (!p_node->IsTerminal()) {
-    m_infoset->Append(_("New information set"));
-    if (p_node->GetInfoset()->IsChanceInfoset()) {
+    m_infoset->Append(isChance ? _("New event") : _("New infoset"));
+    if (isChance) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
         if (infoset->GetActions().size() == p_node->GetChildren().size()) {
           m_infosetList.push_back(infoset);
           wxString label;
-          label << _("Chance infoset ") << infoset->GetNumber();
+          label << _("Event ") << infoset->GetNumber();
           m_infoset->Append(label);
           if (infoset == p_node->GetInfoset()) {
             selection = m_infosetList.size();
