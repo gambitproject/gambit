@@ -131,6 +131,23 @@ since only one computation has been run in this example, it shows
 brief description of the method used to compute the equilibria is
 listed across the top of the profiles panel.
 
+By default the equilibria are listed in the order in which they were
+computed. Clicking on the label of a column in the profiles listing
+sorts the equilibria by the probability with which that action or
+strategy is played; clicking on the same column label again reverses
+the order. The label of the column sorted on is highlighted and
+carries an arrow, :guilabel:`▲` or :guilabel:`▼`, showing the
+direction of the sort. Equilibria which agree on that
+column are ordered by
+comparing their profiles entry-by-entry from the leftmost column
+onwards, so sorting on the first column lists the equilibria in
+lexicographic order by profile. Clicking on the :guilabel:`#` label in
+the top left corner of the listing restores the order in which the
+equilibria were computed. Sorting only changes the order in which the
+equilibria are listed: the number shown at the left of each row always
+identifies the equilibrium itself, so it does not change when the list
+is re-sorted.
+
 Some methods for computing equilibria construct good numerical
 approximations to equilibrium points rather than exact values; for
 these methods, the computed equilibria are stored in floating-point

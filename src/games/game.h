@@ -28,7 +28,6 @@
 #include <list>
 #include <memory>
 #include <numeric>
-#include <queue>
 #include <random>
 #include <set>
 #include <stack>
@@ -663,6 +662,8 @@ public:
   //@}
 };
 
+enum class TraversalOrder { Preorder, Postorder };
+
 /// A node in an extensive game
 class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
   friend class GameTreeRep;
@@ -680,8 +681,6 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
   GameNodeRep *m_parent;
   GameOutcomeRep *m_outcome;
   std::vector<std::shared_ptr<GameNodeRep>> m_children;
-
-  void DeleteOutcome(GameOutcomeRep *outc);
 
 public:
   using Children = ElementCollection<GameNode, GameNodeRep>;
@@ -890,8 +889,6 @@ public:
   InfosetCollection GetSubgameDifference() const;
 };
 
-enum class TraversalOrder { Preorder, Postorder };
-
 class CartesianProductSpace {
 public:
   std::vector<int> m_radices;
@@ -1090,49 +1087,69 @@ public:
     class iterator {
       friend class Nodes;
 
-      struct NodeHandler {
-        std::queue<GameNode> m_queue;
+      using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
 
-        static DFSCallbackResult OnEnter(const GameNode &, int)
-        {
-          return DFSCallbackResult::Continue;
-        }
-        static DFSCallbackResult OnAction(const GameNode &, const GameNode &, int)
-        {
-          return DFSCallbackResult::Continue;
-        }
-        static DFSCallbackResult OnExit(const GameNode &, int)
-        {
-          return DFSCallbackResult::Continue;
-        }
-        void OnVisit(const GameNode &p_node, int) { m_queue.push(p_node); }
+      // One frame per node currently open on the path from the root; this mirrors
+      // WalkDFS's own stack, but is kept alive across calls to advance() (instead of
+      // living inside a single call to WalkDFS) so the walk can pause after each node
+      // and resume from exactly where it left off, rather than visiting the whole tree
+      // up front.
+      struct Frame {
+        GameNode m_node;
+        ChildIterator m_current;
+        ChildIterator m_end;
+        bool m_entered{false};
       };
 
       Game m_owner{nullptr};
-      std::shared_ptr<NodeHandler> m_handler;
+      TraversalOrder m_order{TraversalOrder::Preorder};
+      std::stack<Frame> m_stack;
       GameNode m_current{nullptr};
 
-      iterator(const Game &p_game, TraversalOrder p_order)
-        : m_owner(p_game), m_handler(std::make_shared<NodeHandler>())
+      iterator(const Game &p_game, TraversalOrder p_order) : m_owner(p_game), m_order(p_order)
       {
         if (!p_game) {
           m_owner = nullptr;
           return;
         }
-        WalkDFS(p_game, p_game->GetRoot(), p_order, *m_handler);
+        m_stack.push(Frame{p_game->GetRoot(), {}, {}, false});
         advance();
       }
 
       void advance()
       {
-        if (!m_handler || m_handler->m_queue.empty()) {
-          m_current = nullptr;
-          m_owner = nullptr;
+        while (!m_stack.empty()) {
+          Frame &f = m_stack.top();
+
+          if (!f.m_entered) {
+            f.m_entered = true;
+            if (!f.m_node->IsTerminal()) {
+              auto children = f.m_node->GetChildren();
+              f.m_current = children.begin();
+              f.m_end = children.end();
+            }
+            if (m_order == TraversalOrder::Preorder) {
+              m_current = f.m_node;
+              return;
+            }
+          }
+
+          if (!f.m_node->IsTerminal() && f.m_current != f.m_end) {
+            GameNode const child = *f.m_current;
+            ++f.m_current;
+            m_stack.push(Frame{child, {}, {}, false});
+            continue;
+          }
+
+          GameNode const finished = f.m_node;
+          m_stack.pop();
+          if (m_order == TraversalOrder::Postorder) {
+            m_current = finished;
+            return;
+          }
         }
-        else {
-          m_current = m_handler->m_queue.front();
-          m_handler->m_queue.pop();
-        }
+        m_current = nullptr;
+        m_owner = nullptr;
       }
 
     public:
@@ -1231,6 +1248,14 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the player has perfect recall
+  virtual bool HasPerfectRecall(const GamePlayer &p_player) const
+  {
+    if (p_player->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return true;
+  }
   /// Returns true if the information set is absent-minded
   virtual bool IsAbsentMinded(const GameInfoset &p_infoset) const
   {
@@ -1337,11 +1362,6 @@ public:
   {
     throw UndefinedException();
   }
-  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
-  {
-    throw UndefinedException();
-  }
-
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
@@ -1434,8 +1454,6 @@ public:
   {
     return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
   }
-  /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome(const std::string &p_label) { throw UndefinedException(); }
   /// Creates an outcome with the given payoffs and label for the specified nodes.
   virtual GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
                                   const std::string &)
@@ -1448,8 +1466,13 @@ public:
   {
     throw UndefinedException();
   }
-  /// Deletes the specified outcome from the game
-  virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
+  /// Resets the outcome at the specified nodes to the null outcome.
+  virtual void MakeOutcomeNull(const std::vector<GameNode> &) { throw UndefinedException(); }
+  /// Resets the outcome at the specified contingencies to the null outcome.
+  virtual void MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &)
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Nodes

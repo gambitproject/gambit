@@ -68,6 +68,10 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
+  /// Returns the subset of p_covered no longer referenced by any node outside p_selected.
+  std::set<const GameOutcomeRep *>
+  ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
+                          const std::set<const GameOutcomeRep *> &p_covered) const;
   //@}
 
   /// @name Managing the representation
@@ -108,6 +112,7 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
+  bool HasPerfectRecall(const GamePlayer &p_player) const override;
 
   /// Returns the smallest payoff to the player in any play of the game
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
@@ -137,8 +142,6 @@ public:
   /// Returns the last action taken by the node's owner before reaching this node
   GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
-
-  void DeleteOutcome(const GameOutcome &) override;
 
   /// @name Writing data files
   //@{
@@ -179,6 +182,7 @@ public:
   void DeleteTree(GameNode) override;
   GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
                           const std::string &) override;
+  void MakeOutcomeNull(const std::vector<GameNode> &) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
   void Reveal(GameInfoset, GamePlayer) override;
@@ -188,8 +192,6 @@ public:
   void SetMoveActions(const GameInfoset &, const std::vector<std::string> &) override;
   void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
                        const std::vector<Number> &) override;
-  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
-
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
   std::vector<GameNode> GetPlays(GameAction action) const override;

@@ -49,8 +49,8 @@ def _default_start(game: gbt.Game) -> gbt.MixedStrategyProfileRational:
     """Each player's first strategy, matching the C++ library's `SimpdivDefaultStart`."""
     start = game.mixed_strategy_profile(rational=True)
     for player in game.players:
-        first_strategy = next(iter(player.strategies))
-        start[player.label] = {first_strategy: 1}
+        first_strategy = next(iter(game.get_strategies(player)))
+        start[player] = {first_strategy: 1}
     return start
 
 

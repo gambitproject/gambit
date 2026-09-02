@@ -31,13 +31,13 @@ def test_read_efg_repeated_outcome_id_consistent():
 def test_read_efg_empty_action_labels_are_normalized():
     g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "" "" } 0\n'
                    't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
-    assert [a.label for a in g.root.infoset.actions] == ["_1", "_2"]
+    assert list(g.root.infoset.actions) == ["_1", "_2"]
 
 
 def test_read_efg_duplicate_action_labels_are_normalized():
     g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "l" } 0\n'
                    't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
-    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+    assert list(g.root.infoset.actions) == ["l_1", "l_2"]
 
 
 def test_read_efg_repeated_infoset_duplicate_labels_consistent():
@@ -53,7 +53,7 @@ def test_read_efg_repeated_infoset_duplicate_labels_consistent():
         't "" 2 "" { 2, -2 }\n'
         't "" 3 "" { 3, -3 }\n'
     )
-    assert [a.label for a in g.root.infoset.actions] == ["l_1", "l_2"]
+    assert list(g.root.infoset.actions) == ["l_1", "l_2"]
 
 
 _NFG_PAYOFF_BODY = '\n{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n1 2 3 4\n'
@@ -62,13 +62,13 @@ _NFG_PAYOFF_BODY = '\n{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n
 def test_read_nfg_empty_strategy_labels_are_normalized():
     g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "" "" }\n{ "x" "y" }\n}\n""\n' +
                    _NFG_PAYOFF_BODY)
-    assert list(g.players["A"].strategies) == ["_1", "_2"]
+    assert g.get_strategies("A") == ["_1", "_2"]
 
 
 def test_read_nfg_duplicate_strategy_labels_are_normalized():
     g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "l" "l" }\n{ "x" "y" }\n}\n""\n' +
                    _NFG_PAYOFF_BODY)
-    assert list(g.players["A"].strategies) == ["l_1", "l_2"]
+    assert g.get_strategies("A") == ["l_1", "l_2"]
 
 
 def test_read_nfg_strategy_labels_swap_default_numbering():
@@ -78,7 +78,7 @@ def test_read_nfg_strategy_labels_swap_default_numbering():
     """
     g = _parse_nfg('NFG 1 R "t" { "A" "B" }\n\n{ { "2" "1" }\n{ "x" "y" }\n}\n""\n' +
                    _NFG_PAYOFF_BODY)
-    assert list(g.players["A"].strategies) == ["2", "1"]
+    assert g.get_strategies("A") == ["2", "1"]
 
 
 def test_string_empty():

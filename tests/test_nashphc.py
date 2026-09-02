@@ -37,17 +37,17 @@ def test_playerletters_excludes_disallowed_variable_letters():
 
 
 def test_strategy_index(matching_pennies):
-    player = matching_pennies.players["1"]
-    assert _strategy_index(player, "1") == 0
-    assert _strategy_index(player, "2") == 1
+    assert _strategy_index(matching_pennies, "1", "1") == 0
+    assert _strategy_index(matching_pennies, "1", "2") == 1
 
 
 def test_contingencies_skips_given_player(matching_pennies):
-    p1, p2 = matching_pennies.players
+    players = list(matching_pennies.players)
+    p1, p2 = players
     support = matching_pennies.strategy_support_profile()
     conts = list(_contingencies(support, p1))
-    assert all(cont[p1.number] is None for cont in conts)
-    assert {cont[p2.number] for cont in conts} == {"1", "2"}
+    assert all(cont[players.index(p1)] is None for cont in conts)
+    assert {cont[players.index(p2)] for cont in conts} == {"1", "2"}
 
 
 def test_equilibrium_equations(matching_pennies):

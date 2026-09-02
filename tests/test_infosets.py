@@ -34,8 +34,8 @@ def test_infoset_label_unicode_accepted(label):
 
 def test_infoset_label_duplicate_within_player_raises_valueerror():
     game = games.read_from_file("subgames.efg")
-    player = next(p for p in game.players if sum(1 for _ in p.infosets) >= 2)
-    first, second = itertools.islice(player.infosets, 2)
+    player = next(p for p in game.players if len(game.get_infosets(p)) >= 2)
+    first, second = (n.infoset for n in itertools.islice(game.get_infosets(player), 2))
     first.label = "shared"
     with pytest.raises(ValueError):
         second.label = "shared"
@@ -59,7 +59,7 @@ def test_make_infoset_change_player_keeps_label():
     game = games.read_from_file("basic_extensive_game.efg")
     _, p2, *_ = game.players
     members = list(game.root.infoset.members)
-    game.make_infoset(members, p2.label, "moved")
+    game.make_infoset(members, p2, "moved")
     assert game.root.infoset.player == p2
     assert game.root.infoset.label == "moved"
     assert list(game.root.infoset.members) == members
@@ -78,16 +78,17 @@ def test_make_infoset_terminal_node_raises():
     game = games.read_from_file("basic_extensive_game.efg")
     terminal = game.root.children["U1"].children["U2"].children["U3"]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_infoset([terminal], game.root.player.label)
+        game.make_infoset([terminal], game.root.player)
 
 
 def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
-    personal = next(n for n in game.nodes if not n.is_terminal and not n.infoset.is_chance)
-    game.make_infoset([chance_node], personal.infoset.player.label)
-    assert not chance_node.infoset.is_chance
+    personal = next(n for n in game.nodes if not n.is_terminal and n.infoset)
+    game.make_infoset([chance_node], personal.infoset.player)
+    assert not chance_node.event
+    assert chance_node.infoset
     assert chance_node.infoset.player == personal.infoset.player
 
 
@@ -106,14 +107,14 @@ def test_make_infoset_empty_nodes_raises():
     """`nodes` must be nonempty."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.make_infoset([], game.root.player.label)
+        game.make_infoset([], game.root.player)
 
 
 def test_make_infoset_repeated_node_raises():
     """Each node may be referenced only once."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.make_infoset([game.root, game.root], game.root.player.label)
+        game.make_infoset([game.root, game.root], game.root.player)
 
 
 def test_make_infoset_strategic_game_raises():
@@ -123,32 +124,15 @@ def test_make_infoset_strategic_game_raises():
         game.make_infoset([], "1")
 
 
-def test_set_move_actions_add_preserves_existing_action_handles():
-    """New actions may be declared at any position; the existing Action objects
-    survive in declared order."""
+def test_set_move_actions_add_preserves_existing_action_order():
+    """New actions may be declared at any position; the existing actions' relative
+    order is preserved."""
     game = games.read_from_file("basic_extensive_game.efg")
-    actions = list(game.root.infoset.actions)
-    labels = [action.label for action in actions]
-    game.set_move_actions(game.root.infoset, labels + ["end"])
-    assert list(game.root.infoset.actions)[:-1] == actions
-    game.set_move_actions(game.root.infoset, ["front"] + labels + ["end"])
-    assert list(game.root.infoset.actions)[1:-1] == actions
-
-
-def test_infoset_plays():
-    """Verify `infoset.plays` returns plays reachable from a given infoset.
-    """
-    game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    list_nodes = list(game.nodes)
-    list_infosets = list(game.infosets)
-
-    test_infoset = list_infosets[2]  # members' paths=[1, 0], [1]
-
-    expected_set_of_plays = {
-        list_nodes[4], list_nodes[5], list_nodes[7], list_nodes[8]
-    }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
-
-    assert set(test_infoset.plays) == expected_set_of_plays
+    labels = list(game.root.actions)
+    game.set_move_actions(game.root, labels + ["end"])
+    assert list(game.root.actions)[:-1] == labels
+    game.set_move_actions(game.root, ["front"] + labels + ["end"])
+    assert list(game.root.actions)[1:-1] == labels
 
 
 @pytest.mark.parametrize(
@@ -165,8 +149,9 @@ def test_make_event_sets_probabilities(inprobs, outprobs):
     """
     game = games.read_from_file("stripped_down_poker.efg")
     game.make_event([game.root], inprobs, "Deal")
-    for action, prob in zip(game.root.infoset.actions, outprobs, strict=True):
-        assert action.prob == prob
+    probs = game.root.action_probs
+    for action, prob in zip(game.root.actions, outprobs, strict=True):
+        assert probs[action] == prob
 
 
 def test_make_event_pools_nodes_from_different_infosets():
@@ -174,11 +159,10 @@ def test_make_event_pools_nodes_from_different_infosets():
     game = games.read_from_file("stripped_down_poker.efg")
     nodes = [game.root.children["King"], game.root.children["Queen"]]
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
-    assert nodes[0].infoset == nodes[1].infoset
-    assert nodes[0].infoset.is_chance
-    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
-                                                          gbt.Rational("3/4")]
-    assert not list(game.players["Alice"].infosets)
+    assert nodes[0].event == nodes[1].event
+    assert nodes[0].event
+    assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
+    assert not game.get_infosets("Alice")
 
 
 @pytest.mark.parametrize("probs", [["1/2", "1/2"], {"Call": 1}])
@@ -197,11 +181,12 @@ def test_make_event_requires_matching_action_labels(probs):
 def test_make_event_converts_personal_node():
     """A personal decision node becomes a chance node carrying the probabilities given."""
     game = games.read_from_file("stripped_down_poker.efg")
-    node = next(iter(game.players["Alice"].infosets["Alice has King"].members))
+    node = next(
+        n for n in game.get_infosets("Alice") if n.infoset.label == "Alice has King"
+    )
     game.make_event([node], ["1/4", "3/4"])
-    assert node.infoset.is_chance
-    assert [a.prob for a in node.infoset.actions] == [gbt.Rational("1/4"),
-                                                      gbt.Rational("3/4")]
+    assert node.event
+    assert list(node.action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
 
 
 def test_make_event_terminal_node_raises():
@@ -255,11 +240,12 @@ def test_make_event_label_reused_when_fully_absorbed():
     nodes = [game.root.children["King"], game.root.children["Queen"]]
     game.make_event(nodes, ["1/2", "1/2"], "Coin")
     game.make_event(nodes, ["1/4", "3/4"], "Coin")
-    assert nodes[0].infoset == nodes[1].infoset
-    assert nodes[0].infoset.label == "Coin"
-    assert [a.prob for a in nodes[0].infoset.actions] == [gbt.Rational("1/4"),
-                                                          gbt.Rational("3/4")]
-    assert [infoset.label for infoset in game.players.chance.infosets].count("Coin") == 1
+    assert nodes[0].event == nodes[1].event
+    assert nodes[0].event.label == "Coin"
+    assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
+    assert [
+        n.event.label for n in game.get_events()
+    ].count("Coin") == 1
 
 
 @pytest.mark.parametrize("probs", [["3/4", "-1/2"], [0.75, 0.40], ["foo", "bar"]])
@@ -281,76 +267,11 @@ def test_make_event_malformed_probs_raises(probs, error):
 
 
 @dataclasses.dataclass
-class PriorActionsTestCase:
-    """TestCase for testing own_prior_actions."""
-    factory: typing.Callable[[], gbt.Game]
-    # each tuple is (action_path_to_a_member_node, expected_prior_actions_set)
-    expected_results: list[tuple[list[str], set]]
-
-
-@dataclasses.dataclass
 class AbsentMindednessTestCase:
     """TestCase for testing is_absent_minded."""
     factory: typing.Callable[[], gbt.Game]
     expected_am_paths: list[list[str]]
 
-
-PRIOR_ACTIONS_CASES = [
-    pytest.param(
-        PriorActionsTestCase(
-            factory=functools.partial(games.read_from_file, "binary_3_levels_generic_payoffs.efg"),
-            expected_results=[
-                ([], {None}),
-                (["Left", "Left"], {("Player 1", 0, "Left")}),
-                (["Right", "Left"], {("Player 1", 0, "Right")}),
-                (["Left"], {None}),
-            ]
-        ),
-        id="perfect_recall"
-    ),
-    pytest.param(
-        PriorActionsTestCase(
-            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
-            expected_results=[
-                ([], {None}),
-                (["R"], {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
-                (["R", "r"], {None}),
-            ]
-        ),
-        id="wichardt_forgetting_action"
-    ),
-    pytest.param(
-        PriorActionsTestCase(
-            factory=functools.partial(games.read_from_file, "subgames.efg"),
-            expected_results=[
-                (["1"], {None}),
-                (["2"], {None}),
-                (["2", "1", "2"], {("Player 1", 1, "1")}),
-                (["2", "2", "1", "1"], {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
-                (["2", "2", "1", "2"], {("Player 1", 1, "2")}),
-                (["2", "2", "1", "2", "2", "1"], {("Player 1", 4, "2")}),
-                (["2", "2", "2"], {("Player 1", 1, "2")}),
-                ([], {None}),
-                (["2", "1"], {("Player 2", 0, "2")}),
-                (["2", "2", "1"], {("Player 2", 1, "1")}),
-                (["2", "2", "1", "1", "1"], {("Player 2", 2, "1")}),
-                (["2", "2", "1", "2", "1"], {("Player 2", 2, "2")}),
-                (["2", "2", "1", "2", "2", "1", "1"], {("Player 2", 4, "1")}),
-            ]
-        ),
-        id="four_subgames"
-    ),
-    pytest.param(
-        PriorActionsTestCase(
-            factory=functools.partial(games.read_from_file, "AM-driver-subgame.efg"),
-            expected_results=[
-                ([], {None, ("Player 1", 0, "S")}),
-                (["S", "T"], {None}),
-            ]
-        ),
-        id="AM_driver"
-    ),
-]
 
 ABSENT_MINDEDNESS_CASES = [
     # Games without absent-mindedness
@@ -424,33 +345,6 @@ def _get_node_by_path(game, path: list[str]) -> gbt.Node:
     return node
 
 
-@pytest.mark.parametrize("test_case", PRIOR_ACTIONS_CASES)
-def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
-    """
-    Test `infoset.own_prior_actions`.
-
-    Verifies that the set of prior actions (as player-infoset-label tuples)
-    matches the expected results.  Each infoset is identified by an action
-    path to one of its member nodes.
-    """
-    game = test_case.factory()
-
-    for path, expected_set in test_case.expected_results:
-        node = game.root
-        for action_label in path:
-            node = node.children[action_label]
-        infoset = node.infoset
-
-        actual_actions = infoset.own_prior_actions
-
-        actual_details = {
-            (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
-            for a in actual_actions
-        }
-
-        assert actual_details == expected_set
-
-
 @pytest.mark.parametrize("test_case", ABSENT_MINDEDNESS_CASES)
 def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
     """
@@ -465,7 +359,10 @@ def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
         _get_node_by_path(game, path).infoset
         for path in test_case.expected_am_paths
         }
-    actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
+    actual_infosets = {
+        n.infoset for p in game.players for n in game.get_infosets(p)
+        if n.infoset.is_absent_minded
+    }
 
     assert actual_infosets == expected_infosets
 
@@ -548,12 +445,12 @@ def test_make_infoset_across_different_source_players():
     game.append_move(game.root.children["b"], "3", ["a", "b"])   # player 3
     n2 = game.root.children["a"]
     n3 = game.root.children["b"]
-    assert n2.infoset.player == game.players["2"]
-    assert n3.infoset.player == game.players["3"]
+    assert n2.infoset.player == "2"
+    assert n3.infoset.player == "3"
     game.make_infoset([n2, n3], "1")
     assert n2.infoset == n3.infoset
-    assert n2.infoset.player == game.players["1"]
-    assert n3.infoset.player == game.players["1"]
+    assert n2.infoset.player == "1"
+    assert n3.infoset.player == "1"
 
 
 def test_infoset_proxy_reresolves_after_split():
@@ -563,28 +460,35 @@ def test_infoset_proxy_reresolves_after_split():
     node = game.root.children["U1"]
     proxy = node.infoset
     assert len(proxy.members) == 2
-    game.make_infoset(node, node.player.label)
+    game.make_infoset(node, node.player)
     assert list(proxy.members) == [node]
+
+
+def test_infoset_members_is_a_plain_snapshot_list():
+    """`members` returns a plain `list`, not a lazily-resolved view: it supports
+    integer indexing, and a list obtained before a mutation keeps reflecting the
+    information set as it was at the time, rather than tracking its owner."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    node = game.root.children["U1"]
+    members = node.infoset.members
+    assert isinstance(members, list)
+    assert node in (members[0], members[1])
+    game.make_infoset(node, node.player)
+    assert len(members) == 2
+    assert list(node.infoset.members) == [node]
 
 
 def test_reveal_splits_infoset_by_action():
     """Revealing the deal to Bob separates his single infoset into per-card
     singletons; the other player's structure is untouched."""
     game = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
-    n_alice = len(list(game.players["Alice"].infosets))
-    assert len(list(game.players["Bob"].infosets)) == 1
-    game.reveal(game.root.infoset, "Bob")
-    bob = list(game.players["Bob"].infosets)
+    n_alice = len(game.get_infosets("Alice"))
+    assert len(game.get_infosets("Bob")) == 1
+    game.reveal(game.root, "Bob")
+    bob = game.get_infosets("Bob")
     assert len(bob) == 2
-    assert all(len(list(i.members)) == 1 for i in bob)
-    assert len(list(game.players["Alice"].infosets)) == n_alice
-
-
-def test_reveal_chance_player_raises():
-    """`player` must be a personal player; revealing to chance is not well-defined."""
-    game = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.reveal(game.root.infoset, game.players.chance)
+    assert all(len(list(n.infoset.members)) == 1 for n in bob)
+    assert len(game.get_infosets("Alice")) == n_alice
 
 
 def test_reveal_absent_minded_infoset_raises():
@@ -596,12 +500,4 @@ def test_reveal_absent_minded_infoset_raises():
     game.make_infoset([game.root, mid], "Driver")
     game.append_move(mid.children["Continue"], "2", ["l", "r"])
     with pytest.raises(gbt.UndefinedOperationError):
-        game.reveal(game.root.infoset, "2")
-
-
-def test_reveal_mismatch_raises():
-    """`infoset` and `player` must belong to this game."""
-    game1 = games.read_from_file("stripped_down_poker.efg")
-    game2 = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.reveal(game1.root.infoset, next(iter(game2.players)))
+        game.reveal(game.root, "2")

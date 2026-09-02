@@ -68,6 +68,48 @@ class NashComputationResult:
     parameters: dict = dataclasses.field(default_factory=dict)
 
 
+def _validate_stop_after(funcname: str, stop_after: int | None) -> None:
+    """Shared validation for a `stop_after` keyword argument, accepted by `lcp_solve`/
+    `enumpoly_solve`: `None` is always valid; otherwise must be a positive `int`
+    (not `bool`).
+    """
+    if stop_after is not None and (
+        isinstance(stop_after, bool)
+        or not isinstance(stop_after, Integral)
+        or stop_after <= 0
+    ):
+        raise ValueError(
+            f"{funcname}(): stop_after argument must be a positive integer; got {stop_after}"
+        )
+
+
+def _normalize_perturbation(
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile
+) -> tuple[libgbt.Game, libgbt.MixedStrategyProfileDouble]:
+    """Shared normalization of a `perturbation` parameter, accepted by `ipa_solve`/
+    `gnm_solve`: a `Game` becomes a profile with probability 1 on each player's first
+    strategy and 0 elsewhere; a `MixedStrategyProfile` is converted to floating-point
+    via `as_float()`. Returns (game, perturbation).
+    """
+    if isinstance(perturbation, libgbt.Game):
+        game = perturbation
+        perturbation = game.mixed_strategy_profile(rational=False)
+        for player in game.players:
+            strategies = game.get_strategies(player)
+            perturbation[player] = {
+                s: (1.0 if s == strategies[0] else 0.0) for s in strategies
+            }
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
+        game = perturbation.game
+        perturbation = perturbation.as_float()
+    else:
+        raise TypeError(
+            f"parameter must be Game or MixedStrategyProfile, "
+            f"not {perturbation.__class__.__name__}"
+        )
+    return game, perturbation
+
+
 def enumpure_solve(
         game: libgbt.Game,
         nash_callback: Callable[[libgbt.MixedStrategyProfileRational], None] | None = None,
@@ -321,15 +363,9 @@ def lcp_solve(
             raise ValueError(
                 "lcp_solve(): max_depth can only be used on the strategic representation"
             )
-    if stop_after is not None and (
-        isinstance(stop_after, bool)
-        or not isinstance(stop_after, Integral)
-        or stop_after <= 0
-    ):
-        raise ValueError(
-            f"lcp_solve(): stop_after argument must be a positive integer; got {stop_after}"
-        )
-    if not game.is_tree or use_strategic:
+    _validate_stop_after("lcp_solve", stop_after)
+    use_strategic = not game.is_tree or use_strategic
+    if use_strategic:
         if rational:
             equilibria = libgbt._lcp_strategy_solve_rational(
                 game, stop_after, max_depth or 0, nash_callback
@@ -346,7 +382,7 @@ def lcp_solve(
         game=game,
         method="lcp",
         rational=rational,
-        use_strategic=not game.is_tree or use_strategic,
+        use_strategic=use_strategic,
         equilibria=equilibria,
         parameters={"stop_after": stop_after, "max_depth": max_depth}
     )
@@ -392,7 +428,8 @@ def lp_solve(
     RuntimeError
         If game has more than two players or is not constant sum.
     """
-    if not game.is_tree or use_strategic:
+    use_strategic = not game.is_tree or use_strategic
+    if use_strategic:
         if rational:
             equilibria = libgbt._lp_strategy_solve_rational(game, nash_callback)
         else:
@@ -548,7 +585,7 @@ def liap_agent_solve(
         The result represented as a ``NashComputationResult`` object.
     """
     if maxregret <= 0.0:
-        raise ValueError("liap_solve(): maxregret argument must be positive")
+        raise ValueError("liap_agent_solve(): maxregret argument must be positive")
     start = start.as_float()
     equilibria = libgbt._liap_behavior_solve(
         start, maxregret=maxregret, maxiter=maxiter,
@@ -694,22 +731,7 @@ def ipa_solve(
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    if isinstance(perturbation, libgbt.Game):
-        game = perturbation
-        perturbation = game.mixed_strategy_profile(rational=False)
-        for player in game.players:
-            strategies = list(player.strategies)
-            perturbation[player.label] = {
-                s: (1.0 if s == strategies[0] else 0.0) for s in strategies
-            }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
-        game = perturbation.game
-        perturbation = perturbation.as_float()
-    else:
-        raise TypeError(
-            f"parameter must be Game or MixedStrategyProfile, "
-            f"not {perturbation.__class__.__name__}"
-        )
+    game, perturbation = _normalize_perturbation(perturbation)
     return NashComputationResult(
         game=game,
         method="ipa",
@@ -813,22 +835,7 @@ GNMTerminationEvent], None], optional
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    if isinstance(perturbation, libgbt.Game):
-        game = perturbation
-        perturbation = game.mixed_strategy_profile(rational=False)
-        for player in game.players:
-            strategies = list(player.strategies)
-            perturbation[player.label] = {
-                s: (1.0 if s == strategies[0] else 0.0) for s in strategies
-            }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
-        game = perturbation.game
-        perturbation = perturbation.as_float()
-    else:
-        raise TypeError(
-            f"parameter must be Game or MixedStrategyProfile, "
-            f"not {perturbation.__class__.__name__}"
-        )
+    game, perturbation = _normalize_perturbation(perturbation)
     if end_lambda >= 0.0:
         raise ValueError(f"end_lambda must be a negative number; got {end_lambda}")
     if steps <= 0:
@@ -973,15 +980,7 @@ def enumpoly_solve(
     -----
     PHCpack is available at https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
-    if stop_after is not None and (
-        isinstance(stop_after, bool)
-        or not isinstance(stop_after, Integral)
-        or stop_after <= 0
-    ):
-        raise ValueError(
-            f"enumpoly_solve(): "
-            f"stop_after argument must be a positive integer; got {stop_after}"
-        )
+    _validate_stop_after("enumpoly_solve", stop_after)
     if maxregret <= 0.0:
         raise ValueError(
             f"enumpoly_solve(): maxregret must be a positive number; got {maxregret}"
@@ -991,8 +990,9 @@ def enumpoly_solve(
             f"enumpoly_solve(): "
             f"max_rectangles argument must be a positive number; got {max_rectangles}"
         )
+    use_strategic = not game.is_tree or use_strategic
     if phcpack_path is not None:
-        if game.is_tree and not use_strategic:
+        if not use_strategic:
             raise ValueError(
                 "enumpoly_solve(): only solving on the strategic representation is "
                 "supported by the PHCpack implementation"
@@ -1007,13 +1007,13 @@ def enumpoly_solve(
             game=game,
             method="enumpoly",
             rational=False,
-            use_strategic=False,
+            use_strategic=True,
             parameters={"stop_after": stop_after, "maxregret": maxregret,
                         "phcpack_path": phcpack_path},
             equilibria=equilibria,
         )
 
-    if not game.is_tree or use_strategic:
+    if use_strategic:
         equilibria = libgbt._enumpoly_strategy_solve(
             game, stop_after, maxregret, max_rectangles, nash_callback, event_callback
         )
@@ -1025,7 +1025,7 @@ def enumpoly_solve(
         game=game,
         method="enumpoly",
         rational=False,
-        use_strategic=not game.is_tree or use_strategic,
+        use_strategic=use_strategic,
         parameters={"stop_after": stop_after, "maxregret": maxregret,
                     "max_rectangles": max_rectangles},
         equilibria=equilibria,
@@ -1092,7 +1092,8 @@ None], optional
         raise ValueError("logit_solve(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
-    if not game.is_tree or use_strategic:
+    use_strategic = not game.is_tree or use_strategic
+    if use_strategic:
         equilibria = libgbt._logit_strategy_solve(
             game, maxregret, first_step, max_accel, event_callback
         )
@@ -1104,7 +1105,7 @@ None], optional
         game=game,
         method="logit",
         rational=False,
-        use_strategic=not game.is_tree or use_strategic,
+        use_strategic=use_strategic,
         equilibria=equilibria,
         parameters={"first_step": first_step, "max_accel": max_accel},
     )

@@ -14,11 +14,11 @@ Representation of games
    :toctree: api/
 
    Game
-   Player
    Outcome
    Node
    Infoset
-   Action
+   Event
+   Branch
    Subgame
 
 
@@ -70,7 +70,6 @@ Transforming game information structure
    :toctree: api/
 
    Game.make_infoset
-   Game.make_outcome
    Game.make_event
    Game.relabel_actions
    Game.set_move_actions
@@ -86,11 +85,10 @@ Transforming game components
 
    Game.relabel_players
    Game.set_players
-   Game.add_outcome
-   Game.delete_outcome
-   Game.set_outcome
    Game.relabel_strategies
    Game.set_strategies
+   Game.make_outcome
+   Game.make_outcome_null
 
 
 Information about the game
@@ -104,33 +102,24 @@ Information about the game
    Game.is_const_sum
    Game.is_tree
    Game.is_perfect_recall
+   Game.has_perfect_recall
    Game.players
    Game.outcomes
    Game.min_payoff
    Game.max_payoff
+   Game.get_min_payoff
+   Game.get_max_payoff
    Game.root
-   Game.actions
-   Game.infosets
+   Game.get_infosets
+   Game.get_events
+   Game.get_strategies
+   Game.get_sequences
    Game.nodes
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs
    Game.subgames
    Game.minimal_subgame
-
-.. autosummary::
-   :toctree: api/
-
-   Player.label
-   Player.number
-   Player.game
-   Player.strategies
-   Player.infosets
-   Player.actions
-   Player.is_chance
-   Player.min_payoff
-   Player.max_payoff
-   Player.sequences
 
 .. autosummary::
    :toctree: api/
@@ -154,6 +143,10 @@ Information about the game
    Node.prior_sibling
    Node.next_sibling
    Node.infoset
+   Node.event
+   Node.members
+   Node.actions
+   Node.action_probs
    Node.player
    Node.is_successor_of
    Node.plays
@@ -173,24 +166,23 @@ Information about the game
 
    Infoset.label
    Infoset.game
-   Infoset.is_chance
    Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
    Infoset.members
    Infoset.precedes
-   Infoset.plays
-   Infoset.own_prior_actions
 
 .. autosummary::
 
    :toctree: api/
 
-   Action.label
-   Action.infoset
-   Action.precedes
-   Action.prob
-   Action.plays
+   Event.label
+   Event.game
+   Event.is_absent_minded
+   Event.player
+   Event.actions
+   Event.members
+   Event.precedes
 
 .. autosummary::
 

@@ -20,8 +20,6 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-ACLOCAL_AMFLAGS = -I m4
-
 include build_support/catalog/catalog.am
 
 EXTRA_DIST = \
@@ -351,11 +349,8 @@ if WITH_GUI
 bin_PROGRAMS = gambit
 endif
 
-# Read version from GAMBIT_VERSION file for use in compilation
-GAMBIT_VERSION = $(shell cat $(top_srcdir)/build_support/GAMBIT_VERSION)
-
 # Define VERSION for all C++ compilations and set include paths
-AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\" \
+AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\" \
 	-DLOCALEDIR=\"$(LOCALEDIR)\"
 
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
@@ -437,6 +432,10 @@ gambit_SOURCES = \
 	src/gui/nfgprofile.h \
 	src/gui/nfgtable.cc \
 	src/gui/nfgtable.h \
+	src/gui/profilelabels.cc \
+	src/gui/profilelabels.h \
+	src/gui/profilesort.cc \
+	src/gui/profilesort.h \
 	src/gui/renratio.cc \
 	src/gui/renratio.h \
 	src/gui/style.cc \
@@ -543,6 +542,6 @@ endif
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\"

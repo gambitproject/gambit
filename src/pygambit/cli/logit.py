@@ -31,9 +31,7 @@ import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_game,
+    load_game,
     render_profile_csv,
     version_option,
 )
@@ -63,7 +61,7 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
     comma-separated list of counts, one per strategy, in the same order as a profile's
     CSV row, matching the C++ tool's `ReadProfile`.
     """
-    count = sum(len(list(player.strategies)) for player in game.players)
+    count = sum(len(game.get_strategies(player)) for player in game.players)
     try:
         fields = pathlib.Path(path).read_text().split(",")
         values = [float(fields[i]) for i in range(count)]
@@ -72,7 +70,7 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
     frequencies = game.mixed_strategy_profile(rational=False)
     it = iter(values)
     for player in game.players:
-        frequencies[player.label] = {s: next(it) for s in player.strategies}
+        frequencies[player] = {s: next(it) for s in game.get_strategies(player)}
     return frequencies
 
 
@@ -152,9 +150,7 @@ def main(
     terminal_only: bool,
     quiet: bool,
 ) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION)
-    game = read_game(open_game_file(file, PROG_NAME))
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     if not game.is_perfect_recall:
         raise ValueError("Computing equilibria of games with imperfect recall is not supported.")
 

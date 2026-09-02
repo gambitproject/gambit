@@ -21,152 +21,74 @@
 #
 
 @cython.cclass
-class InfosetMembers:
-    """The set of nodes which are members of an information set."""
-    infoset = cython.declare(c_GameInfoset)
+class _InfosetOrEvent:
+    """Shared implementation for `Infoset` and `Event`: a lazy, node-anchored view over
+    an information set, filtered to whichever of the two subclasses' concept currently
+    applies at the anchoring node (see each subclass's `_try_resolve`).
 
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create InfosetMembers outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> InfosetMembers:
-        obj: InfosetMembers = InfosetMembers.__new__(InfosetMembers)
-        obj.infoset = infoset
-        return obj
-
-    def __repr__(self) -> str:
-        return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
-
-    def __len__(self) -> int:
-        return self.infoset.deref().GetMembers().size()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        for member in self.infoset.deref().GetMembers():
-            yield Node.wrap(member)
-
-    def __getitem__(self, label: str) -> Node:
-        """Returns the member node with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the member node to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the information set has no member with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one member has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference a member by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Infoset", "member", "members")
-
-
-@cython.cclass
-class InfosetActions:
-    """The set of actions which are available at an information set."""
-    infoset = cython.declare(c_GameInfoset)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create InfosetActions outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> InfosetActions:
-        obj: InfosetActions = InfosetActions.__new__(InfosetActions)
-        obj.infoset = infoset
-        return obj
-
-    def __repr__(self) -> str:
-        return f"InfosetActions(infoset={Infoset.wrap(self.infoset)})"
-
-    def __len__(self):
-        """The number of actions at the information set."""
-        return self.infoset.deref().GetActions().size()
-
-    def __iter__(self) -> typing.Iterator[Action]:
-        for action in self.infoset.deref().GetActions():
-            yield Action.wrap(action)
-
-    def __getitem__(self, label: str) -> Action:
-        """Returns the action at the information set with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the action to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If the information set has no action with label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one action at the information
-            set has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an action by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Infoset", "action", "actions")
-
-
-@cython.cclass
-class Infoset:
-    """An information set in a ``Game``.
-
-    An information set belonging to a personal player is a decision: the point at
-    which that player chooses an action, and so the object of potential optimisation.
-    An information set belonging to the chance player is instead called an event: its
-    probability distribution over actions is exogenously specified, not chosen.
+    Not exported; only `Infoset` and `Event` are part of the public API.
     """
-    infoset = cython.declare(c_GameInfoset)
+    node = cython.declare(c_GameNode)
 
     def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create an Infoset outside a Game.")
+        raise ValueError(f"Cannot create an {type(self).__name__} outside a Game.")
 
-    @staticmethod
     @cython.cfunc
-    def wrap(infoset: c_GameInfoset) -> Infoset:
-        obj: Infoset = Infoset.__new__(Infoset)
-        obj.infoset = infoset
-        return obj
+    def _try_resolve(self) -> c_GameInfoset:
+        """Returns the resolved handle, filtered to this subclass's applicable case;
+        null if that case does not currently apply at the anchoring node (including,
+        but not limited to, a terminal node)."""
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _resolve(self) -> c_GameInfoset:
+        """Returns the resolved handle, raising if this subclass's case does not
+        currently apply at the anchoring node."""
+        resolved: c_GameInfoset = self._try_resolve()
+        if resolved == cython.cast(c_GameInfoset, NULL):
+            raise AttributeError(
+                f"node's {type(self).__name__.lower()} is currently None"
+            )
+        return resolved
 
     def __repr__(self) -> str:
+        if self._try_resolve() == cython.cast(c_GameInfoset, NULL):
+            return "None"
+        name = type(self).__name__
         if self.label:
-            return f"Infoset(player={self.player}, label='{self.label}')"
+            return f"{name}(player={self.player}, label='{self.label}')"
         else:
-            return f"Infoset(player={self.player}, number={self.number})"
+            return f"{name}(player={self.player}, number={self.number})"
 
     def __eq__(self, other: typing.Any):
-        if not isinstance(other, Infoset):
+        if type(other) is not type(self):
             return NotImplemented
-        return self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
+        mine: c_GameInfoset = self._try_resolve()
+        theirs: c_GameInfoset = cython.cast(_InfosetOrEvent, other)._try_resolve()
+        if mine == cython.cast(c_GameInfoset, NULL) or theirs == cython.cast(c_GameInfoset, NULL):
+            return (
+                mine == cython.cast(c_GameInfoset, NULL) and
+                theirs == cython.cast(c_GameInfoset, NULL)
+            )
+        return mine == theirs
+
+    def __bool__(self) -> bool:
+        return self._try_resolve() != cython.cast(c_GameInfoset, NULL)
 
     def __hash__(self) -> int:
-        return cython.cast(cython.long, self.infoset.deref())
+        resolved: c_GameInfoset = self._try_resolve()
+        if resolved == cython.cast(c_GameInfoset, NULL):
+            return 0
+        return cython.cast(cython.long, resolved.deref())
 
     def precedes(self, node: Node) -> bool:
         """Return whether this information set precedes `node` in the game tree."""
-        return self.infoset.deref().Precedes(cython.cast(Node, node).node)
+        return self._resolve().deref().Precedes(cython.cast(Node, node).node)
 
     @property
     def game(self) -> Game:
         """The ``Game`` to which the information set belongs."""
-        return Game.wrap(self.infoset.deref().GetGame())
+        return Game.wrap(self._resolve().deref().GetGame())
 
     @property
     def label(self) -> str:
@@ -178,25 +100,18 @@ class Infoset:
             two consecutive whitespace characters.  "Whitespace" means any Unicode space
             separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
         """
-        return self.infoset.deref().GetLabel().decode("utf-8")
+        return self._resolve().deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.infoset.deref().SetLabel(value.encode("utf-8"))
+        self._resolve().deref().SetLabel(value.encode("utf-8"))
 
     @property
     def number(self) -> int:
         """Returns the number of the information set for its player.
         Information sets are numbered starting with 0.
         """
-        return self.infoset.deref().GetNumber() - 1
-
-    @property
-    def is_chance(self) -> bool:
-        """Whether the information set belongs to the chance player, i.e. is an event
-        rather than a decision.
-        """
-        return self.infoset.deref().IsChanceInfoset()
+        return self._resolve().deref().GetNumber() - 1
 
     @property
     def is_absent_minded(self) -> bool:
@@ -208,55 +123,98 @@ class Infoset:
 
         .. versionadded:: 16.5.0
         """
-        return self.infoset.deref().GetGame().deref().IsAbsentMinded(self.infoset)
+        resolved: c_GameInfoset = self._resolve()
+        return resolved.deref().GetGame().deref().IsAbsentMinded(resolved)
 
     @property
-    def actions(self) -> InfosetActions:
-        """The set of actions at the information set."""
-        return InfosetActions.wrap(self.infoset)
+    def actions(self) -> list[str]:
+        """The labels of the actions available at the information set, in order.
 
-    @property
-    def own_prior_actions(self) -> list[Action | None]:
-        """The set of actions taken by the player immediately preceding the member nodes
-        in the information set.
-
-        Returns
-        -------
-        list of Action or None
-            A list containing Action objects. If a node in the information set
-            is reached without the player having moved previously, None will be
-            included in the list.
-        .. versionadded:: 16.5.0
-
-        See Also
-        --------
-        Node.own_prior_action
+        .. versionchanged:: 17.0.0
+            Returns bare labels rather than ``Action`` objects, following its removal.
         """
-        c_actions: stdset[c_GameAction] = self.infoset.deref().GetOwnPriorActions()
-
-        return [
-            Action.wrap(action) if action != cython.cast(c_GameAction, NULL) else None
-            for action in c_actions
-        ]
+        resolved: c_GameInfoset = self._resolve()
+        return [a.deref().GetLabel().decode("utf-8") for a in resolved.deref().GetActions()]
 
     @property
-    def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set.
+    def members(self) -> list[Node]:
+        """The nodes which are members of the information set.
 
-        The iteration order of information set members is the order in which they
-        are encountered in the pre-order depth first traversal of the game tree.
+        The order of information set members is the order in which they are
+        encountered in the pre-order depth first traversal of the game tree.
+
+        .. versionchanged:: 17.0.0
+            Returns a plain ``list`` rather than a lazily-resolved collection; a
+            member is no longer accessible by label, following the removal of
+            ``Action``/``Strategy`` label-indexed collections elsewhere in the API.
         """
-        return InfosetMembers.wrap(self.infoset)
+        resolved: c_GameInfoset = self._resolve()
+        return [Node.wrap(member) for member in resolved.deref().GetMembers()]
 
     @property
-    def player(self) -> Player:
-        """The player who has the move at this information set."""
-        return Player.wrap(self.infoset.deref().GetPlayer())
+    def player(self) -> str:
+        """The label of the player who has the move at this information set."""
+        return self._resolve().deref().GetPlayer().deref().GetLabel().decode("utf-8")
 
-    @property
-    def plays(self) -> list[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
-        """
-        return [
-            Node.wrap(n) for n in self.infoset.deref().GetGame().deref().GetPlays(self.infoset)
-        ]
+
+@cython.cclass
+class Infoset(_InfosetOrEvent):
+    """An information set belonging to a personal player in a ``Game``: the point at
+    which that player chooses an action, and so the object of potential optimisation.
+    The corresponding concept for the chance player is an ``Event``.
+
+    A lazy, node-anchored view: holds a member node and resolves the information set
+    on each access, so the value reflects the current state of the game even after
+    the game is mutated. For a node currently belonging to no personal player's
+    information set (a terminal node, or a chance event -- see ``Node.event``), the
+    view is falsy and equals ``None``.
+
+    .. versionchanged:: 17.0.0
+        Now a node-anchored view (see ``Node.infoset``) rather than an object with
+        identity of its own; equality/hashing are still based on the information set
+        currently resolved, not on the anchoring node. No longer used for the chance
+        player's events; see ``Event``.
+    """
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> Infoset:
+        obj: Infoset = Infoset.__new__(Infoset)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _try_resolve(self) -> c_GameInfoset:
+        resolved: c_GameInfoset = self.node.deref().GetInfoset()
+        if resolved != cython.cast(c_GameInfoset, NULL) and resolved.deref().IsChanceInfoset():
+            return cython.cast(c_GameInfoset, NULL)
+        return resolved
+
+
+@cython.cclass
+class Event(_InfosetOrEvent):
+    """An event belonging to the chance player in a ``Game``: a point of exogenous
+    randomness, with a probability distribution over its actions that is specified
+    rather than chosen. The corresponding concept for a personal player is an
+    ``Infoset``.
+
+    A lazy, node-anchored view: holds a member node and resolves the event on each
+    access, so the value reflects the current state of the game even after the game
+    is mutated. For a node not currently belonging to a chance event (a terminal
+    node, or a personal player's information set -- see ``Node.infoset``), the view
+    is falsy and equals ``None``.
+
+    .. versionadded:: 17.0.0
+    """
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> Event:
+        obj: Event = Event.__new__(Event)
+        obj.node = node
+        return obj
+
+    @cython.cfunc
+    def _try_resolve(self) -> c_GameInfoset:
+        resolved: c_GameInfoset = self.node.deref().GetInfoset()
+        if resolved != cython.cast(c_GameInfoset, NULL) and not resolved.deref().IsChanceInfoset():
+            return cython.cast(c_GameInfoset, NULL)
+        return resolved

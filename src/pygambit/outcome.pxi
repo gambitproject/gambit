@@ -20,8 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import cython
-from cython.operator cimport dereference as deref
-from libcpp.memory cimport shared_ptr
 
 import typing
 
@@ -111,7 +109,7 @@ class Outcome:
         return self.outcome.deref().GetNumber() - 1
 
     def __getitem__(
-            self, player: Player | str
+            self, player: str
     ) -> decimal.Decimal | Rational:
         """The payoff to `player` at the outcome.
 
@@ -119,34 +117,34 @@ class Outcome:
 
         Raises
         ------
-        MismatchError
-            If `player` is a ``Player`` from a different game than the outcome.
+        KeyError
+            If no player of the outcome's game has label `player`.
         """
-        resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, "Outcome.__getitem__"))
+        game: Game = self.game
+        resolved_player: c_GamePlayer = game._resolve_player(player, "Outcome.__getitem__")
         payoff = (
-            self.outcome.deref().GetPayoff[string](resolved_player.player).decode("ascii")
+            self.outcome.deref().GetPayoff[string](resolved_player).decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
         else:
             return Rational(payoff)
 
-    def __setitem__(self, player: Player | str, value: typing.Any) -> None:
+    def __setitem__(self, player: str, value: typing.Any) -> None:
         """Set the payoff to `player` at the outcome.
 
         Parameters
         ----------
-        player : Player or str
-            A reference to the player for which to set the payoff.
+        player : str
+            The label of the player for which to set the payoff.
         value : Any
             The value of the payoff.  This can be any numeric type, or any object that
             has a string representation which can be interpreted as a number.
 
         Raises
         ------
-        MismatchError
-            If `player` is a ``Player`` from a different game than the outcome.
+        KeyError
+            If no player of the outcome's game has label `player`.
         ValueError
             If `value` cannot be interpreted as a number.
         UndefinedOperationError
@@ -157,6 +155,6 @@ class Outcome:
                 "Payoffs cannot be set on the null outcome; "
                 "use Game.make_outcome to create and attach an outcome"
             )
-        resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, "Outcome.__setitem__"))
-        self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))
+        game: Game = self.game
+        resolved_player: c_GamePlayer = game._resolve_player(player, "Outcome.__setitem__")
+        self.outcome.deref().SetPayoff(resolved_player, _to_number(value))

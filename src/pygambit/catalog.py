@@ -420,14 +420,19 @@ def games(
         if n_actions is not None:
             if not game.is_tree:
                 return False
-            if len(game.actions) != n_actions:
+            n_game_actions = sum(
+                len(node.infoset.actions)
+                for player in game.players
+                for node in game.get_infosets(player)
+            )
+            if n_game_actions != n_actions:
                 return False
         if n_contingencies is not None and len(game.contingencies) != n_contingencies:
             return False
         if n_infosets is not None:
             if not game.is_tree:
                 return False
-            if len(game.infosets) != n_infosets:
+            if sum(len(game.get_infosets(p)) for p in game.players) != n_infosets:
                 return False
         if is_const_sum is not None and game.is_const_sum != is_const_sum:
             return False
@@ -448,7 +453,7 @@ def games(
             return False
         if n_players is not None and len(game.players) != n_players:
             return False
-        total_strategies = sum(len(list(p.strategies)) for p in game.players)
+        total_strategies = sum(len(game.get_strategies(p)) for p in game.players)
         return not (n_strategies is not None and total_strategies != n_strategies)
 
     def append_record(
