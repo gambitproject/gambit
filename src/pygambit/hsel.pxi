@@ -44,6 +44,31 @@ class _PlaysStep:
         return "_PlaysStep()"
 
 
+class _AfterStep:
+    """One `.after(*labels)` operation: an unconstrained (possibly empty)
+    prefix, then exactly these trailing labels. As the first op in a
+    Selector, matches anywhere in the whole game, not just root's frontier --
+    the natural counterpart to `.path(...)`'s root anchoring. Chained onto an
+    existing selection, it's a pure filter: no new nodes are considered, just
+    whichever already-selected ones end in this suffix."""
+
+    def __init__(self, labels: tuple) -> None:
+        self.labels = labels
+
+    def __repr__(self) -> str:
+        return f"_AfterStep(labels={self.labels!r})"
+
+
+def _matches_suffix(node: Node, labels: tuple) -> bool:
+    """Whether `node`'s own history ends with exactly `labels`."""
+    current: Node = node
+    for label in reversed(labels):
+        if current.parent is None or current.prior_action.label != label:
+            return False
+        current = current.parent
+    return True
+
+
 class Selector:
     """A game-neutral description of a set of nodes.  Carries no reference to
     any game -- it's just a recipe, evaluated only when handed to a Game
@@ -74,6 +99,11 @@ class Selector:
         each already-selected node."""
         return self._extend(_PlaysStep())
 
+    def after(self, *labels: str) -> Selector:
+        """Filter this selection to just the elements whose own trailing
+        labels are exactly `labels`, whatever came before them."""
+        return self._extend(_AfterStep(labels))
+
 
 class H:
     """Namespace of seed constructors for the node-selector algebra.  Not
@@ -93,6 +123,14 @@ class H:
         the root itself.
         """
         return Selector().path(*steps)
+
+    @staticmethod
+    def after(*labels: str) -> Selector:
+        """Anywhere in the whole game whose own trailing labels are exactly
+        `labels`, whatever came before them -- the suffix-anchored
+        counterpart to the root-anchored `.path(...)`.
+        """
+        return Selector().after(*labels)
 
     plays: Selector = Selector((_PlaysStep(),))
     """All currently-terminal nodes in the whole game."""
