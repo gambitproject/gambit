@@ -553,8 +553,44 @@ class Game:
 
         By convention, games with a strategic representation have perfect recall as they
         are treated as simultaneous-move games.
+
+        See Also
+        --------
+        Game.has_perfect_recall
         """
         return self.game.deref().IsPerfectRecall()
+
+    def has_perfect_recall(self, player: str) -> bool:
+        """Returns whether `player` has perfect recall.
+
+        A player has perfect recall if, at each of the player's information sets, every
+        member node is reached by the same sequence of the player's own prior actions;
+        that is, the player never forgets an action they took previously, nor information
+        they previously knew.  A game has perfect recall if and only if every player does.
+
+        By convention, in games with a strategic representation every player has perfect
+        recall as such games are treated as simultaneous-move games.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : str
+            The label of the player.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+
+        See Also
+        --------
+        Game.is_perfect_recall
+        """
+        resolved_player = self._resolve_player(player, "has_perfect_recall")
+        return self.game.deref().HasPerfectRecall(resolved_player)
 
     @property
     def min_payoff(self) -> decimal.Decimal | Rational:
