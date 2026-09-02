@@ -69,6 +69,20 @@ def _matches_suffix(node: Node, labels: tuple) -> bool:
     return True
 
 
+class _FilterStep:
+    """One `.filter(callable)` operation: keep only elements where
+    `predicate`, given a HistoryView, returns something truthy. Chained-only
+    -- unlike `.after(...)`, there's no natural "whole game" domain for a
+    bare predicate to start from, so it's not exposed as an `H.filter(...)`
+    seed."""
+
+    def __init__(self, predicate: typing.Callable) -> None:
+        self.predicate = predicate
+
+    def __repr__(self) -> str:
+        return f"_FilterStep(predicate={self.predicate!r})"
+
+
 class Selector:
     """A game-neutral description of a set of nodes.  Carries no reference to
     any game -- it's just a recipe, evaluated only when handed to a Game
@@ -103,6 +117,15 @@ class Selector:
         """Filter this selection to just the elements whose own trailing
         labels are exactly `labels`, whatever came before them."""
         return self._extend(_AfterStep(labels))
+
+    def filter(self, predicate: typing.Callable) -> Selector:
+        """Keep only the elements of this selection where `predicate`,
+        called once per element with a read-only `HistoryView` of it,
+        returns something truthy. The general escape hatch for a filter
+        `.after(...)`'s label-pattern matching can't express -- e.g.
+        anything needing `.last_action(player)` rather than a plain
+        trailing-label match."""
+        return self._extend(_FilterStep(predicate))
 
     def by(self, key: typing.Callable) -> GroupedSelector:
         """Partition this selection by `key`, called once per element with a

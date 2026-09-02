@@ -571,6 +571,11 @@ class Game:
                     )
             elif isinstance(op, _PlaysStep):
                 current = [play for node in current for play in node.plays]
+            elif isinstance(op, _FilterStep):
+                current = [
+                    node for node in current
+                    if op.predicate(HistoryView._wrap(node, _history_of(node)))
+                ]
             else:
                 raise TypeError(f"get_nodes(): unknown selector op {op!r}")
         if current is None:
