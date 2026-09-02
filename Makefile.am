@@ -363,13 +363,14 @@ AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 ## recompiling the same core/games/solver sources from scratch.
 
 noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
-	libliap.a liblogit.a libsimpdiv.a libenumpoly.a
+	libliap.a liblogit.a libsimpdiv.a libenumpoly.a libhp.a
 
 libcore_a_SOURCES = ${core_SOURCES}
 libgames_a_SOURCES = ${game_SOURCES}
 libbimatrix_a_SOURCES = ${bimatrix_SOURCES}
 libgtracer_a_SOURCES = ${gtracerlib_SOURCES}
 libliap_a_SOURCES = ${liap_SOURCES}
+libhp_a_SOURCES = ${hp_SOURCES}
 liblogit_a_SOURCES = ${logit_SOURCES}
 libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
 libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
@@ -450,7 +451,7 @@ gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
 gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
 gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
-	libsimpdiv.a libenumpoly.a libgames.a libcore.a
+	libsimpdiv.a libenumpoly.a libhp.a libgames.a libcore.a
 
 gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
 

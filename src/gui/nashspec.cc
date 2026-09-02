@@ -26,6 +26,7 @@
 #include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpure/enumpure.h"
 #include "solvers/gnm/gnm.h"
+#include "solvers/hp/hp.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/lcp/lcp.h"
 #include "solvers/liap/liap.h"
@@ -91,6 +92,21 @@ std::optional<SolverFunction> GNMNashSpec::MakeSolver(NashRepresentation) const
           spec.localNewtonMaxIterations,
           [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
           Nash::NullGNMEventCallback, p_cancel);
+    }
+  };
+}
+
+std::optional<SolverFunction> HPNashSpec::MakeSolver(NashRepresentation) const
+{
+  const HPNashSpec spec = *this;
+  return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                const CancelToken &p_cancel) {
+    for (const auto &prior : NewRandomStrategyProfiles(p_game, spec.priors)) {
+      p_cancel.Check();
+      Nash::HPStrategySolve(
+          prior,
+          [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
+          Nash::NullHPEventCallback, p_cancel);
     }
   };
 }
@@ -178,7 +194,7 @@ std::optional<SolverFunction> LogitNashSpec::MakeSolver(NashRepresentation p_rep
                   const CancelToken &p_cancel) {
       const LogitQREMixedBehaviorProfile start(p_game);
       LogitBehaviorSolve(
-          start, spec.maxRegret, spec.omega, spec.firstStep, spec.maxAcceleration,
+          start, spec.maxRegret, spec.direction, spec.firstStep, spec.maxAcceleration,
           [&p_callback](const MixedBehaviorProfile<double> &p) { p_callback(ComputedProfile(p)); },
           NullLogitEventCallback<LogitQREMixedBehaviorProfile>, p_cancel);
     };
@@ -187,7 +203,7 @@ std::optional<SolverFunction> LogitNashSpec::MakeSolver(NashRepresentation p_rep
                 const CancelToken &p_cancel) {
     const LogitQREMixedStrategyProfile start(p_game);
     LogitStrategySolve(
-        start, spec.maxRegret, spec.omega, spec.firstStep, spec.maxAcceleration,
+        start, spec.maxRegret, spec.direction, spec.firstStep, spec.maxAcceleration,
         [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
         NullLogitEventCallback<LogitQREMixedStrategyProfile>, p_cancel);
   };

@@ -87,8 +87,8 @@ struct BehavLogitTraits {
                     const CancelToken &p_cancel)
   {
     const QREType start(p_game);
-    LogitBehaviorSolve(start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullBehaviorCallback<double>,
-                       p_onEvent, p_cancel);
+    LogitBehaviorSolve(start, 1.0e-8, PathTracer::TraceDirection::Positive, 0.03, 1.1,
+                       Nash::NullBehaviorCallback<double>, p_onEvent, p_cancel);
   }
 };
 
@@ -123,8 +123,8 @@ struct MixedLogitTraits {
                     const CancelToken &p_cancel)
   {
     const QREType start(p_game);
-    LogitStrategySolve(start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullStrategyCallback<double>,
-                       p_onEvent, p_cancel);
+    LogitStrategySolve(start, 1.0e-8, PathTracer::TraceDirection::Positive, 0.03, 1.1,
+                       Nash::NullStrategyCallback<double>, p_onEvent, p_cancel);
   }
 };
 
