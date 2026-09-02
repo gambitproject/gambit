@@ -1696,6 +1696,36 @@ LIAP_STRATEGY_CASES = [
 ]
 
 
+HP_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(data=[[0.5, 0.5], [2.0 / 3.0, 1.0 / 3.0]], rational=False),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_herings_peeters_example",
+    ),
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(
+                data=[[1.0 / 3.0, 2.0 / 3.0], [1.0 / 6.0, 5.0 / 6.0]], rational=False
+            ),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_hs_example_1",
+    ),
+]
+
+
 SIMPDIV_CASES = [
     pytest.param(
         EquilibriumTestCaseWithStart(
@@ -1718,6 +1748,7 @@ SIMPDIV_CASES = [
 
 CASES = []
 CASES += LIAP_STRATEGY_CASES
+CASES += HP_STRATEGY_CASES
 CASES += SIMPDIV_CASES
 
 
@@ -1746,6 +1777,23 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
                     eq_prob = eq[player][strategy]
                     exp_prob = expected[player][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
+
+
+@pytest.mark.nash
+@pytest.mark.nash_hp_strategy
+def test_hp_degenerate_t0_prior_raises_error() -> None:
+    """hp_solve() rejects a prior without a unique best response for some player at t=0,
+    rather than picking one of the tied best responses arbitrarily.
+    """
+    game = games.create_hs1988_base_game()
+    prior = game.mixed_strategy_profile(
+        data=[[2.0 / 3.0, 1.0 / 3.0], [1.0 / 3.0, 2.0 / 3.0]], rational=False
+    )
+    with pytest.raises(
+        RuntimeError,
+        match="Multiple best responses found for player 1. Only one best response is allowed.",
+    ):
+        gbt.nash.hp_solve(prior)
 
 
 ##################################################################################################
