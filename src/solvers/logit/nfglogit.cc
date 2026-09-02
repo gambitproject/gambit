@@ -25,7 +25,7 @@
 
 #include "games.h"
 #include "logit.h"
-#include "path.h"
+#include "solvers/path/path.h"
 
 namespace Gambit {
 

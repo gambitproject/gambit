@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/solvers/logit/path.cc
+// FILE: src/solvers/path/path.cc
 // Implementation of generic smooth path-following algorithm.
 //
 // This program is free software; you can redistribute it and/or modify

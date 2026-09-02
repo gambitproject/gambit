@@ -23,7 +23,7 @@
 #include "gambit.h"
 #include "solvers/hp/hp.h"
 #include "solvers/hp/hpsystem.h"
-#include "solvers/logit/path.h"
+#include "solvers/path/path.h"
 
 namespace Gambit::Nash {
 std::list<MixedStrategyProfile<double>>

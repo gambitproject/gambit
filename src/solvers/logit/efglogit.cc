@@ -26,7 +26,7 @@
 #include "games.h"
 #include "logit.h"
 #include "logbehav.imp"
-#include "path.h"
+#include "solvers/path/path.h"
 
 namespace {
 

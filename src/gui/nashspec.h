@@ -30,8 +30,8 @@
 #include "core/matrix.h"
 #include "core/rational.h"
 #include "core/vector.h"
-#include "solvers/logit/path.h"
 #include "solvers/nash.h"
+#include "solvers/path/path.h"
 
 namespace Gambit::GUI {
 

@@ -26,8 +26,8 @@
 #include <functional>
 #include <variant>
 
-#include "solvers/logit/path.h"
 #include "solvers/nash.h"
+#include "solvers/path/path.h"
 
 namespace Gambit {
 

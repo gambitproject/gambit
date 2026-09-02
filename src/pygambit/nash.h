@@ -23,7 +23,7 @@
 #include "solvers/enummixed/enummixed.h"
 #include "solvers/hp/hp.h"
 #include "solvers/logit/logit.h"
-#include "solvers/logit/path.h"
+#include "solvers/path/path.h"
 
 using namespace std;
 using namespace Gambit;
