@@ -2185,7 +2185,8 @@ class Game:
             A node belonging to the information set or event of the move to reveal
             to the player, or such a node's label.
         player : str
-            The label of the player to which to reveal the move at this information set.
+            The label of the player to which to reveal the move at this information
+            set or event.
 
         Raises
         ------
@@ -2203,7 +2204,7 @@ class Game:
         if resolved_infoset.is_absent_minded:
             raise UndefinedOperationError(
                 "reveal(): revealing the move at an absent-minded information set "
-                "is not well-defined"
+                "or event is not well-defined"
             )
         self.game.deref().Reveal(resolved_infoset._resolve(), resolved_player)
 

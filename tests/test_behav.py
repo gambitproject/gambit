@@ -768,12 +768,31 @@ def test_absent_minded_infoset_prob(
 
 @pytest.mark.parametrize("rational_flag", [False, True])
 def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
-    """The chance root infoset is reached with probability one."""
+    """The chance event at the root is reached with probability one."""
     game = gbt.catalog.load("journals/geb/gilboa1997/fig2")
     profile = game.mixed_behavior_profile(rational=rational_flag)
     one = gbt.Rational(1) if rational_flag else 1.0
     assert profile.realiz_probs[game.root] == one
-    assert profile.infoset_probs[game.root] == one
+    assert profile.event_probs[game.root] == one
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_infoset_probs_and_event_probs_partition_by_kind(rational_flag: bool):
+    """`infoset_probs` covers exactly the personal players' information sets and
+    `event_probs` exactly the chance player's events; each rejects the other kind."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    infoset_probs = profile.infoset_probs
+    event_probs = profile.event_probs
+    assert isinstance(event_probs, gbt.EventProbVector)
+    assert len(list(infoset_probs)) == len(games.all_infosets(game))
+    assert len(list(event_probs)) == len(game.get_events())
+    (event_node,) = game.get_events()
+    personal_node = next(iter(games.all_infosets(game)[0].members))
+    with pytest.raises(KeyError, match="no information set for"):
+        infoset_probs[event_node]
+    with pytest.raises(KeyError, match="no event for"):
+        event_probs[personal_node]
 
 
 @pytest.mark.parametrize(
@@ -956,13 +975,13 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
                     == best_response_value - infoset_action_values[action]
                 )
 
+    event_probs = profile.event_probs
     for node in game.nodes:
         if node.is_terminal:
             continue
-        if infoset_probs[node] == 0:
+        reach_prob = infoset_probs[node] if node.infoset else event_probs[node]
+        if reach_prob == 0:
             assert beliefs[node] is None
-        else:
-            assert beliefs[node] is not None
 
     # equal to an equivalent plain dict or same-type vector, but never to a vector of a
     # different quantity, even where the underlying numbers happen to coincide
