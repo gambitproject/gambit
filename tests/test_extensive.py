@@ -97,6 +97,31 @@ def test_is_perfect_recall(game_input, expected_result: bool):
     assert game.is_perfect_recall == expected_result
 
 
+@pytest.mark.parametrize("game_input,expected_result", [
+    (gbt.catalog.load("journals/geb/wichardt2008"), {"Player 1": False, "Player 2": True}),
+    ("noPR-information-no-deflate.efg", {"Player 1": True, "Player 2": False}),
+    ("noPR-action-AM.efg", {"Player 1": False, "Player 2": True}),
+    ("stripped_down_poker.efg", {"Alice": True, "Bob": True}),
+    ("gilboa_two_am_agents.efg", {"Player 1": False, "Player 2": True}),
+    ("2x2.agg", {"1": True, "2": True}),
+])
+def test_has_perfect_recall(game_input, expected_result: dict):
+    """
+    Verify the HasPerfectRecall implementation, for individual players, against games
+    with and without perfect recall, and in each representation.
+    """
+    game = (games.read_from_file(game_input) if isinstance(game_input, str) else game_input)
+    assert set(game.players) == set(expected_result)
+    for player, expected in expected_result.items():
+        assert game.has_perfect_recall(player) == expected
+
+
+def test_has_perfect_recall_trivial_game():
+    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    assert game.has_perfect_recall("Alice")
+    assert game.has_perfect_recall("Bob")
+
+
 def test_getting_payoff_by_label_string():
     game = games.read_from_file("sample_extensive_game.efg")
     s1 = game.get_strategies("Player 1")

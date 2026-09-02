@@ -1248,6 +1248,14 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the player has perfect recall
+  virtual bool HasPerfectRecall(const GamePlayer &p_player) const
+  {
+    if (p_player->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return true;
+  }
   /// Returns true if the information set is absent-minded
   virtual bool IsAbsentMinded(const GameInfoset &p_infoset) const
   {
