@@ -599,12 +599,37 @@ class Game:
         """Internal: like `get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
         need to resolve straight back to concrete nodes, avoiding a
-        Node -> History -> Node round trip."""
+        Node -> History -> Node round trip.
+
+        Applies `grouped`'s initial partition (`base`/`key`), then its
+        `post_ops` in order, each one per-group -- expanding/filtering each
+        group's own members independently, leaving the key untouched, except
+        that a `.plays` step refines the key by `recall_player`'s last action
+        at that point, if `with_recall` set one (see `GroupedSelector`'s
+        docstring for why).
+        """
         result: dict = {}
         for node in self.get_nodes(grouped.base):
             view: HistoryView = HistoryView._wrap(node, _history_of(node))
             key = grouped.key(view)
             result.setdefault(key, []).append(node)
+        for op in grouped.post_ops:
+            next_result: dict = {}
+            for key, nodes in result.items():
+                if isinstance(op, _PlaysStep):
+                    expanded = [play for node in nodes for play in node.plays]
+                    if grouped.recall_player is None:
+                        next_result[key] = expanded
+                    else:
+                        for play in expanded:
+                            refined_key = (key, _last_action(play, grouped.recall_player))
+                            next_result.setdefault(refined_key, []).append(play)
+                    continue
+                if isinstance(op, _AfterStep):
+                    next_result[key] = [n for n in nodes if _matches_suffix(n, op.labels)]
+                    continue
+                raise TypeError(f"_group_nodes(): unknown post-op {op!r}")
+            result = next_result
         return result
 
     def get_groups(self, grouped: GroupedSelector) -> dict:
@@ -1567,6 +1592,8 @@ class Game:
         """
         if isinstance(nodes, GroupedSelector):
             for group in self._group_nodes(nodes).values():
+                if not group:
+                    continue
                 self.append_move(group, player, actions)
             return
         resolved_player = self._resolve_player(player, "append_move")

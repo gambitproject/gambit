@@ -135,20 +135,64 @@ class Selector:
 
 
 class GroupedSelector:
-    """Result of `.by(callable)`.  Game-neutral until evaluated -- iterate
-    the evaluated result (`Game.get_groups`) as `(key, group)` pairs.  No
-    further chaining yet (`.plays`/`.after(...)` applied per-group) --
-    deferred until a concrete need for it shows up.
+    """Result of `.by(callable)`.  Game-neutral until evaluated -- call
+    `Game.get_groups` and iterate its result as `(key, group)` pairs.
+
+    `.plays`/`.after(...)` chain onto a `GroupedSelector` the same way they
+    chain onto a plain `Selector`, but apply per-group: each group's own
+    members are expanded/filtered independently, and the group's key is left
+    untouched -- expanding past a decision point doesn't retroactively change
+    what a group was keyed by. `.with_recall(player)` is the one exception:
+    once set, every subsequent `.plays` on this selector *also* refines each
+    group's key by folding in `player`'s last action at that point, so a
+    partition built for one decision stays a valid recall-respecting
+    partition when reused for a later one, without the caller needing to
+    re-derive or manually re-key it. Scoped to `.plays` specifically for now
+    (not every expand-style op) -- narrower than the full "any expand-style
+    step" idea from the design notes, not yet stress-tested against a shape
+    that would need more.
 
     .. versionadded:: 17.0.0
     """
 
-    def __init__(self, base: Selector, key: typing.Callable) -> None:
+    def __init__(
+        self,
+        base: Selector,
+        key: typing.Callable,
+        post_ops: tuple = (),
+        recall_player: str = None,
+    ) -> None:
         self.base = base
         self.key = key
+        self.post_ops = post_ops
+        self.recall_player = recall_player
 
     def __repr__(self) -> str:
-        return f"GroupedSelector(base={self.base!r}, key={self.key!r})"
+        return (
+            f"GroupedSelector(base={self.base!r}, key={self.key!r}, "
+            f"post_ops={self.post_ops!r}, recall_player={self.recall_player!r})"
+        )
+
+    def _extend(self, op) -> GroupedSelector:
+        return GroupedSelector(self.base, self.key, self.post_ops + (op,), self.recall_player)
+
+    @property
+    def plays(self) -> GroupedSelector:
+        """The current terminal frontier of each group, independently --
+        see the class docstring for how this interacts with
+        `.with_recall(player)`."""
+        return self._extend(_PlaysStep())
+
+    def after(self, *labels: str) -> GroupedSelector:
+        """Filter each group to just the members whose own trailing labels
+        are exactly `labels`, whatever came before them."""
+        return self._extend(_AfterStep(labels))
+
+    def with_recall(self, player: str) -> GroupedSelector:
+        """From here on, every `.plays` on this selector also refines each
+        group's key by folding in `player`'s last action at that point --
+        see the class docstring."""
+        return GroupedSelector(self.base, self.key, self.post_ops, player)
 
 
 def _history_of(node: Node) -> tuple:
@@ -195,12 +239,19 @@ class HistoryView:
     def last_action(self, player: str) -> str | None:
         """The label of the last action `player` took on the path to this
         history, wherever it fell -- `None` if `player` hasn't acted yet."""
-        current: Node = self._node
-        while current.parent is not None:
-            if current.parent.player == player:
-                return current.prior_action.label
-            current = current.parent
-        return None
+        return _last_action(self._node, player)
+
+
+def _last_action(node: Node, player: str) -> str | None:
+    """The label of the last action `player` took on the path to `node`,
+    wherever it fell -- `None` if `player` hasn't acted yet. Shared between
+    `HistoryView.last_action` and `.with_recall(player)`'s evaluation."""
+    current: Node = node
+    while current.parent is not None:
+        if current.parent.player == player:
+            return current.prior_action.label
+        current = current.parent
+    return None
 
 
 class H:
