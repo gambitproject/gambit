@@ -17,6 +17,46 @@ def test_make_outcome_attaches_to_all_given_nodes():
     assert outcome["Bob"] == -1
 
 
+def test_make_outcome_accepts_selector():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    outcome = game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
+    assert up.outcome == outcome
+    assert not middle.outcome
+    assert not down.outcome
+
+
+def test_make_outcome_accepts_selector_matching_several_nodes():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    outcome = game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
+    assert up.outcome == outcome
+    assert middle.outcome == outcome
+    assert down.outcome == outcome
+
+
+def test_make_outcome_accepts_history_tuple():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    outcome = game.make_outcome(("U",), {"Alice": 1, "Bob": -1}, "shared")
+    assert up.outcome == outcome
+    assert not middle.outcome
+    assert not down.outcome
+
+
+def test_make_outcome_accepts_iterable_of_history_tuples():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    outcome = game.make_outcome([("U",), ("M",)], {"Alice": 1, "Bob": -1}, "shared")
+    assert up.outcome == outcome
+    assert middle.outcome == outcome
+    assert not down.outcome
+
+
 def test_make_outcome_attaches_at_contingencies():
     game = gbt.Game.new_table([2, 2])
     outcome = game.make_outcome(
@@ -94,6 +134,28 @@ def test_make_outcome_null_resets_given_nodes_to_null():
     up, middle, down = game.root.children
     game.make_outcome([up, middle], {"Alice": 1, "Bob": -1}, "shared")
     game.make_outcome_null(up)
+    assert not up.outcome
+    assert middle.outcome
+    assert not down.outcome
+
+
+def test_make_outcome_null_accepts_selector():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    game.make_outcome([up, middle], {"Alice": 1, "Bob": -1}, "shared")
+    game.make_outcome_null(gbt.H.path("U"))
+    assert not up.outcome
+    assert middle.outcome
+    assert not down.outcome
+
+
+def test_make_outcome_null_accepts_history_tuple():
+    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game.append_move(game.root, "Alice", ["U", "M", "D"])
+    up, middle, down = game.root.children
+    game.make_outcome([up, middle], {"Alice": 1, "Bob": -1}, "shared")
+    game.make_outcome_null(("U",))
     assert not up.outcome
     assert middle.outcome
     assert not down.outcome
