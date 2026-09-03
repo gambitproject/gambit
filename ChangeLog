@@ -3,6 +3,12 @@
 ### Added
 - Added `Game.has_perfect_recall(player)`, and `GameRep::HasPerfectRecall(const GamePlayer &)`
   in C++, reporting whether an individual player has perfect recall.  (#1107)
+- Added `MixedBehaviorProfile.event_probs`, returning the probability with which each of
+  the chance player's events is reached, as an `EventProbVector`.  (#1109)
+
+### Changed
+- `MixedBehaviorProfile.infoset_probs` now covers only the personal players' information sets,
+  as `infoset_values` and `infoset_regrets`; the chance player's events moved to `event_probs`.  (#1109)
 
 ## [17.0.0-alpha.3] - 2026-08-31
 
