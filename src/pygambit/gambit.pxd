@@ -346,7 +346,6 @@ cdef extern from "games/game.h":
                                   string) except +ValueError
         void MakeOutcomeNull(stdvector[c_GameNode]) except +ValueError
         void MakeOutcomeNull(stdvector[stdvector[c_GameStrategy]]) except +ValueError
-        void Reveal(c_GameInfoset, c_GamePlayer) except +
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
         void SetEventActions(c_GameInfoset, stdvector[string],

@@ -74,7 +74,6 @@ Transforming game information structure
    Game.relabel_actions
    Game.set_move_actions
    Game.set_event_actions
-   Game.reveal
 
 
 Transforming game components

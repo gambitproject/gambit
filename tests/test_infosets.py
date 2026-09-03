@@ -451,27 +451,3 @@ def test_infoset_members_is_a_plain_snapshot_list():
     game.make_infoset(gbt.H.path("U1"), node.player)
     assert len(members) == 2
     assert list(node.infoset.members) == [node]
-
-
-def test_reveal_splits_infoset_by_action():
-    """Revealing the deal to Bob separates his single infoset into per-card
-    singletons; the other player's structure is untouched."""
-    game = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
-    n_alice = len(game.get_infosets("Alice"))
-    assert len(game.get_infosets("Bob")) == 1
-    game.reveal(game.root, "Bob")
-    bob = game.get_infosets("Bob")
-    assert len(bob) == 2
-    assert all(len(list(n.infoset.members)) == 1 for n in bob)
-    assert len(game.get_infosets("Alice")) == n_alice
-
-
-def test_reveal_absent_minded_infoset_raises():
-    """Revealing the move at an absent-minded infoset is rejected (17.0)."""
-    game = gbt.Game.new_tree(players=["Driver", "2"])
-    game.append_move(gbt.H.path(), "Driver", ["Continue", "Exit"])
-    game.append_move(gbt.H.path("Continue"), "Driver", ["Continue", "Exit"])
-    game.make_infoset(gbt.H.after().filter(lambda h: h[:] in ((), ("Continue",))), "Driver")
-    game.append_move(gbt.H.path("Continue", "Continue"), "2", ["l", "r"])
-    with pytest.raises(gbt.UndefinedOperationError):
-        game.reveal(game.root, "2")

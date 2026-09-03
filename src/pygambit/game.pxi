@@ -2480,49 +2480,6 @@ class Game:
             c_nodes.push_back(cython.cast(Node, n).node)
         self.game.deref().MakeInfoset(c_nodes, resolved_player, (label or "").encode())
 
-    def reveal(self,
-               infoset: NodeReference,
-               player: str) -> None:
-        """Reveals the move made at the information set or event `infoset` to `player`.
-
-        Revealing the move modifies all subsequent information sets for `player` such
-        that any two nodes which are successors of two different actions at this
-        information set are placed in different information sets for `player`.
-
-        Revelation is a one-shot operation; it is not enforced with respect to any
-        revisions made to the game tree subsequently.
-
-        .. versionchanged:: 17.0.0
-            Revealing the move at an absent-minded information set is not permitted.
-
-        Parameters
-        ----------
-        infoset : Node or str
-            A node belonging to the information set or event of the move to reveal
-            to the player, or such a node's label.
-        player : str
-            The label of the player to which to reveal the move at this information set.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
-        KeyError
-            If no player in the game has label `player`.
-        UndefinedOperationError
-            If `infoset` is absent-minded.
-        """
-        resolved_infoset = cython.cast(
-            _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "reveal")
-        )
-        resolved_player = self._resolve_player(player, "reveal")
-        if resolved_infoset.is_absent_minded:
-            raise UndefinedOperationError(
-                "reveal(): revealing the move at an absent-minded information set "
-                "is not well-defined"
-            )
-        self.game.deref().Reveal(resolved_infoset._resolve(), resolved_player)
-
     def set_players(self,
                     players: list[str],
                     drop: bool = False,
