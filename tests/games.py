@@ -33,6 +33,25 @@ def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Infoset:
     return next(i for i in all_infosets(game) if i.label == label)
 
 
+def _node_history(node: gbt.Node) -> tuple:
+    """The plain-tuple history of `node`, walked via `.parent`/`.prior_action`."""
+    labels = []
+    current = node
+    while current.parent is not None:
+        labels.append(current.prior_action.label)
+        current = current.parent
+    labels.reverse()
+    return tuple(labels)
+
+
+def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
+    """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
+    nodes -- for adapting fixtures that compute a `Node` list dynamically to the
+    `H`-only mutation methods."""
+    histories = frozenset(_node_history(n) for n in nodes)
+    return gbt.H.after().filter(lambda h: h[:] in histories)
+
+
 # Label-validation fixtures.
 # VALID: accepted by the C++ validator (IsValidLabel in src/games/game.h), including
 #        well-formed UTF-8 text (#862, 17.0.0). A single Unicode whitespace character
@@ -724,7 +743,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             if not n.is_terminal and not n.children["L"].is_terminal:
                 left = n.children["L"]
                 g.make_infoset(
-                    list(left.infoset.members) + [n.children["R"]],
+                    selector_for_nodes(list(left.infoset.members) + [n.children["R"]]),
                     left.infoset.player,
                     left.infoset.label or None,
                 )

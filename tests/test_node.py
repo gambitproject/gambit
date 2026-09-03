@@ -633,7 +633,7 @@ def test_node_infoset_becomes_null_when_truncated():
     node = game.root.children["U1"]
     proxy = node.infoset
     assert proxy
-    game.delete_tree(node)
+    game.delete_tree(gbt.H.path("U1"))
     assert not proxy
 
 
@@ -641,7 +641,7 @@ def test_node_delete_parent():
     """Test to ensure deleting a parent node works"""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"]
-    game.delete_parent(node)
+    game.delete_parent(gbt.H.path("U1"))
     assert game.root == node
 
 
@@ -649,7 +649,7 @@ def test_node_delete_tree():
     """Test to ensure deleting every child of a node works"""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"]
-    game.delete_tree(node)
+    game.delete_tree(gbt.H.path("U1"))
     assert len(node.children) == 0
 
 
@@ -657,19 +657,7 @@ def test_node_copy_nonterminal():
     """Test on copying to a nonterminal node."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.copy_tree(game.root, game.root)
-
-
-def test_node_copy_across_games():
-    """Test to ensure a gbt.MismatchError is raised when trying to copy a tree
-    from a different game.
-    """
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.copy_tree(game1.root, game2.root)
-    with pytest.raises(gbt.MismatchError):
-        game1.copy_tree(game2.root, game1.root)
+        game.copy_tree(gbt.H.path(), gbt.H.path())
 
 
 def _subtrees_equal(
@@ -706,7 +694,7 @@ def test_copy_tree_onto_nondescendent_terminal_node():
     src_node = g.root.children["R"].children["L"]
     dest_node = g.root.children["R"].children["R"]
 
-    g.copy_tree(src_node, dest_node)
+    g.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
 
     assert _subtrees_equal(src_node, dest_node)
 
@@ -717,7 +705,7 @@ def test_copy_tree_onto_descendent_terminal_node():
     src_node = g.root.children["R"]
     dest_node = g.root.children["R"].children["L"].children["R"]
 
-    g.copy_tree(src_node, dest_node)
+    g.copy_tree(gbt.H.path("R"), gbt.H.path("R", "L", "R"))
 
     assert _subtrees_equal(src_node, dest_node, dest_node)
 
@@ -726,26 +714,14 @@ def test_node_move_nonterminal():
     """Test on moving to a nonterminal node."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.move_tree(game.root, game.root)
+        game.move_tree(gbt.H.path(), gbt.H.path())
 
 
 def test_node_move_successor():
     """Test on moving a node to one of its successors."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.move_tree(game.root, game.root.children["U1"].children["U2"].children["U3"])
-
-
-def test_node_move_across_games():
-    """Test to ensure a gbt.MismatchError is raised when trying to move a tree
-    between different games.
-    """
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.move_tree(game1.root, game2.root)
-    with pytest.raises(gbt.MismatchError):
-        game1.move_tree(game2.root, game1.root)
+        game.move_tree(gbt.H.path(), gbt.H.path("U1", "U2", "U3"))
 
 
 def test_append_move_creates_single_infoset_list_of_nodes():
@@ -1020,7 +996,7 @@ def test_len_after_delete_tree():
     root_of_the_deleted_subtree = game.root.children["R"].children["L"]
     number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree, True) - 1
 
-    game.delete_tree(root_of_the_deleted_subtree)
+    game.delete_tree(gbt.H.path("R", "L"))
 
     assert len(game.nodes) == initial_number_of_nodes - number_of_deleted_nodes
 
@@ -1037,7 +1013,7 @@ def test_len_after_delete_parent():
     number_of_parent_ancestors = _count_subtree_nodes(node_parent_to_delete.parent, True)
     diff = number_of_parent_ancestors - number_of_node_ancestors
 
-    game.delete_parent(node_parent_to_delete)
+    game.delete_parent(gbt.H.path("L", "L"))
 
     assert len(game.nodes) == initial_number_of_nodes - diff
 
@@ -1135,10 +1111,9 @@ def test_len_after_copy_tree():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     src_node = game.root.children["R"].children["L"]
-    dest_node = game.root.children["R"].children["R"]
     number_of_src_ancestors = _count_subtree_nodes(src_node, True)
 
-    game.copy_tree(src_node, dest_node)
+    game.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_src_ancestors - 1
 

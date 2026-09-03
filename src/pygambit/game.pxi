@@ -1941,8 +1941,9 @@ class Game:
             c_probs.push_back(_to_number(actions[label]))
         self.game.deref().InsertEvent(resolved_node.node, c_actions, c_probs)
 
-    def copy_tree(self, src: Node | str, dest: Node | str) -> None:
-        """Copy the subtree rooted at the node `src` to the node `dest`.
+    def copy_tree(self, src: Selector, dest: Selector) -> None:
+        """Copy the subtree rooted at the node identified by `src` to the node
+        identified by `dest`.
 
         Each node in the subtree copied to follow `dest` is placed in the same information set
         as the corresponding node in the original subtree under `src`.
@@ -1953,43 +1954,76 @@ class Game:
 
         The outcome associated with `dest` is not changed by this operation.
 
+        `src` and `dest` are each a `Selector` (an `H`-built expression, evaluated
+        against this game) that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `src` and `dest` are now `Selector`s; a `Node` or `str` is no longer
+            accepted directly -- build one with `H`.
+
         Parameters
         ----------
-        src : Node or str
-            The root of the source subtree to copy
-        dest : Node or str
-            The destination subtree to copy to.  `dest` must be a terminal node.
+        src : Selector
+            A `Selector` resolving to the root of the source subtree to copy.
+        dest : Selector
+            A `Selector` resolving to the destination subtree to copy to.  Must
+            resolve to a terminal node.
 
         Raises
         ------
-        MismatchError
-            If `src` or `dest` is not a member of the same game as this node.
+        TypeError
+            If `src` or `dest` is not a `Selector`.
         UndefinedOperationError
             If `dest` is not a terminal node.
+        ValueError
+            If `src` or `dest` does not resolve to exactly one node.
         """
+        if not isinstance(src, Selector):
+            raise TypeError(f"copy_tree(): src must be a Selector, not {src.__class__.__name__}")
+        if not isinstance(dest, Selector):
+            raise TypeError(
+                f"copy_tree(): dest must be a Selector, not {dest.__class__.__name__}"
+            )
         resolved_src = cython.cast(Node, self._resolve_node(src, "copy_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
         if not resolved_dest.is_terminal:
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
         self.game.deref().CopyTree(resolved_dest.node, resolved_src.node)
 
-    def move_tree(self, src: Node | str, dest: Node | str) -> None:
-        """Move the subtree rooted at 'src' to 'dest'.
+    def move_tree(self, src: Selector, dest: Selector) -> None:
+        """Move the subtree rooted at the node identified by `src` to the node
+        identified by `dest`.
+
+        `src` and `dest` are each a `Selector` (an `H`-built expression, evaluated
+        against this game) that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `src` and `dest` are now `Selector`s; a `Node` or `str` is no longer
+            accepted directly -- build one with `H`.
 
         Parameters
         ----------
-        src : Node or str
-            The root of the source subtree to move
-        dest : Node or str
-            The destination subtree to move to.  `dest` must be a terminal node.
+        src : Selector
+            A `Selector` resolving to the root of the source subtree to move.
+        dest : Selector
+            A `Selector` resolving to the destination subtree to move to.  Must
+            resolve to a terminal node.
 
         Raises
         ------
-        MismatchError
-            If `src` or `dest` is not a member of the same game as this node.
+        TypeError
+            If `src` or `dest` is not a `Selector`.
         UndefinedOperationError
             If `dest` is not a terminal node, or `dest` is a successor of `src`.
+        ValueError
+            If `src` or `dest` does not resolve to exactly one node.
         """
+        if not isinstance(src, Selector):
+            raise TypeError(f"move_tree(): src must be a Selector, not {src.__class__.__name__}")
+        if not isinstance(dest, Selector):
+            raise TypeError(
+                f"move_tree(): dest must be a Selector, not {dest.__class__.__name__}"
+            )
         resolved_src = cython.cast(Node, self._resolve_node(src, "move_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "move_tree", "dest"))
         if not resolved_dest.is_terminal:
@@ -1998,39 +2032,64 @@ class Game:
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
         self.game.deref().MoveTree(resolved_dest.node, resolved_src.node)
 
-    def delete_parent(self, node: Node | str) -> None:
-        """Delete the parent node of `node`.  `node` replaces its parent in the tree.  All other
-        subtrees rooted at `node`'s parent are deleted.
+    def delete_parent(self, node: Selector) -> None:
+        """Delete the parent of the node identified by `node`.  That node replaces
+        its parent in the tree.  All other subtrees rooted at the parent are deleted.
+
+        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
 
         Parameters
         ----------
-        node : Node or str
-            The node to retain after deleting its parent.
-            If a string is passed, the node is determined by finding the node with that label,
-            if any.
+        node : Selector
+            A `Selector` resolving to the single node to retain after deleting its
+            parent.
 
         Raises
         ------
-        MismatchError
-            If `node` is a `Node` from a different game.
+        TypeError
+            If `node` is not a `Selector`.
+        ValueError
+            If `node` does not resolve to exactly one node.
         """
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"delete_parent(): node must be a Selector, not {node.__class__.__name__}"
+            )
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_parent"))
         self.game.deref().DeleteParent(resolved_node.node)
 
-    def delete_tree(self, node: Node | str) -> None:
-        """Truncate the game tree at `node`, deleting the subtree beneath it.
+    def delete_tree(self, node: Selector) -> None:
+        """Truncate the game tree at the node identified by `node`, deleting the
+        subtree beneath it.
+
+        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
 
         Parameters
         ----------
-        node : Node or str
-            The node to truncate the game at.  If a string is passed, the node is determined by
-            finding the node with that label, if any.
+        node : Selector
+            A `Selector` resolving to the single node to truncate the game at.
 
         Raises
         ------
-        MismatchError
-            If `node` is a `Node` from a different game.
+        TypeError
+            If `node` is not a `Selector`.
+        ValueError
+            If `node` does not resolve to exactly one node.
         """
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"delete_tree(): node must be a Selector, not {node.__class__.__name__}"
+            )
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_tree"))
         self.game.deref().DeleteTree(resolved_node.node)
 
@@ -2188,8 +2247,8 @@ class Game:
         self.game.deref().SetEventActions(resolved_event._resolve(), c_labels, c_probs)
 
     def make_event(self,
-                   nodes: Node | NodeReferenceSet,
-                   probs: typing.Sequence | typing.Mapping,
+                   nodes: Selector | GroupedSelector,
+                   probs: typing.Mapping,
                    label: str | None = None) -> None:
         """Form `nodes` into a single event with distribution `probs`.
 
@@ -2202,20 +2261,31 @@ class Game:
         raises ``RuntimeError``.
         The resulting event is accessible as ``node.event`` for any node in `nodes`.
 
-        The first node in `nodes` determines the action order of the event,
-        and is the frame against which mapping keys in `probs` are resolved.
+        `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
+        and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
+        `.by(...)` expression, whose groups are pooled together into the one event).
+
+        Which resolved node is treated as "first", determining the action order of
+        the event and the frame against which keys of `probs` are resolved, follows
+        `nodes`' own resolution order.
 
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
+            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
+        .. versionchanged:: 17.0.0
+            `probs` is now always a mapping from action label to probability; a
+            positional sequence is no longer accepted.
 
         Parameters
         ----------
-        nodes : Node or NodeReferenceSet
+        nodes : Selector or GroupedSelector
             The nonempty set of nonterminal nodes to place in the event.
-        probs : sequence or mapping
-            The probability distribution over the actions of the event.  A sequence must specify
-            one probability per action, in action order.  A mapping from action labels
-            to probabilities may be sparse; omitted actions are assigned probability zero.
-            Probabilities are non-negative and sum to exactly one.
+        probs : Mapping
+            The probability distribution over the actions of the event, as a mapping
+            from action label to probability.  May be sparse; omitted actions are
+            assigned probability zero.  Probabilities are non-negative and sum to
+            exactly one.
         label : str, optional
             The label of the new event.  If specified, must be unique among the events
             of the game after the operation.  A label currently held by another event
@@ -2223,13 +2293,11 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If any of `nodes` is from a different game.
+        TypeError
+            If `nodes` is not a `Selector` or `GroupedSelector`, or `probs` is not a
+            mapping.
         KeyError
-            If a node reference matches no node, or a key of `probs` matches no
-            action label of the event.
-        IndexError
-            If a sequence `probs` does not have exactly one entry per action.
+            If a key of `probs` matches no action label of the event.
         UndefinedOperationError
             If any of `nodes` is a terminal node, or the game is not a tree.
         ValueError
@@ -2241,6 +2309,17 @@ class Game:
         if not self.is_tree:
             raise UndefinedOperationError(
                 "make_event(): operation only defined for games with a tree representation"
+            )
+        if isinstance(nodes, GroupedSelector):
+            nodes = [n for group in self._group_nodes(nodes).values() for n in group]
+        elif not isinstance(nodes, Selector):
+            raise TypeError(
+                f"make_event(): nodes must be a Selector or GroupedSelector, "
+                f"not {nodes.__class__.__name__}"
+            )
+        if not isinstance(probs, typing.Mapping):
+            raise TypeError(
+                f"make_event(): probs must be a mapping, not {probs.__class__.__name__}"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_event")
         if any(n.is_terminal for n in resolved_nodes):
@@ -2326,7 +2405,7 @@ class Game:
         self.game.deref().RelabelActions(resolved_infoset._resolve(), c_labels)
 
     def make_infoset(self,
-                     nodes: Node | NodeReferenceSet,
+                     nodes: Selector | GroupedSelector,
                      player: str,
                      label: str | None = None) -> None:
         """Form `nodes` into a single information set belonging to `player`.
@@ -2341,11 +2420,19 @@ class Game:
         The structure of the tree is unchanged: no nodes are created or removed.
         This operation may introduce imperfect recall or absent-mindedness.
 
+        `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
+        and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
+        `.by(...)` expression, whose groups are pooled together into the one
+        information set).
+
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
+            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
-        nodes : Node or NodeReferenceSet
+        nodes : Selector or GroupedSelector
             The nodes to place in the information set.  Nonempty; each
             node may be referenced only once.
         player : str
@@ -2358,12 +2445,11 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If any of `nodes` is from a different game.
-        KeyError
-            If any of `nodes`, or `player`, is a label matching no such object in the game.
         TypeError
-            If any of `nodes`, or `player`, is not of an accepted type.
+            If `nodes` is not a `Selector` or `GroupedSelector`, or `player` is not
+            of an accepted type.
+        KeyError
+            If `player` is a label matching no such object in the game.
         UndefinedOperationError
             If any of `nodes` is a terminal node, or if the game is not a tree.
         ValueError
@@ -2374,6 +2460,13 @@ class Game:
         if not self.is_tree:
             raise UndefinedOperationError(
                 "make_infoset(): operation only defined for games with a tree representation"
+            )
+        if isinstance(nodes, GroupedSelector):
+            nodes = [n for group in self._group_nodes(nodes).values() for n in group]
+        elif not isinstance(nodes, Selector):
+            raise TypeError(
+                f"make_infoset(): nodes must be a Selector or GroupedSelector, "
+                f"not {nodes.__class__.__name__}"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_infoset")
         resolved_player = self._resolve_player(player, "make_infoset")
