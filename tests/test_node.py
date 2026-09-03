@@ -618,21 +618,21 @@ def test_insert_move_error_player_actions():
     """Test to ensure there are actions when inserting with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.insert_move(game.root, "Player 1", [])
+        game.insert_move(gbt.H.path(), "Player 1", [])
 
 
 def test_insert_move_error_empty_label():
     """Test that an empty label in `actions` is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.insert_move(game.root, "Player 1", ["a", ""])
+        game.insert_move(gbt.H.path(), "Player 1", ["a", ""])
 
 
 def test_insert_move_error_duplicate_label():
     """Test that duplicated labels in `actions` are rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.insert_move(game.root, "Player 1", ["a", "a"])
+        game.insert_move(gbt.H.path(), "Player 1", ["a", "a"])
 
 
 def test_node_infoset_becomes_null_when_truncated():
@@ -1157,11 +1157,10 @@ def test_len_after_insert_move():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
 
-    node_to_insert_above = game.root.children["L"].children["R"]  # the [1, 0] node
     player = "Player 2"
     actions_to_add = ["a", "b", "c"]
 
-    game.insert_move(node_to_insert_above, player, actions_to_add)
+    game.insert_move(gbt.H.path("L", "R"), player, actions_to_add)  # the [1, 0] node
 
     assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
 
@@ -1170,7 +1169,7 @@ def test_insert_move_actions_labeled():
     """Test that the inserted move's actions are labeled according to `actions`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
-    game.insert_move(node, "Player 2", ["Up", "Down"])
+    game.insert_move(gbt.H.path("L", "R"), "Player 2", ["Up", "Down"])
     assert list(node.parent.infoset.actions) == ["Up", "Down"]
 
 

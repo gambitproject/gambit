@@ -1769,24 +1769,37 @@ class Game:
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_event._resolve())
 
-    def insert_move(self, node: Node | str,
+    def insert_move(self, node: Selector,
                     player: str, actions: list[str]) -> None:
-        """Insert a move for `player` prior to the node `node`, with actions labeled
-        according to `actions`.  `node` becomes the first child of the newly-inserted node.
+        """Insert a move for `player` prior to the node identified by `node`, with
+        actions labeled according to `actions`.  The node becomes the first child of
+        the newly-inserted node.
 
         `player` must be a personal player; use `insert_event` to insert a chance move.
 
+        `node` is a `Selector` (an `H`-built expression, evaluated against this game)
+        that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
+
         Raises
         ------
+        TypeError
+            If `node` is not a `Selector`.
         UndefinedOperationError
             If `actions` is empty.
-        MismatchError
-            If `node` is a `Node` from a different game.
         KeyError
             If no player in the game has label `player`.
         ValueError
-            If `actions` contains an empty or a duplicated label.
+            If `node` does not resolve to exactly one node, or `actions` contains an
+            empty or a duplicated label.
         """
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"insert_move(): node must be a Selector, not {node.__class__.__name__}"
+            )
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_move"))
         resolved_player = self._resolve_player(player, "insert_move")
         if not actions:
