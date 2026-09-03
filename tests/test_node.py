@@ -454,7 +454,8 @@ def test_subgame_children(test_case: SubgameStructureTestCase):
 
 @pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
 def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
-    """`game.minimal_subgame(infoset)` returns the smallest subgame containing the infoset."""
+    """`game.get_minimal_subgame(node)` returns the smallest subgame containing
+    the information set `node` belongs to."""
     game = test_case.factory()
     expected_path_for_key = {
         key: path
@@ -464,7 +465,10 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
     for player in game.players:
         for node in game.get_infosets(player):
             key = (node.infoset.player, node.infoset.number)
-            actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(node).root))
+            selector = games.selector_for_nodes([node])
+            actual_path = tuple(
+                _get_path_of_action_labels(game.get_minimal_subgame(selector).root)
+            )
             assert actual_path == expected_path_for_key[key]
 
 

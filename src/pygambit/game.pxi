@@ -740,33 +740,51 @@ class Game:
             )
         return GameSubgames.wrap(self.game)
 
-    def minimal_subgame(self, infoset: NodeReference) -> Subgame:
-        """Returns the smallest subgame containing `infoset`.
+    def get_minimal_subgame(self, node: Selector) -> Subgame:
+        """Returns the smallest subgame containing the information set or event that
+        the node identified by `node` belongs to.
+
+        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
+        .. versionadded:: 16.7.0
+        .. versionchanged:: 17.0.0
+            Renamed from `minimal_subgame`.  `node` (formerly `infoset`) is now a
+            `Selector`; a `Node` or `str` is no longer accepted directly -- build
+            one with `H`.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set to query, or such a node's label.
+        node : Selector
+            A `Selector` resolving to a single node belonging to the information
+            set or event to query.
 
         Returns
         -------
         Subgame
-            The smallest subgame containing `infoset`.
-
-        .. versionadded:: 16.7.0
+            The smallest subgame containing the information set or event that
+            `node` belongs to.
 
         Raises
         ------
+        TypeError
+            If `node` is not a `Selector`.
         UndefinedOperationError
             If the game does not have a tree representation.
-        MismatchError
-            If `infoset` is from a different game.
+        ValueError
+            If `node` does not resolve to exactly one node, or belongs to no
+            information set or event (it is terminal).
         """
         if not self.is_tree:
             raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
+                "get_minimal_subgame(): operation only defined for games "
+                "with a tree representation"
             )
-        resolved_infoset = self._resolve_infoset_or_event(infoset, "minimal_subgame")
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"get_minimal_subgame(): node must be a Selector, not {node.__class__.__name__}"
+            )
+        resolved_infoset = self._resolve_infoset_or_event(node, "get_minimal_subgame")
         return Subgame.wrap(
             self.game.deref().GetMinimalSubgame(
                 cython.cast(_InfosetOrEvent, resolved_infoset)._resolve()

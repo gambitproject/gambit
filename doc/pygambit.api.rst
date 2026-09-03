@@ -118,7 +118,7 @@ Information about the game
    Game.get_outcome
    Game.get_payoffs
    Game.subgames
-   Game.minimal_subgame
+   Game.get_minimal_subgame
 
 .. autosummary::
    :toctree: api/
