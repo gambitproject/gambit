@@ -241,6 +241,19 @@ class HistoryView:
         history, wherever it fell -- `None` if `player` hasn't acted yet."""
         return _last_action(self._node, player)
 
+    @property
+    def members(self) -> list[tuple]:
+        """The Histories of the nodes which are members of the information set or
+        event to which this history currently belongs -- whichever applies.
+
+        Raises
+        ------
+        AttributeError
+            If this history currently belongs to no information set or event (a
+            terminal node).
+        """
+        return [_history_of(member) for member in self._node.members]
+
 
 def _last_action(node: Node, player: str) -> str | None:
     """The label of the last action `player` took on the path to `node`,
