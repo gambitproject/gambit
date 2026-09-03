@@ -1885,56 +1885,60 @@ class Game:
         )
         self.game.deref().InsertMove(resolved_node.node, resolved_infoset._resolve())
 
-    def insert_event(self, node: Node | str,
-                     actions: list[str],
-                     probs: typing.Sequence | typing.Mapping) -> None:
-        """Insert a chance move prior to the node `node`, with actions labeled according
-        to `actions` and distribution `probs`.  `node` becomes the first child of the
-        newly-inserted node.
+    def insert_event(self, node: Selector, actions: typing.Mapping) -> None:
+        """Insert a chance move prior to the node identified by `node`, with actions
+        and their probabilities given by `actions`.  The node becomes the first
+        child of the newly-inserted node.
+
+        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
 
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
+        .. versionchanged:: 17.0.0
+            `actions` and `probs` are combined into a single mapping from action
+            label to probability, rather than a list of labels plus a separate
+            probability sequence or mapping.
 
         Parameters
         ----------
-        node : Node or str
-            The node before which to insert the move.
-        actions : list of str
-            The labels of the actions of the new event.  Nonempty, with no empty or
-            duplicated label.
-        probs : sequence or mapping
-            The probability distribution over `actions`.  A sequence must specify one
-            probability per action, in the order given in `actions`.  A mapping from
-            action labels to probabilities may be sparse; omitted actions are assigned
-            probability zero.  Probabilities are non-negative and sum to exactly one.
+        node : Selector
+            A `Selector` resolving to the single node before which to insert the
+            move.
+        actions : Mapping
+            A mapping from each new action's label to its probability.  Nonempty,
+            with no empty label.  Probabilities are non-negative and sum to exactly
+            one.
 
         Raises
         ------
+        TypeError
+            If `node` is not a `Selector`.
         UndefinedOperationError
             If `actions` is empty.
-        MismatchError
-            If `node` is a `Node` from a different game.
-        KeyError
-            If a key of `probs` matches no label in `actions`.
-        IndexError
-            If a sequence `probs` does not have exactly one entry per action.
         ValueError
-            If `actions` contains an empty or a duplicated label, or if `probs` are not
-            non-negative numbers summing to exactly one.
+            If `node` does not resolve to exactly one node; if `actions` contains
+            an empty label; or if the probabilities are not non-negative numbers
+            summing to exactly one.
         """
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"insert_event(): node must be a Selector, not {node.__class__.__name__}"
+            )
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_event"))
-        if not actions:
-            raise UndefinedOperationError("insert_event(): `actions` must be a nonempty list")
-        if any(not label for label in actions):
+        action_labels = list(actions)
+        if not action_labels:
+            raise UndefinedOperationError("insert_event(): `actions` must be a nonempty mapping")
+        if any(not label for label in action_labels):
             raise ValueError("insert_event(): action labels must not be empty")
-        if len(set(actions)) != len(actions):
-            raise ValueError("insert_event(): action labels must be unique")
-        resolved_probs = self._resolve_probs(probs, actions, "insert_event")
         c_actions = stdvector[string]()
-        for label in actions:
+        for label in action_labels:
             c_actions.push_back(label.encode("utf-8"))
         c_probs = stdvector[c_Number]()
-        for p in resolved_probs:
-            c_probs.push_back(_to_number(p))
+        for label in action_labels:
+            c_probs.push_back(_to_number(actions[label]))
         self.game.deref().InsertEvent(resolved_node.node, c_actions, c_probs)
 
     def copy_tree(self, src: Node | str, dest: Node | str) -> None:

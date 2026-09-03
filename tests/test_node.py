@@ -948,7 +948,7 @@ def test_insert_event_actions_labeled():
     """Test that the inserted event's actions are labeled according to `actions`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     node = game.root.children["L"].children["R"]
-    game.insert_event(node, ["Up", "Down"], [gbt.Rational(1, 2)] * 2)
+    game.insert_event(gbt.H.path("L", "R"), {"Up": gbt.Rational(1, 2), "Down": gbt.Rational(1, 2)})
     assert list(node.parent.actions) == ["Up", "Down"]
     assert node.parent.event
 
@@ -957,7 +957,7 @@ def test_insert_event_sets_distribution():
     """Test that the inserted event's actions carry the given probabilities."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root
-    game.insert_event(node, ["a", "b"], [gbt.Rational(1, 4), gbt.Rational(3, 4)])
+    game.insert_event(gbt.H.path(), {"a": gbt.Rational(1, 4), "b": gbt.Rational(3, 4)})
     assert list(node.parent.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
 
@@ -965,36 +965,21 @@ def test_insert_event_error_actions_empty():
     """Test to ensure there are actions when inserting an event."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.insert_event(game.root, [], [])
-
-
-def test_insert_event_error_node_mismatch():
-    """Test to ensure the node is from this game."""
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.insert_event(game2.root, ["a", "b"], [gbt.Rational(1, 2)] * 2)
+        game.insert_event(gbt.H.path(), {})
 
 
 def test_insert_event_error_empty_label():
     """Test that an empty label in `actions` is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.insert_event(game.root, ["a", ""], [gbt.Rational(1, 2)] * 2)
-
-
-def test_insert_event_error_duplicate_label():
-    """Test that duplicated labels in `actions` are rejected."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(ValueError):
-        game.insert_event(game.root, ["a", "a"], [gbt.Rational(1, 2)] * 2)
+        game.insert_event(gbt.H.path(), {"a": gbt.Rational(1, 2), "": gbt.Rational(1, 2)})
 
 
 def test_insert_event_error_invalid_distribution():
     """Test that a distribution which does not sum to one is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.insert_event(game.root, ["a", "b"], [gbt.Rational(1, 2), gbt.Rational(1, 3)])
+        game.insert_event(gbt.H.path(), {"a": gbt.Rational(1, 2), "b": gbt.Rational(1, 3)})
 
 
 def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:

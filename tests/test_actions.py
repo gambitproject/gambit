@@ -209,6 +209,14 @@ def test_set_move_actions_absent_minded_drop_and_add():
     assert len(game.nodes) == 3
 
 
+def test_set_event_actions_error_mismatch():
+    """Test to ensure `event` is from the same game."""
+    game1 = gbt.Game.new_tree()
+    game2 = games.create_stripped_down_poker_efg()
+    with pytest.raises(gbt.MismatchError):
+        game1.set_event_actions(game2.root, {"King": "1/2", "Queen": "1/2"})
+
+
 def test_set_event_actions_reorder_carries_probabilities():
     game = games.create_stripped_down_poker_efg()
     game.set_event_actions(game.root, {"King": "3/4", "Queen": "1/4"})
