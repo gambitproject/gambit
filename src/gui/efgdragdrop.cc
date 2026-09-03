@@ -258,11 +258,14 @@ bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &
       menu.AppendSeparator();
     }
 
+    const bool isChance = p_sourceNode->GetPlayer()->IsChance();
     if (p_targetNode->IsTerminal()) {
-      menu.Append(infosetId, _("Insert move using same information set"));
+      menu.Append(infosetId, isChance ? _("Insert move using same event")
+                                      : _("Insert move using same information set"));
     }
     else {
-      menu.Append(infosetId, _("Put node in same information set"));
+      menu.Append(infosetId,
+                  isChance ? _("Put node in same event") : _("Put node in same information set"));
     }
   }
 

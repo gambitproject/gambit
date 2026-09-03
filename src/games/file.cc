@@ -762,7 +762,7 @@ void CheckChanceProbs(const GameFileLexer &p_state, const int p_infosetId,
                       const GameInfoset &p_infoset, const Array<Number> &p_probs)
 {
   if (p_infoset->GetActions().size() != p_probs.size()) {
-    p_state.OnParseError("Chance infoset probability count mismatch "
+    p_state.OnParseError("Event probability count mismatch "
                          "(infoset " +
                          std::to_string(p_infosetId) + ")");
   }
@@ -770,7 +770,7 @@ void CheckChanceProbs(const GameFileLexer &p_state, const int p_infosetId,
   for (size_t i = 1; i <= p_probs.size(); ++i) {
     if (static_cast<const std::string &>(p_infoset->GetActionProb(*action_it)) !=
         static_cast<const std::string &>(p_probs[i])) {
-      p_state.OnParseError("Chance infoset probabilities do not match previous definition "
+      p_state.OnParseError("Event probabilities do not match previous definition "
                            "(infoset " +
                            std::to_string(p_infosetId) + ")");
     }

@@ -64,7 +64,7 @@ public:
   std::string GetStableLabel(int p_index) const;
   // The label as currently typed into the row at position `p_index`.
   wxString GetActionLabel(int p_index) const;
-  // The probability currently typed into the row at position `p_index` (chance infosets only).
+  // The probability currently typed into the row at position `p_index` (events only).
   Number GetActionProb(int p_index) const;
 };
 } // namespace Gambit::GUI

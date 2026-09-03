@@ -267,6 +267,8 @@ def test_mixed_behavior_profile_game_structure_changed():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.copy()
         with pytest.raises(gbt.GameStructureChangedError):
+            _ = profile.event_probs
+        with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.infoset_probs
         with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.infoset_regrets
