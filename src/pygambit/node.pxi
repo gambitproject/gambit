@@ -481,6 +481,16 @@ class Node:
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
 
+    @property
+    def history(self) -> tuple:
+        """The History (a tuple of action labels) leading to this node from the root --
+        the materialized, game-agnostic form used elsewhere in the public API (profile
+        indexing, `H`-built selector results, ...).
+
+        .. versionadded:: 17.0.0
+        """
+        return _history_of(self)
+
 
 @cython.cclass
 class Subgame:

@@ -502,45 +502,45 @@ class Game:
         return GameOutcomes.wrap(self.game)
 
     @property
-    def nodes(self) -> GameNodes:
-        """The set of nodes in the game.
-
-        Iteration over this property yields the nodes in the order of depth-first search.
-
-        .. versionchanged:: 16.4
-           Changed from a method ``nodes()`` to a property.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-
-        return GameNodes.wrap(self.game)
-
-    @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
 
-    @property
-    def root(self) -> Node:
-        """The root node of the game.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not hae a tree representation.
+    def _root_node(self) -> Node:
+        """Internal: the root node of the game. `Game.root` was retired from the
+        public API in favor of `H` selectors and materialized `History` tuples
+        (e.g. `H.path()`/`()`); this is the last direct access to it, used only to
+        seed selector evaluation.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
                 "root: only games with a tree representation have a root node"
             )
         return Node.wrap(self.game.deref().GetRoot())
+
+    def _all_nodes(self) -> list:
+        """Internal: every node of the game, in the C++ tree's depth-first order.
+        `Game.nodes` was retired from the public API -- its only real job was
+        letting calling code build ad hoc selections by hand, which `H` now does
+        directly; this is the last surviving use, backing `H.after(...)`'s
+        whole-game seed and label-based node lookup.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return [Node.wrap(node) for node in self.game.deref().GetNodes()]
+
+    def _num_nodes(self) -> int:
+        """Internal: the number of nodes in the game -- a cheap count for callers (such
+        as catalog filtering) that don't need the nodes themselves, so don't need to pay
+        for materializing `_all_nodes()`'s full list.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return self.game.deref().NumNodes()
 
     def get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
@@ -557,11 +557,11 @@ class Game:
         current: list = None
         for op in selector._ops:
             if isinstance(op, _AfterStep):
-                candidates = list(self.nodes) if current is None else current
+                candidates = self._all_nodes() if current is None else current
                 current = [n for n in candidates if _matches_suffix(n, op.labels)]
                 continue
             if current is None:
-                current = [self.root]
+                current = [self._root_node()]
             if isinstance(op, _PathStep):
                 for step in op.steps:
                     current = (
@@ -579,7 +579,7 @@ class Game:
             else:
                 raise TypeError(f"get_nodes(): unknown selector op {op!r}")
         if current is None:
-            current = [self.root]
+            current = [self._root_node()]
         return current
 
     def get_histories(self, selector: Selector) -> list[tuple]:
@@ -1023,7 +1023,7 @@ class Game:
                         f"Number of elements does not match number of "
                         f"actions for infoset {infoset} for {p}"
                     )
-                profile[node] = {
+                profile[node.history] = {
                     a: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)
                 }
         return profile
@@ -1105,7 +1105,7 @@ class Game:
             profile = self.mixed_behavior_profile()
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _dirichlet_distribution(node.infoset.actions, gen)
+                    profile[node.history] = _dirichlet_distribution(node.infoset.actions, gen)
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1113,7 +1113,9 @@ class Game:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _grid_distribution(node.infoset.actions, denom, gen)
+                    profile[node.history] = _grid_distribution(
+                        node.infoset.actions, denom, gen
+                    )
             return profile
 
     def strategy_support_profile(
@@ -1399,7 +1401,7 @@ class Game:
                 raise ValueError(
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
-            for n in self.nodes:
+            for n in self._all_nodes():
                 if n.label == node:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
@@ -2776,7 +2778,7 @@ class NodeCoordinates:
 def _layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     layout = CreateLayout(game.game)
     data = {}
-    for node in game.nodes:
+    for node in game._all_nodes():
         data[node] = NodeCoordinates(deref(layout).GetNodeLevel(cython.cast(Node, node).node),
                                      deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
                                      deref(layout).GetNodeOffset(cython.cast(Node, node).node))

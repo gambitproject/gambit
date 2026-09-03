@@ -26,7 +26,7 @@ def d(*probs) -> tuple:
 def _action_prob(profile: gbt.MixedBehaviorProfile, node: gbt.Node, label: str):
     """The probability profile assigns to the action labeled `label` at `node`'s
     information set."""
-    return profile[node][label]
+    return profile[node.history][label]
 
 
 @dataclasses.dataclass

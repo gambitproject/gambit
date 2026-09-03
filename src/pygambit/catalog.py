@@ -447,7 +447,7 @@ def games(
         if n_nodes is not None:
             if not game.is_tree:
                 return False
-            if len(game.nodes) != n_nodes:
+            if game._num_nodes() != n_nodes:
                 return False
         if n_outcomes is not None and len(game.outcomes) != n_outcomes:
             return False

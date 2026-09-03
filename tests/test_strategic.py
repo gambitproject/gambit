@@ -12,18 +12,6 @@ def test_strategic_game_get_infosets():
         _ = game.get_infosets(player)
 
 
-def test_strategic_game_root():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.root
-
-
-def test_strategic_game_nodes():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.nodes
-
-
 def test_game_behav_profile_error():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(gbt.UndefinedOperationError):

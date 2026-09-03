@@ -5,7 +5,7 @@ from click.testing import CliRunner
 
 import pygambit as gbt
 
-from ..games import create_2x2_zero_sum_efg
+from ..games import create_2x2_zero_sum_efg, root_node
 
 
 @pytest.fixture
@@ -97,8 +97,8 @@ def efg_asymmetric_tree_text() -> str:
     payoff-irrelevant and so free to vary across equilibria).
     """
     game = gbt.Game.new_tree(players=["1", "2"], title="Asymmetric multi-infoset game")
-    game.append_move(game.root, "1", ["L", "R"])
-    left, right = game.root.children
+    game.append_move(root_node(game), "1", ["L", "R"])
+    left, right = root_node(game).children
     game.append_move(left, "2", ["x", "y", "z"])
     game.append_move(right, "2", ["p", "q"])
     for node in left.children:

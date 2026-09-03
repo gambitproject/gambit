@@ -154,7 +154,7 @@ def test_game_get_outcome_unmatched_label_after_relabel_raises():
 
 def test_game_get_outcome_tree_raises():
     game = gbt.Game.new_tree(["Alice"])
-    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_move(games.root_node(game), "Alice", ["a", "b"])
     with pytest.raises(gbt.UndefinedOperationError):
         _ = game.get_outcome({"Alice": "a"})
 
@@ -169,13 +169,13 @@ def test_game_get_payoffs():
 
 def test_game_get_payoffs_tree():
     game = gbt.Game.new_tree(["Alice"])
-    game.append_move(game.root, "Alice", ["a", "b"])
-    infoset = game.root.infoset
+    game.append_move(games.root_node(game), "Alice", ["a", "b"])
+    infoset = games.root_node(game).infoset
     strategy = next(
         s for s in game.get_strategies("Alice")
         if game.get_behavior("Alice", s).get(infoset) == "a"
     )
-    game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
+    game.make_outcome(games.root_node(game).children["a"], {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})
     assert payoffs["Alice"] == 1
 
@@ -218,7 +218,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    game.set_move_actions(game.root, ["D1"], drop=True)
+    game.set_move_actions(games.root_node(game), ["D1"], drop=True)
     distribution = {s: 0 for s in game.get_strategies(player)}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -253,8 +253,8 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
 def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
-    game.set_move_actions(game.root, ["D1"], drop=True)
-    infoset = game.root
+    game.set_move_actions(games.root_node(game), ["D1"], drop=True)
+    infoset = games.root_node(game)
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.action_regrets
@@ -297,11 +297,11 @@ def test_mixed_behavior_profile_game_structure_changed():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(game.root, {})
+            profile.__setitem__((), {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_mixed_action(game.root, {})
+            profile.set_mixed_action((), {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(game.root)
+            profile.__getitem__(())
 
 
 COLLECTION_GETTERS = [

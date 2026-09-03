@@ -108,12 +108,10 @@ Information about the game
    Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
-   Game.root
    Game.get_infosets
    Game.get_events
    Game.get_strategies
    Game.get_sequences
-   Game.nodes
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs
@@ -150,6 +148,7 @@ Information about the game
    Node.is_successor_of
    Node.plays
    Node.own_prior_action
+   Node.history
 
 .. autosummary::
    :toctree: api/

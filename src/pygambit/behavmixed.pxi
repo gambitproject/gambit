@@ -297,27 +297,35 @@ class MixedBehavior:
         """
         yield from self._values.items()
 
-    def __getitem__(self, index: Node) -> MixedAction:
+    def __getitem__(self, index: tuple) -> MixedAction:
         """Returns the mixed action at the information set containing `index`.
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to return.
+        index : History
+            A History (a tuple of action labels) belonging to the information set
+            to return.
 
         Raises
         ------
+        TypeError
+            If `index` is not a ``History``.
+        KeyError
+            If `index` does not match any node of the game.
         MismatchError
-            If `index` is a ``Node`` from a different game, or belongs to an
-            information set that isn't this player's.
+            If `index` belongs to an information set that isn't this player's.
         ValueError
-            If `index` is a terminal node, which belongs to no information set.
+            If `index` resolves to a terminal node, which belongs to no
+            information set.
         """
-        infoset = cython.cast(Infoset, index.infoset)
-        if not infoset:
-            raise ValueError("node is terminal, has no information set")
+        if not isinstance(index, tuple):
+            raise TypeError(f"index must be History, not {index.__class__.__name__}")
+        if not self._values:
+            raise MismatchError("history must belong to this player")
+        game = next(iter(self._values)).game
+        infoset = game._resolve_infoset(index, "__getitem__")
         if infoset.player != self._player:
-            raise MismatchError("node must belong to this player")
+            raise MismatchError("history must belong to this player")
         return self._values[infoset]
 
 
@@ -388,29 +396,30 @@ class MixedBehaviorProfile:
 
         Parameters
         ----------
-        index : str or Node
+        index : str or History
             The part of the profile to return:
 
             * If `index` is a ``str``, returns a ``MixedBehavior`` over the player's
               information sets. The player is determined by finding the player with
               that label, if any.
-            * If `index` is a ``Node``, returns a ``MixedAction`` over the actions at
-              the node's information set.
+            * If `index` is a ``History`` (a tuple of action labels, as returned by
+              e.g. `Game.get_histories`), returns a ``MixedAction`` over the actions
+              at that history's information set.
 
         Raises
         ------
         TypeError
-            If `index` is not a ``str`` or a ``Node``.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
-        ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set.
+            If `index` is not a ``str`` or a ``History``.
         KeyError
-            If `index` is a ``str`` and no player in the game has that label.
+            If `index` is a ``str`` and no player in the game has that label, or a
+            ``History`` that does not match any node of the game.
+        ValueError
+            If `index` is a ``History`` resolving to a terminal node, which belongs
+            to no information set.
         """
         self._check_validity()
-        if isinstance(index, Node):
-            return self._mixed_action_at(self._resolve_infoset_for_node(index))
+        if isinstance(index, tuple):
+            return self._mixed_action_at(self.game._resolve_infoset(index, "__getitem__"))
         if isinstance(index, str):
             values = {
                 node.infoset: self._mixed_action_at(node.infoset)
@@ -418,31 +427,8 @@ class MixedBehaviorProfile:
             }
             return MixedBehavior.wrap(index, values)
         raise TypeError(
-            f"profile index must be str or Node, not {index.__class__.__name__}"
+            f"profile index must be str or History, not {index.__class__.__name__}"
         )
-
-    def _resolve_infoset_for_node(self, node: Node) -> Infoset:
-        """Resolves the personal player's information set containing node.
-
-        Raises
-        ------
-        MismatchError
-            If `node` belongs to a different game.
-        ValueError
-            If `node` resolves to a chance event, or is terminal, and so belongs to
-            no personal player's information set.
-        """
-        if node.game != self.game:
-            raise MismatchError("node must belong to this game")
-        infoset = cython.cast(Infoset, node.infoset)
-        if not infoset:
-            if node.event:
-                raise ValueError(
-                    "node belongs to a chance event, not a personal player's "
-                    "information set"
-                )
-            raise ValueError("node is terminal, has no information set")
-        return infoset
 
     def _all_infosets(self) -> typing.Iterator[Infoset]:
         """Iterates over every information set and event in the game."""
@@ -617,7 +603,7 @@ class MixedBehaviorProfile:
         for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
             self._setprob_action(a, values[a.deref().GetLabel().decode("utf-8")])
 
-    def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
+    def __setitem__(self, index: tuple, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed action at the information set containing `index`.
 
         `distribution` need not specify a weight for every one of the information
@@ -626,8 +612,9 @@ class MixedBehaviorProfile:
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to set.
+        index : History
+            A History (a tuple of action labels) belonging to the information set
+            to set.
         distribution : Mapping[str, Any]
             A non-negative weight for some or all of the information set's actions,
             keyed by action label; actions it omits are treated as having weight
@@ -638,14 +625,14 @@ class MixedBehaviorProfile:
         Raises
         ------
         TypeError
-            If `index` is not a ``Node``, or `distribution` is not a Mapping.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
+            If `index` is not a ``History``, or `distribution` is not a Mapping.
+        KeyError
+            If `index` does not match any node of the game.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set;
-            if any key of `distribution` is not one of the information set's action
-            labels; if any weight cannot be interpreted as a number; if any weight
-            is negative; or if the weights are all zero.
+            If `index` resolves to a terminal node, which belongs to no information
+            set; if any key of `distribution` is not one of the information set's
+            action labels; if any weight cannot be interpreted as a number; if any
+            weight is negative; or if the weights are all zero.
 
         See Also
         --------
@@ -654,13 +641,13 @@ class MixedBehaviorProfile:
             silently defaulting omitted ones to zero.
         """
         self._check_validity()
-        if not isinstance(index, Node):
-            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
-        infoset = self._resolve_infoset_for_node(index)
+        if not isinstance(index, tuple):
+            raise TypeError(f"profile index must be History, not {index.__class__.__name__}")
+        infoset = self.game._resolve_infoset(index, "__setitem__")
         self._setprob_infoset(infoset, distribution, sparse=True)
 
     def set_mixed_action(
-        self, index: Node, distribution: collections.abc.Mapping, sparse: bool = False
+        self, index: tuple, distribution: collections.abc.Mapping, sparse: bool = False
     ) -> None:
         """Sets the mixed action at the information set containing `index`.
 
@@ -674,8 +661,9 @@ class MixedBehaviorProfile:
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to set.
+        index : History
+            A History (a tuple of action labels) belonging to the information set
+            to set.
         distribution : Mapping[str, Any]
             A non-negative weight for the information set's actions, keyed by
             action label. A weight may be any value Gambit can interpret as a
@@ -690,24 +678,24 @@ class MixedBehaviorProfile:
         Raises
         ------
         TypeError
-            If `index` is not a ``Node``, or `distribution` is not a Mapping.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
+            If `index` is not a ``History``, or `distribution` is not a Mapping.
+        KeyError
+            If `index` does not match any node of the game.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set;
-            if any key of `distribution` is not one of the information set's action
-            labels; if `sparse` is False and `distribution` omits an action; if any
-            weight cannot be interpreted as a number; if any weight is negative; or
-            if the weights are all zero.
+            If `index` resolves to a terminal node, which belongs to no information
+            set; if any key of `distribution` is not one of the information set's
+            action labels; if `sparse` is False and `distribution` omits an action;
+            if any weight cannot be interpreted as a number; if any weight is
+            negative; or if the weights are all zero.
 
         See Also
         --------
         __setitem__
         """
         self._check_validity()
-        if not isinstance(index, Node):
-            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
-        infoset = self._resolve_infoset_for_node(index)
+        if not isinstance(index, tuple):
+            raise TypeError(f"profile index must be History, not {index.__class__.__name__}")
+        infoset = self.game._resolve_infoset(index, "set_mixed_action")
         self._setprob_infoset(infoset, distribution, sparse=sparse)
 
     def is_defined_at(self, infoset: NodeReference) -> bool:
@@ -748,7 +736,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return NodeValuesVector({
-            p: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
+            p: NodeValueVector({n: self._node_value(p, n) for n in self.game._all_nodes()})
             for p in self.game.players
         })
 
@@ -797,7 +785,7 @@ class MixedBehaviorProfile:
         play according to the profile.
         """
         self._check_validity()
-        return RealizProbVector({n: self._realiz_prob(n) for n in self.game.nodes})
+        return RealizProbVector({n: self._realiz_prob(n) for n in self.game._all_nodes()})
 
     @property
     def infoset_probs(self) -> InfosetProbVector:
@@ -844,7 +832,7 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return BeliefVector({n: self._belief(n) for n in self.game.nodes})
+        return BeliefVector({n: self._belief(n) for n in self.game._all_nodes()})
 
     @property
     def action_regrets(self) -> ActionRegretsVector:

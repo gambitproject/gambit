@@ -388,7 +388,7 @@ def read_behavior_profiles_csv(
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for node in game.get_infosets(player):
-                profile[node] = {a: next(values) for a in node.infoset.actions}
+                profile[node.history] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles
 

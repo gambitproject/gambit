@@ -19,7 +19,7 @@ def _branching_game():
     that removing an action can make a whole subtree's information set unreachable.
     """
     game = gbt.Game.new_tree(players=["P1", "P2"])
-    root = game.root
+    root = games.root_node(game)
     game.append_move(root, "P1", ["L", "R"])
     left = root.children["L"]
     right = root.children["R"]
@@ -164,11 +164,11 @@ def test_actionsupport_is_snapshot():
 def test_getitem_setitem_accept_node_infoset():
     game, root_infoset, left_infoset, right_infoset = _branching_game()
     profile = game.behavior_support_profile()
-    # game.root.infoset is a live, node-anchored Infoset view -- both __getitem__ and
+    # games.root_node(game).infoset is a live, node-anchored Infoset view -- both __getitem__ and
     # __setitem__ must resolve it the same way Node.infoset is used everywhere else.
-    assert set(profile[game.root.infoset]) == {"L", "R"}
-    profile[game.root.infoset] = ["R"]
-    assert set(profile[game.root.infoset]) == {"R"}
+    assert set(profile[games.root_node(game).infoset]) == {"L", "R"}
+    profile[games.root_node(game).infoset] = ["R"]
+    assert set(profile[games.root_node(game).infoset]) == {"R"}
 
 
 def test_is_reachable():
