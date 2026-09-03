@@ -1661,31 +1661,63 @@ class Game:
         for n in resolved_nodes[1:]:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset._resolve())
 
-    def append_infoset(self, nodes: Node | NodeReferenceSet,
-                       infoset: NodeReference) -> None:
-        """Add a move in the information set or event `infoset` at terminal `nodes`.
+    def append_infoset(self, nodes: Selector | GroupedSelector,
+                       infoset: Selector) -> None:
+        """Add a move at terminal `nodes`, joining the information set that the node
+        identified by `infoset` belongs to.
+
+        `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
+        and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
+        `.by(...)` expression, whose groups are pooled together -- every resolved
+        node joins the same `infoset` regardless of grouping).
+
+        `infoset` is a `Selector` that must resolve to exactly one node; that node
+        must belong to a personal player and must not be terminal -- the information
+        set it currently belongs to is the one joined.
+
+        .. versionchanged:: 17.0.0
+            `nodes` is now a `Selector` or `GroupedSelector`, and `infoset` is now a
+            `Selector` identifying a node by the information set it belongs to,
+            rather than a `Node` or `str` reference to an `Infoset`/`Event` directly.
+            Joining an existing chance event is no longer supported here.
 
         Parameters
         ----------
-        nodes : Node or NodeReferenceSet
+        nodes : Selector or GroupedSelector
             The nonempty set of terminal nodes at which to add the move.
-        infoset : Node or str
-            A node belonging to the information set or event to join, or such a
-            node's label.
+        infoset : Selector
+            A `Selector` resolving to a single node of the personal player's
+            information set to join.
 
         Raises
         ------
+        TypeError
+            If `nodes` is not a `Selector` or `GroupedSelector`, or `infoset` is not
+            a `Selector`.
         UndefinedOperationError
-            If any element in `nodes` is not a terminal node.
-        MismatchError
-            If an element in `nodes` is a `Node` from a different game,
-            or `infoset` is a `Node` from a different game.
+            If any element in `nodes` is not a terminal node, or `infoset` resolves
+            to a terminal node or to a chance node.
         ValueError
-            If `nodes` has duplicated elements, or is empty.
+            If `nodes` has duplicated elements, or is empty; or if `infoset` does not
+            resolve to exactly one node.
         """
-        resolved_infoset = cython.cast(
-            _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "append_infoset")
-        )
+        if isinstance(nodes, GroupedSelector):
+            nodes = [n for group in self._group_nodes(nodes).values() for n in group]
+        elif not isinstance(nodes, Selector):
+            raise TypeError(
+                f"append_infoset(): nodes must be a Selector or GroupedSelector, "
+                f"not {nodes.__class__.__name__}"
+            )
+        if not isinstance(infoset, Selector):
+            raise TypeError(
+                f"append_infoset(): infoset must be a Selector, not {infoset.__class__.__name__}"
+            )
+        infoset_node = cython.cast(Node, self._resolve_node(infoset, "append_infoset", "infoset"))
+        if not infoset_node.infoset:
+            raise UndefinedOperationError(
+                "append_infoset(): infoset must resolve to a personal player's node"
+            )
+        resolved_infoset = cython.cast(Infoset, infoset_node.infoset)
         resolved_nodes = self._resolve_nodes(nodes, "append_infoset", "nodes")
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")

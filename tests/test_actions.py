@@ -194,7 +194,7 @@ def test_set_move_actions_absent_minded_drop_and_add():
     set deletes that member with the subtree."""
     game = gbt.Game.new_tree(players=["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
-    game.append_infoset(game.root.children["a"], game.root)
+    game.append_infoset(gbt.H.path("a"), gbt.H.path())
     game.set_move_actions(game.root, ["b", "c"], drop=True)
     assert list(game.root.infoset.actions) == ["b", "c"]
     assert len(game.root.infoset.members) == 1
