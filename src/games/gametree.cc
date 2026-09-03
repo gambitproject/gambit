@@ -1138,10 +1138,13 @@ void GameTreeRep::BuildSubgameRoots() const
     std::unordered_map<GameNodeRep *, uint64_t> m_weight;
     std::unordered_map<GameNodeRep *, uint64_t> m_flux;
     std::mt19937_64 m_rng;
+    uint64_t m_mask;
     std::vector<GameNodeRep *> &m_subgames;
 
-    explicit ZobristVisitor(std::vector<GameNodeRep *> &p_subgames)
-      : m_rng(std::random_device{}()), m_subgames(p_subgames)
+    explicit ZobristVisitor(std::vector<GameNodeRep *> &p_subgames, int p_bits = 20)
+      : m_rng(std::random_device{}()),
+        // Weights live in {0,1}^p_bits -- now parametrised.
+        m_mask(p_bits >= 64 ? ~uint64_t{0} : (uint64_t{1} << p_bits) - 1), m_subgames(p_subgames)
     {
     }
 
@@ -1155,7 +1158,7 @@ void GameTreeRep::BuildSubgameRoots() const
           uint64_t xor_sum = 0;
           auto &members = infoset->m_members;
           for (size_t i = 0; i + 1 < members.size(); ++i) {
-            const uint64_t w = m_rng();
+            const uint64_t w = m_rng() & m_mask;
             m_weight[members[i].get()] = w;
             xor_sum ^= w;
           }
