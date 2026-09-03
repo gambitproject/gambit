@@ -1594,7 +1594,7 @@ class Game:
             raise IndexError(f"{funcname}(): must specify exactly one probability per action")
         return probs
 
-    def append_move(self, nodes: Node | NodeReferenceSet | Selector | GroupedSelector,
+    def append_move(self, nodes: Selector | GroupedSelector,
                     player: str,
                     actions: list[str]) -> None:
         """Add a move for `player` at terminal `nodes`.  All elements of `nodes` become part of
@@ -1602,20 +1602,21 @@ class Game:
 
         `player` must be a personal player; use `append_event` to add a chance move.
 
-        `nodes` may be a `Selector` (an `H`-built expression, evaluated against this
-        game and treated as a flat `NodeReferenceSet`) or a `GroupedSelector` (an
-        `H`-built `.by(...)` expression) -- in the latter case, one new information
-        set is created per distinct group, rather than one spanning every match.
+        `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
+        and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
+        `.by(...)` expression) -- in the latter case, one new information set is
+        created per distinct group, rather than one spanning every match.
 
         .. versionchanged:: 17.0.0
-            `nodes` may now be a `Selector` or `GroupedSelector`.
+            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
+            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
 
         Raises
         ------
+        TypeError
+            If `nodes` is not a `Selector` or `GroupedSelector`.
         UndefinedOperationError
             If `nodes` are not all terminal, or `actions` is empty.
-        MismatchError
-            If an element from `nodes` is a `Node` from a different game.
         KeyError
             If no player in the game has label `player`.
         ValueError
@@ -1626,8 +1627,20 @@ class Game:
             for group in self._group_nodes(nodes).values():
                 if not group:
                     continue
-                self.append_move(group, player, actions)
+                self._append_move_at(group, player, actions)
             return
+        if not isinstance(nodes, Selector):
+            raise TypeError(
+                f"append_move(): nodes must be a Selector or GroupedSelector, "
+                f"not {nodes.__class__.__name__}"
+            )
+        self._append_move_at(nodes, player, actions)
+
+    def _append_move_at(self, nodes: Selector | list[Node], player: str,
+                        actions: list[str]) -> None:
+        """Internal: shared body of `append_move`, taking either a `Selector` or an
+        already-resolved list of `Node` (the latter used for one group at a time,
+        dispatched from a `GroupedSelector`)."""
         resolved_player = self._resolve_player(player, "append_move")
         if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")

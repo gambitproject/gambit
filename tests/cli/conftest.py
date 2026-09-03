@@ -97,10 +97,10 @@ def efg_asymmetric_tree_text() -> str:
     payoff-irrelevant and so free to vary across equilibria).
     """
     game = gbt.Game.new_tree(players=["1", "2"], title="Asymmetric multi-infoset game")
-    game.append_move(game.root, "1", ["L", "R"])
+    game.append_move(gbt.H.path(), "1", ["L", "R"])
     left, right = game.root.children
-    game.append_move(left, "2", ["x", "y", "z"])
-    game.append_move(right, "2", ["p", "q"])
+    game.append_move(gbt.H.path("L"), "2", ["x", "y", "z"])
+    game.append_move(gbt.H.path("R"), "2", ["p", "q"])
     for node in left.children:
         payoff = [1, 1] if node.prior_action.label == "x" else [0, 0]
         game.make_outcome(node, {"1": payoff[0], "2": payoff[1]}, node.prior_action.label)

@@ -128,10 +128,12 @@ def test_set_move_actions_reorder_carries_subtrees():
     """Reordering three actions as a cycle moves every action to a new position.
     Each action carries its whole subtree with it, at every member of the information set."""
     game = gbt.Game.new_tree(players=["Alice", "Bob"])
-    game.append_move(game.root, "Bob", ["x", "y"])
-    game.append_move(list(game.root.children), "Alice", ["a", "b", "c"])
-    game.append_move([game.root.children["x"].children["a"],
-                      game.root.children["y"].children["b"]], "Bob", ["l", "r"])
+    game.append_move(gbt.H.path(), "Bob", ["x", "y"])
+    game.append_move(gbt.H.path(...), "Alice", ["a", "b", "c"])
+    game.append_move(
+        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in (("x", "a"), ("y", "b"))),
+        "Bob", ["l", "r"]
+    )
     infoset = game.root.children["x"].infoset
     members = list(infoset.members)
     children_before = [{label: member.children[label] for label in ("a", "b", "c")}
@@ -191,7 +193,7 @@ def test_set_move_actions_absent_minded_drop_and_add():
     """Dropping an action whose subtree contains another member of the same information
     set deletes that member with the subtree."""
     game = gbt.Game.new_tree(players=["Alice"])
-    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     game.append_infoset(game.root.children["a"], game.root)
     game.set_move_actions(game.root, ["b", "c"], drop=True)
     assert list(game.root.infoset.actions) == ["b", "c"]

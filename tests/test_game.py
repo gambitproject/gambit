@@ -154,7 +154,7 @@ def test_game_get_outcome_unmatched_label_after_relabel_raises():
 
 def test_game_get_outcome_tree_raises():
     game = gbt.Game.new_tree(["Alice"])
-    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     with pytest.raises(gbt.UndefinedOperationError):
         _ = game.get_outcome({"Alice": "a"})
 
@@ -169,7 +169,7 @@ def test_game_get_payoffs():
 
 def test_game_get_payoffs_tree():
     game = gbt.Game.new_tree(["Alice"])
-    game.append_move(game.root, "Alice", ["a", "b"])
+    game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     infoset = game.root.infoset
     strategy = next(
         s for s in game.get_strategies("Alice")

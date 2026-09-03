@@ -20,11 +20,11 @@ def _branching_game():
     """
     game = gbt.Game.new_tree(players=["P1", "P2"])
     root = game.root
-    game.append_move(root, "P1", ["L", "R"])
+    game.append_move(gbt.H.path(), "P1", ["L", "R"])
     left = root.children["L"]
     right = root.children["R"]
-    game.append_move(left, "P2", ["A", "B"])
-    game.append_move(right, "P2", ["A", "B"])
+    game.append_move(gbt.H.path("L"), "P2", ["A", "B"])
+    game.append_move(gbt.H.path("R"), "P2", ["A", "B"])
     root.infoset.label = "P1 infoset"
     left.infoset.label = "P2 left infoset"
     right.infoset.label = "P2 right infoset"

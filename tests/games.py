@@ -93,8 +93,8 @@ def create_efg_corresponding_to_bimatrix_game_arrays(
     g = gbt.Game.new_tree(players=["1", "2"], title=title)
     actions1 = [str(i) for i in range(m)]
     actions2 = [str(i) for i in range(n)]
-    g.append_move(g.root, "1", actions1)
-    g.append_move(g.root.children, "2", actions2)
+    g.append_move(gbt.H.path(), "1", actions1)
+    g.append_move(gbt.H.path(...), "2", actions2)
     for i, j in itertools.product(range(m), range(n)):
         node = g.root.children[str(i)].children[str(j)]
         g.make_outcome(node, {"1": A[i, j], "2": B[i, j]}, f"({i},{j})")
@@ -165,14 +165,17 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     deals = ["King", "Queen"]
     g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
 
-    for node in g.root.children:
-        g.append_move(node, player="Alice", actions=["Bet", "Fold"])
+    for card in deals:
+        g.append_move(
+            gbt.H.path(...).filter(lambda h, card=card: h[0] == card),
+            player="Alice", actions=["Bet", "Fold"]
+        )
 
     alice_bets_nodes = [
         g.root.children["King"].children["Bet"],
         g.root.children["Queen"].children["Bet"],
     ]
-    g.append_move(alice_bets_nodes, player="Bob", actions=["Call", "Fold"])
+    g.append_move(gbt.H.path(..., "Bet"), player="Bob", actions=["Call", "Fold"])
 
     g.make_outcome(g.root, {"Alice": -1, "Bob": -1}, "Ante")
     g.make_outcome(
@@ -199,34 +202,31 @@ def _create_kuhn_poker_efg_without_outcomes():
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
-    def deals_by_infoset(player, card):
-        player_idx = 0 if player == "Alice" else 1
-        return [d for d in deals if d[player_idx] == card]
-
     g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
-        term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
-        g.append_move(term_nodes, "Alice", ["Check", "Bet"])
+        g.append_move(
+            gbt.H.path(...).filter(lambda h, card=alice_card: h[0][0] == card),
+            "Alice", ["Check", "Bet"]
+        )
     for bob_card in cards:
         # Bob's move after Alice checks
-        term_nodes = [
-            g.root.children[d].children["Check"] for d in deals_by_infoset("Bob", bob_card)
-        ]
-        g.append_move(term_nodes, "Bob", ["Check", "Bet"])
+        g.append_move(
+            gbt.H.path(..., "Check").filter(lambda h, card=bob_card: h[0][1] == card),
+            "Bob", ["Check", "Bet"]
+        )
     for alice_card in cards:
         # Alice's move if Bob's second action is bet
-        term_nodes = [
-            g.root.children[d].children["Check"].children["Bet"]
-            for d in deals_by_infoset("Alice", alice_card)
-        ]
-        g.append_move(term_nodes, "Alice", ["Fold", "Call"])
+        g.append_move(
+            gbt.H.path(..., "Check", "Bet").filter(lambda h, card=alice_card: h[0][0] == card),
+            "Alice", ["Fold", "Call"]
+        )
     for bob_card in cards:
         # Bob's move after Alice bets initially
-        term_nodes = [
-            g.root.children[d].children["Bet"] for d in deals_by_infoset("Bob", bob_card)
-        ]
-        g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+        g.append_move(
+            gbt.H.path(..., "Bet").filter(lambda h, card=bob_card: h[0][1] == card),
+            "Bob", ["Fold", "Call"]
+        )
     return g
 
 
@@ -439,8 +439,8 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
-    g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
-    g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
+    g.append_move(gbt.H.path(), "Buyer", ["Trust", "Not trust"])
+    g.append_move(gbt.H.path("Trust"), "Seller", ["Honor", "Abuse"])
     g.make_outcome(
         g.root.children["Trust"].children["Honor"], {"Buyer": 1, "Seller": 1}, "Trustworthy"
     )
@@ -569,7 +569,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
         current_node = g.root
         current_player = "1"
         for t in range(self.N):
-            g.append_move(current_node, current_player, ["Take", "Push"])
+            g.append_move(gbt.H.path(*(["Push"] * t)), current_player, ["Take", "Push"])
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
@@ -700,7 +700,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.set_size_of_rsf(rs)
         return rs
 
-    def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
+    def create_binary_tree(self, g, node, path, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
             g.make_outcome(
@@ -708,18 +708,18 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             )
         else:
             current_player = str(whose_turn + 1)
-            g.append_move(node, current_player, ["L", "R"])
+            g.append_move(gbt.H.path(*path), current_player, ["L", "R"])
 
             whose_turn = (whose_turn + 1) % self.n_players
-            for child in node.children:
-                self.create_binary_tree(g, child, whose_turn, depth + 1, max_depth)
+            for label, child in zip(["L", "R"], node.children, strict=True):
+                self.create_binary_tree(g, child, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
         g = gbt.Game.new_tree(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
-        self.create_binary_tree(g, g.root, 0, 0, self.level)
+        self.create_binary_tree(g, g.root, (), 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
                 left = n.children["L"]

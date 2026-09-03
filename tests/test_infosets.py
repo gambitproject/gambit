@@ -97,8 +97,8 @@ def test_make_infoset_requires_matching_action_labels(node_actions):
     """Nodes must have the same actions, with the same labels in the same order;
     a matching count is not sufficient."""
     game = gbt.Game.new_tree(players=["1"])
-    game.append_move(game.root, "1", ["a", "b"])
-    game.append_move(game.root.children["a"], "1", node_actions)
+    game.append_move(gbt.H.path(), "1", ["a", "b"])
+    game.append_move(gbt.H.path("a"), "1", node_actions)
     with pytest.raises(ValueError):
         game.make_infoset([game.root, game.root.children["a"]], "1")
 
@@ -440,9 +440,9 @@ def test_make_infoset_split_leaves_new_infoset_unlabeled():
 def test_make_infoset_across_different_source_players():
     """Nodes drawn from different players all land under the target player."""
     game = gbt.Game.new_tree(players=["1", "2", "3"])
-    game.append_move(game.root, "1", ["a", "b"])
-    game.append_move(game.root.children["a"], "2", ["a", "b"])   # player 2
-    game.append_move(game.root.children["b"], "3", ["a", "b"])   # player 3
+    game.append_move(gbt.H.path(), "1", ["a", "b"])
+    game.append_move(gbt.H.path("a"), "2", ["a", "b"])   # player 2
+    game.append_move(gbt.H.path("b"), "3", ["a", "b"])   # player 3
     n2 = game.root.children["a"]
     n3 = game.root.children["b"]
     assert n2.infoset.player == "2"
@@ -494,10 +494,10 @@ def test_reveal_splits_infoset_by_action():
 def test_reveal_absent_minded_infoset_raises():
     """Revealing the move at an absent-minded infoset is rejected (17.0)."""
     game = gbt.Game.new_tree(players=["Driver", "2"])
-    game.append_move(game.root, "Driver", ["Continue", "Exit"])
+    game.append_move(gbt.H.path(), "Driver", ["Continue", "Exit"])
     mid = game.root.children["Continue"]
-    game.append_move(mid, "Driver", ["Continue", "Exit"])
+    game.append_move(gbt.H.path("Continue"), "Driver", ["Continue", "Exit"])
     game.make_infoset([game.root, mid], "Driver")
-    game.append_move(mid.children["Continue"], "2", ["l", "r"])
+    game.append_move(gbt.H.path("Continue", "Continue"), "2", ["l", "r"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.reveal(game.root, "2")
