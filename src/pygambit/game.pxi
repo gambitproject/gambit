@@ -1845,25 +1845,40 @@ class Game:
             c_actions.push_back(label.encode("utf-8"))
         self.game.deref().InsertMove(resolved_node.node, resolved_player, c_actions)
 
-    def insert_infoset(self, node: Node | str,
-                       infoset: NodeReference) -> None:
-        """Insert a move in the information set or event `infoset` prior to the node
-        `node`. `node` becomes the first child of the newly-inserted node.
+    def insert_infoset(self, node: Selector,
+                       infoset: Selector) -> None:
+        """Insert a move in the information set or event that the node identified by
+        `infoset` belongs to, prior to the node identified by `node`.  The node
+        becomes the first child of the newly-inserted node.
 
-        Parameters
-        ----------
-        node : Node or str
-            The node before which to insert the move.
-        infoset : Node or str
-            A node belonging to the information set or event to join, or such a
-            node's label.
+        `node` and `infoset` are each a `Selector` (an `H`-built expression,
+        evaluated against this game) that must resolve to exactly one node.
+
+        .. versionchanged:: 17.0.0
+            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
+        .. versionchanged:: 17.0.0
+            `infoset` is now a `Selector` identifying a node by the information set
+            or event it belongs to, rather than a `Node` or `str` reference to an
+            `Infoset`/`Event` directly.
 
         Raises
         ------
-        MismatchError
-            If `node` is a `Node` from a different game, or `infoset` is a `Node` from a
-            different game.
+        TypeError
+            If `node` or `infoset` is not a `Selector`.
+        ValueError
+            If `node` or `infoset` does not resolve to exactly one node, or if the
+            node identified by `infoset` belongs to no information set or event (it
+            is terminal).
         """
+        if not isinstance(node, Selector):
+            raise TypeError(
+                f"insert_infoset(): node must be a Selector, not {node.__class__.__name__}"
+            )
+        if not isinstance(infoset, Selector):
+            raise TypeError(
+                f"insert_infoset(): infoset must be a Selector, not {infoset.__class__.__name__}"
+            )
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_infoset"))
         resolved_infoset = cython.cast(
             _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "insert_infoset")

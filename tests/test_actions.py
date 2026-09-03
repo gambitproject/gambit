@@ -34,6 +34,14 @@ def test_relabel_actions_duplicate_raises_valueerror():
         game.relabel_actions(game.root, {"King": "Queen"})
 
 
+def test_relabel_actions_error_mismatch():
+    """Test to ensure `infoset` is from the same game."""
+    game1 = gbt.Game.new_tree()
+    game2 = games.create_stripped_down_poker_efg()
+    with pytest.raises(gbt.MismatchError):
+        game1.relabel_actions(game2.root, {"King": "Queen"})
+
+
 def test_relabel_actions_simultaneous_swap():
     """Reassignment is simultaneous, so a swap is well-defined; applying the entries one
     at a time would collide on the intermediate state.

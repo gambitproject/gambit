@@ -592,14 +592,6 @@ def test_append_move_error_player_actions():
         game.append_move(gbt.H.path(), "Player 1", [])
 
 
-def test_insert_infoset_error_mismatch():
-    """Test to ensure the infoset is from the same game."""
-    game1 = gbt.Game.new_tree()
-    game2 = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(gbt.MismatchError):
-        game1.insert_infoset(game1.root, game2.root)
-
-
 def test_append_move_error_empty_label():
     """Test that an empty label in `actions` is rejected."""
     game = games.read_from_file("basic_extensive_game.efg")
@@ -1145,10 +1137,9 @@ def test_len_after_insert_infoset():
     initial_number_of_nodes = len(game.nodes)
 
     infoset_to_modify = game.root.children["L"].infoset
-    node_to_insert_above = game.root.children["L"].children["R"]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
-    game.insert_infoset(node_to_insert_above, game.root.children["L"])
+    game.insert_infoset(gbt.H.path("L", "R"), gbt.H.path("L"))
 
     assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
 
