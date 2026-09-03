@@ -542,17 +542,15 @@ class Game:
             )
         return Node.wrap(self.game.deref().GetRoot())
 
-    def get_nodes(self, selector: Selector) -> list[Node]:
+    def _get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
 
-        First sketch of the `H` selector algebra's evaluator: interprets the
+        Internal: the `H` selector algebra's evaluator, interpreting the
         selector's ops in order, starting from the root, reusing `Node`'s
         existing navigation (`.children`, `.plays`) rather than walking the
-        C++ tree directly. Returns raw `Node` objects for now -- a real
-        public version would wrap each result in a `.game`-free facade
-        instead, not yet built.
-
-        .. versionadded:: 17.0.0
+        C++ tree directly. Not part of the public API yet -- used to resolve
+        a `Selector`/`GroupedSelector` argument to `append_move`,
+        `append_event`, `append_infoset`, and `make_outcome`.
         """
         current: list = None
         for op in selector._ops:
@@ -577,26 +575,23 @@ class Game:
                     if op.predicate(HistoryView._wrap(node, _history_of(node)))
                 ]
             else:
-                raise TypeError(f"get_nodes(): unknown selector op {op!r}")
+                raise TypeError(f"_get_nodes(): unknown selector op {op!r}")
         if current is None:
             current = [self.root]
         return current
 
-    def get_histories(self, selector: Selector) -> list[tuple]:
+    def _get_histories(self, selector: Selector) -> list[tuple]:
         """Evaluate `selector` (an `H`-built expression) against this game,
         materializing each result as a `History` -- a plain tuple of action
         labels from the root, carrying no reference to this game.
 
-        This is the public-facing counterpart to `get_nodes`: `get_nodes`
-        exists only as an internal sketch and is never meant to hand a `Node`
-        to calling code.
-
-        .. versionadded:: 17.0.0
+        Internal: the History-materializing counterpart to `_get_nodes`, kept
+        for use by `_get_groups` and tests. Not part of the public API yet.
         """
-        return [_history_of(node) for node in self.get_nodes(selector)]
+        return [_history_of(node) for node in self._get_nodes(selector)]
 
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
-        """Internal: like `get_groups`, but keeps `Node` objects rather than
+        """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
         need to resolve straight back to concrete nodes, avoiding a
         Node -> History -> Node round trip.
@@ -609,7 +604,7 @@ class Game:
         docstring for why).
         """
         result: dict = {}
-        for node in self.get_nodes(grouped.base):
+        for node in self._get_nodes(grouped.base):
             view: HistoryView = HistoryView._wrap(node, _history_of(node))
             key = grouped.key(view)
             result.setdefault(key, []).append(node)
@@ -632,12 +627,13 @@ class Game:
             result = next_result
         return result
 
-    def get_groups(self, grouped: GroupedSelector) -> dict:
+    def _get_groups(self, grouped: GroupedSelector) -> dict:
         """Evaluate a `.by(callable)`-built `GroupedSelector` against this
         game, returning a dict from each distinct key to the list of
         Histories that produced it.
 
-        .. versionadded:: 17.0.0
+        Internal: the History-materializing counterpart to `_group_nodes`,
+        kept for use by tests. Not part of the public API yet.
         """
         return {
             key: [_history_of(node) for node in nodes]
@@ -1420,7 +1416,7 @@ class Game:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, Selector):
-            resolved = self.get_nodes(node)
+            resolved = self._get_nodes(node)
             if len(resolved) != 1:
                 raise ValueError(
                     f"{funcname}(): {argname} selector must resolve to exactly one "
@@ -1452,10 +1448,10 @@ class Game:
         See `_resolve_node` for details on functionality.
 
         `nodes` may also be a `Selector` (an `H`-built expression), evaluated
-        against this game via `get_nodes` before the usual resolution.
+        against this game via `_get_nodes` before the usual resolution.
         """
         if isinstance(nodes, Selector):
-            nodes = self.get_nodes(nodes)
+            nodes = self._get_nodes(nodes)
         resolved_nodes = [
             self._resolve_node(n, funcname, argname)
             for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, (str, tuple))

@@ -85,8 +85,8 @@ class _FilterStep:
 
 class Selector:
     """A game-neutral description of a set of nodes.  Carries no reference to
-    any game -- it's just a recipe, evaluated only when handed to a Game
-    method such as `get_nodes`.
+    any game -- it's just a recipe, evaluated only when handed to a `Game`
+    method that accepts one, such as `append_move` or `make_outcome`.
 
     .. versionadded:: 17.0.0
     """
@@ -135,8 +135,9 @@ class Selector:
 
 
 class GroupedSelector:
-    """Result of `.by(callable)`.  Game-neutral until evaluated -- call
-    `Game.get_groups` and iterate its result as `(key, group)` pairs.
+    """Result of `.by(callable)`.  Game-neutral until evaluated -- pass to a
+    `Game` method that accepts a `GroupedSelector`, such as `append_move`,
+    which dispatches one call per group.
 
     `.plays`/`.after(...)` chain onto a `GroupedSelector` the same way they
     chain onto a plain `Selector`, but apply per-group: each group's own

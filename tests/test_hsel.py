@@ -14,7 +14,7 @@ def test_history_view_members_on_shared_infoset():
         captured[h[:]] = h.members
         return frozenset(h.members)
 
-    groups = game.get_groups(gbt.H.path(...).by(key))
+    groups = game._get_groups(gbt.H.path(...).by(key))
     assert captured == {
         ("U",): [("U",), ("D",)],
         ("D",): [("U",), ("D",)],
@@ -34,7 +34,7 @@ def test_history_view_members_singleton_infoset():
         captured[h[:]] = h.members
         return None
 
-    game.get_groups(gbt.H.path(...).by(key))
+    game._get_groups(gbt.H.path(...).by(key))
     assert captured == {("U",): [("U",)], ("D",): [("D",)]}
 
 
@@ -49,7 +49,7 @@ def test_history_view_members_on_event():
         captured[h[:]] = h.members
         return None
 
-    game.get_groups(gbt.H.path(...).by(key))
+    game._get_groups(gbt.H.path(...).by(key))
     assert captured == {("L",): [("L",), ("R",)], ("R",): [("L",), ("R",)]}
 
 
@@ -62,4 +62,4 @@ def test_history_view_members_raises_on_terminal():
             _ = h.members
         return None
 
-    game.get_groups(gbt.H.plays.by(key))
+    game._get_groups(gbt.H.plays.by(key))
