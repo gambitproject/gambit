@@ -163,7 +163,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
                                             poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
-    g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
+    g.append_event(gbt.H.path(), dict.fromkeys(deals, gbt.Rational(1, 2)))
 
     for card in deals:
         g.append_move(
@@ -202,7 +202,7 @@ def _create_kuhn_poker_efg_without_outcomes():
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
-    g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
+    g.append_event(gbt.H.path(), dict.fromkeys(deals, gbt.Rational(1, 6)))
     for alice_card in cards:
         # Alice's first move
         g.append_move(

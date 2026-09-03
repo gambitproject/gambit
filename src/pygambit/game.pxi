@@ -1692,60 +1692,78 @@ class Game:
         for n in resolved_nodes:
             self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset._resolve())
 
-    def append_event(self, nodes: Node | NodeReferenceSet,
-                     actions: list[str],
-                     probs: typing.Sequence | typing.Mapping) -> None:
-        """Add a chance move at terminal `nodes`, with distribution `probs`.  All elements
-        of `nodes` become part of a new event, with actions labeled according to `actions`.
+    def append_event(self, nodes: Selector | GroupedSelector,
+                     actions: typing.Mapping) -> None:
+        """Add a chance move at terminal `nodes`, with actions and their probabilities
+        given by `actions`.  All elements of `nodes` become part of a new event.
+
+        `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
+        and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
+        `.by(...)` expression) -- in the latter case, one new event is created per
+        distinct group, rather than one spanning every match.
 
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
+            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
+        .. versionchanged:: 17.0.0
+            `actions` and `probs` are combined into a single mapping from action
+            label to probability, rather than a list of labels plus a separate
+            probability sequence or mapping.
 
         Parameters
         ----------
-        nodes : Node or NodeReferenceSet
+        nodes : Selector or GroupedSelector
             The nonempty set of terminal nodes at which to add the move.
-        actions : list of str
-            The labels of the actions of the new event.  Nonempty, with no empty or
-            duplicated label.
-        probs : sequence or mapping
-            The probability distribution over `actions`.  A sequence must specify one
-            probability per action, in the order given in `actions`.  A mapping from
-            action labels to probabilities may be sparse; omitted actions are assigned
-            probability zero.  Probabilities are non-negative and sum to exactly one.
+        actions : Mapping
+            A mapping from each new action's label to its probability.  Nonempty,
+            with no empty label.  Probabilities are non-negative and sum to exactly
+            one.
 
         Raises
         ------
+        TypeError
+            If `nodes` is not a `Selector` or `GroupedSelector`.
         UndefinedOperationError
             If `nodes` are not all terminal, or `actions` is empty.
-        MismatchError
-            If an element from `nodes` is a `Node` from a different game.
-        KeyError
-            If a key of `probs` matches no label in `actions`.
-        IndexError
-            If a sequence `probs` does not have exactly one entry per action.
         ValueError
             If `nodes` has duplicated elements, or is empty; if `actions` contains
-            an empty or a duplicated label; or if `probs` are not non-negative numbers
+            an empty label; or if the probabilities are not non-negative numbers
             summing to exactly one.
         """
-        if not actions:
-            raise UndefinedOperationError("append_event(): `actions` must be a nonempty list")
-        if any(not label for label in actions):
+        if isinstance(nodes, GroupedSelector):
+            for group in self._group_nodes(nodes).values():
+                if not group:
+                    continue
+                self._append_event_at(group, actions)
+            return
+        if not isinstance(nodes, Selector):
+            raise TypeError(
+                f"append_event(): nodes must be a Selector or GroupedSelector, "
+                f"not {nodes.__class__.__name__}"
+            )
+        self._append_event_at(nodes, actions)
+
+    def _append_event_at(self, nodes: Selector | list[Node], actions: typing.Mapping) -> None:
+        """Internal: shared body of `append_event`, taking either a `Selector` or an
+        already-resolved list of `Node` (the latter used for one group at a time,
+        dispatched from a `GroupedSelector`)."""
+        action_labels = list(actions)
+        if not action_labels:
+            raise UndefinedOperationError("append_event(): `actions` must be a nonempty mapping")
+        if any(not label for label in action_labels):
             raise ValueError("append_event(): action labels must not be empty")
-        if len(set(actions)) != len(actions):
-            raise ValueError("append_event(): action labels must be unique")
         resolved_nodes = self._resolve_nodes(nodes, "append_event", "nodes")
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_event(): `nodes` must be terminal nodes")
-        resolved_probs = self._resolve_probs(probs, actions, "append_event")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
         c_actions = stdvector[string]()
-        for label in actions:
+        for label in action_labels:
             c_actions.push_back(label.encode("utf-8"))
         c_probs = stdvector[c_Number]()
-        for p in resolved_probs:
-            c_probs.push_back(_to_number(p))
+        for label in action_labels:
+            c_probs.push_back(_to_number(actions[label]))
         self.game.deref().AppendEvent(resolved_node.node, c_actions, c_probs)
         resolved_event = cython.cast(Event, resolved_node.event)
         for n in resolved_nodes[1:]:

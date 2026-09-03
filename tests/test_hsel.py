@@ -40,8 +40,8 @@ def test_history_view_members_singleton_infoset():
 
 def test_history_view_members_on_event():
     game = gbt.Game.new_tree(players=["A"])
-    game.append_event(gbt.H.path(), ["L", "R"], [0.5, 0.5])
-    game.append_event(gbt.H.plays, ["p", "q"], [0.5, 0.5])
+    game.append_event(gbt.H.path(), {"L": 0.5, "R": 0.5})
+    game.append_event(gbt.H.plays, {"p": 0.5, "q": 0.5})
 
     captured = {}
 
