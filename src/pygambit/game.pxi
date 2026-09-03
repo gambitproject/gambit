@@ -2419,8 +2419,10 @@ class Game:
 
     def _resolve_outcome_location(self, location, funcname: str) -> tuple:
         """Resolve `location` for `make_outcome`/`make_outcome_null`: for a tree game,
-        into a list of `Node`; for a strategic game, into a list of pure-strategy
-        contingencies (each a mapping from player label to strategy label).
+        into a list of `Node` (via `_resolve_nodes`, so `location` may be a `Node`,
+        `History`, `Selector`, or an iterable of these); for a strategic game, into a
+        list of pure-strategy contingencies (each a mapping from player label to
+        strategy label).
 
         Returns (is_tree, resolved).
 
@@ -2457,10 +2459,11 @@ class Game:
                      label: str) -> Outcome:
         """Create an outcome with `payoffs` and `label` and attach it at `location`.
 
-        For an extensive game, `location` is a ``Node`` or an iterable of nodes.  For a
-        strategic game, `location` is a pure-strategy contingency — a complete mapping
-        from the game's players' labels to strategy labels — or an iterable of such
-        contingencies.
+        For an extensive game, `location` is a ``Node``, a ``History``, a ``Selector``
+        (an `H`-built expression, evaluated against this game), or an iterable of
+        these.  For a strategic game, `location` is a pure-strategy contingency — a
+        complete mapping from the game's players' labels to strategy labels — or an
+        iterable of such contingencies.
 
         Any outcome all of whose references are among `location` is absorbed by the
         operation: it is removed from the game, and `label` may reuse its label.
@@ -2469,7 +2472,7 @@ class Game:
 
         Parameters
         ----------
-        location : Node, contingency, or iterable of these
+        location : Node, History, Selector, contingency, or iterable of these
             Where to attach the new outcome.  Nonempty; each node or contingency may
             be referenced only once.
         payoffs : Mapping
@@ -2541,10 +2544,11 @@ class Game:
     def make_outcome_null(self, location) -> None:
         """Reset the outcome at `location` to the null outcome.
 
-        For an extensive game, `location` is a ``Node`` or an iterable of nodes.  For a
-        strategic game, `location` is a pure-strategy contingency — a complete mapping
-        from the game's players' labels to strategy labels — or an iterable of such
-        contingencies.
+        For an extensive game, `location` is a ``Node``, a ``History``, a ``Selector``
+        (an `H`-built expression, evaluated against this game), or an iterable of
+        these.  For a strategic game, `location` is a pure-strategy contingency — a
+        complete mapping from the game's players' labels to strategy labels — or an
+        iterable of such contingencies.
 
         Any outcome all of whose references are among `location` is removed from the game.
 
@@ -2552,7 +2556,7 @@ class Game:
 
         Parameters
         ----------
-        location : Node, contingency, or iterable of these
+        location : Node, History, Selector, contingency, or iterable of these
             The nodes or contingencies to reset to the null outcome.  Nonempty; each
             node or contingency may be referenced only once.
 
