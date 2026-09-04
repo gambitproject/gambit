@@ -33,6 +33,25 @@ def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Infoset:
     return next(i for i in all_infosets(game) if i.label == label)
 
 
+def _node_history(node: gbt.Node) -> tuple:
+    """The plain-tuple history of `node`, walked via `.parent`/`.prior_action`."""
+    labels = []
+    current = node
+    while current.parent is not None:
+        labels.append(current.prior_action.label)
+        current = current.parent
+    labels.reverse()
+    return tuple(labels)
+
+
+def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
+    """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
+    nodes -- for adapting fixtures that compute a `Node` list dynamically to the
+    `H`-only mutation methods."""
+    histories = frozenset(_node_history(n) for n in nodes)
+    return gbt.H.after().filter(lambda h: h[:] in histories)
+
+
 # Label-validation fixtures.
 # VALID: accepted by the C++ validator (IsValidLabel in src/games/game.h), including
 #        well-formed UTF-8 text (#862, 17.0.0). A single Unicode whitespace character
@@ -93,11 +112,10 @@ def create_efg_corresponding_to_bimatrix_game_arrays(
     g = gbt.Game.new_tree(players=["1", "2"], title=title)
     actions1 = [str(i) for i in range(m)]
     actions2 = [str(i) for i in range(n)]
-    g.append_move(g.root, "1", actions1)
-    g.append_move(g.root.children, "2", actions2)
+    g.append_move(gbt.H.path(), "1", actions1)
+    g.append_move(gbt.H.path(...), "2", actions2)
     for i, j in itertools.product(range(m), range(n)):
-        node = g.root.children[str(i)].children[str(j)]
-        g.make_outcome(node, {"1": A[i, j], "2": B[i, j]}, f"({i},{j})")
+        g.make_outcome(gbt.H.path(str(i), str(j)), {"1": A[i, j], "2": B[i, j]}, f"({i},{j})")
     return g
 
 
@@ -134,9 +152,9 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     g = create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
     if variant == "missing term outcome":
-        g.make_outcome_null(g.root.children["0"].children["1"])
+        g.make_outcome_null(gbt.H.path("0", "1"))
     elif variant == "with neutral outcome":
-        g.make_outcome(g.root.children["0"], {"1": 0, "2": 0}, "neutral")
+        g.make_outcome(gbt.H.path("0"), {"1": 0, "2": 0}, "neutral")
 
     return g
 
@@ -163,31 +181,26 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
                                             poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
-    g.append_event(g.root, deals, [gbt.Rational(1, 2)] * 2)
+    g.append_event(gbt.H.path(), dict.fromkeys(deals, gbt.Rational(1, 2)))
 
-    for node in g.root.children:
-        g.append_move(node, player="Alice", actions=["Bet", "Fold"])
+    for card in deals:
+        g.append_move(
+            gbt.H.path(...).filter(lambda h, card=card: h[0] == card),
+            player="Alice", actions=["Bet", "Fold"]
+        )
 
-    alice_bets_nodes = [
-        g.root.children["King"].children["Bet"],
-        g.root.children["Queen"].children["Bet"],
-    ]
-    g.append_move(alice_bets_nodes, player="Bob", actions=["Call", "Fold"])
+    g.append_move(gbt.H.path(..., "Bet"), player="Bob", actions=["Call", "Fold"])
 
-    g.make_outcome(g.root, {"Alice": -1, "Bob": -1}, "Ante")
+    g.make_outcome(gbt.H.path(), {"Alice": -1, "Bob": -1}, "Ante")
+    g.make_outcome(gbt.H.path(..., "Fold"), {"Alice": 0, "Bob": 2}, "Alice Folds")
+    g.make_outcome(gbt.H.path(..., "Bet"), {"Alice": -1, "Bob": 0}, "Alice Bets")
+    g.make_outcome(gbt.H.path(..., "Bet", "Fold"), {"Alice": 3, "Bob": 0}, "Bob Folds")
     g.make_outcome(
-        [node.children["Fold"] for node in g.root.children], {"Alice": 0, "Bob": 2}, "Alice Folds"
+        gbt.H.path("King", "Bet", "Call"), {"Alice": 4, "Bob": -1}, "Bob Calls and Loses"
     )
     g.make_outcome(
-        [node.children["Bet"] for node in g.root.children], {"Alice": -1, "Bob": 0}, "Alice Bets"
+        gbt.H.path("Queen", "Bet", "Call"), {"Alice": 0, "Bob": 3}, "Bob Calls and Wins"
     )
-    g.make_outcome(
-        [node.children["Fold"] for node in alice_bets_nodes], {"Alice": 3, "Bob": 0}, "Bob Folds"
-    )
-    bob_calls_and_loses_node = g.root.children["King"].children["Bet"].children["Call"]
-    g.make_outcome(bob_calls_and_loses_node, {"Alice": 4, "Bob": -1}, "Bob Calls and Loses")
-    bob_calls_and_wins_node = g.root.children["Queen"].children["Bet"].children["Call"]
-    g.make_outcome(bob_calls_and_wins_node, {"Alice": 0, "Bob": 3}, "Bob Calls and Wins")
     return g
 
 
@@ -199,34 +212,31 @@ def _create_kuhn_poker_efg_without_outcomes():
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
-    def deals_by_infoset(player, card):
-        player_idx = 0 if player == "Alice" else 1
-        return [d for d in deals if d[player_idx] == card]
-
-    g.append_event(g.root, deals, [gbt.Rational(1, 6)] * 6)
+    g.append_event(gbt.H.path(), dict.fromkeys(deals, gbt.Rational(1, 6)))
     for alice_card in cards:
         # Alice's first move
-        term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
-        g.append_move(term_nodes, "Alice", ["Check", "Bet"])
+        g.append_move(
+            gbt.H.path(...).filter(lambda h, card=alice_card: h[0][0] == card),
+            "Alice", ["Check", "Bet"]
+        )
     for bob_card in cards:
         # Bob's move after Alice checks
-        term_nodes = [
-            g.root.children[d].children["Check"] for d in deals_by_infoset("Bob", bob_card)
-        ]
-        g.append_move(term_nodes, "Bob", ["Check", "Bet"])
+        g.append_move(
+            gbt.H.path(..., "Check").filter(lambda h, card=bob_card: h[0][1] == card),
+            "Bob", ["Check", "Bet"]
+        )
     for alice_card in cards:
         # Alice's move if Bob's second action is bet
-        term_nodes = [
-            g.root.children[d].children["Check"].children["Bet"]
-            for d in deals_by_infoset("Alice", alice_card)
-        ]
-        g.append_move(term_nodes, "Alice", ["Fold", "Call"])
+        g.append_move(
+            gbt.H.path(..., "Check", "Bet").filter(lambda h, card=alice_card: h[0][0] == card),
+            "Alice", ["Fold", "Call"]
+        )
     for bob_card in cards:
         # Bob's move after Alice bets initially
-        term_nodes = [
-            g.root.children[d].children["Bet"] for d in deals_by_infoset("Bob", bob_card)
-        ]
-        g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+        g.append_move(
+            gbt.H.path(..., "Bet").filter(lambda h, card=bob_card: h[0][1] == card),
+            "Bob", ["Fold", "Call"]
+        )
     return g
 
 
@@ -301,7 +311,10 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
 
     for payoffs, nodes in nodes_by_payoff.items():
-        g.make_outcome(nodes, {"Alice": payoffs[0], "Bob": payoffs[1]}, payoff_labels[payoffs])
+        g.make_outcome(
+            selector_for_nodes(nodes), {"Alice": payoffs[0], "Bob": payoffs[1]},
+            payoff_labels[payoffs]
+        )
 
     return g
 
@@ -368,7 +381,9 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         # the same non-terminal node is revisited once per terminal descendant walked above
         deduped_nodes = list(dict.fromkeys(nodes))
         alice_payoff, bob_payoff = payoffs_by_key[key]
-        g.make_outcome(deduped_nodes, {"Alice": alice_payoff, "Bob": bob_payoff}, key)
+        g.make_outcome(
+            selector_for_nodes(deduped_nodes), {"Alice": alice_payoff, "Bob": bob_payoff}, key
+        )
 
     return g
 
@@ -439,24 +454,24 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
-    g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
-    g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
+    g.append_move(gbt.H.path(), "Buyer", ["Trust", "Not trust"])
+    g.append_move(gbt.H.path("Trust"), "Seller", ["Honor", "Abuse"])
     g.make_outcome(
-        g.root.children["Trust"].children["Honor"], {"Buyer": 1, "Seller": 1}, "Trustworthy"
+        gbt.H.path("Trust", "Honor"), {"Buyer": 1, "Seller": 1}, "Trustworthy"
     )
     if unique_NE_variant:
         g.make_outcome(
-            g.root.children["Trust"].children["Abuse"],
+            gbt.H.path("Trust", "Abuse"),
             {"Buyer": "1/2", "Seller": 2},
             "Untrustworthy",
         )
     else:
         g.make_outcome(
-            g.root.children["Trust"].children["Abuse"],
+            gbt.H.path("Trust", "Abuse"),
             {"Buyer": -1, "Seller": 2},
             "Untrustworthy",
         )
-    g.make_outcome(g.root.children["Not trust"], {"Buyer": 0, "Seller": 0}, "Opt-out")
+    g.make_outcome(gbt.H.path("Not trust"), {"Buyer": 0, "Seller": 0}, "Opt-out")
     return g
 
 
@@ -566,24 +581,24 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
 
     def gbt_game(self):
         g = gbt.Game.new_tree(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
-        current_node = g.root
         current_player = "1"
         for t in range(self.N):
-            g.append_move(current_node, current_player, ["Take", "Push"])
+            g.append_move(gbt.H.path(*(["Push"] * t)), current_player, ["Take", "Push"])
             payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
             if current_player == "2":
                 payoffs.reverse()
             g.make_outcome(
-                current_node.children["Take"], {"1": payoffs[0], "2": payoffs[1]}, f"take_{t}"
+                gbt.H.path(*(["Push"] * t), "Take"), {"1": payoffs[0], "2": payoffs[1]},
+                f"take_{t}"
             )
             if t == self.N - 1:  # for last round, push payoffs
                 payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
                 if current_player == "2":
                     payoffs.reverse()
                 g.make_outcome(
-                    current_node.children["Push"], {"1": payoffs[0], "2": payoffs[1]}, f"push_{t}"
+                    gbt.H.path(*(["Push"] * (t + 1))), {"1": payoffs[0], "2": payoffs[1]},
+                    f"push_{t}"
                 )
-            current_node = current_node.children["Push"]
             current_player = "2" if current_player == "1" else "1"
         return g
 
@@ -700,31 +715,32 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.set_size_of_rsf(rs)
         return rs
 
-    def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
+    def create_binary_tree(self, g, node, path, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
             g.make_outcome(
-                node, {str(p): 0 for p in self.players}, f"leaf_{len(list(g.outcomes))}"
+                gbt.H.path(*path), {str(p): 0 for p in self.players},
+                f"leaf_{len(list(g.outcomes))}"
             )
         else:
             current_player = str(whose_turn + 1)
-            g.append_move(node, current_player, ["L", "R"])
+            g.append_move(gbt.H.path(*path), current_player, ["L", "R"])
 
             whose_turn = (whose_turn + 1) % self.n_players
-            for child in node.children:
-                self.create_binary_tree(g, child, whose_turn, depth + 1, max_depth)
+            for label, child in zip(["L", "R"], node.children, strict=True):
+                self.create_binary_tree(g, child, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
         g = gbt.Game.new_tree(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
-        self.create_binary_tree(g, g.root, 0, 0, self.level)
+        self.create_binary_tree(g, g.root, (), 0, 0, self.level)
         for n in g.nodes:
             if not n.is_terminal and not n.children["L"].is_terminal:
                 left = n.children["L"]
                 g.make_infoset(
-                    list(left.infoset.members) + [n.children["R"]],
+                    selector_for_nodes(list(left.infoset.members) + [n.children["R"]]),
                     left.infoset.player,
                     left.infoset.label or None,
                 )

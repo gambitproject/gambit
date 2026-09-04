@@ -49,6 +49,14 @@ def test_resolve_node_invalid(game: gbt.Game, node: str, exception: BaseExceptio
         game._resolve_node(node, "test_resolve_node_invalid")
 
 
+def test_resolve_node_mismatch():
+    """A `Node` from a different game raises `MismatchError`."""
+    game1 = gbt.Game.new_tree()
+    game2 = games.read_from_file("sample_extensive_game.efg")
+    with pytest.raises(gbt.MismatchError):
+        game1._resolve_node(game2.root, "test_resolve_node_mismatch")
+
+
 @pytest.mark.parametrize(
     "game",
     [

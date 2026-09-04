@@ -74,7 +74,6 @@ Transforming game information structure
    Game.relabel_actions
    Game.set_move_actions
    Game.set_event_actions
-   Game.reveal
 
 
 Transforming game components
@@ -119,7 +118,7 @@ Information about the game
    Game.get_outcome
    Game.get_payoffs
    Game.subgames
-   Game.minimal_subgame
+   Game.get_minimal_subgame
 
 .. autosummary::
    :toctree: api/
@@ -291,7 +290,6 @@ Probability distributions over behavior
    MixedBehaviorProfile.realiz_probs
    MixedBehaviorProfile.infoset_probs
    MixedBehaviorProfile.beliefs
-   MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.max_regret

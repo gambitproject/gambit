@@ -100,9 +100,6 @@ def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural
     return matches[0]
 
 
-NodeReference = Node | str
-NodeReferenceSet = typing.Iterable[NodeReference]
-
 ProfileDType = float | Rational
 
 
@@ -192,6 +189,7 @@ include "infoset.pxi"
 include "strategy.pxi"
 include "outcome.pxi"
 include "node.pxi"
+include "hsel.pxi"
 include "stratspt.pxi"
 include "behavspt.pxi"
 include "stratmixed.pxi"
