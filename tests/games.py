@@ -52,6 +52,13 @@ def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
     return gbt.H.after().filter(lambda h: h[:] in histories)
 
 
+def selector_for_node(node: gbt.Node) -> gbt.Selector:
+    """A root-anchored `Selector` matching exactly `node`'s own path of action
+    labels -- for adapting a fixture's `Node` (e.g. one from `Game.get_infosets`)
+    to profile indexing, which is `Selector`-only."""
+    return gbt.H.path(*_node_history(node))
+
+
 # Label-validation fixtures.
 # VALID: accepted by the C++ validator (IsValidLabel in src/games/game.h), including
 #        well-formed UTF-8 text (#862, 17.0.0). A single Unicode whitespace character

@@ -357,7 +357,7 @@ Subsets of actions
    BehaviorSupportProfile.__getitem__
    BehaviorSupportProfile.__setitem__
    BehaviorSupportProfile.copy
-   BehaviorSupportProfile.is_reachable
+   BehaviorSupportProfile.is_infoset_reachable
 
    BehaviorSupport
    BehaviorSupport.player

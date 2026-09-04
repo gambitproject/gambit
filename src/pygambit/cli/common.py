@@ -361,6 +361,17 @@ def read_strategy_profiles_csv(
     return profiles
 
 
+def _selector_for_node(node: gbt.Node) -> gbt.H:
+    """A root-anchored `Selector` matching exactly `node`'s own path of action labels."""
+    labels = []
+    current = node
+    while current.parent is not None:
+        labels.append(current.prior_action.label)
+        current = current.parent
+    labels.reverse()
+    return gbt.H.path(*labels)
+
+
 def read_behavior_profiles_csv(
     path: str, game: gbt.Game
 ) -> list[gbt.MixedBehaviorProfileRational]:
@@ -388,7 +399,7 @@ def read_behavior_profiles_csv(
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for node in game.get_infosets(player):
-                profile[node] = {a: next(values) for a in node.infoset.actions}
+                profile[_selector_for_node(node)] = {a: next(values) for a in node.infoset.actions}
         profiles.append(profile)
     return profiles
 

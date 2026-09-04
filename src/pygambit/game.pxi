@@ -1073,9 +1073,11 @@ class Game:
                         f"Number of elements does not match number of "
                         f"actions for infoset {infoset} for {p}"
                     )
-                profile[node] = {
-                    a: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)
-                }
+                profile._setprob_infoset(
+                    infoset,
+                    {a: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)},
+                    sparse=True,
+                )
         return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
@@ -1155,7 +1157,10 @@ class Game:
             profile = self.mixed_behavior_profile()
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _dirichlet_distribution(node.infoset.actions, gen)
+                    infoset = node.infoset
+                    profile._setprob_infoset(
+                        infoset, _dirichlet_distribution(infoset.actions, gen), sparse=True
+                    )
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1163,7 +1168,10 @@ class Game:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _grid_distribution(node.infoset.actions, denom, gen)
+                    infoset = node.infoset
+                    profile._setprob_infoset(
+                        infoset, _grid_distribution(infoset.actions, denom, gen), sparse=True
+                    )
             return profile
 
     def strategy_support_profile(
