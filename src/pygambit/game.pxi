@@ -1044,45 +1044,73 @@ class Game:
             deref(deref(psp).deref()).SetStrategy(handle)
         return psp
 
-    def get_outcome(self, contingency: typing.Mapping) -> Outcome:
-        """Returns the `Outcome` attached to a pure-strategy contingency.
+    def get_outcome(self, location) -> Outcome | str | None:
+        """Returns the outcome attached at `location`.
 
-        Only defined for games in strategic (table) representation; for extensive-form
-        and action-graph games, a pure-strategy contingency has no single stored outcome
-        to return (see `get_payoffs`).
+        For a tree game, `location` is a `Selector` (an `H`-built expression,
+        evaluated against this game) that must resolve to exactly one node;
+        the label of the outcome currently attached there is returned.
+
+        For a strategic (table) game, `location` is a pure-strategy
+        contingency -- a complete mapping from the game's players' labels to
+        the label of the strategy played by that player; the `Outcome`
+        attached to it is returned.
 
         .. versionadded:: 17.0.0
 
+        .. versionchanged:: 17.0.0
+            For a tree game, `location` may now be a `Selector`, returning
+            the outcome's label (or `None`) directly, rather than raising
+            `UndefinedOperationError`.
+
         Parameters
         ----------
-        contingency : Mapping
-            A complete mapping from the game's players' labels to the label of the
-            strategy played by that player.
+        location : Selector or Mapping
+            A `Selector` resolving to a single node (tree game), or a
+            pure-strategy contingency (strategic game).
 
         Returns
         -------
-        Outcome
-            The outcome attached to `contingency` (possibly the null outcome).
+        Outcome, str, or None
+            For a strategic game, the `Outcome` attached to `location`
+            (possibly the null outcome).  For a tree game, the label of the
+            outcome currently attached to the resolved node, or `None` if it
+            has none.
 
         Raises
         ------
-        UndefinedOperationError
-            If the game is not in strategic (table) representation.
-        ValueError
-            If `contingency` does not specify exactly one strategy for each player
-            of the game, or a key is an empty or all-whitespace string.
-        KeyError
-            If a player label, or a player's strategy label, does not match any
-            player, or that player's strategies, in the game.
         TypeError
-            If `contingency` is not a mapping, or a key or value is not a `str`.
+            If `location` is not a `Selector` (tree game); or is not a
+            mapping, or a key or value is not a `str` (strategic game).
+        ValueError
+            For a tree game, if `location` does not resolve to exactly one
+            node.  For a strategic game, if `location` does not specify
+            exactly one strategy for each player of the game, or a key is an
+            empty or all-whitespace string.
+        KeyError
+            For a strategic game, if a player label, or a player's strategy
+            label, does not match any player, or that player's strategies,
+            in the game.
+        UndefinedOperationError
+            If the game is in neither a tree nor a strategic (table)
+            representation.
         """
-        if self.is_tree or self.game.deref().IsAgg():
+        if self.is_tree:
+            if not isinstance(location, Selector):
+                raise TypeError(
+                    f"get_outcome(): location must be a Selector, not "
+                    f"{location.__class__.__name__}"
+                )
+            resolved_node = self._resolve_node(location, "get_outcome")
+            return Outcome.wrap(
+                cython.cast(Node, resolved_node).node.deref().GetOutcome()
+            ).label
+        if self.game.deref().IsAgg():
             raise UndefinedOperationError(
                 "get_outcome(): operation not defined for games not in "
                 "strategic (table) representation"
             )
-        resolved = self._resolve_contingency(contingency, "get_outcome")
+        resolved = self._resolve_contingency(location, "get_outcome")
         psp = self._make_pure_strategy_profile(resolved)
         return Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
 

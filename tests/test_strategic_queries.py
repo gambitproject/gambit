@@ -99,10 +99,12 @@ def test_game_get_outcome_unmatched_label_after_relabel_raises():
         _ = game.get_outcome({pl1: "defect", pl2: "defect"})
 
 
-def test_game_get_outcome_tree_raises():
+def test_game_get_outcome_tree_rejects_contingency():
+    """A pure-strategy contingency (a Mapping) is only meaningful for a
+    strategic game; for a tree game, `location` must be a `Selector`."""
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(TypeError):
         _ = game.get_outcome({"Alice": "a"})
 
 

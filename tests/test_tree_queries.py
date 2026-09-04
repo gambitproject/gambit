@@ -9,6 +9,30 @@ import pygambit as gbt
 from . import games
 
 
+def test_get_outcome():
+    """A tree game's `get_outcome` resolves a `Selector` to a single node and
+    returns the label of the outcome attached there, or `None` if it has none."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.get_outcome(gbt.H.path("U1", "D2", "U3")) == "Outcome 1"
+    assert game.get_outcome(gbt.H.path()) is None
+
+
+def test_get_outcome_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_outcome(())
+    with pytest.raises(TypeError):
+        game.get_outcome("U1")
+
+
+def test_get_outcome_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_outcome(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_outcome(gbt.H.path(...).filter(lambda h: False))
+
+
 def test_get_actions():
     """A personal or chance node's actions, in order; a terminal node has none --
     a node is terminal exactly when this is empty."""
