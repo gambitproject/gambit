@@ -64,16 +64,18 @@ def test_resolve_node_mismatch():
     ]
 )
 def test_resolve_infoset(game: gbt.Game) -> None:
-    """`_resolve_infoset` resolves a Node to itself, or a node's label to the node
-    with that label, validating that it currently belongs to a personal player's
-    information set; this holds for every member node, not just the representative
-    `Game.get_infosets` returns."""
+    """`_resolve_infoset` resolves a Selector to the node it identifies, or a
+    node's label to that node, validating that it currently belongs to a
+    personal player's information set; this holds for every member node, not
+    just the representative `Game.get_infosets` returns."""
     for player in game.players:
-        for node in game.get_infosets(player):
-            for member in node.members:
-                assert game._resolve_infoset(member, "test") == member
-                if member.label:
-                    assert game._resolve_infoset(member.label, "test") == member
+        for history in game.get_infosets(player):
+            for member in game.get_members(gbt.H.path(*history)):
+                resolved = game._resolve_infoset(gbt.H.path(*member), "test")
+                assert games._node_history(resolved) == member
+                if resolved.label:
+                    resolved_by_label = game._resolve_infoset(resolved.label, "test")
+                    assert games._node_history(resolved_by_label) == member
 
 
 @pytest.mark.parametrize(

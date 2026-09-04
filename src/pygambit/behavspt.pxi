@@ -211,7 +211,7 @@ class BehaviorSupportProfile:
         if isinstance(index, str):
             values = {
                 _canonical_history(node): self._action_support_at(node)
-                for node in self.game.get_infosets(index)
+                for node in self.game._get_infosets(index)
             }
             return BehaviorSupport.wrap(self.game, index, values)
         if isinstance(index, Selector):

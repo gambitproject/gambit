@@ -9,13 +9,12 @@ import numpy as np
 import pygambit as gbt
 
 
-def all_infosets(game: gbt.Game) -> list[gbt.Node]:
-    """A representative node of every information set belonging to a personal
-    player, across every player, in the canonical order `Game.infosets` used to
-    yield before its removal (17.0.0). One node per information set, matching
-    `Game.get_infosets`; use `.members`/`.actions`/etc. on the node, which already
-    proxy to its information set."""
-    return [n for p in game.players for n in game.get_infosets(p)]
+def all_infosets(game: gbt.Game) -> list[tuple]:
+    """The History of a representative member of every information set belonging
+    to a personal player, across every player, in the canonical order
+    `Game.infosets` used to yield before its removal (17.0.0). One History per
+    information set, matching `Game.get_infosets`."""
+    return [h for p in game.players for h in game.get_infosets(p)]
 
 
 def all_nodes(game: gbt.Game) -> list[gbt.Node]:
@@ -29,17 +28,20 @@ def all_nodes(game: gbt.Game) -> list[gbt.Node]:
     return list(_walk(game.root))
 
 
-def player_infosets(game: gbt.Game, player: str) -> list[gbt.Node]:
-    """A representative node of every information set belonging to `player`, in
-    canonical order, matching `Player.infosets` before its removal (17.0.0)."""
+def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
+    """The History of a representative member of every information set belonging
+    to `player`, in canonical order, matching `Player.infosets` before its
+    removal (17.0.0)."""
     return list(game.get_infosets(player))
 
 
 def infoset_number(node: gbt.Node) -> int:
     """The 0-based position of `node`'s information set among its player's
     information sets, matching the removed `Infoset.number` (17.0.0)."""
-    for i, rep in enumerate(node.game.get_infosets(node.player)):
-        if rep in node.members:
+    game = node.game
+    members = set(game.get_members(selector_for_node(node)))
+    for i, history in enumerate(game.get_infosets(node.player)):
+        if history in members:
             return i
     raise ValueError("node is terminal, has no information set")
 

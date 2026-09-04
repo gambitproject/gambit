@@ -446,9 +446,9 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
         for key in keys
     }
     for player in game.players:
-        for node in game.get_infosets(player):
-            key = (node.player, games.infoset_number(node))
-            selector = games.selector_for_nodes([node])
+        for i, history in enumerate(game.get_infosets(player)):
+            key = (player, i)
+            selector = gbt.H.path(*history)
             actual_path = tuple(
                 _get_path_of_action_labels(game.get_minimal_subgame(selector).root)
             )

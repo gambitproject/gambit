@@ -29,20 +29,41 @@ class InfosetIndexedVector(_LabeledVector):
     information set.
 
     Since information sets don't reliably have unique persistent labels, this is indexed
-    by any ``Node`` belonging to the information set (resolved to the History of the
-    information set's canonical member before lookup) rather than by a label: any
-    member node is an equally valid key, unlike ``NodeIndexedVector``.
+    by a `Selector` (an `H`-built expression) resolving to a single node belonging to the
+    information set -- resolved to the History of the information set's canonical member
+    before lookup, so any member node is an equally valid key -- rather than by a label,
+    unlike `NodeIndexedVector`.
+
+    .. versionchanged:: 17.0.0
+        Indexed by a `Selector` rather than a `Node` object.
     """
     _label_kind = "information set"
+    _game = cython.declare(Game)
 
-    def __getitem__(self, node: Node) -> typing.Any:
-        resolved_node = cython.cast(Node, node)
-        if resolved_node._infoset_handle() == cython.cast(c_GameInfoset, NULL):
-            raise ValueError("node is terminal, has no information set")
+    def __init__(self, game: Game, values: collections.abc.Mapping) -> None:
+        self._game = game
+        _LabeledVector.__init__(self, values)
+
+    def __getitem__(self, selector: Selector) -> typing.Any:
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"{type(self).__name__} index must be a Selector, not "
+                f"{selector.__class__.__name__}"
+            )
+        # Resolves via _resolve_infoset_or_event, not _resolve_infoset: infoset_probs's
+        # values span both personal information sets and chance events, so resolution
+        # must succeed for either kind here, leaving "wrong kind for this vector" (e.g.
+        # a chance node in infoset_values, which only holds personal ones) to surface
+        # as the KeyError below, from _values simply not having that entry -- not as a
+        # resolution-time error that would also wrongly block a valid chance lookup in
+        # infoset_probs.
+        resolved_node = self._game._resolve_infoset_or_event(
+            selector, f"{type(self).__name__}.__getitem__"
+        )
         try:
             return self._values[_canonical_history(resolved_node)]
         except KeyError:
-            raise KeyError(f"no {self._label_kind} for this node") from None
+            raise KeyError(f"no {self._label_kind} for this selector") from None
 
 
 @cython.cclass
@@ -428,7 +449,7 @@ class MixedBehaviorProfile:
         if isinstance(index, str):
             values = {
                 _canonical_history(node): self._mixed_action_at(node)
-                for node in self.game.get_infosets(index)
+                for node in self.game._get_infosets(index)
             }
             return MixedBehavior.wrap(self.game, index, values)
         if isinstance(index, Selector):
@@ -444,15 +465,15 @@ class MixedBehaviorProfile:
         """Iterates over a representative node of every information set and event in
         the game."""
         for player in self.game.players:
-            yield from self.game.get_infosets(player)
-        yield from self.game.get_events()
+            yield from self.game._get_infosets(player)
+        yield from self.game._get_events()
 
     def _personal_infosets(self) -> typing.Iterator[Node]:
         """Iterates over a representative node of every information set in the game
         belonging to a personal player, excluding the chance player's.
         """
         for player in self.game.players:
-            yield from self.game.get_infosets(player)
+            yield from self.game._get_infosets(player)
 
     # The public API above is implemented once here and dispatches to the hooks below,
     # each of which is implemented by a concrete dtype-specific subclass
@@ -742,7 +763,7 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return InfosetValueVector({
+        return InfosetValueVector(self.game, {
             _canonical_history(node): self._infoset_value(node)
             for node in self._personal_infosets()
         })
@@ -761,7 +782,7 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return ActionValuesVector({
+        return ActionValuesVector(self.game, {
             _canonical_history(node): ActionValueVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_value(a)
                 for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
@@ -800,7 +821,7 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.beliefs
         """
         self._check_validity()
-        return InfosetProbVector({
+        return InfosetProbVector(self.game, {
             _canonical_history(node): self._infoset_prob(node)
             for node in self._all_infosets()
         })
@@ -854,7 +875,7 @@ class MixedBehaviorProfile:
         agent_max_regret
         """
         self._check_validity()
-        return ActionRegretsVector({
+        return ActionRegretsVector(self.game, {
             _canonical_history(node): ActionRegretVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_regret(a)
                 for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
@@ -881,7 +902,7 @@ class MixedBehaviorProfile:
         agent_max_regret
         """
         self._check_validity()
-        return InfosetRegretVector({
+        return InfosetRegretVector(self.game, {
             _canonical_history(node): self._infoset_regret(node)
             for node in self._personal_infosets()
         })
@@ -1253,7 +1274,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
-            for node in self.game.get_infosets(player):
+            for node in self.game._get_infosets(player):
                 profile._setprob_infoset(
                     node,
                     {

@@ -18,10 +18,11 @@ def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_f
     """
     convert = (lambda p: gbt.Rational(p)) if rational_flag else (lambda p: p)
     probs_iter = iter(probs)
-    for infoset in games.all_infosets(profile.game):
-        node = next(iter(infoset.members))
-        profile[games.selector_for_node(node)] = {
-            a: convert(next(probs_iter)) for a in infoset.actions
+    game = profile.game
+    for infoset in games.all_infosets(game):
+        selector = gbt.H.path(*infoset)
+        profile[selector] = {
+            a: convert(next(probs_iter)) for a in game.get_actions(selector)
         }
 
 
@@ -251,7 +252,7 @@ def test_behavior_indexing_rejects_selector_from_different_player(
     """
     profile = game.mixed_behavior_profile()
     other_infoset = games.player_infosets(game, other_player_label)[0]
-    other_selector = games.selector_for_node(next(iter(other_infoset.members)))
+    other_selector = gbt.H.path(*other_infoset)
     with pytest.raises(gbt.MismatchError):
         profile[player_label][other_selector]
 
@@ -278,7 +279,7 @@ def test_profile_indexing_by_player_label_reference(
     if rational_flag:
         behav_data = [[gbt.Rational(prob) for prob in probs] for probs in behav_data]
     expected = [
-        dict(zip(infoset.actions, probs, strict=True))
+        dict(zip(game.get_actions(gbt.H.path(*infoset)), probs, strict=True))
         for infoset, probs in zip(
             games.player_infosets(game, player_label), behav_data, strict=True
         )
@@ -432,7 +433,7 @@ def test_set_probabilities_player_by_label(
     if rational_flag:
         behav_data = [[gbt.Rational(prob) for prob in probs] for probs in behav_data]
     expected = [
-        dict(zip(infoset.actions, probs, strict=True))
+        dict(zip(game.get_actions(gbt.H.path(*infoset)), probs, strict=True))
         for infoset, probs in zip(
             games.player_infosets(game, player_label), behav_data, strict=True
         )
@@ -440,25 +441,26 @@ def test_set_probabilities_player_by_label(
     for infoset, distribution in zip(
         games.player_infosets(game, player_label), expected, strict=True
     ):
-        profile[games.selector_for_node(next(iter(infoset.members)))] = distribution
+        profile[gbt.H.path(*infoset)] = distribution
     assert profile[player_label] == expected
 
 
-def _p1_node(game: gbt.Game):
-    return next(iter(games.player_infosets(game, "Player 1")[0].members))
+def _p1_selector(game: gbt.Game) -> gbt.Selector:
+    """A Selector for Player 1's first information set."""
+    return gbt.H.path(*games.player_infosets(game, "Player 1")[0])
 
 
 def test_behavior_setitem_allows_sparse_distribution():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     profile[selector] = {"U1": 1}
     assert profile[selector] == {"U1": 1, "D1": 0}
 
 
 def test_set_mixed_action_sparse_matches_setitem():
     game = games.read_from_file("mixed_behavior_game.efg")
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     sparse_profile = game.mixed_behavior_profile()
     sparse_profile.set_mixed_action(selector, {"U1": 1}, sparse=True)
     setitem_profile = game.mixed_behavior_profile()
@@ -469,7 +471,7 @@ def test_set_mixed_action_sparse_matches_setitem():
 def test_set_mixed_action_defaults_to_requiring_every_label():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     with pytest.raises(ValueError, match="exactly one weight"):
         profile.set_mixed_action(selector, {"U1": 1})
 
@@ -478,7 +480,7 @@ def test_set_mixed_action_defaults_to_requiring_every_label():
 def test_setitem_and_set_mixed_action_reject_unknown_action_label(sparse: bool):
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     with pytest.raises(ValueError, match="not an action label"):
         profile.set_mixed_action(selector, {"not-an-action": 1}, sparse=sparse)
     with pytest.raises(ValueError, match="not an action label"):
@@ -488,7 +490,7 @@ def test_setitem_and_set_mixed_action_reject_unknown_action_label(sparse: bool):
 def test_behavior_setitem_empty_distribution_is_all_zero_error():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     with pytest.raises(ValueError, match="zero"):
         profile[selector] = {}
 
@@ -497,7 +499,7 @@ def test_behavior_setitem_empty_distribution_is_all_zero_error():
 def test_setitem_and_set_mixed_action_reject_non_mapping(sparse: bool):
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     with pytest.raises(TypeError, match="Mapping"):
         profile.set_mixed_action(selector, [1, 0], sparse=sparse)
     with pytest.raises(TypeError, match="Mapping"):
@@ -508,7 +510,7 @@ def test_setitem_and_set_mixed_action_reject_non_mapping(sparse: bool):
 def test_setitem_and_set_mixed_action_reject_uncoercible_weight(sparse: bool):
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     full_distribution = {"U1": "abc", "D1": 0}
     with pytest.raises(ValueError, match="convert"):
         profile.set_mixed_action(selector, full_distribution, sparse=sparse)
@@ -520,20 +522,21 @@ def test_behavior_setitem_sparse_rejects_negative_weight():
     """Negativity is checked even for weights given under a sparse distribution."""
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     with pytest.raises(ValueError, match="negative"):
         profile[selector] = {"U1": -1}
 
 
 @pytest.mark.parametrize("sparse", [False, True])
 def test_behavior_indexing_rejects_node_and_infoset(sparse: bool):
-    """MixedBehaviorProfile's indexing is Selector-only; a bare Node or Infoset object
-    is rejected, following the same pattern as `Game.get_minimal_subgame`.
+    """MixedBehaviorProfile's indexing is Selector-only; neither a bare History nor a
+    bare `Node` object is accepted, following the same pattern as
+    `Game.get_minimal_subgame`.
     """
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
     infoset = games.player_infosets(game, "Player 1")[0]
-    node = next(iter(infoset.members))
+    node = games.all_nodes(game)[0]
     with pytest.raises(TypeError):
         profile[infoset]
     with pytest.raises(TypeError):
@@ -555,7 +558,7 @@ def test_mixed_action_and_behavior_are_frozen_snapshots(rational_flag: bool):
     """
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     action_before = profile[selector]
     behavior_before = profile["Player 1"]
     profile[selector] = {"U1": 1, "D1": 0}
@@ -568,7 +571,7 @@ def test_mixed_action_and_behavior_are_frozen_snapshots(rational_flag: bool):
 def test_behavior_copy_mutating_copy_does_not_affect_original(rational_flag: bool):
     game = games.read_from_file("mixed_behavior_game.efg")
     original = game.mixed_behavior_profile(rational=rational_flag)
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     original_before = dict(original[selector])
     copy = original.copy()
     copy[selector] = {"U1": 1, "D1": 0}
@@ -580,7 +583,7 @@ def test_behavior_copy_mutating_copy_does_not_affect_original(rational_flag: boo
 def test_behavior_copy_mutating_original_does_not_affect_copy(rational_flag: bool):
     game = games.read_from_file("mixed_behavior_game.efg")
     original = game.mixed_behavior_profile(rational=rational_flag)
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     copy = original.copy()
     copy_before = dict(copy[selector])
     original[selector] = {"U1": 1, "D1": 0}
@@ -598,7 +601,7 @@ def test_as_float_returns_double(rational_flag: bool):
 def test_as_float_converts_rational_probabilities():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile(rational=True)
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     profile[selector] = {"U1": "1/3", "D1": "2/3"}
     result = profile.as_float()
     assert dict(result[selector]) == {"U1": pytest.approx(1 / 3), "D1": pytest.approx(2 / 3)}
@@ -607,7 +610,7 @@ def test_as_float_converts_rational_probabilities():
 def test_as_float_is_independent_copy():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile(rational=False)
-    selector = games.selector_for_node(_p1_node(game))
+    selector = _p1_selector(game)
     result = profile.as_float()
     assert result == profile
     result[selector] = {"U1": 1.0, "D1": 0.0}
@@ -693,7 +696,7 @@ def test_infoset_probs_reference(game: gbt.Game, rational_flag: bool, infoset_pr
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for prob, infoset in zip(infoset_probs, games.all_infosets(game), strict=True):
         prob = gbt.Rational(prob) if rational_flag else prob
-        assert profile.infoset_probs[next(iter(infoset.members))] == prob
+        assert profile.infoset_probs[gbt.H.path(*infoset)] == prob
 
 
 @pytest.mark.parametrize(
@@ -732,7 +735,7 @@ def test_absent_minded_infoset_prob(
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
-    ip = profile.infoset_probs[node]
+    ip = profile.infoset_probs[games.selector_for_node(node)]
     assert ip == (gbt.Rational(prob) if rational_flag else prob)
 
 
@@ -743,7 +746,7 @@ def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     one = gbt.Rational(1) if rational_flag else 1.0
     assert profile.realiz_probs[()] == one
-    assert profile.infoset_probs[game.root] == one
+    assert profile.infoset_probs[gbt.H.path()] == one
 
 
 @pytest.mark.parametrize(
@@ -759,7 +762,7 @@ def test_infoset_values_reference(game: gbt.Game, rational_flag: bool, infoset_v
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for payoff, infoset in zip(infoset_values, games.all_infosets(game), strict=True):
         payoff = gbt.Rational(payoff) if rational_flag else payoff
-        assert profile.infoset_values[next(iter(infoset.members))] == payoff
+        assert profile.infoset_values[gbt.H.path(*infoset)] == payoff
 
 
 @pytest.mark.parametrize(
@@ -782,8 +785,11 @@ def test_infoset_values_reference(game: gbt.Game, rational_flag: bool, infoset_v
 def test_action_values_reference(game: gbt.Game, rational_flag: bool, action_values: tuple):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for values_for_infoset, infoset in zip(action_values, games.all_infosets(game), strict=True):
-        infoset_action_values = profile.action_values[next(iter(infoset.members))]
-        for value, action in zip(values_for_infoset, infoset.actions, strict=True):
+        selector = gbt.H.path(*infoset)
+        infoset_action_values = profile.action_values[selector]
+        for value, action in zip(
+            values_for_infoset, game.get_actions(selector), strict=True
+        ):
             value = gbt.Rational(value) if rational_flag else value
             assert infoset_action_values[action] == value
 
@@ -803,11 +809,12 @@ def test_action_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for player in game.players:
         for infoset in games.player_infosets(game, player):
-            node = next(iter(infoset.members))
-            for action in infoset.actions:
-                assert profile.action_regrets[node][action] == max(
-                    profile.action_values[node][a] for a in infoset.actions
-                ) - profile.action_values[node][action]
+            selector = gbt.H.path(*infoset)
+            actions = game.get_actions(selector)
+            for action in actions:
+                assert profile.action_regrets[selector][action] == max(
+                    profile.action_values[selector][a] for a in actions
+                ) - profile.action_values[selector][action]
 
 
 @pytest.mark.parametrize(
@@ -825,10 +832,10 @@ def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for player in game.players:
         for infoset in games.player_infosets(game, player):
-            node = next(iter(infoset.members))
-            assert profile.infoset_regrets[node] == max(
-                profile.action_values[node][a] for a in infoset.actions
-            ) - profile.infoset_values[node]
+            selector = gbt.H.path(*infoset)
+            assert profile.infoset_regrets[selector] == max(
+                profile.action_values[selector][a] for a in game.get_actions(selector)
+            ) - profile.infoset_values[selector]
 
 
 @pytest.mark.parametrize(
@@ -864,7 +871,7 @@ def test_agent_max_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     infoset_regrets = profile.infoset_regrets
     assert profile.agent_max_regret() == max(
-        infoset_regrets[next(iter(infoset.members))] for infoset in games.all_infosets(game)
+        infoset_regrets[gbt.H.path(*infoset)] for infoset in games.all_infosets(game)
     )
 
 
@@ -912,15 +919,16 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
         assert player_node_values[()] == payoffs[player]
 
         for infoset in games.player_infosets(game, player):
-            node = next(iter(infoset.members))
-            infoset_action_values = action_values[node]
-            infoset_action_regrets = action_regrets[node]
+            selector = gbt.H.path(*infoset)
+            actions = game.get_actions(selector)
+            infoset_action_values = action_values[selector]
+            infoset_action_regrets = action_regrets[selector]
             assert isinstance(infoset_action_values, gbt.ActionValueVector)
             assert isinstance(infoset_action_regrets, gbt.ActionRegretVector)
 
-            best_response_value = max(infoset_action_values[a] for a in infoset.actions)
-            assert infoset_regrets[node] == best_response_value - infoset_values[node]
-            for action in infoset.actions:
+            best_response_value = max(infoset_action_values[a] for a in actions)
+            assert infoset_regrets[selector] == best_response_value - infoset_values[selector]
+            for action in actions:
                 assert (
                     infoset_action_regrets[action]
                     == best_response_value - infoset_action_values[action]
@@ -930,7 +938,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
         if not node.children:
             continue
         history = games._node_history(node)
-        if infoset_probs[node] == 0:
+        if infoset_probs[gbt.H.path(*history)] == 0:
             assert beliefs[history] is None
         else:
             assert beliefs[history] is not None
@@ -1010,8 +1018,11 @@ def test_action_regrets_reference(
     if action_probs:
         _set_action_probs(profile, action_probs, rational_flag)
     for regrets_for_infoset, infoset in zip(action_regrets, games.all_infosets(game), strict=True):
-        infoset_action_regrets = profile.action_regrets[next(iter(infoset.members))]
-        for regret, action in zip(regrets_for_infoset, infoset.actions, strict=True):
+        selector = gbt.H.path(*infoset)
+        infoset_action_regrets = profile.action_regrets[selector]
+        for regret, action in zip(
+            regrets_for_infoset, game.get_actions(selector), strict=True
+        ):
             regret = gbt.Rational(regret) if rational_flag else regret
             assert abs(infoset_action_regrets[action] - regret) <= tol
 
@@ -1378,7 +1389,9 @@ def test_infoset_value_error_with_chance_player_infoset(game: gbt.Game, rational
     """
     chance_node = game.get_events()[0]
     with pytest.raises(KeyError):
-        game.mixed_behavior_profile(rational=rational_flag).infoset_values[chance_node]
+        game.mixed_behavior_profile(rational=rational_flag).infoset_values[
+            gbt.H.path(*chance_node)
+        ]
 
 
 @pytest.mark.parametrize(
@@ -1394,16 +1407,19 @@ def test_action_value_error_with_chance_player_action(game: gbt.Game, rational_f
     """
     chance_node = game.get_events()[0]
     with pytest.raises(KeyError):
-        game.mixed_behavior_profile(rational=rational_flag).action_values[chance_node]
+        game.mixed_behavior_profile(rational=rational_flag).action_values[
+            gbt.H.path(*chance_node)
+        ]
 
 
-def _all_node_actions(game: gbt.Game) -> list[tuple[gbt.Node, str]]:
-    """All (node, action label) pairs across every personal player's information sets."""
+def _all_node_actions(game: gbt.Game) -> list[tuple[gbt.Selector, str]]:
+    """All (selector, action label) pairs across every personal player's information sets."""
     return [
-        (node, action)
+        (selector, action)
         for player in game.players
-        for node in game.get_infosets(player)
-        for action in node.actions
+        for history in game.get_infosets(player)
+        for selector in [gbt.H.path(*history)]
+        for action in game.get_actions(selector)
     ]
 
 
@@ -1535,7 +1551,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.infoset_probs[next(iter(y.members))],
+            lambda x, y: x.infoset_probs[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1543,7 +1559,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_probs[next(iter(y.members))],
+            lambda x, y: x.infoset_probs[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1551,7 +1567,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.infoset_probs[next(iter(y.members))],
+            lambda x, y: x.infoset_probs[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1559,7 +1575,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_probs[next(iter(y.members))],
+            lambda x, y: x.infoset_probs[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         ######################################################################################
@@ -1569,7 +1585,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.infoset_values[next(iter(y.members))],
+            lambda x, y: x.infoset_values[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1577,7 +1593,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_values[next(iter(y.members))],
+            lambda x, y: x.infoset_values[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1585,7 +1601,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.infoset_values[next(iter(y.members))],
+            lambda x, y: x.infoset_values[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         (
@@ -1593,7 +1609,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.infoset_values[next(iter(y.members))],
+            lambda x, y: x.infoset_values[gbt.H.path(*y)],
             lambda x: games.all_infosets(x),
         ),
         ######################################################################################
@@ -1887,8 +1903,8 @@ def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
     profile = game.mixed_behavior_profile(rational=rational_flag, data=data)
     flattened = iter([k for i in data for j in i for k in j])
     for infoset in games.all_infosets(game):
-        selector = games.selector_for_node(next(iter(infoset.members)))
-        for action in infoset.actions:
+        selector = gbt.H.path(*infoset)
+        for action in game.get_actions(selector):
             prob = next(flattened)
             assert profile[selector][action] == (gbt.Rational(prob) if rational_flag else prob)
 
@@ -1976,20 +1992,18 @@ def test_undefined_action_value():
     """Test that undefined action values return `None`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
-    infoset = games.player_infosets(game, p3)[0]
-    node = next(iter(infoset.members))
-    action = next(iter(infoset.actions))
+    selector = gbt.H.path(*games.player_infosets(game, p3)[0])
+    action = game.get_actions(selector)[0]
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.action_values[node][action] is None
+        assert profile.action_values[selector][action] is None
 
 
 def test_undefined_belief():
     """Test that undefined beliefs return `None`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
-    node = next(iter(games.player_infosets(game, p3)[0].members))
-    history = games._node_history(node)
+    history = games.player_infosets(game, p3)[0]
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
         assert profile.beliefs[history] is None
@@ -1999,7 +2013,7 @@ def test_undefined_infoset_value():
     """Test that undefined infoset values return `None`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
-    node = next(iter(games.player_infosets(game, p3)[0].members))
+    selector = gbt.H.path(*games.player_infosets(game, p3)[0])
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.infoset_values[node] is None
+        assert profile.infoset_values[selector] is None

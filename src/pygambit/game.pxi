@@ -308,37 +308,10 @@ class Game:
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
 
-    def get_infosets(self, player: str) -> list[Node]:
-        """Returns a snapshot of the information sets belonging to the personal
-        player `player`: the decisions at which that player chooses an action.
-
-        One representative member node is returned per information set, in the order
-        the information sets are encountered in the pre-order depth first traversal of
-        the game tree. This is a materialized snapshot, not a live view: it reflects
-        the game's state at the moment of the call, and does not change if the game is
-        subsequently mutated.
-
-        Parameters
-        ----------
-        player : str
-            The label of the personal player whose information sets to return.
-
-        Returns
-        -------
-        list of Node
-            One representative member node per information set belonging to `player`.
-
-        .. versionadded:: 17.0.0
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        KeyError
-            If no player in the game has label `player`; the chance player has no
-            label reachable this way -- use `get_events` for its events.
-        ValueError
-            If `player` is an empty string or all whitespace.
+    def _get_infosets(self, player: str) -> list[Node]:
+        """Internal: like `get_infosets`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -350,27 +323,49 @@ class Game:
             for infoset in resolved_player.deref().GetInfosets()
         ]
 
-    def get_events(self) -> list[Node]:
-        """Returns a snapshot of the chance player's events: the points of exogenous
-        randomness, each with a probability distribution over its actions.
+    def get_infosets(self, player: str) -> list[tuple]:
+        """Returns a snapshot of the information sets belonging to the personal
+        player `player`: the decisions at which that player chooses an action.
 
-        One representative member node is returned per event, in the order the events
-        are encountered in the pre-order depth first traversal of the game tree. This
-        is a materialized snapshot, not a live view: it reflects the game's state at
-        the moment of the call, and does not change if the game is subsequently
-        mutated.
+        One representative member's History is returned per information set, in the
+        order the information sets are encountered in the pre-order depth first
+        traversal of the game tree. This is a materialized snapshot, not a live view:
+        it reflects the game's state at the moment of the call, and does not change if
+        the game is subsequently mutated.
+
+        Parameters
+        ----------
+        player : str
+            The label of the personal player whose information sets to return.
 
         Returns
         -------
-        list of Node
-            One representative member node per event.
+        list of tuple
+            The History of one representative member per information set belonging to
+            `player`.
 
         .. versionadded:: 17.0.0
+
+        .. versionchanged:: 17.0.0
+            Returns each information set's representative as a History rather than a
+            ``Node`` object.
 
         Raises
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
+        KeyError
+            If no player in the game has label `player`; the chance player has no
+            label reachable this way -- use `get_events` for its events.
+        ValueError
+            If `player` is an empty string or all whitespace.
+        """
+        return [_history_of(node) for node in self._get_infosets(player)]
+
+    def _get_events(self) -> list[Node]:
+        """Internal: like `get_events`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -380,6 +375,34 @@ class Game:
             Node.wrap(event.deref().GetMember(1))
             for event in self.game.deref().GetChance().deref().GetInfosets()
         ]
+
+    def get_events(self) -> list[tuple]:
+        """Returns a snapshot of the chance player's events: the points of exogenous
+        randomness, each with a probability distribution over its actions.
+
+        One representative member's History is returned per event, in the order the
+        events are encountered in the pre-order depth first traversal of the game
+        tree. This is a materialized snapshot, not a live view: it reflects the
+        game's state at the moment of the call, and does not change if the game is
+        subsequently mutated.
+
+        Returns
+        -------
+        list of tuple
+            The History of one representative member per event.
+
+        .. versionadded:: 17.0.0
+
+        .. versionchanged:: 17.0.0
+            Returns each event's representative as a History rather than a ``Node``
+            object.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        return [_history_of(node) for node in self._get_events()]
 
     def get_strategies(self, player: str) -> list[str]:
         """Returns a snapshot of the labels of the strategies belonging to `player`.
@@ -758,11 +781,19 @@ class Game:
                 f"get_members(): history must be a Selector, not "
                 f"{history.__class__.__name__}"
             )
+        return [_history_of(member) for member in self._get_members(history)]
+
+    def _get_members(self, history: Selector) -> list[Node]:
+        """Internal: like `get_members`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed. `history` is assumed already
+        validated as a `Selector` by the caller.
+        """
         resolved_node = self._resolve_node(history, "get_members")
         infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
         if infoset_handle == cython.cast(c_GameInfoset, NULL):
             return []
-        return [_history_of(Node.wrap(member)) for member in infoset_handle.deref().GetMembers()]
+        return [Node.wrap(member) for member in infoset_handle.deref().GetMembers()]
 
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
@@ -1267,7 +1298,7 @@ class Game:
         if len(data) != len(self.players):
             raise ValueError("Number of elements does not match number of players")
         for (p, d) in zip(self.players, data):
-            p_infosets = self.get_infosets(p)
+            p_infosets = self._get_infosets(p)
             if len(p_infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
             for (node, v) in zip(p_infosets, d, strict=True):
@@ -1359,7 +1390,7 @@ class Game:
         if denom is None:
             profile = self.mixed_behavior_profile()
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _dirichlet_distribution(node.actions, gen), sparse=True
                     )
@@ -1369,7 +1400,7 @@ class Game:
         else:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _grid_distribution(node.actions, denom, gen), sparse=True
                     )
@@ -1423,7 +1454,7 @@ class Game:
         profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
         if actions is not None:
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
                     infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
                     for action in infoset_handle.deref().GetActions():
                         if not actions(node, action.deref().GetLabel().decode("utf-8")):
