@@ -674,14 +674,10 @@ def test_as_float_is_independent_copy():
 def test_realiz_prob_nodes_reference(
     game: gbt.Game, path: list[str], realiz_prob: str | float, rational_flag: bool
 ):
-    # nodes have no labels, so each node is reached by walking the action-label
-    # path from the root (an empty path is the root itself)
+    # a node's History is the tuple of action labels from the root (empty for the root)
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_prob = gbt.Rational(realiz_prob) if rational_flag else realiz_prob
-    node = game.root
-    for action_label in path:
-        node = node.children[action_label]
-    assert profile.realiz_probs[node] == realiz_prob
+    assert profile.realiz_probs[tuple(path)] == realiz_prob
 
 
 @pytest.mark.parametrize(
@@ -746,7 +742,7 @@ def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
     game = gbt.catalog.load("journals/geb/gilboa1997/fig2")
     profile = game.mixed_behavior_profile(rational=rational_flag)
     one = gbt.Rational(1) if rational_flag else 1.0
-    assert profile.realiz_probs[game.root] == one
+    assert profile.realiz_probs[()] == one
     assert profile.infoset_probs[game.root] == one
 
 
@@ -913,7 +909,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     for player in game.players:
         player_node_values = node_values[player]
         assert isinstance(player_node_values, gbt.NodeValueVector)
-        assert player_node_values[game.root] == payoffs[player]
+        assert player_node_values[()] == payoffs[player]
 
         for infoset in games.player_infosets(game, player):
             node = next(iter(infoset.members))
@@ -930,17 +926,18 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
                     == best_response_value - infoset_action_values[action]
                 )
 
-    for node in game.nodes:
+    for node in games.all_nodes(game):
         if not node.children:
             continue
+        history = games._node_history(node)
         if infoset_probs[node] == 0:
-            assert beliefs[node] is None
+            assert beliefs[history] is None
         else:
-            assert beliefs[node] is not None
+            assert beliefs[history] is not None
 
     # equal to an equivalent plain dict or same-type vector, but never to a vector of a
     # different quantity, even where the underlying numbers happen to coincide
-    expected = {n: realiz_probs[n] for n in game.nodes}
+    expected = dict(realiz_probs)
     assert realiz_probs == expected
     assert realiz_probs == gbt.RealizProbVector(expected)
     assert realiz_probs != beliefs
@@ -1036,16 +1033,16 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_probs = profile.realiz_probs
     node_values = profile.node_values
-    for node in game.nodes:
+    for node in games.all_nodes(game):
         if not node.children or node.player == "Chance":
             continue
         expected_val = 0
-        node_prob = realiz_probs[node]
+        node_prob = realiz_probs[games._node_history(node)]
         player_node_values = node_values[node.player]
         for child in node.children:
-            prob = realiz_probs[child] / node_prob
-            expected_val += prob * player_node_values[child]
-        assert player_node_values[node] == expected_val
+            prob = realiz_probs[games._node_history(child)] / node_prob
+            expected_val += prob * player_node_values[games._node_history(child)]
+        assert player_node_values[games._node_history(node)] == expected_val
 
 
 @pytest.mark.parametrize(
@@ -1064,7 +1061,7 @@ def test_node_value_consistency(game: gbt.Game, rational_flag: bool):
     node_values = profile.node_values
     payoffs = profile.payoffs
     for player in game.players:
-        assert node_values[player][game.root] == payoffs[player]
+        assert node_values[player][()] == payoffs[player]
 
 
 @pytest.mark.parametrize(
@@ -1361,15 +1358,11 @@ def test_node_belief_reference(
     value: str | float,
     rational_flag: bool,
 ):
-    # nodes have no labels, so each belief node is reached by walking the
-    # action-label path from the root (an empty path is the root itself)
+    # a node's History is the tuple of action labels from the root (empty for the root)
     profile = game.mixed_behavior_profile(rational=rational_flag)
     _set_action_probs(profile, probs, rational_flag)
-    node = game.root
-    for action_label in path:
-        node = node.children[action_label]
     value = gbt.Rational(value) if rational_flag else value
-    assert abs(profile.beliefs[node] - value) <= tol
+    assert abs(profile.beliefs[tuple(path)] - value) <= tol
 
 
 @pytest.mark.parametrize(
@@ -1475,7 +1468,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_doub,
             False,
             lambda x, y: x.beliefs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.read_from_file("mixed_behavior_game.efg"),
@@ -1483,7 +1476,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.beliefs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1491,7 +1484,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2B_doub,
             False,
             lambda x, y: x.beliefs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1499,7 +1492,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.beliefs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         ######################################################################################
         # realiz_prob (at nodes)
@@ -1509,7 +1502,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_doub,
             False,
             lambda x, y: x.realiz_probs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.read_from_file("mixed_behavior_game.efg"),
@@ -1517,7 +1510,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.realiz_probs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1525,7 +1518,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2B_doub,
             False,
             lambda x, y: x.realiz_probs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1533,7 +1526,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.realiz_probs[y],
-            lambda x: x.nodes,
+            lambda x: x.get_histories(gbt.H.after()),
         ),
         ######################################################################################
         # infoset_prob
@@ -1679,7 +1672,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_doub,
             False,
             lambda x, y: x.node_values[y[0]][y[1]],
-            lambda x: list(product(x.players, x.nodes)),
+            lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
             games.read_from_file("mixed_behavior_game.efg"),
@@ -1687,7 +1680,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.node_values[y[0]][y[1]],
-            lambda x: list(product(x.players, x.nodes)),
+            lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1695,7 +1688,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2B_doub,
             False,
             lambda x, y: x.node_values[y[0]][y[1]],
-            lambda x: list(product(x.players, x.nodes)),
+            lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -1703,7 +1696,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_2A_rat,
             True,
             lambda x, y: x.node_values[y[0]][y[1]],
-            lambda x: list(product(x.players, x.nodes)),
+            lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         ######################################################################################
         # agent_liap_value (of profile, hence [1] for objects_to_test,
@@ -1996,9 +1989,10 @@ def test_undefined_belief():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     *_, p3 = game.players
     node = next(iter(games.player_infosets(game, p3)[0].members))
+    history = games._node_history(node)
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.beliefs[node] is None
+        assert profile.beliefs[history] is None
 
 
 def test_undefined_infoset_value():

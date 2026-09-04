@@ -111,7 +111,6 @@ Information about the game
    Game.get_events
    Game.get_strategies
    Game.get_sequences
-   Game.nodes
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs

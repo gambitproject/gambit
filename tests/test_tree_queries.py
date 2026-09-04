@@ -1,6 +1,5 @@
 import dataclasses
 import functools
-import itertools
 import typing
 
 import pytest
@@ -221,7 +220,7 @@ def test_subgame_roots(test_case: SubgameRootsTestCase):
     """
     game = test_case.factory()
 
-    actual_roots = [node for node in game.nodes if node.is_subgame_root]
+    actual_roots = [node for node in games.all_nodes(game) if node.is_subgame_root]
     actual_paths = [_get_path_of_action_labels(node) for node in actual_roots]
 
     assert sorted(actual_paths) == sorted(test_case.expected_paths)
@@ -445,7 +444,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
 
     actual_node_data = []
 
-    for node in game.nodes:
+    for node in games.all_nodes(game):
         if not node.children:
             assert node.own_prior_action is None, (
                 f"Terminal node at {_get_path_of_action_labels(node)} must be None"
@@ -486,7 +485,7 @@ def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[
     list of paths against a known-correct list.
     """
     game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
-    nodes = game.nodes
+    nodes = games.all_nodes(game)
 
     actual_unreachable_paths = [
         _get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
@@ -592,12 +591,14 @@ def test_get_behavior_raises_value_error_for_wrong_player(
         pytest.param(gbt.Game.new_tree()),
     ],
 )
-def test_nodes_iteration_order(game_obj: gbt.Game):
-    """Verify that the C++ `game.nodes` iterator produces the DFS traversal.
+def test_get_histories_after_iteration_order(game_obj: gbt.Game):
+    """`Game.get_histories(H.after())` -- the public replacement for the removed
+    `Game.nodes` -- produces nodes in depth-first traversal order.
     """
     def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
         yield node
         for child in node.children:
             yield from dfs(child)
 
-    assert all(a == b for a, b in itertools.zip_longest(game_obj.nodes, dfs(game_obj.root)))
+    expected = [games._node_history(node) for node in dfs(game_obj.root)]
+    assert game_obj.get_histories(gbt.H.after()) == expected

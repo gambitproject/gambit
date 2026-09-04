@@ -18,6 +18,17 @@ def all_infosets(game: gbt.Game) -> list[gbt.Node]:
     return [n for p in game.players for n in game.get_infosets(p)]
 
 
+def all_nodes(game: gbt.Game) -> list[gbt.Node]:
+    """Every node in the game, in depth-first traversal order, matching
+    `Game.nodes` before its removal (17.0.0). Built from `.root`/`.children`,
+    the surviving Node-navigation primitives."""
+    def _walk(node: gbt.Node):
+        yield node
+        for child in node.children:
+            yield from _walk(child)
+    return list(_walk(game.root))
+
+
 def player_infosets(game: gbt.Game, player: str) -> list[gbt.Node]:
     """A representative node of every information set belonging to `player`, in
     canonical order, matching `Player.infosets` before its removal (17.0.0)."""
@@ -386,7 +397,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         (-2, 2): "BOb wins 2",
     }
     nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
-    for term_node in [n for n in g.nodes if not n.children]:
+    for term_node in [n for n in all_nodes(g) if not n.children]:
         nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
 
     for payoffs, nodes in nodes_by_payoff.items():
@@ -453,7 +464,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
                 tmp = "wins" if winner == "Bob" else "loses"
                 nodes_by_key[f"Bob calls and {tmp}"].append(n)
 
-    for term_node in [n for n in g.nodes if not n.children]:
+    for term_node in [n for n in all_nodes(g) if not n.children]:
         collect_nodes(term_node)
 
     for key, nodes in nodes_by_key.items():
@@ -815,7 +826,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             title=f"Binary Tree Game (L={self.level})",
         )
         self.create_binary_tree(g, g.root, (), 0, 0, self.level)
-        for n in g.nodes:
+        for n in all_nodes(g):
             if n.children and n.children["L"].children:
                 left = n.children["L"]
                 g.make_infoset(

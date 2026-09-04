@@ -717,10 +717,15 @@ class MixedBehaviorProfile:
     def node_values(self) -> NodeValuesVector:
         """Returns the expected payoff to each player conditional on play reaching each
         node, if all players play according to the profile, grouped by player.
+
+        .. versionchanged:: 17.0.0
+            Keyed by each node's History rather than a ``Node`` object.
         """
         self._check_validity()
         return NodeValuesVector({
-            p: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
+            p: NodeValueVector({
+                _history_of(n): self._node_value(p, n) for n in self.game._all_nodes()
+            })
             for p in self.game.players
         })
 
@@ -768,9 +773,14 @@ class MixedBehaviorProfile:
     def realiz_probs(self) -> RealizProbVector:
         """Returns the probability with which each node is reached, if all players
         play according to the profile.
+
+        .. versionchanged:: 17.0.0
+            Keyed by each node's History rather than a ``Node`` object.
         """
         self._check_validity()
-        return RealizProbVector({n: self._realiz_prob(n) for n in self.game.nodes})
+        return RealizProbVector({
+            _history_of(n): self._realiz_prob(n) for n in self.game._all_nodes()
+        })
 
     @property
     def infoset_probs(self) -> InfosetProbVector:
@@ -816,9 +826,14 @@ class MixedBehaviorProfile:
         See Also
         --------
         MixedBehaviorProfile.infoset_probs
+
+        .. versionchanged:: 17.0.0
+            Keyed by each node's History rather than a ``Node`` object.
         """
         self._check_validity()
-        return BeliefVector({n: self._belief(n) for n in self.game.nodes})
+        return BeliefVector({
+            _history_of(n): self._belief(n) for n in self.game._all_nodes()
+        })
 
     @property
     def action_regrets(self) -> ActionRegretsVector:

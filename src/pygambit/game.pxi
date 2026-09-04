@@ -502,27 +502,6 @@ class Game:
         return GameOutcomes.wrap(self.game)
 
     @property
-    def nodes(self) -> GameNodes:
-        """The set of nodes in the game.
-
-        Iteration over this property yields the nodes in the order of depth-first search.
-
-        .. versionchanged:: 16.4
-           Changed from a method ``nodes()`` to a property.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-
-        return GameNodes.wrap(self.game)
-
-    @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
@@ -542,6 +521,16 @@ class Game:
             )
         return Node.wrap(self.game.deref().GetRoot())
 
+    def _all_nodes(self) -> list:
+        """All nodes in the game, in depth-first traversal order. Not part of
+        the public API; the public equivalent is `Game.get_histories(H.after())`.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return [Node.wrap(node) for node in self.game.deref().GetNodes()]
+
     def _get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
 
@@ -555,7 +544,7 @@ class Game:
         current: list = None
         for op in selector._ops:
             if isinstance(op, _AfterStep):
-                candidates = list(self.nodes) if current is None else current
+                candidates = self._all_nodes() if current is None else current
                 current = [n for n in candidates if _matches_suffix(n, op.labels)]
                 continue
             if current is None:
@@ -1559,7 +1548,7 @@ class Game:
                 raise ValueError(
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
-            for n in self.nodes:
+            for n in self._all_nodes():
                 if n.label == node:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
@@ -3142,7 +3131,7 @@ class NodeCoordinates:
 def _layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
     layout = CreateLayout(game.game)
     data = {}
-    for node in game.nodes:
+    for node in game._all_nodes():
         data[node] = NodeCoordinates(deref(layout).GetNodeLevel(cython.cast(Node, node).node),
                                      deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
                                      deref(layout).GetNodeOffset(cython.cast(Node, node).node))

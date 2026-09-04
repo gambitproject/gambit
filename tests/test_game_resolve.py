@@ -32,7 +32,7 @@ def _test_valid_resolutions(collection: list, resolver: typing.Callable) -> None
     ]
 )
 def test_resolve_node(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.nodes,
+    _test_valid_resolutions(games.all_nodes(game),
                             lambda label, fn: game._resolve_node(label, fn))
 
 

@@ -138,7 +138,7 @@ def test_catalog_games_filter_n_nodes(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.nodes) == 5
+        assert len(g.get_histories(gbt.H.after())) == 5
 
 
 def test_catalog_games_filter_n_outcomes(all_games):

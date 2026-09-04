@@ -100,6 +100,14 @@ def test_get_histories_empty():
     assert game.get_histories(gbt.H.after("nonexistent")) == []
 
 
+def test_get_histories_after_strategic_game_raises():
+    """`H.after()`, used bare, enumerates every node -- the replacement for the
+    removed `Game.nodes` -- so it inherits the same tree-only restriction."""
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.get_histories(gbt.H.after())
+
+
 def test_get_histories_requires_selector():
     game = gbt.Game.new_tree(players=["A"])
     game.append_move(gbt.H.path(), "A", ["U", "D"])

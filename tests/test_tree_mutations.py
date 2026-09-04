@@ -395,37 +395,40 @@ def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:
     return count
 
 
+def _n_nodes(game: gbt.Game) -> int:
+    """The number of nodes in the game -- a stand-in for `len(Game.nodes)`,
+    removed since `Game.nodes` was."""
+    return len(game.get_histories(gbt.H.after()))
+
+
 def test_len_matches_expected_node_count():
-    """Verify `len(game.nodes)` matches expected node count
-    """
+    """Verify the node count matches expectations."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     expected_node_count = 9
 
-    direct_len = len(game.nodes)
+    direct_len = _n_nodes(game)
     assert direct_len == expected_node_count
 
     assert direct_len == _count_subtree_nodes(game.root, True)
 
 
 def test_len_after_delete_tree():
-    """Verify `len(game.nodes)` is correct after `delete_tree`.
-    """
+    """Verify the node count is correct after `delete_tree`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     root_of_the_deleted_subtree = game.root.children["R"].children["L"]
     number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree, True) - 1
 
     game.delete_tree(gbt.H.path("R", "L"))
 
-    assert len(game.nodes) == initial_number_of_nodes - number_of_deleted_nodes
+    assert _n_nodes(game) == initial_number_of_nodes - number_of_deleted_nodes
 
 
 def test_len_after_delete_parent():
-    """Verify `len(game.nodes)` is correct after `delete_parent`.
-    """
+    """Verify the node count is correct after `delete_parent`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     node_parent_to_delete = game.root.children["L"].children["L"]
 
@@ -435,51 +438,50 @@ def test_len_after_delete_parent():
 
     game.delete_parent(gbt.H.path("L", "L"))
 
-    assert len(game.nodes) == initial_number_of_nodes - diff
+    assert _n_nodes(game) == initial_number_of_nodes - diff
 
 
 def test_len_after_append_move():
-    """Verify `len(game.nodes)` is correct after `append_move`."""
+    """Verify the node count is correct after `append_move`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     player = "Player 1"
     actions_to_add = ["T", "M", "B"]
 
     game.append_move(gbt.H.path("R", "L", "L"), player, actions_to_add)  # the [1,1,0] terminal
 
-    assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
+    assert _n_nodes(game) == initial_number_of_nodes + len(actions_to_add)
 
 
 def test_len_after_append_infoset():
-    """Verify `len(game.nodes)` is correct after `append_infoset`.
-    """
+    """Verify the node count is correct after `append_infoset`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     infoset_to_modify = game.root.children["L"]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
     game.append_infoset(gbt.H.path("L", "L", "l"), gbt.H.path("L"))
 
-    assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
+    assert _n_nodes(game) == initial_number_of_nodes + number_of_infoset_actions
 
 
 def test_len_after_set_move_actions_add():
-    """Verify `len(game.nodes)` is correct after `set_move_actions` creates an action."""
+    """Verify the node count is correct after `set_move_actions` creates an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
     infoset_to_modify = game.root.children["L"]   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
     labels = list(infoset_to_modify.actions)
     game.set_move_actions(gbt.H.path("L"), labels + ["new"])
-    assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
+    assert _n_nodes(game) == initial_number_of_nodes + num_nodes_in_infoset
 
 
 def test_len_after_set_move_actions_drop():
-    """Verify `len(game.nodes)` is correct after `set_move_actions` deletes an action."""
+    """Verify the node count is correct after `set_move_actions` deletes an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
     action_to_drop = "L"
     nodes_to_delete = sum(
         _count_subtree_nodes(member.children[action_to_drop], True)
@@ -487,20 +489,20 @@ def test_len_after_set_move_actions_drop():
     )
     remaining = [a for a in game.root.actions if a != "L"]
     game.set_move_actions(gbt.H.path(), remaining, drop=True)
-    assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
+    assert _n_nodes(game) == initial_number_of_nodes - nodes_to_delete
 
 
 def test_len_after_insert_move():
-    """Verify `len(game.nodes)` is correct after `insert_move`."""
+    """Verify the node count is correct after `insert_move`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     player = "Player 2"
     actions_to_add = ["a", "b", "c"]
 
     game.insert_move(gbt.H.path("L", "R"), player, actions_to_add)  # the [1, 0] node
 
-    assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
+    assert _n_nodes(game) == initial_number_of_nodes + len(actions_to_add)
 
 
 def test_insert_move_actions_labeled():
@@ -512,30 +514,28 @@ def test_insert_move_actions_labeled():
 
 
 def test_len_after_insert_infoset():
-    """Verify `len(game.nodes)` is correct after `insert_infoset`.
-    """
+    """Verify the node count is correct after `insert_infoset`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
 
     infoset_to_modify = game.root.children["L"]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
     game.insert_infoset(gbt.H.path("L", "R"), gbt.H.path("L"))
 
-    assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
+    assert _n_nodes(game) == initial_number_of_nodes + number_of_infoset_actions
 
 
 def test_len_after_copy_tree():
-    """Verify `len(game.nodes)` is correct after `copy_tree`.
-    """
+    """Verify the node count is correct after `copy_tree`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    initial_number_of_nodes = len(game.nodes)
+    initial_number_of_nodes = _n_nodes(game)
     src_node = game.root.children["R"].children["L"]
     number_of_src_ancestors = _count_subtree_nodes(src_node, True)
 
     game.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
 
-    assert len(game.nodes) == initial_number_of_nodes + number_of_src_ancestors - 1
+    assert _n_nodes(game) == initial_number_of_nodes + number_of_src_ancestors - 1
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
@@ -598,7 +598,7 @@ def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
-    personal = next(n for n in game.nodes if n.children and n.player != "Chance")
+    personal = next(n for n in games.all_nodes(game) if n.children and n.player != "Chance")
     game.make_infoset(gbt.H.path(), personal.player)
     assert chance_node.player != "Chance"
     assert chance_node.player == personal.player
@@ -978,11 +978,11 @@ def test_set_move_actions_add_drop_and_reorder_together():
     game = games.create_stripped_down_poker_efg()
     infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
-    nodes_before = len(game.nodes)
+    nodes_before = _n_nodes(game)
     game.set_move_actions(games.selector_for_nodes([node]), ["Raise", "Fold"], drop=True)
     assert list(infoset.actions) == ["Raise", "Fold"]
     # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
-    assert len(game.nodes) == nodes_before - 3 + 1
+    assert _n_nodes(game) == nodes_before - 3 + 1
     # Bob's response infoset survives, now with only its Queen-side member: the
     # King-side member (found via the removed "Bet" action) is gone with the subtree.
     assert len(game.root.children["Queen"].children["Bet"].members) == 1
@@ -1031,7 +1031,7 @@ def test_set_move_actions_absent_minded_drop_and_add():
     game.set_move_actions(gbt.H.path(), ["b", "c"], drop=True)
     assert list(game.root.actions) == ["b", "c"]
     assert len(game.root.members) == 1
-    assert len(game.nodes) == 3
+    assert _n_nodes(game) == 3
 
 
 def test_set_event_actions_reorder_carries_probabilities():
@@ -1044,13 +1044,13 @@ def test_set_event_actions_reorder_carries_probabilities():
 
 def test_set_event_actions_add_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
-    nodes_before = len(game.nodes)
+    nodes_before = _n_nodes(game)
     game.set_event_actions(gbt.H.path(), {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
     assert list(game.root.actions) == ["Jack", "King", "Queen"]
     assert game.root.action_probs == {
         "Jack": gbt.Rational(1, 2), "King": gbt.Rational(1, 4), "Queen": gbt.Rational(1, 4)
     }
-    assert len(game.nodes) == nodes_before + 1
+    assert _n_nodes(game) == nodes_before + 1
 
 
 def test_set_event_actions_drop_with_probs_mapping():

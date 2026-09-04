@@ -22,39 +22,6 @@
 #
 
 @cython.cclass
-class GameNodes:
-    """Represents the set of nodes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameNodes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameNodes:
-        obj: GameNodes = GameNodes.__new__(GameNodes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameNodes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of nodes in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().NumNodes()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        """Iterate over the game nodes in the depth-first traversal order."""
-        if not self.game.deref().IsTree():
-            return
-
-        for node in self.game.deref().GetNodes():
-            yield Node.wrap(node)
-
-
-@cython.cclass
 class GameSubgames:
     """Represents the set of subgames in a game."""
     game = cython.declare(c_Game)
