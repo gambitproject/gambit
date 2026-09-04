@@ -137,8 +137,6 @@ Information about the game
    Node.is_terminal
    Node.is_strategy_reachable
    Node.prior_action
-   Node.prior_sibling
-   Node.next_sibling
    Node.members
    Node.actions
    Node.action_probs

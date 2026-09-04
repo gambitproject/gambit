@@ -130,20 +130,6 @@ def test_get_prior_action():
     assert game.root.prior_action is None
 
 
-def test_get_prior_sibling():
-    """Test to ensure that we can retrieve a prior sibling of a given node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["D1"].prior_sibling == game.root.children["U1"]
-    assert game.root.children["U1"].prior_sibling is None
-
-
-def test_get_next_sibling():
-    """Test to ensure that we can retrieve a next sibling of a given node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].next_sibling == game.root.children["D1"]
-    assert game.root.children["D1"].next_sibling is None
-
-
 def test_is_terminal():
     """Test to ensure that we can check if a given node is a terminal node"""
     game = games.read_from_file("basic_extensive_game.efg")

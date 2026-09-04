@@ -384,28 +384,6 @@ class Node:
         return Branch(Node.wrap(cur.deref().GetParent()), label)
 
     @property
-    def prior_sibling(self) -> Node | None:
-        """The node which is immediately before this one in its parent's children.
-
-        If this is the root node or the first child of its parent,
-        None is returned.
-        """
-        if self.node.deref().GetPriorSibling() != cython.cast(c_GameNode, NULL):
-            return Node.wrap(self.node.deref().GetPriorSibling())
-        return None
-
-    @property
-    def next_sibling(self) -> Node | None:
-        """The node which is immediately after this one in its parent's children.
-
-        If this is the root node or the last child of its parent,
-        None is returned.
-        """
-        if self.node.deref().GetNextSibling() != cython.cast(c_GameNode, NULL):
-            return Node.wrap(self.node.deref().GetNextSibling())
-        return None
-
-    @property
     def is_terminal(self) -> bool:
         """Returns whether this is a terminal node of the game."""
         return self.node.deref().IsTerminal()
