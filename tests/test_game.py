@@ -218,7 +218,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
-    game.set_move_actions(game.root, ["D1"], drop=True)
+    game.set_move_actions(gbt.H.path(), ["D1"], drop=True)
     distribution = {s: 0 for s in game.get_strategies(player)}
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
@@ -253,7 +253,7 @@ def test_mixed_strategy_profile_game_structure_changed_tree():
 def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
-    game.set_move_actions(game.root, ["D1"], drop=True)
+    game.set_move_actions(gbt.H.path(), ["D1"], drop=True)
     infoset = game.root
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):

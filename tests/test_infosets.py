@@ -113,9 +113,9 @@ def test_set_move_actions_add_preserves_existing_action_order():
     order is preserved."""
     game = games.read_from_file("basic_extensive_game.efg")
     labels = list(game.root.actions)
-    game.set_move_actions(game.root, labels + ["end"])
+    game.set_move_actions(gbt.H.path(), labels + ["end"])
     assert list(game.root.actions)[:-1] == labels
-    game.set_move_actions(game.root, ["front"] + labels + ["end"])
+    game.set_move_actions(gbt.H.path(), ["front"] + labels + ["end"])
     assert list(game.root.actions)[1:-1] == labels
 
 

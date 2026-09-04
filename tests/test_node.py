@@ -1056,7 +1056,7 @@ def test_len_after_set_move_actions_add():
     infoset_to_modify = game.root.children["L"].infoset   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
     labels = list(infoset_to_modify.actions)
-    game.set_move_actions(game.root.children["L"], labels + ["new"])
+    game.set_move_actions(gbt.H.path("L"), labels + ["new"])
     assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
 
 
@@ -1070,7 +1070,7 @@ def test_len_after_set_move_actions_drop():
         for member in game.root.infoset.members
     )
     remaining = [a for a in game.root.infoset.actions if a != "L"]
-    game.set_move_actions(game.root, remaining, drop=True)
+    game.set_move_actions(gbt.H.path(), remaining, drop=True)
     assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
 
 

@@ -116,7 +116,7 @@ def test_set_move_actions_drop_shrinks_actions_and_children():
     node = next(iter(infoset.members))
     action_count = len(infoset.actions)
     remaining = list(infoset.actions)[1:]
-    game.set_move_actions(node, remaining, drop=True)
+    game.set_move_actions(games.selector_for_nodes([node]), remaining, drop=True)
     assert len(infoset.actions) == action_count - 1
     assert len(node.children) == action_count - 1
 
@@ -126,10 +126,11 @@ def test_set_move_actions_cannot_remove_the_only_action():
     infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     last = next(iter(infoset.actions))
-    game.set_move_actions(node, [last], drop=True)
+    selector = games.selector_for_nodes([node])
+    game.set_move_actions(selector, [last], drop=True)
     assert list(infoset.actions) == [last]
     with pytest.raises(gbt.UndefinedOperationError):
-        game.set_move_actions(node, [], drop=True)
+        game.set_move_actions(selector, [], drop=True)
 
 
 def test_set_move_actions_reorder_carries_subtrees():
@@ -146,7 +147,7 @@ def test_set_move_actions_reorder_carries_subtrees():
     members = list(infoset.members)
     children_before = [{label: member.children[label] for label in ("a", "b", "c")}
                        for member in members]
-    game.set_move_actions(game.root.children["x"], ["c", "a", "b"])
+    game.set_move_actions(gbt.H.path("x"), ["c", "a", "b"])
     assert list(infoset.actions) == ["c", "a", "b"]
     for member, children in zip(members, children_before, strict=True):
         assert list(member.children) == [children["c"], children["a"], children["b"]]
@@ -157,7 +158,7 @@ def test_set_move_actions_add_drop_and_reorder_together():
     infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     nodes_before = len(game.nodes)
-    game.set_move_actions(node, ["Raise", "Fold"], drop=True)
+    game.set_move_actions(games.selector_for_nodes([node]), ["Raise", "Fold"], drop=True)
     assert list(infoset.actions) == ["Raise", "Fold"]
     # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
     assert len(game.nodes) == nodes_before - 3 + 1
@@ -169,10 +170,11 @@ def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
     infoset = games.find_infoset(game, "Alice", "Alice has King")
     node = next(iter(infoset.members))
     before = game.to_efg()
+    selector = games.selector_for_nodes([node])
     with pytest.raises(ValueError):
-        game.set_move_actions(node, ["Bet"])
+        game.set_move_actions(selector, ["Bet"])
     with pytest.raises(ValueError):
-        game.set_move_actions(node, ["Bet", "Fold", "Raise"], add=False)
+        game.set_move_actions(selector, ["Bet", "Fold", "Raise"], add=False)
     assert game.to_efg() == before
 
 
@@ -181,7 +183,7 @@ def test_set_move_actions_raises_at_an_event():
     corresponding operation for an event."""
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
-        game.set_move_actions(game.root, ["King", "Queen"])
+        game.set_move_actions(gbt.H.path(), ["King", "Queen"])
 
 
 @pytest.mark.parametrize("bad_labels", [["Bet", "Bet"], ["Bet", ""], ["Bet", " x"]])
@@ -193,7 +195,7 @@ def test_set_move_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
     node = next(iter(infoset.members))
     before = game.to_efg()
     with pytest.raises(ValueError):
-        game.set_move_actions(node, bad_labels, drop=True)
+        game.set_move_actions(games.selector_for_nodes([node]), bad_labels, drop=True)
     assert game.to_efg() == before
 
 
@@ -203,24 +205,16 @@ def test_set_move_actions_absent_minded_drop_and_add():
     game = gbt.Game.new_tree(players=["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     game.append_infoset(gbt.H.path("a"), gbt.H.path())
-    game.set_move_actions(game.root, ["b", "c"], drop=True)
+    game.set_move_actions(gbt.H.path(), ["b", "c"], drop=True)
     assert list(game.root.infoset.actions) == ["b", "c"]
     assert len(game.root.infoset.members) == 1
     assert len(game.nodes) == 3
 
 
-def test_set_event_actions_error_mismatch():
-    """Test to ensure `event` is from the same game."""
-    game1 = gbt.Game.new_tree()
-    game2 = games.create_stripped_down_poker_efg()
-    with pytest.raises(gbt.MismatchError):
-        game1.set_event_actions(game2.root, {"King": "1/2", "Queen": "1/2"})
-
-
 def test_set_event_actions_reorder_carries_probabilities():
     game = games.create_stripped_down_poker_efg()
-    game.set_event_actions(game.root, {"King": "3/4", "Queen": "1/4"})
-    game.set_event_actions(game.root, {"Queen": "1/4", "King": "3/4"})
+    game.set_event_actions(gbt.H.path(), {"King": "3/4", "Queen": "1/4"})
+    game.set_event_actions(gbt.H.path(), {"Queen": "1/4", "King": "3/4"})
     assert list(game.root.actions) == ["Queen", "King"]
     assert game.root.action_probs == {"Queen": gbt.Rational(1, 4), "King": gbt.Rational(3, 4)}
 
@@ -228,7 +222,7 @@ def test_set_event_actions_reorder_carries_probabilities():
 def test_set_event_actions_add_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     nodes_before = len(game.nodes)
-    game.set_event_actions(game.root, {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
+    game.set_event_actions(gbt.H.path(), {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
     assert list(game.root.actions) == ["Jack", "King", "Queen"]
     assert game.root.action_probs == {
         "Jack": gbt.Rational(1, 2), "King": gbt.Rational(1, 4), "Queen": gbt.Rational(1, 4)
@@ -238,7 +232,7 @@ def test_set_event_actions_add_with_probs_mapping():
 
 def test_set_event_actions_drop_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
-    game.set_event_actions(game.root, {"King": 1}, drop=True)
+    game.set_event_actions(gbt.H.path(), {"King": 1}, drop=True)
     assert list(game.root.actions) == ["King"]
     assert game.root.action_probs == {"King": 1}
 
@@ -248,10 +242,10 @@ def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
     _ = game.root.event
     before = game.to_efg()
     with pytest.raises(ValueError):
-        game.set_event_actions(game.root, {"King": 1})
+        game.set_event_actions(gbt.H.path(), {"King": 1})
     with pytest.raises(ValueError):
         game.set_event_actions(
-            game.root, {"King": "1/2", "Queen": "1/4", "Jack": "1/4"}, add=False
+            gbt.H.path(), {"King": "1/2", "Queen": "1/4", "Jack": "1/4"}, add=False
         )
     assert game.to_efg() == before
 
@@ -262,7 +256,9 @@ def test_set_event_actions_raises_at_a_move():
     game = games.create_stripped_down_poker_efg()
     infoset = games.find_infoset(game, "Alice", "Alice has King")
     with pytest.raises(ValueError):
-        game.set_event_actions(next(iter(infoset.members)), {"Bet": 1})
+        game.set_event_actions(
+            games.selector_for_nodes([next(iter(infoset.members))]), {"Bet": 1}
+        )
 
 
 def test_set_event_actions_rejects_non_mapping_probs():
@@ -271,7 +267,7 @@ def test_set_event_actions_rejects_non_mapping_probs():
     game = games.create_stripped_down_poker_efg()
     before = game.to_efg()
     with pytest.raises(TypeError):
-        game.set_event_actions(game.root, ["3/4", "1/4"])
+        game.set_event_actions(gbt.H.path(), ["3/4", "1/4"])
     assert game.to_efg() == before
 
 
@@ -279,7 +275,7 @@ def test_set_event_actions_bad_distribution_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     before = game.to_efg()
     with pytest.raises(ValueError):
-        game.set_event_actions(game.root, {"King": "3/4", "Queen": "3/4"})
+        game.set_event_actions(gbt.H.path(), {"King": "3/4", "Queen": "3/4"})
     assert game.to_efg() == before
 
 

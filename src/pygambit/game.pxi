@@ -2112,11 +2112,12 @@ class Game:
         self.game.deref().DeleteTree(resolved_node.node)
 
     def set_move_actions(self,
-                         infoset: NodeReference,
+                         infoset: Selector,
                          actions: list[str],
                          drop: bool = False,
                          add: bool = True) -> None:
-        """Set the actions at the move `infoset` to be `actions`, matching by label.
+        """Set the actions at the move that the node identified by `infoset`
+        belongs to, to be `actions`, matching by label.
 
         An entry of `actions` matching the label of a current action refers to that action,
         which keeps its subtrees; an entry matching no current action creates a new action there,
@@ -2124,13 +2125,19 @@ class Game:
         in `actions` is deleted, along with the subtrees its branches lead to.
         Listing the current labels in a new order reorders the actions as well as the children.
 
+        `infoset` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `infoset` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the (personal player's) move at which to set the
-            actions, or such a node's label.
+        infoset : Selector
+            A `Selector` resolving to a single node belonging to the (personal
+            player's) move at which to set the actions.
         actions : list of str
             The labels of the actions the move is to have, in order.
             Must be nonempty and without duplicates; each label must be a valid, nonempty label.
@@ -2143,25 +2150,27 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
-        KeyError
-            If `infoset` is a string matching no node.
         TypeError
-            If `actions` is a string, or not an iterable of strings.
+            If `infoset` is not a `Selector`; or if `actions` is a string, or not
+            an iterable of strings.
         UndefinedOperationError
             If `actions` is empty.
         ValueError
-            If `infoset` resolves to an event rather than a personal player's move
-            (use `set_event_actions` for an event); or if a label in `actions` is
-            repeated, empty, or invalid; or if adding or deleting actions is not
-            confirmed by `add`/`drop`.
+            If `infoset` does not resolve to exactly one node, or resolves to an
+            event rather than a personal player's move (use `set_event_actions`
+            for an event); or if a label in `actions` is repeated, empty, or
+            invalid; or if adding or deleting actions is not confirmed by
+            `add`/`drop`.
 
         See Also
         --------
         set_event_actions : The corresponding operation for the actions of an event.
         relabel_actions : Change the labels of actions, leaving the tree unchanged.
         """
+        if not isinstance(infoset, Selector):
+            raise TypeError(
+                f"set_move_actions(): infoset must be a Selector, not {infoset.__class__.__name__}"
+            )
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_move_actions"))
         if isinstance(actions, str) or not hasattr(actions, "__iter__"):
             raise TypeError("set_move_actions(): actions must be an iterable of str")
@@ -2181,12 +2190,13 @@ class Game:
         self.game.deref().SetMoveActions(resolved_infoset._resolve(), c_labels)
 
     def set_event_actions(self,
-                          event: NodeReference,
+                          event: Selector,
                           probs: typing.Mapping,
                           drop: bool = False,
                           add: bool = True) -> None:
-        """Set the actions at the event `event` to be the keys of `probs`, in order,
-        with the given probability distribution.
+        """Set the actions at the event that the node identified by `event`
+        belongs to, to be the keys of `probs`, in order, with the given
+        probability distribution.
 
         A key of `probs` matching the label of a current action refers to that action,
         which keeps its subtrees; a key matching no current action creates a new action
@@ -2199,13 +2209,19 @@ class Game:
         of the operation, rather than inferred from the actions which remain: there is no
         way to reorder an event's actions without also restating their probabilities.
 
+        `event` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `event` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
 
         Parameters
         ----------
-        event : Node or str
-            A node belonging to the event at which to set the actions, or such a
-            node's label.
+        event : Selector
+            A `Selector` resolving to a single node belonging to the event at
+            which to set the actions.
         probs : dict-like
             A mapping from the label of each action the event is to have, in order, to its
             probability.  Must be nonempty, with valid, nonempty keys.  Values must be
@@ -2219,20 +2235,18 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `event` is a `Node` from a different game.
-        KeyError
-            If `event` is a string matching no node.
         TypeError
-            If `probs` is not a mapping, or a key of `probs` is not a string.
+            If `event` is not a `Selector`; or if `probs` is not a mapping, or a
+            key of `probs` is not a string.
         UndefinedOperationError
             If `probs` is empty, or if `event` resolves to a personal player's
             information set rather than an event; use `set_move_actions` for a
             personal player's move.
         ValueError
-            If a key of `probs` is empty or invalid; if adding or deleting actions is not
-            confirmed by `add`/`drop`; or if the values of `probs` are not non-negative
-            numbers summing to exactly one.
+            If `event` does not resolve to exactly one node; if a key of `probs`
+            is empty or invalid; if adding or deleting actions is not confirmed by
+            `add`/`drop`; or if the values of `probs` are not non-negative numbers
+            summing to exactly one.
 
         See Also
         --------
@@ -2240,6 +2254,10 @@ class Game:
             player's move.
         relabel_actions : Change the labels of actions, leaving the tree unchanged.
         """
+        if not isinstance(event, Selector):
+            raise TypeError(
+                f"set_event_actions(): event must be a Selector, not {event.__class__.__name__}"
+            )
         resolved_event = cython.cast(Event, self._resolve_event(event, "set_event_actions"))
         if not isinstance(probs, typing.Mapping):
             raise TypeError(
