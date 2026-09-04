@@ -126,15 +126,18 @@ class MixedAction:
 
     An immutable snapshot taken from a ``MixedBehaviorProfile`` at retrieval time: it
     does not reflect later changes to the profile, and cannot itself be modified. The
-    information set is accessible via `infoset`.
+    information set is identified by the history that was resolved to reach it,
+    accessible via `history`.
 
     .. versionchanged:: 17.0.0
 
         No longer a live view onto the profile: holds its own copy of the probabilities,
         and can no longer be assigned into. Set a distribution via
-        ``MixedBehaviorProfile.__setitem__`` instead.
+        ``MixedBehaviorProfile.__setitem__`` instead. `infoset` (an ``Infoset``) replaced
+        by `history` (the ``History`` -- a plain tuple of action labels -- of the node
+        that was resolved to identify the information set).
     """
-    _infoset = cython.declare(Infoset)
+    _history = cython.declare(tuple)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -142,16 +145,16 @@ class MixedAction:
 
     @staticmethod
     @cython.cfunc
-    def wrap(infoset: Infoset, values: dict) -> MixedAction:
+    def wrap(history: tuple, values: dict) -> MixedAction:
         obj: MixedAction = MixedAction.__new__(MixedAction)
-        obj._infoset = infoset
+        obj._history = history
         obj._values = values
         return obj
 
     @property
-    def infoset(self) -> Infoset:
-        """The information set over which this mixed action is defined."""
-        return self._infoset
+    def history(self) -> tuple:
+        """The History of the node that was resolved to identify this information set."""
+        return self._history
 
     def __repr__(self) -> str:
         return str(self._values)
@@ -172,7 +175,7 @@ class MixedAction:
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, collections.abc.Mapping):
             return self._values == dict(other)
-        if not isinstance(other, MixedAction) or self.infoset != other.infoset:
+        if not isinstance(other, MixedAction) or self.history != other.history:
             return False
         return self._values == cython.cast(MixedAction, other)._values
 
@@ -563,7 +566,8 @@ class MixedBehaviorProfile:
         values: dict = {}
         for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
             values[a.deref().GetLabel().decode("utf-8")] = self._getprob_action(a)
-        return MixedAction.wrap(infoset, values)
+        history = _history_of(Node.wrap(cython.cast(Infoset, infoset).node))
+        return MixedAction.wrap(history, values)
 
     def _setprob_infoset(
         self, infoset: Infoset, distribution: collections.abc.Mapping, sparse: bool

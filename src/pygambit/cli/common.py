@@ -244,10 +244,12 @@ def render_support_csv(
         fields = [
             "".join(
                 "1" if action in action_support else "0"
-                for action in action_support.infoset.actions
+                for action in node.infoset.actions
             )
             for player in support.game.players
-            for action_support in support[player]
+            for node, action_support in zip(
+                support.game.get_infosets(player), support[player], strict=True
+            )
         ]
     else:
         fields = [

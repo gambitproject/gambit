@@ -365,7 +365,7 @@ Subsets of actions
    BehaviorSupport.__getitem__
 
    ActionSupport
-   ActionSupport.infoset
+   ActionSupport.history
    ActionSupport.__iter__
    ActionSupport.__contains__
 

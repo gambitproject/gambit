@@ -28,19 +28,25 @@ class ActionSupport(_LabelSet):
     """A set of actions at a specified information set in a `BehaviorSupportProfile`.
 
     An immutable snapshot taken from a ``BehaviorSupportProfile`` at retrieval time: it
-    does not reflect later changes to the profile. The information set is accessible
-    via `infoset`.
+    does not reflect later changes to the profile. The information set is identified by
+    the history that was resolved to reach it, accessible via `history`.
+
+    .. versionchanged:: 17.0.0
+        `infoset` (an ``Infoset``) replaced by `history` (the ``History`` -- a plain
+        tuple of action labels -- of the node that was resolved to identify the
+        information set).
     """
     @staticmethod
     @cython.cfunc
-    def wrap(infoset: Infoset, actions: tuple) -> ActionSupport:
+    def wrap(history: tuple, actions: tuple) -> ActionSupport:
         obj: ActionSupport = ActionSupport.__new__(ActionSupport)
-        obj._owner = infoset
+        obj._owner = history
         obj._labels = actions
         return obj
 
     @property
-    def infoset(self) -> Infoset:
+    def history(self) -> tuple:
+        """The History of the node that was resolved to identify this information set."""
         return self._owner
 
 
@@ -224,7 +230,8 @@ class BehaviorSupportProfile:
             a.deref().GetLabel().decode("utf-8")
             for a in deref(self.profile).GetActions(infoset_handle)
         )
-        return ActionSupport.wrap(infoset, actions)
+        history = _history_of(Node.wrap(cython.cast(Infoset, infoset).node))
+        return ActionSupport.wrap(history, actions)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:

@@ -15,14 +15,14 @@ def _find_node(game, label):
     raise KeyError(label)
 
 
-def _find_infoset(game, label):
-    """Find the Infoset with the given label, searching across all players."""
-    return _find_node(game, label).infoset
-
-
 def _find_selector(game, label):
     """A `Selector` resolving to the infoset with the given label."""
     return games.selector_for_node(_find_node(game, label))
+
+
+def _find_history(game, label):
+    """The History of a member node of the infoset with the given label."""
+    return games._node_history(_find_node(game, label))
 
 
 def _branching_game():
@@ -45,10 +45,9 @@ def _branching_game():
 def test_getitem_by_selector():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.behavior_support_profile()
-    infoset = _find_infoset(game, "Infoset 1:1")
     support = profile[_find_selector(game, "Infoset 1:1")]
     assert set(support) == {"U1", "D1"}
-    assert support.infoset == infoset
+    assert support.history == _find_history(game, "Infoset 1:1")
     assert "U1" in support
     assert "not-a-label" not in support
 
