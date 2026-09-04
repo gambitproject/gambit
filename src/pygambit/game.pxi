@@ -618,6 +618,40 @@ class Game:
             )
         return self._get_histories(selector)
 
+    def get_player(self, history: Selector) -> str | None:
+        """Returns the label of the player associated with the node that
+        `history` resolves to: the one who makes the decision, if this is a
+        personal node, or the chance player, if this is an event.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        str or None
+            The label of the player who owns the node, or `None` if the node
+            is terminal, which has no player.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_player(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_player")
+        return resolved_node.player
+
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that

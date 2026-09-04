@@ -20,17 +20,32 @@ def test_node_actions_reflects_information_set():
 
 
 def test_get_player():
-    """Test to ensure that we can retrieve a player for a given node"""
+    """A personal node's player; a terminal node has none."""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.player == "Player 1"
-    assert not game.root.children["U1"].children["D2"].children["U3"].player
+    assert game.get_player(gbt.H.path()) == "Player 1"
+    assert game.get_player(gbt.H.path("U1", "D2", "U3")) is None
 
 
-def test_node_player_resolves_chance():
+def test_get_player_resolves_chance():
     """At a chance node, the player label is the chance player's."""
     game = games.read_from_file("stripped_down_poker.efg")
-    chance_node = game.root
-    assert chance_node.player == "Chance"
+    assert game.get_player(gbt.H.path()) == "Chance"
+
+
+def test_get_player_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_player(())
+    with pytest.raises(TypeError):
+        game.get_player("U1")
+
+
+def test_get_player_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_player(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_player(gbt.H.path(...).filter(lambda h: False))
 
 
 def test_get_parent():
@@ -485,12 +500,6 @@ def test_node_plays():
     }
 
     assert set(test_node.plays) == expected_set_of_plays
-
-
-def test_infoset_player_retrieval():
-    game = games.read_from_file("basic_extensive_game.efg")
-    p1, *_ = game.players
-    assert p1 == game.root.player
 
 
 @pytest.mark.parametrize(
