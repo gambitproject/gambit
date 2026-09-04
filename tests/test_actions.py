@@ -40,7 +40,7 @@ def test_relabel_actions_simultaneous_swap():
     """
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(gbt.H.path(), {"King": "Queen", "Queen": "King"})
-    assert list(game.root.event.actions) == ["Queen", "King"]
+    assert list(game.root.actions) == ["Queen", "King"]
 
 
 def test_relabel_actions_duplicate_targets_raises_valueerror():
@@ -61,7 +61,7 @@ def test_relabel_actions_unknown_label_raises_keyerror():
 def test_relabel_actions_unknown_label_not_strict_is_ignored():
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(gbt.H.path(), {"Jack": "Ace", "King": "Ace"}, strict=False)
-    assert list(game.root.event.actions) == ["Ace", "Queen"]
+    assert list(game.root.actions) == ["Ace", "Queen"]
 
 
 def test_relabel_actions_failure_leaves_game_unchanged():
@@ -71,7 +71,7 @@ def test_relabel_actions_failure_leaves_game_unchanged():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
         game.relabel_actions(gbt.H.path(), {"King": "Ace", "Queen": ""})
-    assert list(game.root.event.actions) == ["King", "Queen"]
+    assert list(game.root.actions) == ["King", "Queen"]
 
 
 def test_relabel_actions_scope_is_the_information_set():
@@ -135,7 +135,7 @@ def test_set_move_actions_reorder_carries_subtrees():
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in (("x", "a"), ("y", "b"))),
         "Bob", ["l", "r"]
     )
-    infoset = game.root.children["x"].infoset
+    infoset = game.root.children["x"]
     members = list(infoset.members)
     children_before = [{label: member.children[label] for label in ("a", "b", "c")}
                        for member in members]
@@ -154,7 +154,9 @@ def test_set_move_actions_add_drop_and_reorder_together():
     assert list(infoset.actions) == ["Raise", "Fold"]
     # "Bet" and its subtree (Bob's node and its two terminals) go; "Raise" adds one.
     assert len(game.nodes) == nodes_before - 3 + 1
-    assert len(games.find_infoset(game, "Bob", "Bob's response").members) == 1
+    # Bob's response infoset survives, now with only its Queen-side member: the
+    # King-side member (found via the removed "Bet" action) is gone with the subtree.
+    assert len(game.root.children["Queen"].children["Bet"].members) == 1
 
 
 def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
@@ -198,8 +200,8 @@ def test_set_move_actions_absent_minded_drop_and_add():
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     game.append_infoset(gbt.H.path("a"), gbt.H.path())
     game.set_move_actions(gbt.H.path(), ["b", "c"], drop=True)
-    assert list(game.root.infoset.actions) == ["b", "c"]
-    assert len(game.root.infoset.members) == 1
+    assert list(game.root.actions) == ["b", "c"]
+    assert len(game.root.members) == 1
     assert len(game.nodes) == 3
 
 
@@ -231,7 +233,6 @@ def test_set_event_actions_drop_with_probs_mapping():
 
 def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():
     game = games.create_stripped_down_poker_efg()
-    _ = game.root.event
     before = game.to_efg()
     with pytest.raises(ValueError):
         game.set_event_actions(gbt.H.path(), {"King": 1})

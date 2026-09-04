@@ -5,24 +5,14 @@ import pygambit as gbt
 from . import games
 
 
-def _find_node(game, label):
-    """Find a member node of the infoset with the given label, searching across all
-    players."""
-    for player in game.players:
-        for node in game.get_infosets(player):
-            if node.infoset.label == label:
-                return node
-    raise KeyError(label)
-
-
 def _find_selector(game, label):
     """A `Selector` resolving to the infoset with the given label."""
-    return games.selector_for_node(_find_node(game, label))
+    return games.selector_for_node(games.find_infoset_in_game(game, label))
 
 
 def _find_history(game, label):
     """The History of a member node of the infoset with the given label."""
-    return games._node_history(_find_node(game, label))
+    return games._node_history(games.find_infoset_in_game(game, label))
 
 
 def _branching_game():
@@ -36,9 +26,6 @@ def _branching_game():
     right = root.children["R"]
     game.append_move(gbt.H.path("L"), "P2", ["A", "B"])
     game.append_move(gbt.H.path("R"), "P2", ["A", "B"])
-    root.infoset.label = "P1 infoset"
-    left.infoset.label = "P2 left infoset"
-    right.infoset.label = "P2 right infoset"
     return game, root, left, right
 
 
@@ -74,21 +61,17 @@ def test_getitem_rejects_other_types():
         profile[0]
 
 
-def test_getitem_setitem_reject_node_and_infoset():
-    """Profile indexing is `Selector`-only: a bare `Node` or `Infoset` -- even one
-    obtained straight from the game, e.g. `game.root`/`game.root.infoset` -- is no
-    longer accepted, following the same pattern as `Game.get_minimal_subgame`.
+def test_getitem_setitem_reject_node():
+    """Profile indexing is `Selector`-only: a bare `Node` -- even one obtained
+    straight from the game, e.g. `game.root` -- is no longer accepted, following
+    the same pattern as `Game.get_minimal_subgame`.
     """
     game, root, _, _ = _branching_game()
     profile = game.behavior_support_profile()
     with pytest.raises(TypeError):
         profile[root]
     with pytest.raises(TypeError):
-        profile[root.infoset]
-    with pytest.raises(TypeError):
         profile[root] = ["R"]
-    with pytest.raises(TypeError):
-        profile[root.infoset] = ["R"]
 
 
 def test_predicate_construction():
@@ -98,9 +81,11 @@ def test_predicate_construction():
 
 
 def test_predicate_construction_error():
+    """A predicate that excludes every action at some information set (here, the
+    root's) triggers "attempted to remove the last action"."""
     game = games.read_from_file("mixed_behavior_game.efg")
     with pytest.raises(ValueError):
-        game.behavior_support_profile(lambda node, a: node.infoset.label != "Infoset 1:1")
+        game.behavior_support_profile(lambda node, a: node.parent is not None)
 
 
 def test_iter_yields_one_support_per_player():
@@ -172,8 +157,6 @@ def test_getitem_setitem_use_selector():
     game, root, _, _ = _branching_game()
     profile = game.behavior_support_profile()
     root_selector = games.selector_for_node(root)
-    # game.root's information set is a live, node-anchored view -- the Selector must
-    # resolve it the same way Node.infoset is used everywhere else.
     assert set(profile[root_selector]) == {"L", "R"}
     profile[root_selector] = ["R"]
     assert set(profile[root_selector]) == {"R"}

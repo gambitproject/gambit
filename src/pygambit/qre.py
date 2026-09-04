@@ -271,11 +271,11 @@ def _estimate_behavior_empirical(
         data[_selector_for_node(node)][a]
         for p in data.game.players
         for node in data.game.get_infosets(p)
-        for a in node.infoset.actions
+        for a in node.actions
     ]
     normalized = data.normalize()
     regrets = [
-        [-normalized.action_regrets[node][a] for a in node.infoset.actions]
+        [-normalized.action_regrets[node][a] for a in node.actions]
         for player in data.game.players
         for node in data.game.get_infosets(player)
     ]
@@ -289,7 +289,7 @@ def _estimate_behavior_empirical(
     for player in data.game.players:
         for node in data.game.get_infosets(player):
             profile[_selector_for_node(node)] = {
-                a: math.exp(next(log_probs)) for a in node.infoset.actions
+                a: math.exp(next(log_probs)) for a in node.actions
             }
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun

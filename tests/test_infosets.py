@@ -1,8 +1,3 @@
-import dataclasses
-import functools
-import itertools
-import typing
-
 import pytest
 
 import pygambit as gbt
@@ -10,59 +5,21 @@ import pygambit as gbt
 from . import games
 
 
-@pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_infoset_set_label(label):
-    game = games.read_from_file("basic_extensive_game.efg")
-    game.root.infoset.label = label
-    assert game.root.infoset.label == label
-
-
-@pytest.mark.parametrize("label", games.INVALID_LABELS)
-def test_infoset_label_invalid_raises_valueerror(label):
-    game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(ValueError):
-        game.root.infoset.label = label
-
-
-@pytest.mark.parametrize("label", games.UNICODE_LABELS)
-def test_infoset_label_unicode_accepted(label):
-    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    game.root.infoset.label = label
-    assert game.root.infoset.label == label
-
-
-def test_infoset_label_duplicate_within_player_raises_valueerror():
-    game = games.read_from_file("subgames.efg")
-    player = next(p for p in game.players if len(game.get_infosets(p)) >= 2)
-    first, second = (n.infoset for n in itertools.islice(game.get_infosets(player), 2))
-    first.label = "shared"
-    with pytest.raises(ValueError):
-        second.label = "shared"
-
-
 def test_infoset_player_retrieval():
     game = games.read_from_file("basic_extensive_game.efg")
     p1, *_ = game.players
-    assert p1 == game.root.infoset.player
+    assert p1 == game.root.player
 
 
-def test_infoset_node_precedes():
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert not game.root.infoset.precedes(game.root)
-    assert game.root.children["U1"].infoset.precedes(game.root.children["U1"])
-
-
-def test_make_infoset_change_player_keeps_label():
-    """Re-forming an information set under a different player retains an
-    explicitly specified label and its membership."""
+def test_make_infoset_change_player_keeps_membership():
+    """Re-forming an information set under a different player retains its
+    membership."""
     game = games.read_from_file("basic_extensive_game.efg")
     _, p2, *_ = game.players
-    members = list(game.root.infoset.members)
-    game.make_infoset(games.selector_for_nodes(members), p2, "moved")
-    assert game.root.infoset.player == p2
-    assert game.root.infoset.label == "moved"
-    assert list(game.root.infoset.members) == members
+    members = list(game.root.members)
+    game.make_infoset(games.selector_for_nodes(members), p2)
+    assert game.root.player == p2
+    assert list(game.root.members) == members
 
 
 def test_make_infoset_terminal_node_raises():
@@ -76,11 +33,10 @@ def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
-    personal = next(n for n in game.nodes if not n.is_terminal and n.infoset)
-    game.make_infoset(gbt.H.path(), personal.infoset.player)
-    assert not chance_node.event
-    assert chance_node.infoset
-    assert chance_node.infoset.player == personal.infoset.player
+    personal = next(n for n in game.nodes if not n.is_terminal and n.player != "Chance")
+    game.make_infoset(gbt.H.path(), personal.player)
+    assert chance_node.player != "Chance"
+    assert chance_node.player == personal.player
 
 
 @pytest.mark.parametrize("node_actions", [["c", "d"], ["b", "a"]])
@@ -151,8 +107,7 @@ def test_make_event_pools_nodes_from_different_infosets():
     game = games.read_from_file("stripped_down_poker.efg")
     nodes = [game.root.children["King"], game.root.children["Queen"]]
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert nodes[0].event == nodes[1].event
-    assert nodes[0].event
+    assert nodes[0] in nodes[1].members
     assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
     assert not game.get_infosets("Alice")
 
@@ -171,11 +126,9 @@ def test_make_event_requires_matching_action_labels():
 def test_make_event_converts_personal_node():
     """A personal decision node becomes a chance node carrying the probabilities given."""
     game = games.read_from_file("stripped_down_poker.efg")
-    node = next(
-        n for n in game.get_infosets("Alice") if n.infoset.label == "Alice has King"
-    )
+    node = game.root.children["King"]
     game.make_event(gbt.H.path("King"), {"Bet": "1/4", "Fold": "3/4"})
-    assert node.event
+    assert node.player == "Chance"
     assert list(node.action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
 
 
@@ -215,12 +168,8 @@ def test_make_event_label_reused_when_fully_absorbed():
     nodes = [game.root.children["King"], game.root.children["Queen"]]
     game.make_event(gbt.H.path(...), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert nodes[0].event == nodes[1].event
-    assert nodes[0].event.label == "Coin"
+    assert nodes[0] in nodes[1].members
     assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
-    assert [
-        n.event.label for n in game.get_events()
-    ].count("Coin") == 1
 
 
 @pytest.mark.parametrize(
@@ -241,107 +190,6 @@ def test_make_event_malformed_probs_raises():
         game.make_event(gbt.H.path(), {"Jack": 1})
 
 
-@dataclasses.dataclass
-class AbsentMindednessTestCase:
-    """TestCase for testing is_absent_minded."""
-    factory: typing.Callable[[], gbt.Game]
-    expected_am_paths: list[list[str]]
-
-
-ABSENT_MINDEDNESS_CASES = [
-    # Games without absent-mindedness
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(gbt.catalog.load, "journals/ijgt/selten1975/fig2"),
-            expected_am_paths=[]
-        ),
-        id="short_centipede_perfect_info"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
-            expected_am_paths=[]
-        ),
-        id="poker_stripped"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "basic_extensive_game.efg"),
-            expected_am_paths=[]
-        ),
-        id="basic_extensive"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "gilboa_two_am_agents.efg"),
-            expected_am_paths=[]
-        ),
-        id="gilboa_forgetting_info"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
-            expected_am_paths=[]
-        ),
-        id="wichardt_forgetting_action"
-    ),
-    # Games with absent-mindedness
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "noPR-AM-driver-two-players.efg"),
-            expected_am_paths=[[]]
-        ),
-        id="AM_driver_two_players"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "noPR-action-AM.efg"),
-            expected_am_paths=[[]]
-        ),
-        id="AM_forgetting_action"
-    ),
-    pytest.param(
-        AbsentMindednessTestCase(
-            factory=functools.partial(games.read_from_file, "noPR-action-AM-two-hops.efg"),
-            expected_am_paths=[["2", "1", "1", "1", "1"], ["1", "1", "1"]]
-        ),
-        id="AM_infoset_takes_two_hops"
-    ),
-]
-
-
-def _get_node_by_path(game, path: list[str]) -> gbt.Node:
-    """
-    Helper to find a node by following a sequence of action labels.
-    """
-    node = game.root
-    for action_label in reversed(path):
-        node = node.children[action_label]
-    return node
-
-
-@pytest.mark.parametrize("test_case", ABSENT_MINDEDNESS_CASES)
-def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
-    """
-    Test `infoset.is_absent_minded`.
-
-    Verifies that the set of infosets marked as absent-minded matches the
-    expected set derived from action paths.
-    """
-    game = test_case.factory()
-
-    expected_infosets = {
-        _get_node_by_path(game, path).infoset
-        for path in test_case.expected_am_paths
-        }
-    actual_infosets = {
-        n.infoset for p in game.players for n in game.get_infosets(p)
-        if n.infoset.is_absent_minded
-    }
-
-    assert actual_infosets == expected_infosets
-
-
 def _bagwell_p2_nodes(game: gbt.Game) -> tuple[gbt.Node, gbt.Node, gbt.Node, gbt.Node]:
     """Player 2's four decision nodes in Bagwell (1995).
 
@@ -356,40 +204,34 @@ def _bagwell_p2_nodes(game: gbt.Game) -> tuple[gbt.Node, gbt.Node, gbt.Node, gbt
 
 
 def test_make_infoset_cherry_pick_leaves_rumps():
-    """Partial consumption leaves the remainders behind, labels retained."""
+    """Partial consumption leaves the remainders behind."""
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_nodes(game)
-    A.infoset.label = "X"
-    C.infoset.label = "Y"
     game.make_infoset(games.selector_for_nodes([B, C]), "Player 2")
-    assert B.infoset == C.infoset
-    assert list(A.infoset.members) == [A]
-    assert list(D.infoset.members) == [D]
-    assert A.infoset.label == "X"
-    assert D.infoset.label == "Y"
+    assert B in C.members
+    assert list(A.members) == [A]
+    assert list(D.members) == [D]
 
 
 def test_make_infoset_label_held_by_rump_raises():
     """Reusing a label whose infoset is only partly consumed is rejected."""
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_nodes(game)
-    A.infoset.label = "X"
+    game.make_infoset(games.selector_for_nodes([A]), "Player 2", "X")
     with pytest.raises(ValueError):
-        game.make_infoset(games.selector_for_nodes([B, C]), "Player 2", "X")     # A remains in "X"
+        game.make_infoset(games.selector_for_nodes([B, C]), "Player 2", "X")  # A remains in "X"
 
 
 def test_make_infoset_failure_leaves_game_unchanged():
     """A rejected call must not modify the partition."""
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_nodes(game)
-    A.infoset.label = "X"
-    C.infoset.label = "Y"
+    game.make_infoset(games.selector_for_nodes([A, B]), "Player 2", "X")
+    game.make_infoset(games.selector_for_nodes([C, D]), "Player 2", "Y")
     with pytest.raises(ValueError):
         game.make_infoset(games.selector_for_nodes([B, C]), "Player 2", "X")
-    assert A.infoset == B.infoset
-    assert C.infoset == D.infoset
-    assert A.infoset.label == "X"
-    assert C.infoset.label == "Y"
+    assert A in B.members
+    assert C in D.members
 
 
 def test_make_infoset_idempotent():
@@ -398,18 +240,17 @@ def test_make_infoset_idempotent():
     A, B, C, D = _bagwell_p2_nodes(game)
     game.make_infoset(games.selector_for_nodes([B, C]), "Player 2", "Z")
     game.make_infoset(games.selector_for_nodes([B, C]), "Player 2", "Z")
-    assert B.infoset == C.infoset
-    assert B.infoset.label == "Z"
+    assert B in C.members
 
 
-def test_make_infoset_split_leaves_new_infoset_unlabeled():
-    """A node split out gets a fresh unlabeled infoset; the rump keeps the label."""
+def test_make_infoset_split_creates_new_infoset():
+    """A node split out of an infoset lands in a fresh infoset of its own; the rump
+    keeps the rest of the original membership."""
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_nodes(game)
-    A.infoset.label = "X"
     game.make_infoset(gbt.H.path("S", "s"), "Player 2")
-    assert A.infoset.label == ""
-    assert B.infoset.label == "X"
+    assert list(A.members) == [A]
+    assert B not in A.members
 
 
 def test_make_infoset_across_different_source_players():
@@ -420,34 +261,23 @@ def test_make_infoset_across_different_source_players():
     game.append_move(gbt.H.path("b"), "3", ["a", "b"])   # player 3
     n2 = game.root.children["a"]
     n3 = game.root.children["b"]
-    assert n2.infoset.player == "2"
-    assert n3.infoset.player == "3"
+    assert n2.player == "2"
+    assert n3.player == "3"
     game.make_infoset(gbt.H.path(...), "1")
-    assert n2.infoset == n3.infoset
-    assert n2.infoset.player == "1"
-    assert n3.infoset.player == "1"
+    assert n2 in n3.members
+    assert n2.player == "1"
+    assert n3.player == "1"
 
 
-def test_infoset_proxy_reresolves_after_split():
-    """A node-anchored infoset proxy is lazy: it re-resolves after the node is
-    placed in a new information set."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
-    proxy = node.infoset
-    assert len(proxy.members) == 2
-    game.make_infoset(gbt.H.path("U1"), node.player)
-    assert list(proxy.members) == [node]
-
-
-def test_infoset_members_is_a_plain_snapshot_list():
+def test_node_members_is_a_plain_snapshot_list():
     """`members` returns a plain `list`, not a lazily-resolved view: it supports
     integer indexing, and a list obtained before a mutation keeps reflecting the
     information set as it was at the time, rather than tracking its owner."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"]
-    members = node.infoset.members
+    members = node.members
     assert isinstance(members, list)
     assert node in (members[0], members[1])
     game.make_infoset(gbt.H.path("U1"), node.player)
     assert len(members) == 2
-    assert list(node.infoset.members) == [node]
+    assert list(node.members) == [node]

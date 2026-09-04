@@ -146,8 +146,8 @@ class GamePlayers:
         Iterates over player labels (``str``) rather than ``Player`` objects;
         indexing by label is no longer supported (a label is already in hand once
         iterated) -- use ``in`` to test membership.  The chance player is no longer
-        exposed here (it never was included in iteration); the ``Infoset``/``Event``
-        split on ``Node`` already distinguishes personal from chance nodes.
+        exposed here (it never was included in iteration); ``Node.player`` already
+        distinguishes personal from chance nodes.
     """
     game = cython.declare(c_Game)
 

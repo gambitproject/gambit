@@ -244,7 +244,7 @@ def render_support_csv(
         fields = [
             "".join(
                 "1" if action in action_support else "0"
-                for action in node.infoset.actions
+                for action in node.actions
             )
             for player in support.game.players
             for node, action_support in zip(
@@ -305,33 +305,33 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append(f"Behavior profile for player {number}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        for node, (_, mixed_action) in zip(
-            profile.game.get_infosets(player), profile[player], strict=True
+        # Numbered by position among the player's information sets: Infoset no
+        # longer exists as an object, so there is currently no infoset-level label
+        # to prefer over this, unlike _name_or_number's use for players/nodes/actions.
+        for infoset_number, (node, (_, mixed_action)) in enumerate(
+            zip(profile.game.get_infosets(player), profile[player], strict=True), start=1
         ):
-            infoset = node.infoset
-            infoset_name = _name_or_number(infoset)
             values = action_values[node]
-            for action in infoset.actions:
+            for action in node.actions:
                 prob = mixed_action[action]
                 value = values[action]
                 value_text = format_value(value, decimals) if value is not None else ""
                 lines.append(
-                    f"{infoset_name:>7}    {action:>7}   "
+                    f"{infoset_number:>7}    {action:>7}   "
                     f"{format_value(prob, decimals):>11}   {value_text:>11}"
                 )
         lines.append("")
         lines.append("Infoset    Node       Belief        Prob")
         lines.append("-------    -------    -----------   -----------")
-        for node in profile.game.get_infosets(player):
-            infoset = node.infoset
-            infoset_name = _name_or_number(infoset)
-            for member in infoset.members:
+        for infoset_number, node in enumerate(profile.game.get_infosets(player), start=1):
+            for member in node.members:
                 node_name = _name_or_number(member)
                 belief = beliefs[member]
                 belief_text = format_value(belief, decimals) if belief is not None else ""
                 realiz_text = format_value(realiz_probs[member], decimals)
                 lines.append(
-                    f"{infoset_name:>7}    {node_name:>7}   {belief_text:>11}   {realiz_text:>11}"
+                    f"{infoset_number:>7}    {node_name:>7}   "
+                    f"{belief_text:>11}   {realiz_text:>11}"
                 )
         lines.append("")
     return "\n".join(lines)
@@ -388,7 +388,7 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(node.infoset.actions)
+        len(node.actions)
         for player in game.players
         for node in game.get_infosets(player)
     )
@@ -405,7 +405,7 @@ def read_behavior_profiles_csv(
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for node in game.get_infosets(player):
-                profile[_selector_for_node(node)] = {a: next(values) for a in node.infoset.actions}
+                profile[_selector_for_node(node)] = {a: next(values) for a in node.actions}
         profiles.append(profile)
     return profiles
 

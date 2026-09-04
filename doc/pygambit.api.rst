@@ -16,8 +16,6 @@ Representation of games
    Game
    Outcome
    Node
-   Infoset
-   Event
    Branch
    Subgame
 
@@ -141,8 +139,6 @@ Information about the game
    Node.prior_action
    Node.prior_sibling
    Node.next_sibling
-   Node.infoset
-   Node.event
    Node.members
    Node.actions
    Node.action_probs
@@ -158,30 +154,6 @@ Information about the game
    Subgame.root
    Subgame.parent
    Subgame.children
-
-.. autosummary::
-
-   :toctree: api/
-
-   Infoset.label
-   Infoset.game
-   Infoset.is_absent_minded
-   Infoset.player
-   Infoset.actions
-   Infoset.members
-   Infoset.precedes
-
-.. autosummary::
-
-   :toctree: api/
-
-   Event.label
-   Event.game
-   Event.is_absent_minded
-   Event.player
-   Event.actions
-   Event.members
-   Event.precedes
 
 .. autosummary::
 

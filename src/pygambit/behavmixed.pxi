@@ -37,11 +37,10 @@ class InfosetIndexedVector(_LabeledVector):
 
     def __getitem__(self, node: Node) -> typing.Any:
         resolved_node = cython.cast(Node, node)
-        infoset = resolved_node.infoset or resolved_node.event
-        if not infoset:
+        if resolved_node._infoset_handle() == cython.cast(c_GameInfoset, NULL):
             raise ValueError("node is terminal, has no information set")
         try:
-            return self._values[_canonical_history(infoset)]
+            return self._values[_canonical_history(resolved_node)]
         except KeyError:
             raise KeyError(f"no {self._label_kind} for this node") from None
 
@@ -428,7 +427,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         if isinstance(index, str):
             values = {
-                _canonical_history(node.infoset): self._mixed_action_at(node.infoset)
+                _canonical_history(node): self._mixed_action_at(node)
                 for node in self.game.get_infosets(index)
             }
             return MixedBehavior.wrap(self.game, index, values)
@@ -441,21 +440,19 @@ class MixedBehaviorProfile:
             f"profile index must be str or Selector, not {index.__class__.__name__}"
         )
 
-    def _all_infosets(self) -> typing.Iterator[Infoset]:
-        """Iterates over every information set and event in the game."""
+    def _all_infosets(self) -> typing.Iterator[Node]:
+        """Iterates over a representative node of every information set and event in
+        the game."""
         for player in self.game.players:
-            for node in self.game.get_infosets(player):
-                yield node.infoset
-        for node in self.game.get_events():
-            yield node.event
+            yield from self.game.get_infosets(player)
+        yield from self.game.get_events()
 
-    def _personal_infosets(self) -> typing.Iterator[Infoset]:
-        """Iterates over every information set in the game belonging to a personal
-        player, excluding the chance player's.
+    def _personal_infosets(self) -> typing.Iterator[Node]:
+        """Iterates over a representative node of every information set in the game
+        belonging to a personal player, excluding the chance player's.
         """
         for player in self.game.players:
-            for node in self.game.get_infosets(player):
-                yield node.infoset
+            yield from self.game.get_infosets(player)
 
     # The public API above is implemented once here and dispatches to the hooks below,
     # each of which is implemented by a concrete dtype-specific subclass
@@ -502,13 +499,13 @@ class MixedBehaviorProfile:
         """Returns the probability that play reaches node."""
         raise NotImplementedError
 
-    def _infoset_prob(self, infoset: _InfosetOrEvent) -> ProfileDType:
-        """Returns the probability that play reaches infoset."""
+    def _infoset_prob(self, node: Node) -> ProfileDType:
+        """Returns the probability that play reaches node's information set or event."""
         raise NotImplementedError
 
-    def _infoset_value(self, infoset: Infoset) -> ProfileDType | None:
-        """Returns the expected payoff to the player owning infoset, conditional on
-        reaching it; None if it is unreached.
+    def _infoset_value(self, node: Node) -> ProfileDType | None:
+        """Returns the expected payoff to the player owning node's information set,
+        conditional on reaching it; None if it is unreached.
         """
         raise NotImplementedError
 
@@ -528,8 +525,9 @@ class MixedBehaviorProfile:
         """Returns the regret to playing action."""
         raise NotImplementedError
 
-    def _infoset_regret(self, infoset: Infoset) -> ProfileDType:
-        """Returns the regret of the player owning infoset for their behavior at it."""
+    def _infoset_regret(self, node: Node) -> ProfileDType:
+        """Returns the regret of the player owning node's information set for their
+        behavior at it."""
         raise NotImplementedError
 
     def _agent_max_regret(self) -> ProfileDType:
@@ -566,18 +564,18 @@ class MixedBehaviorProfile:
         """
         raise NotImplementedError
 
-    def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
-        """Returns a snapshot of the mixed action at infoset, as of now."""
+    def _mixed_action_at(self, node: Node) -> MixedAction:
+        """Returns a snapshot of the mixed action at node's information set, as of
+        now."""
         values: dict = {}
-        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
+        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions():
             values[a.deref().GetLabel().decode("utf-8")] = self._getprob_action(a)
-        history = _history_of(Node.wrap(cython.cast(Infoset, infoset).node))
-        return MixedAction.wrap(history, values)
+        return MixedAction.wrap(_history_of(node), values)
 
     def _setprob_infoset(
-        self, infoset: Infoset, distribution: collections.abc.Mapping, sparse: bool
+        self, node: Node, distribution: collections.abc.Mapping, sparse: bool
     ) -> None:
-        """Validates and sets the whole mixed action for infoset.
+        """Validates and sets the whole mixed action for node's information set.
 
         Every key of `distribution` must be one of the information set's action
         labels. If `sparse` is True, actions `distribution` omits are treated as
@@ -589,7 +587,7 @@ class MixedBehaviorProfile:
                 f"a mixed action must be set from a Mapping from action label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = set(infoset.actions)
+        labels = set(node.actions)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -608,7 +606,7 @@ class MixedBehaviorProfile:
             raise ValueError("a mixed action's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed action's weights must not all be zero")
-        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions():
+        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions():
             self._setprob_action(a, values[a.deref().GetLabel().decode("utf-8")])
 
     def __setitem__(self, index: Selector, distribution: collections.abc.Mapping) -> None:
@@ -740,8 +738,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetValueVector({
-            _canonical_history(infoset): self._infoset_value(infoset)
-            for infoset in self._personal_infosets()
+            _canonical_history(node): self._infoset_value(node)
+            for node in self._personal_infosets()
         })
 
     @property
@@ -759,11 +757,11 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionValuesVector({
-            _canonical_history(infoset): ActionValueVector({
+            _canonical_history(node): ActionValueVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_value(a)
-                for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
+                for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
             })
-            for infoset in self._personal_infosets()
+            for node in self._personal_infosets()
         })
 
     @property
@@ -793,8 +791,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetProbVector({
-            _canonical_history(infoset): self._infoset_prob(infoset)
-            for infoset in self._all_infosets()
+            _canonical_history(node): self._infoset_prob(node)
+            for node in self._all_infosets()
         })
 
     @property
@@ -842,11 +840,11 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionRegretsVector({
-            _canonical_history(infoset): ActionRegretVector({
+            _canonical_history(node): ActionRegretVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_regret(a)
-                for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
+                for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
             })
-            for infoset in self._personal_infosets()
+            for node in self._personal_infosets()
         })
 
     @property
@@ -869,8 +867,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetRegretVector({
-            _canonical_history(infoset): self._infoset_regret(infoset)
-            for infoset in self._personal_infosets()
+            _canonical_history(node): self._infoset_regret(node)
+            for node in self._personal_infosets()
         })
 
     def agent_max_regret(self) -> ProfileDType:
@@ -1051,11 +1049,13 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> float:
         return deref(self.profile).GetRealizProb(node.node)
 
-    def _infoset_prob(self, infoset: _InfosetOrEvent) -> float:
-        return deref(self.profile).GetInfosetProb(infoset._resolve())
+    def _infoset_prob(self, node: Node) -> float:
+        return deref(self.profile).GetInfosetProb(cython.cast(Node, node)._infoset_handle())
 
-    def _infoset_value(self, infoset: Infoset) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(infoset._resolve())
+    def _infoset_value(self, node: Node) -> float | None:
+        cdef optional[double] value = deref(self.profile).GetPayoff(
+            cython.cast(Node, node)._infoset_handle()
+        )
         if value.has_value():
             return value.value()
         return None
@@ -1076,8 +1076,8 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _action_regret(self, action: c_GameAction) -> object:
         return deref(self.profile).GetRegret(action)
 
-    def _infoset_regret(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetRegret(infoset._resolve())
+    def _infoset_regret(self, node: Node) -> float:
+        return deref(self.profile).GetRegret(cython.cast(Node, node)._infoset_handle())
 
     def _agent_max_regret(self) -> float:
         return deref(self.profile).GetAgentMaxRegret()
@@ -1181,11 +1181,15 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetRealizProb(node.node))
 
-    def _infoset_prob(self, infoset: _InfosetOrEvent) -> Rational:
-        return rat_to_py(deref(self.profile).GetInfosetProb(infoset._resolve()))
+    def _infoset_prob(self, node: Node) -> Rational:
+        return rat_to_py(
+            deref(self.profile).GetInfosetProb(cython.cast(Node, node)._infoset_handle())
+        )
 
-    def _infoset_value(self, infoset: Infoset) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(infoset._resolve())
+    def _infoset_value(self, node: Node) -> Rational | None:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(
+            cython.cast(Node, node)._infoset_handle()
+        )
         if value.has_value():
             return rat_to_py(value.value())
         return None
@@ -1206,8 +1210,8 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _action_regret(self, action: c_GameAction) -> object:
         return rat_to_py(deref(self.profile).GetRegret(action))
 
-    def _infoset_regret(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(infoset._resolve()))
+    def _infoset_regret(self, node: Node) -> Rational:
+        return rat_to_py(deref(self.profile).GetRegret(cython.cast(Node, node)._infoset_handle()))
 
     def _agent_max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentMaxRegret())
@@ -1235,12 +1239,11 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
             for node in self.game.get_infosets(player):
-                infoset = node.infoset
                 profile._setprob_infoset(
-                    infoset,
+                    node,
                     {
                         a.deref().GetLabel().decode("utf-8"): float(self._getprob_action(a))
-                        for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
+                        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
                     },
                     sparse=True,
                 )

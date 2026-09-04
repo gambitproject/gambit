@@ -128,12 +128,12 @@ class BehaviorSupport:
             raise TypeError(
                 f"BehaviorSupport index must be Selector, not {selector.__class__.__name__}"
             )
-        infoset = self._game._resolve_infoset(selector, "BehaviorSupport.__getitem__")
-        if infoset.player != self._player:
+        resolved_node = self._game._resolve_infoset(selector, "BehaviorSupport.__getitem__")
+        if resolved_node.player != self._player:
             raise MismatchError(
                 "selector must resolve to an information set belonging to this player"
             )
-        return self._values[_canonical_history(infoset)]
+        return self._values[_canonical_history(resolved_node)]
 
 
 @cython.cclass
@@ -210,28 +210,28 @@ class BehaviorSupportProfile:
         """
         if isinstance(index, str):
             values = {
-                _canonical_history(node.infoset): self._action_support_at(node.infoset)
+                _canonical_history(node): self._action_support_at(node)
                 for node in self.game.get_infosets(index)
             }
             return BehaviorSupport.wrap(self.game, index, values)
         if isinstance(index, Selector):
-            resolved_infoset = self.game._resolve_infoset(
+            resolved_node = self.game._resolve_infoset(
                 index, "BehaviorSupportProfile.__getitem__"
             )
-            return self._action_support_at(resolved_infoset)
+            return self._action_support_at(resolved_node)
         raise TypeError(
             f"profile index must be str or Selector, not {index.__class__.__name__}"
         )
 
-    def _action_support_at(self, infoset: Infoset) -> ActionSupport:
-        """Returns a snapshot of the action support at infoset, as of now."""
-        infoset_handle = cython.cast(Infoset, infoset)._resolve()
+    def _action_support_at(self, node: Node) -> ActionSupport:
+        """Returns a snapshot of the action support at node's information set, as of
+        now."""
+        infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
         actions = tuple(
             a.deref().GetLabel().decode("utf-8")
             for a in deref(self.profile).GetActions(infoset_handle)
         )
-        history = _history_of(Node.wrap(cython.cast(Infoset, infoset).node))
-        return ActionSupport.wrap(history, actions)
+        return ActionSupport.wrap(_history_of(node), actions)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -242,13 +242,13 @@ class BehaviorSupportProfile:
             self.profile = make_shared[c_BehaviorSupportProfile](deref(self.profile))
 
     @cython.cfunc
-    def _set_support(self, infoset: Infoset, actions: object) -> cython.void:
-        """Validates and sets the whole support at infoset.
+    def _set_support(self, node: Node, actions: object) -> cython.void:
+        """Validates and sets the whole support at node's information set.
 
         Every entry of `actions` must be one of the information set's action labels, and
         at least one must be given.
         """
-        labels = set(infoset.actions)
+        labels = set(node.actions)
         given = set(actions)
         unknown = given - labels
         if unknown:
@@ -261,7 +261,7 @@ class BehaviorSupportProfile:
         # Actions to keep are added first, so that a subsequent removal is never asked
         # to remove the last remaining action at the information set. (Unlike
         # RemoveStrategy, RemoveAction does not itself guard against emptying its scope.)
-        action_handles = cython.cast(Infoset, infoset)._resolve().deref().GetActions()
+        action_handles = cython.cast(Node, node)._infoset_handle().deref().GetActions()
         for a in action_handles:
             if a.deref().GetLabel().decode("utf-8") in given:
                 deref(self.profile).AddAction(a)
@@ -296,10 +296,10 @@ class BehaviorSupportProfile:
             raise TypeError(
                 f"profile index must be Selector, not {infoset.__class__.__name__}"
             )
-        resolved_infoset = self.game._resolve_infoset(
+        resolved_node = self.game._resolve_infoset(
             infoset, "BehaviorSupportProfile.__setitem__"
         )
-        self._set_support(resolved_infoset, actions)
+        self._set_support(resolved_node, actions)
 
     def copy(self) -> BehaviorSupportProfile:
         """Creates a copy of the support profile.
@@ -335,5 +335,5 @@ class BehaviorSupportProfile:
                 f"is_infoset_reachable(): infoset must be a Selector, "
                 f"not {infoset.__class__.__name__}"
             )
-        resolved_infoset: Infoset = self.game._resolve_infoset(infoset, "is_infoset_reachable")
-        return deref(self.profile).IsReachable(resolved_infoset._resolve())
+        resolved_node: Node = self.game._resolve_infoset(infoset, "is_infoset_reachable")
+        return deref(self.profile).IsReachable(resolved_node._infoset_handle())

@@ -245,41 +245,19 @@ class Node:
         """Gets the ``Game`` to which the node belongs."""
         return Game.wrap(self.node.deref().GetGame())
 
-    @property
-    def infoset(self) -> Infoset:
-        """The personal player's information set to which this node currently belongs.
-
-        Returns a lazy, node-anchored view resolved on each access, so the value reflects
-        the current state of the game even if the game is mutated after this property is read.
-        For a node that does not currently belong to a personal player's information set
-        (a terminal node, or a chance event -- see `event`), the view is falsy and equals
-        ``None``.
-
-        .. versionchanged:: 16.7.0
-        .. versionchanged:: 17.0.0
-            No longer resolves to the chance player's events; see `event`.
+    @cython.cfunc
+    def _infoset_handle(self) -> c_GameInfoset:
+        """The node's current information set or event, as a raw handle -- null if
+        the node is currently terminal. Not part of the public API; the information
+        set/event a node belongs to is otherwise only exposed piecemeal, via
+        `members`/`actions`/`action_probs` and the `Game`/`Selector`-based resolvers.
         """
-        return Infoset.wrap(self.node)
-
-    @property
-    def event(self) -> Event:
-        """The chance event to which this node currently belongs.
-
-        Returns a lazy, node-anchored view resolved on each access, so the value reflects
-        the current state of the game even if the game is mutated after this property is read.
-        For a node that is not currently a chance event (a terminal node, or a personal
-        player's information set -- see `infoset`), the view is falsy and equals ``None``.
-
-        .. versionadded:: 17.0.0
-        """
-        return Event.wrap(self.node)
+        return self.node.deref().GetInfoset()
 
     @property
     def members(self) -> list[Node]:
         """The nodes which are members of the information set or event to which
-        this node currently belongs -- whichever applies. Equivalent to
-        ``self.infoset.members`` or ``self.event.members``, whichever is not falsy;
-        unlike those, this is well-defined regardless of which currently applies.
+        this node currently belongs -- whichever applies.
 
         .. versionadded:: 17.0.0
 
@@ -289,10 +267,10 @@ class Node:
             If this node currently belongs to no information set or event (a terminal
             node).
         """
-        infoset: Infoset = self.infoset
-        if infoset:
-            return infoset.members
-        return self.event.members
+        resolved: c_GameInfoset = self._infoset_handle()
+        if resolved == cython.cast(c_GameInfoset, NULL):
+            raise AttributeError("node currently belongs to no information set or event")
+        return [Node.wrap(member) for member in resolved.deref().GetMembers()]
 
     @property
     def actions(self) -> list[str]:
@@ -307,10 +285,10 @@ class Node:
             If this node currently belongs to no information set or event (a
             terminal node).
         """
-        infoset: Infoset = self.infoset
-        if infoset:
-            return infoset.actions
-        return self.event.actions
+        resolved: c_GameInfoset = self._infoset_handle()
+        if resolved == cython.cast(c_GameInfoset, NULL):
+            raise AttributeError("node currently belongs to no information set or event")
+        return [a.deref().GetLabel().decode("utf-8") for a in resolved.deref().GetActions()]
 
     @property
     def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
@@ -324,12 +302,11 @@ class Node:
         UndefinedOperationError
             If the node does not currently belong to a chance event.
         """
-        event: Event = self.event
-        if not event:
+        resolved: c_GameInfoset = self._infoset_handle()
+        if resolved == cython.cast(c_GameInfoset, NULL) or not resolved.deref().IsChanceInfoset():
             raise UndefinedOperationError(
                 "action probabilities are only defined at events"
             )
-        resolved: c_GameInfoset = event._resolve()
         result: dict = {}
         for a in resolved.deref().GetActions():
             result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(

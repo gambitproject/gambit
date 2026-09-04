@@ -305,7 +305,7 @@ def test_player_sequence_count():
     game = gbt.catalog.load("books/myerson1991/fig2_1")
     for player in game.players:
         action_count = sum(
-            len(node.infoset.actions) for node in game.get_infosets(player)
+            len(node.actions) for node in game.get_infosets(player)
         )
         assert len(game.get_sequences(player)) == action_count + 1
 
@@ -318,7 +318,7 @@ def test_player_sequence_actions():
         set(
             (action, )
             for node in game.get_infosets(player)
-            for action in node.infoset.actions
+            for action in node.actions
         ) |
         {tuple()}
     )

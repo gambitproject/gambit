@@ -421,7 +421,7 @@ def games(
             if not game.is_tree:
                 return False
             n_game_actions = sum(
-                len(node.infoset.actions)
+                len(node.actions)
                 for player in game.players
                 for node in game.get_infosets(player)
             )
