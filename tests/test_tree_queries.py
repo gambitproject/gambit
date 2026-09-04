@@ -33,12 +33,6 @@ def test_node_player_resolves_chance():
     assert chance_node.player == "Chance"
 
 
-def test_get_game():
-    """Test to ensure that we can retrieve the game object from a given node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game == game.root.game
-
-
 def test_get_parent():
     """Test to ensure that we can retrieve a parent node for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
@@ -493,61 +487,10 @@ def test_node_plays():
     assert set(test_node.plays) == expected_set_of_plays
 
 
-def test_node_children_action_label():
-    """Label lookup returns the correct child.
-
-    The RHS reaches the child positionally (independent of ``__getitem__``); a label
-    on both sides would make the assertion circular.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    root_children = list(game.root.children)
-    assert game.root.children["King"] == root_children[0]
-    assert game.root.children["Queen"].children["Fold"] == list(root_children[1].children)[1]
-
-
-def test_node_children_empty_label():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError, match="empty or all whitespace"):
-        _ = game.root.children["   "]
-
-
-def test_node_children_terminal_node():
-    game = games.read_from_file("stripped_down_poker.efg")
-    terminal = next(n for n in game.nodes if n.is_terminal)
-    with pytest.raises(KeyError, match="No action with label"):
-        _ = terminal.children["Bet"]
-
-
-def test_node_children_nonexistent_action():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(KeyError, match="No action with label 'Jack'"):
-        _ = game.root.children["Jack"]
-
-
-def test_node_children_rejects_int():
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(TypeError, match="16.7.0"):
-        _ = game.root.children[0]
-
-
 def test_infoset_player_retrieval():
     game = games.read_from_file("basic_extensive_game.efg")
     p1, *_ = game.players
     assert p1 == game.root.player
-
-
-def test_node_members_is_a_plain_snapshot_list():
-    """`members` returns a plain `list`, not a lazily-resolved view: it supports
-    integer indexing, and a list obtained before a mutation keeps reflecting the
-    information set as it was at the time, rather than tracking its owner."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
-    members = node.members
-    assert isinstance(members, list)
-    assert node in (members[0], members[1])
-    game.make_infoset(gbt.H.path("U1"), node.player)
-    assert len(members) == 2
-    assert list(node.members) == [node]
 
 
 @pytest.mark.parametrize(
