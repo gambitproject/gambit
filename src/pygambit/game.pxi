@@ -2607,25 +2607,31 @@ class Game:
 
     def _resolve_outcome_location(self, location, funcname: str) -> tuple:
         """Resolve `location` for `make_outcome`/`make_outcome_null`: for a tree game,
-        into a list of `Node` (via `_resolve_nodes`, so `location` may be a `Node`,
-        `History`, `Selector`, or an iterable of these); for a strategic game, into a
-        list of pure-strategy contingencies (each a mapping from player label to
-        strategy label).
+        into a list of `Node` (via `_resolve_nodes`, so `location` must be a
+        `Selector` or `GroupedSelector`); for a strategic game, into a list of
+        pure-strategy contingencies (each a mapping from player label to strategy
+        label).
 
         Returns (is_tree, resolved).
 
         Raises
         ------
-        MismatchError
-            If any node is from a different game.
         TypeError
-            If `location` is not a contingency or an iterable of contingencies
+            If `location` is not a `Selector` or `GroupedSelector` (tree game
+            only); or is not a contingency or an iterable of contingencies
             (strategic game only).
         ValueError
             If `location` is empty or contains a repeat, or (strategic game only) if
             a contingency does not specify exactly one strategy for each player.
         """
         if self.is_tree:
+            if isinstance(location, GroupedSelector):
+                location = [n for group in self._group_nodes(location).values() for n in group]
+            elif not isinstance(location, Selector):
+                raise TypeError(
+                    f"{funcname}(): location must be a Selector or GroupedSelector, "
+                    f"not {location.__class__.__name__}"
+                )
             return True, self._resolve_nodes(location, funcname)
         if isinstance(location, collections.abc.Mapping):
             entries = [location]
@@ -2647,20 +2653,26 @@ class Game:
                      label: str) -> Outcome:
         """Create an outcome with `payoffs` and `label` and attach it at `location`.
 
-        For an extensive game, `location` is a ``Node``, a ``History``, a ``Selector``
-        (an `H`-built expression, evaluated against this game), or an iterable of
-        these.  For a strategic game, `location` is a pure-strategy contingency — a
-        complete mapping from the game's players' labels to strategy labels — or an
+        For an extensive game, `location` is a `Selector` (an `H`-built
+        expression, evaluated against this game and treated as a flat set of
+        nodes) or a `GroupedSelector` (an `H`-built `.by(...)` expression, whose
+        groups are pooled together, all receiving the same outcome).  For a
+        strategic game, `location` is a pure-strategy contingency — a complete
+        mapping from the game's players' labels to strategy labels — or an
         iterable of such contingencies.
 
         Any outcome all of whose references are among `location` is absorbed by the
         operation: it is removed from the game, and `label` may reuse its label.
 
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            For an extensive game, `location` is now a `Selector` or
+            `GroupedSelector`; a `Node`, `History`, or iterable of these is no
+            longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
-        location : Node, History, Selector, contingency, or iterable of these
+        location : Selector, GroupedSelector, contingency, or iterable of contingencies
             Where to attach the new outcome.  Nonempty; each node or contingency may
             be referenced only once.
         payoffs : Mapping
@@ -2677,8 +2689,9 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If any node is from a different game.
+        TypeError
+            If, for an extensive game, `location` is not a `Selector` or
+            `GroupedSelector`.
         ValueError
             If `location` is empty or contains a repeat; if `payoffs` is not a complete
             mapping over exactly the game's players; if a contingency does not specify
@@ -2732,26 +2745,32 @@ class Game:
     def make_outcome_null(self, location) -> None:
         """Reset the outcome at `location` to the null outcome.
 
-        For an extensive game, `location` is a ``Node``, a ``History``, a ``Selector``
-        (an `H`-built expression, evaluated against this game), or an iterable of
-        these.  For a strategic game, `location` is a pure-strategy contingency — a
-        complete mapping from the game's players' labels to strategy labels — or an
-        iterable of such contingencies.
+        For an extensive game, `location` is a `Selector` (an `H`-built
+        expression, evaluated against this game and treated as a flat set of
+        nodes) or a `GroupedSelector` (an `H`-built `.by(...)` expression, whose
+        groups are pooled together).  For a strategic game, `location` is a
+        pure-strategy contingency — a complete mapping from the game's players'
+        labels to strategy labels — or an iterable of such contingencies.
 
         Any outcome all of whose references are among `location` is removed from the game.
 
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            For an extensive game, `location` is now a `Selector` or
+            `GroupedSelector`; a `Node`, `History`, or iterable of these is no
+            longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
-        location : Node, History, Selector, contingency, or iterable of these
+        location : Selector, GroupedSelector, contingency, or iterable of contingencies
             The nodes or contingencies to reset to the null outcome.  Nonempty; each
             node or contingency may be referenced only once.
 
         Raises
         ------
-        MismatchError
-            If any node is from a different game.
+        TypeError
+            If, for an extensive game, `location` is not a `Selector` or
+            `GroupedSelector`.
         ValueError
             If `location` is empty or contains a repeat, or if a contingency does not
             specify exactly one strategy for each player.

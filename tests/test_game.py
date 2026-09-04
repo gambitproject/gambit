@@ -175,7 +175,7 @@ def test_game_get_payoffs_tree():
         s for s in game.get_strategies("Alice")
         if game.get_behavior("Alice", s).get(infoset) == "a"
     )
-    game.make_outcome(game.root.children["a"], {"Alice": 1}, "a-outcome")
+    game.make_outcome(gbt.H.path("a"), {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})
     assert payoffs["Alice"] == 1
 

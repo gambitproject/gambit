@@ -53,7 +53,7 @@ def test_make_outcome_null():
     """Resetting a node's outcome to null leaves the node's outcome view falsy."""
     game = games.read_from_file("basic_extensive_game.efg")
     node = game.root.children["U1"].children["U2"].children["U3"]
-    game.make_outcome_null(node)
+    game.make_outcome_null(gbt.H.path("U1", "U2", "U3"))
     assert not node.outcome
 
 
