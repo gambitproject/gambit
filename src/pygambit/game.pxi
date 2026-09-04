@@ -2380,23 +2380,30 @@ class Game:
         self.game.deref().MakeEvent(c_nodes, c_probs, (label or "").encode("utf-8"))
 
     def relabel_actions(self,
-                        infoset: NodeReference,
+                        infoset: Selector,
                         labels: typing.Mapping[str, str],
                         strict: bool = True) -> None:
-        """Simultaneously reassign the labels of actions at `infoset`.
+        """Simultaneously reassign the labels of actions at the information set or
+        event that the node identified by `infoset` belongs to.
 
         `labels` maps current action labels to their replacements.  The reassignment
         is simultaneous, so labels can be swapped directly, e.g. ``{"a": "b", "b": "a"}``.
         Actions are not re-ordered: each relabelled action keeps its position and, at an event,
         its probability.  After the operation, the labels must be nonempty and unique.
 
+        `infoset` is a `Selector` (an `H`-built expression, evaluated against this
+        game) that must resolve to exactly one node.
+
         .. versionadded:: 17.0.0
+        .. versionchanged:: 17.0.0
+            `infoset` is now a `Selector`; a `Node` or `str` is no longer accepted
+            directly -- build one with `H`.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set at which to relabel actions, or
-            such a node's label.
+        infoset : Selector
+            A `Selector` resolving to a single node belonging to the information
+            set or event at which to relabel actions.
         labels : Mapping[str, str]
             A mapping from current action labels to replacement labels.  Entries
             whose key equals their value are ignored.
@@ -2407,19 +2414,23 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
-        KeyError
-            If `infoset` is a string matching no node; or, when `strict`
-            is `True`, if a key of `labels` matches no action at `infoset`.
         TypeError
-            If `labels` is not a mapping, or any key or value is not a string.
+            If `infoset` is not a `Selector`; or if `labels` is not a mapping, or
+            any key or value is not a string.
+        KeyError
+            If, when `strict` is `True`, a key of `labels` matches no action at
+            `infoset`.
         ValueError
-            If a key of `labels` matches more than one action at `infoset` (possible
-            in games read from files predating unique-label enforcement); or if any
+            If `infoset` does not resolve to exactly one node; if a key of
+            `labels` matches more than one action at `infoset` (possible in games
+            read from files predating unique-label enforcement); or if any
             replacement label is empty, is not a valid label, or would result in a
             duplicate label at the information set.
         """
+        if not isinstance(infoset, Selector):
+            raise TypeError(
+                f"relabel_actions(): infoset must be a Selector, not {infoset.__class__.__name__}"
+            )
         resolved_infoset = cython.cast(
             _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "relabel_actions")
         )

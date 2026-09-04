@@ -9,7 +9,7 @@ from . import games
 def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
-    game.relabel_actions(game.root, {action: label})
+    game.relabel_actions(gbt.H.path(), {action: label})
     assert label in game.root.actions
 
 
@@ -18,28 +18,20 @@ def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {action: label})
+        game.relabel_actions(gbt.H.path(), {action: label})
 
 
 def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     action = next(iter(game.root.actions))
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {action: ""})
+        game.relabel_actions(gbt.H.path(), {action: ""})
 
 
 def test_relabel_actions_duplicate_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {"King": "Queen"})
-
-
-def test_relabel_actions_error_mismatch():
-    """Test to ensure `infoset` is from the same game."""
-    game1 = gbt.Game.new_tree()
-    game2 = games.create_stripped_down_poker_efg()
-    with pytest.raises(gbt.MismatchError):
-        game1.relabel_actions(game2.root, {"King": "Queen"})
+        game.relabel_actions(gbt.H.path(), {"King": "Queen"})
 
 
 def test_relabel_actions_simultaneous_swap():
@@ -47,7 +39,7 @@ def test_relabel_actions_simultaneous_swap():
     at a time would collide on the intermediate state.
     """
     game = games.create_stripped_down_poker_efg()
-    game.relabel_actions(game.root, {"King": "Queen", "Queen": "King"})
+    game.relabel_actions(gbt.H.path(), {"King": "Queen", "Queen": "King"})
     assert list(game.root.event.actions) == ["Queen", "King"]
 
 
@@ -57,18 +49,18 @@ def test_relabel_actions_duplicate_targets_raises_valueerror():
     """
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {"King": "Ace", "Queen": "Ace"})
+        game.relabel_actions(gbt.H.path(), {"King": "Ace", "Queen": "Ace"})
 
 
 def test_relabel_actions_unknown_label_raises_keyerror():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(KeyError):
-        game.relabel_actions(game.root, {"Jack": "Ace"})
+        game.relabel_actions(gbt.H.path(), {"Jack": "Ace"})
 
 
 def test_relabel_actions_unknown_label_not_strict_is_ignored():
     game = games.create_stripped_down_poker_efg()
-    game.relabel_actions(game.root, {"Jack": "Ace", "King": "Ace"}, strict=False)
+    game.relabel_actions(gbt.H.path(), {"Jack": "Ace", "King": "Ace"}, strict=False)
     assert list(game.root.event.actions) == ["Ace", "Queen"]
 
 
@@ -78,7 +70,7 @@ def test_relabel_actions_failure_leaves_game_unchanged():
     """
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
-        game.relabel_actions(game.root, {"King": "Ace", "Queen": ""})
+        game.relabel_actions(gbt.H.path(), {"King": "Ace", "Queen": ""})
     assert list(game.root.event.actions) == ["King", "Queen"]
 
 
@@ -90,24 +82,24 @@ def test_relabel_actions_scope_is_the_information_set():
     game = games.create_stripped_down_poker_efg()
     king = games.find_infoset(game, "Alice", "Alice has King")
     queen = games.find_infoset(game, "Alice", "Alice has Queen")
-    game.relabel_actions(next(iter(king.members)), {"Bet": "Raise"})
+    game.relabel_actions(games.selector_for_nodes([next(iter(king.members))]), {"Bet": "Raise"})
     assert list(king.actions) == ["Raise", "Fold"]
     assert list(queen.actions) == ["Bet", "Fold"]
-    game.relabel_actions(next(iter(queen.members)), {"Bet": "Raise"})
+    game.relabel_actions(games.selector_for_nodes([next(iter(queen.members))]), {"Bet": "Raise"})
     assert list(queen.actions) == ["Raise", "Fold"]
 
 
 def test_relabel_actions_not_a_mapping_raises_typeerror():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(TypeError):
-        game.relabel_actions(game.root, [("King", "Queen")])
+        game.relabel_actions(gbt.H.path(), [("King", "Queen")])
 
 
 @pytest.mark.parametrize("labels", [{1: "Queen"}, {"King": 1}])
 def test_relabel_actions_non_str_label_raises_typeerror(labels: dict):
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(TypeError):
-        game.relabel_actions(game.root, labels)
+        game.relabel_actions(gbt.H.path(), labels)
 
 
 def test_set_move_actions_drop_shrinks_actions_and_children():
