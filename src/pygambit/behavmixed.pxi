@@ -29,9 +29,9 @@ class InfosetIndexedVector(_LabeledVector):
     information set.
 
     Since information sets don't reliably have unique persistent labels, this is indexed
-    by any ``Node`` belonging to the information set (resolved to the information set
-    itself before lookup) rather than by a label: any member node is an equally valid
-    key, unlike ``NodeIndexedVector``.
+    by any ``Node`` belonging to the information set (resolved to the History of the
+    information set's canonical member before lookup) rather than by a label: any
+    member node is an equally valid key, unlike ``NodeIndexedVector``.
     """
     _label_kind = "information set"
 
@@ -41,7 +41,7 @@ class InfosetIndexedVector(_LabeledVector):
         if not infoset:
             raise ValueError("node is terminal, has no information set")
         try:
-            return self._values[infoset]
+            return self._values[_canonical_history(infoset)]
         except KeyError:
             raise KeyError(f"no {self._label_kind} for this node") from None
 
@@ -281,7 +281,7 @@ class MixedBehavior:
     def __len__(self) -> int:
         return len(self._values)
 
-    def __iter__(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[tuple, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
 
         A ``MixedBehavior`` is a collection of ``MixedAction``\\ s, one per information
@@ -293,10 +293,15 @@ class MixedBehavior:
             Previously iterated over individual actions and their probabilities; use
             ``MixedAction``'s own iteration for that at a specific information set.
 
+        .. versionchanged:: 17.0.0
+
+            Yields the History of the information set's canonical member (its first,
+            in pre-order depth-first order) instead of an ``Infoset``.
+
         Yields
         ------
-        infoset : Infoset
-            An information set belonging to the player
+        history : tuple
+            The History identifying an information set belonging to the player
         action : MixedAction
             The player's mixed action specified at the information set
         """
@@ -330,7 +335,7 @@ class MixedBehavior:
             raise MismatchError(
                 "selector must resolve to an information set belonging to this player"
             )
-        return self._values[infoset]
+        return self._values[_canonical_history(infoset)]
 
 
 @cython.cclass
@@ -423,7 +428,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         if isinstance(index, str):
             values = {
-                node.infoset: self._mixed_action_at(node.infoset)
+                _canonical_history(node.infoset): self._mixed_action_at(node.infoset)
                 for node in self.game.get_infosets(index)
             }
             return MixedBehavior.wrap(self.game, index, values)
@@ -735,7 +740,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetValueVector({
-            infoset: self._infoset_value(infoset) for infoset in self._personal_infosets()
+            _canonical_history(infoset): self._infoset_value(infoset)
+            for infoset in self._personal_infosets()
         })
 
     @property
@@ -753,7 +759,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionValuesVector({
-            infoset: ActionValueVector({
+            _canonical_history(infoset): ActionValueVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_value(a)
                 for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
             })
@@ -787,7 +793,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetProbVector({
-            infoset: self._infoset_prob(infoset) for infoset in self._all_infosets()
+            _canonical_history(infoset): self._infoset_prob(infoset)
+            for infoset in self._all_infosets()
         })
 
     @property
@@ -835,7 +842,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return ActionRegretsVector({
-            infoset: ActionRegretVector({
+            _canonical_history(infoset): ActionRegretVector({
                 a.deref().GetLabel().decode("utf-8"): self._action_regret(a)
                 for a in cython.cast(Infoset, infoset)._resolve().deref().GetActions()
             })
@@ -862,7 +869,8 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return InfosetRegretVector({
-            infoset: self._infoset_regret(infoset) for infoset in self._personal_infosets()
+            _canonical_history(infoset): self._infoset_regret(infoset)
+            for infoset in self._personal_infosets()
         })
 
     def agent_max_regret(self) -> ProfileDType:

@@ -133,7 +133,7 @@ class BehaviorSupport:
             raise MismatchError(
                 "selector must resolve to an information set belonging to this player"
             )
-        return self._values[infoset]
+        return self._values[_canonical_history(infoset)]
 
 
 @cython.cclass
@@ -210,7 +210,7 @@ class BehaviorSupportProfile:
         """
         if isinstance(index, str):
             values = {
-                node.infoset: self._action_support_at(node.infoset)
+                _canonical_history(node.infoset): self._action_support_at(node.infoset)
                 for node in self.game.get_infosets(index)
             }
             return BehaviorSupport.wrap(self.game, index, values)

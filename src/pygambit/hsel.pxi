@@ -208,6 +208,17 @@ def _history_of(node: Node) -> tuple:
     return tuple(labels)
 
 
+def _canonical_history(infoset: _InfosetOrEvent) -> tuple:
+    """The History of `infoset`'s canonical member: the first one encountered in the
+    pre-order depth-first traversal of the game tree (``GetMember(1)``), matching the
+    order ``Infoset.members``/``Event.members`` themselves use. Used as the stable key
+    identifying an information set or event, in place of the `Infoset`/`Event` object
+    itself.
+    """
+    resolved: c_GameInfoset = infoset._resolve()
+    return _history_of(Node.wrap(resolved.deref().GetMember(1)))
+
+
 class HistoryView:
     """The object a `.by(callable)` key function actually receives.  Supports
     plain sequence indexing/slicing like a `History` tuple, plus limited

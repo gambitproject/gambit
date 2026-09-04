@@ -305,9 +305,12 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append(f"Behavior profile for player {number}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, mixed_action in profile[player]:
+        for node, (_, mixed_action) in zip(
+            profile.game.get_infosets(player), profile[player], strict=True
+        ):
+            infoset = node.infoset
             infoset_name = _name_or_number(infoset)
-            values = action_values[next(iter(infoset.members))]
+            values = action_values[node]
             for action in infoset.actions:
                 prob = mixed_action[action]
                 value = values[action]
@@ -319,13 +322,14 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append("")
         lines.append("Infoset    Node       Belief        Prob")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, _mixed_action in profile[player]:
+        for node in profile.game.get_infosets(player):
+            infoset = node.infoset
             infoset_name = _name_or_number(infoset)
-            for node in infoset.members:
-                node_name = _name_or_number(node)
-                belief = beliefs[node]
+            for member in infoset.members:
+                node_name = _name_or_number(member)
+                belief = beliefs[member]
                 belief_text = format_value(belief, decimals) if belief is not None else ""
-                realiz_text = format_value(realiz_probs[node], decimals)
+                realiz_text = format_value(realiz_probs[member], decimals)
                 lines.append(
                     f"{infoset_name:>7}    {node_name:>7}   {belief_text:>11}   {realiz_text:>11}"
                 )
