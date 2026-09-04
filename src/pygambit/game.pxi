@@ -590,6 +590,34 @@ class Game:
         """
         return [_history_of(node) for node in self._get_nodes(selector)]
 
+    def get_histories(self, selector: Selector) -> list[tuple]:
+        """Returns the Histories of the nodes that `selector` resolves to.
+
+        Parameters
+        ----------
+        selector : Selector
+            An `H`-built expression, evaluated against this game.
+
+        Returns
+        -------
+        list of tuple
+            The Histories -- plain tuples of action labels from the root --
+            of the matching nodes, in the order `selector` produces them.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `selector` is not a `Selector`.
+        """
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"get_histories(): selector must be a Selector, not "
+                f"{selector.__class__.__name__}"
+            )
+        return self._get_histories(selector)
+
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
