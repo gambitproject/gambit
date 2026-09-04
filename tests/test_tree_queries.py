@@ -34,6 +34,60 @@ def test_get_actions_requires_single_match():
         game.get_actions(gbt.H.path(...).filter(lambda h: False))
 
 
+def test_get_action_probs():
+    """A chance node's action probabilities, keyed by label; empty for a
+    personal node or a terminal node -- a node currently belongs to a chance
+    event exactly when this is nonempty."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.get_action_probs(gbt.H.path()) == {
+        "King": gbt.Rational(1, 2), "Queen": gbt.Rational(1, 2)
+    }
+    assert game.get_action_probs(gbt.H.path("King")) == {}
+    assert game.get_action_probs(gbt.H.path("King", "Fold")) == {}
+
+
+def test_get_action_probs_requires_selector():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(TypeError):
+        game.get_action_probs(())
+    with pytest.raises(TypeError):
+        game.get_action_probs("King")
+
+
+def test_get_action_probs_requires_single_match():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.get_action_probs(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_action_probs(gbt.H.path(...).filter(lambda h: False))
+
+
+def test_get_members():
+    """The Histories of the nodes sharing a node's current information set or
+    event, including a shared infoset across the members of different chance
+    outcomes; empty for a terminal node."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.get_members(gbt.H.path()) == [()]
+    assert game.get_members(gbt.H.path("King", "Bet")) == [("King", "Bet"), ("Queen", "Bet")]
+    assert game.get_members(gbt.H.path("King", "Fold")) == []
+
+
+def test_get_members_requires_selector():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(TypeError):
+        game.get_members(())
+    with pytest.raises(TypeError):
+        game.get_members("King")
+
+
+def test_get_members_requires_single_match():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.get_members(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_members(gbt.H.path(...).filter(lambda h: False))
+
+
 def test_get_player():
     """A personal node's player; a terminal node has none."""
     game = games.read_from_file("basic_extensive_game.efg")

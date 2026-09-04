@@ -682,6 +682,88 @@ class Game:
             a.deref().GetLabel().decode("utf-8") for a in infoset_handle.deref().GetActions()
         ]
 
+    def get_action_probs(self, history: Selector) -> dict[str, decimal.Decimal | Rational]:
+        """Returns the probability of each action at the node that `history`
+        resolves to, keyed by label, if it currently belongs to a chance event.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        dict of str to Decimal or Rational
+            The probability of each action, keyed by label, or an empty dict
+            if the node does not currently belong to a chance event --
+            including a terminal node, or a personal player's node.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_action_probs(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_action_probs")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if (
+            infoset_handle == cython.cast(c_GameInfoset, NULL)
+            or not infoset_handle.deref().IsChanceInfoset()
+        ):
+            return {}
+        result: dict = {}
+        for a in infoset_handle.deref().GetActions():
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+                cython.cast(string, infoset_handle.deref().GetActionProb(a))
+            )
+        return result
+
+    def get_members(self, history: Selector) -> list[tuple]:
+        """Returns the Histories of the nodes which are members of the
+        information set or event that the node identified by `history`
+        currently belongs to.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        list of tuple
+            The Histories of the member nodes, or an empty list if the node
+            is currently terminal (belongs to no information set or event).
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_members(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_members")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if infoset_handle == cython.cast(c_GameInfoset, NULL):
+            return []
+        return [_history_of(Node.wrap(member)) for member in infoset_handle.deref().GetMembers()]
+
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
