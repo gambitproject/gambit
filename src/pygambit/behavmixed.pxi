@@ -491,10 +491,6 @@ class MixedBehaviorProfile:
         """
         raise NotImplementedError
 
-    def _is_defined_at(self, infoset: Infoset) -> bool:
-        """Returns whether the profile specifies a probability distribution at infoset."""
-        raise NotImplementedError
-
     def _payoff(self, player: str) -> ProfileDType:
         """Returns the expected payoff to player."""
         raise NotImplementedError
@@ -709,26 +705,6 @@ class MixedBehaviorProfile:
             raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
         infoset = self._resolve_infoset_for_node(index)
         self._setprob_infoset(infoset, distribution, sparse=sparse)
-
-    def is_defined_at(self, infoset: NodeReference) -> bool:
-        """Returns whether the profile has probabilities defined at the information set.
-        A profile can be well-defined if probabilities are not specified at some information sets,
-        as long as those information sets are reached with zero probability.
-
-        Parameters
-        ----------
-        infoset : Node or str
-            A node belonging to the information set to check, or such a node's label.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is a ``Node`` from a different game.
-        KeyError
-            If `infoset` is a string and no node in the game has that label.
-        """
-        self._check_validity()
-        return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
 
     @property
     def payoffs(self) -> PayoffVector:
@@ -1036,9 +1012,6 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()
 
-    def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset._resolve())
-
     @cython.cfunc
     def _getprob_action(self, index: c_GameAction) -> object:
         return deref(self.profile).getaction(index)
@@ -1167,9 +1140,6 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()
-
-    def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset._resolve())
 
     @cython.cfunc
     def _getprob_action(self, index: c_GameAction) -> object:

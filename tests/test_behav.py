@@ -40,46 +40,6 @@ def test_payoffs_reference(game: gbt.Game, rational_flag: bool, payoffs: tuple):
 
 
 @pytest.mark.parametrize(
-    "game,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), False),
-        (games.read_from_file("mixed_behavior_game.efg"), True),
-        (games.create_stripped_down_poker_efg(), False),
-        (games.create_stripped_down_poker_efg(), True),
-    ],
-)
-def test_is_defined_at(game: gbt.Game, rational_flag: bool):
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    for infoset in games.all_infosets(game):
-        assert profile.is_defined_at(next(iter(infoset.members)))
-
-
-@pytest.mark.parametrize(
-    "game,label,rational_flag",
-    [
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", False),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 2:1", False),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 3:1", False),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 1:1", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 2:1", True),
-        (games.read_from_file("mixed_behavior_game.efg"), "Infoset 3:1", True),
-        (games.create_stripped_down_poker_efg(), "Alice has King", False),
-        (games.create_stripped_down_poker_efg(), "Alice has Queen", False),
-        (games.create_stripped_down_poker_efg(), "Bob's response", False),
-        (games.create_stripped_down_poker_efg(), "Alice has King", True),
-        (games.create_stripped_down_poker_efg(), "Alice has Queen", True),
-        (games.create_stripped_down_poker_efg(), "Bob's response", True),
-    ],
-)
-def test_is_defined_at_by_label(game: gbt.Game, label: str, rational_flag: bool):
-    """is_defined_at resolves a string as a node's own label, not an infoset's label."""
-    node = next(iter(games.find_infoset_in_game(game, label).members))
-    node.label = "target"
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile.is_defined_at(node.label)
-
-
-@pytest.mark.parametrize(
     "game,player_label,infoset_label,action_label,prob,rational_flag",
     [
         (

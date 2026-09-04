@@ -398,7 +398,6 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         c_Game GetGame() except +
         bool IsInvalidated()
         int BehaviorProfileLength() except +
-        bool IsDefinedAt(c_GameInfoset) except +
         c_MixedBehaviorProfile[T] Normalize()  # except + doesn't compile
         T getitem "operator[]"(int) except +IndexError
         T getaction "operator[]"(c_GameAction) except +IndexError

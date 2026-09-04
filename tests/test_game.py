@@ -254,7 +254,6 @@ def test_mixed_behavior_profile_game_structure_changed():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_behavior_profile(rational=b) for b in [False, True]]
     game.set_move_actions(gbt.H.path(), ["D1"], drop=True)
-    infoset = game.root
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.action_regrets
@@ -272,8 +271,6 @@ def test_mixed_behavior_profile_game_structure_changed():
             _ = profile.infoset_regrets
         with pytest.raises(gbt.GameStructureChangedError):
             _ = profile.infoset_values
-        with pytest.raises(gbt.GameStructureChangedError):
-            profile.is_defined_at(infoset)
         with pytest.raises(gbt.GameStructureChangedError):
             profile.agent_liap_value()
         with pytest.raises(gbt.GameStructureChangedError):
