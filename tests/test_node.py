@@ -800,7 +800,7 @@ def test_append_infoset_error_infoset_not_a_selector():
     game.set_players(list(game.players) + ["Player 3"])
     game.append_move(gbt.H.path("1", "1"), "Player 3", ["B", "F"])
     with pytest.raises(TypeError):
-        game.append_infoset(gbt.H.path("1", "2"), game.root.children["1"].children["1"])
+        game.append_infoset(gbt.H.path("1", "2"), 42)
 
 
 def test_append_infoset_error_infoset_terminal():

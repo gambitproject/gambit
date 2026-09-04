@@ -154,24 +154,24 @@ def test_actionsupport_is_snapshot():
 
 
 def test_getitem_setitem_use_selector():
-    game, root, _, _ = _branching_game()
+    game, _, _, _ = _branching_game()
     profile = game.behavior_support_profile()
-    root_selector = games.selector_for_node(root)
+    root_selector = gbt.H.path()
     assert set(profile[root_selector]) == {"L", "R"}
     profile[root_selector] = ["R"]
     assert set(profile[root_selector]) == {"R"}
 
 
 def test_is_infoset_reachable():
-    game, root, left, right = _branching_game()
+    game, _, _, _ = _branching_game()
     profile = game.behavior_support_profile()
-    left_selector = games.selector_for_node(left)
-    right_selector = games.selector_for_node(right)
+    left_selector = gbt.H.path("L")
+    right_selector = gbt.H.path("R")
     assert profile.is_infoset_reachable(left_selector)
     assert profile.is_infoset_reachable(right_selector)
 
     copy = profile.copy()
-    copy[games.selector_for_node(root)] = ["R"]
+    copy[gbt.H.path()] = ["R"]
     assert not copy.is_infoset_reachable(left_selector)
     assert copy.is_infoset_reachable(right_selector)
     # the original, un-mutated profile is unaffected
