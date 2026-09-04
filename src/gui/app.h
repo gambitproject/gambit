@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/config.h>  // for wxConfig
 #include <wx/docview.h> // for wxFileHistory
+#include <wx/intl.h> // for wxLocale
 #include <wx/splash.h>
 
 namespace Gambit::GUI {
@@ -46,6 +47,7 @@ class Application final : public wxApp {
   wxSplashScreen *m_splash{nullptr};
   wxStopWatch m_splashTimer;
   wxTimer m_splashDismissTimer;
+  wxLocale *m_locale{nullptr};
 
   bool OnInit() override;
   void DismissSplash();
@@ -55,10 +57,20 @@ class Application final : public wxApp {
 
 public:
   Application() = default;
-  ~Application() override = default;
+  ~Application() override;
 
   const wxString &GetCurrentDir() { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
+
+  //! Applies the given language code ("en", "es", "fr", or "System") by
+  //! (re)initializing the application locale and loading the gambit catalog.
+  //! Returns true on success.
+  bool SetLanguage(const wxString &p_language);
+  //! Short code of the language currently in effect.
+  wxString GetLanguage() const
+  {
+    return m_locale ? m_locale->GetCanonicalName().BeforeFirst('_') : wxString("en");
+  }
 
   wxString GetHistoryFile(int index) const { return m_fileHistory.GetHistoryFile(index); }
   void AddMenu(wxMenu *p_menu)

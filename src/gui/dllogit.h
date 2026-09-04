@@ -344,7 +344,7 @@ template <class Traits> class LogitDialog final : public wxDialog {
     m_runner = std::make_unique<LogitThreadRunner<Traits>>(this, m_doc->GetGame());
     if (m_runner->Run() != wxTHREAD_NO_ERROR) {
       m_runner.reset();
-      m_statusText->SetLabel(wxT("Failed to launch computation."));
+      m_statusText->SetLabel(_("Failed to launch computation."));
       m_statusText->SetForegroundColour(*wxRED);
       m_okButton->Enable(true);
     }
@@ -377,15 +377,15 @@ template <class Traits> class LogitDialog final : public wxDialog {
     }
 
     if (m_stopRequested) {
-      m_statusText->SetLabel(wxT("The computation has been stopped."));
+      m_statusText->SetLabel(_("The computation has been stopped."));
       m_statusText->SetForegroundColour(wxColour(196, 128, 0));
     }
     else if (p_event.GetInt() == 0) {
-      m_statusText->SetLabel(wxT("The computation has completed."));
+      m_statusText->SetLabel(_("The computation has completed."));
       m_statusText->SetForegroundColour(wxColour(0, 192, 0));
     }
     else {
-      m_statusText->SetLabel(wxT("The computation ended abnormally."));
+      m_statusText->SetLabel(_("The computation ended abnormally."));
       m_statusText->SetForegroundColour(*wxRED);
     }
 
@@ -435,7 +435,7 @@ template <class Traits> class LogitDialog final : public wxDialog {
 
 public:
   LogitDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
-    : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition,
+    : wxDialog(p_parent, wxID_ANY, _("Compute quantal response equilibria"), wxDefaultPosition,
                wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
       m_doc(p_doc), m_list(new LogitGrid<Traits>(this, m_doc))
   {
@@ -446,7 +446,7 @@ public:
     auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
     m_statusText =
-        new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
+        new wxStaticText(this, wxID_STATIC, _("The computation is currently in progress."));
     m_statusText->SetForegroundColour(*wxBLUE);
     startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, S);
 
@@ -462,7 +462,7 @@ public:
     sizer->Add(m_list, 1, wxALL | wxEXPAND, S);
 
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
+    m_saveButton = new wxButton(this, wxID_SAVE, _("Save correspondence to .csv file"));
     m_saveButton->Enable(false);
     buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, S);
     m_saveButton->Bind(wxEVT_BUTTON, &LogitDialog::OnSave, this);

@@ -272,7 +272,7 @@ void StrategyPanel::Rebuild()
     }
 
     row.deleteButton =
-        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
+        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar('X'),
                      wxDefaultPosition, buttonSize);
     row.deleteButton->SetToolTip(row.isDeleted ? _("Restore strategy") : _("Delete strategy"));
     row.deleteButton->Enable(row.isDeleted || activeCount > 1);

@@ -65,7 +65,7 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *nodeSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Drawing nodes"));
+  auto *nodeSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Drawing nodes"));
 
   auto *tokenSizer = new wxFlexGridSizer(2);
 
@@ -183,7 +183,7 @@ LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderCon
   styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, S);
   topSizer->Add(styleBoxSizer, 0, wxALL | wxALIGN_CENTER, S);
 
-  auto *lengthSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("size of branches"));
+  auto *lengthSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("size of branches"));
 
   auto *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);

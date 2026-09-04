@@ -27,6 +27,7 @@
 #include <wx/artprov.h>
 #include <wx/display.h>
 #include <wx/image.h>
+#include <wx/intl.h>
 
 #include "games.h"
 
@@ -74,6 +75,12 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
   // m_fileHistory.Save(config);
   wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
+  // Apply the persisted language preference (if any), so that every dialog/window
+  // constructed from here on is localized.
+  wxString languagePref;
+  wxConfigBase::Get()->Read(_T("/General/Language"), &languagePref, _T("System"));
+  SetLanguage(languagePref);
+
   // Process command line arguments, if any.
   for (int i = 1; i < argc; i++) {
     LoadFile(argv[i], nullptr);
@@ -117,6 +124,55 @@ void Application::DismissSplash()
 
   m_splash->Destroy();
   m_splash = nullptr;
+}
+
+bool Application::SetLanguage(const wxString &p_language)
+{
+  std::string code = p_language.ToStdString();
+  if (code == "System" || code.empty()) {
+    code = "en";
+  }
+
+  wxLanguage lang = wxLANGUAGE_ENGLISH;
+  if (code == "en") {
+    lang = wxLANGUAGE_ENGLISH;
+  }
+  else if (code == "es") {
+    lang = wxLANGUAGE_SPANISH;
+  }
+  else if (code == "fr") {
+    lang = wxLANGUAGE_FRENCH;
+  }
+  else {
+    lang = wxLANGUAGE_UNKNOWN;
+    return false;
+  }
+
+  // Recreate the locale on every call: wxLocale::Init() may only be invoked once
+  // per object, so a runtime language change (via the Preferences dialog) must build
+  // a fresh locale rather than re-initializing the existing one.  The new locale is
+  // only committed once it has been initialized successfully.
+  auto *newLocale = new wxLocale;
+
+#ifndef LOCALEDIR
+#define LOCALEDIR "share/locale"
+#endif
+  newLocale->AddCatalogLookupPathPrefix(LOCALEDIR);
+  if (!newLocale->Init(lang)) {
+    delete newLocale;
+    return false;
+  }
+  newLocale->AddCatalog("gambit");
+
+  delete m_locale;
+  m_locale = newLocale;
+  return true;
+}
+
+Application::~Application()
+{
+  delete m_locale;
+  m_locale = nullptr;
 }
 
 namespace {

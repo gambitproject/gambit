@@ -50,6 +50,9 @@ EXTRA_DIST = \
 	src/gui/bitmaps/undo.h \
 	src/gui/bitmaps/redo.h \
 	src/gui/bitmaps/gambitrc.rc \
+	po/gambit.pot \
+	po/es.po \
+	po/fr.po \
 	contrib/games/2s2x2x2.efg \
 	contrib/games/2x2x2.efg \
 	contrib/games/4cards.efg \
@@ -347,7 +350,8 @@ bin_PROGRAMS = gambit
 endif
 
 # Define VERSION for all C++ compilations and set include paths
-AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
+AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\" \
+	-DLOCALEDIR=\"$(LOCALEDIR)\"
 
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
@@ -379,6 +383,8 @@ gambit_SOURCES = \
 	src/gui/edittext.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
+	src/gui/dlpreferences.cc \
+	src/gui/dlpreferences.h \
 	src/gui/dleditmove.cc \
 	src/gui/dleditmove.h \
 	src/gui/dleditnode.cc \
@@ -457,6 +463,56 @@ endif
 src/gui/bitmaps/gambitrc.o: src/gui/bitmaps/gambitrc.rc
 	$(WINDRES) $(WX_CXXFLAGS) -I$(srcdir)/src/gui/bitmaps -o $@ $<
 
+#-----------------------------------------------------------------------
+# Translations
+#
+# GUI strings are extracted with xgettext (maintainer action, "make update-po"),
+# kept as hand-edited po/<lang>.po files, and compiled to GNU mo catalogs with
+# msgfmt at build time.  The mo files are installed under $(LOCALEDIR), which
+# app.cc registers with wxLocale so that the "_()" macro translates the UI.
+# When msgfmt is unavailable, no catalogs are built/installed and the interface
+# falls back to the built-in English strings.
+#-----------------------------------------------------------------------
+
+PO_LANGS = es fr
+PO_CATALOGS = $(PO_LANGS:%=$(top_builddir)/po/%.mo)
+
+if HAVE_MSGFMT
+all-local: $(PO_CATALOGS)
+
+$(top_builddir)/po/%.mo: $(top_srcdir)/po/%.po
+	$(MKDIR_P) $(top_builddir)/po
+	$(MSGFMT) --check -o $@ $<
+
+install-data-local: $(PO_CATALOGS)
+	@for lang in $(PO_LANGS); do \
+	  $(MKDIR_P) $(DESTDIR)$(LOCALEDIR)/$$lang/LC_MESSAGES || exit 1; \
+	  $(INSTALL_DATA) $(top_builddir)/po/$$lang.mo \
+	    $(DESTDIR)$(LOCALEDIR)/$$lang/LC_MESSAGES/gambit.mo || exit 1; \
+	done
+endif
+
+if HAVE_XGETTEXT
+.PHONY: update-po
+update-po: po/gambit.pot
+	@for lang in $(PO_LANGS); do \
+	  test -f po/$$lang.po || cp -f po/gambit.pot po/$$lang.po; \
+	  msgmerge --update --quiet po/$$lang.po po/gambit.pot >/dev/null 2>&1 || true; \
+	done
+
+po/gambit.pot: $(gambit_SOURCES)
+	$(MKDIR_P) po
+	$(XGETTEXT) --keyword=_ --keyword=wxPLURAL:1,2 --add-comments=TRANSLATORS: \
+	  --from-code=UTF-8 --language=C++ -o $@ $(gambit_SOURCES)
+	$(XGETTEXT) --keyword=_ --keyword=wxPLURAL:1,2 --add-comments=TRANSLATORS: \
+	  --from-code=UTF-8 --language=C++ -j -o $@ $(wildcard src/gui/*.h)
+endif
+
+uninstall-local:
+	@for lang in $(PO_LANGS); do \
+	  rm -f $(DESTDIR)$(LOCALEDIR)/$$lang/LC_MESSAGES/gambit.mo; \
+	done
+
 osx-bundle:
 	make all
 	-rm -rf Gambit.app
@@ -476,6 +532,12 @@ osx-dmg:  osx-bundle
 msw-msi:
 	-mkdir installer
 	cp gambit* installer
+if HAVE_MSGFMT
+	$(MSGFMT) --check -o $(top_builddir)/po/es.mo $(top_srcdir)/po/es.po
+	$(MSGFMT) --check -o $(top_builddir)/po/fr.mo $(top_srcdir)/po/fr.po
+	cp $(top_builddir)/po/es.mo installer/es.mo
+	cp $(top_builddir)/po/fr.mo installer/fr.mo
+endif
 	candle build_support/msw/gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
 
