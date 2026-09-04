@@ -60,7 +60,13 @@ public:
   const wxString &GetCurrentDir() { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
 
+  size_t GetHistoryCount() const { return m_fileHistory.GetCount(); }
   wxString GetHistoryFile(int index) const { return m_fileHistory.GetHistoryFile(index); }
+  void RemoveHistoryFile(int index)
+  {
+    m_fileHistory.RemoveFileFromHistory(index);
+    m_fileHistory.Save(*wxConfigBase::Get());
+  }
   void AddMenu(wxMenu *p_menu)
   {
     m_fileHistory.UseMenu(p_menu);

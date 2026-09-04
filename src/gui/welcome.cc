@@ -1,10 +1,17 @@
 
+#include <algorithm>
+
 #include <wx/button.h>
 #include <wx/commandlinkbutton.h>
+#include <wx/dcclient.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/filedlg.h>
+#include <wx/filename.h>
+#include <wx/hyperlink.h>
 #include <wx/msgdlg.h>
+#include <wx/settings.h>
+#include <wx/statline.h>
 
 #include "games.h"
 
@@ -19,11 +26,29 @@ using namespace Gambit::GUI;
 
 wxDEFINE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_WELCOME_OPEN_RECENT, wxCommandEvent);
 
 namespace {
 constexpr int ID_WELCOME_OPEN = wxID_HIGHEST + 100;
 constexpr int ID_WELCOME_NEW_NORMAL_FORM = wxID_HIGHEST + 101;
 constexpr int ID_WELCOME_NEW_EXTENSIVE_FORM = wxID_HIGHEST + 102;
+
+/// The application tracks more recently-used files, showing only the first few.
+constexpr int MAX_RECENT_FILES = 5;
+constexpr int ID_WELCOME_RECENT_FIRST = wxID_HIGHEST + 110;
+constexpr int ID_WELCOME_RECENT_LAST = ID_WELCOME_RECENT_FIRST + MAX_RECENT_FILES - 1;
+
+/// Drop `p_filename` from the application's most-recently-used list, if it is there.
+void RemoveFromFileHistory(const wxString &p_filename)
+{
+  const auto count = static_cast<int>(wxGetApp().GetHistoryCount());
+  for (int i = 0; i < count; i++) {
+    if (wxGetApp().GetHistoryFile(i) == p_filename) {
+      wxGetApp().RemoveHistoryFile(i);
+      return;
+    }
+  }
+}
 } // namespace
 
 // --------------------
@@ -99,9 +124,74 @@ void WelcomePanel::CreateControls()
   m_newNormalFormButton->SetMinSize(buttonSize);
   m_newExtensiveFormButton->SetMinSize(buttonSize);
 
+  m_recentLine = new wxStaticLine(this);
+  m_recentHeading = new wxStaticText(this, wxID_ANY, _("Recent games"));
+  auto headingFont = m_recentHeading->GetFont();
+  headingFont.SetWeight(wxFONTWEIGHT_BOLD);
+  m_recentHeading->SetFont(headingFont);
+
+  m_recentPanel = new wxPanel(this);
+  RefreshRecentFiles();
+
   Bind(wxEVT_BUTTON, &WelcomePanel::OnOpen, this, ID_WELCOME_OPEN);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewNormalForm, this, ID_WELCOME_NEW_NORMAL_FORM);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewExtensiveForm, this, ID_WELCOME_NEW_EXTENSIVE_FORM);
+  Bind(wxEVT_HYPERLINK, &WelcomePanel::OnOpenRecent, this, ID_WELCOME_RECENT_FIRST,
+       ID_WELCOME_RECENT_LAST);
+}
+
+bool WelcomePanel::RefreshRecentFiles()
+{
+  m_recentFiles.clear();
+  m_recentPanel->DestroyChildren();
+
+  auto *sizer = new wxBoxSizer(wxVERTICAL);
+
+  const auto count = std::min(static_cast<int>(wxGetApp().GetHistoryCount()), MAX_RECENT_FILES);
+  for (int i = 0; i < count; i++) {
+    const wxString filename = wxGetApp().GetHistoryFile(i);
+    if (filename.empty()) {
+      continue;
+    }
+
+    const wxFileName path(filename);
+    const auto id = ID_WELCOME_RECENT_FIRST + static_cast<int>(m_recentFiles.size());
+
+    auto *row = new wxBoxSizer(wxHORIZONTAL);
+
+    const int rowWidth = m_openButton->GetMinSize().GetWidth();
+    const int gap = 8;
+    const wxClientDC dc(m_recentPanel);
+    const wxString name = wxControl::Ellipsize(path.GetFullName(), dc, wxELLIPSIZE_MIDDLE,
+                                               rowWidth * 2 / 3, wxELLIPSIZE_FLAGS_NONE);
+
+    auto *link =
+        new wxHyperlinkCtrl(m_recentPanel, id, wxControl::EscapeMnemonics(name), wxEmptyString,
+                            wxDefaultPosition, wxDefaultSize, wxHL_ALIGN_LEFT | wxNO_BORDER);
+    link->SetVisitedColour(link->GetNormalColour());
+    link->SetToolTip(filename);
+    row->Add(link, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+
+    auto *directory = new wxStaticText(m_recentPanel, wxID_ANY, wxEmptyString);
+    directory->SetLabelText(wxControl::Ellipsize(path.GetPath(), dc, wxELLIPSIZE_MIDDLE,
+                                                 rowWidth - link->GetBestSize().GetWidth() - gap,
+                                                 wxELLIPSIZE_FLAGS_NONE));
+    directory->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+    directory->SetToolTip(filename);
+    row->Add(directory, 0, wxALIGN_CENTER_VERTICAL);
+
+    sizer->Add(row, 0, wxBOTTOM, 4);
+    m_recentFiles.push_back(filename);
+  }
+
+  m_recentPanel->SetSizer(sizer);
+  m_recentPanel->Layout();
+
+  const bool hasRecentFiles = !m_recentFiles.empty();
+  m_recentLine->Show(hasRecentFiles);
+  m_recentHeading->Show(hasRecentFiles);
+  m_recentPanel->Show(hasRecentFiles);
+  return hasRecentFiles;
 }
 
 void WelcomePanel::LayoutControls()
@@ -116,6 +206,11 @@ void WelcomePanel::LayoutControls()
   content->Add(m_openButton, 0, wxEXPAND | wxBOTTOM, 16);
   content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, 16);
   content->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
+
+  // Hidden, and contributing no height, when there is no file history to show.
+  content->Add(m_recentLine, 0, wxEXPAND | wxTOP | wxBOTTOM, 20);
+  content->Add(m_recentHeading, 0, wxBOTTOM, 8);
+  content->Add(m_recentPanel, 0, wxEXPAND);
 
   row->AddStretchSpacer(1);
   row->Add(content, 0, wxEXPAND | wxLEFT | wxRIGHT, 24);
@@ -140,10 +235,26 @@ void WelcomePanel::OnNewExtensiveForm(wxCommandEvent &)
   SendNewEvent(WelcomeNewProblemKind::ExtensiveForm);
 }
 
+void WelcomePanel::OnOpenRecent(wxCommandEvent &p_event)
+{
+  const auto index = static_cast<size_t>(p_event.GetId() - ID_WELCOME_RECENT_FIRST);
+  if (index < m_recentFiles.size()) {
+    SendOpenRecentEvent(m_recentFiles[index]);
+  }
+}
+
 void WelcomePanel::SendOpenEvent()
 {
   wxCommandEvent event(wxEVT_WELCOME_OPEN);
   event.SetEventObject(this);
+  GetParent()->ProcessWindowEvent(event);
+}
+
+void WelcomePanel::SendOpenRecentEvent(const wxString &p_filename)
+{
+  wxCommandEvent event(wxEVT_WELCOME_OPEN_RECENT);
+  event.SetEventObject(this);
+  event.SetString(p_filename);
   GetParent()->ProcessWindowEvent(event);
 }
 
@@ -160,7 +271,7 @@ void WelcomePanel::SendNewEvent(WelcomeNewProblemKind p_kind)
 // --------------------
 
 WelcomeFrame::WelcomeFrame(wxWindow *parent)
-  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 500),
+  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxDefaultSize,
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
   CreateControls();
@@ -168,6 +279,7 @@ WelcomeFrame::WelcomeFrame(wxWindow *parent)
 
   Bind(wxEVT_WELCOME_OPEN, &WelcomeFrame::OnWelcomeOpen, this);
   Bind(wxEVT_WELCOME_NEW, &WelcomeFrame::OnWelcomeNew, this);
+  Bind(wxEVT_WELCOME_OPEN_RECENT, &WelcomeFrame::OnWelcomeOpenRecent, this);
   Bind(wxEVT_CLOSE_WINDOW, &WelcomeFrame::OnClose, this);
 
   CentreOnScreen();
@@ -180,6 +292,15 @@ void WelcomeFrame::LayoutControls()
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_panel, 1, wxEXPAND);
   SetSizer(topSizer);
+  FitToContents();
+}
+
+void WelcomeFrame::FitToContents()
+{
+  const int contentHeight = m_panel->GetSizer()->GetMinSize().GetHeight() + 64;
+  m_panel->SetMinSize(wxSize(600, std::max(500, contentHeight)));
+  GetSizer()->SetSizeHints(this);
+  Layout();
 }
 
 void WelcomeFrame::OnWelcomeOpen(wxCommandEvent &)
@@ -194,6 +315,13 @@ void WelcomeFrame::OnWelcomeNew(wxCommandEvent &p_event)
   const auto kind = static_cast<WelcomeNewProblemKind>(p_event.GetInt());
 
   if (DoCreateNew(kind)) {
+    Destroy();
+  }
+}
+
+void WelcomeFrame::OnWelcomeOpenRecent(wxCommandEvent &p_event)
+{
+  if (DoOpenRecent(p_event.GetString())) {
     Destroy();
   }
 }
@@ -213,6 +341,25 @@ bool WelcomeFrame::DoOpen()
   const wxString filename = dialog.GetPath();
   wxGetApp().SetCurrentDir(wxPathOnly(filename));
   return wxGetApp().LoadFile(filename, this) == AppLoadResult::Success;
+}
+
+bool WelcomeFrame::DoOpenRecent(const wxString &p_filename)
+{
+  if (!wxFileName::FileExists(p_filename)) {
+    wxMessageBox(wxString::Format(_("Gambit could not find the file %s.\n\n"
+                                    "It has been removed from the list of recent games."),
+                                  p_filename),
+                 _("File not found"), wxOK | wxICON_EXCLAMATION, this);
+    RemoveFromFileHistory(p_filename);
+    CallAfter([this]() {
+      m_panel->RefreshRecentFiles();
+      FitToContents();
+    });
+    return false;
+  }
+
+  wxGetApp().SetCurrentDir(wxPathOnly(p_filename));
+  return wxGetApp().LoadFile(p_filename, this) == AppLoadResult::Success;
 }
 
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
