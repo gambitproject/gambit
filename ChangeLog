@@ -3,6 +3,8 @@
 ### Added
 - Added `Game.has_perfect_recall(player)`, and `GameRep::HasPerfectRecall(const GamePlayer &)`
   in C++, reporting whether an individual player has perfect recall.  (#1107)
+- The GUI's welcome screen now lists the most recently opened games, so one can be reopened
+  with a click; entries whose files no longer exist are dropped from the list when chosen.  (#1108)
 
 ## [17.0.0-alpha.3] - 2026-08-31
 
