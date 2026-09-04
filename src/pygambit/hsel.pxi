@@ -208,6 +208,24 @@ def _history_of(node: Node) -> tuple:
     return tuple(labels)
 
 
+def _canonical_history(node: Node) -> tuple:
+    """The History of the canonical member of `node`'s current information set or
+    event: the first member encountered in the pre-order depth-first traversal of the
+    game tree (``GetMember(1)``), matching the order `Node.members` itself uses. Used
+    as the stable key identifying an information set or event, in place of any one
+    particular member node.
+
+    Raises
+    ------
+    AttributeError
+        If `node` currently belongs to no information set or event (a terminal node).
+    """
+    resolved: c_GameInfoset = node._infoset_handle()
+    if resolved == cython.cast(c_GameInfoset, NULL):
+        raise AttributeError("node currently belongs to no information set or event")
+    return _history_of(Node.wrap(resolved.deref().GetMember(1)))
+
+
 class HistoryView:
     """The object a `.by(callable)` key function actually receives.  Supports
     plain sequence indexing/slicing like a `History` tuple, plus limited

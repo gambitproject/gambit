@@ -784,10 +784,10 @@ class Game:
             raise TypeError(
                 f"get_minimal_subgame(): node must be a Selector, not {node.__class__.__name__}"
             )
-        resolved_infoset = self._resolve_infoset_or_event(node, "get_minimal_subgame")
+        resolved_node = self._resolve_infoset_or_event(node, "get_minimal_subgame")
         return Subgame.wrap(
             self.game.deref().GetMinimalSubgame(
-                cython.cast(_InfosetOrEvent, resolved_infoset)._resolve()
+                cython.cast(Node, resolved_node)._infoset_handle()
             )
         )
 
@@ -1067,15 +1067,16 @@ class Game:
             if len(p_infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
             for (node, v) in zip(p_infosets, d, strict=True):
-                infoset = node.infoset
-                if len(infoset.actions) != len(v):
+                if len(node.actions) != len(v):
                     raise ValueError(
                         f"Number of elements does not match number of "
-                        f"actions for infoset {infoset} for {p}"
+                        f"actions for infoset {node} for {p}"
                     )
-                profile[node] = {
-                    a: typefunc(u) for a, u in zip(infoset.actions, v, strict=True)
-                }
+                profile._setprob_infoset(
+                    node,
+                    {a: typefunc(u) for a, u in zip(node.actions, v, strict=True)},
+                    sparse=True,
+                )
         return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
@@ -1155,7 +1156,9 @@ class Game:
             profile = self.mixed_behavior_profile()
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _dirichlet_distribution(node.infoset.actions, gen)
+                    profile._setprob_infoset(
+                        node, _dirichlet_distribution(node.actions, gen), sparse=True
+                    )
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1163,7 +1166,9 @@ class Game:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
                 for node in self.get_infosets(player):
-                    profile[node] = _grid_distribution(node.infoset.actions, denom, gen)
+                    profile._setprob_infoset(
+                        node, _grid_distribution(node.actions, denom, gen), sparse=True
+                    )
             return profile
 
     def strategy_support_profile(
@@ -1215,7 +1220,7 @@ class Game:
         if actions is not None:
             for player in self.players:
                 for node in self.get_infosets(player):
-                    infoset_handle: c_GameInfoset = cython.cast(Infoset, node.infoset)._resolve()
+                    infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
                     for action in infoset_handle.deref().GetActions():
                         if not actions(node, action.deref().GetLabel().decode("utf-8")):
                             if not deref(profile.profile).RemoveAction(action):
@@ -1482,7 +1487,7 @@ class Game:
         return resolved_nodes
 
     def _resolve_infoset(self,
-                         infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
+                         infoset: typing.Any, funcname: str, argname: str = "infoset") -> Node:
         """Resolve an attempt to reference a personal player's information set of the
         game, via a member node or its label.
 
@@ -1494,6 +1499,12 @@ class Game:
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
             The name of the argument being checked
+
+        Returns
+        -------
+        Node
+            The resolved node itself, validated as currently belonging to a personal
+            player's information set.
 
         Raises
         ------
@@ -1508,14 +1519,15 @@ class Game:
             information set, or to no information set at all (the node is terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
-        return cython.cast(Infoset, _resolve_infoset_or_event_kind(
-            resolved_node.infoset, resolved_node.event,
+        is_personal, is_chance = _node_infoset_kind(resolved_node)
+        return _resolve_infoset_or_event_kind(
+            resolved_node, is_personal, is_chance,
             "information set", "a personal player's information set", "a chance event",
             funcname, argname
-        ))
+        )
 
     def _resolve_event(self,
-                       event: typing.Any, funcname: str, argname: str = "event") -> Event:
+                       event: typing.Any, funcname: str, argname: str = "event") -> Node:
         """Resolve an attempt to reference a chance event of the game, via a member
         node or its label.
 
@@ -1527,6 +1539,12 @@ class Game:
             The name of the function to raise any exception on behalf of.
         argname : str, default 'event'
             The name of the argument being checked
+
+        Returns
+        -------
+        Node
+            The resolved node itself, validated as currently belonging to a chance
+            event.
 
         Raises
         ------
@@ -1541,16 +1559,17 @@ class Game:
             chance event, or to no event at all (the node is terminal).
         """
         resolved_node = self._resolve_node(event, funcname, argname)
-        return cython.cast(Event, _resolve_infoset_or_event_kind(
-            resolved_node.event, resolved_node.infoset,
+        is_personal, is_chance = _node_infoset_kind(resolved_node)
+        return _resolve_infoset_or_event_kind(
+            resolved_node, is_chance, is_personal,
             "event", "a chance event", "a personal player's information set",
             funcname, argname
-        ))
+        )
 
     def _resolve_infoset_or_event(self,
                                   infoset: typing.Any,
                                   funcname: str,
-                                  argname: str = "infoset") -> typing.Any:
+                                  argname: str = "infoset") -> Node:
         """Resolve an attempt to reference an information set or event of the game
         (whichever applies), via a member node or its label. For operations that
         apply uniformly to either, such as attaching to an existing one.
@@ -1566,7 +1585,9 @@ class Game:
 
         Returns
         -------
-        Infoset or Event
+        Node
+            The resolved node itself, validated as currently belonging to some
+            information set or event.
 
         Raises
         ------
@@ -1581,12 +1602,9 @@ class Game:
             terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
-        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
-        if resolved_infoset:
-            return resolved_infoset
-        resolved_event = cython.cast(Event, resolved_node.event)
-        if resolved_event:
-            return resolved_event
+        is_personal, is_chance = _node_infoset_kind(resolved_node)
+        if is_personal or is_chance:
+            return resolved_node
         raise ValueError(
             f"{funcname}(): {argname} resolves to no information set "
             f"(the node is terminal)"
@@ -1675,9 +1693,9 @@ class Game:
         for label in actions:
             c_actions.push_back(label.encode("utf-8"))
         self.game.deref().AppendMove(resolved_node.node, resolved_player, c_actions)
-        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
+        infoset_handle: c_GameInfoset = resolved_node._infoset_handle()
         for n in resolved_nodes[1:]:
-            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset._resolve())
+            self.game.deref().AppendMove(cython.cast(Node, n).node, infoset_handle)
 
     def append_infoset(self, nodes: Selector | GroupedSelector,
                        infoset: Selector) -> None:
@@ -1731,16 +1749,17 @@ class Game:
                 f"append_infoset(): infoset must be a Selector, not {infoset.__class__.__name__}"
             )
         infoset_node = cython.cast(Node, self._resolve_node(infoset, "append_infoset", "infoset"))
-        if not infoset_node.infoset:
+        is_personal, _ = _node_infoset_kind(infoset_node)
+        if not is_personal:
             raise UndefinedOperationError(
                 "append_infoset(): infoset must resolve to a personal player's node"
             )
-        resolved_infoset = cython.cast(Infoset, infoset_node.infoset)
+        infoset_handle: c_GameInfoset = infoset_node._infoset_handle()
         resolved_nodes = self._resolve_nodes(nodes, "append_infoset", "nodes")
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
-            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset._resolve())
+            self.game.deref().AppendMove(cython.cast(Node, n).node, infoset_handle)
 
     def append_event(self, nodes: Selector | GroupedSelector,
                      actions: typing.Mapping) -> None:
@@ -1815,9 +1834,9 @@ class Game:
         for label in action_labels:
             c_probs.push_back(_to_number(actions[label]))
         self.game.deref().AppendEvent(resolved_node.node, c_actions, c_probs)
-        resolved_event = cython.cast(Event, resolved_node.event)
+        event_handle: c_GameInfoset = resolved_node._infoset_handle()
         for n in resolved_nodes[1:]:
-            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_event._resolve())
+            self.game.deref().AppendMove(cython.cast(Node, n).node, event_handle)
 
     def insert_move(self, node: Selector,
                     player: str, actions: list[str]) -> None:
@@ -1898,10 +1917,10 @@ class Game:
                 f"insert_infoset(): infoset must be a Selector, not {infoset.__class__.__name__}"
             )
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_infoset"))
-        resolved_infoset = cython.cast(
-            _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "insert_infoset")
+        resolved_infoset_node = cython.cast(
+            Node, self._resolve_infoset_or_event(infoset, "insert_infoset")
         )
-        self.game.deref().InsertMove(resolved_node.node, resolved_infoset._resolve())
+        self.game.deref().InsertMove(resolved_node.node, resolved_infoset_node._infoset_handle())
 
     def insert_event(self, node: Selector, actions: typing.Mapping) -> None:
         """Insert a chance move prior to the node identified by `node`, with actions
@@ -2171,7 +2190,7 @@ class Game:
             raise TypeError(
                 f"set_move_actions(): infoset must be a Selector, not {infoset.__class__.__name__}"
             )
-        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_move_actions"))
+        resolved_infoset = cython.cast(Node, self._resolve_infoset(infoset, "set_move_actions"))
         if isinstance(actions, str) or not hasattr(actions, "__iter__"):
             raise TypeError("set_move_actions(): actions must be an iterable of str")
         labels = list(actions)
@@ -2187,7 +2206,7 @@ class Game:
         c_labels = stdvector[string]()
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
-        self.game.deref().SetMoveActions(resolved_infoset._resolve(), c_labels)
+        self.game.deref().SetMoveActions(resolved_infoset._infoset_handle(), c_labels)
 
     def set_event_actions(self,
                           event: Selector,
@@ -2258,7 +2277,7 @@ class Game:
             raise TypeError(
                 f"set_event_actions(): event must be a Selector, not {event.__class__.__name__}"
             )
-        resolved_event = cython.cast(Event, self._resolve_event(event, "set_event_actions"))
+        resolved_event = cython.cast(Node, self._resolve_event(event, "set_event_actions"))
         if not isinstance(probs, typing.Mapping):
             raise TypeError(
                 "set_event_actions(): probs must be a mapping from label to probability"
@@ -2280,7 +2299,7 @@ class Game:
         for label in labels:
             c_labels.push_back(label.encode("utf-8"))
             c_probs.push_back(_to_number(probs[label]))
-        self.game.deref().SetEventActions(resolved_event._resolve(), c_labels, c_probs)
+        self.game.deref().SetEventActions(resolved_event._infoset_handle(), c_labels, c_probs)
 
     def make_event(self,
                    nodes: Selector | GroupedSelector,
@@ -2293,9 +2312,8 @@ class Game:
         converted, and the move is thereafter resolved by chance.  Nodes are removed from
         whatever information sets or events they currently belong to; any of those which
         retain members survive, keeping their labels, and those left with no members are deleted.
-        Any ``Infoset`` object referring to a deleted one becomes invalid, and subsequent use
-        raises ``RuntimeError``.
-        The resulting event is accessible as ``node.event`` for any node in `nodes`.
+        The resulting event's members, actions, and player are accessible via
+        ``Node.members``/``Node.actions``/``Node.player`` for any node in `nodes`.
 
         `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
         and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
@@ -2363,8 +2381,8 @@ class Game:
                 "make_event(): all nodes must be nonterminal"
             )
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        action_labels = list((resolved_node.infoset or resolved_node.event).actions)
-        if any(list((n.infoset or n.event).actions) != action_labels
+        action_labels = list(resolved_node.actions)
+        if any(list(n.actions) != action_labels
                for n in resolved_nodes[1:]):
             raise ValueError(
                 "make_event(): all nodes must have the same actions, "
@@ -2432,7 +2450,7 @@ class Game:
                 f"relabel_actions(): infoset must be a Selector, not {infoset.__class__.__name__}"
             )
         resolved_infoset = cython.cast(
-            _InfosetOrEvent, self._resolve_infoset_or_event(infoset, "relabel_actions")
+            Node, self._resolve_infoset_or_event(infoset, "relabel_actions")
         )
         if not hasattr(labels, "items"):
             raise TypeError(
@@ -2449,7 +2467,7 @@ class Game:
         c_labels = stdmap[string, string]()
         for old, new in remap.items():
             c_labels[old.encode("utf-8")] = new.encode("utf-8")
-        self.game.deref().RelabelActions(resolved_infoset._resolve(), c_labels)
+        self.game.deref().RelabelActions(resolved_infoset._infoset_handle(), c_labels)
 
     def make_infoset(self,
                      nodes: Selector | GroupedSelector,

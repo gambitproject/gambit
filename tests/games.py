@@ -9,28 +9,100 @@ import numpy as np
 import pygambit as gbt
 
 
-def all_infosets(game: gbt.Game) -> list[gbt.Infoset]:
-    """All Infosets belonging to a personal player, across every player, in the
-    canonical order `Game.infosets` used to yield before its removal (17.0.0)."""
-    return [n.infoset for p in game.players for n in game.get_infosets(p)]
+def all_infosets(game: gbt.Game) -> list[gbt.Node]:
+    """A representative node of every information set belonging to a personal
+    player, across every player, in the canonical order `Game.infosets` used to
+    yield before its removal (17.0.0). One node per information set, matching
+    `Game.get_infosets`; use `.members`/`.actions`/etc. on the node, which already
+    proxy to its information set."""
+    return [n for p in game.players for n in game.get_infosets(p)]
 
 
-def player_infosets(game: gbt.Game, player: str) -> list[gbt.Infoset]:
-    """All Infosets belonging to `player`, in canonical order, matching
-    `Player.infosets` before its removal (17.0.0)."""
-    return [n.infoset for n in game.get_infosets(player)]
+def player_infosets(game: gbt.Game, player: str) -> list[gbt.Node]:
+    """A representative node of every information set belonging to `player`, in
+    canonical order, matching `Player.infosets` before its removal (17.0.0)."""
+    return list(game.get_infosets(player))
 
 
-def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Infoset:
-    """Find the Infoset belonging to `player` with the given label, matching
-    `Player.infosets[label]` before its removal (17.0.0)."""
-    return next(i for i in player_infosets(game, player) if i.label == label)
+def infoset_number(node: gbt.Node) -> int:
+    """The 0-based position of `node`'s information set among its player's
+    information sets, matching the removed `Infoset.number` (17.0.0)."""
+    for i, rep in enumerate(node.game.get_infosets(node.player)):
+        if rep in node.members:
+            return i
+    raise ValueError("node is terminal, has no information set")
 
 
-def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Infoset:
-    """Find the Infoset with the given label, searching across all (personal)
-    players, matching `Game.infosets[label]` before its removal (17.0.0)."""
-    return next(i for i in all_infosets(game) if i.label == label)
+# (game.title, infoset label) -> the History of a member node, hand-verified against
+# each fixture file before `Infoset.label` (and thus by-label lookup) was removed
+# (17.0.0). `find_infoset`/`find_infoset_in_game` are a fixed stand-in for that
+# removed lookup, recognizing only the fixture games this test suite happens to use
+# it with; add an entry here if a new fixture/label combination is needed.
+_INFOSET_LABEL_HISTORIES = {
+    ("Test Extensive Form Game", "Infoset 1:1"): (),
+    ("Test Extensive Form Game", "Infoset 2:1"): ("U1",),
+    ("Test Extensive Form Game", "Infoset 3:1"): ("U1", "U2"),
+    ("A simple Poker game", "Alice has King"): ("King",),
+    ("A simple Poker game", "Alice has Queen"): ("Queen",),
+    ("A simple Poker game", "Bob's response"): ("King", "Bet"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,1)"):
+        ("1=rational", "2=rational"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,3)"):
+        ("1=rational", "2=rational", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,5)"):
+        ("1=rational", "2=rational", "p", "p", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,2)"):
+        ("1=altruist", "2=rational"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,4)"):
+        ("1=altruist", "2=rational", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(1,6)"):
+        ("1=altruist", "2=rational", "p", "p", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,1)"):
+        ("1=rational", "2=rational", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,4)"):
+        ("1=rational", "2=rational", "p", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,5)"):
+        ("1=rational", "2=rational", "p", "p", "p", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,2)"):
+        ("1=rational", "2=altruist", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,3)"):
+        ("1=rational", "2=altruist", "p", "p", "p"),
+    ("Centipede game. Three inning with probability of altruism.  ", "(2,6)"):
+        ("1=rational", "2=altruist", "p", "p", "p", "p", "p"),
+    ("AM-driver variation", "Absent-minded"): (),
+    ("AM-driver variation", "Second"): ("1",),
+    ("AM-driver variation", "Third"): ("1", "1", "2"),
+    ("AM-game with two players", "Absent-minded"): (),
+    ("AM-game with two players", "Response 1"): ("1", "1"),
+    ("AM-game with two players", "Response 2"): ("1", "2"),
+    ("AM-game with two players", "Response 3"): ("2", "1"),
+    ("AM-game with two players", "Response 4"): ("2", "2"),
+    ("Untitled Extensive Game", "Absent-minded"): (),
+    ("Untitled Extensive Game", "Second"): ("1",),
+    ("Untitled Extensive Game", "Player 2"): ("1", "1", "2", "2"),
+}
+
+
+def _node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
+    node = game.root
+    for step in history:
+        node = node.children[step]
+    return node
+
+
+def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Node:
+    """The representative node of `player`'s information set historically identified
+    by `label`, matching `Player.infosets[label]` before its removal (17.0.0)."""
+    node = _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
+    assert node.player == player
+    return node
+
+
+def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Node:
+    """The representative node of the information set historically identified by
+    `label`, searching across all (personal) players, matching
+    `Game.infosets[label]` before its removal (17.0.0)."""
+    return _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
 
 
 def _node_history(node: gbt.Node) -> tuple:
@@ -50,6 +122,13 @@ def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
     `H`-only mutation methods."""
     histories = frozenset(_node_history(n) for n in nodes)
     return gbt.H.after().filter(lambda h: h[:] in histories)
+
+
+def selector_for_node(node: gbt.Node) -> gbt.Selector:
+    """A root-anchored `Selector` matching exactly `node`'s own path of action
+    labels -- for adapting a fixture's `Node` (e.g. one from `Game.get_infosets`)
+    to profile indexing, which is `Selector`-only."""
+    return gbt.H.path(*_node_history(node))
 
 
 # Label-validation fixtures.
@@ -740,9 +819,8 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             if not n.is_terminal and not n.children["L"].is_terminal:
                 left = n.children["L"]
                 g.make_infoset(
-                    selector_for_nodes(list(left.infoset.members) + [n.children["R"]]),
-                    left.infoset.player,
-                    left.infoset.label or None,
+                    selector_for_nodes(list(left.members) + [n.children["R"]]),
+                    left.player,
                 )
         return g
 

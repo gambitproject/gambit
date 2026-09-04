@@ -185,7 +185,6 @@ class NodeIndexedVector(_LabeledVector):
 # Includes
 ######################
 
-include "infoset.pxi"
 include "strategy.pxi"
 include "outcome.pxi"
 include "node.pxi"

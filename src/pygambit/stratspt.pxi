@@ -30,7 +30,7 @@ class _LabelSet:
     """Shared implementation for `StrategySupport` and `ActionSupport`: an immutable
     snapshot of a set of labels (strategies, or actions at an information set) taken
     from a support profile at retrieval time, together with the owner (a player label,
-    or an information set) the labels belong to.
+    or the History identifying an information set) the labels belong to.
 
     Not exported; only `StrategySupport` and `ActionSupport` are part of the public API.
     """

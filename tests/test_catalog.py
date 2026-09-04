@@ -63,7 +63,7 @@ def test_catalog_games_filter_n_actions(all_games):
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
         n_game_actions = sum(
-            len(node.infoset.actions)
+            len(node.actions)
             for player in g.players
             for node in g.get_infosets(player)
         )
