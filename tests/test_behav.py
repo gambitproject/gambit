@@ -225,14 +225,15 @@ def test_profile_indexing_by_player_infoset_action_reference(
 def test_profile_indexing_by_selector_reference(
     game: gbt.Game, player_label: str, infoset_label: str, probs: list, rational_flag: bool
 ):
-    """profile[selector] and profile[player_label][node] resolve to the same MixedAction."""
+    """profile[selector] and profile[player_label][selector] resolve to the same
+    MixedAction."""
     profile = game.mixed_behavior_profile(rational=rational_flag)
     infoset = games.find_infoset(game, player_label, infoset_label)
-    node = next(iter(infoset.members))
+    selector = games.selector_for_node(next(iter(infoset.members)))
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
     expected = dict(zip(infoset.actions, probs, strict=True))
-    assert profile[player_label][node] == expected
-    assert profile[games.selector_for_node(node)] == expected
+    assert profile[player_label][selector] == expected
+    assert profile[selector] == expected
 
 
 @pytest.mark.parametrize(
@@ -242,17 +243,17 @@ def test_profile_indexing_by_selector_reference(
         (games.create_stripped_down_poker_efg(), "Alice", "Bob"),
     ],
 )
-def test_behavior_indexing_rejects_node_from_different_player(
+def test_behavior_indexing_rejects_selector_from_different_player(
     game: gbt.Game, player_label: str, other_player_label: str
 ):
-    """MixedBehavior/MixedBehaviorProfile reject a Node whose information set belongs to a
+    """MixedBehavior rejects a Selector whose information set belongs to a
     different player than the one being indexed.
     """
     profile = game.mixed_behavior_profile()
     other_infoset = games.player_infosets(game, other_player_label)[0]
-    other_node = next(iter(other_infoset.members))
+    other_selector = games.selector_for_node(next(iter(other_infoset.members)))
     with pytest.raises(gbt.MismatchError):
-        profile[player_label][other_node]
+        profile[player_label][other_selector]
 
 
 @pytest.mark.parametrize(
@@ -554,13 +555,12 @@ def test_mixed_action_and_behavior_are_frozen_snapshots(rational_flag: bool):
     """
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    node = _p1_node(game)
-    selector = games.selector_for_node(node)
+    selector = games.selector_for_node(_p1_node(game))
     action_before = profile[selector]
     behavior_before = profile["Player 1"]
     profile[selector] = {"U1": 1, "D1": 0}
     assert dict(action_before) == {"U1": 0.5, "D1": 0.5}
-    assert dict(behavior_before[node]) == {"U1": 0.5, "D1": 0.5}
+    assert dict(behavior_before[selector]) == {"U1": 0.5, "D1": 0.5}
     assert dict(profile[selector]) == {"U1": 1, "D1": 0}
 
 

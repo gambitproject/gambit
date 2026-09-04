@@ -170,10 +170,10 @@ def test_game_get_payoffs():
 def test_game_get_payoffs_tree():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
-    infoset = game.root.infoset
+    selector = gbt.H.path()
     strategy = next(
         s for s in game.get_strategies("Alice")
-        if game.get_behavior("Alice", s).get(infoset) == "a"
+        if game.get_behavior("Alice", s).get(selector) == "a"
     )
     game.make_outcome(gbt.H.path("a"), {"Alice": 1}, "a-outcome")
     payoffs = game.get_payoffs({"Alice": strategy})

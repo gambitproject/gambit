@@ -58,8 +58,7 @@ def test_getitem_by_player_label():
     profile = game.behavior_support_profile()
     support = profile["Player 1"]
     assert support.player == "Player 1"
-    infoset = _find_infoset(game, "Infoset 1:1")
-    assert set(support[infoset]) == {"U1", "D1"}
+    assert set(support[_find_selector(game, "Infoset 1:1")]) == {"U1", "D1"}
 
 
 def test_getitem_unknown_player():

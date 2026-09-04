@@ -296,12 +296,9 @@ def test_get_behavior_prescribed_action_defined(
     game, player_label, strategy_label, infoset_path, expected_action_label
 ):
     """Verify `Game.get_behavior` retrieves the correct action for defined actions."""
-    node = game.root
-    for action_label in infoset_path:
-        node = node.children[action_label]
-    infoset = node.infoset
+    selector = gbt.H.path(*infoset_path)
 
-    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(selector)
 
     assert prescribed_action == expected_action_label
 
@@ -323,14 +320,12 @@ def test_get_behavior_prescribed_action_undefined_returns_none(
 ):
     """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
     if infoset_label is not None:
-        infoset = games.find_infoset_in_game(game, infoset_label)
+        node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
+        selector = games.selector_for_node(node)
     else:
-        node = game.root
-        for action_label in infoset_path:
-            node = node.children[action_label]
-        infoset = node.infoset
+        selector = gbt.H.path(*infoset_path)
 
-    prescribed_action = game.get_behavior(player_label, strategy_label).get(infoset)
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(selector)
 
     assert prescribed_action is None
 
@@ -355,10 +350,7 @@ def test_get_behavior_raises_value_error_for_wrong_player(
     to a different player than the strategy.
     """
     behavior = game.get_behavior(player_label, next(iter(game.get_strategies(player_label))))
-    node = game.root
-    for action_label in other_infoset_path:
-        node = node.children[action_label]
-    other_players_infoset = node.infoset
+    other_selector = gbt.H.path(*other_infoset_path)
 
     with pytest.raises(ValueError):
-        behavior.get(other_players_infoset)
+        behavior.get(other_selector)

@@ -74,32 +74,38 @@ class StrategyBehavior:
             return None
         return action.deref().GetLabel().decode("utf-8")
 
-    def _resolve_key(self, key: Infoset | str) -> Infoset:
+    def _resolve_key(self, key: Selector) -> Infoset:
         """Resolve `key` to an information set at which the player has the move."""
-        infoset: Infoset
-        if isinstance(key, Infoset):
-            infoset = key
-            if infoset.game != self._game:
-                raise MismatchError("StrategyBehavior: key must be part of the same game")
-        else:
-            infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
+        if not isinstance(key, Selector):
+            raise TypeError(
+                f"StrategyBehavior key must be Selector, not {key.__class__.__name__}"
+            )
+        infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
         if infoset.player != self._player_label:
             raise ValueError(
                 f"Player '{self._player_label}' does not have the move at {infoset}."
             )
         return infoset
 
-    def __getitem__(self, key: Infoset | str) -> str:
-        """Return the label of the action prescribed at the information set
-        referenced by `key`.
+    def __getitem__(self, key: Selector) -> str:
+        """Return the label of the action prescribed at the information set `key`
+        resolves to.
+
+        Parameters
+        ----------
+        key : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to look up.
 
         Raises
         ------
+        TypeError
+            If `key` is not a ``Selector``.
         KeyError
-            If the strategy prescribes no action at the information set,
-            or if `key` is a string and no information set has that label.
+            If the strategy prescribes no action at the information set.
         ValueError
-            If the information set belongs to a different player.
+            If the information set belongs to a different player, or `key`
+            resolves to a terminal node or a chance event.
         """
         infoset = self._resolve_key(key)
         action = self._action_at(infoset)
@@ -109,7 +115,7 @@ class StrategyBehavior:
             )
         return action
 
-    def get(self, key: Infoset | str, default: typing.Any = None) -> str | None:
+    def get(self, key: Selector, default: typing.Any = None) -> str | None:
         """Return the label of the action prescribed at `key`, or `default` if none
         is prescribed."""
         infoset = self._resolve_key(key)

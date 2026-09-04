@@ -55,14 +55,16 @@ class BehaviorSupport:
     """
     _player = cython.declare(str)
     _values = cython.declare(dict)
+    _game = cython.declare(Game)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a BehaviorSupport outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: str, values: dict) -> BehaviorSupport:
+    def wrap(game: Game, player: str, values: dict) -> BehaviorSupport:
         obj: BehaviorSupport = BehaviorSupport.__new__(BehaviorSupport)
+        obj._game = game
         obj._player = player
         obj._values = values
         return obj
@@ -97,21 +99,34 @@ class BehaviorSupport:
         """
         yield from self._values.values()
 
-    def __getitem__(self, infoset: Infoset) -> ActionSupport:
-        """Returns the action support at `infoset`.
+    def __getitem__(self, selector: Selector) -> ActionSupport:
+        """Returns the action support at the information set `selector` resolves to.
 
         Parameters
         ----------
-        infoset : Infoset
-            The information set to return the support for.
+        selector : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to return the support for.
 
         Raises
         ------
+        TypeError
+            If `selector` is not a ``Selector``.
+        ValueError
+            If `selector` resolves to a terminal node, which belongs to no
+            information set, or to a chance event.
         MismatchError
-            If `infoset` does not belong to this player.
+            If the resolved information set does not belong to this player.
         """
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"BehaviorSupport index must be Selector, not {selector.__class__.__name__}"
+            )
+        infoset = self._game._resolve_infoset(selector, "BehaviorSupport.__getitem__")
         if infoset.player != self._player:
-            raise MismatchError("infoset must belong to this player")
+            raise MismatchError(
+                "selector must resolve to an information set belonging to this player"
+            )
         return self._values[infoset]
 
 
@@ -192,7 +207,7 @@ class BehaviorSupportProfile:
                 node.infoset: self._action_support_at(node.infoset)
                 for node in self.game.get_infosets(index)
             }
-            return BehaviorSupport.wrap(index, values)
+            return BehaviorSupport.wrap(self.game, index, values)
         if isinstance(index, Selector):
             resolved_infoset = self.game._resolve_infoset(
                 index, "BehaviorSupportProfile.__getitem__"

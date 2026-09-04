@@ -235,14 +235,16 @@ class MixedBehavior:
     """
     _player = cython.declare(str)
     _values = cython.declare(dict)
+    _game = cython.declare(Game)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a MixedBehavior outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: str, values: dict) -> MixedBehavior:
+    def wrap(game: Game, player: str, values: dict) -> MixedBehavior:
         obj: MixedBehavior = MixedBehavior.__new__(MixedBehavior)
+        obj._game = game
         obj._player = player
         obj._values = values
         return obj
@@ -297,27 +299,34 @@ class MixedBehavior:
         """
         yield from self._values.items()
 
-    def __getitem__(self, index: Node) -> MixedAction:
-        """Returns the mixed action at the information set containing `index`.
+    def __getitem__(self, selector: Selector) -> MixedAction:
+        """Returns the mixed action at the information set `selector` resolves to.
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to return.
+        selector : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to return.
 
         Raises
         ------
-        MismatchError
-            If `index` is a ``Node`` from a different game, or belongs to an
-            information set that isn't this player's.
+        TypeError
+            If `selector` is not a ``Selector``.
         ValueError
-            If `index` is a terminal node, which belongs to no information set.
+            If `selector` resolves to a terminal node, which belongs to no
+            information set, or to a chance event.
+        MismatchError
+            If the resolved information set does not belong to this player.
         """
-        infoset = cython.cast(Infoset, index.infoset)
-        if not infoset:
-            raise ValueError("node is terminal, has no information set")
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"MixedBehavior index must be Selector, not {selector.__class__.__name__}"
+            )
+        infoset = self._game._resolve_infoset(selector, "MixedBehavior.__getitem__")
         if infoset.player != self._player:
-            raise MismatchError("node must belong to this player")
+            raise MismatchError(
+                "selector must resolve to an information set belonging to this player"
+            )
         return self._values[infoset]
 
 
@@ -414,7 +423,7 @@ class MixedBehaviorProfile:
                 node.infoset: self._mixed_action_at(node.infoset)
                 for node in self.game.get_infosets(index)
             }
-            return MixedBehavior.wrap(index, values)
+            return MixedBehavior.wrap(self.game, index, values)
         if isinstance(index, Selector):
             resolved_infoset = self.game._resolve_infoset(
                 index, "MixedBehaviorProfile.__getitem__"
