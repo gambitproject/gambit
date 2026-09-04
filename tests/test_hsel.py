@@ -83,6 +83,16 @@ def test_get_histories_multiple():
     ]
 
 
+def test_get_histories_plays_from_non_root():
+    """`.plays` chained after a path prefix is the terminal frontier reachable
+    from that point, not from the whole game."""
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
+
+    assert set(game.get_histories(gbt.H.path("L").plays)) == {
+        ("L", "R"), ("L", "L", "r"), ("L", "L", "l"),
+    }
+
+
 def test_get_histories_empty():
     game = gbt.Game.new_tree(players=["A"])
     game.append_move(gbt.H.path(), "A", ["U", "D"])

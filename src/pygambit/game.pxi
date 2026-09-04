@@ -568,7 +568,9 @@ class Game:
                         else [node.children[step] for node in current]
                     )
             elif isinstance(op, _PlaysStep):
-                current = [play for node in current for play in node.plays]
+                current = [
+                    play for node in current for play in cython.cast(Node, node)._plays()
+                ]
             elif isinstance(op, _FilterStep):
                 current = [
                     node for node in current
@@ -713,7 +715,9 @@ class Game:
             next_result: dict = {}
             for key, nodes in result.items():
                 if isinstance(op, _PlaysStep):
-                    expanded = [play for node in nodes for play in node.plays]
+                    expanded = [
+                        play for node in nodes for play in cython.cast(Node, node)._plays()
+                    ]
                     if grouped.recall_player is None:
                         next_result[key] = expanded
                     else:

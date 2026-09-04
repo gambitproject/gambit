@@ -495,22 +495,6 @@ def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[
     assert actual_unreachable_paths == expected_unreachable_paths
 
 
-def test_node_plays():
-    """Verify `node.plays` returns plays reachable from a given node.
-    """
-    game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
-
-    test_node = game.root.children["L"]
-
-    expected_set_of_plays = {
-        game.root.children["L"].children["R"],
-        game.root.children["L"].children["L"].children["r"],
-        game.root.children["L"].children["L"].children["l"],
-    }
-
-    assert set(test_node.plays) == expected_set_of_plays
-
-
 @pytest.mark.parametrize(
     "game, player_label, strategy_label, infoset_path, expected_action_label",
     [

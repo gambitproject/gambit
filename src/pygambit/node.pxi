@@ -432,9 +432,11 @@ class Node:
         """
         return NodeOutcome.wrap(self.node)
 
-    @property
-    def plays(self) -> list[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
+    @cython.cfunc
+    def _plays(self) -> list:
+        """The terminal nodes consistent with this node. Not part of the public
+        API; the public equivalent is a `Selector`'s `.plays` step, e.g.
+        `game.get_histories(H.path(...).plays)`.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
 

@@ -141,7 +141,6 @@ Information about the game
    Node.action_probs
    Node.player
    Node.is_successor_of
-   Node.plays
    Node.own_prior_action
 
 .. autosummary::
