@@ -383,9 +383,11 @@ class Node:
             cur = cur.deref().GetParent()
         return Branch(Node.wrap(cur.deref().GetParent()), label)
 
-    @property
-    def is_terminal(self) -> bool:
-        """Returns whether this is a terminal node of the game."""
+    @cython.cfunc
+    def _is_terminal(self) -> cython.bint:
+        """Whether this is a terminal node of the game. Not part of the public
+        API; a node is terminal exactly when `Game.get_actions` is empty for it.
+        """
         return self.node.deref().IsTerminal()
 
     @property

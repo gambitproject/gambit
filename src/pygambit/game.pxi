@@ -652,6 +652,45 @@ class Game:
         resolved_node = self._resolve_node(history, "get_player")
         return resolved_node.player
 
+    def get_actions(self, history: Selector) -> list[str]:
+        """Returns the labels of the actions available at the node that
+        `history` resolves to, in the order they are defined.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        list of str
+            The labels of the actions at the node's current information set
+            or event, or an empty list if the node is terminal -- a node is
+            terminal exactly when this is empty.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_actions(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_actions")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if infoset_handle == cython.cast(c_GameInfoset, NULL):
+            return []
+        return [
+            a.deref().GetLabel().decode("utf-8") for a in infoset_handle.deref().GetActions()
+        ]
+
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
@@ -2085,7 +2124,7 @@ class Game:
             )
         resolved_src = cython.cast(Node, self._resolve_node(src, "copy_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
-        if not resolved_dest.is_terminal:
+        if not cython.cast(Node, resolved_dest)._is_terminal():
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
         self.game.deref().CopyTree(resolved_dest.node, resolved_src.node)
 
@@ -2125,7 +2164,7 @@ class Game:
             )
         resolved_src = cython.cast(Node, self._resolve_node(src, "move_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "move_tree", "dest"))
-        if not resolved_dest.is_terminal:
+        if not cython.cast(Node, resolved_dest)._is_terminal():
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
         if resolved_dest.is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
@@ -2438,7 +2477,7 @@ class Game:
                 f"make_event(): probs must be a mapping, not {probs.__class__.__name__}"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_event")
-        if any(n.is_terminal for n in resolved_nodes):
+        if any(cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError(
                 "make_event(): all nodes must be nonterminal"
             )
@@ -2598,7 +2637,7 @@ class Game:
         resolved_nodes = self._resolve_nodes(nodes, "make_infoset")
         resolved_player = self._resolve_player(player, "make_infoset")
         for n in resolved_nodes:
-            if n.is_terminal:
+            if cython.cast(Node, n)._is_terminal():
                 raise UndefinedOperationError(
                     "make_infoset(): all nodes must be decision nodes"
                 )

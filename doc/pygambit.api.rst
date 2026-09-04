@@ -134,7 +134,6 @@ Information about the game
    Node.children
    Node.parent
    Node.is_subgame_root
-   Node.is_terminal
    Node.is_strategy_reachable
    Node.prior_action
    Node.members

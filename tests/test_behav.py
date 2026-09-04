@@ -931,7 +931,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
                 )
 
     for node in game.nodes:
-        if node.is_terminal:
+        if not node.children:
             continue
         if infoset_probs[node] == 0:
             assert beliefs[node] is None
@@ -1037,7 +1037,7 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     realiz_probs = profile.realiz_probs
     node_values = profile.node_values
     for node in game.nodes:
-        if node.is_terminal or node.player == "Chance":
+        if not node.children or node.player == "Chance":
             continue
         expected_val = 0
         node_prob = realiz_probs[node]

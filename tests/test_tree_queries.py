@@ -10,13 +10,29 @@ import pygambit as gbt
 from . import games
 
 
-def test_node_actions_reflects_information_set():
-    """A node has actions iff it currently belongs to an information set or event."""
+def test_get_actions():
+    """A personal or chance node's actions, in order; a terminal node has none --
+    a node is terminal exactly when this is empty."""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.actions
-    assert game.root.children["U1"].actions
-    with pytest.raises(AttributeError):
-        _ = game.root.children["U1"].children["D2"].children["U3"].actions
+    assert game.get_actions(gbt.H.path()) == ["U1", "D1"]
+    assert game.get_actions(gbt.H.path("U1")) == ["U2", "D2"]
+    assert game.get_actions(gbt.H.path("U1", "D2", "U3")) == []
+
+
+def test_get_actions_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_actions(())
+    with pytest.raises(TypeError):
+        game.get_actions("U1")
+
+
+def test_get_actions_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_actions(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_actions(gbt.H.path(...).filter(lambda h: False))
 
 
 def test_get_player():
@@ -60,13 +76,6 @@ def test_get_prior_action():
     game = games.read_from_file("basic_extensive_game.efg")
     assert game.root.children["U1"].prior_action == gbt.Branch(game.root, "U1")
     assert game.root.prior_action is None
-
-
-def test_is_terminal():
-    """Test to ensure that we can check if a given node is a terminal node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.is_terminal is False
-    assert game.root.children["U1"].children["U2"].children["U3"].is_terminal is True
 
 
 def test_is_successor_of():
@@ -437,7 +446,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
     actual_node_data = []
 
     for node in game.nodes:
-        if node.is_terminal:
+        if not node.children:
             assert node.own_prior_action is None, (
                 f"Terminal node at {_get_path_of_action_labels(node)} must be None"
             )

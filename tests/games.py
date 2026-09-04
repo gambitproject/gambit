@@ -386,7 +386,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         (-2, 2): "BOb wins 2",
     }
     nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
-    for term_node in [n for n in g.nodes if n.is_terminal]:
+    for term_node in [n for n in g.nodes if not n.children]:
         nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
 
     for payoffs, nodes in nodes_by_payoff.items():
@@ -453,7 +453,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
                 tmp = "wins" if winner == "Bob" else "loses"
                 nodes_by_key[f"Bob calls and {tmp}"].append(n)
 
-    for term_node in [n for n in g.nodes if n.is_terminal]:
+    for term_node in [n for n in g.nodes if not n.children]:
         collect_nodes(term_node)
 
     for key, nodes in nodes_by_key.items():
@@ -816,7 +816,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         )
         self.create_binary_tree(g, g.root, (), 0, 0, self.level)
         for n in g.nodes:
-            if not n.is_terminal and not n.children["L"].is_terminal:
+            if n.children and n.children["L"].children:
                 left = n.children["L"]
                 g.make_infoset(
                     selector_for_nodes(list(left.members) + [n.children["R"]]),

@@ -86,12 +86,12 @@ def _subtrees_equal(
         recursion_stop_node: gbt.Node | None = None
 ) -> bool:
     if n1 == recursion_stop_node:
-        return n2.is_terminal
-    if n1.is_terminal and n2.is_terminal:
+        return not n2.children
+    if not n1.children and not n2.children:
         if not n1.outcome and not n2.outcome:
             return True
         return n1.outcome == n2.outcome
-    if n1.is_terminal is not n2.is_terminal:
+    if bool(n1.children) != bool(n2.children):
         return False
     # now, both n1 and n2 are non-terminal
     # check that they are in the same infosets
@@ -283,7 +283,7 @@ def test_append_event_creates_single_event_list_of_nodes():
         {"a": gbt.Rational(1, 2), "b": gbt.Rational(1, 2)}
     )
     assert node1 in node2.members
-    assert not node1.is_terminal
+    assert node1.children
 
 
 def test_append_event_sets_distribution():
@@ -388,7 +388,7 @@ def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:
     count_terminal: bool
         Include or exclude terminal nodes from count
     """
-    count = 1 if count_terminal or not start_node.is_terminal else 0
+    count = 1 if count_terminal or start_node.children else 0
 
     for child in start_node.children:
         count += _count_subtree_nodes(child, count_terminal)
@@ -598,7 +598,7 @@ def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = game.root            # the deal is a chance move
-    personal = next(n for n in game.nodes if not n.is_terminal and n.player != "Chance")
+    personal = next(n for n in game.nodes if n.children and n.player != "Chance")
     game.make_infoset(gbt.H.path(), personal.player)
     assert chance_node.player != "Chance"
     assert chance_node.player == personal.player
