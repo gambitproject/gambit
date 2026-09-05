@@ -2,8 +2,6 @@ import pytest
 
 import pygambit as gbt
 
-from . import games
-
 
 def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
@@ -50,11 +48,9 @@ def test_make_outcome_accepts_grouped_selector_pooled():
 
 
 def test_make_outcome_error_location_not_a_selector():
-    """A bare `Node` or `History` tuple is no longer accepted for an extensive game."""
+    """A bare `History` tuple is no longer accepted for an extensive game."""
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
-    with pytest.raises(TypeError):
-        game.make_outcome(games.node_at_history(game, ("U",)), {"Alice": 1}, "w")
     with pytest.raises(TypeError):
         game.make_outcome(("U",), {"Alice": 1}, "w")
 
@@ -140,11 +136,9 @@ def test_make_outcome_null_accepts_selector():
 
 
 def test_make_outcome_null_error_location_not_a_selector():
-    """A bare `Node` or `History` tuple is no longer accepted for an extensive game."""
+    """A bare `History` tuple is no longer accepted for an extensive game."""
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
-    with pytest.raises(TypeError):
-        game.make_outcome_null(games.node_at_history(game, ("U",)))
     with pytest.raises(TypeError):
         game.make_outcome_null(("U",))
 

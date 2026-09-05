@@ -15,18 +15,15 @@ def _find_selector(game, label):
     return gbt.H.path(*_find_history(game, label))
 
 
-def _branching_game():
+def _branching_game() -> gbt.Game:
     """A small tree where P1 chooses L/R, each leading to a separate P2 decision, so
     that removing an action can make a whole subtree's information set unreachable.
     """
     game = gbt.Game.new_tree(players=["P1", "P2"])
-    root = games.node_at_history(game, ())
     game.append_move(gbt.H.path(), "P1", ["L", "R"])
-    left = games.node_at_history(game, ("L",))
-    right = games.node_at_history(game, ("R",))
     game.append_move(gbt.H.path("L"), "P2", ["A", "B"])
     game.append_move(gbt.H.path("R"), "P2", ["A", "B"])
-    return game, root, left, right
+    return game
 
 
 def test_getitem_by_selector():
@@ -61,17 +58,16 @@ def test_getitem_rejects_other_types():
         profile[0]
 
 
-def test_getitem_setitem_reject_node():
-    """Profile indexing is `Selector`-only: a bare `Node` -- even one obtained
-    straight from the game, e.g. `game.root` -- is no longer accepted, following
-    the same pattern as `Game.get_minimal_subgame`.
+def test_getitem_setitem_reject_history():
+    """Profile indexing is `Selector`-only: a bare `History` tuple is no longer
+    accepted, following the same pattern as `Game.get_minimal_subgame`.
     """
-    game, root, _, _ = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
     with pytest.raises(TypeError):
-        profile[root]
+        profile[("L",)]
     with pytest.raises(TypeError):
-        profile[root] = ["R"]
+        profile[("L",)] = ["A"]
 
 
 def test_predicate_construction():
@@ -154,7 +150,7 @@ def test_actionsupport_is_snapshot():
 
 
 def test_getitem_setitem_use_selector():
-    game, _, _, _ = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
     root_selector = gbt.H.path()
     assert set(profile[root_selector]) == {"L", "R"}
@@ -163,7 +159,7 @@ def test_getitem_setitem_use_selector():
 
 
 def test_is_infoset_reachable():
-    game, _, _, _ = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
     left_selector = gbt.H.path("L")
     right_selector = gbt.H.path("R")

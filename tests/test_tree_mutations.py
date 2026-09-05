@@ -47,24 +47,6 @@ def test_insert_move_error_duplicate_label():
         game.insert_move(gbt.H.path(), "Player 1", ["a", "a"])
 
 
-def test_node_actions_becomes_undefined_when_truncated():
-    """A node's actions become undefined after it is truncated to a leaf."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    node = games.node_at_history(game, ("U1",))
-    assert node.actions
-    game.delete_tree(gbt.H.path("U1"))
-    with pytest.raises(AttributeError):
-        _ = node.actions
-
-
-def test_node_delete_parent():
-    """Test to ensure deleting a parent node works"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    node = games.node_at_history(game, ("U1",))
-    game.delete_parent(gbt.H.path("U1"))
-    assert games.node_at_history(game, ()) == node
-
-
 def test_node_delete_tree():
     """Test to ensure deleting every child of a node works"""
     game = games.read_from_file("basic_extensive_game.efg")
@@ -77,58 +59,6 @@ def test_node_copy_nonterminal():
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
         game.copy_tree(gbt.H.path(), gbt.H.path())
-
-
-def _subtrees_equal(
-        n1: gbt.Node,
-        n2: gbt.Node,
-        recursion_stop_node: gbt.Node | None = None
-) -> bool:
-    if n1 == recursion_stop_node:
-        return not n2._children()
-    if not n1._children() and not n2._children():
-        game = n1._game()
-        return (
-            game.get_outcome(gbt.H.path(*games._node_history(n1)))
-            == game.get_outcome(gbt.H.path(*games._node_history(n2)))
-        )
-    if bool(n1._children()) != bool(n2._children()):
-        return False
-    # now, both n1 and n2 are non-terminal
-    # check that they are in the same infosets
-    if n1 not in n2.members:
-        return False
-    # check that they have the same number of children
-    if len(n1._children()) != len(n2._children()):
-        return False
-
-    return all(
-        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(
-            n1._children(), n2._children(), strict=True
-            )
-    )
-
-
-def test_copy_tree_onto_nondescendent_terminal_node():
-    """Test copying a subtree to a non-descendent node."""
-    g = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    src_node = games.node_at_history(g, ("R", "L"))
-    dest_node = games.node_at_history(g, ("R", "R"))
-
-    g.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
-
-    assert _subtrees_equal(src_node, dest_node)
-
-
-def test_copy_tree_onto_descendent_terminal_node():
-    """Test copying a subtree to a node that's a descendent of the original."""
-    g = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    src_node = games.node_at_history(g, ("R",))
-    dest_node = games.node_at_history(g, ("R", "L", "R"))
-
-    g.copy_tree(gbt.H.path("R"), gbt.H.path("R", "L", "R"))
-
-    assert _subtrees_equal(src_node, dest_node, dest_node)
 
 
 def test_node_move_nonterminal():

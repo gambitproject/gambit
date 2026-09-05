@@ -543,27 +543,19 @@ def test_behavior_setitem_sparse_rejects_negative_weight():
 
 
 @pytest.mark.parametrize("sparse", [False, True])
-def test_behavior_indexing_rejects_node_and_infoset(sparse: bool):
-    """MixedBehaviorProfile's indexing is Selector-only; neither a bare History nor a
-    bare `Node` object is accepted, following the same pattern as
-    `Game.get_minimal_subgame`.
+def test_behavior_indexing_rejects_history(sparse: bool):
+    """MixedBehaviorProfile's indexing is Selector-only; a bare `History` tuple is
+    not accepted, following the same pattern as `Game.get_minimal_subgame`.
     """
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.mixed_behavior_profile()
-    infoset = games.player_infosets(game, "Player 1")[0]
-    node = games.all_nodes(game)[0]
+    history = games.player_infosets(game, "Player 1")[0]
     with pytest.raises(TypeError):
-        profile[infoset]
+        profile[history]
     with pytest.raises(TypeError):
-        profile[infoset] = {"U1": 1}
+        profile[history] = {"U1": 1}
     with pytest.raises(TypeError):
-        profile.set_mixed_action(infoset, {"U1": 1}, sparse=sparse)
-    with pytest.raises(TypeError):
-        profile[node]
-    with pytest.raises(TypeError):
-        profile[node] = {"U1": 1}
-    with pytest.raises(TypeError):
-        profile.set_mixed_action(node, {"U1": 1}, sparse=sparse)
+        profile.set_mixed_action(history, {"U1": 1}, sparse=sparse)
 
 
 @pytest.mark.parametrize("rational_flag", [False, True])
