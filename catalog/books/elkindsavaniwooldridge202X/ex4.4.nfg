@@ -3,7 +3,7 @@ NFG 1 R "Untitled strategic game" { "1" "2" }
 { { "1" "2" }
 { "1" "2" }
 }
-""
+"TEST"
 
 {
 { "" 1.0, 1.0 }
