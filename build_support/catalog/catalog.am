@@ -1,4 +1,5 @@
 CATALOG_FILES = \
+	catalog/books/elkindsavaniwooldridge202X/ex4.4.nfg \
 	catalog/books/myerson1991/fig2_1.efg \
 	catalog/books/myerson1991/fig4_2.efg \
 	catalog/books/shohamleytonbrown2008/fig5_1.efg \
