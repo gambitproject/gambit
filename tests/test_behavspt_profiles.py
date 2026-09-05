@@ -85,7 +85,7 @@ def test_predicate_construction_error():
     root's) triggers "attempted to remove the last action"."""
     game = games.read_from_file("mixed_behavior_game.efg")
     with pytest.raises(ValueError):
-        game.behavior_support_profile(lambda node, a: node.parent is not None)
+        game.behavior_support_profile(lambda node, a: node._parent() is not None)
 
 
 def test_iter_yields_one_support_per_player():

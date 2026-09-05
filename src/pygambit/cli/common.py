@@ -277,11 +277,11 @@ def render_profile_detail(
 
 def _name_or_number(node: gbt.Node) -> str:
     # Gambit's Python API numbers nodes from 0; the C++ tools display the
-    # underlying (1-based) engine numbering. `Node._number` is private (not part
-    # of the public API) but still Python-accessible, same as `Game._get_infosets`
-    # just below -- rendering needs the node's own engine number, which a History
-    # alone cannot provide.
-    return node.label if node.label else str(node._number() + 1)
+    # underlying (1-based) engine numbering. `Node._label`/`._number` are private
+    # (not part of the public API) but still Python-accessible, same as
+    # `Game._get_infosets` just below -- rendering needs the node's own label/engine
+    # number, which a History alone cannot provide.
+    return node._label if node._label else str(node._number() + 1)
 
 
 def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
@@ -300,12 +300,13 @@ def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) ->
 
 
 def _history_of(node: gbt.Node) -> tuple:
-    """The plain-tuple History of `node`, walked via `.parent`/`.prior_action`."""
+    """The plain-tuple History of `node`, walked via the private
+    `Node._parent`/`._prior_action`."""
     labels = []
     current = node
-    while current.parent is not None:
-        labels.append(current.prior_action.label)
-        current = current.parent
+    while current._parent() is not None:
+        labels.append(current._prior_action().label)
+        current = current._parent()
     labels.reverse()
     return tuple(labels)
 

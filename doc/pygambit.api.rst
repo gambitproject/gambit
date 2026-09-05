@@ -16,7 +16,6 @@ Representation of games
    Game
    Outcome
    Node
-   Branch
    TreeLayout
    TreeLayoutCoordinates
 
@@ -137,16 +136,11 @@ Information about the game
 .. autosummary::
    :toctree: api/
 
-   Node.label
    Node.outcome
-   Node.parent
-   Node.prior_action
    Node.members
    Node.actions
    Node.action_probs
    Node.player
-   Node.is_successor_of
-   Node.own_prior_action
 
 .. autosummary::
 

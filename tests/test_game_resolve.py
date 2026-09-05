@@ -11,7 +11,7 @@ from . import games
 def _test_valid_resolutions(collection: list, resolver: typing.Callable) -> None:
     """Generic function to exercise resolving objects as themselves or via existing labels."""
     for label, objects in itertools.groupby(
-            sorted(collection, key=lambda x: x.label), lambda x: x.label
+            sorted(collection, key=lambda x: x._label), lambda x: x._label
     ):
         objects = list(objects)
         # Objects resolve to themselves
@@ -73,8 +73,8 @@ def test_resolve_infoset(game: gbt.Game) -> None:
             for member in game.get_members(gbt.H.path(*history)):
                 resolved = game._resolve_infoset(gbt.H.path(*member), "test")
                 assert games._node_history(resolved) == member
-                if resolved.label:
-                    resolved_by_label = game._resolve_infoset(resolved.label, "test")
+                if resolved._label:
+                    resolved_by_label = game._resolve_infoset(resolved._label, "test")
                     assert games._node_history(resolved_by_label) == member
 
 

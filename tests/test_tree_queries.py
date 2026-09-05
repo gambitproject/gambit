@@ -141,39 +141,6 @@ def test_get_player_requires_single_match():
         game.get_player(gbt.H.path(...).filter(lambda h: False))
 
 
-def test_get_parent():
-    """Test to ensure that we can retrieve a parent node for a given node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    root = games.node_at_history(game, ())
-    assert games.node_at_history(game, ("U1",)).parent == root
-    assert root.parent is None
-
-
-def test_get_prior_action():
-    """Test to ensure that we can retrieve the prior action for a given node"""
-    game = games.read_from_file("basic_extensive_game.efg")
-    root = games.node_at_history(game, ())
-    assert games.node_at_history(game, ("U1",)).prior_action == gbt.Branch(root, "U1")
-    assert root.prior_action is None
-
-
-def test_is_successor_of():
-    """Test to ensure that we can check if a given node is a
-    successor of a supplied node
-    """
-    game = games.read_from_file("basic_extensive_game.efg")
-    root = games.node_at_history(game, ())
-    child = games.node_at_history(game, ("U1",))
-    assert child.is_successor_of(root)
-    assert not root.is_successor_of(child)
-    with pytest.raises(TypeError):
-        root.is_successor_of(9)
-    with pytest.raises(TypeError):
-        root.is_successor_of("Test")
-    with pytest.raises(TypeError):
-        root.is_successor_of("Player 1")
-
-
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     """
     Computes the path of action labels from a given node to the root.
@@ -184,9 +151,9 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
 
     path = []
     current_node = node
-    while current_node.parent:
-        path.append(current_node.prior_action.label)
-        current_node = current_node.parent
+    while current_node._parent():
+        path.append(current_node._prior_action().label)
+        current_node = current_node._parent()
 
     return path
 
@@ -403,90 +370,6 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
             key = (player, i)
             selector = gbt.H.path(*history)
             assert game.get_minimal_subgame(selector) == expected_root_for_key[key]
-
-
-@pytest.mark.parametrize("game_file, expected_node_data", [
-    (
-        "binary_3_levels_generic_payoffs.efg",
-        [
-            # Format: (Path in Node->Root order, (Player Label, Infoset Num, Action Label) or None)
-            ([], None),
-            (["Left"], None),
-            (["Left", "Left"], ("Player 1", 0, "Left")),
-            (["Right", "Left"], ("Player 1", 0, "Left")),
-            (["Right"], None),
-            (["Left", "Right"], ("Player 1", 0, "Right")),
-            (["Right", "Right"], ("Player 1", 0, "Right")),
-        ]
-    ),
-    (
-        gbt.catalog.load("journals/geb/wichardt2008"),
-        [
-            ([], None),
-            (["R"], ("Player 1", 0, "R")),
-            (["r", "R"], None),
-            (["l", "R"], None),
-            (["L"], ("Player 1", 0, "L")),
-            (["r", "L"], None),
-            (["l", "L"], None),
-        ]
-    ),
-    (
-        "subgames.efg",
-        [
-            ([], None),
-            (["1"], None),
-            (["2"], None),
-            (["1", "2"], ("Player 2", 0, "2")),
-            (["2", "1", "2"], ("Player 1", 1, "1")),
-            (["2", "2"], ("Player 2", 0, "2")),
-            (["1", "2", "2"], ("Player 2", 1, "1")),
-            (["1", "1", "2", "2"], ("Player 1", 1, "2")),
-            (["1", "1", "1", "2", "2"], ("Player 2", 2, "1")),
-            (["2", "1", "2", "2"], ("Player 1", 1, "2")),
-            (["1", "2", "1", "2", "2"], ("Player 2", 2, "2")),
-            (["2", "2", "1", "2", "2"], ("Player 2", 2, "2")),
-            (["1", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
-            (["1", "1", "2", "2", "1", "2", "2"], ("Player 2", 4, "1")),
-            (["1", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
-            (["2", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
-            (["2", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
-            (["2", "2", "2"], ("Player 1", 1, "2")),
-        ]
-    ),
-    (
-        "AM-driver-subgame.efg",
-        [
-            ([], None),
-            (["S"], ("Player 1", 0, "S")),
-            (["T", "S"], None),
-        ]
-    ),
-])
-def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
-    """
-    Tests `node.own_prior_action` for non-terminal nodes.
-    Also verifies that all terminal nodes return None.
-    """
-    game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
-
-    actual_node_data = []
-
-    for node in games.all_nodes(game):
-        if not game.get_actions(games.selector_for_node(node)):
-            assert node.own_prior_action is None, (
-                f"Terminal node at {_get_path_of_action_labels(node)} must be None"
-            )
-        else:
-            # Only collect data for non-terminal nodes
-            opa = node.own_prior_action
-            if opa is not None:
-                details = (opa.node.player, games.infoset_number(opa.node), opa.label)
-            else:
-                details = None
-            actual_node_data.append((_get_path_of_action_labels(node), details))
-
-    assert actual_node_data == expected_node_data
 
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [

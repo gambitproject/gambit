@@ -1719,7 +1719,7 @@ class Game:
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
             for n in self._all_nodes():
-                if n.label == node:
+                if cython.cast(Node, n)._label == node:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(
@@ -2329,7 +2329,7 @@ class Game:
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "move_tree", "dest"))
         if not cython.cast(Node, resolved_dest)._is_terminal():
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
-        if resolved_dest.is_successor_of(resolved_src):
+        if resolved_dest._is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
         self.game.deref().MoveTree(resolved_dest.node, resolved_src.node)
 

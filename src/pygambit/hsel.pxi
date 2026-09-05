@@ -63,9 +63,10 @@ def _matches_suffix(node: Node, labels: tuple) -> bool:
     """Whether `node`'s own history ends with exactly `labels`."""
     current: Node = node
     for label in reversed(labels):
-        if current.parent is None or current.prior_action.label != label:
+        parent = current._parent()
+        if parent is None or current._prior_action().label != label:
             return False
-        current = current.parent
+        current = parent
     return True
 
 
@@ -198,12 +199,12 @@ class GroupedSelector:
 
 def _history_of(node: Node) -> tuple:
     """The plain-tuple History for `node` -- walks back to the root via the
-    existing `Node.parent`/`.prior_action` navigation."""
+    private `Node._parent`/`._prior_action` navigation."""
     labels: list = []
     current: Node = node
-    while current.parent is not None:
-        labels.append(current.prior_action.label)
-        current = current.parent
+    while current._parent() is not None:
+        labels.append(current._prior_action().label)
+        current = current._parent()
     labels.reverse()
     return tuple(labels)
 
@@ -279,10 +280,10 @@ def _last_action(node: Node, player: str) -> str | None:
     wherever it fell -- `None` if `player` hasn't acted yet. Shared between
     `HistoryView.last_action` and `.with_recall(player)`'s evaluation."""
     current: Node = node
-    while current.parent is not None:
-        if current.parent.player == player:
-            return current.prior_action.label
-        current = current.parent
+    while current._parent() is not None:
+        if current._parent().player == player:
+            return current._prior_action().label
+        current = current._parent()
     return None
 
 

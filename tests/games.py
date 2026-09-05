@@ -42,17 +42,6 @@ def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
     return list(game.get_infosets(player))
 
 
-def infoset_number(node: gbt.Node) -> int:
-    """The 0-based position of `node`'s information set among its player's
-    information sets, matching the removed `Infoset.number` (17.0.0)."""
-    game = node._game()
-    members = set(game.get_members(selector_for_node(node)))
-    for i, history in enumerate(game.get_infosets(node.player)):
-        if history in members:
-            return i
-    raise ValueError("node is terminal, has no information set")
-
-
 # (game.title, infoset label) -> the History of a member node, hand-verified against
 # each fixture file before `Infoset.label` (and thus by-label lookup) was removed
 # (17.0.0). `find_infoset`/`find_infoset_in_game` are a fixed stand-in for that
@@ -126,12 +115,13 @@ def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Node:
 
 
 def _node_history(node: gbt.Node) -> tuple:
-    """The plain-tuple history of `node`, walked via `.parent`/`.prior_action`."""
+    """The plain-tuple history of `node`, walked via the private
+    `Node._parent`/`._prior_action`."""
     labels = []
     current = node
-    while current.parent is not None:
-        labels.append(current.prior_action.label)
-        current = current.parent
+    while current._parent() is not None:
+        labels.append(current._prior_action().label)
+        current = current._parent()
     labels.reverse()
     return tuple(labels)
 
@@ -368,9 +358,9 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
     def calculate_payoffs(term_node):
         def get_path(node):
             path = []
-            while node.parent:
-                path.append(node.prior_action.label)
-                node = node.parent
+            while node._parent():
+                path.append(node._prior_action().label)
+                node = node._parent()
             return path
 
         def showdown(deal, payoffs, pot):
@@ -450,9 +440,9 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
     def collect_nodes(term_node):
         def get_path(node):
             path = []
-            while node.parent:
-                path.append((node, node.prior_action.label))
-                node = node.parent
+            while node._parent():
+                path.append((node, node._prior_action().label))
+                node = node._parent()
             return path
 
         path = get_path(term_node)

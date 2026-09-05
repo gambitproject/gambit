@@ -528,44 +528,6 @@ def test_len_after_copy_tree():
     assert _n_nodes(game) == initial_number_of_nodes + number_of_src_ancestors - 1
 
 
-@pytest.mark.parametrize("label", games.VALID_LABELS)
-def test_node_label_valid(label):
-    game = games.read_from_file("basic_extensive_game.efg")
-    games.node_at_history(game, ()).label = label
-    assert games.node_at_history(game, ()).label == label
-
-
-def test_node_label_duplicate_raises_valueerror():
-    game = games.read_from_file("basic_extensive_game.efg")
-    games.node_at_history(game, ()).label = "shared"
-    with pytest.raises(ValueError):
-        games.node_at_history(game, ("U1",)).label = "shared"
-
-
-def test_node_label_empty_is_allowed():
-    """Node labels may be empty (unlike outcomes/players); multiple empties coexist."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    games.node_at_history(game, ()).label = ""
-    games.node_at_history(game, ("U1",)).label = ""
-    assert games.node_at_history(game, ()).label == ""
-    assert games.node_at_history(game, ("U1",)).label == ""
-
-
-@pytest.mark.parametrize("label", games.INVALID_LABELS)
-def test_node_label_invalid_raises_valueerror(label):
-    game = games.read_from_file("basic_extensive_game.efg")
-    with pytest.raises(ValueError):
-        games.node_at_history(game, ()).label = label
-
-
-@pytest.mark.parametrize("label", games.UNICODE_LABELS)
-def test_node_label_unicode_accepted(label):
-    """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    games.node_at_history(game, ()).label = label
-    assert games.node_at_history(game, ()).label == label
-
-
 def test_make_infoset_change_player_keeps_membership():
     """Re-forming an information set under a different player retains its
     membership."""
