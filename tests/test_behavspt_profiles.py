@@ -20,7 +20,7 @@ def _branching_game():
     that removing an action can make a whole subtree's information set unreachable.
     """
     game = gbt.Game.new_tree(players=["P1", "P2"])
-    root = game.root
+    root = games.node_at_history(game, ())
     game.append_move(gbt.H.path(), "P1", ["L", "R"])
     left = root.children["L"]
     right = root.children["R"]

@@ -31,13 +31,13 @@ def test_read_efg_repeated_outcome_id_consistent():
 def test_read_efg_empty_action_labels_are_normalized():
     g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "" "" } 0\n'
                    't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
-    assert list(g.root.actions) == ["_1", "_2"]
+    assert g.get_actions(gbt.H.path()) == ["_1", "_2"]
 
 
 def test_read_efg_duplicate_action_labels_are_normalized():
     g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "l" } 0\n'
                    't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
-    assert list(g.root.actions) == ["l_1", "l_2"]
+    assert g.get_actions(gbt.H.path()) == ["l_1", "l_2"]
 
 
 def test_read_efg_repeated_infoset_duplicate_labels_consistent():
@@ -53,7 +53,7 @@ def test_read_efg_repeated_infoset_duplicate_labels_consistent():
         't "" 2 "" { 2, -2 }\n'
         't "" 3 "" { 3, -3 }\n'
     )
-    assert list(g.root.actions) == ["l_1", "l_2"]
+    assert g.get_actions(gbt.H.path()) == ["l_1", "l_2"]
 
 
 _NFG_PAYOFF_BODY = '\n{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n1 2 3 4\n'

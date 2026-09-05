@@ -12,10 +12,12 @@ def test_strategic_game_get_infosets():
         _ = game.get_infosets(player)
 
 
-def test_strategic_game_root():
+def test_strategic_game_get_histories_root_raises():
+    """A bare `H.path()` (the root) still resolves through the same
+    tree-only guard as `H.after()`, just via a different internal path."""
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.root
+        _ = game.get_histories(gbt.H.path())
 
 
 def test_game_behav_profile_error():

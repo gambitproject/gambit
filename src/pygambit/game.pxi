@@ -529,14 +529,9 @@ class Game:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
 
-    @property
-    def root(self) -> Node:
-        """The root node of the game.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not hae a tree representation.
+    def _root(self) -> Node:
+        """The root node of the game. Not part of the public API; the public
+        equivalent is the trivial empty History, `()`, or `H.path()` as a Selector.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -571,7 +566,7 @@ class Game:
                 current = [n for n in candidates if _matches_suffix(n, op.labels)]
                 continue
             if current is None:
-                current = [self.root]
+                current = [self._root()]
             if isinstance(op, _PathStep):
                 for step in op.steps:
                     current = (
@@ -591,7 +586,7 @@ class Game:
             else:
                 raise TypeError(f"_get_nodes(): unknown selector op {op!r}")
         if current is None:
-            current = [self.root]
+            current = [self._root()]
         return current
 
     def _get_histories(self, selector: Selector) -> list[tuple]:

@@ -54,7 +54,7 @@ def test_resolve_node_mismatch():
     game1 = gbt.Game.new_tree()
     game2 = games.read_from_file("sample_extensive_game.efg")
     with pytest.raises(gbt.MismatchError):
-        game1._resolve_node(game2.root, "test_resolve_node_mismatch")
+        game1._resolve_node(games.node_at_history(game2, ()), "test_resolve_node_mismatch")
 
 
 @pytest.mark.parametrize(

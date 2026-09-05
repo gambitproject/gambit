@@ -19,13 +19,14 @@ def all_infosets(game: gbt.Game) -> list[tuple]:
 
 def all_nodes(game: gbt.Game) -> list[gbt.Node]:
     """Every node in the game, in depth-first traversal order, matching
-    `Game.nodes` before its removal (17.0.0). Built from `.root`/`.children`,
-    the surviving Node-navigation primitives."""
+    `Game.nodes` before its removal (17.0.0). Built from `.children`, the
+    surviving Node-navigation primitive, starting from `node_at_history(game, ())`
+    (the root) since `Game.root` was itself removed (17.0.0)."""
     def _walk(node: gbt.Node):
         yield node
         for child in node.children:
             yield from _walk(child)
-    return list(_walk(game.root))
+    return list(_walk(node_at_history(game, ())))
 
 
 def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
@@ -96,17 +97,17 @@ _INFOSET_LABEL_HISTORIES = {
 }
 
 
-def _node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
-    node = game.root
-    for step in history:
-        node = node.children[step]
-    return node
+def node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
+    """The Node reached by following `history` (a tuple of action labels) from
+    the root -- the standard way to obtain a `Node` now that `Game.root` is
+    removed (17.0.0): `H.path(*history)` always resolves to exactly one node."""
+    return game._get_nodes(gbt.H.path(*history))[0]
 
 
 def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Node:
     """The representative node of `player`'s information set historically identified
     by `label`, matching `Player.infosets[label]` before its removal (17.0.0)."""
-    node = _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
+    node = node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
     assert node.player == player
     return node
 
@@ -115,7 +116,7 @@ def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Node:
     """The representative node of the information set historically identified by
     `label`, searching across all (personal) players, matching
     `Game.infosets[label]` before its removal (17.0.0)."""
-    return _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
+    return node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
 
 
 def _node_history(node: gbt.Node) -> tuple:
@@ -430,7 +431,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         payoffs_by_key[f"{player} calls and loses"] = (-1, 4) if player == "Alice" else (4, -1)
 
     nodes_by_key = {key: [] for key in payoffs_by_key}
-    nodes_by_key["Ante"].append(g.root)
+    nodes_by_key["Ante"].append(node_at_history(g, ()))
 
     def collect_nodes(term_node):
         def get_path(node):
@@ -827,7 +828,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
-        self.create_binary_tree(g, g.root, (), 0, 0, self.level)
+        self.create_binary_tree(g, node_at_history(g, ()), (), 0, 0, self.level)
         for n in all_nodes(g):
             if n.children and n.children["L"].children:
                 left = n.children["L"]

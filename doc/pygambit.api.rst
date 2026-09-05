@@ -116,7 +116,6 @@ Information about the game
    Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
-   Game.root
    Game.get_infosets
    Game.get_events
    Game.get_strategies

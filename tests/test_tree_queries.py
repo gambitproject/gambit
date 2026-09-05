@@ -144,15 +144,17 @@ def test_get_player_requires_single_match():
 def test_get_parent():
     """Test to ensure that we can retrieve a parent node for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].parent == game.root
-    assert game.root.parent is None
+    root = games.node_at_history(game, ())
+    assert games.node_at_history(game, ("U1",)).parent == root
+    assert root.parent is None
 
 
 def test_get_prior_action():
     """Test to ensure that we can retrieve the prior action for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].prior_action == gbt.Branch(game.root, "U1")
-    assert game.root.prior_action is None
+    root = games.node_at_history(game, ())
+    assert games.node_at_history(game, ("U1",)).prior_action == gbt.Branch(root, "U1")
+    assert root.prior_action is None
 
 
 def test_is_successor_of():
@@ -160,14 +162,16 @@ def test_is_successor_of():
     successor of a supplied node
     """
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children["U1"].is_successor_of(game.root)
-    assert not game.root.is_successor_of(game.root.children["U1"])
+    root = games.node_at_history(game, ())
+    child = games.node_at_history(game, ("U1",))
+    assert child.is_successor_of(root)
+    assert not root.is_successor_of(child)
     with pytest.raises(TypeError):
-        game.root.is_successor_of(9)
+        root.is_successor_of(9)
     with pytest.raises(TypeError):
-        game.root.is_successor_of("Test")
+        root.is_successor_of("Test")
     with pytest.raises(TypeError):
-        game.root.is_successor_of("Player 1")
+        root.is_successor_of("Player 1")
 
 
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
@@ -620,7 +624,9 @@ def test_get_histories_after_iteration_order(game_obj: gbt.Game):
         for child in node.children:
             yield from dfs(child)
 
-    expected = [games._node_history(node) for node in dfs(game_obj.root)]
+    expected = [
+        games._node_history(node) for node in dfs(games.node_at_history(game_obj, ()))
+    ]
     assert game_obj.get_histories(gbt.H.after()) == expected
 
 

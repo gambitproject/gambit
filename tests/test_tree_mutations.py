@@ -50,7 +50,7 @@ def test_insert_move_error_duplicate_label():
 def test_node_actions_becomes_undefined_when_truncated():
     """A node's actions become undefined after it is truncated to a leaf."""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
+    node = games.node_at_history(game, ("U1",))
     assert node.actions
     game.delete_tree(gbt.H.path("U1"))
     with pytest.raises(AttributeError):
@@ -60,15 +60,15 @@ def test_node_actions_becomes_undefined_when_truncated():
 def test_node_delete_parent():
     """Test to ensure deleting a parent node works"""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
+    node = games.node_at_history(game, ("U1",))
     game.delete_parent(gbt.H.path("U1"))
-    assert game.root == node
+    assert games.node_at_history(game, ()) == node
 
 
 def test_node_delete_tree():
     """Test to ensure deleting every child of a node works"""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root.children["U1"]
+    node = games.node_at_history(game, ("U1",))
     game.delete_tree(gbt.H.path("U1"))
     assert len(node.children) == 0
 
@@ -111,8 +111,8 @@ def _subtrees_equal(
 def test_copy_tree_onto_nondescendent_terminal_node():
     """Test copying a subtree to a non-descendent node."""
     g = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    src_node = g.root.children["R"].children["L"]
-    dest_node = g.root.children["R"].children["R"]
+    src_node = games.node_at_history(g, ("R", "L"))
+    dest_node = games.node_at_history(g, ("R", "R"))
 
     g.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
 
@@ -122,8 +122,8 @@ def test_copy_tree_onto_nondescendent_terminal_node():
 def test_copy_tree_onto_descendent_terminal_node():
     """Test copying a subtree to a node that's a descendent of the original."""
     g = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    src_node = g.root.children["R"]
-    dest_node = g.root.children["R"].children["L"].children["R"]
+    src_node = games.node_at_history(g, ("R",))
+    dest_node = games.node_at_history(g, ("R", "L", "R"))
 
     g.copy_tree(gbt.H.path("R"), gbt.H.path("R", "L", "R"))
 
@@ -161,8 +161,8 @@ def test_append_move_same_infoset_list_of_nodes():
     """Test that nodes matched by a Selector are resolved in the same infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
     game.set_players(list(game.players) + ["Player 3"])
-    node1 = game.root.children["2"].children["1"]
-    node2 = game.root.children["1"].children["1"]
+    node1 = games.node_at_history(game, ("2", "1"))
+    node2 = games.node_at_history(game, ("1", "1"))
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches), "Player 3", ["B", "F"]
@@ -176,8 +176,8 @@ def test_append_move_actions_list_of_nodes():
     """
     game = games.read_from_file("sample_extensive_game.efg")
     game.set_players(list(game.players) + ["Player 3"])
-    node1 = game.root.children["2"].children["1"]
-    node2 = game.root.children["1"].children["1"]
+    node1 = games.node_at_history(game, ("2", "1"))
+    node2 = games.node_at_history(game, ("1", "1"))
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
@@ -192,8 +192,8 @@ def test_append_move_labels_list_of_nodes():
     """
     game = games.read_from_file("sample_extensive_game.efg")
     game.set_players(list(game.players) + ["Player 3"])
-    node1 = game.root.children["2"].children["1"]
-    node2 = game.root.children["1"].children["1"]
+    node1 = games.node_at_history(game, ("2", "1"))
+    node2 = games.node_at_history(game, ("1", "1"))
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
@@ -275,8 +275,8 @@ def test_append_event_creates_single_event_list_of_nodes():
     """Test that appending a Selector matching several nodes creates a single
     chance event."""
     game = games.read_from_file("sample_extensive_game.efg")
-    node1 = game.root.children["2"].children["1"]
-    node2 = game.root.children["1"].children["1"]
+    node1 = games.node_at_history(game, ("2", "1"))
+    node2 = games.node_at_history(game, ("1", "1"))
     matches = (("2", "1"), ("1", "1"))
     game.append_event(
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
@@ -289,7 +289,7 @@ def test_append_event_creates_single_event_list_of_nodes():
 def test_append_event_sets_distribution():
     """Test that the new event's actions carry the given probabilities."""
     game = games.read_from_file("sample_extensive_game.efg")
-    node = game.root.children["1"].children["1"]
+    node = games.node_at_history(game, ("1", "1"))
     game.append_event(gbt.H.path("1", "1"), {"a": gbt.Rational(1, 4), "b": gbt.Rational(3, 4)})
     assert list(node.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
@@ -343,7 +343,7 @@ def test_append_event_error_invalid_distribution():
 def test_insert_event_actions_labeled():
     """Test that the inserted event's actions are labeled according to `actions`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    node = game.root.children["L"].children["R"]
+    node = games.node_at_history(game, ("L", "R"))
     game.insert_event(gbt.H.path("L", "R"), {"Up": gbt.Rational(1, 2), "Down": gbt.Rational(1, 2)})
     assert list(node.parent.actions) == ["Up", "Down"]
     assert node.parent.player == "Chance"
@@ -352,7 +352,7 @@ def test_insert_event_actions_labeled():
 def test_insert_event_sets_distribution():
     """Test that the inserted event's actions carry the given probabilities."""
     game = games.read_from_file("basic_extensive_game.efg")
-    node = game.root
+    node = games.node_at_history(game, ())
     game.insert_event(gbt.H.path(), {"a": gbt.Rational(1, 4), "b": gbt.Rational(3, 4)})
     assert list(node.parent.action_probs.values()) == [gbt.Rational(1, 4), gbt.Rational(3, 4)]
 
@@ -409,7 +409,7 @@ def test_len_matches_expected_node_count():
     direct_len = _n_nodes(game)
     assert direct_len == expected_node_count
 
-    assert direct_len == _count_subtree_nodes(game.root, True)
+    assert direct_len == _count_subtree_nodes(games.node_at_history(game, ()), True)
 
 
 def test_len_after_delete_tree():
@@ -417,7 +417,7 @@ def test_len_after_delete_tree():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = _n_nodes(game)
 
-    root_of_the_deleted_subtree = game.root.children["R"].children["L"]
+    root_of_the_deleted_subtree = games.node_at_history(game, ("R", "L"))
     number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree, True) - 1
 
     game.delete_tree(gbt.H.path("R", "L"))
@@ -430,7 +430,7 @@ def test_len_after_delete_parent():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = _n_nodes(game)
 
-    node_parent_to_delete = game.root.children["L"].children["L"]
+    node_parent_to_delete = games.node_at_history(game, ("L", "L"))
 
     number_of_node_ancestors = _count_subtree_nodes(node_parent_to_delete, True)
     number_of_parent_ancestors = _count_subtree_nodes(node_parent_to_delete.parent, True)
@@ -459,7 +459,7 @@ def test_len_after_append_infoset():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
     initial_number_of_nodes = _n_nodes(game)
 
-    infoset_to_modify = game.root.children["L"]
+    infoset_to_modify = games.node_at_history(game, ("L",))
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
     game.append_infoset(gbt.H.path("L", "L", "l"), gbt.H.path("L"))
@@ -471,7 +471,7 @@ def test_len_after_set_move_actions_add():
     """Verify the node count is correct after `set_move_actions` creates an action."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = _n_nodes(game)
-    infoset_to_modify = game.root.children["L"]   # Player 2's infoset
+    infoset_to_modify = games.node_at_history(game, ("L",))   # Player 2's infoset
     num_nodes_in_infoset = len(infoset_to_modify.members)
     labels = list(infoset_to_modify.actions)
     game.set_move_actions(gbt.H.path("L"), labels + ["new"])
@@ -485,9 +485,9 @@ def test_len_after_set_move_actions_drop():
     action_to_drop = "L"
     nodes_to_delete = sum(
         _count_subtree_nodes(member.children[action_to_drop], True)
-        for member in game.root.members
+        for member in games.node_at_history(game, ()).members
     )
-    remaining = [a for a in game.root.actions if a != "L"]
+    remaining = [a for a in games.node_at_history(game, ()).actions if a != "L"]
     game.set_move_actions(gbt.H.path(), remaining, drop=True)
     assert _n_nodes(game) == initial_number_of_nodes - nodes_to_delete
 
@@ -508,7 +508,7 @@ def test_len_after_insert_move():
 def test_insert_move_actions_labeled():
     """Test that the inserted move's actions are labeled according to `actions`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
-    node = game.root.children["L"].children["R"]
+    node = games.node_at_history(game, ("L", "R"))
     game.insert_move(gbt.H.path("L", "R"), "Player 2", ["Up", "Down"])
     assert list(node.parent.actions) == ["Up", "Down"]
 
@@ -518,7 +518,7 @@ def test_len_after_insert_infoset():
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = _n_nodes(game)
 
-    infoset_to_modify = game.root.children["L"]
+    infoset_to_modify = games.node_at_history(game, ("L",))
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
     game.insert_infoset(gbt.H.path("L", "R"), gbt.H.path("L"))
@@ -530,7 +530,7 @@ def test_len_after_copy_tree():
     """Verify the node count is correct after `copy_tree`."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig1")
     initial_number_of_nodes = _n_nodes(game)
-    src_node = game.root.children["R"].children["L"]
+    src_node = games.node_at_history(game, ("R", "L"))
     number_of_src_ancestors = _count_subtree_nodes(src_node, True)
 
     game.copy_tree(gbt.H.path("R", "L"), gbt.H.path("R", "R"))
@@ -541,39 +541,39 @@ def test_len_after_copy_tree():
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_node_label_valid(label):
     game = games.read_from_file("basic_extensive_game.efg")
-    game.root.label = label
-    assert game.root.label == label
+    games.node_at_history(game, ()).label = label
+    assert games.node_at_history(game, ()).label == label
 
 
 def test_node_label_duplicate_raises_valueerror():
     game = games.read_from_file("basic_extensive_game.efg")
-    game.root.label = "shared"
+    games.node_at_history(game, ()).label = "shared"
     with pytest.raises(ValueError):
-        game.root.children["U1"].label = "shared"
+        games.node_at_history(game, ("U1",)).label = "shared"
 
 
 def test_node_label_empty_is_allowed():
     """Node labels may be empty (unlike outcomes/players); multiple empties coexist."""
     game = games.read_from_file("basic_extensive_game.efg")
-    game.root.label = ""
-    game.root.children["U1"].label = ""
-    assert game.root.label == ""
-    assert game.root.children["U1"].label == ""
+    games.node_at_history(game, ()).label = ""
+    games.node_at_history(game, ("U1",)).label = ""
+    assert games.node_at_history(game, ()).label == ""
+    assert games.node_at_history(game, ("U1",)).label == ""
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_node_label_invalid_raises_valueerror(label):
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.root.label = label
+        games.node_at_history(game, ()).label = label
 
 
 @pytest.mark.parametrize("label", games.UNICODE_LABELS)
 def test_node_label_unicode_accepted(label):
     """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = games.read_from_file("basic_extensive_game.efg")
-    game.root.label = label
-    assert game.root.label == label
+    games.node_at_history(game, ()).label = label
+    assert games.node_at_history(game, ()).label == label
 
 
 def test_make_infoset_change_player_keeps_membership():
@@ -581,23 +581,23 @@ def test_make_infoset_change_player_keeps_membership():
     membership."""
     game = games.read_from_file("basic_extensive_game.efg")
     _, p2, *_ = game.players
-    members = list(game.root.members)
+    members = list(games.node_at_history(game, ()).members)
     game.make_infoset(games.selector_for_nodes(members), p2)
-    assert game.root.player == p2
-    assert list(game.root.members) == members
+    assert games.node_at_history(game, ()).player == p2
+    assert list(games.node_at_history(game, ()).members) == members
 
 
 def test_make_infoset_terminal_node_raises():
     """All nodes must be decision nodes."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_infoset(gbt.H.path("U1", "U2", "U3"), game.root.player)
+        game.make_infoset(gbt.H.path("U1", "U2", "U3"), games.node_at_history(game, ()).player)
 
 
 def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
-    chance_node = game.root            # the deal is a chance move
+    chance_node = games.node_at_history(game, ())            # the deal is a chance move
     personal = next(n for n in games.all_nodes(game) if n.children and n.player != "Chance")
     game.make_infoset(gbt.H.path(), personal.player)
     assert chance_node.player != "Chance"
@@ -619,7 +619,9 @@ def test_make_infoset_empty_nodes_raises():
     """`nodes` must be nonempty."""
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(ValueError):
-        game.make_infoset(gbt.H.path(...).filter(lambda h: False), game.root.player)
+        game.make_infoset(
+            gbt.H.path(...).filter(lambda h: False), games.node_at_history(game, ()).player
+        )
 
 
 def test_make_infoset_strategic_game_raises():
@@ -633,11 +635,11 @@ def test_set_move_actions_add_preserves_existing_action_order():
     """New actions may be declared at any position; the existing actions' relative
     order is preserved."""
     game = games.read_from_file("basic_extensive_game.efg")
-    labels = list(game.root.actions)
+    labels = list(games.node_at_history(game, ()).actions)
     game.set_move_actions(gbt.H.path(), labels + ["end"])
-    assert list(game.root.actions)[:-1] == labels
+    assert list(games.node_at_history(game, ()).actions)[:-1] == labels
     game.set_move_actions(gbt.H.path(), ["front"] + labels + ["end"])
-    assert list(game.root.actions)[1:-1] == labels
+    assert list(games.node_at_history(game, ()).actions)[1:-1] == labels
 
 
 @pytest.mark.parametrize(
@@ -654,8 +656,8 @@ def test_make_event_sets_probabilities(inprobs, outprobs):
     """
     game = games.read_from_file("stripped_down_poker.efg")
     game.make_event(gbt.H.path(), inprobs, "Deal")
-    probs = game.root.action_probs
-    for action, prob in zip(game.root.actions, outprobs, strict=True):
+    probs = games.node_at_history(game, ()).action_probs
+    for action, prob in zip(games.node_at_history(game, ()).actions, outprobs, strict=True):
         assert probs[action] == prob
 
 
@@ -670,7 +672,7 @@ def test_make_event_probs_not_a_mapping_raises_typeerror(probs):
 def test_make_event_pools_nodes_from_different_infosets():
     """Nodes in distinct information sets are formed into a single event."""
     game = games.read_from_file("stripped_down_poker.efg")
-    nodes = [game.root.children["King"], game.root.children["Queen"]]
+    nodes = [games.node_at_history(game, ("King",)), games.node_at_history(game, ("Queen",))]
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
     assert nodes[0] in nodes[1].members
     assert list(nodes[0].action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
@@ -691,7 +693,7 @@ def test_make_event_requires_matching_action_labels():
 def test_make_event_converts_personal_node():
     """A personal decision node becomes a chance node carrying the probabilities given."""
     game = games.read_from_file("stripped_down_poker.efg")
-    node = game.root.children["King"]
+    node = games.node_at_history(game, ("King",))
     game.make_event(gbt.H.path("King"), {"Bet": "1/4", "Fold": "3/4"})
     assert node.player == "Chance"
     assert list(node.action_probs.values()) == [gbt.Rational("1/4"), gbt.Rational("3/4")]
@@ -730,7 +732,7 @@ def test_make_event_label_reused_when_fully_absorbed():
     event's members are absorbed into the new one; the old event is not left behind.
     """
     game = games.read_from_file("stripped_down_poker.efg")
-    nodes = [game.root.children["King"], game.root.children["Queen"]]
+    nodes = [games.node_at_history(game, ("King",)), games.node_at_history(game, ("Queen",))]
     game.make_event(gbt.H.path(...), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
     assert nodes[0] in nodes[1].members
@@ -762,10 +764,10 @@ def _bagwell_p2_nodes(game: gbt.Game) -> tuple[gbt.Node, gbt.Node, gbt.Node, gbt
     can produce -- each with two members and actions ("S", "C").  Returns
     (A, B, C, D) with {A, B} the members of one and {C, D} of the other.
     """
-    return (game.root.children["S"].children["s"],
-            game.root.children["C"].children["s"],
-            game.root.children["S"].children["c"],
-            game.root.children["C"].children["c"])
+    return (games.node_at_history(game, ("S", "s")),
+            games.node_at_history(game, ("C", "s")),
+            games.node_at_history(game, ("S", "c")),
+            games.node_at_history(game, ("C", "c")))
 
 
 def test_make_infoset_cherry_pick_leaves_rumps():
@@ -824,8 +826,8 @@ def test_make_infoset_across_different_source_players():
     game.append_move(gbt.H.path(), "1", ["a", "b"])
     game.append_move(gbt.H.path("a"), "2", ["a", "b"])   # player 2
     game.append_move(gbt.H.path("b"), "3", ["a", "b"])   # player 3
-    n2 = game.root.children["a"]
-    n3 = game.root.children["b"]
+    n2 = games.node_at_history(game, ("a",))
+    n3 = games.node_at_history(game, ("b",))
     assert n2.player == "2"
     assert n3.player == "3"
     game.make_infoset(gbt.H.path(...), "1")
@@ -837,22 +839,22 @@ def test_make_infoset_across_different_source_players():
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_action_label(label: str):
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.actions))
+    action = next(iter(games.node_at_history(game, ()).actions))
     game.relabel_actions(gbt.H.path(), {action: label})
-    assert label in game.root.actions
+    assert label in games.node_at_history(game, ()).actions
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_action_label_invalid_raises_valueerror(label: str):
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.actions))
+    action = next(iter(games.node_at_history(game, ()).actions))
     with pytest.raises(ValueError):
         game.relabel_actions(gbt.H.path(), {action: label})
 
 
 def test_relabel_action_empty_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
-    action = next(iter(game.root.actions))
+    action = next(iter(games.node_at_history(game, ()).actions))
     with pytest.raises(ValueError):
         game.relabel_actions(gbt.H.path(), {action: ""})
 
@@ -869,7 +871,7 @@ def test_relabel_actions_simultaneous_swap():
     """
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(gbt.H.path(), {"King": "Queen", "Queen": "King"})
-    assert list(game.root.actions) == ["Queen", "King"]
+    assert list(games.node_at_history(game, ()).actions) == ["Queen", "King"]
 
 
 def test_relabel_actions_duplicate_targets_raises_valueerror():
@@ -890,7 +892,7 @@ def test_relabel_actions_unknown_label_raises_keyerror():
 def test_relabel_actions_unknown_label_not_strict_is_ignored():
     game = games.create_stripped_down_poker_efg()
     game.relabel_actions(gbt.H.path(), {"Jack": "Ace", "King": "Ace"}, strict=False)
-    assert list(game.root.actions) == ["Ace", "Queen"]
+    assert list(games.node_at_history(game, ()).actions) == ["Ace", "Queen"]
 
 
 def test_relabel_actions_failure_leaves_game_unchanged():
@@ -900,7 +902,7 @@ def test_relabel_actions_failure_leaves_game_unchanged():
     game = games.create_stripped_down_poker_efg()
     with pytest.raises(ValueError):
         game.relabel_actions(gbt.H.path(), {"King": "Ace", "Queen": ""})
-    assert list(game.root.actions) == ["King", "Queen"]
+    assert list(games.node_at_history(game, ()).actions) == ["King", "Queen"]
 
 
 def test_relabel_actions_scope_is_the_information_set():
@@ -964,7 +966,7 @@ def test_set_move_actions_reorder_carries_subtrees():
         gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in (("x", "a"), ("y", "b"))),
         "Bob", ["l", "r"]
     )
-    infoset = game.root.children["x"]
+    infoset = games.node_at_history(game, ("x",))
     members = list(infoset.members)
     children_before = [{label: member.children[label] for label in ("a", "b", "c")}
                        for member in members]
@@ -985,7 +987,7 @@ def test_set_move_actions_add_drop_and_reorder_together():
     assert _n_nodes(game) == nodes_before - 3 + 1
     # Bob's response infoset survives, now with only its Queen-side member: the
     # King-side member (found via the removed "Bet" action) is gone with the subtree.
-    assert len(game.root.children["Queen"].children["Bet"].members) == 1
+    assert len(games.node_at_history(game, ("Queen", "Bet")).members) == 1
 
 
 def test_set_move_actions_unconfirmed_drop_and_disabled_add_raise():
@@ -1029,8 +1031,8 @@ def test_set_move_actions_absent_minded_drop_and_add():
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     game.append_infoset(gbt.H.path("a"), gbt.H.path())
     game.set_move_actions(gbt.H.path(), ["b", "c"], drop=True)
-    assert list(game.root.actions) == ["b", "c"]
-    assert len(game.root.members) == 1
+    assert list(games.node_at_history(game, ()).actions) == ["b", "c"]
+    assert len(games.node_at_history(game, ()).members) == 1
     assert _n_nodes(game) == 3
 
 
@@ -1038,16 +1040,18 @@ def test_set_event_actions_reorder_carries_probabilities():
     game = games.create_stripped_down_poker_efg()
     game.set_event_actions(gbt.H.path(), {"King": "3/4", "Queen": "1/4"})
     game.set_event_actions(gbt.H.path(), {"Queen": "1/4", "King": "3/4"})
-    assert list(game.root.actions) == ["Queen", "King"]
-    assert game.root.action_probs == {"Queen": gbt.Rational(1, 4), "King": gbt.Rational(3, 4)}
+    assert list(games.node_at_history(game, ()).actions) == ["Queen", "King"]
+    assert games.node_at_history(game, ()).action_probs == {
+        "Queen": gbt.Rational(1, 4), "King": gbt.Rational(3, 4)
+    }
 
 
 def test_set_event_actions_add_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     nodes_before = _n_nodes(game)
     game.set_event_actions(gbt.H.path(), {"Jack": "1/2", "King": "1/4", "Queen": "1/4"})
-    assert list(game.root.actions) == ["Jack", "King", "Queen"]
-    assert game.root.action_probs == {
+    assert list(games.node_at_history(game, ()).actions) == ["Jack", "King", "Queen"]
+    assert games.node_at_history(game, ()).action_probs == {
         "Jack": gbt.Rational(1, 2), "King": gbt.Rational(1, 4), "Queen": gbt.Rational(1, 4)
     }
     assert _n_nodes(game) == nodes_before + 1
@@ -1056,8 +1060,8 @@ def test_set_event_actions_add_with_probs_mapping():
 def test_set_event_actions_drop_with_probs_mapping():
     game = games.create_stripped_down_poker_efg()
     game.set_event_actions(gbt.H.path(), {"King": 1}, drop=True)
-    assert list(game.root.actions) == ["King"]
-    assert game.root.action_probs == {"King": 1}
+    assert list(games.node_at_history(game, ()).actions) == ["King"]
+    assert games.node_at_history(game, ()).action_probs == {"King": 1}
 
 
 def test_set_event_actions_unconfirmed_drop_and_disabled_add_raise():

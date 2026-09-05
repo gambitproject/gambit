@@ -119,8 +119,8 @@ def test_mixed_behavior_profile_game_structure_changed():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__setitem__(game.root, {})
+            profile.__setitem__(gbt.H.path(), {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.set_mixed_action(game.root, {})
+            profile.set_mixed_action(gbt.H.path(), {})
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.__getitem__(game.root)
+            profile.__getitem__(gbt.H.path())

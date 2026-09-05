@@ -2,11 +2,13 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
+
 
 def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = game.root.children
+    up, middle, down = games.node_at_history(game, ()).children
     outcome = game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
     )
@@ -20,7 +22,7 @@ def test_make_outcome_attaches_to_all_given_nodes():
 def test_make_outcome_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = game.root.children
+    up, middle, down = games.node_at_history(game, ()).children
     outcome = game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
     assert up.outcome == outcome
     assert not middle.outcome
@@ -30,7 +32,7 @@ def test_make_outcome_accepts_selector():
 def test_make_outcome_accepts_selector_matching_several_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = game.root.children
+    up, middle, down = games.node_at_history(game, ()).children
     outcome = game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
     assert up.outcome == outcome
     assert middle.outcome == outcome
@@ -42,7 +44,7 @@ def test_make_outcome_accepts_grouped_selector_pooled():
     receives the same outcome, regardless of grouping."""
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = game.root.children
+    up, middle, down = games.node_at_history(game, ()).children
     outcome = game.make_outcome(
         gbt.H.path(...).by(lambda h: h[0]), {"Alice": 1, "Bob": -1}, "shared"
     )
@@ -56,7 +58,7 @@ def test_make_outcome_error_location_not_a_selector():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     with pytest.raises(TypeError):
-        game.make_outcome(game.root.children["U"], {"Alice": 1}, "w")
+        game.make_outcome(games.node_at_history(game, ("U",)), {"Alice": 1}, "w")
     with pytest.raises(TypeError):
         game.make_outcome(("U",), {"Alice": 1}, "w")
 
@@ -132,7 +134,7 @@ def test_make_outcome_payoffs_naming_player_twice_raises():
 def test_make_outcome_null_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = game.root.children
+    up, middle, down = games.node_at_history(game, ()).children
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
     )
@@ -147,7 +149,7 @@ def test_make_outcome_null_error_location_not_a_selector():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     with pytest.raises(TypeError):
-        game.make_outcome_null(game.root.children["U"])
+        game.make_outcome_null(games.node_at_history(game, ("U",)))
     with pytest.raises(TypeError):
         game.make_outcome_null(("U",))
 
@@ -175,7 +177,7 @@ def test_make_outcome_null_removes_fully_orphaned_outcome():
 def test_make_outcome_null_keeps_partially_referenced_outcome():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    middle = game.root.children["M"]
+    middle = games.node_at_history(game, ("M",))
     game.make_outcome(gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1}, "shared")
     outcome_count = len(game.outcomes)
     game.make_outcome_null(gbt.H.path("U"))
@@ -186,7 +188,7 @@ def test_make_outcome_null_keeps_partially_referenced_outcome():
 def test_make_outcome_null_on_already_null_node_is_a_no_op():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
-    up = game.root.children["U"]
+    up = games.node_at_history(game, ("U",))
     outcome_count = len(game.outcomes)
     game.make_outcome_null(gbt.H.path("U"))
     assert outcome_count == len(game.outcomes)
