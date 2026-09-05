@@ -228,11 +228,12 @@ def _canonical_history(node: Node) -> tuple:
 
 
 class HistoryView:
-    """The object a `.by(callable)` key function actually receives.  Supports
-    plain sequence indexing/slicing like a `History` tuple, plus limited
-    game-aware navigation (`.last_action(player)`) -- but never exposes the
-    `Node`/game it's privately backed by.  Never returned to calling code
-    outside a `.by(callable)` call; not constructible directly.
+    """The object a `.filter(callable)`/`.by(callable)` predicate, or
+    `Game.behavior_support_profile`'s `actions` callback, actually receives.
+    Supports plain sequence indexing/slicing like a `History` tuple, plus
+    limited game-aware navigation (`.last_action(player)`) -- but never
+    exposes the `Node`/game it's privately backed by.  Not constructible
+    directly.
 
     .. versionadded:: 17.0.0
     """

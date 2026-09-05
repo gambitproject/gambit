@@ -72,7 +72,7 @@ def test_getitem_setitem_reject_history():
 
 def test_predicate_construction():
     game = games.read_from_file("mixed_behavior_game.efg")
-    profile = game.behavior_support_profile(lambda node, a: a != "D1")
+    profile = game.behavior_support_profile(lambda history, a: a != "D1")
     assert set(profile[_find_selector(game, "Infoset 1:1")]) == {"U1"}
 
 
@@ -81,7 +81,7 @@ def test_predicate_construction_error():
     root's) triggers "attempted to remove the last action"."""
     game = games.read_from_file("mixed_behavior_game.efg")
     with pytest.raises(ValueError):
-        game.behavior_support_profile(lambda node, a: node._parent() is not None)
+        game.behavior_support_profile(lambda history, a: len(history) > 0)
 
 
 def test_iter_yields_one_support_per_player():

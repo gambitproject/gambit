@@ -1481,9 +1481,13 @@ class Game:
         ----------
         actions : function, optional
             By default the support profile contains all actions at all information
-            sets. If specified, called as ``actions(node, action)`` for each action at
-            each information set, where ``node`` is a representative node of the
-            information set; only actions for which it returns `True` are included.
+            sets. If specified, called as ``actions(history, action)`` for each action
+            at each information set, where ``history`` is a read-only `HistoryView` (see
+            `Selector.filter`) of a representative member of the information set; only
+            actions for which it returns `True` are included.
+
+        .. versionchanged:: 17.0.0
+            ``actions`` is now called with a `HistoryView` rather than a `Node`.
 
         Returns
         -------
@@ -1493,9 +1497,11 @@ class Game:
         if actions is not None:
             for player in self.players:
                 for node in self._get_infosets(player):
+                    history_view = HistoryView._wrap(node, _history_of(node))
                     infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
                     for action in infoset_handle.deref().GetActions():
-                        if not actions(node, action.deref().GetLabel().decode("utf-8")):
+                        label = action.deref().GetLabel().decode("utf-8")
+                        if not actions(history_view, label):
                             if not deref(profile.profile).RemoveAction(action):
                                 raise ValueError(
                                     "attempted to remove the last action at an information set"
