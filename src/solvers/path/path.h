@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/solvers/logit/path.h
+// FILE: src/solvers/path/path.h
 // Interface to generic smooth path-following algorithm.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -72,6 +72,7 @@ struct TracePathResult {
 //
 class PathTracer {
 public:
+  enum class TraceDirection { Positive = 1, Negative = -1 };
   PathTracer() = default;
   virtual ~PathTracer() = default;
 
@@ -84,7 +85,8 @@ public:
   TracePathResult
   TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
             std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
+            Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
+            TerminationFunctionType p_terminate,
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction,

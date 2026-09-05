@@ -38,6 +38,7 @@ static wxString s_enumpure(wxT("by looking for pure strategy equilibria"));
 static wxString s_enummixed(wxT("by enumerating extreme points"));
 static wxString s_enumpoly(wxT("by solving systems of polynomial equations"));
 static wxString s_gnm(wxT("by global Newton tracing"));
+static wxString s_hp(wxT("by the Herings-Peeters homotopy"));
 static wxString s_ipa(wxT("by iterated polymatrix approximation"));
 static wxString s_lp(wxT("by solving a linear program"));
 static wxString s_lcp(wxT("by solving a linear complementarity program"));
@@ -91,6 +92,9 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
   if (p_method == s_gnm) {
     return GNMNashSpec{};
   }
+  if (p_method == s_hp) {
+    return HPNashSpec{};
+  }
   if (p_method == s_ipa) {
     return IPANashSpec{};
   }
@@ -118,7 +122,7 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
 template <class M>
 concept StrategicMethod =
     std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
-    std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
+    std::same_as<M, GNMNashSpec> || std::same_as<M, HPNashSpec> || std::same_as<M, IPANashSpec> ||
     std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
 
 template <class M>
@@ -169,6 +173,9 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                                            method.perturbations, method.lambdaEnd, method.steps,
                                            method.localNewtonInterval,
                                            method.localNewtonMaxIterations);
+        }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return prefix + wxString::Format("hp -d 10 -n %d", method.priors);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations);
@@ -223,6 +230,9 @@ wxString MethodDescription(const NashMethodSpec &p_method)
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
           return wxT("by global Newton tracing");
         }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return wxT("by the Herings-Peeters homotopy");
+        }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return wxT("by iterated polymatrix approximation");
         }
@@ -262,6 +272,9 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
               "every %d steps, at most %d iterations)",
               method.perturbations, method.lambdaEnd, method.steps, method.localNewtonInterval,
               method.localNewtonMaxIterations);
+        }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return wxString::Format(" (%d random priors)", method.priors);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return wxString::Format(" (%d perturbation)", method.perturbations);
@@ -387,6 +400,7 @@ void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
     m_methodChoice->Append(s_liap);
     m_methodChoice->Append(s_gnm);
     m_methodChoice->Append(s_ipa);
+    m_methodChoice->Append(s_hp);
     m_methodChoice->Append(s_enumpoly);
   }
   else {

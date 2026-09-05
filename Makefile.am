@@ -277,6 +277,12 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
+hp_SOURCES = \
+	src/solvers/hp/hp.h \
+	src/solvers/hp/hp.cc \
+	src/solvers/hp/hpsystem.h \
+	src/solvers/hp/hpsystem.cc
+
 nashsupport_SOURCES = \
 	src/solvers/nashsupport/efgsupport.cc \
 	src/solvers/nashsupport/nfgsupport.cc \
@@ -306,14 +312,21 @@ liap_SOURCES = \
 	src/solvers/liap/nfgliap.cc \
 	src/solvers/liap/liap.h
 
+path_SOURCES = \
+	src/solvers/path/path.cc \
+	src/solvers/path/path.h
+
 logit_SOURCES = \
 	src/solvers/logit/logbehav.h \
 	src/solvers/logit/logbehav.imp \
-	src/solvers/logit/path.cc \
-	src/solvers/logit/path.h \
     src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc
+
+homotopy_SOURCES = \
+	${path_SOURCES} \
+	${logit_SOURCES} \
+	${hp_SOURCES}
 
 simpdiv_SOURCES = \
 	src/solvers/simpdiv/simpdiv.cc \
@@ -357,14 +370,14 @@ AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 ## recompiling the same core/games/solver sources from scratch.
 
 noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
-	libliap.a liblogit.a libsimpdiv.a libenumpoly.a
+	libliap.a libhomotopy.a libsimpdiv.a libenumpoly.a
 
 libcore_a_SOURCES = ${core_SOURCES}
 libgames_a_SOURCES = ${game_SOURCES}
 libbimatrix_a_SOURCES = ${bimatrix_SOURCES}
 libgtracer_a_SOURCES = ${gtracerlib_SOURCES}
 libliap_a_SOURCES = ${liap_SOURCES}
-liblogit_a_SOURCES = ${logit_SOURCES}
+libhomotopy_a_SOURCES = ${homotopy_SOURCES}
 libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
 libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
 
@@ -443,7 +456,7 @@ gambit_SOURCES = \
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
 gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
-gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
+gambit_LDADD_LIBS = libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
 gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)

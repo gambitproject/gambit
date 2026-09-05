@@ -209,6 +209,15 @@ def create_efg_corresponding_to_bimatrix_game(g: gbt.Game) -> gbt.Game:
     return create_efg_corresponding_to_bimatrix_game_arrays(A, B, g.title)
 
 
+def create_hs1988_base_game() -> gbt.Game:
+    """The base 2x2 game used in all examples from Harsanyi & Selten (1988) Section 4.11,
+    also featured as Figure 1 of Herings & Peeters (2001).
+    """
+    p1_payoffs = np.array([[2, 0], [0, 1]])
+    p2_payoffs = np.array([[1, 0], [0, 4]])
+    return gbt.Game.from_arrays(p1_payoffs, p2_payoffs, title="HS 1988 Base Game")
+
+
 ################################################################################################
 # Extensive-form games (efg)
 
