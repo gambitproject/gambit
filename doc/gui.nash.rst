@@ -87,7 +87,6 @@ Method            Parameters used by the graphical interface
 ``ipa``           One random perturbation.
 ``gnm``           One random perturbation; ending lambda ``-10``; 100 steps per support cell;
                   local Newton refinement every 3 steps, with at most 10 iterations.
-``hp``            No method-specific parameters.
 ================  ============================================================================
 
 For extensive games, there is an option of whether to use the
