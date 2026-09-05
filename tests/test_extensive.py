@@ -533,10 +533,10 @@ def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
             behavior = game.get_behavior(player, strategy)
             assert tuple(
                 "*" if (
-                    action := behavior.get(games.selector_for_node(next(iter(infoset.members))))
+                    action := behavior.get(gbt.H.path(*history))
                 ) is None
-                else str(infoset.actions.index(action) + 1)
-                for infoset in games.player_infosets(game, player)
+                else str(game.get_actions(gbt.H.path(*history)).index(action) + 1)
+                for history in games.player_infosets(game, player)
             ) == expected
 
 

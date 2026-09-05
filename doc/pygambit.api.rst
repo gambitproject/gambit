@@ -16,8 +16,8 @@ Representation of games
    Game
    Outcome
    Node
-   Branch
-   Subgame
+   TreeLayout
+   TreeLayoutCoordinates
 
 
 Creating, reading, and writing games
@@ -41,6 +41,15 @@ Creating, reading, and writing games
    Game.to_nfg
    Game.to_html
    Game.to_latex
+
+
+Computing a tree layout for graphical display
+..............................................
+
+.. autosummary::
+   :toctree: api/
+
+   layout_tree
 
 
 Transforming game trees
@@ -106,17 +115,16 @@ Information about the game
    Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
-   Game.root
    Game.get_infosets
    Game.get_events
    Game.get_strategies
    Game.get_sequences
-   Game.nodes
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs
-   Game.subgames
+   Game.get_subgame_roots
    Game.get_minimal_subgame
+   Game.get_strategy_unreachable
 
 .. autosummary::
    :toctree: api/
@@ -128,32 +136,10 @@ Information about the game
 .. autosummary::
    :toctree: api/
 
-   Node.label
-   Node.game
-   Node.outcome
-   Node.children
-   Node.parent
-   Node.is_subgame_root
-   Node.is_terminal
-   Node.is_strategy_reachable
-   Node.prior_action
-   Node.prior_sibling
-   Node.next_sibling
    Node.members
    Node.actions
    Node.action_probs
    Node.player
-   Node.is_successor_of
-   Node.plays
-   Node.own_prior_action
-
-.. autosummary::
-   :toctree: api/
-
-   Subgame.game
-   Subgame.root
-   Subgame.parent
-   Subgame.children
 
 .. autosummary::
 

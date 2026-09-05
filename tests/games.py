@@ -9,28 +9,37 @@ import numpy as np
 import pygambit as gbt
 
 
-def all_infosets(game: gbt.Game) -> list[gbt.Node]:
-    """A representative node of every information set belonging to a personal
-    player, across every player, in the canonical order `Game.infosets` used to
-    yield before its removal (17.0.0). One node per information set, matching
-    `Game.get_infosets`; use `.members`/`.actions`/etc. on the node, which already
-    proxy to its information set."""
-    return [n for p in game.players for n in game.get_infosets(p)]
+def all_infosets(game: gbt.Game) -> list[tuple]:
+    """The History of a representative member of every information set belonging
+    to a personal player, across every player, in the canonical order
+    `Game.infosets` used to yield before its removal (17.0.0). One History per
+    information set, matching `Game.get_infosets`."""
+    return [h for p in game.players for h in game.get_infosets(p)]
 
 
-def player_infosets(game: gbt.Game, player: str) -> list[gbt.Node]:
-    """A representative node of every information set belonging to `player`, in
-    canonical order, matching `Player.infosets` before its removal (17.0.0)."""
+def all_nodes(game: gbt.Game) -> list[gbt.Node]:
+    """Every node in the game, in depth-first traversal order, matching
+    `Game.nodes` before its removal (17.0.0)."""
+    return game._all_nodes()
+
+
+def children_histories(game: gbt.Game, history: tuple) -> list[tuple]:
+    """The Histories of the children of the node at `history` -- the standard way
+    to enumerate a node's children now that `Node.children` is removed (17.0.0)."""
+    return [(*history, action) for action in game.get_actions(gbt.H.path(*history))]
+
+
+def children_of(game: gbt.Game, history: tuple) -> list[gbt.Node]:
+    """The children of the node at `history`, as real Nodes -- for callers that
+    need actual `Node` objects (e.g. `.members`/`.player`), not just Histories."""
+    return [node_at_history(game, h) for h in children_histories(game, history)]
+
+
+def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
+    """The History of a representative member of every information set belonging
+    to `player`, in canonical order, matching `Player.infosets` before its
+    removal (17.0.0)."""
     return list(game.get_infosets(player))
-
-
-def infoset_number(node: gbt.Node) -> int:
-    """The 0-based position of `node`'s information set among its player's
-    information sets, matching the removed `Infoset.number` (17.0.0)."""
-    for i, rep in enumerate(node.game.get_infosets(node.player)):
-        if rep in node.members:
-            return i
-    raise ValueError("node is terminal, has no information set")
 
 
 # (game.title, infoset label) -> the History of a member node, hand-verified against
@@ -83,17 +92,17 @@ _INFOSET_LABEL_HISTORIES = {
 }
 
 
-def _node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
-    node = game.root
-    for step in history:
-        node = node.children[step]
-    return node
+def node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
+    """The Node reached by following `history` (a tuple of action labels) from
+    the root -- the standard way to obtain a `Node` now that `Game.root` is
+    removed (17.0.0): `H.path(*history)` always resolves to exactly one node."""
+    return game._get_nodes(gbt.H.path(*history))[0]
 
 
 def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Node:
     """The representative node of `player`'s information set historically identified
     by `label`, matching `Player.infosets[label]` before its removal (17.0.0)."""
-    node = _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
+    node = node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
     assert node.player == player
     return node
 
@@ -102,16 +111,17 @@ def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Node:
     """The representative node of the information set historically identified by
     `label`, searching across all (personal) players, matching
     `Game.infosets[label]` before its removal (17.0.0)."""
-    return _node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
+    return node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
 
 
 def _node_history(node: gbt.Node) -> tuple:
-    """The plain-tuple history of `node`, walked via `.parent`/`.prior_action`."""
+    """The plain-tuple history of `node`, walked via the private
+    `Node._parent`/`._prior_action`."""
     labels = []
     current = node
-    while current.parent is not None:
-        labels.append(current.prior_action.label)
-        current = current.parent
+    while current._parent() is not None:
+        labels.append(current._prior_action().label)
+        current = current._parent()
     labels.reverse()
     return tuple(labels)
 
@@ -121,6 +131,14 @@ def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
     nodes -- for adapting fixtures that compute a `Node` list dynamically to the
     `H`-only mutation methods."""
     histories = frozenset(_node_history(n) for n in nodes)
+    return gbt.H.after().filter(lambda h: h[:] in histories)
+
+
+def selector_for_histories(histories: list[tuple]) -> gbt.Selector:
+    """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
+    Histories -- the History-only counterpart to `selector_for_nodes`, for
+    fixtures that already work in terms of `History` rather than `Node`."""
+    histories = frozenset(histories)
     return gbt.H.after().filter(lambda h: h[:] in histories)
 
 
@@ -340,9 +358,9 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
     def calculate_payoffs(term_node):
         def get_path(node):
             path = []
-            while node.parent:
-                path.append(node.prior_action.label)
-                node = node.parent
+            while node._parent():
+                path.append(node._prior_action().label)
+                node = node._parent()
             return path
 
         def showdown(deal, payoffs, pot):
@@ -386,7 +404,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         (-2, 2): "BOb wins 2",
     }
     nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
-    for term_node in [n for n in g.nodes if n.is_terminal]:
+    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
         nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
 
     for payoffs, nodes in nodes_by_payoff.items():
@@ -417,14 +435,14 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         payoffs_by_key[f"{player} calls and loses"] = (-1, 4) if player == "Alice" else (4, -1)
 
     nodes_by_key = {key: [] for key in payoffs_by_key}
-    nodes_by_key["Ante"].append(g.root)
+    nodes_by_key["Ante"].append(node_at_history(g, ()))
 
     def collect_nodes(term_node):
         def get_path(node):
             path = []
-            while node.parent:
-                path.append((node, node.prior_action.label))
-                node = node.parent
+            while node._parent():
+                path.append((node, node._prior_action().label))
+                node = node._parent()
             return path
 
         path = get_path(term_node)
@@ -453,7 +471,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
                 tmp = "wins" if winner == "Bob" else "loses"
                 nodes_by_key[f"Bob calls and {tmp}"].append(n)
 
-    for term_node in [n for n in g.nodes if n.is_terminal]:
+    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
         collect_nodes(term_node)
 
     for key, nodes in nodes_by_key.items():
@@ -794,7 +812,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.set_size_of_rsf(rs)
         return rs
 
-    def create_binary_tree(self, g, node, path, whose_turn, depth, max_depth):
+    def create_binary_tree(self, g, path, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
             g.make_outcome(
@@ -806,20 +824,21 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             g.append_move(gbt.H.path(*path), current_player, ["L", "R"])
 
             whose_turn = (whose_turn + 1) % self.n_players
-            for label, child in zip(["L", "R"], node.children, strict=True):
-                self.create_binary_tree(g, child, (*path, label), whose_turn, depth + 1, max_depth)
+            for label in ["L", "R"]:
+                self.create_binary_tree(g, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
         g = gbt.Game.new_tree(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
-        self.create_binary_tree(g, g.root, (), 0, 0, self.level)
-        for n in g.nodes:
-            if not n.is_terminal and not n.children["L"].is_terminal:
-                left = n.children["L"]
+        self.create_binary_tree(g, (), 0, 0, self.level)
+        for n in all_nodes(g):
+            history = _node_history(n)
+            if g.get_actions(gbt.H.path(*history)) and g.get_actions(gbt.H.path(*history, "L")):
+                left, right = children_of(g, history)
                 g.make_infoset(
-                    selector_for_nodes(list(left.members) + [n.children["R"]]),
+                    selector_for_nodes(list(left.members) + [right]),
                     left.player,
                 )
         return g

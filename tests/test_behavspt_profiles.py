@@ -5,28 +5,25 @@ import pygambit as gbt
 from . import games
 
 
-def _find_selector(game, label):
-    """A `Selector` resolving to the infoset with the given label."""
-    return games.selector_for_node(games.find_infoset_in_game(game, label))
-
-
 def _find_history(game, label):
     """The History of a member node of the infoset with the given label."""
-    return games._node_history(games.find_infoset_in_game(game, label))
+    return games._INFOSET_LABEL_HISTORIES[(game.title, label)]
 
 
-def _branching_game():
+def _find_selector(game, label):
+    """A `Selector` resolving to the infoset with the given label."""
+    return gbt.H.path(*_find_history(game, label))
+
+
+def _branching_game() -> gbt.Game:
     """A small tree where P1 chooses L/R, each leading to a separate P2 decision, so
     that removing an action can make a whole subtree's information set unreachable.
     """
     game = gbt.Game.new_tree(players=["P1", "P2"])
-    root = game.root
     game.append_move(gbt.H.path(), "P1", ["L", "R"])
-    left = root.children["L"]
-    right = root.children["R"]
     game.append_move(gbt.H.path("L"), "P2", ["A", "B"])
     game.append_move(gbt.H.path("R"), "P2", ["A", "B"])
-    return game, root, left, right
+    return game
 
 
 def test_getitem_by_selector():
@@ -61,22 +58,21 @@ def test_getitem_rejects_other_types():
         profile[0]
 
 
-def test_getitem_setitem_reject_node():
-    """Profile indexing is `Selector`-only: a bare `Node` -- even one obtained
-    straight from the game, e.g. `game.root` -- is no longer accepted, following
-    the same pattern as `Game.get_minimal_subgame`.
+def test_getitem_setitem_reject_history():
+    """Profile indexing is `Selector`-only: a bare `History` tuple is no longer
+    accepted, following the same pattern as `Game.get_minimal_subgame`.
     """
-    game, root, _, _ = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
     with pytest.raises(TypeError):
-        profile[root]
+        profile[("L",)]
     with pytest.raises(TypeError):
-        profile[root] = ["R"]
+        profile[("L",)] = ["A"]
 
 
 def test_predicate_construction():
     game = games.read_from_file("mixed_behavior_game.efg")
-    profile = game.behavior_support_profile(lambda node, a: a != "D1")
+    profile = game.behavior_support_profile(lambda history, a: a != "D1")
     assert set(profile[_find_selector(game, "Infoset 1:1")]) == {"U1"}
 
 
@@ -85,7 +81,7 @@ def test_predicate_construction_error():
     root's) triggers "attempted to remove the last action"."""
     game = games.read_from_file("mixed_behavior_game.efg")
     with pytest.raises(ValueError):
-        game.behavior_support_profile(lambda node, a: node.parent is not None)
+        game.behavior_support_profile(lambda history, a: len(history) > 0)
 
 
 def test_iter_yields_one_support_per_player():
@@ -154,24 +150,24 @@ def test_actionsupport_is_snapshot():
 
 
 def test_getitem_setitem_use_selector():
-    game, root, _, _ = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
-    root_selector = games.selector_for_node(root)
+    root_selector = gbt.H.path()
     assert set(profile[root_selector]) == {"L", "R"}
     profile[root_selector] = ["R"]
     assert set(profile[root_selector]) == {"R"}
 
 
 def test_is_infoset_reachable():
-    game, root, left, right = _branching_game()
+    game = _branching_game()
     profile = game.behavior_support_profile()
-    left_selector = games.selector_for_node(left)
-    right_selector = games.selector_for_node(right)
+    left_selector = gbt.H.path("L")
+    right_selector = gbt.H.path("R")
     assert profile.is_infoset_reachable(left_selector)
     assert profile.is_infoset_reachable(right_selector)
 
     copy = profile.copy()
-    copy[games.selector_for_node(root)] = ["R"]
+    copy[gbt.H.path()] = ["R"]
     assert not copy.is_infoset_reachable(left_selector)
     assert copy.is_infoset_reachable(right_selector)
     # the original, un-mutated profile is unaffected

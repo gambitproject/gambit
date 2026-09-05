@@ -150,7 +150,7 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g.get_outcome(contingency)
+            outcome = g._get_outcome_object(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
         g.title = title
@@ -239,7 +239,7 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g.get_outcome(contingency)
+            outcome = g._get_outcome_object(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
         g.title = title
@@ -308,37 +308,10 @@ class Game:
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
 
-    def get_infosets(self, player: str) -> list[Node]:
-        """Returns a snapshot of the information sets belonging to the personal
-        player `player`: the decisions at which that player chooses an action.
-
-        One representative member node is returned per information set, in the order
-        the information sets are encountered in the pre-order depth first traversal of
-        the game tree. This is a materialized snapshot, not a live view: it reflects
-        the game's state at the moment of the call, and does not change if the game is
-        subsequently mutated.
-
-        Parameters
-        ----------
-        player : str
-            The label of the personal player whose information sets to return.
-
-        Returns
-        -------
-        list of Node
-            One representative member node per information set belonging to `player`.
-
-        .. versionadded:: 17.0.0
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        KeyError
-            If no player in the game has label `player`; the chance player has no
-            label reachable this way -- use `get_events` for its events.
-        ValueError
-            If `player` is an empty string or all whitespace.
+    def _get_infosets(self, player: str) -> list[Node]:
+        """Internal: like `get_infosets`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -350,27 +323,49 @@ class Game:
             for infoset in resolved_player.deref().GetInfosets()
         ]
 
-    def get_events(self) -> list[Node]:
-        """Returns a snapshot of the chance player's events: the points of exogenous
-        randomness, each with a probability distribution over its actions.
+    def get_infosets(self, player: str) -> list[tuple]:
+        """Returns a snapshot of the information sets belonging to the personal
+        player `player`: the decisions at which that player chooses an action.
 
-        One representative member node is returned per event, in the order the events
-        are encountered in the pre-order depth first traversal of the game tree. This
-        is a materialized snapshot, not a live view: it reflects the game's state at
-        the moment of the call, and does not change if the game is subsequently
-        mutated.
+        One representative member's History is returned per information set, in the
+        order the information sets are encountered in the pre-order depth first
+        traversal of the game tree. This is a materialized snapshot, not a live view:
+        it reflects the game's state at the moment of the call, and does not change if
+        the game is subsequently mutated.
+
+        Parameters
+        ----------
+        player : str
+            The label of the personal player whose information sets to return.
 
         Returns
         -------
-        list of Node
-            One representative member node per event.
+        list of tuple
+            The History of one representative member per information set belonging to
+            `player`.
 
         .. versionadded:: 17.0.0
+
+        .. versionchanged:: 17.0.0
+            Returns each information set's representative as a History rather than a
+            ``Node`` object.
 
         Raises
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
+        KeyError
+            If no player in the game has label `player`; the chance player has no
+            label reachable this way -- use `get_events` for its events.
+        ValueError
+            If `player` is an empty string or all whitespace.
+        """
+        return [_history_of(node) for node in self._get_infosets(player)]
+
+    def _get_events(self) -> list[Node]:
+        """Internal: like `get_events`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -380,6 +375,34 @@ class Game:
             Node.wrap(event.deref().GetMember(1))
             for event in self.game.deref().GetChance().deref().GetInfosets()
         ]
+
+    def get_events(self) -> list[tuple]:
+        """Returns a snapshot of the chance player's events: the points of exogenous
+        randomness, each with a probability distribution over its actions.
+
+        One representative member's History is returned per event, in the order the
+        events are encountered in the pre-order depth first traversal of the game
+        tree. This is a materialized snapshot, not a live view: it reflects the
+        game's state at the moment of the call, and does not change if the game is
+        subsequently mutated.
+
+        Returns
+        -------
+        list of tuple
+            The History of one representative member per event.
+
+        .. versionadded:: 17.0.0
+
+        .. versionchanged:: 17.0.0
+            Returns each event's representative as a History rather than a ``Node``
+            object.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        return [_history_of(node) for node in self._get_events()]
 
     def get_strategies(self, player: str) -> list[str]:
         """Returns a snapshot of the labels of the strategies belonging to `player`.
@@ -502,39 +525,13 @@ class Game:
         return GameOutcomes.wrap(self.game)
 
     @property
-    def nodes(self) -> GameNodes:
-        """The set of nodes in the game.
-
-        Iteration over this property yields the nodes in the order of depth-first search.
-
-        .. versionchanged:: 16.4
-           Changed from a method ``nodes()`` to a property.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
-        """
-        if not self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
-            )
-
-        return GameNodes.wrap(self.game)
-
-    @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
 
-    @property
-    def root(self) -> Node:
-        """The root node of the game.
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not hae a tree representation.
+    def _root(self) -> Node:
+        """The root node of the game. Not part of the public API; the public
+        equivalent is the trivial empty History, `()`, or `H.path()` as a Selector.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -542,33 +539,49 @@ class Game:
             )
         return Node.wrap(self.game.deref().GetRoot())
 
+    def _all_nodes(self) -> list:
+        """All nodes in the game, in depth-first traversal order. Not part of
+        the public API; the public equivalent is `Game.get_histories(H.after())`.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return [Node.wrap(node) for node in self.game.deref().GetNodes()]
+
     def _get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
 
         Internal: the `H` selector algebra's evaluator, interpreting the
         selector's ops in order, starting from the root, reusing `Node`'s
-        existing navigation (`.children`, `.plays`) rather than walking the
-        C++ tree directly. Not part of the public API yet -- used to resolve
+        existing (private) navigation (`_children()`, `_plays()`) rather than
+        walking the C++ tree directly. Not part of the public API yet -- used to resolve
         a `Selector`/`GroupedSelector` argument to `append_move`,
         `append_event`, `append_infoset`, and `make_outcome`.
         """
         current: list = None
         for op in selector._ops:
             if isinstance(op, _AfterStep):
-                candidates = list(self.nodes) if current is None else current
+                candidates = self._all_nodes() if current is None else current
                 current = [n for n in candidates if _matches_suffix(n, op.labels)]
                 continue
             if current is None:
-                current = [self.root]
+                current = [self._root()]
             if isinstance(op, _PathStep):
                 for step in op.steps:
                     current = (
-                        [child for node in current for child in node.children]
+                        [
+                            child
+                            for node in current
+                            for child in cython.cast(Node, node)._children()
+                        ]
                         if step is Ellipsis
-                        else [node.children[step] for node in current]
+                        else [cython.cast(Node, node)._children()[step] for node in current]
                     )
             elif isinstance(op, _PlaysStep):
-                current = [play for node in current for play in node.plays]
+                current = [
+                    play for node in current for play in cython.cast(Node, node)._plays()
+                ]
             elif isinstance(op, _FilterStep):
                 current = [
                     node for node in current
@@ -577,7 +590,7 @@ class Game:
             else:
                 raise TypeError(f"_get_nodes(): unknown selector op {op!r}")
         if current is None:
-            current = [self.root]
+            current = [self._root()]
         return current
 
     def _get_histories(self, selector: Selector) -> list[tuple]:
@@ -589,6 +602,197 @@ class Game:
         for use by `_get_groups` and tests. Not part of the public API yet.
         """
         return [_history_of(node) for node in self._get_nodes(selector)]
+
+    def get_histories(self, selector: Selector) -> list[tuple]:
+        """Returns the Histories of the nodes that `selector` resolves to.
+
+        Parameters
+        ----------
+        selector : Selector
+            An `H`-built expression, evaluated against this game.
+
+        Returns
+        -------
+        list of tuple
+            The Histories -- plain tuples of action labels from the root --
+            of the matching nodes, in the order `selector` produces them.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `selector` is not a `Selector`.
+        """
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"get_histories(): selector must be a Selector, not "
+                f"{selector.__class__.__name__}"
+            )
+        return self._get_histories(selector)
+
+    def get_player(self, history: Selector) -> str | None:
+        """Returns the label of the player associated with the node that
+        `history` resolves to: the one who makes the decision, if this is a
+        personal node, or the chance player, if this is an event.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        str or None
+            The label of the player who owns the node, or `None` if the node
+            is terminal, which has no player.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_player(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_player")
+        return resolved_node.player
+
+    def get_actions(self, history: Selector) -> list[str]:
+        """Returns the labels of the actions available at the node that
+        `history` resolves to, in the order they are defined.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        list of str
+            The labels of the actions at the node's current information set
+            or event, or an empty list if the node is terminal -- a node is
+            terminal exactly when this is empty.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_actions(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_actions")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if infoset_handle == cython.cast(c_GameInfoset, NULL):
+            return []
+        return [
+            a.deref().GetLabel().decode("utf-8") for a in infoset_handle.deref().GetActions()
+        ]
+
+    def get_action_probs(self, history: Selector) -> dict[str, decimal.Decimal | Rational]:
+        """Returns the probability of each action at the node that `history`
+        resolves to, keyed by label, if it currently belongs to a chance event.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        dict of str to Decimal or Rational
+            The probability of each action, keyed by label, or an empty dict
+            if the node does not currently belong to a chance event --
+            including a terminal node, or a personal player's node.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_action_probs(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        resolved_node = self._resolve_node(history, "get_action_probs")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if (
+            infoset_handle == cython.cast(c_GameInfoset, NULL)
+            or not infoset_handle.deref().IsChanceInfoset()
+        ):
+            return {}
+        result: dict = {}
+        for a in infoset_handle.deref().GetActions():
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+                cython.cast(string, infoset_handle.deref().GetActionProb(a))
+            )
+        return result
+
+    def get_members(self, history: Selector) -> list[tuple]:
+        """Returns the Histories of the nodes which are members of the
+        information set or event that the node identified by `history`
+        currently belongs to.
+
+        Parameters
+        ----------
+        history : Selector
+            An `H`-built expression, evaluated against this game, that must
+            resolve to exactly one node.
+
+        Returns
+        -------
+        list of tuple
+            The Histories of the member nodes, or an empty list if the node
+            is currently terminal (belongs to no information set or event).
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        TypeError
+            If `history` is not a `Selector`.
+        ValueError
+            If `history` does not resolve to exactly one node.
+        """
+        if not isinstance(history, Selector):
+            raise TypeError(
+                f"get_members(): history must be a Selector, not "
+                f"{history.__class__.__name__}"
+            )
+        return [_history_of(member) for member in self._get_members(history)]
+
+    def _get_members(self, history: Selector) -> list[Node]:
+        """Internal: like `get_members`, but keeps `Node` objects rather than
+        materializing each into a History -- used internally where the actual node
+        (not just its identifying History) is needed. `history` is assumed already
+        validated as a `Selector` by the caller.
+        """
+        resolved_node = self._resolve_node(history, "get_members")
+        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        if infoset_handle == cython.cast(c_GameInfoset, NULL):
+            return []
+        return [Node.wrap(member) for member in infoset_handle.deref().GetMembers()]
 
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
@@ -612,7 +816,9 @@ class Game:
             next_result: dict = {}
             for key, nodes in result.items():
                 if isinstance(op, _PlaysStep):
-                    expanded = [play for node in nodes for play in node.plays]
+                    expanded = [
+                        play for node in nodes for play in cython.cast(Node, node)._plays()
+                    ]
                     if grouped.recall_player is None:
                         next_result[key] = expanded
                     else:
@@ -720,14 +926,11 @@ class Game:
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
-    @property
-    def subgames(self) -> GameSubgames:
-        """The set of subgames in the game.
+    def get_subgame_roots(self) -> list[tuple]:
+        """Returns the Histories of the roots of the subgames of the game, in
+        postorder (children before parents).
 
-        Iteration over this property yields the subgames in postorder
-        (children before parents).
-
-        .. versionadded:: 16.7.0
+        .. versionadded:: 17.0.0
 
         Raises
         ------
@@ -736,15 +939,19 @@ class Game:
         """
         if not self.is_tree:
             raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
+                "get_subgame_roots(): operation only defined for games "
+                "with a tree representation"
             )
-        return GameSubgames.wrap(self.game)
+        return [
+            _history_of(Node.wrap(subgame.deref().GetRoot()))
+            for subgame in self.game.deref().GetSubgames()
+        ]
 
-    def get_minimal_subgame(self, node: Selector) -> Subgame:
-        """Returns the smallest subgame containing the information set or event that
-        the node identified by `node` belongs to.
+    def get_minimal_subgame(self, history: Selector) -> tuple:
+        """Returns the History of the root of the smallest subgame containing the
+        information set or event that the node identified by `history` belongs to.
 
-        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        `history` is a `Selector` (an `H`-built expression, evaluated against this
         game) that must resolve to exactly one node.
 
         .. versionadded:: 16.7.0
@@ -752,27 +959,29 @@ class Game:
             Renamed from `minimal_subgame`.  `node` (formerly `infoset`) is now a
             `Selector`; a `Node` or `str` is no longer accepted directly -- build
             one with `H`.
+        .. versionchanged:: 17.0.0
+            Returns the History of the subgame's root, instead of a `Subgame` object.
 
         Parameters
         ----------
-        node : Selector
+        history : Selector
             A `Selector` resolving to a single node belonging to the information
             set or event to query.
 
         Returns
         -------
-        Subgame
-            The smallest subgame containing the information set or event that
-            `node` belongs to.
+        tuple
+            The History of the root of the smallest subgame containing the
+            information set or event that `history` belongs to.
 
         Raises
         ------
         TypeError
-            If `node` is not a `Selector`.
+            If `history` is not a `Selector`.
         UndefinedOperationError
             If the game does not have a tree representation.
         ValueError
-            If `node` does not resolve to exactly one node, or belongs to no
+            If `history` does not resolve to exactly one node, or belongs to no
             information set or event (it is terminal).
         """
         if not self.is_tree:
@@ -780,16 +989,43 @@ class Game:
                 "get_minimal_subgame(): operation only defined for games "
                 "with a tree representation"
             )
-        if not isinstance(node, Selector):
+        if not isinstance(history, Selector):
             raise TypeError(
-                f"get_minimal_subgame(): node must be a Selector, not {node.__class__.__name__}"
+                "get_minimal_subgame(): history must be a Selector, "
+                f"not {history.__class__.__name__}"
             )
-        resolved_node = self._resolve_infoset_or_event(node, "get_minimal_subgame")
-        return Subgame.wrap(
-            self.game.deref().GetMinimalSubgame(
-                cython.cast(Node, resolved_node)._infoset_handle()
-            )
+        resolved_node = self._resolve_infoset_or_event(history, "get_minimal_subgame")
+        subgame: c_GameSubgame = self.game.deref().GetMinimalSubgame(
+            cython.cast(Node, resolved_node)._infoset_handle()
         )
+        return _history_of(Node.wrap(subgame.deref().GetRoot()))
+
+    def get_strategy_unreachable(self) -> list[tuple]:
+        """Returns the Histories of the nodes that are not reachable by any pure
+        strategy profile.
+
+        A node is considered reachable if there exists at least one pure
+        strategy profile where the resulting path of play passes through it.
+        In games with absent-mindedness, some nodes may be unreachable because
+        any path to them requires conflicting choices at the same information
+        set.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "get_strategy_unreachable(): operation only defined for games "
+                "with a tree representation"
+            )
+        return [
+            _history_of(node) for node in self._all_nodes()
+            if not cython.cast(Node, node)._is_strategy_reachable()
+        ]
 
     def get_behavior(self,
                      player: str,
@@ -868,40 +1104,77 @@ class Game:
             deref(deref(psp).deref()).SetStrategy(handle)
         return psp
 
-    def get_outcome(self, contingency: typing.Mapping) -> Outcome:
-        """Returns the `Outcome` attached to a pure-strategy contingency.
+    def get_outcome(self, location) -> str | None:
+        """Returns the label of the outcome attached at `location`.
 
-        Only defined for games in strategic (table) representation; for extensive-form
-        and action-graph games, a pure-strategy contingency has no single stored outcome
-        to return (see `get_payoffs`).
+        For a tree game, `location` is a `Selector` (an `H`-built expression,
+        evaluated against this game) that must resolve to exactly one node.
+
+        For a strategic (table) game, `location` is a pure-strategy
+        contingency -- a complete mapping from the game's players' labels to
+        the label of the strategy played by that player.
 
         .. versionadded:: 17.0.0
 
+        .. versionchanged:: 17.0.0
+            For a tree game, `location` may now be a `Selector`, returning
+            the outcome's label (or `None`) directly, rather than raising
+            `UndefinedOperationError`.
+
+        .. versionchanged:: 17.0.0
+            Always returns the outcome's label (or `None`); previously
+            returned the `Outcome` object itself for a strategic game.
+
         Parameters
         ----------
-        contingency : Mapping
-            A complete mapping from the game's players' labels to the label of the
-            strategy played by that player.
+        location : Selector or Mapping
+            A `Selector` resolving to a single node (tree game), or a
+            pure-strategy contingency (strategic game).
 
         Returns
         -------
-        Outcome
-            The outcome attached to `contingency` (possibly the null outcome).
+        str or None
+            The label of the outcome attached at `location`, or `None` if it
+            is the null outcome.
 
         Raises
         ------
-        UndefinedOperationError
-            If the game is not in strategic (table) representation.
-        ValueError
-            If `contingency` does not specify exactly one strategy for each player
-            of the game, or a key is an empty or all-whitespace string.
-        KeyError
-            If a player label, or a player's strategy label, does not match any
-            player, or that player's strategies, in the game.
         TypeError
-            If `contingency` is not a mapping, or a key or value is not a `str`.
+            If `location` is not a `Selector` (tree game); or is not a
+            mapping, or a key or value is not a `str` (strategic game).
+        ValueError
+            For a tree game, if `location` does not resolve to exactly one
+            node.  For a strategic game, if `location` does not specify
+            exactly one strategy for each player of the game, or a key is an
+            empty or all-whitespace string.
+        KeyError
+            For a strategic game, if a player label, or a player's strategy
+            label, does not match any player, or that player's strategies,
+            in the game.
+        UndefinedOperationError
+            If the game is in neither a tree nor a strategic (table)
+            representation.
         """
-        if self.is_tree or self.game.deref().IsAgg():
+        if self.is_tree:
+            if not isinstance(location, Selector):
+                raise TypeError(
+                    f"get_outcome(): location must be a Selector, not "
+                    f"{location.__class__.__name__}"
+                )
+            resolved_node = self._resolve_node(location, "get_outcome")
+            return Outcome.wrap(
+                cython.cast(Node, resolved_node).node.deref().GetOutcome()
+            ).label
+        return self._get_outcome_object(location).label
+
+    def _get_outcome_object(self, contingency: typing.Mapping) -> Outcome:
+        """Returns the `Outcome` object attached at a pure-strategy
+        `contingency` in a strategic (table) game. Not part of the public
+        API; `get_outcome` returns only the label. Used internally by
+        `from_arrays`/`from_dict`, which need to mutate the outcome's
+        payoffs directly.
+        """
+        if self.game.deref().IsAgg():
             raise UndefinedOperationError(
                 "get_outcome(): operation not defined for games not in "
                 "strategic (table) representation"
@@ -1063,7 +1336,7 @@ class Game:
         if len(data) != len(self.players):
             raise ValueError("Number of elements does not match number of players")
         for (p, d) in zip(self.players, data):
-            p_infosets = self.get_infosets(p)
+            p_infosets = self._get_infosets(p)
             if len(p_infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
             for (node, v) in zip(p_infosets, d, strict=True):
@@ -1155,7 +1428,7 @@ class Game:
         if denom is None:
             profile = self.mixed_behavior_profile()
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _dirichlet_distribution(node.actions, gen), sparse=True
                     )
@@ -1165,7 +1438,7 @@ class Game:
         else:
             profile = self.mixed_behavior_profile(rational=True)
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _grid_distribution(node.actions, denom, gen), sparse=True
                     )
@@ -1208,9 +1481,13 @@ class Game:
         ----------
         actions : function, optional
             By default the support profile contains all actions at all information
-            sets. If specified, called as ``actions(node, action)`` for each action at
-            each information set, where ``node`` is a representative node of the
-            information set; only actions for which it returns `True` are included.
+            sets. If specified, called as ``actions(history, action)`` for each action
+            at each information set, where ``history`` is a read-only `HistoryView` (see
+            `Selector.filter`) of a representative member of the information set; only
+            actions for which it returns `True` are included.
+
+        .. versionchanged:: 17.0.0
+            ``actions`` is now called with a `HistoryView` rather than a `Node`.
 
         Returns
         -------
@@ -1219,10 +1496,12 @@ class Game:
         profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
         if actions is not None:
             for player in self.players:
-                for node in self.get_infosets(player):
+                for node in self._get_infosets(player):
+                    history_view = HistoryView._wrap(node, _history_of(node))
                     infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
                     for action in infoset_handle.deref().GetActions():
-                        if not actions(node, action.deref().GetLabel().decode("utf-8")):
+                        label = action.deref().GetLabel().decode("utf-8")
+                        if not actions(history_view, label):
                             if not deref(profile.profile).RemoveAction(action):
                                 raise ValueError(
                                     "attempted to remove the last action at an information set"
@@ -1412,7 +1691,10 @@ class Game:
         )
 
     def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
-        """Resolve an attempt to reference a node of the game.
+        """Resolve an attempt to reference a node of the game. A bare `Node` is not
+        accepted -- every public method that reaches this already requires a
+        `Selector` (or, for internal callers, an already-resolved `Node`, never
+        routed back through here).
 
         Parameters
         ----------
@@ -1425,20 +1707,14 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `node` is a `Node` from a different game.
         KeyError
             If `node` is a string and no node in the game has that label.
         TypeError
-            If `node` is not a `Node` or a `str`
+            If `node` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `node` is an empty `str` or all spaces
         """
-        if isinstance(node, Node):
-            if node.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return node
-        elif isinstance(node, Selector):
+        if isinstance(node, Selector):
             resolved = self._get_nodes(node)
             if len(resolved) != 1:
                 raise ValueError(
@@ -1454,32 +1730,31 @@ class Game:
                 raise ValueError(
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
-            for n in self.nodes:
-                if n.label == node:
+            for n in self._all_nodes():
+                if cython.cast(Node, n)._label == node:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(
-            f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}"
+            f"{funcname}(): {argname} must be Selector, tuple, or str, "
+            f"not {node.__class__.__name__}"
         )
 
     def _resolve_nodes(self,
                        nodes: typing.Any,
                        funcname: str,
                        argname: str = "nodes") -> list[Node]:
-        """Resolve an attempt to reference a subset of the nodes of the game of the game.
+        """Resolve an attempt to reference a subset of the nodes of the game.
 
-        See `_resolve_node` for details on functionality.
-
-        `nodes` may also be a `Selector` (an `H`-built expression), evaluated
-        against this game via `_get_nodes` before the usual resolution.
+        `nodes` is a `Selector` (an `H`-built expression), evaluated against this
+        game via `_get_nodes`; or an already-resolved list of `Node`, dispatched
+        internally one group at a time from a `GroupedSelector` -- never a bare
+        `Node`/History/label from the caller directly, so no further per-element
+        resolution is needed.
         """
         if isinstance(nodes, Selector):
-            nodes = self._get_nodes(nodes)
-        resolved_nodes = [
-            self._resolve_node(n, funcname, argname)
-            for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, (str, tuple))
-                      else [nodes])
-        ]
+            resolved_nodes = self._get_nodes(nodes)
+        else:
+            resolved_nodes = list(nodes)
         if not resolved_nodes:
             raise ValueError(f"{funcname}(): `{argname}` must not be empty")
         if len(resolved_nodes) != len(set(resolved_nodes)):
@@ -1489,12 +1764,13 @@ class Game:
     def _resolve_infoset(self,
                          infoset: typing.Any, funcname: str, argname: str = "infoset") -> Node:
         """Resolve an attempt to reference a personal player's information set of the
-        game, via a member node or its label.
+        game, via a `Selector` resolving to a member node, or such a node's label.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set, or such a node's label.
+        infoset : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the information
+            set, or such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1508,12 +1784,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
         KeyError
             If `infoset` is a string and no node in the game has that label.
         TypeError
-            If `infoset` is not a `Node` or a `str`
+            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `infoset` resolves to a chance event rather than a personal player's
             information set, or to no information set at all (the node is terminal).
@@ -1528,13 +1802,14 @@ class Game:
 
     def _resolve_event(self,
                        event: typing.Any, funcname: str, argname: str = "event") -> Node:
-        """Resolve an attempt to reference a chance event of the game, via a member
-        node or its label.
+        """Resolve an attempt to reference a chance event of the game, via a
+        `Selector` resolving to a member node, or such a node's label.
 
         Parameters
         ----------
-        event : Node or str
-            A node belonging to the event, or such a node's label.
+        event : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the event, or
+            such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'event'
@@ -1548,12 +1823,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `event` is a `Node` from a different game.
         KeyError
             If `event` is a string and no node in the game has that label.
         TypeError
-            If `event` is not a `Node` or a `str`
+            If `event` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `event` resolves to a personal player's information set rather than a
             chance event, or to no event at all (the node is terminal).
@@ -1571,13 +1844,15 @@ class Game:
                                   funcname: str,
                                   argname: str = "infoset") -> Node:
         """Resolve an attempt to reference an information set or event of the game
-        (whichever applies), via a member node or its label. For operations that
-        apply uniformly to either, such as attaching to an existing one.
+        (whichever applies), via a `Selector` resolving to a member node, or such a
+        node's label. For operations that apply uniformly to either, such as
+        attaching to an existing one.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set or event, or such a node's label.
+        infoset : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the information
+            set or event, or such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1591,12 +1866,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
         KeyError
             If `infoset` is a string and no node in the game has that label.
         TypeError
-            If `infoset` is not a `Node` or a `str`
+            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `infoset` resolves to no information set or event (the node is
             terminal).
@@ -1685,7 +1958,7 @@ class Game:
         if len(set(actions)) != len(actions):
             raise ValueError("append_move(): action labels must be unique")
         resolved_nodes = self._resolve_nodes(nodes, "append_move", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
@@ -1756,7 +2029,7 @@ class Game:
             )
         infoset_handle: c_GameInfoset = infoset_node._infoset_handle()
         resolved_nodes = self._resolve_nodes(nodes, "append_infoset", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
             self.game.deref().AppendMove(cython.cast(Node, n).node, infoset_handle)
@@ -1823,7 +2096,7 @@ class Game:
         if any(not label for label in action_labels):
             raise ValueError("append_event(): action labels must not be empty")
         resolved_nodes = self._resolve_nodes(nodes, "append_event", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_event(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
@@ -2023,7 +2296,7 @@ class Game:
             )
         resolved_src = cython.cast(Node, self._resolve_node(src, "copy_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
-        if not resolved_dest.is_terminal:
+        if not cython.cast(Node, resolved_dest)._is_terminal():
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
         self.game.deref().CopyTree(resolved_dest.node, resolved_src.node)
 
@@ -2063,9 +2336,9 @@ class Game:
             )
         resolved_src = cython.cast(Node, self._resolve_node(src, "move_tree", "src"))
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "move_tree", "dest"))
-        if not resolved_dest.is_terminal:
+        if not cython.cast(Node, resolved_dest)._is_terminal():
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
-        if resolved_dest.is_successor_of(resolved_src):
+        if resolved_dest._is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
         self.game.deref().MoveTree(resolved_dest.node, resolved_src.node)
 
@@ -2376,7 +2649,7 @@ class Game:
                 f"make_event(): probs must be a mapping, not {probs.__class__.__name__}"
             )
         resolved_nodes = self._resolve_nodes(nodes, "make_event")
-        if any(n.is_terminal for n in resolved_nodes):
+        if any(cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError(
                 "make_event(): all nodes must be nonterminal"
             )
@@ -2536,7 +2809,7 @@ class Game:
         resolved_nodes = self._resolve_nodes(nodes, "make_infoset")
         resolved_player = self._resolve_player(player, "make_infoset")
         for n in resolved_nodes:
-            if n.is_terminal:
+            if cython.cast(Node, n)._is_terminal():
                 raise UndefinedOperationError(
                     "make_infoset(): all nodes must be decision nodes"
                 )
@@ -3027,22 +3300,75 @@ class Game:
 
 
 @dataclasses.dataclass
-class NodeCoordinates:
+class TreeLayoutCoordinates:
+    """The layout coordinates of a single node in a game tree, computed for
+    graphical display.
+
+    .. versionchanged:: 17.0.0
+        Renamed from `NodeCoordinates`.
+    """
     level: int
     sublevel: int
     offset: float
 
 
+class TreeLayout:
+    """The layout of a game's tree, computed for graphical display.
+
+    Maps each node's History to its `TreeLayoutCoordinates`.
+
+    .. versionadded:: 17.0.0
+    """
+
+    def __init__(self, data: dict[tuple, TreeLayoutCoordinates]) -> None:
+        self._data = data
+
+    def __repr__(self) -> str:
+        return f"TreeLayout({self._data!r})"
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    def __iter__(self) -> typing.Iterator[tuple]:
+        return iter(self._data)
+
+    def __contains__(self, history: tuple) -> bool:
+        return history in self._data
+
+    def __getitem__(self, history: tuple) -> TreeLayoutCoordinates:
+        return self._data[history]
+
+    def items(self) -> typing.ItemsView[tuple, TreeLayoutCoordinates]:
+        return self._data.items()
+
+
 @cython.cfunc
-def _layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
+def _layout_tree(game: Game) -> object:
     layout = CreateLayout(game.game)
     data = {}
-    for node in game.nodes:
-        data[node] = NodeCoordinates(deref(layout).GetNodeLevel(cython.cast(Node, node).node),
-                                     deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
-                                     deref(layout).GetNodeOffset(cython.cast(Node, node).node))
-    return data
+    for node in game._all_nodes():
+        data[_history_of(node)] = TreeLayoutCoordinates(
+            deref(layout).GetNodeLevel(cython.cast(Node, node).node),
+            deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
+            deref(layout).GetNodeOffset(cython.cast(Node, node).node))
+    return TreeLayout(data)
 
 
-def layout_tree(game: Game) -> dict[Node, NodeCoordinates]:
+def layout_tree(game: Game) -> TreeLayout:
+    """Computes the layout of `game`'s tree for graphical display.
+
+    .. versionchanged:: 17.0.0
+        Returns a `TreeLayout` (History-keyed) instead of a
+        `dict[Node, NodeCoordinates]`.
+
+    Parameters
+    ----------
+    game : Game
+        The game whose tree layout to compute.
+
+    Returns
+    -------
+    TreeLayout
+        The layout of `game`'s tree.
+    """
     return _layout_tree(game)

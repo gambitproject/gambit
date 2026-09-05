@@ -21,14 +21,12 @@
 #
 
 Branch = collections.namedtuple("Branch", ["node", "label"])
-Branch.__doc__ = """The action labeled `label`, taken at `node`.
-
-Returned by `Node.prior_action` and `Node.own_prior_action`; `node` is the node at
-which the action was taken (not the node it leads to), so ``branch.node.actions``
+Branch.__doc__ = """The action labeled `label`, taken at `node`. Not part of the
+public API; internal return type of the private `Node._prior_action`/
+`._own_prior_action`, pending a `Game`/`History`-based design. `node` is the node
+at which the action was taken (not the node it leads to), so ``branch.node.actions``
 and, for a chance event, ``branch.node.action_probs[branch.label]`` are always
 well-defined.
-
-.. versionadded:: 17.0.0
 """
 
 
@@ -111,68 +109,6 @@ class NodeChildren:
 
 
 @cython.cclass
-class NodeOutcome:
-    """The outcome attached to a node.
-
-    A lazy, node-anchored view: holds the node and resolves its outcome on each access,
-    so the value reflects the current state of the game even after the game is mutated.
-
-    .. versionadded:: 16.7.0
-
-    .. versionchanged:: 17.0.0
-        A node with no outcome attached resolves to the game's null outcome: the view is
-        falsy, its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
-        to every outcome — including another null and itself — and to ``None``.
-    """
-    node = cython.declare(c_GameNode)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a NodeOutcome outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(node: c_GameNode) -> NodeOutcome:
-        obj: NodeOutcome = NodeOutcome.__new__(NodeOutcome)
-        obj.node = node
-        return obj
-
-    @cython.cfunc
-    def _resolve(self) -> Outcome:
-        return Outcome.wrap(self.node.deref().GetOutcome())
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(f"'NodeOutcome' object has no attribute '{name}'")
-        return getattr(self._resolve(), name)
-
-    def __getitem__(self, player):
-        return self._resolve()[player]
-
-    def __setitem__(self, player, value):
-        self._resolve()[player] = value
-
-    @property
-    def label(self):
-        return self._resolve().label
-
-    @label.setter
-    def label(self, value):
-        self._resolve().label = value
-
-    def __repr__(self) -> str:
-        return repr(self._resolve())
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return self._resolve() == other
-
-    def __bool__(self) -> bool:
-        return not self.node.deref().GetOutcome().deref().IsNull()
-
-    def __hash__(self) -> int:
-        return hash(self._resolve())
-
-
-@cython.cclass
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
@@ -188,16 +124,16 @@ class Node:
         return obj
 
     def __repr__(self) -> str:
-        if self.label:
-            return f"Node(game={self.game}, label='{self.label}')"
+        if self._label:
+            return f"Node(game={self._game()}, label='{self._label}')"
         path = []
         node = self
-        while node.parent:
+        while node._parent():
             path.append(
                 cython.cast(Node, node).node.deref().GetPriorAction().deref().GetNumber() - 1
             )
-            node = node.parent
-        return f"Node(game={self.game}, path={path})"
+            node = node._parent()
+        return f"Node(game={self._game()}, path={path})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -208,41 +144,40 @@ class Node:
     def __hash__(self) -> long:
         return cython.cast(long, self.node.deref())
 
-    def is_successor_of(self, node: Node) -> bool:
-        """Returns whether this node is a successor of `node`."""
+    def _is_successor_of(self, node: Node) -> bool:
+        """Whether this node is a successor of `node`. Not part of the public
+        API, pending a `Game`/`History`-based design.
+        """
         return self.node.deref().IsSuccessorOf((<Node>node).node)
 
     @property
-    def label(self) -> str:
-        """The text label associated with the node.
-
-        .. versionchanged:: 17.0.0
-            A label may now be any well-formed UTF-8 text, not just ASCII; it must still
-            contain no control characters, and must not begin/end with whitespace or have
-            two consecutive whitespace characters.  "Whitespace" means any Unicode space
-            separator (e.g. U+00A0 NO-BREAK SPACE), not just the ASCII space.
+    def _label(self) -> str:
+        """The text label associated with the node. Not part of the public API,
+        pending a `Game`/`Selector`-based design.
         """
         return self.node.deref().GetLabel().decode("utf-8")
 
-    @label.setter
-    def label(self, value: str) -> None:
+    @_label.setter
+    def _label(self, value: str) -> None:
         self.node.deref().SetLabel(value.encode("utf-8"))
 
-    @property
-    def number(self) -> int:
-        """Returns the number of the node in its game.
-        Nodes are numbered starting with 0.
+    def _number(self) -> int:
+        """The number of the node in its game, numbered starting with 0. Not part
+        of the public API; a node's position is otherwise only exposed via History.
         """
         return self.node.deref().GetNumber() - 1
 
-    @property
-    def children(self) -> NodeChildren:
-        """The set of children of this node."""
+    def _children(self) -> NodeChildren:
+        """The set of children of this node. Not part of the public API; the public
+        equivalent is a `Selector`'s `.path(..., ...)` wildcard step, e.g.
+        `game.get_histories(H.path(*history, ...))`.
+        """
         return NodeChildren.wrap(self.node)
 
-    @property
-    def game(self) -> Game:
-        """Gets the ``Game`` to which the node belongs."""
+    def _game(self) -> Game:
+        """The `Game` to which the node belongs. Not part of the public API; a
+        `Node` is otherwise only obtained already scoped to a particular `Game`.
+        """
         return Game.wrap(self.node.deref().GetGame())
 
     @cython.cfunc
@@ -331,48 +266,29 @@ class Node:
             return None
         return player.deref().GetLabel().decode("utf-8")
 
-    @property
-    def parent(self) -> Node | None:
-        """The parent of this node.
-
-        If this is the root node, None is returned.
+    def _parent(self) -> Node | None:
+        """The parent of this node, or None if this is the root node. Not part
+        of the public API, pending a `Game`/`History`-based design.
         """
         if self.node.deref().GetParent() != cython.cast(c_GameNode, NULL):
             return Node.wrap(self.node.deref().GetParent())
         return None
 
-    @property
-    def prior_action(self) -> Branch | None:
+    def _prior_action(self) -> Branch | None:
         """The branch -- the parent node and the label of the action taken from it --
-        which leads to this node.
-
-        If this is the root node, None is returned.
-
-        .. versionchanged:: 17.0.0
-            Returns a `Branch` (the parent node and the action's label) rather than
-            an `Action` object, following its removal.
+        which leads to this node, or None if this is the root node. Not part of the
+        public API, pending a `Game`/`History`-based design.
         """
         prior: c_GameAction = self.node.deref().GetPriorAction()
         if prior != cython.cast(c_GameAction, NULL):
-            return Branch(self.parent, prior.deref().GetLabel().decode("utf-8"))
+            return Branch(self._parent(), prior.deref().GetLabel().decode("utf-8"))
         return None
 
-    @property
-    def own_prior_action(self) -> Branch | None:
+    def _own_prior_action(self) -> Branch | None:
         """The last branch -- the node and the label of the action taken there -- at
-        which the node's owner acted before reaching this node.
-
-        Returns
-        -------
-        Branch or None
-            The node at which the node's owner last acted, paired with the label of
-            the action taken there, or None if the player has not moved previously
-            on the path to this node.
-
-        .. versionadded:: 16.5.0
-        .. versionchanged:: 17.0.0
-            Returns a `Branch` (the node and the action's label) rather than an
-            `Action` object, following its removal.
+        which the node's owner acted before reaching this node, or None if the player
+        has not moved previously on the path to this node. Not part of the public
+        API, pending a `Game`/`History`-based design.
         """
         prior: c_GameAction = self.node.deref().GetOwnPriorAction()
         if not (prior != cython.cast(c_GameAction, NULL)):
@@ -383,143 +299,24 @@ class Node:
             cur = cur.deref().GetParent()
         return Branch(Node.wrap(cur.deref().GetParent()), label)
 
-    @property
-    def prior_sibling(self) -> Node | None:
-        """The node which is immediately before this one in its parent's children.
-
-        If this is the root node or the first child of its parent,
-        None is returned.
+    @cython.cfunc
+    def _is_terminal(self) -> cython.bint:
+        """Whether this is a terminal node of the game. Not part of the public
+        API; a node is terminal exactly when `Game.get_actions` is empty for it.
         """
-        if self.node.deref().GetPriorSibling() != cython.cast(c_GameNode, NULL):
-            return Node.wrap(self.node.deref().GetPriorSibling())
-        return None
-
-    @property
-    def next_sibling(self) -> Node | None:
-        """The node which is immediately after this one in its parent's children.
-
-        If this is the root node or the last child of its parent,
-        None is returned.
-        """
-        if self.node.deref().GetNextSibling() != cython.cast(c_GameNode, NULL):
-            return Node.wrap(self.node.deref().GetNextSibling())
-        return None
-
-    @property
-    def is_terminal(self) -> bool:
-        """Returns whether this is a terminal node of the game."""
         return self.node.deref().IsTerminal()
 
-    @property
-    def is_subgame_root(self) -> bool:
-        """Returns whether the node is the root of a proper subgame.
-
-        .. versionchanged:: 16.1.0
-            Changed to being a property instead of a member function.
-        """
-        return self.node.deref().IsSubgameRoot()
-
-    @property
-    def is_strategy_reachable(self) -> bool:
-        """Returns whether this node is reachable by any pure strategy profile.
-
-        A node is considered reachable if there exists at least one pure
-        strategy profile where the resulting path of play passes
-        through that node.
-
-        In games with absent-mindedness, some nodes may be unreachable because
-        any path to them requires conflicting choices at the same information set.
+    @cython.cfunc
+    def _is_strategy_reachable(self) -> cython.bint:
+        """Whether this node is reachable by any pure strategy profile. Not part
+        of the public API; the public equivalent is `Game.get_strategy_unreachable`.
         """
         return self.node.deref().IsStrategyReachable()
 
-    @property
-    def outcome(self) -> NodeOutcome:
-        """The outcome currently attached to this node.
-
-        Returns a lazy, node-anchored view resolved on each access, so the value reflects
-        the current state of the game even if the game is mutated after this property is read.
-        When no outcome is attached, the view resolves to the game's null outcome:
-        its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
-        to every outcome, including another null.
-
-        .. versionchanged:: 16.7.0
-            Now returns a lazily-evaluated, node-anchored view rather than capturing the
-            outcome at the time of access.
-
-        .. versionchanged:: 17.0.0
-            Resolves to the null outcome rather than ``None`` when no outcome is attached;
-            two null outcomes compare unequal.
-        """
-        return NodeOutcome.wrap(self.node)
-
-    @property
-    def plays(self) -> list[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
+    @cython.cfunc
+    def _plays(self) -> list:
+        """The terminal nodes consistent with this node. Not part of the public
+        API; the public equivalent is a `Selector`'s `.plays` step, e.g.
+        `game.get_histories(H.path(...).plays)`.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
-
-
-@cython.cclass
-class Subgame:
-    """A subgame in a ``Game``.
-
-    .. versionadded:: 16.7.0
-    """
-    subgame = cython.declare(c_GameSubgame)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a Subgame outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(subgame: c_GameSubgame) -> Subgame:
-        obj: Subgame = Subgame.__new__(Subgame)
-        obj.subgame = subgame
-        return obj
-
-    def __repr__(self) -> str:
-        return f"Subgame(root={self.root})"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Subgame) and
-            self.subgame.deref() == cython.cast(Subgame, other).subgame.deref()
-        )
-
-    def __hash__(self) -> int:
-        return cython.cast(cython.long, self.subgame.deref())
-
-    @property
-    def game(self) -> Game:
-        """Gets the ``Game`` to which the subgame belongs.
-
-        .. versionadded:: 16.7.0
-        """
-        return Game.wrap(self.subgame.deref().GetGame())
-
-    @property
-    def root(self) -> Node:
-        """Returns the root node of the subgame.
-
-        .. versionadded:: 16.7.0
-        """
-        return Node.wrap(self.subgame.deref().GetRoot())
-
-    @property
-    def parent(self) -> typing.Optional[Subgame]:
-        """Returns the parent subgame, or None if this is the root subgame.
-
-        .. versionadded:: 16.7.0
-        """
-        parent: c_GameSubgame = self.subgame.deref().GetParent()
-        if parent != cython.cast(c_GameSubgame, NULL):
-            return Subgame.wrap(parent)
-        return None
-
-    @property
-    def children(self) -> list[Subgame]:
-        """Returns the immediate child subgames of this subgame.
-
-        .. versionadded:: 16.7.0
-        """
-        return [Subgame.wrap(child) for child in self.subgame.deref().GetChildren()]

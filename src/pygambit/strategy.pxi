@@ -134,7 +134,7 @@ class StrategyBehavior:
     def _reachable_nodes(self) -> typing.Iterator[Node]:
         """The representative nodes of the player's information sets at which the
         strategy prescribes an action, in the player's information set order."""
-        for node in self._game.get_infosets(self._player_label):
+        for node in self._game._get_infosets(self._player_label):
             if self._action_at(node) is not None:
                 yield node
 

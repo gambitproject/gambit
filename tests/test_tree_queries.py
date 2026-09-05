@@ -1,0 +1,533 @@
+import dataclasses
+import functools
+import typing
+
+import pytest
+
+import pygambit as gbt
+
+from . import games
+
+
+def test_get_outcome():
+    """A tree game's `get_outcome` resolves a `Selector` to a single node and
+    returns the label of the outcome attached there, or `None` if it has none."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.get_outcome(gbt.H.path("U1", "D2", "U3")) == "Outcome 1"
+    assert game.get_outcome(gbt.H.path()) is None
+
+
+def test_get_outcome_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_outcome(())
+    with pytest.raises(TypeError):
+        game.get_outcome("U1")
+
+
+def test_get_outcome_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_outcome(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_outcome(gbt.H.path(...).filter(lambda h: False))
+
+
+def test_get_actions():
+    """A personal or chance node's actions, in order; a terminal node has none --
+    a node is terminal exactly when this is empty."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.get_actions(gbt.H.path()) == ["U1", "D1"]
+    assert game.get_actions(gbt.H.path("U1")) == ["U2", "D2"]
+    assert game.get_actions(gbt.H.path("U1", "D2", "U3")) == []
+
+
+def test_get_actions_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_actions(())
+    with pytest.raises(TypeError):
+        game.get_actions("U1")
+
+
+def test_get_actions_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_actions(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_actions(gbt.H.path(...).filter(lambda h: False))
+
+
+def test_get_action_probs():
+    """A chance node's action probabilities, keyed by label; empty for a
+    personal node or a terminal node -- a node currently belongs to a chance
+    event exactly when this is nonempty."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.get_action_probs(gbt.H.path()) == {
+        "King": gbt.Rational(1, 2), "Queen": gbt.Rational(1, 2)
+    }
+    assert game.get_action_probs(gbt.H.path("King")) == {}
+    assert game.get_action_probs(gbt.H.path("King", "Fold")) == {}
+
+
+def test_get_action_probs_requires_selector():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(TypeError):
+        game.get_action_probs(())
+    with pytest.raises(TypeError):
+        game.get_action_probs("King")
+
+
+def test_get_action_probs_requires_single_match():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.get_action_probs(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_action_probs(gbt.H.path(...).filter(lambda h: False))
+
+
+def test_get_members():
+    """The Histories of the nodes sharing a node's current information set or
+    event, including a shared infoset across the members of different chance
+    outcomes; empty for a terminal node."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.get_members(gbt.H.path()) == [()]
+    assert game.get_members(gbt.H.path("King", "Bet")) == [("King", "Bet"), ("Queen", "Bet")]
+    assert game.get_members(gbt.H.path("King", "Fold")) == []
+
+
+def test_get_members_requires_selector():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(TypeError):
+        game.get_members(())
+    with pytest.raises(TypeError):
+        game.get_members("King")
+
+
+def test_get_members_requires_single_match():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        game.get_members(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_members(gbt.H.path(...).filter(lambda h: False))
+
+
+def test_get_player():
+    """A personal node's player; a terminal node has none."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    assert game.get_player(gbt.H.path()) == "Player 1"
+    assert game.get_player(gbt.H.path("U1", "D2", "U3")) is None
+
+
+def test_get_player_resolves_chance():
+    """At a chance node, the player label is the chance player's."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.get_player(gbt.H.path()) == "Chance"
+
+
+def test_get_player_requires_selector():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(TypeError):
+        game.get_player(())
+    with pytest.raises(TypeError):
+        game.get_player("U1")
+
+
+def test_get_player_requires_single_match():
+    game = games.read_from_file("basic_extensive_game.efg")
+    with pytest.raises(ValueError):
+        game.get_player(gbt.H.path(...))
+    with pytest.raises(ValueError):
+        game.get_player(gbt.H.path(...).filter(lambda h: False))
+
+
+def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
+    """
+    Computes the path of action labels from a given node to the root.
+    Returns a list of strings.
+    """
+    if not isinstance(node, gbt.Node):
+        raise TypeError(f"Input must be a pygambit.Node, but got {type(node).__name__}")
+
+    path = []
+    current_node = node
+    while current_node._parent():
+        path.append(current_node._prior_action().label)
+        current_node = current_node._parent()
+
+    return path
+
+
+@dataclasses.dataclass
+class SubgameRootsTestCase:
+    """TestCase for testing subgame root detection."""
+    factory: typing.Callable[[], gbt.Game]
+    expected_paths: list[list[str]]
+
+
+SUBGAME_ROOTS_CASES = [
+    # ------------------------------------------------------------------------
+    #                              Empty Game
+    # ------------------------------------------------------------------------
+    pytest.param(
+        # `GetSubgames()` returns no roots at all for a single-node (terminal-root) game,
+        # unlike `IsSubgameRoot()` (which special-cases it as trivially its own subgame) --
+        # a known, narrow C++-core discrepancy (`GameTreeRep::GetSubgameData()`'s early
+        # return for `m_root->IsTerminal()`), not something to paper over here.
+        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[]),
+        id="empty_tree"
+    ),
+    # ------------------------------------------------------------------------
+    #                      Perfect Information Games
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/ijgt/selten1975/fig2"),
+            expected_paths=[[], ["L"], ["L", "L"]]
+        ),
+        id="centipede_3_rounds"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=lambda: games.Centipede.get_test_data(N=5, m0=2, m1=7)[0],
+            expected_paths=[[], ["Push"], ["Push", "Push"], ["Push", "Push", "Push"],
+                            ["Push", "Push", "Push", "Push"]]
+        ),
+        id="centipede_5_rounds"
+    ),
+    # ------------------------------------------------------------------------
+    #              Imperfect Information (No Absent-Mindedness)
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
+            expected_paths=[[]]
+        ),
+        id="wichardt_no_nontrivial_subgames"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "binary_3_levels_generic_payoffs.efg"),
+            expected_paths=[[]]
+        ),
+        id="binary_3_levels_no_nontrivial_subgames"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "subgame_roots_finder_small_subgames_and_overplapping_infosets.efg"),
+            expected_paths=[[], ["1"], ["2"], ["1", "2", "2"], ["2", "1", "2"],
+                            ["1", "1", "1", "2", "2"], ["2", "2", "2"]]
+        ),
+        id="small_subgames_and_overlapping_infosets_inside_subgames_no_Nature_moves"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
+            expected_paths=[[], ["1_2"], ["1_2", "1_3", "1_2"], ["1_3", "1_2"]]
+        ),
+        id="overlapping_infosets_inside_subgames_and_Nature_move"
+    ),
+    # ------------------------------------------------------------------------
+    #                           Absent-Minded Games
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-subgames.efg"),
+            expected_paths=[[], ["2"], ["1", "1"], ["2", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "noPR-action-AM-two-hops.efg"),
+            expected_paths=[[], ["2", "1", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-three-times"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-unary-hops.efg"),
+            expected_paths=[[], ["1", "1"], ["T", "1", "1", "1", "1", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-unary-branches.efg"),
+            expected_paths=[[], ["1", "1", "1", "T"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
+]
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_ROOTS_CASES)
+def test_subgame_roots(test_case: SubgameRootsTestCase):
+    """
+    Tests that `Game.get_subgame_roots` matches the expected set of paths
+    (Action Labels from Node -> Root, matching `_get_path_of_action_labels`'s
+    convention -- `get_subgame_roots` itself returns Histories, Root -> Node).
+    """
+    game = test_case.factory()
+
+    actual_paths = [list(reversed(history)) for history in game.get_subgame_roots()]
+
+    assert sorted(actual_paths) == sorted(test_case.expected_paths)
+
+
+# ============================================================================
+#                              Subgames
+# ============================================================================
+@dataclasses.dataclass
+class SubgameStructureTestCase:
+    """Expected subgame structure of a game.
+
+    `roots` lists the History of each subgame root, in the postorder
+    `Game.get_subgame_roots` is expected to produce (children before parents).
+
+    `differences` maps each subgame-root History to the set of
+    (player_label, infoset_number) keys in that subgame's difference ---
+    the information sets belonging to the subgame but not to any child subgame.
+    """
+    factory: typing.Callable[[], gbt.Game]
+    roots: list[tuple[str, ...]]
+    differences: dict[tuple[str, ...], set[tuple[str, int]]]
+
+
+SUBGAME_STRUCTURE_CASES = [
+    # ------------------------------------------------------------------------
+    #                    EF game with the only subgame
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameStructureTestCase(
+            factory=functools.partial(gbt.catalog.load, "journals/geb/wichardt2008"),
+            roots=[()],
+            differences={(): {("Player 1", 0), ("Player 1", 1), ("Player 2", 0)}},
+        ),
+        id="wichardt_no_nontrivial_subgames",
+    ),
+    # ------------------------------------------------------------------------
+    #                       Tree with eight subgames
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameStructureTestCase(
+            factory=functools.partial(games.read_from_file, "subgame-8-roots.efg"),
+            roots=[
+                ("L", "L", "L", "L", "L"),
+                ("L", "L", "L", "L", "R"),
+                ("L", "L", "L", "L"),
+                ("L", "L"),
+                ("L", "R"),
+                ("L",),
+                ("R",),
+                (),
+            ],
+            differences={
+                ("L", "L", "L", "L", "L"): {
+                    ("Player 1", 3), ("Player 2", 2), ("Player 2", 3),
+                },
+                ("L", "L", "L", "L", "R"): {("Player 1", 4), ("Player 1", 5)},
+                ("L", "L", "L", "L"): {("Player 2", 1)},
+                ("L", "L"): {("Player 1", 1), ("Player 1", 2)},
+                ("L", "R"): {("Player 1", 6)},
+                ("L",): {("Player 2", 0)},
+                ("R",): {
+                    ("Player 1", 7), ("Player 1", 8), ("Player 1", 9),
+                    ("Player 2", 4), ("Player 2", 5), ("Player 2", 6),
+                },
+                (): {("Player 1", 0)},
+            },
+        ),
+        id="eight_subgames",
+    ),
+]
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_get_subgame_roots_postorder_sequence(test_case: SubgameStructureTestCase):
+    """`Game.get_subgame_roots` produces the expected postorder sequence of
+    subgame-root Histories (children before parents)."""
+    game = test_case.factory()
+    assert game.get_subgame_roots() == test_case.roots
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
+    """`game.get_minimal_subgame(history)` returns the History of the root of the
+    smallest subgame containing the information set `history` belongs to."""
+    game = test_case.factory()
+    expected_root_for_key = {
+        key: root
+        for root, keys in test_case.differences.items()
+        for key in keys
+    }
+    for player in game.players:
+        for i, history in enumerate(game.get_infosets(player)):
+            key = (player, i)
+            selector = gbt.H.path(*history)
+            assert game.get_minimal_subgame(selector) == expected_root_for_key[key]
+
+
+@pytest.mark.parametrize("game_file, expected_unreachable_paths", [
+    # Games without absent-mindedness, where all nodes are reachable
+    (gbt.catalog.load("journals/geb/wichardt2008"), []),
+    ("subgames.efg", []),
+
+    # An absent-minded driver game with an unreachable terminal node
+    (
+        "AM-driver-one-infoset.efg",
+        [["T", "S"]]
+    ),
+
+    # An absent-minded driver game with an unreachable subtree
+    (
+        "AM-driver-subgame.efg",
+        [["T", "S"], ["r", "T", "S"], ["l", "T", "S"]]
+    ),
+])
+def test_get_strategy_unreachable(game_file: str, expected_unreachable_paths: list[list[str]]):
+    """
+    Tests `Game.get_strategy_unreachable` against a known-correct list of
+    unreachable-node paths (Action Labels from Node -> Root, matching
+    `_get_path_of_action_labels`'s convention -- `get_strategy_unreachable`
+    itself returns Histories, Root -> Node).
+    """
+    game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
+
+    actual_unreachable_paths = [
+        list(reversed(history)) for history in game.get_strategy_unreachable()
+    ]
+
+    assert actual_unreachable_paths == expected_unreachable_paths
+
+
+@pytest.mark.parametrize(
+    "game, player_label, strategy_label, infoset_path, expected_action_label",
+    [
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 1", "1", [], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 1", "2", [], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 2", "1", ["R"], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 2", "2", ["R"], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "1", ["R", "L"], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 3", "2", ["R", "L"], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", [], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "2", [], "L"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "1", ["L"], "R"),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", "2", ["L"], "L"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 1", "1", [], "U1"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 1", "2", [], "D1"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 2", "1", ["U1"], "U2"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 2", "2", ["U1"], "D2"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 3", "1", ["U1", "U2"], "U3"),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 3", "2", ["U1", "U2"], "D3"),
+    ],
+)
+def test_get_behavior_prescribed_action_defined(
+    game, player_label, strategy_label, infoset_path, expected_action_label
+):
+    """Verify `Game.get_behavior` retrieves the correct action for defined actions."""
+    selector = gbt.H.path(*infoset_path)
+
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(selector)
+
+    assert prescribed_action == expected_action_label
+
+
+@pytest.mark.parametrize(
+    "game, player_label, strategy_label, infoset_label, infoset_path",
+    [
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", "1", None, ["L", "L"]),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,3)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "1", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 1", "2", "(1,5)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "1", "(2,4)", None),
+        (games.read_from_file("cent3.efg"), "Player 2", "2", "(2,5)", None),
+    ],
+)
+def test_get_behavior_prescribed_action_undefined_returns_none(
+    game, player_label, strategy_label, infoset_label, infoset_path
+):
+    """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
+    if infoset_label is not None:
+        node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
+        selector = games.selector_for_node(node)
+    else:
+        selector = gbt.H.path(*infoset_path)
+
+    prescribed_action = game.get_behavior(player_label, strategy_label).get(selector)
+
+    assert prescribed_action is None
+
+
+@pytest.mark.parametrize(
+    "game, player_label, other_infoset_path",
+    [
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 1", ["R"]),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig1"), "Player 2", []),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 1", ["L"]),
+        (gbt.catalog.load("journals/ijgt/selten1975/fig2"), "Player 2", []),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 1", ["U1"]),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 2", ["U1", "U2"]),
+        (games.read_from_file("basic_extensive_game.efg"), "Player 3", []),
+    ],
+)
+def test_get_behavior_raises_value_error_for_wrong_player(
+    game, player_label, other_infoset_path
+):
+    """
+    Verify `Game.get_behavior`'s result raises ValueError when the infoset belongs
+    to a different player than the strategy.
+    """
+    behavior = game.get_behavior(player_label, next(iter(game.get_strategies(player_label))))
+    other_selector = gbt.H.path(*other_infoset_path)
+
+    with pytest.raises(ValueError):
+        behavior.get(other_selector)
+
+
+@pytest.mark.parametrize(
+    "game_obj",
+    [
+        pytest.param(games.read_from_file("basic_extensive_game.efg")),
+        pytest.param(games.read_from_file("binary_3_levels_generic_payoffs.efg")),
+        pytest.param(games.read_from_file("cent3.efg")),
+        pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig1")),
+        pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig2")),
+        pytest.param(games.read_from_file("stripped_down_poker.efg")),
+        pytest.param(gbt.Game.new_tree()),
+    ],
+)
+def test_get_histories_after_iteration_order(game_obj: gbt.Game):
+    """`Game.get_histories(H.after())` -- the public replacement for the removed
+    `Game.nodes` -- produces nodes in depth-first traversal order.
+    """
+    def dfs(history: tuple) -> typing.Iterator[tuple]:
+        yield history
+        for action in game_obj.get_actions(gbt.H.path(*history)):
+            yield from dfs((*history, action))
+
+    expected = list(dfs(()))
+    assert game_obj.get_histories(gbt.H.after()) == expected
+
+
+def test_layout_tree():
+    """`layout_tree` returns a `TreeLayout`, keyed by History, with one
+    `TreeLayoutCoordinates` entry per node of the game."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    layout = gbt.layout_tree(game)
+
+    assert len(layout) == len(game.get_histories(gbt.H.after()))
+    for history in game.get_histories(gbt.H.after()):
+        assert history in layout
+        coordinates = layout[history]
+        assert isinstance(coordinates, gbt.TreeLayoutCoordinates)
+        assert isinstance(coordinates.level, int)
+        assert isinstance(coordinates.sublevel, int)
+        assert isinstance(coordinates.offset, float)
+
+    assert set(layout) == set(game.get_histories(gbt.H.after()))
