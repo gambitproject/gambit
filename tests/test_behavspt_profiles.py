@@ -5,14 +5,14 @@ import pygambit as gbt
 from . import games
 
 
-def _find_selector(game, label):
-    """A `Selector` resolving to the infoset with the given label."""
-    return games.selector_for_node(games.find_infoset_in_game(game, label))
-
-
 def _find_history(game, label):
     """The History of a member node of the infoset with the given label."""
-    return games._node_history(games.find_infoset_in_game(game, label))
+    return games._INFOSET_LABEL_HISTORIES[(game.title, label)]
+
+
+def _find_selector(game, label):
+    """A `Selector` resolving to the infoset with the given label."""
+    return gbt.H.path(*_find_history(game, label))
 
 
 def _branching_game():

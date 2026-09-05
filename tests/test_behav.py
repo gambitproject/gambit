@@ -26,6 +26,21 @@ def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_f
         }
 
 
+def _infoset_history(game: gbt.Game, label: str) -> tuple:
+    """The History of the representative member of the infoset historically
+    identified by `label`, matching the removed `Infoset`'s by-label lookup."""
+    return games._INFOSET_LABEL_HISTORIES[(game.title, label)]
+
+
+def _member_selector(game: gbt.Game, label: str) -> gbt.Selector:
+    """A `Selector` for some member of the infoset historically identified by
+    `label` -- not necessarily the representative one, so profile indexing is
+    verified to work from any member, not just the canonical one."""
+    history = _infoset_history(game, label)
+    member = next(iter(game.get_members(gbt.H.path(*history))))
+    return gbt.H.path(*member)
+
+
 @pytest.mark.parametrize(
     "game,rational_flag,payoffs",
     [
@@ -164,10 +179,10 @@ def test_profile_indexing_by_player_infoset_action_reference(
     rational_flag: bool,
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    infoset = games.find_infoset(game, player_label, infoset_label)
-    node = next(iter(infoset.members))
+    history = _infoset_history(game, infoset_label)
+    assert game.get_player(gbt.H.path(*history)) == player_label
     prob = gbt.Rational(prob) if rational_flag else prob
-    assert profile[games.selector_for_node(node)][action_label] == prob
+    assert profile[_member_selector(game, infoset_label)][action_label] == prob
 
 
 @pytest.mark.parametrize(
@@ -229,10 +244,11 @@ def test_profile_indexing_by_selector_reference(
     """profile[selector] and profile[player_label][selector] resolve to the same
     MixedAction."""
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    infoset = games.find_infoset(game, player_label, infoset_label)
-    selector = games.selector_for_node(next(iter(infoset.members)))
+    history = _infoset_history(game, infoset_label)
+    assert game.get_player(gbt.H.path(*history)) == player_label
+    selector = _member_selector(game, infoset_label)
     probs = [gbt.Rational(prob) for prob in probs] if rational_flag else probs
-    expected = dict(zip(infoset.actions, probs, strict=True))
+    expected = dict(zip(game.get_actions(gbt.H.path(*history)), probs, strict=True))
     assert profile[player_label][selector] == expected
     assert profile[selector] == expected
 
@@ -322,8 +338,7 @@ def test_set_probabilities_action(
     """A sparse one-action distribution leaves the infoset's other actions at weight zero."""
     profile = game.mixed_behavior_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
-    node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
-    selector = games.selector_for_node(node)
+    selector = _member_selector(game, infoset_label)
     profile[selector] = {action_label: prob}
     assert profile[selector][action_label] == prob
 
@@ -399,10 +414,10 @@ def test_set_probabilities_infoset(
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if rational_flag:
         probs = [gbt.Rational(p) for p in probs]
-    infoset = games.find_infoset(game, player_label, infoset_label)
-    node = next(iter(infoset.members))
-    selector = games.selector_for_node(node)
-    expected = dict(zip(infoset.actions, probs, strict=True))
+    history = _infoset_history(game, infoset_label)
+    assert game.get_player(gbt.H.path(*history)) == player_label
+    selector = _member_selector(game, infoset_label)
+    expected = dict(zip(game.get_actions(gbt.H.path(*history)), probs, strict=True))
     profile[selector] = expected
     assert profile[selector] == expected
 
@@ -734,8 +749,7 @@ def test_absent_minded_infoset_prob(
     game: gbt.Game, infoset_label: str, prob: str | float, rational_flag: bool
 ):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
-    ip = profile.infoset_probs[games.selector_for_node(node)]
+    ip = profile.infoset_probs[_member_selector(game, infoset_label)]
     assert ip == (gbt.Rational(prob) if rational_flag else prob)
 
 
@@ -934,8 +948,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
                     == best_response_value - infoset_action_values[action]
                 )
 
-    for node in games.all_nodes(game):
-        history = games._node_history(node)
+    for history in game.get_histories(gbt.H.after()):
         if not game.get_actions(gbt.H.path(*history)):
             continue
         if infoset_probs[gbt.H.path(*history)] == 0:
@@ -1044,13 +1057,13 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_probs = profile.realiz_probs
     node_values = profile.node_values
-    for node in games.all_nodes(game):
-        history = games._node_history(node)
-        if not game.get_actions(gbt.H.path(*history)) or node.player == "Chance":
+    for history in game.get_histories(gbt.H.after()):
+        player = game.get_player(gbt.H.path(*history))
+        if player is None or player == "Chance":
             continue
         expected_val = 0
         node_prob = realiz_probs[history]
-        player_node_values = node_values[node.player]
+        player_node_values = node_values[player]
         for child_history in games.children_histories(game, history):
             prob = realiz_probs[child_history] / node_prob
             expected_val += prob * player_node_values[child_history]

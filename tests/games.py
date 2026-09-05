@@ -144,6 +144,14 @@ def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
     return gbt.H.after().filter(lambda h: h[:] in histories)
 
 
+def selector_for_histories(histories: list[tuple]) -> gbt.Selector:
+    """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
+    Histories -- the History-only counterpart to `selector_for_nodes`, for
+    fixtures that already work in terms of `History` rather than `Node`."""
+    histories = frozenset(histories)
+    return gbt.H.after().filter(lambda h: h[:] in histories)
+
+
 def selector_for_node(node: gbt.Node) -> gbt.Selector:
     """A root-anchored `Selector` matching exactly `node`'s own path of action
     labels -- for adapting a fixture's `Node` (e.g. one from `Game.get_infosets`)
