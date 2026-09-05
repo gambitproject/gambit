@@ -49,7 +49,7 @@ def test_game_get_max_payoff():
 def test_game_get_outcome():
     game = gbt.Game.new_table([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 0, "2": 0}, "top left")
-    assert game.get_outcome({"1": "1", "2": "1"}) == next(iter(game.outcomes))
+    assert game.get_outcome({"1": "1", "2": "1"}) == "top left"
 
 
 def test_game_get_outcome_by_relabeled_strategies():
@@ -58,8 +58,7 @@ def test_game_get_outcome_by_relabeled_strategies():
     game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
     game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
     game.make_outcome({pl1: "defect", pl2: "cooperate"}, {"1": 0, "2": 0}, "corner")
-    assert game.get_outcome({pl1: "defect", pl2: "cooperate"}) == \
-        next(iter(game.outcomes))
+    assert game.get_outcome({pl1: "defect", pl2: "cooperate"}) == "corner"
 
 
 def test_game_get_outcome_incomplete_contingency_raises():

@@ -64,8 +64,8 @@ def test_make_outcome_attaches_at_contingencies():
     outcome = game.make_outcome(
         [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
     )
-    assert game.get_outcome({"1": "1", "2": "1"}) == outcome
-    assert game.get_outcome({"1": "2", "2": "2"}) == outcome
+    assert game.get_outcome({"1": "1", "2": "1"}) == outcome.label
+    assert game.get_outcome({"1": "2", "2": "2"}) == outcome.label
     assert not game.get_outcome({"1": "1", "2": "2"})
     assert outcome["1"] == 2
 

@@ -109,68 +109,6 @@ class NodeChildren:
 
 
 @cython.cclass
-class NodeOutcome:
-    """The outcome attached to a node.
-
-    A lazy, node-anchored view: holds the node and resolves its outcome on each access,
-    so the value reflects the current state of the game even after the game is mutated.
-
-    .. versionadded:: 16.7.0
-
-    .. versionchanged:: 17.0.0
-        A node with no outcome attached resolves to the game's null outcome: the view is
-        falsy, its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
-        to every outcome — including another null and itself — and to ``None``.
-    """
-    node = cython.declare(c_GameNode)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a NodeOutcome outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(node: c_GameNode) -> NodeOutcome:
-        obj: NodeOutcome = NodeOutcome.__new__(NodeOutcome)
-        obj.node = node
-        return obj
-
-    @cython.cfunc
-    def _resolve(self) -> Outcome:
-        return Outcome.wrap(self.node.deref().GetOutcome())
-
-    def __getattr__(self, name):
-        if name.startswith("_"):
-            raise AttributeError(f"'NodeOutcome' object has no attribute '{name}'")
-        return getattr(self._resolve(), name)
-
-    def __getitem__(self, player):
-        return self._resolve()[player]
-
-    def __setitem__(self, player, value):
-        self._resolve()[player] = value
-
-    @property
-    def label(self):
-        return self._resolve().label
-
-    @label.setter
-    def label(self, value):
-        self._resolve().label = value
-
-    def __repr__(self) -> str:
-        return repr(self._resolve())
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return self._resolve() == other
-
-    def __bool__(self) -> bool:
-        return not self.node.deref().GetOutcome().deref().IsNull()
-
-    def __hash__(self) -> int:
-        return hash(self._resolve())
-
-
-@cython.cclass
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
@@ -374,26 +312,6 @@ class Node:
         of the public API; the public equivalent is `Game.get_strategy_unreachable`.
         """
         return self.node.deref().IsStrategyReachable()
-
-    @property
-    def outcome(self) -> NodeOutcome:
-        """The outcome currently attached to this node.
-
-        Returns a lazy, node-anchored view resolved on each access, so the value reflects
-        the current state of the game even if the game is mutated after this property is read.
-        When no outcome is attached, the view resolves to the game's null outcome:
-        its ``label`` is ``None``, its payoffs read as zero, and it compares unequal
-        to every outcome, including another null.
-
-        .. versionchanged:: 16.7.0
-            Now returns a lazily-evaluated, node-anchored view rather than capturing the
-            outcome at the time of access.
-
-        .. versionchanged:: 17.0.0
-            Resolves to the null outcome rather than ``None`` when no outcome is attached;
-            two null outcomes compare unequal.
-        """
-        return NodeOutcome.wrap(self.node)
 
     @cython.cfunc
     def _plays(self) -> list:

@@ -150,7 +150,7 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g.get_outcome(contingency)
+            outcome = g._get_outcome_object(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
         g.title = title
@@ -239,7 +239,7 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g.get_outcome(contingency)
+            outcome = g._get_outcome_object(contingency)
             for array, player in zip(arrays, players, strict=True):
                 outcome[player] = array[profile]
         g.title = title
@@ -1104,17 +1104,15 @@ class Game:
             deref(deref(psp).deref()).SetStrategy(handle)
         return psp
 
-    def get_outcome(self, location) -> Outcome | str | None:
-        """Returns the outcome attached at `location`.
+    def get_outcome(self, location) -> str | None:
+        """Returns the label of the outcome attached at `location`.
 
         For a tree game, `location` is a `Selector` (an `H`-built expression,
-        evaluated against this game) that must resolve to exactly one node;
-        the label of the outcome currently attached there is returned.
+        evaluated against this game) that must resolve to exactly one node.
 
         For a strategic (table) game, `location` is a pure-strategy
         contingency -- a complete mapping from the game's players' labels to
-        the label of the strategy played by that player; the `Outcome`
-        attached to it is returned.
+        the label of the strategy played by that player.
 
         .. versionadded:: 17.0.0
 
@@ -1122,6 +1120,10 @@ class Game:
             For a tree game, `location` may now be a `Selector`, returning
             the outcome's label (or `None`) directly, rather than raising
             `UndefinedOperationError`.
+
+        .. versionchanged:: 17.0.0
+            Always returns the outcome's label (or `None`); previously
+            returned the `Outcome` object itself for a strategic game.
 
         Parameters
         ----------
@@ -1131,11 +1133,9 @@ class Game:
 
         Returns
         -------
-        Outcome, str, or None
-            For a strategic game, the `Outcome` attached to `location`
-            (possibly the null outcome).  For a tree game, the label of the
-            outcome currently attached to the resolved node, or `None` if it
-            has none.
+        str or None
+            The label of the outcome attached at `location`, or `None` if it
+            is the null outcome.
 
         Raises
         ------
@@ -1165,12 +1165,21 @@ class Game:
             return Outcome.wrap(
                 cython.cast(Node, resolved_node).node.deref().GetOutcome()
             ).label
+        return self._get_outcome_object(location).label
+
+    def _get_outcome_object(self, contingency: typing.Mapping) -> Outcome:
+        """Returns the `Outcome` object attached at a pure-strategy
+        `contingency` in a strategic (table) game. Not part of the public
+        API; `get_outcome` returns only the label. Used internally by
+        `from_arrays`/`from_dict`, which need to mutate the outcome's
+        payoffs directly.
+        """
         if self.game.deref().IsAgg():
             raise UndefinedOperationError(
                 "get_outcome(): operation not defined for games not in "
                 "strategic (table) representation"
             )
-        resolved = self._resolve_contingency(location, "get_outcome")
+        resolved = self._resolve_contingency(contingency, "get_outcome")
         psp = self._make_pure_strategy_profile(resolved)
         return Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
 

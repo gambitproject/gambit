@@ -136,7 +136,6 @@ Information about the game
 .. autosummary::
    :toctree: api/
 
-   Node.outcome
    Node.members
    Node.actions
    Node.action_probs

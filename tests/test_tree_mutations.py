@@ -87,9 +87,11 @@ def _subtrees_equal(
     if n1 == recursion_stop_node:
         return not n2._children()
     if not n1._children() and not n2._children():
-        if not n1.outcome and not n2.outcome:
-            return True
-        return n1.outcome == n2.outcome
+        game = n1._game()
+        return (
+            game.get_outcome(gbt.H.path(*games._node_history(n1)))
+            == game.get_outcome(gbt.H.path(*games._node_history(n2)))
+        )
     if bool(n1._children()) != bool(n2._children()):
         return False
     # now, both n1 and n2 are non-terminal
