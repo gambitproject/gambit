@@ -17,6 +17,8 @@ Representation of games
    Outcome
    Node
    Branch
+   TreeLayout
+   TreeLayoutCoordinates
 
 
 Creating, reading, and writing games
@@ -40,6 +42,15 @@ Creating, reading, and writing games
    Game.to_nfg
    Game.to_html
    Game.to_latex
+
+
+Computing a tree layout for graphical display
+..............................................
+
+.. autosummary::
+   :toctree: api/
+
+   layout_tree
 
 
 Transforming game trees

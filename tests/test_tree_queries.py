@@ -622,3 +622,21 @@ def test_get_histories_after_iteration_order(game_obj: gbt.Game):
 
     expected = [games._node_history(node) for node in dfs(game_obj.root)]
     assert game_obj.get_histories(gbt.H.after()) == expected
+
+
+def test_layout_tree():
+    """`layout_tree` returns a `TreeLayout`, keyed by History, with one
+    `TreeLayoutCoordinates` entry per node of the game."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    layout = gbt.layout_tree(game)
+
+    assert len(layout) == len(game.get_histories(gbt.H.after()))
+    for history in game.get_histories(gbt.H.after()):
+        assert history in layout
+        coordinates = layout[history]
+        assert isinstance(coordinates, gbt.TreeLayoutCoordinates)
+        assert isinstance(coordinates.level, int)
+        assert isinstance(coordinates.sublevel, int)
+        assert isinstance(coordinates.offset, float)
+
+    assert set(layout) == set(game.get_histories(gbt.H.after()))
