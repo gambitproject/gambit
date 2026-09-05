@@ -927,14 +927,11 @@ class Game:
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
-    @property
-    def subgames(self) -> GameSubgames:
-        """The set of subgames in the game.
+    def get_subgame_roots(self) -> list[tuple]:
+        """Returns the Histories of the roots of the subgames of the game, in
+        postorder (children before parents).
 
-        Iteration over this property yields the subgames in postorder
-        (children before parents).
-
-        .. versionadded:: 16.7.0
+        .. versionadded:: 17.0.0
 
         Raises
         ------
@@ -943,15 +940,19 @@ class Game:
         """
         if not self.is_tree:
             raise UndefinedOperationError(
-                "Operation only defined for games with a tree representation"
+                "get_subgame_roots(): operation only defined for games "
+                "with a tree representation"
             )
-        return GameSubgames.wrap(self.game)
+        return [
+            _history_of(Node.wrap(subgame.deref().GetRoot()))
+            for subgame in self.game.deref().GetSubgames()
+        ]
 
-    def get_minimal_subgame(self, node: Selector) -> Subgame:
-        """Returns the smallest subgame containing the information set or event that
-        the node identified by `node` belongs to.
+    def get_minimal_subgame(self, history: Selector) -> tuple:
+        """Returns the History of the root of the smallest subgame containing the
+        information set or event that the node identified by `history` belongs to.
 
-        `node` is a `Selector` (an `H`-built expression, evaluated against this
+        `history` is a `Selector` (an `H`-built expression, evaluated against this
         game) that must resolve to exactly one node.
 
         .. versionadded:: 16.7.0
@@ -959,27 +960,29 @@ class Game:
             Renamed from `minimal_subgame`.  `node` (formerly `infoset`) is now a
             `Selector`; a `Node` or `str` is no longer accepted directly -- build
             one with `H`.
+        .. versionchanged:: 17.0.0
+            Returns the History of the subgame's root, instead of a `Subgame` object.
 
         Parameters
         ----------
-        node : Selector
+        history : Selector
             A `Selector` resolving to a single node belonging to the information
             set or event to query.
 
         Returns
         -------
-        Subgame
-            The smallest subgame containing the information set or event that
-            `node` belongs to.
+        tuple
+            The History of the root of the smallest subgame containing the
+            information set or event that `history` belongs to.
 
         Raises
         ------
         TypeError
-            If `node` is not a `Selector`.
+            If `history` is not a `Selector`.
         UndefinedOperationError
             If the game does not have a tree representation.
         ValueError
-            If `node` does not resolve to exactly one node, or belongs to no
+            If `history` does not resolve to exactly one node, or belongs to no
             information set or event (it is terminal).
         """
         if not self.is_tree:
@@ -987,16 +990,16 @@ class Game:
                 "get_minimal_subgame(): operation only defined for games "
                 "with a tree representation"
             )
-        if not isinstance(node, Selector):
+        if not isinstance(history, Selector):
             raise TypeError(
-                f"get_minimal_subgame(): node must be a Selector, not {node.__class__.__name__}"
+                "get_minimal_subgame(): history must be a Selector, "
+                f"not {history.__class__.__name__}"
             )
-        resolved_node = self._resolve_infoset_or_event(node, "get_minimal_subgame")
-        return Subgame.wrap(
-            self.game.deref().GetMinimalSubgame(
-                cython.cast(Node, resolved_node)._infoset_handle()
-            )
+        resolved_node = self._resolve_infoset_or_event(history, "get_minimal_subgame")
+        subgame: c_GameSubgame = self.game.deref().GetMinimalSubgame(
+            cython.cast(Node, resolved_node)._infoset_handle()
         )
+        return _history_of(Node.wrap(subgame.deref().GetRoot()))
 
     def get_behavior(self,
                      player: str,

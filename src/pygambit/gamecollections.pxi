@@ -22,38 +22,6 @@
 #
 
 @cython.cclass
-class GameSubgames:
-    """Represents the set of subgames in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameSubgames outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameSubgames:
-        obj: GameSubgames = GameSubgames.__new__(GameSubgames)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameSubgames(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of subgames in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().GetSubgames().size()
-
-    def __iter__(self) -> typing.Iterator[Subgame]:
-        """Iterate over the game subgames in postorder."""
-        if not self.game.deref().IsTree():
-            return
-        for subgame in self.game.deref().GetSubgames():
-            yield Subgame.wrap(subgame)
-
-
-@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)

@@ -17,7 +17,6 @@ Representation of games
    Outcome
    Node
    Branch
-   Subgame
 
 
 Creating, reading, and writing games
@@ -114,7 +113,7 @@ Information about the game
    Game.contingencies
    Game.get_outcome
    Game.get_payoffs
-   Game.subgames
+   Game.get_subgame_roots
    Game.get_minimal_subgame
 
 .. autosummary::
@@ -141,14 +140,6 @@ Information about the game
    Node.player
    Node.is_successor_of
    Node.own_prior_action
-
-.. autosummary::
-   :toctree: api/
-
-   Subgame.game
-   Subgame.root
-   Subgame.parent
-   Subgame.children
 
 .. autosummary::
 
