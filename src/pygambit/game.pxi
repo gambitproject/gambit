@@ -1691,7 +1691,10 @@ class Game:
         )
 
     def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
-        """Resolve an attempt to reference a node of the game.
+        """Resolve an attempt to reference a node of the game. A bare `Node` is not
+        accepted -- every public method that reaches this already requires a
+        `Selector` (or, for internal callers, an already-resolved `Node`, never
+        routed back through here).
 
         Parameters
         ----------
@@ -1704,20 +1707,14 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `node` is a `Node` from a different game.
         KeyError
             If `node` is a string and no node in the game has that label.
         TypeError
-            If `node` is not a `Node` or a `str`
+            If `node` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `node` is an empty `str` or all spaces
         """
-        if isinstance(node, Node):
-            if cython.cast(Node, node)._game() != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return node
-        elif isinstance(node, Selector):
+        if isinstance(node, Selector):
             resolved = self._get_nodes(node)
             if len(resolved) != 1:
                 raise ValueError(
@@ -1738,27 +1735,26 @@ class Game:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
         raise TypeError(
-            f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}"
+            f"{funcname}(): {argname} must be Selector, tuple, or str, "
+            f"not {node.__class__.__name__}"
         )
 
     def _resolve_nodes(self,
                        nodes: typing.Any,
                        funcname: str,
                        argname: str = "nodes") -> list[Node]:
-        """Resolve an attempt to reference a subset of the nodes of the game of the game.
+        """Resolve an attempt to reference a subset of the nodes of the game.
 
-        See `_resolve_node` for details on functionality.
-
-        `nodes` may also be a `Selector` (an `H`-built expression), evaluated
-        against this game via `_get_nodes` before the usual resolution.
+        `nodes` is a `Selector` (an `H`-built expression), evaluated against this
+        game via `_get_nodes`; or an already-resolved list of `Node`, dispatched
+        internally one group at a time from a `GroupedSelector` -- never a bare
+        `Node`/History/label from the caller directly, so no further per-element
+        resolution is needed.
         """
         if isinstance(nodes, Selector):
-            nodes = self._get_nodes(nodes)
-        resolved_nodes = [
-            self._resolve_node(n, funcname, argname)
-            for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, (str, tuple))
-                      else [nodes])
-        ]
+            resolved_nodes = self._get_nodes(nodes)
+        else:
+            resolved_nodes = list(nodes)
         if not resolved_nodes:
             raise ValueError(f"{funcname}(): `{argname}` must not be empty")
         if len(resolved_nodes) != len(set(resolved_nodes)):
@@ -1768,12 +1764,13 @@ class Game:
     def _resolve_infoset(self,
                          infoset: typing.Any, funcname: str, argname: str = "infoset") -> Node:
         """Resolve an attempt to reference a personal player's information set of the
-        game, via a member node or its label.
+        game, via a `Selector` resolving to a member node, or such a node's label.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set, or such a node's label.
+        infoset : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the information
+            set, or such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1787,12 +1784,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
         KeyError
             If `infoset` is a string and no node in the game has that label.
         TypeError
-            If `infoset` is not a `Node` or a `str`
+            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `infoset` resolves to a chance event rather than a personal player's
             information set, or to no information set at all (the node is terminal).
@@ -1807,13 +1802,14 @@ class Game:
 
     def _resolve_event(self,
                        event: typing.Any, funcname: str, argname: str = "event") -> Node:
-        """Resolve an attempt to reference a chance event of the game, via a member
-        node or its label.
+        """Resolve an attempt to reference a chance event of the game, via a
+        `Selector` resolving to a member node, or such a node's label.
 
         Parameters
         ----------
-        event : Node or str
-            A node belonging to the event, or such a node's label.
+        event : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the event, or
+            such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'event'
@@ -1827,12 +1823,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `event` is a `Node` from a different game.
         KeyError
             If `event` is a string and no node in the game has that label.
         TypeError
-            If `event` is not a `Node` or a `str`
+            If `event` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `event` resolves to a personal player's information set rather than a
             chance event, or to no event at all (the node is terminal).
@@ -1850,13 +1844,15 @@ class Game:
                                   funcname: str,
                                   argname: str = "infoset") -> Node:
         """Resolve an attempt to reference an information set or event of the game
-        (whichever applies), via a member node or its label. For operations that
-        apply uniformly to either, such as attaching to an existing one.
+        (whichever applies), via a `Selector` resolving to a member node, or such a
+        node's label. For operations that apply uniformly to either, such as
+        attaching to an existing one.
 
         Parameters
         ----------
-        infoset : Node or str
-            A node belonging to the information set or event, or such a node's label.
+        infoset : Selector, tuple, or str
+            A `Selector`/History resolving to a node belonging to the information
+            set or event, or such a node's label.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1870,12 +1866,10 @@ class Game:
 
         Raises
         ------
-        MismatchError
-            If `infoset` is a `Node` from a different game.
         KeyError
             If `infoset` is a string and no node in the game has that label.
         TypeError
-            If `infoset` is not a `Node` or a `str`
+            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
             If `infoset` resolves to no information set or event (the node is
             terminal).
