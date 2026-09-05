@@ -203,7 +203,11 @@ SUBGAME_ROOTS_CASES = [
     #                              Empty Game
     # ------------------------------------------------------------------------
     pytest.param(
-        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[[]]),
+        # `GetSubgames()` returns no roots at all for a single-node (terminal-root) game,
+        # unlike `IsSubgameRoot()` (which special-cases it as trivially its own subgame) --
+        # a known, narrow C++-core discrepancy (`GameTreeRep::GetSubgameData()`'s early
+        # return for `m_root->IsTerminal()`), not something to paper over here.
+        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[]),
         id="empty_tree"
     ),
     # ------------------------------------------------------------------------
@@ -297,13 +301,13 @@ SUBGAME_ROOTS_CASES = [
 @pytest.mark.parametrize("test_case", SUBGAME_ROOTS_CASES)
 def test_subgame_roots(test_case: SubgameRootsTestCase):
     """
-    Tests that the set of nodes marked as subgame roots matches the expected
-    set of paths (Action Labels from Root -> Node).
+    Tests that `Game.get_subgame_roots` matches the expected set of paths
+    (Action Labels from Node -> Root, matching `_get_path_of_action_labels`'s
+    convention -- `get_subgame_roots` itself returns Histories, Root -> Node).
     """
     game = test_case.factory()
 
-    actual_roots = [node for node in games.all_nodes(game) if node.is_subgame_root]
-    actual_paths = [_get_path_of_action_labels(node) for node in actual_roots]
+    actual_paths = [list(reversed(history)) for history in game.get_subgame_roots()]
 
     assert sorted(actual_paths) == sorted(test_case.expected_paths)
 
@@ -469,7 +473,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
     actual_node_data = []
 
     for node in games.all_nodes(game):
-        if not node.children:
+        if not game.get_actions(games.selector_for_node(node)):
             assert node.own_prior_action is None, (
                 f"Terminal node at {_get_path_of_action_labels(node)} must be None"
             )
@@ -619,14 +623,12 @@ def test_get_histories_after_iteration_order(game_obj: gbt.Game):
     """`Game.get_histories(H.after())` -- the public replacement for the removed
     `Game.nodes` -- produces nodes in depth-first traversal order.
     """
-    def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
-        yield node
-        for child in node.children:
-            yield from dfs(child)
+    def dfs(history: tuple) -> typing.Iterator[tuple]:
+        yield history
+        for action in game_obj.get_actions(gbt.H.path(*history)):
+            yield from dfs((*history, action))
 
-    expected = [
-        games._node_history(node) for node in dfs(games.node_at_history(game_obj, ()))
-    ]
+    expected = list(dfs(()))
     assert game_obj.get_histories(gbt.H.after()) == expected
 
 

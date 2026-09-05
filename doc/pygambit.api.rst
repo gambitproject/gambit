@@ -137,11 +137,8 @@ Information about the game
    :toctree: api/
 
    Node.label
-   Node.game
    Node.outcome
-   Node.children
    Node.parent
-   Node.is_subgame_root
    Node.is_strategy_reachable
    Node.prior_action
    Node.members

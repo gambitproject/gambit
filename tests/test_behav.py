@@ -935,9 +935,9 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
                 )
 
     for node in games.all_nodes(game):
-        if not node.children:
-            continue
         history = games._node_history(node)
+        if not game.get_actions(gbt.H.path(*history)):
+            continue
         if infoset_probs[gbt.H.path(*history)] == 0:
             assert beliefs[history] is None
         else:
@@ -1045,15 +1045,16 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     realiz_probs = profile.realiz_probs
     node_values = profile.node_values
     for node in games.all_nodes(game):
-        if not node.children or node.player == "Chance":
+        history = games._node_history(node)
+        if not game.get_actions(gbt.H.path(*history)) or node.player == "Chance":
             continue
         expected_val = 0
-        node_prob = realiz_probs[games._node_history(node)]
+        node_prob = realiz_probs[history]
         player_node_values = node_values[node.player]
-        for child in node.children:
-            prob = realiz_probs[games._node_history(child)] / node_prob
-            expected_val += prob * player_node_values[games._node_history(child)]
-        assert player_node_values[games._node_history(node)] == expected_val
+        for child_history in games.children_histories(game, history):
+            prob = realiz_probs[child_history] / node_prob
+            expected_val += prob * player_node_values[child_history]
+        assert player_node_values[history] == expected_val
 
 
 @pytest.mark.parametrize(

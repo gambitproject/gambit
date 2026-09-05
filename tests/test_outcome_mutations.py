@@ -8,7 +8,7 @@ from . import games
 def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = games.node_at_history(game, ()).children
+    up, middle, down = games.children_of(game, ())
     outcome = game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
     )
@@ -22,7 +22,7 @@ def test_make_outcome_attaches_to_all_given_nodes():
 def test_make_outcome_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = games.node_at_history(game, ()).children
+    up, middle, down = games.children_of(game, ())
     outcome = game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
     assert up.outcome == outcome
     assert not middle.outcome
@@ -32,7 +32,7 @@ def test_make_outcome_accepts_selector():
 def test_make_outcome_accepts_selector_matching_several_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = games.node_at_history(game, ()).children
+    up, middle, down = games.children_of(game, ())
     outcome = game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
     assert up.outcome == outcome
     assert middle.outcome == outcome
@@ -44,7 +44,7 @@ def test_make_outcome_accepts_grouped_selector_pooled():
     receives the same outcome, regardless of grouping."""
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = games.node_at_history(game, ()).children
+    up, middle, down = games.children_of(game, ())
     outcome = game.make_outcome(
         gbt.H.path(...).by(lambda h: h[0]), {"Alice": 1, "Bob": -1}, "shared"
     )
@@ -134,7 +134,7 @@ def test_make_outcome_payoffs_naming_player_twice_raises():
 def test_make_outcome_null_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    up, middle, down = games.node_at_history(game, ()).children
+    up, middle, down = games.children_of(game, ())
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
     )

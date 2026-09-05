@@ -70,7 +70,7 @@ def test_node_delete_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     node = games.node_at_history(game, ("U1",))
     game.delete_tree(gbt.H.path("U1"))
-    assert len(node.children) == 0
+    assert len(node._children()) == 0
 
 
 def test_node_copy_nonterminal():
@@ -86,24 +86,24 @@ def _subtrees_equal(
         recursion_stop_node: gbt.Node | None = None
 ) -> bool:
     if n1 == recursion_stop_node:
-        return not n2.children
-    if not n1.children and not n2.children:
+        return not n2._children()
+    if not n1._children() and not n2._children():
         if not n1.outcome and not n2.outcome:
             return True
         return n1.outcome == n2.outcome
-    if bool(n1.children) != bool(n2.children):
+    if bool(n1._children()) != bool(n2._children()):
         return False
     # now, both n1 and n2 are non-terminal
     # check that they are in the same infosets
     if n1 not in n2.members:
         return False
     # check that they have the same number of children
-    if len(n1.children) != len(n2.children):
+    if len(n1._children()) != len(n2._children()):
         return False
 
     return all(
         _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(
-            n1.children, n2.children, strict=True
+            n1._children(), n2._children(), strict=True
             )
     )
 
@@ -283,7 +283,7 @@ def test_append_event_creates_single_event_list_of_nodes():
         {"a": gbt.Rational(1, 2), "b": gbt.Rational(1, 2)}
     )
     assert node1 in node2.members
-    assert node1.children
+    assert node1._children()
 
 
 def test_append_event_sets_distribution():
@@ -388,9 +388,9 @@ def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:
     count_terminal: bool
         Include or exclude terminal nodes from count
     """
-    count = 1 if count_terminal or start_node.children else 0
+    count = 1 if count_terminal or start_node._children() else 0
 
-    for child in start_node.children:
+    for child in start_node._children():
         count += _count_subtree_nodes(child, count_terminal)
     return count
 
@@ -484,7 +484,7 @@ def test_len_after_set_move_actions_drop():
     initial_number_of_nodes = _n_nodes(game)
     action_to_drop = "L"
     nodes_to_delete = sum(
-        _count_subtree_nodes(member.children[action_to_drop], True)
+        _count_subtree_nodes(member._children()[action_to_drop], True)
         for member in games.node_at_history(game, ()).members
     )
     remaining = [a for a in games.node_at_history(game, ()).actions if a != "L"]
@@ -598,7 +598,7 @@ def test_make_infoset_converts_chance_node():
     """A chance node becomes a personal decision node, discarding its probabilities."""
     game = games.read_from_file("stripped_down_poker.efg")
     chance_node = games.node_at_history(game, ())            # the deal is a chance move
-    personal = next(n for n in games.all_nodes(game) if n.children and n.player != "Chance")
+    personal = next(n for n in games.all_nodes(game) if n._children() and n.player != "Chance")
     game.make_infoset(gbt.H.path(), personal.player)
     assert chance_node.player != "Chance"
     assert chance_node.player == personal.player
@@ -941,7 +941,7 @@ def test_set_move_actions_drop_shrinks_actions_and_children():
     remaining = list(infoset.actions)[1:]
     game.set_move_actions(games.selector_for_nodes([node]), remaining, drop=True)
     assert len(infoset.actions) == action_count - 1
-    assert len(node.children) == action_count - 1
+    assert len(node._children()) == action_count - 1
 
 
 def test_set_move_actions_cannot_remove_the_only_action():
@@ -968,12 +968,12 @@ def test_set_move_actions_reorder_carries_subtrees():
     )
     infoset = games.node_at_history(game, ("x",))
     members = list(infoset.members)
-    children_before = [{label: member.children[label] for label in ("a", "b", "c")}
+    children_before = [{label: member._children()[label] for label in ("a", "b", "c")}
                        for member in members]
     game.set_move_actions(gbt.H.path("x"), ["c", "a", "b"])
     assert list(infoset.actions) == ["c", "a", "b"]
     for member, children in zip(members, children_before, strict=True):
-        assert list(member.children) == [children["c"], children["a"], children["b"]]
+        assert list(member._children()) == [children["c"], children["a"], children["b"]]
 
 
 def test_set_move_actions_add_drop_and_reorder_together():

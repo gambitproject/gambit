@@ -275,10 +275,13 @@ def render_profile_detail(
     return _render_strategy_detail(profile, decimals)
 
 
-def _name_or_number(obj) -> str:
-    # Gambit's Python API numbers players/strategies/infosets/actions from 0;
-    # the C++ tools display the underlying (1-based) engine numbering.
-    return obj.label if obj.label else str(obj.number + 1)
+def _name_or_number(node: gbt.Node) -> str:
+    # Gambit's Python API numbers nodes from 0; the C++ tools display the
+    # underlying (1-based) engine numbering. `Node._number` is private (not part
+    # of the public API) but still Python-accessible, same as `Game._get_infosets`
+    # just below -- rendering needs the node's own engine number, which a History
+    # alone cannot provide.
+    return node.label if node.label else str(node._number() + 1)
 
 
 def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:

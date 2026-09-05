@@ -19,14 +19,20 @@ def all_infosets(game: gbt.Game) -> list[tuple]:
 
 def all_nodes(game: gbt.Game) -> list[gbt.Node]:
     """Every node in the game, in depth-first traversal order, matching
-    `Game.nodes` before its removal (17.0.0). Built from `.children`, the
-    surviving Node-navigation primitive, starting from `node_at_history(game, ())`
-    (the root) since `Game.root` was itself removed (17.0.0)."""
-    def _walk(node: gbt.Node):
-        yield node
-        for child in node.children:
-            yield from _walk(child)
-    return list(_walk(node_at_history(game, ())))
+    `Game.nodes` before its removal (17.0.0)."""
+    return game._all_nodes()
+
+
+def children_histories(game: gbt.Game, history: tuple) -> list[tuple]:
+    """The Histories of the children of the node at `history` -- the standard way
+    to enumerate a node's children now that `Node.children` is removed (17.0.0)."""
+    return [(*history, action) for action in game.get_actions(gbt.H.path(*history))]
+
+
+def children_of(game: gbt.Game, history: tuple) -> list[gbt.Node]:
+    """The children of the node at `history`, as real Nodes -- for callers that
+    need actual `Node` objects (e.g. `.members`/`.player`), not just Histories."""
+    return [node_at_history(game, h) for h in children_histories(game, history)]
 
 
 def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
@@ -39,7 +45,7 @@ def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
 def infoset_number(node: gbt.Node) -> int:
     """The 0-based position of `node`'s information set among its player's
     information sets, matching the removed `Infoset.number` (17.0.0)."""
-    game = node.game
+    game = node._game()
     members = set(game.get_members(selector_for_node(node)))
     for i, history in enumerate(game.get_infosets(node.player)):
         if history in members:
@@ -400,7 +406,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         (-2, 2): "BOb wins 2",
     }
     nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
-    for term_node in [n for n in all_nodes(g) if not n.children]:
+    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
         nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
 
     for payoffs, nodes in nodes_by_payoff.items():
@@ -467,7 +473,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
                 tmp = "wins" if winner == "Bob" else "loses"
                 nodes_by_key[f"Bob calls and {tmp}"].append(n)
 
-    for term_node in [n for n in all_nodes(g) if not n.children]:
+    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
         collect_nodes(term_node)
 
     for key, nodes in nodes_by_key.items():
@@ -808,7 +814,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.set_size_of_rsf(rs)
         return rs
 
-    def create_binary_tree(self, g, node, path, whose_turn, depth, max_depth):
+    def create_binary_tree(self, g, path, whose_turn, depth, max_depth):
         # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
         if depth == max_depth:
             g.make_outcome(
@@ -820,20 +826,21 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
             g.append_move(gbt.H.path(*path), current_player, ["L", "R"])
 
             whose_turn = (whose_turn + 1) % self.n_players
-            for label, child in zip(["L", "R"], node.children, strict=True):
-                self.create_binary_tree(g, child, (*path, label), whose_turn, depth + 1, max_depth)
+            for label in ["L", "R"]:
+                self.create_binary_tree(g, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
         g = gbt.Game.new_tree(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
-        self.create_binary_tree(g, node_at_history(g, ()), (), 0, 0, self.level)
+        self.create_binary_tree(g, (), 0, 0, self.level)
         for n in all_nodes(g):
-            if n.children and n.children["L"].children:
-                left = n.children["L"]
+            history = _node_history(n)
+            if g.get_actions(gbt.H.path(*history)) and g.get_actions(gbt.H.path(*history, "L")):
+                left, right = children_of(g, history)
                 g.make_infoset(
-                    selector_for_nodes(list(left.members) + [n.children["R"]]),
+                    selector_for_nodes(list(left.members) + [right]),
                     left.player,
                 )
         return g

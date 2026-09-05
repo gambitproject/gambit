@@ -189,7 +189,7 @@ class Node:
 
     def __repr__(self) -> str:
         if self.label:
-            return f"Node(game={self.game}, label='{self.label}')"
+            return f"Node(game={self._game()}, label='{self.label}')"
         path = []
         node = self
         while node.parent:
@@ -197,7 +197,7 @@ class Node:
                 cython.cast(Node, node).node.deref().GetPriorAction().deref().GetNumber() - 1
             )
             node = node.parent
-        return f"Node(game={self.game}, path={path})"
+        return f"Node(game={self._game()}, path={path})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -228,21 +228,23 @@ class Node:
     def label(self, value: str) -> None:
         self.node.deref().SetLabel(value.encode("utf-8"))
 
-    @property
-    def number(self) -> int:
-        """Returns the number of the node in its game.
-        Nodes are numbered starting with 0.
+    def _number(self) -> int:
+        """The number of the node in its game, numbered starting with 0. Not part
+        of the public API; a node's position is otherwise only exposed via History.
         """
         return self.node.deref().GetNumber() - 1
 
-    @property
-    def children(self) -> NodeChildren:
-        """The set of children of this node."""
+    def _children(self) -> NodeChildren:
+        """The set of children of this node. Not part of the public API; the public
+        equivalent is a `Selector`'s `.path(..., ...)` wildcard step, e.g.
+        `game.get_histories(H.path(*history, ...))`.
+        """
         return NodeChildren.wrap(self.node)
 
-    @property
-    def game(self) -> Game:
-        """Gets the ``Game`` to which the node belongs."""
+    def _game(self) -> Game:
+        """The `Game` to which the node belongs. Not part of the public API; a
+        `Node` is otherwise only obtained already scoped to a particular `Game`.
+        """
         return Game.wrap(self.node.deref().GetGame())
 
     @cython.cfunc
@@ -389,15 +391,6 @@ class Node:
         API; a node is terminal exactly when `Game.get_actions` is empty for it.
         """
         return self.node.deref().IsTerminal()
-
-    @property
-    def is_subgame_root(self) -> bool:
-        """Returns whether the node is the root of a proper subgame.
-
-        .. versionchanged:: 16.1.0
-            Changed to being a property instead of a member function.
-        """
-        return self.node.deref().IsSubgameRoot()
 
     @property
     def is_strategy_reachable(self) -> bool:

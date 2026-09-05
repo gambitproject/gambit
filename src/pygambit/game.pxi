@@ -554,8 +554,8 @@ class Game:
 
         Internal: the `H` selector algebra's evaluator, interpreting the
         selector's ops in order, starting from the root, reusing `Node`'s
-        existing navigation (`.children`, `.plays`) rather than walking the
-        C++ tree directly. Not part of the public API yet -- used to resolve
+        existing (private) navigation (`_children()`, `_plays()`) rather than
+        walking the C++ tree directly. Not part of the public API yet -- used to resolve
         a `Selector`/`GroupedSelector` argument to `append_move`,
         `append_event`, `append_infoset`, and `make_outcome`.
         """
@@ -570,9 +570,13 @@ class Game:
             if isinstance(op, _PathStep):
                 for step in op.steps:
                     current = (
-                        [child for node in current for child in node.children]
+                        [
+                            child
+                            for node in current
+                            for child in cython.cast(Node, node)._children()
+                        ]
                         if step is Ellipsis
-                        else [node.children[step] for node in current]
+                        else [cython.cast(Node, node)._children()[step] for node in current]
                     )
             elif isinstance(op, _PlaysStep):
                 current = [
@@ -1668,7 +1672,7 @@ class Game:
             If `node` is an empty `str` or all spaces
         """
         if isinstance(node, Node):
-            if node.game != self:
+            if cython.cast(Node, node)._game() != self:
                 raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
             return node
         elif isinstance(node, Selector):
@@ -1918,7 +1922,7 @@ class Game:
         if len(set(actions)) != len(actions):
             raise ValueError("append_move(): action labels must be unique")
         resolved_nodes = self._resolve_nodes(nodes, "append_move", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
@@ -1989,7 +1993,7 @@ class Game:
             )
         infoset_handle: c_GameInfoset = infoset_node._infoset_handle()
         resolved_nodes = self._resolve_nodes(nodes, "append_infoset", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
             self.game.deref().AppendMove(cython.cast(Node, n).node, infoset_handle)
@@ -2056,7 +2060,7 @@ class Game:
         if any(not label for label in action_labels):
             raise ValueError("append_event(): action labels must not be empty")
         resolved_nodes = self._resolve_nodes(nodes, "append_event", "nodes")
-        if any(len(n.children) > 0 for n in resolved_nodes):
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError("append_event(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
