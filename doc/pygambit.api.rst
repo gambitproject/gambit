@@ -125,6 +125,7 @@ Information about the game
    Game.get_payoffs
    Game.get_subgame_roots
    Game.get_minimal_subgame
+   Game.get_strategy_unreachable
 
 .. autosummary::
    :toctree: api/
@@ -139,7 +140,6 @@ Information about the game
    Node.label
    Node.outcome
    Node.parent
-   Node.is_strategy_reachable
    Node.prior_action
    Node.members
    Node.actions

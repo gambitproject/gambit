@@ -1000,6 +1000,33 @@ class Game:
         )
         return _history_of(Node.wrap(subgame.deref().GetRoot()))
 
+    def get_strategy_unreachable(self) -> list[tuple]:
+        """Returns the Histories of the nodes that are not reachable by any pure
+        strategy profile.
+
+        A node is considered reachable if there exists at least one pure
+        strategy profile where the resulting path of play passes through it.
+        In games with absent-mindedness, some nodes may be unreachable because
+        any path to them requires conflicting choices at the same information
+        set.
+
+        .. versionadded:: 17.0.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "get_strategy_unreachable(): operation only defined for games "
+                "with a tree representation"
+            )
+        return [
+            _history_of(node) for node in self._all_nodes()
+            if not cython.cast(Node, node)._is_strategy_reachable()
+        ]
+
     def get_behavior(self,
                      player: str,
                      strategy: str) -> StrategyBehavior:

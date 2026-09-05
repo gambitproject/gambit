@@ -506,17 +506,17 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
         [["T", "S"], ["r", "T", "S"], ["l", "T", "S"]]
     ),
 ])
-def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[list[str]]):
+def test_get_strategy_unreachable(game_file: str, expected_unreachable_paths: list[list[str]]):
     """
-    Tests `node.is_strategy_reachable` by collecting all unreachable nodes,
-    converting them to their action-label paths, and comparing the resulting
-    list of paths against a known-correct list.
+    Tests `Game.get_strategy_unreachable` against a known-correct list of
+    unreachable-node paths (Action Labels from Node -> Root, matching
+    `_get_path_of_action_labels`'s convention -- `get_strategy_unreachable`
+    itself returns Histories, Root -> Node).
     """
     game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
-    nodes = games.all_nodes(game)
 
     actual_unreachable_paths = [
-        _get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
+        list(reversed(history)) for history in game.get_strategy_unreachable()
     ]
 
     assert actual_unreachable_paths == expected_unreachable_paths
