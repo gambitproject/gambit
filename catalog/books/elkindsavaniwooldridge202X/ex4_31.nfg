@@ -1,0 +1,20 @@
+NFG 1 R "Example 4.31" { "1" "2" }
+
+{ { "T" "M" "B" }
+{ "L" "C" "R" }
+}
+"Example 4.31 from :cite:p:`ESW2X`, which is used to show that myopic best responses may not
+converge, even if a pure Nash equilubrium exists in the game."
+
+{
+{ "" -1, 1 }
+{ "" 1, -1 }
+{ "" -2, -2 }
+{ "" 1, -1 }
+{ "" -1, 1 }
+{ "" -2, -2 }
+{ "" -2, -2 }
+{ "" -2, -2 }
+{ "" 2, 2 }
+}
+1 2 3 4 5 6 7 8 9
