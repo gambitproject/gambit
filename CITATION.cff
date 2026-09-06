@@ -13,3 +13,6 @@ authors:
     given-names: Theodore L.
     affiliation: "The Alan Turing Institute / University of East Anglia"
 repository-code: "https://github.com/d-kad/gambit"
+version: 16.6.0-zobrist-ipl.2
+date-released: 2026-09-06
+doi: 10.5281/zenodo.20589719

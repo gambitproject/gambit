@@ -1141,9 +1141,18 @@ void GameTreeRep::BuildSubgameRoots() const
     uint64_t m_mask;
     std::vector<GameNodeRep *> &m_subgames;
 
-    explicit ZobristVisitor(std::vector<GameNodeRep *> &p_subgames, int p_bits = 20)
+    // p_bits is k, the width of the Zobrist weights and hence of the flux accumulator (Sec. 5):
+    // each weight is a uniform element of {0,1}^k, drawn as a 64-bit value and masked.
+    // The production value is 64, for which the mask is all-ones and behaviour is bit-identical
+    // to an unmasked draw.  Smaller values make false positives observable: the expected number
+    // of non-subgame-root nodes reported per run is exactly (|X| - |R|) * 2^-k,
+    // since the flux of such a node is uniform on {0,1}^k.
+    // The false-positive counts in the paper (footnote, Sec. 6) were obtained by rebuilding
+    // with **p_bits = 16 and 20** and running the false-positive cell of the benchmark notebook.
+    // The mask is guarded because 1 << 64 is undefined behaviour and yields a zero mask,
+    // which would zero every weight and report every node as a root.
+    explicit ZobristVisitor(std::vector<GameNodeRep *> &p_subgames, int p_bits = 64)
       : m_rng(std::random_device{}()),
-        // Weights live in {0,1}^p_bits -- now parametrised.
         m_mask(p_bits >= 64 ? ~uint64_t{0} : (uint64_t{1} << p_bits) - 1), m_subgames(p_subgames)
     {
     }
