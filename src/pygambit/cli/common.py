@@ -244,10 +244,10 @@ def render_support_csv(
         fields = [
             "".join(
                 "1" if action in action_support else "0"
-                for action in node.actions
+                for action in support.game.get_actions(gbt.H.path(*history))
             )
             for player in support.game.players
-            for node, action_support in zip(
+            for history, action_support in zip(
                 support.game.get_infosets(player), support[player], strict=True
             )
         ]
@@ -275,10 +275,13 @@ def render_profile_detail(
     return _render_strategy_detail(profile, decimals)
 
 
-def _name_or_number(obj) -> str:
-    # Gambit's Python API numbers players/strategies/infosets/actions from 0;
-    # the C++ tools display the underlying (1-based) engine numbering.
-    return obj.label if obj.label else str(obj.number + 1)
+def _name_or_number(node: gbt.Node) -> str:
+    # Gambit's Python API numbers nodes from 0; the C++ tools display the
+    # underlying (1-based) engine numbering. `Node._label`/`._number` are private
+    # (not part of the public API) but still Python-accessible, same as
+    # `Game._get_infosets` just below -- rendering needs the node's own label/engine
+    # number, which a History alone cannot provide.
+    return node._label if node._label else str(node._number() + 1)
 
 
 def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
@@ -296,6 +299,18 @@ def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) ->
     return "\n".join(lines)
 
 
+def _history_of(node: gbt.Node) -> tuple:
+    """The plain-tuple History of `node`, walked via the private
+    `Node._parent`/`._prior_action`."""
+    labels = []
+    current = node
+    while current._parent() is not None:
+        labels.append(current._prior_action().label)
+        current = current._parent()
+    labels.reverse()
+    return tuple(labels)
+
+
 def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) -> str:
     lines = []
     action_values = profile.action_values
@@ -308,11 +323,12 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         # Numbered by position among the player's information sets: Infoset no
         # longer exists as an object, so there is currently no infoset-level label
         # to prefer over this, unlike _name_or_number's use for players/nodes/actions.
-        for infoset_number, (node, (_, mixed_action)) in enumerate(
+        for infoset_number, (history, (_, mixed_action)) in enumerate(
             zip(profile.game.get_infosets(player), profile[player], strict=True), start=1
         ):
-            values = action_values[node]
-            for action in node.actions:
+            selector = gbt.H.path(*history)
+            values = action_values[selector]
+            for action in profile.game.get_actions(selector):
                 prob = mixed_action[action]
                 value = values[action]
                 value_text = format_value(value, decimals) if value is not None else ""
@@ -323,12 +339,19 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append("")
         lines.append("Infoset    Node       Belief        Prob")
         lines.append("-------    -------    -----------   -----------")
-        for infoset_number, node in enumerate(profile.game.get_infosets(player), start=1):
+        # Uses the private, Node-returning `_get_infosets` (rather than the public
+        # History-returning `get_infosets`) because rendering needs each member's own
+        # `.label`/`.number` for display, which a History alone cannot provide;
+        # `Node.members` (still public) then gives the other members directly, and
+        # `_history_of` recovers the History each one needs to index
+        # `beliefs`/`realiz_probs` with.
+        for infoset_number, node in enumerate(profile.game._get_infosets(player), start=1):
             for member in node.members:
                 node_name = _name_or_number(member)
-                belief = beliefs[member]
+                member_history = _history_of(member)
+                belief = beliefs[member_history]
                 belief_text = format_value(belief, decimals) if belief is not None else ""
-                realiz_text = format_value(realiz_probs[member], decimals)
+                realiz_text = format_value(realiz_probs[member_history], decimals)
                 lines.append(
                     f"{infoset_number:>7}    {node_name:>7}   "
                     f"{belief_text:>11}   {realiz_text:>11}"
@@ -367,17 +390,6 @@ def read_strategy_profiles_csv(
     return profiles
 
 
-def _selector_for_node(node: gbt.Node) -> gbt.H:
-    """A root-anchored `Selector` matching exactly `node`'s own path of action labels."""
-    labels = []
-    current = node
-    while current.parent is not None:
-        labels.append(current.prior_action.label)
-        current = current.parent
-    labels.reverse()
-    return gbt.H.path(*labels)
-
-
 def read_behavior_profiles_csv(
     path: str, game: gbt.Game
 ) -> list[gbt.MixedBehaviorProfileRational]:
@@ -388,9 +400,9 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(node.actions)
+        len(game.get_actions(gbt.H.path(*history)))
         for player in game.players
-        for node in game.get_infosets(player)
+        for history in game.get_infosets(player)
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -404,8 +416,9 @@ def read_behavior_profiles_csv(
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
-            for node in game.get_infosets(player):
-                profile[_selector_for_node(node)] = {a: next(values) for a in node.actions}
+            for history in game.get_infosets(player):
+                selector = gbt.H.path(*history)
+                profile[selector] = {a: next(values) for a in game.get_actions(selector)}
         profiles.append(profile)
     return profiles
 

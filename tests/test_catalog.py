@@ -63,9 +63,9 @@ def test_catalog_games_filter_n_actions(all_games):
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
         n_game_actions = sum(
-            len(node.actions)
+            len(g.get_actions(gbt.H.path(*history)))
             for player in g.players
-            for node in g.get_infosets(player)
+            for history in g.get_infosets(player)
         )
         assert n_game_actions == 2
 
@@ -138,7 +138,7 @@ def test_catalog_games_filter_n_nodes(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.nodes) == 5
+        assert len(g.get_histories(gbt.H.after())) == 5
 
 
 def test_catalog_games_filter_n_outcomes(all_games):
