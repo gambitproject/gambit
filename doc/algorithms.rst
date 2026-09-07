@@ -22,6 +22,42 @@ Algorithm         Description                                                   
 :ref:`hp`         Compute a specific Nash equilibrium using a homotopy path-following method    :py:func:`pygambit.nash.hp_solve`         :ref:`gambit-hp <gambit-hp>`
 ================  ===========================================================================   ========================================  ==========================================
 
+.. _pygambit-nash-maxregret:
+
+Acceptance criteria for approximate Nash equilibria
+----------------------------------------------------
+
+Some methods for computing Nash equilibria operate using floating-point arithmetic and/or
+generate candidate equilibrium profiles using methods which involve some form of successive
+approximation.  The outputs of these methods therefore are in general
+:math:`\varepsilon`-equilibria, for some positive :math:`\varepsilon`: a strategy profile at
+which no player can gain more than :math:`\varepsilon` in expected payoff by unilaterally
+deviating.  Every Nash equilibrium is an :math:`\varepsilon`-equilibrium with
+:math:`\varepsilon = 0`.
+
+To provide a uniform interface across methods, where relevant Gambit provides a parameter
+`maxregret`, which specifies the acceptance criterion for labeling the output of the
+algorithm as an equilibrium.  This parameter is interpreted *proportionally* to the range of
+payoffs in the game: any profile returned as an equilibrium is guaranteed to be an
+:math:`\varepsilon`-equilibrium, for :math:`\varepsilon` no more than `maxregret` times the
+difference of the game's maximum and minimum payoffs.  For example, with the default
+`maxregret` of :math:`10^{-8}` in a game whose payoffs range over 4 units, any equilibrium
+returned is guaranteed to have a regret, measured directly in the game's own payoffs, of no
+more than :math:`4 \times 10^{-8}`.
+
+Expressing `maxregret` scaled by the game's payoffs in this way standardises the behavior of
+methods across games: for instance, doubling all the payoffs in a game does not change the
+`maxregret` value needed to obtain equilibria of comparable quality.
+
+Methods differ in the guarantees they offer once a `maxregret` criterion is specified.
+Globally-convergent methods, such as :ref:`logit` and :ref:`gnm`, are guaranteed to eventually
+satisfy any `maxregret` criterion, though a tighter criterion generally requires more
+computation.  Other methods, such as :ref:`liap`, are not globally convergent, and may fail to
+find any equilibrium satisfying the criterion from a given starting point.
+
+See the :doc:`stripped-down poker tutorial <tutorials/03_stripped_down_poker>` for a worked
+example comparing `maxregret` across several methods.
+
 .. _enumpure:
 
 enumpure
