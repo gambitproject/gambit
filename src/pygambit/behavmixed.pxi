@@ -154,10 +154,10 @@ class MixedAction:
         No longer a live view onto the profile: holds its own copy of the probabilities,
         and can no longer be assigned into. Set a distribution via
         ``MixedBehaviorProfile.__setitem__`` instead. `infoset` (an ``Infoset``) replaced
-        by `history` (the ``History`` -- a plain tuple of action labels -- of the node
-        that was resolved to identify the information set).
+        by `history` (the ``History`` of the node that was resolved to identify the
+        information set).
     """
-    _history = cython.declare(tuple)
+    _history = cython.declare(object)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -165,14 +165,14 @@ class MixedAction:
 
     @staticmethod
     @cython.cfunc
-    def wrap(history: tuple, values: dict) -> MixedAction:
+    def wrap(history: History, values: dict) -> MixedAction:
         obj: MixedAction = MixedAction.__new__(MixedAction)
         obj._history = history
         obj._values = values
         return obj
 
     @property
-    def history(self) -> tuple:
+    def history(self) -> History:
         """The History of the node that was resolved to identify this information set."""
         return self._history
 
@@ -301,7 +301,7 @@ class MixedBehavior:
     def __len__(self) -> int:
         return len(self._values)
 
-    def __iter__(self) -> typing.Iterator[tuple[tuple, MixedAction], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[History, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
 
         A ``MixedBehavior`` is a collection of ``MixedAction``\\ s, one per information
@@ -320,7 +320,7 @@ class MixedBehavior:
 
         Yields
         ------
-        history : tuple
+        history : History
             The History identifying an information set belonging to the player
         action : MixedAction
             The player's mixed action specified at the information set

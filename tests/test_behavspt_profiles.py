@@ -31,7 +31,7 @@ def test_getitem_by_selector():
     profile = game.behavior_support_profile()
     support = profile[_find_selector(game, "Infoset 1:1")]
     assert set(support) == {"U1", "D1"}
-    assert support.history == _find_history(game, "Infoset 1:1")
+    assert support.history.actions == _find_history(game, "Infoset 1:1")
     assert "U1" in support
     assert "not-a-label" not in support
 

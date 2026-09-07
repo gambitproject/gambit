@@ -14,7 +14,7 @@ def _asymmetric_poker_behavior_data() -> gbt.MixedBehaviorProfile:
     data = game.mixed_behavior_profile(rational=False)
     for player in game.players:
         for history in games.player_infosets(game, player):
-            selector = gbt.H.path(*history)
+            selector = gbt.H.path(*history.actions)
             data[selector] = {
                 a: float(i + 2) for i, a in enumerate(game.get_actions(selector))
             }
@@ -76,7 +76,7 @@ def test_logit_estimate_behavior_completes(use_empirical: bool, local_max: bool)
     assert isinstance(result.profile, gbt.MixedBehaviorProfileDouble)
     for player in data.game.players:
         for history in games.player_infosets(data.game, player):
-            selector = gbt.H.path(*history)
+            selector = gbt.H.path(*history.actions)
             probs = dict(result.profile[selector])
             assert probs.keys() == set(data.game.get_actions(selector))
             assert sum(probs.values()) == pytest.approx(1.0)

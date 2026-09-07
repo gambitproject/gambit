@@ -32,6 +32,7 @@ import click
 import numpy as np
 
 import pygambit as gbt
+from pygambit.gambit import _history_of
 
 _GAME_FORMATS = (
     ("NFG", gbt.read_nfg),
@@ -244,7 +245,7 @@ def render_support_csv(
         fields = [
             "".join(
                 "1" if action in action_support else "0"
-                for action in support.game.get_actions(gbt.H.path(*history))
+                for action in support.game.get_actions(gbt.H.path(*history.actions))
             )
             for player in support.game.players
             for history, action_support in zip(
@@ -299,18 +300,6 @@ def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) ->
     return "\n".join(lines)
 
 
-def _history_of(node: gbt.Node) -> tuple:
-    """The plain-tuple History of `node`, walked via the private
-    `Node._parent`/`._prior_action`."""
-    labels = []
-    current = node
-    while current._parent() is not None:
-        labels.append(current._prior_action().label)
-        current = current._parent()
-    labels.reverse()
-    return tuple(labels)
-
-
 def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) -> str:
     lines = []
     action_values = profile.action_values
@@ -326,7 +315,7 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         for infoset_number, (history, (_, mixed_action)) in enumerate(
             zip(profile.game.get_infosets(player), profile[player], strict=True), start=1
         ):
-            selector = gbt.H.path(*history)
+            selector = gbt.H.path(*history.actions)
             values = action_values[selector]
             for action in profile.game.get_actions(selector):
                 prob = mixed_action[action]
@@ -400,7 +389,7 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(game.get_actions(gbt.H.path(*history)))
+        len(game.get_actions(gbt.H.path(*history.actions)))
         for player in game.players
         for history in game.get_infosets(player)
     )
@@ -417,7 +406,7 @@ def read_behavior_profiles_csv(
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
             for history in game.get_infosets(player):
-                selector = gbt.H.path(*history)
+                selector = gbt.H.path(*history.actions)
                 profile[selector] = {a: next(values) for a in game.get_actions(selector)}
         profiles.append(profile)
     return profiles

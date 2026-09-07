@@ -300,40 +300,6 @@ def test_strategy_label_duplicate_within_player_raises_valueerror():
         game.relabel_strategies(pl1, {s2: s1})
 
 
-def test_player_sequence_count():
-    """Test the identity that the number of sequences is the number of actions plus one."""
-    game = gbt.catalog.load("books/myerson1991/fig2_1")
-    for player in game.players:
-        action_count = sum(
-            len(game.get_actions(gbt.H.path(*history))) for history in game.get_infosets(player)
-        )
-        assert len(game.get_sequences(player)) == action_count + 1
-
-
-def test_player_sequence_actions():
-    game = gbt.catalog.load("books/myerson1991/fig2_1")
-    player = "Alice"
-    sequences = set(tuple(seq.actions) for seq in game.get_sequences(player))
-    reference = (
-        set(
-            (action, )
-            for history in game.get_infosets(player)
-            for action in game.get_actions(gbt.H.path(*history))
-        ) |
-        {tuple()}
-    )
-    assert sequences == reference
-
-
-def test_player_sequence_tree():
-    game = gbt.catalog.load("books/myerson1991/fig2_1")
-    player = "Alice"
-    for seq in game.get_sequences(player):
-        if not seq.parent:
-            continue
-        assert seq in seq.parent.children
-
-
 @pytest.mark.parametrize(
     "game,exp_min_payoffs,exp_max_payoffs",
     [

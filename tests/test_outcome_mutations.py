@@ -7,7 +7,8 @@ def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
-        gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
+        gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")),
+        {"Alice": 1, "Bob": -1}, "shared"
     )
     assert game.get_outcome(gbt.H.path("U")) == "shared"
     assert game.get_outcome(gbt.H.path("M")) == "shared"
@@ -41,7 +42,7 @@ def test_make_outcome_accepts_grouped_selector_pooled():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
-        gbt.H.path(...).by(lambda h: h[0]), {"Alice": 1, "Bob": -1}, "shared"
+        gbt.H.path(...).by(lambda h: h[0].action), {"Alice": 1, "Bob": -1}, "shared"
     )
     assert game.get_outcome(gbt.H.path("U")) == "shared"
     assert game.get_outcome(gbt.H.path("M")) == "shared"
@@ -79,7 +80,9 @@ def test_make_outcome_absorbs_fully_covered_outcome_and_reuses_label():
 def test_make_outcome_label_of_partially_covered_outcome_refused():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    game.make_outcome(gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1}, "w")
+    game.make_outcome(
+        gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")), {"Alice": 1}, "w"
+    )
     with pytest.raises(ValueError):
         game.make_outcome(gbt.H.path("D"), {"Alice": 2}, "w")
     assert len(game.get_outcomes()) == 1
@@ -129,7 +132,8 @@ def test_make_outcome_null_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
-        gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
+        gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")),
+        {"Alice": 1, "Bob": -1}, "shared"
     )
     game.make_outcome_null(gbt.H.path("U"))
     assert game.get_outcome(gbt.H.path("U")) is None
@@ -168,7 +172,9 @@ def test_make_outcome_null_removes_fully_orphaned_outcome():
 def test_make_outcome_null_keeps_partially_referenced_outcome():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    game.make_outcome(gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1}, "shared")
+    game.make_outcome(
+        gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")), {"Alice": 1}, "shared"
+    )
     outcome_count = len(game.get_outcomes())
     game.make_outcome_null(gbt.H.path("U"))
     assert len(game.get_outcomes()) == outcome_count
