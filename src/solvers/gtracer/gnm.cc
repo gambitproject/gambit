@@ -27,7 +27,7 @@
 
 namespace Gambit::gametracer {
 
-const double BIGFLOAT = 3.0e+28F;
+const double BIGFLOAT = 3.0e+28;
 
 // LNM runs the local Newton method on z to attempt to bring it closer to
 // the image of the graph of the equilibrium correspondence above the ray,

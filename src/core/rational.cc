@@ -27,7 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 #include <cmath>
-#include <cfloat>
+#include <limits>
 #include <cctype>
 
 #include "util.h"
@@ -366,14 +366,16 @@ bool Rational::OK() const
   return v;
 }
 
-int Rational::fits_in_float() const
+bool Rational::fits_in_float() const
 {
-  return Rational(FLT_MIN) <= *this && *this <= Rational(FLT_MAX);
+  return Rational(std::numeric_limits<float>::min()) <= *this &&
+         *this <= Rational(std::numeric_limits<float>::max());
 }
 
-int Rational::fits_in_double() const
+bool Rational::fits_in_double() const
 {
-  return Rational(DBL_MIN) <= *this && *this <= Rational(DBL_MAX);
+  return Rational(std::numeric_limits<double>::min()) <= *this &&
+         *this <= Rational(std::numeric_limits<double>::max());
 }
 
 //

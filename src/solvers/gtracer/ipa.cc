@@ -78,7 +78,7 @@ int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &c
 
 void LemkeHowson(const gnmgame &game, cvector &dest, cmatrix &T, std::vector<int> &Im)
 {
-  const double BIGFLOAT = 3.0e+28F;
+  const double BIGFLOAT = 3.0e+28;
   const int numActions = game.getNumActions(), numPlayers = game.getNumPlayers();
   double D = 1;
   const int cg = numActions + numPlayers;
