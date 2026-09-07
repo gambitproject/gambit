@@ -304,6 +304,7 @@ cdef extern from "games/game.h":
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
         Outcomes GetOutcomes() except +
+        void RelabelOutcomes(stdmap[string, string]) except +ValueError
 
         int NumNodes() except +
         c_GameNode GetRoot() except +

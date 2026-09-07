@@ -3,6 +3,28 @@
 ### Added
 - Added `Game.has_perfect_recall(player)`, and `GameRep::HasPerfectRecall(const GamePlayer &)`
   in C++, reporting whether an individual player has perfect recall.  (#1107)
+- Added `Game.get_outcomes()`, returning a materialized list of outcome labels, replacing
+  `Game.outcomes`.
+- Added `Game.get_outcome_payoffs(label)`, returning the payoff to each player at the outcome
+  labeled `label`.
+- Added `Game.set_outcome_payoffs(label, payoffs)`, setting the payoffs at the outcome labeled
+  `label`; `payoffs` must be a complete mapping over the game's players, as with
+  `Game.make_outcome`.
+- Added `Game.relabel_outcomes(labels, strict=True)`, simultaneously reassigning the labels of
+  the game's outcomes, following the same pattern as `Game.relabel_players`/
+  `Game.relabel_strategies`.  Added `GameRep::RelabelOutcomes` in C++.
+
+### Changed
+- `Game.make_outcome` now returns `None` instead of the `Outcome` created; use the `label`
+  already passed in, together with `Game.get_outcome_payoffs`/`Game.relabel_outcomes`, to refer
+  to it afterward.
+
+### Removed
+- `Outcome` has been removed as a public-facing class in pygambit, following `Action`,
+  `Infoset`, `Player`, `Strategy`, and `Node`: no public method holds or returns a live handle
+  into a game's internal outcome list any longer.  `Game.outcomes` has been removed; use
+  `Game.get_outcomes()`, `Game.get_outcome_payoffs()`, `Game.set_outcome_payoffs()`, and
+  `Game.relabel_outcomes()` instead.
 
 ## [17.0.0-alpha.3] - 2026-08-31
 

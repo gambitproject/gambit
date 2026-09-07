@@ -20,12 +20,12 @@ LEGACY_EFG_HEADER = 'EFG 2 R "t" { "A" "B" }\n""\np "" 1 1 "" { "l" "r" } 0\n'
 
 def test_read_efg_empty_outcome_labels_are_normalized():
     g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
-    assert [o.label for o in g.outcomes] == ["_1", "_2"]
+    assert g.get_outcomes() == ["_1", "_2"]
 
 
 def test_read_efg_repeated_outcome_id_consistent():
     g = _parse_efg(LEGACY_EFG_HEADER + 't "" 1 "" { 1, -1 }\nt "" 1 "" { 1, -1 }\n')
-    assert len(g.outcomes) == 1
+    assert len(g.get_outcomes()) == 1
 
 
 def test_read_efg_empty_action_labels_are_normalized():

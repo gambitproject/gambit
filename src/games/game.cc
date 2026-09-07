@@ -277,6 +277,45 @@ void GameRep::RelabelPlayers(const std::map<std::string, std::string> &p_labels)
   }
 }
 
+//------------------------------------------------------------------------
+//                           GameRep: Outcomes
+//------------------------------------------------------------------------
+
+void GameRep::RelabelOutcomes(const std::map<std::string, std::string> &p_labels)
+{
+  // Resolve each key to exactly one outcome of the game.
+  std::map<GameOutcomeRep *, std::string> assignment;
+  std::set<const GameOutcomeRep *> relabeled;
+  for (const auto &[old_label, new_label] : p_labels) {
+    GameOutcomeRep *match = nullptr;
+    for (const auto &outcome : m_outcomes) {
+      if (outcome->GetLabel() == old_label) {
+        if (match) {
+          throw ValueException("Outcome label '" + old_label + "' is ambiguous in this game");
+        }
+        match = outcome.get();
+      }
+    }
+    if (!match) {
+      throw ValueException("No outcome with label '" + old_label + "' in this game");
+    }
+    assignment[match] = new_label;
+    relabeled.insert(match);
+  }
+  // Replacement labels must be legal, unique against untouched outcomes, and pairwise distinct
+  std::set<std::string> targets;
+  for (const auto &[outcome, new_label] : assignment) {
+    CheckOutcomeLabel(new_label, relabeled);
+    if (!targets.insert(new_label).second) {
+      throw ValueException("Outcome label '" + new_label +
+                           "' would be duplicated by the relabelling");
+    }
+  }
+  for (const auto &[outcome, new_label] : assignment) {
+    outcome->m_label = new_label;
+  }
+}
+
 //========================================================================
 //                     MixedStrategyProfileRep<T>
 //========================================================================

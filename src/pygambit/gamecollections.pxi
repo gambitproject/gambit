@@ -3,8 +3,7 @@
 # Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/gamecollections.pxi
-# Cython wrappers for the collections of nodes, subgames, outcomes, and players
-# belonging to a game
+# Cython wrappers for the collections belonging to a game
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,58 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
-@cython.cclass
-class GameOutcomes:
-    """Represents the set of outcomes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameOutcomes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameOutcomes:
-        obj: GameOutcomes = GameOutcomes.__new__(GameOutcomes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameOutcomes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of outcomes in the game."""
-        return self.game.deref().GetOutcomes().size()
-
-    def __iter__(self) -> typing.Iterator[Outcome]:
-        for outcome in self.game.deref().GetOutcomes():
-            yield Outcome.wrap(outcome)
-
-    def __getitem__(self, label: str) -> Outcome:
-        """Returns the outcome with text label `label`.
-
-        Parameters
-        ----------
-        label : str
-            The text label of the outcome to return.  Lookup is by exact match;
-            leading/trailing whitespace is stripped from `label`.
-
-        Raises
-        ------
-        KeyError
-            If no outcome in the game has label `label`.
-        ValueError
-            If `label` is empty or all whitespace, or if more than one outcome has label `label`.
-        TypeError
-            If `label` is not a string.
-
-        .. versionchanged:: 16.7.0
-            Integer indexing is no longer supported; reference an outcome by its label, or iterate
-            over the collection.  String lookup now requires an exact match of the label;
-            previously, leading/trailing whitespace was stripped from `label` before comparison.
-        """
-        return _resolve_by_label(self, label, "Game", "outcome", "outcomes")
-
 
 @cython.cclass
 class GamePlayers:

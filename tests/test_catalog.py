@@ -148,7 +148,7 @@ def test_catalog_games_filter_n_outcomes(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.outcomes) == 3
+        assert len(g.get_outcomes()) == 3
 
 
 def test_catalog_games_filter_n_players(all_games):

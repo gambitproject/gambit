@@ -31,8 +31,8 @@ well-defined.
 
 
 @cython.cfunc
-def _decode_prob(py_string: string) -> object:
-    """Internal: decode a probability formatted by the C++ core as ``Decimal`` or
+def _decode_number(py_string: string) -> object:
+    """Internal: decode a number formatted by the C++ core as ``Decimal`` or
     ``Rational``, matching whichever representation was used to specify it."""
     if "." in py_string.decode("ascii"):
         return decimal.Decimal(py_string.decode("ascii"))
@@ -244,7 +244,7 @@ class Node:
             )
         result: dict = {}
         for a in resolved.deref().GetActions():
-            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_number(
                 cython.cast(string, resolved.deref().GetActionProb(a))
             )
         return result
