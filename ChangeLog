@@ -26,6 +26,13 @@
   `Game.get_outcomes()`, `Game.get_outcome_payoffs()`, `Game.set_outcome_payoffs()`, and
   `Game.relabel_outcomes()` instead.
 
+### Fixed
+- `GameTableRep`'s constructor (used by `Game.from_arrays`/`Game.from_dict`, which build a
+  non-sparse table with one outcome per contingency) gave every outcome the same empty label,
+  violating the invariant that every non-null outcome has a unique, nonempty label. Outcomes
+  are now labeled `"1"`, `"2"`, and so on, following the existing convention for default
+  player/strategy labels.
+
 ## [17.0.0-alpha.3] - 2026-08-31
 
 ### Added

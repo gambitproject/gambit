@@ -54,6 +54,25 @@ def test_outcome_payoffs_invalid_label_type_raises_typeerror(game: gbt.Game):
         _ = game.get_outcome_payoffs(1.3)
 
 
+@pytest.mark.parametrize(
+    "game",
+    [
+        gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]]),
+        gbt.Game.from_dict({"a": [[0, 0], [0, 0]], "b": [[0, 0], [0, 0]]}),
+    ],
+    ids=["from_arrays", "from_dict"],
+)
+def test_outcomes_have_unique_nonempty_labels_at_construction(game: gbt.Game):
+    """`from_arrays`/`from_dict` eagerly create one outcome per contingency
+    (unlike the sparse-by-default `Game.new_table`); each of those must still
+    satisfy the invariant that every non-null outcome has a unique, nonempty
+    label."""
+    labels = game.get_outcomes()
+    assert len(labels) == 4
+    assert all(label for label in labels)
+    assert len(set(labels)) == len(labels)
+
+
 def test_outcome_payoff_by_player_label():
     game = _labeled_table_game()
     game.relabel_players({"1": "joe", "2": "dan"})
