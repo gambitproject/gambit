@@ -304,6 +304,7 @@ cdef extern from "games/game.h":
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
         Outcomes GetOutcomes() except +
+        void RelabelOutcomes(stdmap[string, string]) except +ValueError
 
         int NumNodes() except +
         c_GameNode GetRoot() except +
@@ -324,6 +325,7 @@ cdef extern from "games/game.h":
         stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
         stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
+        bool HasPerfectRecall(c_GamePlayer) except +
         bool IsAbsentMinded(c_GameInfoset) except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, stdvector[string]) except +ValueError
@@ -345,7 +347,6 @@ cdef extern from "games/game.h":
                                   string) except +ValueError
         void MakeOutcomeNull(stdvector[c_GameNode]) except +ValueError
         void MakeOutcomeNull(stdvector[stdvector[c_GameStrategy]]) except +ValueError
-        void Reveal(c_GameInfoset, c_GamePlayer) except +
         void RelabelActions(c_GameInfoset, stdmap[string, string]) except +ValueError
         void SetMoveActions(c_GameInfoset, stdvector[string]) except +ValueError
         void SetEventActions(c_GameInfoset, stdvector[string],
@@ -398,7 +399,6 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         c_Game GetGame() except +
         bool IsInvalidated()
         int BehaviorProfileLength() except +
-        bool IsDefinedAt(c_GameInfoset) except +
         c_MixedBehaviorProfile[T] Normalize()  # except + doesn't compile
         T getitem "operator[]"(int) except +IndexError
         T getaction "operator[]"(c_GameAction) except +IndexError

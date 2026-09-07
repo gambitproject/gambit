@@ -14,12 +14,9 @@ Representation of games
    :toctree: api/
 
    Game
-   Outcome
    Node
-   Infoset
-   Event
-   Branch
-   Subgame
+   TreeLayout
+   TreeLayoutCoordinates
 
 
 Creating, reading, and writing games
@@ -43,6 +40,15 @@ Creating, reading, and writing games
    Game.to_nfg
    Game.to_html
    Game.to_latex
+
+
+Computing a tree layout for graphical display
+..............................................
+
+.. autosummary::
+   :toctree: api/
+
+   layout_tree
 
 
 Transforming game trees
@@ -74,7 +80,6 @@ Transforming game information structure
    Game.relabel_actions
    Game.set_move_actions
    Game.set_event_actions
-   Game.reveal
 
 
 Transforming game components
@@ -89,6 +94,8 @@ Transforming game components
    Game.set_strategies
    Game.make_outcome
    Game.make_outcome_null
+   Game.relabel_outcomes
+   Game.set_outcome_payoffs
 
 
 Information about the game
@@ -102,86 +109,32 @@ Information about the game
    Game.is_const_sum
    Game.is_tree
    Game.is_perfect_recall
+   Game.has_perfect_recall
    Game.players
-   Game.outcomes
    Game.min_payoff
    Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
-   Game.root
    Game.get_infosets
    Game.get_events
    Game.get_strategies
    Game.get_sequences
-   Game.nodes
    Game.contingencies
    Game.get_outcome
+   Game.get_outcomes
+   Game.get_outcome_payoffs
    Game.get_payoffs
-   Game.subgames
-   Game.minimal_subgame
+   Game.get_subgame_roots
+   Game.get_minimal_subgame
+   Game.get_strategy_unreachable
 
 .. autosummary::
    :toctree: api/
 
-   Outcome.label
-   Outcome.number
-   Outcome.game
-
-.. autosummary::
-   :toctree: api/
-
-   Node.label
-   Node.game
-   Node.outcome
-   Node.children
-   Node.parent
-   Node.is_subgame_root
-   Node.is_terminal
-   Node.is_strategy_reachable
-   Node.prior_action
-   Node.prior_sibling
-   Node.next_sibling
-   Node.infoset
-   Node.event
    Node.members
    Node.actions
    Node.action_probs
    Node.player
-   Node.is_successor_of
-   Node.plays
-   Node.own_prior_action
-
-.. autosummary::
-   :toctree: api/
-
-   Subgame.game
-   Subgame.root
-   Subgame.parent
-   Subgame.children
-
-.. autosummary::
-
-   :toctree: api/
-
-   Infoset.label
-   Infoset.game
-   Infoset.is_absent_minded
-   Infoset.player
-   Infoset.actions
-   Infoset.members
-   Infoset.precedes
-
-.. autosummary::
-
-   :toctree: api/
-
-   Event.label
-   Event.game
-   Event.is_absent_minded
-   Event.player
-   Event.actions
-   Event.members
-   Event.precedes
 
 .. autosummary::
 
@@ -290,7 +243,6 @@ Probability distributions over behavior
    MixedBehaviorProfile.realiz_probs
    MixedBehaviorProfile.infoset_probs
    MixedBehaviorProfile.beliefs
-   MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.max_regret
@@ -358,7 +310,7 @@ Subsets of actions
    BehaviorSupportProfile.__getitem__
    BehaviorSupportProfile.__setitem__
    BehaviorSupportProfile.copy
-   BehaviorSupportProfile.is_reachable
+   BehaviorSupportProfile.is_infoset_reachable
 
    BehaviorSupport
    BehaviorSupport.player
@@ -366,7 +318,7 @@ Subsets of actions
    BehaviorSupport.__getitem__
 
    ActionSupport
-   ActionSupport.infoset
+   ActionSupport.history
    ActionSupport.__iter__
    ActionSupport.__contains__
 

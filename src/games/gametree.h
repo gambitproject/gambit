@@ -112,6 +112,7 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
+  bool HasPerfectRecall(const GamePlayer &p_player) const override;
 
   /// Returns the smallest payoff to the player in any play of the game
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;

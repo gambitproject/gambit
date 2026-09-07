@@ -90,22 +90,36 @@ def _compute_relabeling(
     return remap
 
 
-def _resolve_infoset_or_event_kind(
-    this: object, other: object, this_bare: str, this_full: str, other_full: str,
-    funcname: str, argname: str
-) -> object:
-    """Shared error-raising shape for `_resolve_infoset`/`_resolve_event`: `this` is
-    the already-resolved `Infoset`/`Event` of the desired kind, falsy if the
-    anchoring node's partition element is not of that kind; `other` is the opposite
-    kind, consulted only to raise a more specific error when `this` does not apply.
+def _node_infoset_kind(node: Node) -> tuple:
+    """Whether `node` currently belongs to a personal player's information set, and
+    whether it belongs to a chance event -- exactly one of the two, or neither if
+    `node` is currently terminal.
     """
-    if not this:
-        if other:
+    handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
+    if handle == cython.cast(c_GameInfoset, NULL):
+        return False, False
+    is_chance = handle.deref().IsChanceInfoset()
+    return not is_chance, is_chance
+
+
+def _resolve_infoset_or_event_kind(
+    resolved_node: Node, this_ok: bool, other_ok: bool,
+    this_bare: str, this_full: str, other_full: str,
+    funcname: str, argname: str
+) -> Node:
+    """Shared error-raising shape for `_resolve_infoset`/`_resolve_event`: `this_ok` is
+    whether `resolved_node`'s current partition element is of the desired kind;
+    `other_ok` is whether it's the opposite kind, consulted only to raise a more
+    specific error when `this_ok` is False. Returns `resolved_node` unchanged when
+    `this_ok`.
+    """
+    if not this_ok:
+        if other_ok:
             raise ValueError(f"{funcname}(): {argname} resolves to {other_full}, not {this_full}")
         raise ValueError(
             f"{funcname}(): {argname} resolves to no {this_bare} (the node is terminal)"
         )
-    return this
+    return resolved_node
 
 
 def _dirichlet_distribution(items: list, gen: object) -> dict:

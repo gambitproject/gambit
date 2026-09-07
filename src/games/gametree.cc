@@ -1035,6 +1035,21 @@ bool GameTreeRep::IsPerfectRecall() const
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
+bool GameTreeRep::HasPerfectRecall(const GamePlayer &p_player) const
+{
+  if (p_player->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  EnsureOwnPriorActions();
+
+  // Restriction of the check in IsPerfectRecall() to the information sets belonging to p_player.
+  return std::all_of(m_ownPriorActionInfo->infoset_map.cbegin(),
+                     m_ownPriorActionInfo->infoset_map.cend(),
+                     [player = p_player.get()](const auto &pair) {
+                       return pair.first->m_player != player || pair.second.size() <= 1;
+                     });
+}
+
 bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
 {
   if (p_infoset->GetGame().get() != this) {
