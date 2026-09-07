@@ -150,9 +150,11 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g._get_outcome_object(contingency)
+            resolved_outcome = g._get_contingency_outcome(contingency, "from_arrays")
             for array, player in zip(arrays, players, strict=True):
-                outcome[player] = array[profile]
+                resolved_outcome.deref().SetPayoff(
+                    g._resolve_player(player, "from_arrays"), _to_number(array[profile])
+                )
         g.title = title
         return g
 
@@ -239,9 +241,11 @@ class Game:
         players = list(g.players)
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            outcome = g._get_outcome_object(contingency)
+            resolved_outcome = g._get_contingency_outcome(contingency, "from_dict")
             for array, player in zip(arrays, players, strict=True):
-                outcome[player] = array[profile]
+                resolved_outcome.deref().SetPayoff(
+                    g._resolve_player(player, "from_dict"), _to_number(array[profile])
+                )
         g.title = title
         return g
 
@@ -519,10 +523,14 @@ class Game:
         """The set of players in the game."""
         return GamePlayers.wrap(self.game)
 
-    @property
-    def outcomes(self) -> GameOutcomes:
-        """The set of outcomes in the game."""
-        return GameOutcomes.wrap(self.game)
+    def get_outcomes(self) -> list[str]:
+        """Returns the labels of the outcomes in the game.
+
+        .. versionadded:: 17.0.0
+        """
+        return [
+            o.deref().GetLabel().decode("utf-8") for o in self.game.deref().GetOutcomes()
+        ]
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
@@ -744,7 +752,7 @@ class Game:
             return {}
         result: dict = {}
         for a in infoset_handle.deref().GetActions():
-            result[a.deref().GetLabel().decode("utf-8")] = _decode_prob(
+            result[a.deref().GetLabel().decode("utf-8")] = _decode_number(
                 cython.cast(string, infoset_handle.deref().GetActionProb(a))
             )
         return result
@@ -1162,26 +1170,31 @@ class Game:
                     f"{location.__class__.__name__}"
                 )
             resolved_node = self._resolve_node(location, "get_outcome")
-            return Outcome.wrap(
+            resolved_outcome: c_GameOutcome = (
                 cython.cast(Node, resolved_node).node.deref().GetOutcome()
-            ).label
-        return self._get_outcome_object(location).label
+            )
+        else:
+            resolved_outcome = self._get_contingency_outcome(location, "get_outcome")
+        if resolved_outcome.deref().IsNull():
+            return None
+        return resolved_outcome.deref().GetLabel().decode("utf-8")
 
-    def _get_outcome_object(self, contingency: typing.Mapping) -> Outcome:
-        """Returns the `Outcome` object attached at a pure-strategy
-        `contingency` in a strategic (table) game. Not part of the public
-        API; `get_outcome` returns only the label. Used internally by
-        `from_arrays`/`from_dict`, which need to mutate the outcome's
-        payoffs directly.
+    @cython.cfunc
+    def _get_contingency_outcome(
+        self, contingency: typing.Mapping, funcname: str
+    ) -> c_GameOutcome:
+        """Resolve the outcome attached at a pure-strategy `contingency` in a
+        strategic (table) game, as a raw C++ handle. Not part of the public API;
+        used internally by `get_outcome`, `from_arrays`, and `from_dict`.
         """
         if self.game.deref().IsAgg():
             raise UndefinedOperationError(
-                "get_outcome(): operation not defined for games not in "
-                "strategic (table) representation"
+                f"{funcname}(): operation not defined for games not in "
+                f"strategic (table) representation"
             )
-        resolved = self._resolve_contingency(contingency, "get_outcome")
+        resolved = self._resolve_contingency(contingency, funcname)
         psp = self._make_pure_strategy_profile(resolved)
-        return Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
+        return deref(deref(psp).deref()).GetOutcome()
 
     def get_payoffs(self, contingency: typing.Mapping) -> PayoffVector:
         """Returns the payoff to each player at a pure-strategy contingency.
@@ -1689,6 +1702,35 @@ class Game:
         raise KeyError(
             f"{funcname}(): player '{player}' has no strategy with label '{label}'"
         )
+
+    @cython.cfunc
+    def _resolve_outcome(
+        self, label: typing.Any, funcname: str, argname: str = "label"
+    ) -> c_GameOutcome:
+        """Resolve `label` to the C++ handle of one of the game's outcomes.
+
+        Not part of the public API -- used internally to bridge an outcome label to
+        the underlying C++ object without ever constructing a Python wrapper for it.
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`.
+        TypeError
+            If `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all spaces.
+        """
+        if not isinstance(label, str):
+            raise TypeError(
+                f"{funcname}(): {argname} must be str, not {label.__class__.__name__}"
+            )
+        if not label.strip():
+            raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+        for outcome in self.game.deref().GetOutcomes():
+            if outcome.deref().GetLabel().decode("utf-8") == label:
+                return outcome
+        raise KeyError(f"{funcname}(): no outcome with label '{label}'")
 
     def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
         """Resolve an attempt to reference a node of the game. A bare `Node` is not
@@ -2938,10 +2980,42 @@ class Game:
             self._resolve_contingency(entry, funcname, "location") for entry in entries
         ]
 
+    @cython.cfunc
+    def _resolve_payoff_mapping(self, payoffs: typing.Mapping, funcname: str) -> dict:
+        """Validate `payoffs` as a complete mapping from the game's players to payoff
+        values: every player of the game must appear exactly once. Not part of the
+        public API; shared by `make_outcome` and `set_outcome_payoffs`.
+
+        Raises
+        ------
+        TypeError
+            If `payoffs` is not a mapping.
+        KeyError
+            If a key of `payoffs` matches no player of the game.
+        ValueError
+            If a player appears more than once in `payoffs`, or `payoffs` does not
+            specify exactly one value for each player of the game.
+        """
+        if not hasattr(payoffs, "items"):
+            raise TypeError(
+                f"{funcname}(): payoffs must be a mapping, not {payoffs.__class__.__name__}"
+            )
+        resolved_payoffs = {}
+        for player, value in payoffs.items():
+            self._resolve_player(player, funcname, "payoffs")
+            if player in resolved_payoffs:
+                raise ValueError(f"{funcname}(): each player may appear only once in payoffs")
+            resolved_payoffs[player] = value
+        if set(resolved_payoffs) != set(self.players):
+            raise ValueError(
+                f"{funcname}(): payoffs must be specified for each player of the game"
+            )
+        return resolved_payoffs
+
     def make_outcome(self,
                      location,
                      payoffs: typing.Mapping,
-                     label: str) -> Outcome:
+                     label: str) -> None:
         """Create an outcome with `payoffs` and `label` and attach it at `location`.
 
         For an extensive game, `location` is a `Selector` (an `H`-built
@@ -2973,11 +3047,6 @@ class Game:
             The label of the new outcome; must be nonempty and, after the operation,
             unique within the game.
 
-        Returns
-        -------
-        Outcome
-            A reference to the newly-created outcome.
-
         Raises
         ------
         TypeError
@@ -2991,25 +3060,18 @@ class Game:
         UndefinedOperationError
             If the game is in action-graph representation, where outcomes are not
             represented explicitly.
+
+        See Also
+        --------
+        get_outcome_payoffs : Get the payoffs at an outcome.
+        set_outcome_payoffs : Set the payoffs at an outcome.
+        relabel_outcomes : Change the labels of the game's outcomes.
         """
         if self.game.deref().IsAgg():
             raise UndefinedOperationError(
                 "make_outcome(): operation not defined for games in action-graph representation"
             )
-        if not hasattr(payoffs, "items"):
-            raise TypeError(
-                f"make_outcome(): payoffs must be a mapping, not {payoffs.__class__.__name__}"
-            )
-        resolved_payoffs = {}
-        for player, value in payoffs.items():
-            self._resolve_player(player, "make_outcome", "payoffs")
-            if player in resolved_payoffs:
-                raise ValueError("make_outcome(): each player may appear only once in payoffs")
-            resolved_payoffs[player] = value
-        if set(resolved_payoffs) != set(self.players):
-            raise ValueError(
-                "make_outcome(): payoffs must be specified for each player of the game"
-            )
+        resolved_payoffs = self._resolve_payoff_mapping(payoffs, "make_outcome")
         c_payoffs = stdvector[c_Number]()
         for player in self.players:
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
@@ -3018,9 +3080,8 @@ class Game:
             c_nodes = stdvector[c_GameNode]()
             for n in resolved:
                 c_nodes.push_back(cython.cast(Node, n).node)
-            return Outcome.wrap(
-                self.game.deref().MakeOutcome(c_nodes, c_payoffs, label.encode("utf-8"))
-            )
+            self.game.deref().MakeOutcome(c_nodes, c_payoffs, label.encode("utf-8"))
+            return
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
         for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
@@ -3029,9 +3090,7 @@ class Game:
                     self._resolve_strategy(player, contingency[player], "make_outcome")
                 )
             c_contingencies.push_back(c_one)
-        return Outcome.wrap(
-            self.game.deref().MakeOutcome(c_contingencies, c_payoffs, label.encode("utf-8"))
-        )
+        self.game.deref().MakeOutcome(c_contingencies, c_payoffs, label.encode("utf-8"))
 
     def make_outcome_null(self, location) -> None:
         """Reset the outcome at `location` to the null outcome.
@@ -3090,6 +3149,138 @@ class Game:
                 )
             c_contingencies.push_back(c_one)
         self.game.deref().MakeOutcomeNull(c_contingencies)
+
+    def relabel_outcomes(self, labels: typing.Mapping[str, str], strict: bool = True) -> None:
+        """Simultaneously reassign the labels of the game's outcomes.
+
+        `labels` maps current outcome labels to their replacements.  The reassignment
+        is simultaneous, so labels can be swapped directly, e.g. ``{"a": "b", "b": "a"}``.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        labels : Mapping[str, str]
+            A mapping from current outcome labels to replacement labels.
+            Entries whose key equals their value are ignored.
+        strict : bool, default True
+            If `True`, every key of `labels` must be the label of an outcome of the
+            game, and unknown keys raise ``KeyError``.  If `False`, unknown keys are
+            ignored.
+
+        Raises
+        ------
+        KeyError
+            When `strict` is `True`, if a key of `labels` matches no outcome of the game.
+        TypeError
+            If `labels` is not a mapping, or any key or value is not a string.
+        ValueError
+            If a key of `labels` matches more than one outcome; or if any replacement
+            label is empty, is not a valid label, or would result in a duplicate label.
+        UndefinedOperationError
+            If the game is in action-graph representation, where outcomes are not
+            represented explicitly.
+
+        See Also
+        --------
+        relabel_players : Simultaneously reassign the labels of the game's players.
+        relabel_strategies : Change the labels of a player's strategies.
+        """
+        if self.game.deref().IsAgg():
+            raise UndefinedOperationError(
+                "relabel_outcomes(): operation not defined for games in "
+                "action-graph representation"
+            )
+        if not hasattr(labels, "items"):
+            raise TypeError(
+                f"relabel_outcomes(): labels must be a mapping, "
+                f"not {labels.__class__.__name__}"
+            )
+        current = [
+            o.deref().GetLabel().decode("utf-8") for o in self.game.deref().GetOutcomes()
+        ]
+        remap = _compute_relabeling(
+            current, labels, "relabel_outcomes", "outcome", strict, "in this game"
+        )
+        if not remap:
+            return
+        c_labels = stdmap[string, string]()
+        for old, new in remap.items():
+            c_labels[old.encode("utf-8")] = new.encode("utf-8")
+        self.game.deref().RelabelOutcomes(c_labels)
+
+    def get_outcome_payoffs(self, label: str) -> PayoffVector:
+        """Returns the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome.
+
+        Returns
+        -------
+        PayoffVector
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`.
+        TypeError
+            If `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace.
+
+        See Also
+        --------
+        set_outcome_payoffs : Set the payoffs at an outcome.
+        get_payoffs : Get the payoffs at a pure-strategy contingency.
+        """
+        resolved_outcome: c_GameOutcome = self._resolve_outcome(label, "get_outcome_payoffs")
+        values = {}
+        for player in self.players:
+            resolved_player = self._resolve_player(player, "get_outcome_payoffs")
+            values[player] = _decode_number(resolved_outcome.deref().GetPayoff[string](
+                resolved_player
+            ))
+        return PayoffVector(values)
+
+    def set_outcome_payoffs(self, label: str, payoffs: typing.Mapping) -> None:
+        """Sets the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome to modify.
+        payoffs : Mapping
+            A complete mapping from the game's players (or their labels) to payoffs.
+            Every player must be present; zeroes must be given explicitly.
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`; or if a key of `payoffs` matches no player.
+        TypeError
+            If `payoffs` is not a mapping, or `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace; or if `payoffs` is not a
+            complete mapping over exactly the game's players.
+
+        See Also
+        --------
+        get_outcome_payoffs : Get the payoffs at an outcome.
+        make_outcome : Create a new outcome with payoffs.
+        """
+        resolved_outcome: c_GameOutcome = self._resolve_outcome(label, "set_outcome_payoffs")
+        resolved_payoffs = self._resolve_payoff_mapping(payoffs, "set_outcome_payoffs")
+        for player in self.players:
+            resolved_outcome.deref().SetPayoff(
+                self._resolve_player(player, "set_outcome_payoffs"),
+                _to_number(resolved_payoffs[player])
+            )
 
     def relabel_strategies(self,
                            player: str,

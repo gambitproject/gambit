@@ -14,7 +14,6 @@ Representation of games
    :toctree: api/
 
    Game
-   Outcome
    Node
    TreeLayout
    TreeLayoutCoordinates
@@ -95,6 +94,8 @@ Transforming game components
    Game.set_strategies
    Game.make_outcome
    Game.make_outcome_null
+   Game.relabel_outcomes
+   Game.set_outcome_payoffs
 
 
 Information about the game
@@ -110,7 +111,6 @@ Information about the game
    Game.is_perfect_recall
    Game.has_perfect_recall
    Game.players
-   Game.outcomes
    Game.min_payoff
    Game.max_payoff
    Game.get_min_payoff
@@ -121,17 +121,12 @@ Information about the game
    Game.get_sequences
    Game.contingencies
    Game.get_outcome
+   Game.get_outcomes
+   Game.get_outcome_payoffs
    Game.get_payoffs
    Game.get_subgame_roots
    Game.get_minimal_subgame
    Game.get_strategy_unreachable
-
-.. autosummary::
-   :toctree: api/
-
-   Outcome.label
-   Outcome.number
-   Outcome.game
 
 .. autosummary::
    :toctree: api/

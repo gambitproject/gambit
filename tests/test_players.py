@@ -458,7 +458,7 @@ def test_set_players_add_then_drop_round_trips():
     game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     labels = list(game.players)
     game.set_players(labels + ["X"])
-    assert all(outcome["X"] == 0 for outcome in game.outcomes)
+    assert all(game.get_payoffs(c)["X"] == 0 for c in game.contingencies)
     game.set_players(labels, drop=True)
     assert list(game.players) == labels
     assert game.to_arrays()[0].tolist() == [[1, 2], [3, 4]]

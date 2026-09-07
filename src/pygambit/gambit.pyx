@@ -191,7 +191,6 @@ class NodeIndexedVector(_LabeledVector):
 ######################
 
 include "strategy.pxi"
-include "outcome.pxi"
 include "node.pxi"
 include "hsel.pxi"
 include "stratspt.pxi"

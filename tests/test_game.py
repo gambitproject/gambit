@@ -99,7 +99,6 @@ def test_from_dict():
 
 COLLECTION_GETTERS = [
     pytest.param(lambda g: g.players, id="GamePlayers"),
-    pytest.param(lambda g: g.outcomes, id="GameOutcomes"),
 ]
 
 

@@ -6,21 +6,22 @@ import pygambit as gbt
 def test_make_outcome_attaches_to_all_given_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    outcome = game.make_outcome(
+    game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1, "Bob": -1}, "shared"
     )
-    assert game.get_outcome(gbt.H.path("U")) == outcome.label
-    assert game.get_outcome(gbt.H.path("M")) == outcome.label
+    assert game.get_outcome(gbt.H.path("U")) == "shared"
+    assert game.get_outcome(gbt.H.path("M")) == "shared"
     assert game.get_outcome(gbt.H.path("D")) is None
-    assert outcome["Alice"] == 1
-    assert outcome["Bob"] == -1
+    payoffs = game.get_outcome_payoffs("shared")
+    assert payoffs["Alice"] == 1
+    assert payoffs["Bob"] == -1
 
 
 def test_make_outcome_accepts_selector():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    outcome = game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
-    assert game.get_outcome(gbt.H.path("U")) == outcome.label
+    game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
+    assert game.get_outcome(gbt.H.path("U")) == "shared"
     assert game.get_outcome(gbt.H.path("M")) is None
     assert game.get_outcome(gbt.H.path("D")) is None
 
@@ -28,10 +29,10 @@ def test_make_outcome_accepts_selector():
 def test_make_outcome_accepts_selector_matching_several_nodes():
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    outcome = game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
-    assert game.get_outcome(gbt.H.path("U")) == outcome.label
-    assert game.get_outcome(gbt.H.path("M")) == outcome.label
-    assert game.get_outcome(gbt.H.path("D")) == outcome.label
+    game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
+    assert game.get_outcome(gbt.H.path("U")) == "shared"
+    assert game.get_outcome(gbt.H.path("M")) == "shared"
+    assert game.get_outcome(gbt.H.path("D")) == "shared"
 
 
 def test_make_outcome_accepts_grouped_selector_pooled():
@@ -39,12 +40,12 @@ def test_make_outcome_accepts_grouped_selector_pooled():
     receives the same outcome, regardless of grouping."""
     game = gbt.Game.new_tree(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
-    outcome = game.make_outcome(
+    game.make_outcome(
         gbt.H.path(...).by(lambda h: h[0]), {"Alice": 1, "Bob": -1}, "shared"
     )
-    assert game.get_outcome(gbt.H.path("U")) == outcome.label
-    assert game.get_outcome(gbt.H.path("M")) == outcome.label
-    assert game.get_outcome(gbt.H.path("D")) == outcome.label
+    assert game.get_outcome(gbt.H.path("U")) == "shared"
+    assert game.get_outcome(gbt.H.path("M")) == "shared"
+    assert game.get_outcome(gbt.H.path("D")) == "shared"
 
 
 def test_make_outcome_error_location_not_a_selector():
@@ -57,13 +58,13 @@ def test_make_outcome_error_location_not_a_selector():
 
 def test_make_outcome_attaches_at_contingencies():
     game = gbt.Game.new_table([2, 2])
-    outcome = game.make_outcome(
+    game.make_outcome(
         [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
     )
-    assert game.get_outcome({"1": "1", "2": "1"}) == outcome.label
-    assert game.get_outcome({"1": "2", "2": "2"}) == outcome.label
+    assert game.get_outcome({"1": "1", "2": "1"}) == "diagonal"
+    assert game.get_outcome({"1": "2", "2": "2"}) == "diagonal"
     assert not game.get_outcome({"1": "1", "2": "2"})
-    assert outcome["1"] == 2
+    assert game.get_outcome_payoffs("diagonal")["1"] == 2
 
 
 def test_make_outcome_absorbs_fully_covered_outcome_and_reuses_label():
@@ -71,7 +72,8 @@ def test_make_outcome_absorbs_fully_covered_outcome_and_reuses_label():
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     game.make_outcome(gbt.H.path("U"), {"Alice": 1}, "w")
     game.make_outcome(gbt.H.path(...), {"Alice": 2}, "w")
-    assert [(o.label, o["Alice"]) for o in game.outcomes] == [("w", 2)]
+    assert game.get_outcomes() == ["w"]
+    assert game.get_outcome_payoffs("w")["Alice"] == 2
 
 
 def test_make_outcome_label_of_partially_covered_outcome_refused():
@@ -80,7 +82,7 @@ def test_make_outcome_label_of_partially_covered_outcome_refused():
     game.make_outcome(gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1}, "w")
     with pytest.raises(ValueError):
         game.make_outcome(gbt.H.path("D"), {"Alice": 2}, "w")
-    assert len(game.outcomes) == 1
+    assert len(game.get_outcomes()) == 1
 
 
 @pytest.mark.parametrize("bad_label", ["", "win"])
@@ -90,7 +92,7 @@ def test_make_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str)
     game.make_outcome(gbt.H.path("win"), {"A": 1, "B": 2}, "win")
     with pytest.raises(ValueError):
         game.make_outcome(gbt.H.path("lose"), {"A": 3, "B": 4}, bad_label)
-    assert [o.label for o in game.outcomes] == ["win"]
+    assert game.get_outcomes() == ["win"]
 
 
 def test_make_outcome_incomplete_payoffs_raises():
@@ -155,30 +157,30 @@ def test_make_outcome_null_resets_given_contingencies_to_null():
 
 def test_make_outcome_null_removes_fully_orphaned_outcome():
     game = gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
-    outcome_count = len(game.outcomes)
+    outcome_count = len(game.get_outcomes())
     p1, p2 = game.players
     s1 = next(iter(game.get_strategies(p1)))
     s2 = next(iter(game.get_strategies(p2)))
     game.make_outcome_null({p1: s1, p2: s2})
-    assert len(game.outcomes) == outcome_count - 1
+    assert len(game.get_outcomes()) == outcome_count - 1
 
 
 def test_make_outcome_null_keeps_partially_referenced_outcome():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(gbt.H.path(...).filter(lambda h: h[0] in ("U", "M")), {"Alice": 1}, "shared")
-    outcome_count = len(game.outcomes)
+    outcome_count = len(game.get_outcomes())
     game.make_outcome_null(gbt.H.path("U"))
-    assert len(game.outcomes) == outcome_count
+    assert len(game.get_outcomes()) == outcome_count
     assert game.get_outcome(gbt.H.path("M")) is not None
 
 
 def test_make_outcome_null_on_already_null_node_is_a_no_op():
     game = gbt.Game.new_tree(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
-    outcome_count = len(game.outcomes)
+    outcome_count = len(game.get_outcomes())
     game.make_outcome_null(gbt.H.path("U"))
-    assert outcome_count == len(game.outcomes)
+    assert outcome_count == len(game.get_outcomes())
     assert game.get_outcome(gbt.H.path("U")) is None
 
 
@@ -186,7 +188,7 @@ def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
     game = gbt.Game.new_tree(players=["A", "B"])
     game.append_move(gbt.H.path(), "A", ["win", "lose"])
     game.make_outcome(gbt.H.path("win"), {"A": 1, "B": 2}, "win")
-    outcome = game.make_outcome(gbt.H.path("lose"), {"A": 0, "B": 0}, "lose")
+    game.make_outcome(gbt.H.path("lose"), {"A": 0, "B": 0}, "lose")
     with pytest.raises(ValueError):
-        outcome.label = "win"
-    assert outcome.label == "lose"
+        game.relabel_outcomes({"lose": "win"})
+    assert set(game.get_outcomes()) == {"win", "lose"}

@@ -817,7 +817,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         if depth == max_depth:
             g.make_outcome(
                 gbt.H.path(*path), {str(p): 0 for p in self.players},
-                f"leaf_{len(list(g.outcomes))}"
+                f"leaf_{len(g.get_outcomes())}"
             )
         else:
             current_player = str(whose_turn + 1)

@@ -449,7 +449,7 @@ def games(
                 return False
             if len(game.get_histories(gbt.H.after())) != n_nodes:
                 return False
-        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
+        if n_outcomes is not None and len(game.get_outcomes()) != n_outcomes:
             return False
         if n_players is not None and len(game.players) != n_players:
             return False

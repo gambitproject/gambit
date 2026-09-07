@@ -10,7 +10,11 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
     distribution = {s: 0 for s in game.get_strategies(player)}
-    next(iter(game.outcomes))[player] = 3
+    game.make_outcome(
+        {p: "1" for p in game.players},
+        {p: (3 if p == player else 0) for p in game.players},
+        "trigger",
+    )
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.copy()

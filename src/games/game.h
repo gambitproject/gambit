@@ -1473,6 +1473,9 @@ public:
   {
     throw UndefinedException();
   }
+  /// Reassign outcome labels. Keys of p_labels are current labels; values are their
+  /// replacements.
+  void RelabelOutcomes(const std::map<std::string, std::string> &p_labels);
   //@}
 
   /// @name Nodes
