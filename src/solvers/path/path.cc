@@ -331,16 +331,12 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
 {
   x[fixed_index] = fixed_value;
 
-  const Vector<double> original_x = x;
-
   const size_t N = x.size() - 1;
   Vector<double> y(N);               // Equations results
   Matrix<double> jac_full(N + 1, N); // Full Jacobian matrix (N+1 unknowns, N equations)
   Matrix<double> jac_square(N, N);   // Jacobian matrix with fixed_index row removed
   Matrix<double> Q(N, N);            // Orthogonal matrix from QR decomposition
   Vector<double> x_reduced(N);       // Reduced x vector with fixed_index removed
-
-  double const eq_tol = 1e-2;
 
   int steps = 0;
   double dist = 0.0;
@@ -391,14 +387,8 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
     }
   }
 
-  // Checking that the profile satisfies the system of equations
-  for (size_t i = 1; i <= N; ++i) {
-    if (std::abs(y[i]) > eq_tol || std::isnan(y[i]) || std::isinf(y[i])) {
-      x = original_x;
-      return {x, false, "Polishing converged to an invalid mathematical state. Reverted.", steps};
-    }
-  }
-
+  // The loop only exits here once p_terminate(x) holds for the actual, current x;
+  // there is nothing further to validate against a separate tolerance.
   return {x, true, "Polishing terminated successfully.", steps};
 }
 

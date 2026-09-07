@@ -108,6 +108,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
     return {};
   }
   const MixedStrategyProfile<double> equilibrium = system.ExtractEquilibrium(x);
+  if (equilibrium.GetMaxRegret() > p_maxRegret) {
+    return {};
+  }
   p_onEquilibrium(equilibrium);
   equilibria.push_back(equilibrium);
   return equilibria;
