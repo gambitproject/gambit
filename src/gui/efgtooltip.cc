@@ -253,6 +253,15 @@ void OutcomeEditorPopup::BuildControls()
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
+  auto *hintText = new wxStaticText(m_contentPanel, wxID_STATIC,
+                                    _("Escape cancels and closes this window. Enter accepts."));
+  hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+  wxFont hintFont = hintText->GetFont();
+  hintFont.SetPointSize(hintFont.GetPointSize() - 1);
+  hintText->SetFont(hintFont);
+  hintText->Wrap(FromDIP(260));
+  outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
+
   m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
@@ -822,8 +831,10 @@ void AppendMovePopup::BuildControls()
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
-  m_hintText =
-      new wxStaticText(m_contentPanel, wxID_ANY, _("Tab past the last action to add another"));
+  m_hintText = new wxStaticText(
+      m_contentPanel, wxID_ANY,
+      _("Tab past the last action to add another.\nEscape cancels and closes this window. Enter "
+        "accepts."));
   m_hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   wxFont hintFont = m_hintText->GetFont();
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
