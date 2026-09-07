@@ -175,7 +175,8 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                                            method.localNewtonMaxIterations);
         }
         else if constexpr (std::is_same_v<Method, HPNashSpec>) {
-          return prefix + wxString::Format("hp -d 10 -n %d", method.priors);
+          return prefix +
+                 wxString::Format("hp -d 10 -n %d -m %.17g", method.priors, method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations);
@@ -274,7 +275,8 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
               method.localNewtonMaxIterations);
         }
         else if constexpr (std::is_same_v<Method, HPNashSpec>) {
-          return wxString::Format(" (%d random priors)", method.priors);
+          return wxString::Format(" (%d random priors; maximum regret %.4g)", method.priors,
+                                  method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return wxString::Format(" (%d perturbation)", method.perturbations);

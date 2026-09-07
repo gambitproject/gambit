@@ -701,5 +701,5 @@ cdef extern from "nash.h":
             LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
     stdlist[c_MixedStrategyProfile[double]] HPStrategySolveWrapper(
-            c_MixedStrategyProfile[double], HPEventCallbackType
+            c_MixedStrategyProfile[double], double, HPEventCallbackType
     ) except +RuntimeError

@@ -27,7 +27,7 @@
 
 namespace Gambit::Nash {
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
                 StrategyCallbackType<double> p_onEquilibrium, HPEventCallbackType p_onEvent,
                 const CancelToken &p_cancel)
 {
@@ -40,16 +40,16 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
   const PathTracer::TraceDirection direction = PathTracer::TraceDirection::Positive;
   const size_t tracking_index = 1; // Track the first variable (t) for orientation
   const double t_target = 1.0;
-  const double tol = 1e-8;
   double last_t = 0.0;
   bool has_crossed = false;
 
-  auto termination_condition = [t_target, &last_t, &has_crossed, tol,
+  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret,
                                 &system](const Vector<double> &point) {
     const double t = point[1];
 
-    // Path tracer reaches tol
-    if (system.ExtractEquilibrium(point).GetMaxRegret() <= tol && t >= t_target - tol) {
+    // Path tracer reaches maximum acceptable regret
+    if (system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret &&
+        t >= t_target - p_maxRegret) {
       return true;
     }
 
@@ -57,7 +57,8 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
       if (!has_crossed) {
         has_crossed = true;
       }
-      else if (t > last_t + tol) { // Criterion function is not working; polish will do the job
+      else if (t >
+               last_t + p_maxRegret) { // Criterion function is not working; polish will do the job
         return true;
       }
     }
@@ -75,8 +76,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
     return point[1] - t_target;
   };
 
-  auto polishing_termination_condition = [tol, &system](const Vector<double> &point) -> bool {
-    return system.ExtractEquilibrium(point).GetMaxRegret() <= tol;
+  auto polishing_termination_condition = [p_maxRegret,
+                                          &system](const Vector<double> &point) -> bool {
+    return system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret;
   };
 
   const auto tracing_result = tracer.TracePath(

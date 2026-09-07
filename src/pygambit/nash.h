@@ -143,8 +143,9 @@ LogitStrategyEstimateWrapper(std::shared_ptr<MixedStrategyProfile<double>> p_fre
 }
 
 std::list<MixedStrategyProfile<double>>
-HPStrategySolveWrapper(const MixedStrategyProfile<double> &p_prior,
+HPStrategySolveWrapper(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
                        Nash::HPEventCallbackType p_onEvent = Nash::NullHPEventCallback)
 {
-  return Nash::HPStrategySolve(p_prior, Nash::NullStrategyCallback<double>, p_onEvent);
+  return Nash::HPStrategySolve(p_prior, p_maxRegret, Nash::NullStrategyCallback<double>,
+                               p_onEvent);
 }

@@ -45,7 +45,7 @@ inline void NullHPEventCallback(const HPEvent &) {}
 /// @brief Compute a Nash equilibrium of a game using the homotopy method of
 /// Herings and Peeters (2001)
 std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const MixedStrategyProfile<double> &p_prior,
+HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret = 1.0e-8,
                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                 HPEventCallbackType p_onEvent = NullHPEventCallback,
                 const CancelToken &p_cancel = CancelToken());
