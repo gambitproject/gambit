@@ -24,6 +24,11 @@ different equilibria being found.
 
    Prints a help message listing the available options.
 
+.. cmdoption:: -m
+
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
+   (default is 1e-8).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
+
 .. cmdoption:: -n
 
    Randomly generate the specified number of prior distributions.

@@ -914,8 +914,9 @@ def _logit_behavior_branch(game: Game,
 
 def _hp_strategy_solve(
         prior: MixedStrategyProfileDouble,
+        maxregret: float,
         event_callback: object = None,
 ) -> list[MixedStrategyProfileDouble]:
     return _convert_mspd(HPStrategySolveWrapper(
-        deref(prior.profile), MakeHPEventCallback(event_callback)
+        deref(prior.profile), maxregret, MakeHPEventCallback(event_callback)
     ))

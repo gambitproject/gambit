@@ -80,6 +80,14 @@ PROG_NAME = "gambit-hp"
     default=None,
     help="file containing prior distributions (mutually exclusive with -n)",
 )
+@click.option(
+    "-m",
+    "maxregret",
+    default=1.0e-8,
+    show_default=True,
+    type=float,
+    help="maximum regret acceptable as a proportion of the range of payoffs in the game",
+)
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -95,6 +103,7 @@ def main(
     n_priors: int | None,
     seed: int | None,
     start_file: str | None,
+    maxregret: float,
     quiet: bool,
     verbose: bool,
 ) -> None:
@@ -109,7 +118,7 @@ def main(
         prior = prior.as_float()
         if verbose:
             click.echo(render_profile_csv(prior, "prior", decimals))
-        result = gbt.nash.hp_solve(prior, event_callback=render_event)
+        result = gbt.nash.hp_solve(prior, maxregret=maxregret, event_callback=render_event)
         for eq in result.equilibria:
             click.echo(render_profile_csv(eq, "NE", decimals))
 

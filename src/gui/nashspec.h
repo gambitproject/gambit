@@ -102,6 +102,7 @@ struct HPNashSpec {
   // path-tracing can surface more), so this defaults high, like LiapNashSpec's
   // startingPoints, rather than to 1.
   int priors{10};
+  double maxRegret{1.0e-8};
 
   std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };

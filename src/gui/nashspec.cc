@@ -104,7 +104,7 @@ std::optional<SolverFunction> HPNashSpec::MakeSolver(NashRepresentation) const
     for (const auto &prior : NewRandomStrategyProfiles(p_game, spec.priors)) {
       p_cancel.Check();
       Nash::HPStrategySolve(
-          prior,
+          prior, spec.maxRegret,
           [&p_callback](const MixedStrategyProfile<double> &p) { p_callback(ComputedProfile(p)); },
           Nash::NullHPEventCallback, p_cancel);
     }
