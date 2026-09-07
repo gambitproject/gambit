@@ -305,7 +305,7 @@ def test_player_sequence_count():
     game = gbt.catalog.load("books/myerson1991/fig2_1")
     for player in game.players:
         action_count = sum(
-            len(node.infoset.actions) for node in game.get_infosets(player)
+            len(game.get_actions(gbt.H.path(*history))) for history in game.get_infosets(player)
         )
         assert len(game.get_sequences(player)) == action_count + 1
 
@@ -317,8 +317,8 @@ def test_player_sequence_actions():
     reference = (
         set(
             (action, )
-            for node in game.get_infosets(player)
-            for action in node.infoset.actions
+            for history in game.get_infosets(player)
+            for action in game.get_actions(gbt.H.path(*history))
         ) |
         {tuple()}
     )
@@ -375,7 +375,7 @@ def test_player_get_min_payoff_nonterminal_outcomes():
     game = games.read_from_file("stripped_down_poker.efg")
     assert game.get_min_payoff("Alice") == -2
     assert game.get_min_payoff("Bob") == -2
-    game.make_outcome(game.root, {"Alice": -1, "Bob": -1}, "outcome")
+    game.make_outcome(gbt.H.path(), {"Alice": -1, "Bob": -1}, "outcome")
     assert game.get_min_payoff("Alice") == -3
     assert game.get_min_payoff("Bob") == -3
 
@@ -401,7 +401,7 @@ def test_player_get_max_payoff_nonterminal_outcomes():
     game = games.read_from_file("stripped_down_poker.efg")
     assert game.get_max_payoff("Alice") == 2
     assert game.get_max_payoff("Bob") == 2
-    game.make_outcome(game.root, {"Alice": -1, "Bob": -1}, "outcome")
+    game.make_outcome(gbt.H.path(), {"Alice": -1, "Bob": -1}, "outcome")
     assert game.get_max_payoff("Alice") == 1
     assert game.get_max_payoff("Bob") == 1
 
@@ -458,7 +458,7 @@ def test_set_players_add_then_drop_round_trips():
     game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     labels = list(game.players)
     game.set_players(labels + ["X"])
-    assert all(outcome["X"] == 0 for outcome in game.outcomes)
+    assert all(game.get_payoffs(c)["X"] == 0 for c in game.contingencies)
     game.set_players(labels, drop=True)
     assert list(game.players) == labels
     assert game.to_arrays()[0].tolist() == [[1, 2], [3, 4]]
