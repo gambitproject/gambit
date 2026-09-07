@@ -68,22 +68,22 @@ void WelcomePanel::CreateControls()
 {
   m_logoBitmap = new wxStaticBitmap(this, wxID_ANY, MakeScaledBitmap(gambitbig_xpm, 72));
 
-  m_titleText = new wxStaticText(this, wxID_ANY, "Welcome to Gambit");
+  m_titleText = new wxStaticText(this, wxID_ANY, _("Welcome to Gambit"));
   auto titleFont = m_titleText->GetFont();
   titleFont.SetPointSize(titleFont.GetPointSize() + 6);
   titleFont.SetWeight(wxFONTWEIGHT_BOLD);
   m_titleText->SetFont(titleFont);
 
-  m_openButton = new wxCommandLinkButton(this, ID_WELCOME_OPEN, "Open existing game",
-                                         "Load a saved .efg or .nfg file");
+  m_openButton = new wxCommandLinkButton(this, ID_WELCOME_OPEN, _("Open existing game"),
+                                         _("Load a saved .efg or .nfg file"));
 
   m_newNormalFormButton =
-      new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, "New strategic form game",
-                              "Create a game with a strategic representation");
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, _("New strategic form game"),
+                              _("Create a game with a strategic representation"));
 
   m_newExtensiveFormButton =
-      new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive form game",
-                              "Create a game with a tree representation");
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, _("New extensive form game"),
+                              _("Create a game with a tree representation"));
 
   m_openButton->SetBitmap(wxBitmapBundle::FromSVG(open_svg, wxSize(24, 24)));
   m_openButton->SetBitmapMargins(24, 12);

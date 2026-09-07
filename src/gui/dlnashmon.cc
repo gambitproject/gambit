@@ -320,27 +320,27 @@ class NashMonitorDialog final : public wxDialog {
 
   void SetStatusRunning() const
   {
-    m_statusText->SetLabel(wxT("The computation is currently in progress."));
+    m_statusText->SetLabel(_("The computation is currently in progress."));
     m_statusText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     m_stopButton->Enable(true);
     m_okButton->Enable(false);
   }
   void SetStatusStopping() const
   {
-    m_statusText->SetLabel(wxT("Stopping computation..."));
+    m_statusText->SetLabel(_("Stopping computation..."));
     m_statusText->SetForegroundColour(wxColour(196, 128, 0));
     m_stopButton->Enable(false);
   }
   void SetStatusStopped() const
   {
-    m_statusText->SetLabel(wxT("The computation has been stopped."));
+    m_statusText->SetLabel(_("The computation has been stopped."));
     m_statusText->SetForegroundColour(wxColour(196, 128, 0));
     m_okButton->Enable(true);
     m_stopButton->Enable(false);
   }
   void SetStatusFinishedNormally() const
   {
-    m_statusText->SetLabel(wxT("The computation has completed."));
+    m_statusText->SetLabel(_("The computation has completed."));
     m_statusText->SetForegroundColour(wxColour(0, 192, 0));
     m_okButton->Enable(true);
     m_stopButton->Enable(false);
@@ -361,7 +361,7 @@ public:
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
                                      const std::shared_ptr<GameDocument> &p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
-  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition,
+  : wxDialog(p_parent, wxID_ANY, _("Computing Nash equilibria"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc), m_output(p_command)
 {
@@ -371,10 +371,11 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusText = new wxStaticText(this, wxID_STATIC, "The computation is currently in progress.");
+  m_statusText = new wxStaticText(this, wxID_STATIC, _("The computation is currently in progress."));
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, S);
 
-  m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
+  m_countText =
+      new wxStaticText(this, wxID_STATIC, _("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, S);
 
   m_stopButton =
@@ -447,7 +448,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
         std::make_unique<SolverThreadRunner>(this, m_doc->GetGame(), std::move(*solver));
     if (m_threadRunner->Run() != wxTHREAD_NO_ERROR) {
       m_threadRunner.reset();
-      SetStatusFinishedAbnormally("Failed to launch solver thread.");
+      SetStatusFinishedAbnormally(_("Failed to launch solver thread."));
       return;
     }
     SetStatusRunning();
@@ -469,13 +470,13 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
     SetStatusRunning();
     break;
   case ExternalProcessRunner::RunnerStartResult::LaunchFailed:
-    SetStatusFinishedAbnormally("Failed to launch solver.");
+    SetStatusFinishedAbnormally(_("Failed to launch solver."));
     break;
   case ExternalProcessRunner::RunnerStartResult::NoOutputPipe:
-    SetStatusFinishedAbnormally("Solver launched, but I/O redirection failed.");
+    SetStatusFinishedAbnormally(_("Solver launched, but I/O redirection failed."));
     break;
   case ExternalProcessRunner::RunnerStartResult::StdinWriteFailed:
-    SetStatusFinishedAbnormally("Failed to send input to solver.");
+    SetStatusFinishedAbnormally(_("Failed to send input to solver."));
     break;
   }
 }
@@ -486,7 +487,7 @@ void NashMonitorDialog::OnRunnerProfile(wxThreadEvent &p_event)
   std::visit([this](const auto &p) { AddProfile(*m_output, p); }, profile);
   m_doc->DoAnalysisOutputChanged();
   wxString label;
-  label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+  label << _("Number of equilibria found so far: ") << m_output->NumProfiles();
   m_countText->SetLabel(label);
 }
 
@@ -510,7 +511,7 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
   }
   else {
     SetStatusFinishedAbnormally(
-        wxString::Format("The computation ended abnormally (code %d)", p_event.GetInt()));
+        wxString::Format(_("The computation ended abnormally (code %d)"), p_event.GetInt()));
   }
 }
 

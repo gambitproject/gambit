@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/dlexcept.h
-// Declaration of internal exception error dialog.
+// FILE: src/gui/dlpreferences.h
+// Declaration of the Preferences dialog (interface language).
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,24 +20,30 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEXCEPT_H
-#define DLEXCEPT_H
+#ifndef GAMBIT_GUI_DLPREFERENCES_H
+#define GAMBIT_GUI_DLPREFERENCES_H
 
 #include <wx/wx.h>
-#include <wx/richmsgdlg.h>
+#include <wx/choice.h>
 
 namespace Gambit::GUI {
 
-// A general-purpose dialog box to display the description of an internal exception.
-class ExceptionDialog final : public wxRichMessageDialog {
+//!
+//! A modal dialog letting the user choose the interface language.  The choice
+//! persists to the application configuration and takes effect immediately on
+//! confirmation.
+//!
+class PreferencesDialog final : public wxDialog {
 public:
-  ExceptionDialog(wxWindow *p_parent, const std::string &p_message)
-    : wxRichMessageDialog(p_parent, wxString(p_message.c_str(), *wxConvCurrent),
-                          _("Internal exception in Gambit"), wxOK | wxCENTRE | wxICON_ERROR)
-  {
-  }
+  PreferencesDialog(wxWindow *p_parent);
+
+private:
+  wxChoice *m_languageChoice{nullptr};
+
+  void OnOK(wxCommandEvent &);
+  wxDECLARE_EVENT_TABLE();
 };
 
 } // namespace Gambit::GUI
 
-#endif // DLEXCEPT_H
+#endif // GAMBIT_GUI_DLPREFERENCES_H

@@ -311,7 +311,7 @@ void ActionPanel::Rebuild()
     }
 
     row.deleteButton =
-        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
+        new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar('X'),
                      wxDefaultPosition, buttonSize);
     row.deleteButton->SetToolTip(row.isDeleted ? _("Restore action") : _("Delete action"));
     row.deleteButton->Enable(row.isDeleted || activeCount > 1);
@@ -646,8 +646,8 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
     ValidateDistribution(probs);
   }
   catch (ValueException &) {
-    wxRichMessageDialog(this, "Probabilities must be nonnegative numbers summing to one.", "Error",
-                        wxOK | wxCENTRE | wxICON_ERROR)
+    wxRichMessageDialog(this, _("Probabilities must be nonnegative numbers summing to one."),
+                        _("Error"), wxOK | wxCENTRE | wxICON_ERROR)
         .ShowModal();
     return;
   }

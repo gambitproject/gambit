@@ -116,7 +116,7 @@ public:
 wxString RowPlayerTable::GetValue(int row, int col)
 {
   if (m_table->GetRowHeaderColCount() == 0) {
-    return wxT("Payoffs");
+    return _("Payoffs");
   }
 
   const int player = m_table->GetRowHeaderPlayer(col);
@@ -653,7 +653,7 @@ public:
 wxString ColPlayerTable::GetValue(int row, int col)
 {
   if (m_table->GetColHeaderRowCount() == 0) {
-    return wxT("Payoffs");
+    return _("Payoffs");
   }
 
   const int player = m_table->GetColHeaderPlayer(row);
