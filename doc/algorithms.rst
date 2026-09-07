@@ -15,11 +15,11 @@ Algorithm         Description                                                   
 :ref:`lp`         Compute equilibria in a two-player constant-sum game via linear programming   :py:func:`pygambit.nash.lp_solve`         :ref:`gambit-lp <gambit-lp>`
 :ref:`lcp`        Compute equilibria in a two-player game via linear complementarity            :py:func:`pygambit.nash.lcp_solve`        :ref:`gambit-lcp <gambit-lcp>`
 :ref:`liap`       Compute equilibria using function minimization                                :py:func:`pygambit.nash.liap_solve`       :ref:`gambit-liap <gambit-liap>`
-:ref:`logit`      Trace logit QRE and approximate a Nash equilibrium at high precision           :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
+:ref:`logit`      Trace logit QRE and approximate a Nash equilibrium at high precision          :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
 :ref:`simpdiv`    Compute equilibria via simplicial subdivision                                 :py:func:`pygambit.nash.simpdiv_solve`    :ref:`gambit-simpdiv <gambit-simpdiv>`
 :ref:`ipa`        Compute equilibria using iterated polymatrix approximation                    :py:func:`pygambit.nash.ipa_solve`        :ref:`gambit-ipa <gambit-ipa>`
 :ref:`gnm`        Compute equilibria using a global Newton method                               :py:func:`pygambit.nash.gnm_solve`        :ref:`gambit-gnm <gambit-gnm>`
-:ref:`hp`         Compute a specific Nash equilibrium using a homotopy path-following method    :py:func:`pygambit.nash.hp_solve`
+:ref:`hp`         Compute a specific Nash equilibrium using a homotopy path-following method    :py:func:`pygambit.nash.hp_solve`         :ref:`gambit-hp <gambit-hp>`
 ================  ===========================================================================   ========================================  ==========================================
 
 .. _enumpure:
@@ -242,8 +242,7 @@ hp
 ---
 Computes the Nash equilibrium selected by the tracing procedure
 of Harsanyi and Selten using a homotopy path-following method.  The algorithm
-was first described by P. Jean-Jacques Herings and Ronald J.A.P. Peeters
-in :cite:p:`HerPee01`.
+was first described by Herings and Peeters :cite:p:`HerPee01`.
 
 The algorithm takes as a parameter a mixed strategy profile, which acts as
 the subjective prior beliefs of the players.
