@@ -91,7 +91,8 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
         .profile = profile, .iteration = p_iteration, .zDiff = p_zDiff, .sDiff = p_sDiff});
   };
 
-  IPAResult result{cvector(A->getNumActions()), IPATerminationReason::MaxIterationsReached, 0};
+  IPAResult result{
+      cvector(A->getNumActions()), IPATerminationReason::MaxIterationsReached, 0, 0, 0, 0.0};
   for (int restart = 0; restart < MAX_RESTARTS; restart++) {
     p_cancel.Check();
     result = IPA(*A, g, zh, ALPHA, EQERR, 100, onStep, p_cancel);
