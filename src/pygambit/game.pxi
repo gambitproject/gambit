@@ -2578,7 +2578,7 @@ class Game:
         current = list(resolved_event.actions)
         _reconcile_labels(
             current, labels, add, drop, "set_event_actions",
-            "information set", "action", "actions", "the subtrees they lead to"
+            "event", "action", "actions", "the subtrees they lead to"
         )
         c_labels = stdvector[string]()
         c_probs = stdvector[c_Number]()
