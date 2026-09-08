@@ -257,16 +257,19 @@ def _estimate_behavior_empirical(
         data: libgbt.MixedBehaviorProfile,
 ) -> LogitQREMixedBehaviorFitResult:
     flattened_data = [
-        data[node][a]
+        data[libgbt.H.path(*history.actions)][a]
         for p in data.game.players
-        for node in data.game.get_infosets(p)
-        for a in node.infoset.actions
+        for history in data.game.get_infosets(p)
+        for a in data.game.get_actions(libgbt.H.path(*history.actions))
     ]
     normalized = data.normalize()
     regrets = [
-        [-normalized.action_regrets[node][a] for a in node.infoset.actions]
+        [
+            -normalized.action_regrets[libgbt.H.path(*history.actions)][a]
+            for a in data.game.get_actions(libgbt.H.path(*history.actions))
+        ]
         for player in data.game.players
-        for node in data.game.get_infosets(player)
+        for history in data.game.get_infosets(player)
     ]
     res = scipy.optimize.minimize(
         lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
@@ -276,9 +279,10 @@ def _estimate_behavior_empirical(
     profile = data.game.mixed_behavior_profile()
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
     for player in data.game.players:
-        for node in data.game.get_infosets(player):
-            profile[node] = {
-                a: math.exp(next(log_probs)) for a in node.infoset.actions
+        for history in data.game.get_infosets(player):
+            selector = libgbt.H.path(*history.actions)
+            profile[selector] = {
+                a: math.exp(next(log_probs)) for a in data.game.get_actions(selector)
             }
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun

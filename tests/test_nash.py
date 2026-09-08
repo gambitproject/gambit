@@ -23,10 +23,10 @@ def d(*probs) -> tuple:
     return tuple(probs)
 
 
-def _action_prob(profile: gbt.MixedBehaviorProfile, node: gbt.Node, label: str):
-    """The probability profile assigns to the action labeled `label` at `node`'s
-    information set."""
-    return profile[node][label]
+def _action_prob(profile: gbt.MixedBehaviorProfile, history: gbt.History, label: str):
+    """The probability profile assigns to the action labeled `label` at the
+    information set identified by `history`."""
+    return profile[gbt.H.path(*history.actions)][label]
 
 
 @dataclasses.dataclass
@@ -1696,6 +1696,36 @@ LIAP_STRATEGY_CASES = [
 ]
 
 
+HP_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(data=[[0.5, 0.5], [2.0 / 3.0, 1.0 / 3.0]], rational=False),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_herings_peeters_example",
+    ),
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(
+                data=[[1.0 / 3.0, 2.0 / 3.0], [1.0 / 6.0, 5.0 / 6.0]], rational=False
+            ),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_hs_example_1",
+    ),
+]
+
+
 SIMPDIV_CASES = [
     pytest.param(
         EquilibriumTestCaseWithStart(
@@ -1718,6 +1748,7 @@ SIMPDIV_CASES = [
 
 CASES = []
 CASES += LIAP_STRATEGY_CASES
+CASES += HP_STRATEGY_CASES
 CASES += SIMPDIV_CASES
 
 
@@ -1746,6 +1777,23 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
                     eq_prob = eq[player][strategy]
                     exp_prob = expected[player][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
+
+
+@pytest.mark.nash
+@pytest.mark.nash_hp_strategy
+def test_hp_degenerate_t0_prior_raises_error() -> None:
+    """hp_solve() rejects a prior without a unique best response for some player at t=0,
+    rather than picking one of the tied best responses arbitrarily.
+    """
+    game = games.create_hs1988_base_game()
+    prior = game.mixed_strategy_profile(
+        data=[[2.0 / 3.0, 1.0 / 3.0], [1.0 / 3.0, 2.0 / 3.0]], rational=False
+    )
+    with pytest.raises(
+        RuntimeError,
+        match="Multiple best responses found for player 1. Only one best response is allowed.",
+    ):
+        gbt.nash.hp_solve(prior)
 
 
 ##################################################################################################
@@ -3207,11 +3255,11 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for node in game.get_infosets(player):
-                    for action in node.actions:
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
-                            _action_prob(eq, node, action)
-                            - _action_prob(expected, node, action)
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
                         ) <= test_case.prob_tol
 
 
@@ -3259,10 +3307,10 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
 
     def are_the_same(game, found, candidate):
         for p in game.players:
-            for node in game.get_infosets(p):
-                for a in node.actions:
+            for history in game.get_infosets(p):
+                for a in game.get_actions(gbt.H.path(*history.actions)):
                     if not abs(
-                        _action_prob(found, node, a) - _action_prob(candidate, node, a)
+                        _action_prob(found, history, a) - _action_prob(candidate, history, a)
                     ) <= TOL:
                         return False
         return True
@@ -3426,11 +3474,11 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for node in game.get_infosets(player):
-                    for action in node.actions:
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
-                            _action_prob(eq, node, action)
-                            - _action_prob(expected, node, action)
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
                         ) <= test_case.prob_tol
 
 
@@ -3494,11 +3542,11 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for node in game.get_infosets(player):
-                    for action in node.actions:
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
-                            _action_prob(eq, node, action)
-                            - _action_prob(expected, node, action)
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
                         ) <= test_case.prob_tol
 
 

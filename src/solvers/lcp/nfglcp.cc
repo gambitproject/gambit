@@ -96,7 +96,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
 template <class T> Vector<T> Make_b1(const Game &p_game)
 {
   Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
-  b1 = -(T)1;
+  b1 = -static_cast<T>(1);
   return b1;
 }
 
@@ -105,7 +105,7 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
   Vector<T> b2(p_game->GetPlayer(1)->GetStrategies().size() + 1,
                p_game->GetPlayer(1)->GetStrategies().size() +
                    p_game->GetPlayer(2)->GetStrategies().size());
-  b2 = -(T)1;
+  b2 = -static_cast<T>(1);
   return b2;
 }
 
@@ -175,14 +175,14 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
   MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0.0)));
   const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
   const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
-  T sum = (T)0;
+  T sum = static_cast<T>(0);
 
   for (int j = 1; j <= n1; j++) {
     if (cbfs.count(j)) {
       sum += cbfs[j];
     }
   }
-  if (sum == (T)0) {
+  if (sum == static_cast<T>(0)) {
     // This is the trivial CBFS.
     return SearchResult::PruneBranch;
   }
@@ -193,11 +193,11 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
       profile[strategy] = cbfs[j] / sum;
     }
     else {
-      profile[strategy] = (T)0;
+      profile[strategy] = static_cast<T>(0);
     }
   }
 
-  sum = (T)0;
+  sum = static_cast<T>(0);
   for (int j = 1; j <= n2; j++) {
     if (cbfs.count(n1 + j)) {
       sum += cbfs[n1 + j];
@@ -210,7 +210,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tabl
       profile[strategy] = cbfs[n1 + j] / sum;
     }
     else {
-      profile[strategy] = (T)0;
+      profile[strategy] = static_cast<T>(0);
     }
   }
 

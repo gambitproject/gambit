@@ -1109,3 +1109,48 @@ None], optional
         equilibria=equilibria,
         parameters={"first_step": first_step, "max_accel": max_accel},
     )
+
+
+def hp_solve(
+        prior: libgbt.MixedStrategyProfileDouble,
+        maxregret: float = 1.0e-8,
+        event_callback: Callable[[libgbt.HPStepEvent], None] | None = None,
+) -> NashComputationResult:
+    """Compute Nash equilibria of a game using :cite:p:`HerPee01`
+
+    Returns an approximation to the limiting point on the principal branch of
+    the homotopy path for the game.
+
+    Parameters
+    ----------
+    prior : MixedStrategyProfileDouble
+        The prior distribution over strategies.
+
+    maxregret : float, default 1e-8
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
+    event_callback : Callable[[HPStepEvent], None], optional
+        If specified, called with each point traced along the homotopy path,
+        and the homotopy parameter ``t`` at which it was reached, on the way
+        to the returned equilibrium.
+
+        .. versionadded:: 17.0.0
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+    """
+    if maxregret <= 0.0:
+        raise ValueError("hp_solve(): maxregret argument must be positive")
+    equilibria = libgbt._hp_strategy_solve(prior, maxregret, event_callback)
+    return NashComputationResult(
+        game=prior.game,
+        method="hp",
+        rational=False,
+        use_strategic=True,
+        equilibria=equilibria,
+        parameters={"maxregret": maxregret},
+    )

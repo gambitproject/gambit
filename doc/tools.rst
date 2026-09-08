@@ -53,3 +53,4 @@ documentation.
    tools.logit
    tools.gnm
    tools.ipa
+   tools.hp

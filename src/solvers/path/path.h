@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/solvers/logit/path.h
+// FILE: src/solvers/path/path.h
 // Interface to generic smooth path-following algorithm.
 //
 // This program is free software; you can redistribute it and/or modify
@@ -63,8 +63,15 @@ struct TracePathResult {
   Vector<double> final_point;
   bool status; // true if path tracing terminated successfully, false if it terminated due to error
   std::string message; // error message if status is false
+  int steps;           // Step at which the tracing terminated
 };
 
+struct PolishResult {
+  Vector<double> final_point;
+  bool status; // true if polishing terminated successfully, false if it terminated due to error
+  std::string message; // error message if status is false
+  int steps;           // Step at which the polishing terminated
+};
 //
 // This class implements a generic path-following algorithm for smooth curves.
 // It is based on the ideas and codes presented in Allgower and Georg's
@@ -72,6 +79,7 @@ struct TracePathResult {
 //
 class PathTracer {
 public:
+  enum class TraceDirection { Positive = 1, Negative = -1 };
   PathTracer() = default;
   virtual ~PathTracer() = default;
 
@@ -84,7 +92,8 @@ public:
   TracePathResult
   TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
             std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
+            Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
+            TerminationFunctionType p_terminate,
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction,
@@ -93,6 +102,15 @@ public:
 private:
   double m_maxDecel{1.1}, m_hStart{0.03};
 };
+
+// This function reduces the regret of a point that is close to an equilibrium that has been found
+// by the path-following algorithm.  Fixing the value of a component of the point, it uses a
+// Newton-type method to find a nearby point with lower regret.
+PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+                         std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+                         Vector<double> &p_x, double fixed_value, size_t fixed_index,
+                         TerminationFunctionType p_terminate, int max_iter = 100,
+                         CallbackFunctionType p_callback = NullCallbackFunction);
 
 } // end namespace Gambit
 

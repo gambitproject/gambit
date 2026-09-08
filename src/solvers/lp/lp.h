@@ -39,6 +39,6 @@ LpBehaviorSolve(const Game &p_game,
                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
                 const CancelToken &p_cancel = CancelToken());
 
-}; // namespace Gambit::Nash
+} // namespace Gambit::Nash
 
 #endif // GAMBIT_SOLVERS_LP_LP_H

@@ -104,7 +104,7 @@ template <> Rational LPTableau<Rational>::ComputeTotalCost() const
   GetBasisVector(sol);
   for (int i = tmpcol.front_index(); i <= tmpcol.back_index(); i++) {
     if (GetLabel(i) > 0) {
-      tmpcol[i] /= (Rational)Tableau<Rational>::GetTotalDenominator();
+      tmpcol[i] /= static_cast<Rational>(Tableau<Rational>::GetTotalDenominator());
     }
   }
 
@@ -118,7 +118,7 @@ template <class T> T LPTableau<T>::ComputeRelativeCost(int col) const
     return m_unitCost[-col] - m_dual[-col];
   }
   else {
-    this->GetColumn(col, (Vector<T> &)tmpcol);
+    this->GetColumn(col, tmpcol);
     return m_cost[col] - m_dual * tmpcol;
   }
 }

@@ -43,6 +43,7 @@ gambit-simpdiv = "pygambit.cli.simpdiv:main"
 gambit-gnm = "pygambit.cli.gnm:main"
 gambit-ipa = "pygambit.cli.ipa:main"
 gambit-enumpoly = "pygambit.cli.enumpoly:main"
+gambit-hp = "pygambit.cli.hp:main"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
@@ -124,6 +125,7 @@ markers = [
     "nash_logit_behavior: tests of logit_solve in behavior strategies",
     "nash_gnm_strategy: tests of gnm_solve in mixed strategies",
     "nash_ipa_strategy: tests of lpa_solve in mixed strategies",
+    "nash_hp_strategy: tests of hp_solve in mixed strategies",
     "nash_simpdiv: tests of simpdiv_solve (in mixed strategies)",
     "nash_liap_strategy: tests of liap_solve (in mixed strategies)",
     "nash_liap_agent: tests of liap_agent_solve (in mixed behaviors)",

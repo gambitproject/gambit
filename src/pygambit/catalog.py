@@ -421,9 +421,9 @@ def games(
             if not game.is_tree:
                 return False
             n_game_actions = sum(
-                len(node.infoset.actions)
+                len(game.get_actions(gbt.H.path(*history.actions)))
                 for player in game.players
-                for node in game.get_infosets(player)
+                for history in game.get_infosets(player)
             )
             if n_game_actions != n_actions:
                 return False
@@ -447,9 +447,9 @@ def games(
         if n_nodes is not None:
             if not game.is_tree:
                 return False
-            if len(game.nodes) != n_nodes:
+            if len(game.get_histories(gbt.H.after())) != n_nodes:
                 return False
-        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
+        if n_outcomes is not None and len(game.get_outcomes()) != n_outcomes:
             return False
         if n_players is not None and len(game.players) != n_players:
             return False
