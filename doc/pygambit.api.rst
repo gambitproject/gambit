@@ -118,7 +118,6 @@ Information about the game
    Game.get_infosets
    Game.get_events
    Game.get_strategies
-   Game.get_sequences
    Game.contingencies
    Game.get_outcome
    Game.get_outcomes
@@ -136,13 +135,6 @@ Information about the game
    Node.action_probs
    Node.player
 
-.. autosummary::
-
-   :toctree: api/
-
-   Sequence.player
-   Sequence.parent
-   Sequence.actions
 
 Player behavior
 ...............
