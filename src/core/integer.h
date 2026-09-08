@@ -209,8 +209,8 @@ public:
 
   // coercion & conversion
 
-  int fits_in_long() const { return Iislong(rep); }
-  int fits_in_double() const { return Iisdouble(rep); }
+  bool fits_in_long() const { return Iislong(rep); }
+  bool fits_in_double() const { return Iisdouble(rep); }
 
   long as_long() const { return Itolong(rep); }
   double as_double() const { return Itodouble(rep); }

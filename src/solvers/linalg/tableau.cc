@@ -195,9 +195,10 @@ Integer find_lcd(const Vector<Rational> &vec)
 //
 
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
-  : TableauBase<Rational>(A, b), m_tableauData(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
+  : TableauBase<Rational>(A, b), m_nonbasicLabels(A.MinCol(), A.MaxCol()),
+    m_tableauData(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
     m_scaledRHS(b.front_index(), b.back_index()), m_pivotDenominator(1),
-    m_scratchColumn(b.front_index(), b.back_index()), m_nonbasicLabels(A.MinCol(), A.MaxCol())
+    m_scratchColumn(b.front_index(), b.back_index())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
     m_nonbasicLabels[j] = j;
@@ -231,11 +232,10 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
 
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
                            const Vector<Rational> &b)
-  : TableauBase<Rational>(A, art, b),
+  : TableauBase<Rational>(A, art, b), m_nonbasicLabels(A.MinCol(), A.MaxCol() + art.size()),
     m_tableauData(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
     m_scaledRHS(b.front_index(), b.back_index()), m_pivotDenominator(1),
-    m_scratchColumn(b.front_index(), b.back_index()),
-    m_nonbasicLabels(A.MinCol(), A.MaxCol() + art.size())
+    m_scratchColumn(b.front_index(), b.back_index())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
     m_nonbasicLabels[j] = j;

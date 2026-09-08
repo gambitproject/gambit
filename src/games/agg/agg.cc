@@ -22,7 +22,6 @@
 //
 
 #include <iostream>
-#include <cassert>
 #include <algorithm>
 #include <type_traits>
 #include "games/agg/gray.h"
@@ -219,7 +218,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       throw std::runtime_error("Error in game file: expected integer for type of function node #" +
                                std::to_string(i));
     }
-    projTypes[i] = make_proj_func((TypeEnum)pt, in, S, P);
+    projTypes[i] = make_proj_func(static_cast<TypeEnum>(pt), in, S, P);
   }
 
   vector<vector<ConfigDistribution<double>>> projS;
@@ -331,7 +330,9 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
           }
           else if (neighb[Node][k] >= S) {
             const projtype f = projTypes[neighb[Node][k] - S];
-            assert(f);
+            if (!f) {
+              throw ValueException("AGG: encountered a null projection function");
+            }
             const pair<multiset<int>::iterator, multiset<int>::iterator> p =
                 an[neighb[Node][k] - S].equal_range(AS[i][j]);
             multiset<int> blah(p.first, p.second);
@@ -446,7 +447,9 @@ template void AGG::doProjection<Rational>(int Node, int i, Rational *s);
 
 template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) const
 {
-  assert(player >= 0 && player < numPlayers);
+  if (player < 0 || player >= numPlayers) {
+    throw ValueException("AGG::getPurePayoff: player index out of range");
+  }
   const int Node = actionSets[player][s[player]];
   const int keylen = neighbors[Node].size();
   Config pureprofile(projection[Node][0][s[0]]);
@@ -634,7 +637,9 @@ template Rational AGG::payoffInnerProd<Rational>(int node,
 template <class V> V AGG::getMixedPayoff(int player, const StrategyProfile<V> &s)
 {
   V result(0);
-  assert(player >= 0 && player < numPlayers);
+  if (player < 0 || player >= numPlayers) {
+    throw ValueException("AGG::getMixedPayoff: player index out of range");
+  }
   for (int act = 0; act < actions[player]; ++act) {
     if (s[act + firstAction(player)] > V(0)) {
       result += s[act + firstAction(player)] * getV(player, act, s);
@@ -645,7 +650,9 @@ template <class V> V AGG::getMixedPayoff(int player, const StrategyProfile<V> &s
 
 void AGG::getPayoffVector(std::vector<double> &dest, int player, const StrategyProfile<double> &s)
 {
-  assert(player >= 0 && player < numPlayers);
+  if (player < 0 || player >= numPlayers) {
+    throw ValueException("AGG::getPayoffVector: player index out of range");
+  }
   for (int act = 0; act < actions[player]; ++act) {
     dest[act] = getV(player, act, s);
   }
@@ -673,7 +680,7 @@ double AGG::getSymMixedPayoff(StrategyProfile<double> &s)
   }
 
   for (int node = 0; node < numActionNodes; ++node) {
-    if (s[node] > (double)0.0) {
+    if (s[node] > 0.0) {
       result += s[node] * getSymMixedPayoff(node, s);
     }
   }
@@ -696,7 +703,9 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
 
   if (!isPure[node]) { // then compute EU using trie_map::power()
     doProjection(node, 0, s);
-    assert(numPlayers > 1);
+    if (numPlayers <= 1) {
+      throw ValueException("AGG::getSymMixedPayoff: requires more than one player");
+    }
     // ConfigDistribution<double> *dest;
     // m_state.projectedStrat[node][0].power(numPlayers-1, dest, m_state.Pr,
     // numNei,projFunctions[node]);
@@ -715,12 +724,12 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
     if (neighbors[node][i] == node) {
       self = i;
     }
-    if (s[neighbors[node][i]] > (double)0) {
+    if (s[neighbors[node][i]] > 0) {
       support.push_back(i);
       null_prob -= s[neighbors[node][i]];
     }
   }
-  if (numNei < numActionNodes && null_prob > (double)0) {
+  if (numNei < numActionNodes && null_prob > 0) {
     support.push_back(-1);
   }
 
@@ -752,8 +761,10 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
     // update prob
     const double i_prob = (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
     const double d_prob = (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
-    assert(i_prob > (double)0 && d_prob > (double)0);
-    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
+    if (i_prob <= 0 || d_prob <= 0) {
+      throw ValueException("AGG::getSymMixedPayoff: probabilities must be positive");
+    }
+    prob *= (gc.get().at(gc.d) + 1) * i_prob / gc.get().at(gc.i) / d_prob;
 
   } // end while
 
@@ -769,7 +780,9 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
 {
   const int node = uniqueActionSets.at(ownPlClass).at(act);
   int numPl = playerClasses.at(plClass).size();
-  assert(numPl > 0);
+  if (numPl <= 0) {
+    throw ValueException("AGG::getSymConfigProb: player class must be non-empty");
+  }
 
   if (plClass == ownPlClass) {
     numPl--;
@@ -785,7 +798,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     m_state.projectedStrat[node][player].reset();
     if (numPl > 0) {
       for (int j = 0; j < actions[player]; j++) {
-        if (s[j] > (double)0.0) {
+        if (s[j] > 0.0) {
           m_state.projectedStrat[node][player] += make_pair(projection[node][player][j], s[j]);
         }
       }
@@ -833,12 +846,12 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     }
 
     const int a = node2Action.at(neighbors[node][i]).at(p);
-    if (a >= 0 && s[a] > (double)0) {
+    if (a >= 0 && s[a] > 0) {
       support.push_back(i);
       null_prob -= s[a];
     }
   }
-  if (null_prob > (double)0) {
+  if (null_prob > 0) {
     support.push_back(-1);
   }
 
@@ -879,8 +892,10 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
         (support.at(gc.i) != -1) ? s[node2Action[neighbors[node][support[gc.i]]][p]] : null_prob;
     const double d_prob =
         (support.at(gc.d) != -1) ? s[node2Action[neighbors[node][support[gc.d]]][p]] : null_prob;
-    assert(i_prob > (double)0 && d_prob > (double)0);
-    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
+    if (i_prob <= 0 || d_prob <= 0) {
+      throw ValueException("AGG::getSymConfigProb: probabilities must be positive");
+    }
+    prob *= (gc.get().at(gc.d) + 1) * i_prob / gc.get().at(gc.i) / d_prob;
 
   } // end while
 }
@@ -889,8 +904,8 @@ double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile<double>> 
 {
   double result = 0.0;
 
-  for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[playerClass][act] > (double)0.0) {
+  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+    if (s[playerClass][act] > 0.0) {
 
       result += s[playerClass][act] * getKSymMixedPayoff(playerClass, act, s);
     }
@@ -902,8 +917,8 @@ double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile<double> &s)
 {
   double result = 0.0;
 
-  for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[firstKSymAction(playerClass) + act] > (double)0.0) {
+  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+    if (s[firstKSymAction(playerClass) + act] > 0.0) {
 
       result += s[firstKSymAction(playerClass) + act] * getKSymMixedPayoff(s, playerClass, act);
     }
@@ -991,7 +1006,9 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
     }
 
     c = in.get();
-    assert(in.good());
+    if (!in.good()) {
+      throw std::runtime_error("ERROR: unexpected end of input while reading configuration");
+    }
     if (c != AGG::LBRACKET) {
       throw std::runtime_error("ERROR: " + std::to_string(AGG::LBRACKET) +
                                " expected. Instead, got " + std::to_string(c));
@@ -1010,7 +1027,9 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
 
     in >> ws;
     c = in.get(); // get right bracket
-    assert(in.good());
+    if (!in.good()) {
+      throw std::runtime_error("ERROR: unexpected end of input while reading configuration");
+    }
 
     if (c != AGG::RBRACKET) {
       throw std::runtime_error("ERROR: " + std::to_string(AGG::RBRACKET) +
@@ -1059,7 +1078,9 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
 
 template <class V> V AGG::getMaxPayoff() const
 {
-  assert(numActionNodes > 0);
+  if (numActionNodes <= 0) {
+    throw ValueException("AGG::getMaxPayoff: game has no action nodes");
+  }
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
     for (int i = 0; i < numActionNodes; i++) {
@@ -1082,7 +1103,9 @@ template <class V> V AGG::getMaxPayoff() const
 
 template <class V> V AGG::getMinPayoff() const
 {
-  assert(numActionNodes > 0);
+  if (numActionNodes <= 0) {
+    throw ValueException("AGG::getMinPayoff: game has no action nodes");
+  }
   if constexpr (std::is_same_v<V, Rational>) {
     Rational result = static_cast<Rational>(exactPayoffs[0].begin()->second);
     for (int i = 0; i < numActionNodes; i++) {

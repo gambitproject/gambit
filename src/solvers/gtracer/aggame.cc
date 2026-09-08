@@ -76,7 +76,7 @@ void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, double fuzz) cons
         for (int cola = 0; cola < getNumKSymActions(colcls); ++cola) {
 
           dest(rowa + firstKSymAction(rowcls), cola + firstKSymAction(colcls)) =
-              (double)multiplier * aggPtr->getKSymMixedPayoff(sp, rowcls, rowa, colcls, cola);
+              multiplier * aggPtr->getKSymMixedPayoff(sp, rowcls, rowa, colcls, cola);
         }
       }
     }

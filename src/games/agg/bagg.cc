@@ -3,7 +3,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <cassert>
 #include <type_traits>
 #include "games/agg/bagg.h"
 
@@ -209,7 +208,9 @@ template <class V> V BAGG::getMixedPayoff(int player, int tp, const StrategyProf
 void BAGG::getPayoffVector(std::vector<double> &dest, int player, int tp,
                            const StrategyProfile<double> &s)
 {
-  assert(player >= 0 && player < getNumPlayers() && tp >= 0 && tp < getNumTypes(player));
+  if (player < 0 || player >= getNumPlayers() || tp < 0 || tp >= getNumTypes(player)) {
+    throw ValueException("BAGG::getPayoffVector: player or type index out of range");
+  }
   for (size_t act = 0; act < typeActionSets[player][tp].size(); ++act) {
     dest[act] = getV(player, tp, act, s);
   }
