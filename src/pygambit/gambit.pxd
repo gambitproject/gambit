@@ -47,7 +47,6 @@ cdef extern from "core/array.h":
 cdef extern from "games/game.h":
     cdef cppclass c_GameRep "GameRep"
     cdef cppclass c_GameStrategyRep "GameStrategyRep"
-    cdef cppclass c_GameSequenceRep "GameSequenceRep"
     cdef cppclass c_GameActionRep "GameActionRep"
     cdef cppclass c_GameInfosetRep "GameInfosetRep"
     cdef cppclass c_GamePlayerRep "GamePlayerRep"
@@ -85,11 +84,6 @@ cdef extern from "games/game.h":
         bool operator !=(c_GameStrategy) except +
         c_GameStrategyRep *deref "get"() except +RuntimeError
 
-    cdef cppclass c_GameSequence "GameObjectPtr<GameSequenceRep>":
-        bool operator ==(c_GameSequence) except +
-        bool operator !=(c_GameSequence) except +
-        c_GameSequenceRep *deref "get"() except +RuntimeError
-
     cdef cppclass c_GameSubgame "GameObjectPtr<GameSubgameRep>":
         bool operator ==(c_GameSubgame) except +
         bool operator !=(c_GameSubgame) except +
@@ -103,11 +97,6 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
         c_GameAction GetAction(c_GameInfoset) except +
-
-    cdef cppclass c_GameSequenceRep "GameSequenceRep":
-        c_GamePlayer GetPlayer() except +
-        c_GameAction GetAction() except +
-        c_GameSequence GetParent() except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
@@ -174,16 +163,6 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
-        cppclass Sequences:
-            cppclass iterator:
-                c_GameSequence operator *()
-                iterator operator++()
-                bint operator ==(iterator)
-                bint operator !=(iterator)
-            int size() except +
-            iterator begin() except +
-            iterator end() except +
-
         c_Game GetGame() except +
         int GetNumber() except +
         int IsChance() except +
@@ -191,8 +170,6 @@ cdef extern from "games/game.h":
         string GetLabel() except +
 
         Strategies GetStrategies() except +
-
-        Sequences GetSequences() except +
 
         Infosets GetInfosets() except +
 

@@ -327,7 +327,7 @@ class Game:
             for infoset in resolved_player.deref().GetInfosets()
         ]
 
-    def get_infosets(self, player: str) -> list[tuple]:
+    def get_infosets(self, player: str) -> list[History]:
         """Returns a snapshot of the information sets belonging to the personal
         player `player`: the decisions at which that player chooses an action.
 
@@ -344,7 +344,7 @@ class Game:
 
         Returns
         -------
-        list of tuple
+        list of History
             The History of one representative member per information set belonging to
             `player`.
 
@@ -380,7 +380,7 @@ class Game:
             for event in self.game.deref().GetChance().deref().GetInfosets()
         ]
 
-    def get_events(self) -> list[tuple]:
+    def get_events(self) -> list[History]:
         """Returns a snapshot of the chance player's events: the points of exogenous
         randomness, each with a probability distribution over its actions.
 
@@ -392,7 +392,7 @@ class Game:
 
         Returns
         -------
-        list of tuple
+        list of History
             The History of one representative member per event.
 
         .. versionadded:: 17.0.0
@@ -438,35 +438,6 @@ class Game:
         return [
             s.deref().GetLabel().decode("utf-8") for s in resolved_player.deref().GetStrategies()
         ]
-
-    def get_sequences(self, player: str) -> list[Sequence]:
-        """Returns a snapshot of the sequences belonging to `player`.
-
-        This is a materialized snapshot, not a live view: it reflects the game's
-        state at the moment of the call, and does not change if the game is
-        subsequently mutated.
-
-        Parameters
-        ----------
-        player : str
-            The label of the player whose sequences to return.
-
-        Returns
-        -------
-        list of Sequence
-            `player`'s sequences.
-
-        .. versionadded:: 17.0.0
-
-        Raises
-        ------
-        KeyError
-            If no player in the game has label `player`.
-        ValueError
-            If `player` is an empty string or all whitespace.
-        """
-        resolved_player = self._resolve_player(player, "get_sequences")
-        return [Sequence.wrap(s) for s in resolved_player.deref().GetSequences()]
 
     def get_min_payoff(self, player: str) -> Rational:
         """Returns the smallest payoff for `player` in any play of the game.
@@ -601,17 +572,17 @@ class Game:
             current = [self._root()]
         return current
 
-    def _get_histories(self, selector: Selector) -> list[tuple]:
+    def _get_histories(self, selector: Selector) -> list[History]:
         """Evaluate `selector` (an `H`-built expression) against this game,
-        materializing each result as a `History` -- a plain tuple of action
-        labels from the root, carrying no reference to this game.
+        materializing each result as a `History` -- carrying no reference to
+        this game.
 
         Internal: the History-materializing counterpart to `_get_nodes`, kept
         for use by `_get_groups` and tests. Not part of the public API yet.
         """
         return [_history_of(node) for node in self._get_nodes(selector)]
 
-    def get_histories(self, selector: Selector) -> list[tuple]:
+    def get_histories(self, selector: Selector) -> list[History]:
         """Returns the Histories of the nodes that `selector` resolves to.
 
         Parameters
@@ -621,9 +592,9 @@ class Game:
 
         Returns
         -------
-        list of tuple
-            The Histories -- plain tuples of action labels from the root --
-            of the matching nodes, in the order `selector` produces them.
+        list of History
+            The Histories of the matching nodes, in the order `selector`
+            produces them.
 
         .. versionadded:: 17.0.0
 
@@ -757,7 +728,7 @@ class Game:
             )
         return result
 
-    def get_members(self, history: Selector) -> list[tuple]:
+    def get_members(self, history: Selector) -> list[History]:
         """Returns the Histories of the nodes which are members of the
         information set or event that the node identified by `history`
         currently belongs to.
@@ -770,7 +741,7 @@ class Game:
 
         Returns
         -------
-        list of tuple
+        list of History
             The Histories of the member nodes, or an empty list if the node
             is currently terminal (belongs to no information set or event).
 
@@ -934,7 +905,7 @@ class Game:
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
-    def get_subgame_roots(self) -> list[tuple]:
+    def get_subgame_roots(self) -> list[History]:
         """Returns the Histories of the roots of the subgames of the game, in
         postorder (children before parents).
 
@@ -955,7 +926,7 @@ class Game:
             for subgame in self.game.deref().GetSubgames()
         ]
 
-    def get_minimal_subgame(self, history: Selector) -> tuple:
+    def get_minimal_subgame(self, history: Selector) -> History:
         """Returns the History of the root of the smallest subgame containing the
         information set or event that the node identified by `history` belongs to.
 
@@ -978,7 +949,7 @@ class Game:
 
         Returns
         -------
-        tuple
+        History
             The History of the root of the smallest subgame containing the
             information set or event that `history` belongs to.
 
@@ -1008,7 +979,7 @@ class Game:
         )
         return _history_of(Node.wrap(subgame.deref().GetRoot()))
 
-    def get_strategy_unreachable(self) -> list[tuple]:
+    def get_strategy_unreachable(self) -> list[History]:
         """Returns the Histories of the nodes that are not reachable by any pure
         strategy profile.
 
@@ -3511,7 +3482,7 @@ class TreeLayout:
     .. versionadded:: 17.0.0
     """
 
-    def __init__(self, data: dict[tuple, TreeLayoutCoordinates]) -> None:
+    def __init__(self, data: dict[History, TreeLayoutCoordinates]) -> None:
         self._data = data
 
     def __repr__(self) -> str:
@@ -3520,16 +3491,16 @@ class TreeLayout:
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> typing.Iterator[tuple]:
+    def __iter__(self) -> typing.Iterator[History]:
         return iter(self._data)
 
-    def __contains__(self, history: tuple) -> bool:
+    def __contains__(self, history: History) -> bool:
         return history in self._data
 
-    def __getitem__(self, history: tuple) -> TreeLayoutCoordinates:
+    def __getitem__(self, history: History) -> TreeLayoutCoordinates:
         return self._data[history]
 
-    def items(self) -> typing.ItemsView[tuple, TreeLayoutCoordinates]:
+    def items(self) -> typing.ItemsView[History, TreeLayoutCoordinates]:
         return self._data.items()
 
 

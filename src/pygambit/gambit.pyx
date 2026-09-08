@@ -155,9 +155,9 @@ class NodeIndexedVector(_LabeledVector):
     per node.
 
     Unlike ``PlayerIndexedVector``/``StrategyIndexedVector``, which are keyed by a stable
-    label, this is keyed by the node's own History -- a plain tuple of action labels
-    from the root, unique to that node -- since the value can genuinely differ between
-    two nodes, even nodes belonging to the same information set.
+    label, this is keyed by the node's own History -- unique to that node -- since the
+    value can genuinely differ between two nodes, even nodes belonging to the same
+    information set.
 
     .. versionchanged:: 17.0.0
         Keyed by a node's History rather than a ``Node`` object.

@@ -67,12 +67,12 @@ def test_resolve_infoset(game: gbt.Game) -> None:
     just the representative `Game.get_infosets` returns."""
     for player in game.players:
         for history in game.get_infosets(player):
-            for member in game.get_members(gbt.H.path(*history)):
-                resolved = game._resolve_infoset(gbt.H.path(*member), "test")
-                assert games._node_history(resolved) == member
+            for member in game.get_members(gbt.H.path(*history.actions)):
+                resolved = game._resolve_infoset(gbt.H.path(*member.actions), "test")
+                assert games._node_history(resolved) == member.actions
                 if resolved._label:
                     resolved_by_label = game._resolve_infoset(resolved._label, "test")
-                    assert games._node_history(resolved_by_label) == member
+                    assert games._node_history(resolved_by_label) == member.actions
 
 
 @pytest.mark.parametrize(

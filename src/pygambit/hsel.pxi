@@ -22,6 +22,45 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+import dataclasses
+
+
+@dataclasses.dataclass(frozen=True)
+class HistoryTransition:
+    """One step of a `History`: the player who acted, the `History` identifying
+    the information set or event at which they acted, and the label of the
+    action taken.
+
+    .. versionadded:: 17.0.0
+    """
+    player: str
+    state: "History"
+    action: str
+
+
+class History(tuple):
+    """An immutable sequence of `HistoryTransition`s identifying a node (or an
+    information set/event, via its canonical member) by the path of actions
+    taken to reach it from the root.
+
+    .. versionadded:: 17.0.0
+    """
+
+    @property
+    def actions(self) -> tuple[str, ...]:
+        """The plain tuple of action labels, dropping the player/state context
+        each step also carries."""
+        return tuple(t.action for t in self)
+
+    def __getitem__(self, index):
+        result = tuple.__getitem__(self, index)
+        if isinstance(index, slice):
+            return History(result)
+        return result
+
+    def __repr__(self) -> str:
+        return f"History({tuple.__repr__(self)})"
+
 
 class _PathStep:
     """One `H.path(*steps)` operation: each step is an exact action label or
@@ -197,19 +236,27 @@ class GroupedSelector:
         return GroupedSelector(self.base, self.key, self.post_ops, player)
 
 
-def _history_of(node: Node) -> tuple:
-    """The plain-tuple History for `node` -- walks back to the root via the
-    private `Node._parent`/`._prior_action` navigation."""
-    labels: list = []
+def _history_of(node: Node) -> History:
+    """The History for `node` -- walks back to the root via the private
+    `Node._parent`/`._prior_action` navigation, recording a `HistoryTransition`
+    per step."""
+    transitions: list = []
     current: Node = node
     while current._parent() is not None:
-        labels.append(current._prior_action().label)
-        current = current._parent()
-    labels.reverse()
-    return tuple(labels)
+        branch = current._prior_action()
+        transitions.append(
+            HistoryTransition(
+                player=branch.node.player,
+                state=_canonical_history(branch.node),
+                action=branch.label,
+            )
+        )
+        current = branch.node
+    transitions.reverse()
+    return History(transitions)
 
 
-def _canonical_history(node: Node) -> tuple:
+def _canonical_history(node: Node) -> History:
     """The History of the canonical member of `node`'s current information set or
     event: the first member encountered in the pre-order depth-first traversal of the
     game tree (``GetMember(1)``), matching the order `Node.members` itself uses. Used
@@ -230,10 +277,11 @@ def _canonical_history(node: Node) -> tuple:
 class HistoryView:
     """The object a `.filter(callable)`/`.by(callable)` predicate, or
     `Game.behavior_support_profile`'s `actions` callback, actually receives.
-    Supports plain sequence indexing/slicing like a `History` tuple, plus
-    limited game-aware navigation (`.last_action(player)`) -- but never
-    exposes the `Node`/game it's privately backed by.  Not constructible
-    directly.
+    Supports indexing/slicing like a `History` -- so each element is a
+    `HistoryTransition`, not a bare action label -- plus `.actions` (the
+    plain label-tuple projection) and limited game-aware navigation
+    (`.last_action(player)`) -- but never exposes the `Node`/game it's
+    privately backed by.  Not constructible directly.
 
     .. versionadded:: 17.0.0
     """
@@ -242,7 +290,7 @@ class HistoryView:
         raise ValueError("Cannot create a HistoryView directly.")
 
     @staticmethod
-    def _wrap(node: Node, history: tuple) -> HistoryView:
+    def _wrap(node: Node, history: History) -> HistoryView:
         obj: HistoryView = HistoryView.__new__(HistoryView)
         obj._node = node
         obj._history = history
@@ -257,13 +305,19 @@ class HistoryView:
     def __getitem__(self, index: typing.Any) -> typing.Any:
         return self._history[index]
 
+    @property
+    def actions(self) -> tuple[str, ...]:
+        """The plain tuple of action labels, dropping the player/state context
+        each step also carries."""
+        return self._history.actions
+
     def last_action(self, player: str) -> str | None:
         """The label of the last action `player` took on the path to this
         history, wherever it fell -- `None` if `player` hasn't acted yet."""
         return _last_action(self._node, player)
 
     @property
-    def members(self) -> list[tuple]:
+    def members(self) -> list[History]:
         """The Histories of the nodes which are members of the information set or
         event to which this history currently belongs -- whichever applies.
 

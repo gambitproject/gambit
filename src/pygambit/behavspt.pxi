@@ -32,20 +32,19 @@ class ActionSupport(_LabelSet):
     the history that was resolved to reach it, accessible via `history`.
 
     .. versionchanged:: 17.0.0
-        `infoset` (an ``Infoset``) replaced by `history` (the ``History`` -- a plain
-        tuple of action labels -- of the node that was resolved to identify the
-        information set).
+        `infoset` (an ``Infoset``) replaced by `history` (the ``History`` of the
+        node that was resolved to identify the information set).
     """
     @staticmethod
     @cython.cfunc
-    def wrap(history: tuple, actions: tuple) -> ActionSupport:
+    def wrap(history: History, actions: tuple) -> ActionSupport:
         obj: ActionSupport = ActionSupport.__new__(ActionSupport)
         obj._owner = history
         obj._labels = actions
         return obj
 
     @property
-    def history(self) -> tuple:
+    def history(self) -> History:
         """The History of the node that was resolved to identify this information set."""
         return self._owner
 

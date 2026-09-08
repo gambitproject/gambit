@@ -91,8 +91,10 @@ def test_get_members():
     event, including a shared infoset across the members of different chance
     outcomes; empty for a terminal node."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert game.get_members(gbt.H.path()) == [()]
-    assert game.get_members(gbt.H.path("King", "Bet")) == [("King", "Bet"), ("Queen", "Bet")]
+    assert [h.actions for h in game.get_members(gbt.H.path())] == [()]
+    assert [h.actions for h in game.get_members(gbt.H.path("King", "Bet"))] == [
+        ("King", "Bet"), ("Queen", "Bet")
+    ]
     assert game.get_members(gbt.H.path("King", "Fold")) == []
 
 
@@ -274,7 +276,7 @@ def test_subgame_roots(test_case: SubgameRootsTestCase):
     """
     game = test_case.factory()
 
-    actual_paths = [list(reversed(history)) for history in game.get_subgame_roots()]
+    actual_paths = [list(reversed(history.actions)) for history in game.get_subgame_roots()]
 
     assert sorted(actual_paths) == sorted(test_case.expected_paths)
 
@@ -352,7 +354,7 @@ def test_get_subgame_roots_postorder_sequence(test_case: SubgameStructureTestCas
     """`Game.get_subgame_roots` produces the expected postorder sequence of
     subgame-root Histories (children before parents)."""
     game = test_case.factory()
-    assert game.get_subgame_roots() == test_case.roots
+    assert [h.actions for h in game.get_subgame_roots()] == test_case.roots
 
 
 @pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
@@ -368,8 +370,8 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
     for player in game.players:
         for i, history in enumerate(game.get_infosets(player)):
             key = (player, i)
-            selector = gbt.H.path(*history)
-            assert game.get_minimal_subgame(selector) == expected_root_for_key[key]
+            selector = gbt.H.path(*history.actions)
+            assert game.get_minimal_subgame(selector).actions == expected_root_for_key[key]
 
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
@@ -399,7 +401,7 @@ def test_get_strategy_unreachable(game_file: str, expected_unreachable_paths: li
     game = game_file if isinstance(game_file, gbt.Game) else games.read_from_file(game_file)
 
     actual_unreachable_paths = [
-        list(reversed(history)) for history in game.get_strategy_unreachable()
+        list(reversed(history.actions)) for history in game.get_strategy_unreachable()
     ]
 
     assert actual_unreachable_paths == expected_unreachable_paths
@@ -512,7 +514,7 @@ def test_get_histories_after_iteration_order(game_obj: gbt.Game):
             yield from dfs((*history, action))
 
     expected = list(dfs(()))
-    assert game_obj.get_histories(gbt.H.after()) == expected
+    assert [h.actions for h in game_obj.get_histories(gbt.H.after())] == expected
 
 
 def test_layout_tree():

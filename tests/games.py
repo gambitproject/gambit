@@ -131,7 +131,7 @@ def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
     nodes -- for adapting fixtures that compute a `Node` list dynamically to the
     `H`-only mutation methods."""
     histories = frozenset(_node_history(n) for n in nodes)
-    return gbt.H.after().filter(lambda h: h[:] in histories)
+    return gbt.H.after().filter(lambda h: h[:].actions in histories)
 
 
 def selector_for_histories(histories: list[tuple]) -> gbt.Selector:
@@ -139,7 +139,7 @@ def selector_for_histories(histories: list[tuple]) -> gbt.Selector:
     Histories -- the History-only counterpart to `selector_for_nodes`, for
     fixtures that already work in terms of `History` rather than `Node`."""
     histories = frozenset(histories)
-    return gbt.H.after().filter(lambda h: h[:] in histories)
+    return gbt.H.after().filter(lambda h: h[:].actions in histories)
 
 
 def selector_for_node(node: gbt.Node) -> gbt.Selector:
@@ -291,7 +291,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
 
     for card in deals:
         g.append_move(
-            gbt.H.path(...).filter(lambda h, card=card: h[0] == card),
+            gbt.H.path(...).filter(lambda h, card=card: h[0].action == card),
             player="Alice", actions=["Bet", "Fold"]
         )
 
@@ -322,25 +322,27 @@ def _create_kuhn_poker_efg_without_outcomes():
     for alice_card in cards:
         # Alice's first move
         g.append_move(
-            gbt.H.path(...).filter(lambda h, card=alice_card: h[0][0] == card),
+            gbt.H.path(...).filter(lambda h, card=alice_card: h[0].action[0] == card),
             "Alice", ["Check", "Bet"]
         )
     for bob_card in cards:
         # Bob's move after Alice checks
         g.append_move(
-            gbt.H.path(..., "Check").filter(lambda h, card=bob_card: h[0][1] == card),
+            gbt.H.path(..., "Check").filter(lambda h, card=bob_card: h[0].action[1] == card),
             "Bob", ["Check", "Bet"]
         )
     for alice_card in cards:
         # Alice's move if Bob's second action is bet
         g.append_move(
-            gbt.H.path(..., "Check", "Bet").filter(lambda h, card=alice_card: h[0][0] == card),
+            gbt.H.path(..., "Check", "Bet").filter(
+                lambda h, card=alice_card: h[0].action[0] == card
+            ),
             "Alice", ["Fold", "Call"]
         )
     for bob_card in cards:
         # Bob's move after Alice bets initially
         g.append_move(
-            gbt.H.path(..., "Bet").filter(lambda h, card=bob_card: h[0][1] == card),
+            gbt.H.path(..., "Bet").filter(lambda h, card=bob_card: h[0].action[1] == card),
             "Bob", ["Fold", "Call"]
         )
     return g

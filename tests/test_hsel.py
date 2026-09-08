@@ -11,15 +11,15 @@ def test_history_view_members_on_shared_infoset():
     captured = {}
 
     def key(h):
-        captured[h[:]] = h.members
-        return frozenset(h.members)
+        captured[h[:].actions] = [m.actions for m in h.members]
+        return frozenset(m.actions for m in h.members)
 
     groups = game._get_groups(gbt.H.path(...).by(key))
     assert captured == {
         ("U",): [("U",), ("D",)],
         ("D",): [("U",), ("D",)],
     }
-    assert list(groups.values()) == [[("U",), ("D",)]]
+    assert [[m.actions for m in g] for g in groups.values()] == [[("U",), ("D",)]]
 
 
 def test_history_view_members_singleton_infoset():
@@ -31,7 +31,7 @@ def test_history_view_members_singleton_infoset():
     captured = {}
 
     def key(h):
-        captured[h[:]] = h.members
+        captured[h[:].actions] = [m.actions for m in h.members]
         return None
 
     game._get_groups(gbt.H.path(...).by(key))
@@ -46,7 +46,7 @@ def test_history_view_members_on_event():
     captured = {}
 
     def key(h):
-        captured[h[:]] = h.members
+        captured[h[:].actions] = [m.actions for m in h.members]
         return None
 
     game._get_groups(gbt.H.path(...).by(key))
@@ -69,7 +69,7 @@ def test_get_histories_root():
     game = gbt.Game.new_tree(players=["A"])
     game.append_move(gbt.H.path(), "A", ["U", "D"])
 
-    assert game.get_histories(gbt.H.path()) == [()]
+    assert [h.actions for h in game.get_histories(gbt.H.path())] == [()]
 
 
 def test_get_histories_multiple():
@@ -77,8 +77,8 @@ def test_get_histories_multiple():
     game.append_move(gbt.H.path(), "A", ["U", "D"])
     game.append_move(gbt.H.plays, "B", ["x", "y"])
 
-    assert game.get_histories(gbt.H.path(...)) == [("U",), ("D",)]
-    assert game.get_histories(gbt.H.plays) == [
+    assert [h.actions for h in game.get_histories(gbt.H.path(...))] == [("U",), ("D",)]
+    assert [h.actions for h in game.get_histories(gbt.H.plays)] == [
         ("U", "x"), ("U", "y"), ("D", "x"), ("D", "y"),
     ]
 
@@ -88,7 +88,7 @@ def test_get_histories_plays_from_non_root():
     from that point, not from the whole game."""
     game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
 
-    assert set(game.get_histories(gbt.H.path("L").plays)) == {
+    assert {h.actions for h in game.get_histories(gbt.H.path("L").plays)} == {
         ("L", "R"), ("L", "L", "r"), ("L", "L", "l"),
     }
 

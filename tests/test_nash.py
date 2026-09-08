@@ -23,10 +23,10 @@ def d(*probs) -> tuple:
     return tuple(probs)
 
 
-def _action_prob(profile: gbt.MixedBehaviorProfile, history: tuple, label: str):
+def _action_prob(profile: gbt.MixedBehaviorProfile, history: gbt.History, label: str):
     """The probability profile assigns to the action labeled `label` at the
     information set identified by `history`."""
-    return profile[gbt.H.path(*history)][label]
+    return profile[gbt.H.path(*history.actions)][label]
 
 
 @dataclasses.dataclass
@@ -3256,7 +3256,7 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for history in game.get_infosets(player):
-                    for action in game.get_actions(gbt.H.path(*history)):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
                             _action_prob(eq, history, action)
                             - _action_prob(expected, history, action)
@@ -3308,7 +3308,7 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
     def are_the_same(game, found, candidate):
         for p in game.players:
             for history in game.get_infosets(p):
-                for a in game.get_actions(gbt.H.path(*history)):
+                for a in game.get_actions(gbt.H.path(*history.actions)):
                     if not abs(
                         _action_prob(found, history, a) - _action_prob(candidate, history, a)
                     ) <= TOL:
@@ -3475,7 +3475,7 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for history in game.get_infosets(player):
-                    for action in game.get_actions(gbt.H.path(*history)):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
                             _action_prob(eq, history, action)
                             - _action_prob(expected, history, action)
@@ -3543,7 +3543,7 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
                 for history in game.get_infosets(player):
-                    for action in game.get_actions(gbt.H.path(*history)):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
                             _action_prob(eq, history, action)
                             - _action_prob(expected, history, action)

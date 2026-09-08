@@ -170,7 +170,7 @@ class Node:
     def _children(self) -> NodeChildren:
         """The set of children of this node. Not part of the public API; the public
         equivalent is a `Selector`'s `.path(..., ...)` wildcard step, e.g.
-        `game.get_histories(H.path(*history, ...))`.
+        `game.get_histories(H.path(*history.actions, ...))`.
         """
         return NodeChildren.wrap(self.node)
 

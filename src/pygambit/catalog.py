@@ -421,7 +421,7 @@ def games(
             if not game.is_tree:
                 return False
             n_game_actions = sum(
-                len(game.get_actions(gbt.H.path(*history)))
+                len(game.get_actions(gbt.H.path(*history.actions)))
                 for player in game.players
                 for history in game.get_infosets(player)
             )

@@ -82,7 +82,7 @@ def test_append_move_creates_single_infoset_list_of_nodes():
     game.set_players(list(game.players) + ["Player 3"])
     matches = (("2", "1"), ("1", "1"), ("1", "2"))
     game.append_move(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
+        gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
         "Player 3", ["B", "F"]
     )
     assert len(game.get_infosets("Player 3")) == 1
@@ -94,9 +94,10 @@ def test_append_move_same_infoset_list_of_nodes():
     game.set_players(list(game.players) + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches), "Player 3", ["B", "F"]
+        gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
+        "Player 3", ["B", "F"]
     )
-    assert ("2", "1") in game.get_members(gbt.H.path("1", "1"))
+    assert ("2", "1") in [m.actions for m in game.get_members(gbt.H.path("1", "1"))]
 
 
 def test_append_move_actions_list_of_nodes():
@@ -107,7 +108,7 @@ def test_append_move_actions_list_of_nodes():
     game.set_players(list(game.players) + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
+        gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
         "Player 3", ["B", "F", "S"]
     )
     assert game.get_actions(gbt.H.path("2", "1")) == game.get_actions(gbt.H.path("1", "1"))
@@ -121,7 +122,7 @@ def test_append_move_labels_list_of_nodes():
     game.set_players(list(game.players) + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
+        gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
         "Player 3", ["B", "F", "S"]
     )
 
@@ -202,10 +203,10 @@ def test_append_event_creates_single_event_list_of_nodes():
     game = games.read_from_file("sample_extensive_game.efg")
     matches = (("2", "1"), ("1", "1"))
     game.append_event(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in matches),
+        gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
         {"a": gbt.Rational(1, 2), "b": gbt.Rational(1, 2)}
     )
-    assert ("2", "1") in game.get_members(gbt.H.path("1", "1"))
+    assert ("2", "1") in [m.actions for m in game.get_members(gbt.H.path("1", "1"))]
     assert game.get_actions(gbt.H.path("2", "1"))
 
 
@@ -409,7 +410,7 @@ def test_len_after_set_move_actions_drop():
     initial_number_of_nodes = _n_nodes(game)
     action_to_drop = "L"
     nodes_to_delete = sum(
-        _count_subtree_nodes(game, (*member, action_to_drop), True)
+        _count_subtree_nodes(game, (*member.actions, action_to_drop), True)
         for member in game.get_members(gbt.H.path())
     )
     remaining = [a for a in game.get_actions(gbt.H.path()) if a != "L"]
@@ -483,9 +484,10 @@ def test_make_infoset_converts_chance_node():
     game = games.read_from_file("stripped_down_poker.efg")   # the deal is a chance move
     personal_history = next(
         h for h in game.get_histories(gbt.H.after())
-        if game.get_actions(gbt.H.path(*h)) and game.get_player(gbt.H.path(*h)) != "Chance"
+        if game.get_actions(gbt.H.path(*h.actions))
+        and game.get_player(gbt.H.path(*h.actions)) != "Chance"
     )
-    personal_player = game.get_player(gbt.H.path(*personal_history))
+    personal_player = game.get_player(gbt.H.path(*personal_history.actions))
     game.make_infoset(gbt.H.path(), personal_player)
     assert game.get_player(gbt.H.path()) != "Chance"
     assert game.get_player(gbt.H.path()) == personal_player
@@ -499,7 +501,7 @@ def test_make_infoset_requires_matching_action_labels(node_actions):
     game.append_move(gbt.H.path(), "1", ["a", "b"])
     game.append_move(gbt.H.path("a"), "1", node_actions)
     with pytest.raises(ValueError):
-        game.make_infoset(gbt.H.after().filter(lambda h: h[:] in ((), ("a",))), "1")
+        game.make_infoset(gbt.H.after().filter(lambda h: h[:].actions in ((), ("a",))), "1")
 
 
 def test_make_infoset_empty_nodes_raises():
@@ -561,7 +563,7 @@ def test_make_event_pools_nodes_from_different_infosets():
     game = games.read_from_file("stripped_down_poker.efg")
     king, queen = ("King",), ("Queen",)
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert king in game.get_members(gbt.H.path(*queen))
+    assert king in [m.actions for m in game.get_members(gbt.H.path(*queen))]
     assert list(game.get_action_probs(gbt.H.path(*king)).values()) == [
         gbt.Rational("1/4"), gbt.Rational("3/4")
     ]
@@ -574,7 +576,7 @@ def test_make_event_requires_matching_action_labels():
     # King node has actions Bet, Fold; its own Bet-child has actions Call, Fold.
     with pytest.raises(ValueError):
         game.make_event(
-            gbt.H.after().filter(lambda h: h[:] in (("King",), ("King", "Bet"))),
+            gbt.H.after().filter(lambda h: h[:].actions in (("King",), ("King", "Bet"))),
             {"Bet": "1/2", "Fold": "1/2"}
         )
 
@@ -625,7 +627,7 @@ def test_make_event_label_reused_when_fully_absorbed():
     king, queen = ("King",), ("Queen",)
     game.make_event(gbt.H.path(...), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
     game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert king in game.get_members(gbt.H.path(*queen))
+    assert king in [m.actions for m in game.get_members(gbt.H.path(*queen))]
     assert list(game.get_action_probs(gbt.H.path(*king)).values()) == [
         gbt.Rational("1/4"), gbt.Rational("3/4")
     ]
@@ -664,9 +666,9 @@ def test_make_infoset_cherry_pick_leaves_rumps():
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_histories(game)
     game.make_infoset(games.selector_for_histories([B, C]), "Player 2")
-    assert B in game.get_members(gbt.H.path(*C))
-    assert game.get_members(gbt.H.path(*A)) == [A]
-    assert game.get_members(gbt.H.path(*D)) == [D]
+    assert B in [m.actions for m in game.get_members(gbt.H.path(*C))]
+    assert [m.actions for m in game.get_members(gbt.H.path(*A))] == [A]
+    assert [m.actions for m in game.get_members(gbt.H.path(*D))] == [D]
 
 
 def test_make_infoset_label_held_by_rump_raises():
@@ -687,8 +689,8 @@ def test_make_infoset_failure_leaves_game_unchanged():
     game.make_infoset(games.selector_for_histories([C, D]), "Player 2", "Y")
     with pytest.raises(ValueError):
         game.make_infoset(games.selector_for_histories([B, C]), "Player 2", "X")
-    assert A in game.get_members(gbt.H.path(*B))
-    assert C in game.get_members(gbt.H.path(*D))
+    assert A in [m.actions for m in game.get_members(gbt.H.path(*B))]
+    assert C in [m.actions for m in game.get_members(gbt.H.path(*D))]
 
 
 def test_make_infoset_idempotent():
@@ -697,7 +699,7 @@ def test_make_infoset_idempotent():
     A, B, C, D = _bagwell_p2_histories(game)
     game.make_infoset(games.selector_for_histories([B, C]), "Player 2", "Z")
     game.make_infoset(games.selector_for_histories([B, C]), "Player 2", "Z")
-    assert B in game.get_members(gbt.H.path(*C))
+    assert B in [m.actions for m in game.get_members(gbt.H.path(*C))]
 
 
 def test_make_infoset_split_creates_new_infoset():
@@ -706,8 +708,8 @@ def test_make_infoset_split_creates_new_infoset():
     game = gbt.catalog.load("journals/geb/bagwell1995")
     A, B, C, D = _bagwell_p2_histories(game)
     game.make_infoset(gbt.H.path("S", "s"), "Player 2")
-    assert game.get_members(gbt.H.path(*A)) == [A]
-    assert B not in game.get_members(gbt.H.path(*A))
+    assert [m.actions for m in game.get_members(gbt.H.path(*A))] == [A]
+    assert B not in [m.actions for m in game.get_members(gbt.H.path(*A))]
 
 
 def test_make_infoset_across_different_source_players():
@@ -720,7 +722,7 @@ def test_make_infoset_across_different_source_players():
     assert game.get_player(gbt.H.path(*n2)) == "2"
     assert game.get_player(gbt.H.path(*n3)) == "3"
     game.make_infoset(gbt.H.path(...), "1")
-    assert n2 in game.get_members(gbt.H.path(*n3))
+    assert n2 in [m.actions for m in game.get_members(gbt.H.path(*n3))]
     assert game.get_player(gbt.H.path(*n2)) == "1"
     assert game.get_player(gbt.H.path(*n3)) == "1"
 
@@ -859,16 +861,18 @@ def test_set_move_actions_reorder_carries_subtrees():
     game.append_move(gbt.H.path(), "Bob", ["x", "y"])
     game.append_move(gbt.H.path(...), "Alice", ["a", "b", "c"])
     game.append_move(
-        gbt.H.path(..., ...).filter(lambda h: (h[0], h[1]) in (("x", "a"), ("y", "b"))),
+        gbt.H.path(..., ...).filter(
+            lambda h: (h[0].action, h[1].action) in (("x", "a"), ("y", "b"))
+        ),
         "Bob", ["l", "r"]
     )
     members = game.get_members(gbt.H.path("x"))
-    children_before = [{label: (*member, label) for label in ("a", "b", "c")}
+    children_before = [{label: (*member.actions, label) for label in ("a", "b", "c")}
                        for member in members]
     game.set_move_actions(gbt.H.path("x"), ["c", "a", "b"])
     assert game.get_actions(gbt.H.path("x")) == ["c", "a", "b"]
     for member, children in zip(members, children_before, strict=True):
-        assert games.children_histories(game, member) == [
+        assert games.children_histories(game, member.actions) == [
             children["c"], children["a"], children["b"]
         ]
 
