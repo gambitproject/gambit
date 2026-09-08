@@ -449,7 +449,6 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
       for (const auto &strategy : strategies) {
         newCache.m_strategyValues[player][strategy] = *value_it;
         ++value_it;
-        ;
       }
     }
     else {
@@ -460,7 +459,7 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
   }
   newCache.m_valid = true;
   m_cache = std::move(newCache);
-};
+}
 
 template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 {

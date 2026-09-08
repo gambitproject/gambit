@@ -33,6 +33,7 @@
 #include "core/rational.h"
 #include "solvers/enumpoly/enumpoly.h"
 #include "solvers/gnm/gnm.h"
+#include "solvers/hp/hp.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/liap/liap.h"
 #include "solvers/logit/logit.h"
@@ -63,6 +64,10 @@ InvokeLogitStrategyEventCallback(PyObject *p_callback,
 std::string
 InvokeLogitBehaviorEventCallback(PyObject *p_callback,
                                  std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_qre);
+std::string
+InvokeHPStrategyEventCallback(PyObject *p_callback,
+                              std::shared_ptr<Gambit::MixedStrategyProfile<double>> p_profile,
+                              double p_t);
 std::string InvokeGNMPerturbationEventCallback(
     PyObject *p_callback, std::shared_ptr<Gambit::MixedStrategyProfile<double>> p_profile);
 std::string
@@ -225,6 +230,25 @@ MakeLogitEventCallback<Gambit::LogitQREMixedBehaviorProfile>(PyObject *p_callbac
         std::get<Gambit::LogitPathEvent<Gambit::LogitQREMixedBehaviorProfile>>(p_event).qre;
     Gambit::ThrowIfPythonError(InvokeLogitBehaviorEventCallback(
         p_callback, std::make_shared<Gambit::LogitQREMixedBehaviorProfile>(qre)));
+  };
+}
+
+///
+/// Builds an HPEventCallbackType which, when invoked with a point traced
+/// along the HP homotopy path, calls a Python callable with the mixed
+/// strategy profile and homotopy parameter t, converted to the
+/// corresponding pygambit types. A null callback (Python `None`) yields the
+/// solver's own no-op default.
+///
+inline Gambit::Nash::HPEventCallbackType MakeHPEventCallback(PyObject *p_callback)
+{
+  if (!p_callback || p_callback == Py_None) {
+    return Gambit::Nash::NullHPEventCallback;
+  }
+  return [p_callback](const Gambit::Nash::HPEvent &p_event) {
+    const auto &step = std::get<Gambit::Nash::HPStepEvent>(p_event);
+    Gambit::ThrowIfPythonError(InvokeHPStrategyEventCallback(
+        p_callback, std::make_shared<Gambit::MixedStrategyProfile<double>>(step.profile), step.t));
   };
 }
 

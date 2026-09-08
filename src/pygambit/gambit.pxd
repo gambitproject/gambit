@@ -526,6 +526,8 @@ cdef extern from "callback.h":
         pass
     cppclass LogitEventCallbackType "Gambit::LogitEventCallbackType"[T]:
         pass
+    cppclass HPEventCallbackType "Gambit::Nash::HPEventCallbackType":
+        pass
     cppclass GNMEventCallbackType "Gambit::Nash::GNMEventCallbackType":
         pass
     cppclass LiapEventCallbackType "Gambit::Nash::LiapEventCallbackType"[T]:
@@ -540,6 +542,7 @@ cdef extern from "callback.h":
     StrategyCallbackType[T] MakeStrategyCallback[T](object)
     BehaviorCallbackType[T] MakeBehaviorCallback[T](object)
     LogitEventCallbackType[T] MakeLogitEventCallback[T](object)
+    HPEventCallbackType MakeHPEventCallback(object)
     GNMEventCallbackType MakeGNMEventCallback(object)
     LiapEventCallbackType[T] MakeLiapEventCallback[T](object)
     SimpdivEventCallbackType MakeSimpdivEventCallback(object)
@@ -674,3 +677,6 @@ cdef extern from "nash.h":
             shared_ptr[c_MixedStrategyProfile[double]], bool, double, double,
             LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
+    stdlist[c_MixedStrategyProfile[double]] HPStrategySolveWrapper(
+            c_MixedStrategyProfile[double], double, HPEventCallbackType
+    ) except +RuntimeError

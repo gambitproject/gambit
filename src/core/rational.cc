@@ -27,7 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 #include <cmath>
-#include <cfloat>
+#include <limits>
 #include <cctype>
 
 #include "util.h"
@@ -160,7 +160,7 @@ Rational::Rational(double x) : num(0), den(1)
       mantissa *= width;
       mantissa = modf(mantissa, &intpart);
       num <<= shift;
-      num += (long)intpart;
+      num += static_cast<long>(intpart);
       exponent -= shift;
     }
     if (exponent > 0) {
@@ -306,7 +306,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
   }
   while (ch >= '0' && ch <= '9') {
     num *= 10;
-    num += (int)(ch - '0');
+    num += (ch - '0');
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
@@ -321,7 +321,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
     }
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
-      denom += (int)(ch - '0');
+      denom += (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
         ch = ' ';
@@ -337,7 +337,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
       num *= 10;
-      num += (int)(ch - '0');
+      num += (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
         ch = ' ';
@@ -366,14 +366,18 @@ bool Rational::OK() const
   return v;
 }
 
-int Rational::fits_in_float() const
+bool Rational::fits_in_float() const
 {
-  return Rational(FLT_MIN) <= *this && *this <= Rational(FLT_MAX);
+  // NOLINTBEGIN(clang-diagnostic-double-promotion)
+  return Rational(std::numeric_limits<float>::min()) <= *this &&
+         *this <= Rational(std::numeric_limits<float>::max());
+  // NOLINTEND(clang-diagnostic-double-promotion)
 }
 
-int Rational::fits_in_double() const
+bool Rational::fits_in_double() const
 {
-  return Rational(DBL_MIN) <= *this && *this <= Rational(DBL_MAX);
+  return Rational(std::numeric_limits<double>::min()) <= *this &&
+         *this <= Rational(std::numeric_limits<double>::max());
 }
 
 //
@@ -527,7 +531,7 @@ template <> Rational lexical_cast(const std::string &f)
 
   while (ch >= '0' && ch <= '9' && index <= length) {
     num *= 10;
-    num += (int)(ch - '0');
+    num += (ch - '0');
     ch = f[index++];
   }
 
@@ -536,7 +540,7 @@ template <> Rational lexical_cast(const std::string &f)
     ch = f[index++];
     while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
-      denom += (int)(ch - '0');
+      denom += (ch - '0');
       ch = f[index++];
     }
   }
@@ -546,7 +550,7 @@ template <> Rational lexical_cast(const std::string &f)
     while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
       num *= 10;
-      num += (int)(ch - '0');
+      num += (ch - '0');
       ch = f[index++];
     }
 
@@ -560,7 +564,7 @@ template <> Rational lexical_cast(const std::string &f)
       }
       while (ch >= '0' && ch <= '9' && index <= length) {
         exponent *= 10;
-        exponent += (int)(ch - '0');
+        exponent += (ch - '0');
         ch = f[index++];
       }
       if (exponent * expsign > 0) {
@@ -587,7 +591,7 @@ template <> Rational lexical_cast(const std::string &f)
     }
     while (ch >= '0' && ch <= '9' && index <= length) {
       exponent *= 10;
-      exponent += (int)(ch - '0');
+      exponent += (ch - '0');
       ch = f[index++];
     }
     if (exponent * expsign > 0) {
