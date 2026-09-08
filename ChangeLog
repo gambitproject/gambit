@@ -1,6 +1,9 @@
 ## [17.0.0-beta.1] - unreleased
 
 ### Added
+- Added the Herings-Peeters homotopy method to compute equilibria, as `hp_solve` in `pygambit`
+  and `gambit-hp` as a command line tool; also available as a user-selectable method in
+  the graphical interface.
 - Added `Game.has_perfect_recall(player)`, and `GameRep::HasPerfectRecall(const GamePlayer &)`
   in C++, reporting whether an individual player has perfect recall.  (#1107)
 - Added `MixedBehaviorProfile.event_probs`, returning the probability with which each of
@@ -25,7 +28,7 @@
 
 ### Removed
 - `Outcome` has been removed as a public-facing class in pygambit, following `Action`,
-  `Infoset`, `Player`, `Strategy`, and `Node`: no public method holds or returns a live handle
+  `Infoset`, `Player`, and `Strategy`: no public method holds or returns a live handle
   into a game's internal outcome list any longer.  `Game.outcomes` has been removed; use
   `Game.get_outcomes()`, `Game.get_outcome_payoffs()`, `Game.set_outcome_payoffs()`, and
   `Game.relabel_outcomes()` instead.
@@ -80,6 +83,17 @@
 - In the GUI, computed strategy and behaviour profiles can now be sorted by probability (#1077)
 
 ### Changed
+- Entities are increasingly identified by their `str` label rather than by dedicated proxy
+  objects, continuing the shift completed below for `Player`, `Strategy`, and `Action`.
+  `Node.player`, `Infoset.player`/`Event.player`/`Sequence.player`,
+  `StrategySupport.player`/`BehaviorSupport.player`, and
+  `MixedStrategy.player`/`MixedBehavior.player` now return a label (`str`), or `None` where
+  applicable, rather than a `Player` object; `Game.players` iterates labels directly (indexing
+  by label is no longer supported -- use `in` to test membership); and `player` arguments
+  throughout (`Game.append_move`, `Game.insert_move`, `Game.reveal`,
+  `Game.relabel_strategies`, `Game.set_strategies`, and the filter callables of
+  `Game.strategy_support_profile` and `Game.behavior_support_profile`) now take a label rather
+  than a `Player` object.
 - `Infoset` is now a lazy, node-anchored view (like `Node.player`/`Node.outcome`), constructed
   by anchoring on a representative member node rather than carrying independent identity, and is
   now specific to personal players; see `Event` for the chance player.  `Infoset.is_chance` has
@@ -88,27 +102,11 @@
   `Game.append_infoset`, `Game.insert_infoset`, `Game.set_move_actions`, `Game.set_event_actions`,
   `Game.relabel_actions`, `Game.reveal`, and `Game.minimal_subgame` now identify an information
   set or event via a member `Node` (or its label) rather than an `Infoset` object.
-- `Infoset.actions`/`Event.actions`/`Node.actions` now return the plain labels (`list[str]`) of
-  the actions at the information set or event, rather than `Action` objects.
-- `Sequence.actions` now returns a `tuple[str, ...]` of labels rather than `Action` objects.
-- `Node.prior_action`/`Node.own_prior_action` now return a `Branch` (a `(node, label)` pair)
-  rather than an `Action`.
-- `Game.behavior_support_profile`'s `actions` filter callable is now called as
-  `actions(node, action)` (two positional arguments, where `node` is a representative node of
-  the information set and `action` is the action's label) rather than with a single `Action`.
-- `Node.player` now returns the player's label (`str`), or `None` at a terminal node, directly
-  rather than a lazy `NodePlayer` proxy object. `Infoset.player`/`Event.player`/`Sequence.player`
-  now likewise return a label (`str`) rather than a `Player` object.
-- `StrategySupport.player`, `BehaviorSupport.player`, `MixedStrategy.player`, and
-  `MixedBehavior.player` now return a label (`str`) rather than a `Player` object.
-- `Game.players` now iterates player labels (`str`) rather than `Player` objects; indexing by
-  label is no longer supported (a label is already in hand once iterated) -- use `in` to test
-  membership.
-- `Game.append_move`, `Game.insert_move`, `Game.reveal`, `Game.relabel_strategies`, and
-  `Game.set_strategies` now take `player` as a label (`str`) rather than accepting a `Player`
-  object.
-- `Game.strategy_support_profile`'s `strategies` filter callable's `player` argument is now a
-  label (`str`) rather than a `Player` object.
+- `Infoset.actions`/`Event.actions`/`Node.actions`/`Sequence.actions` now return plain labels
+  (`str`) rather than `Action` objects, and `Node.prior_action`/`Node.own_prior_action` return a
+  `Branch` (a `(node, label)` pair) rather than an `Action`; `Game.behavior_support_profile`'s
+  `actions` filter callable is called accordingly, as `actions(node, action)` with `action` a
+  label.
 - Command-line tools are now implemented in `pygambit` rather than C++-based compiled programs.
   The `gambit-convert` utility has been removed.
 - Refreshed GUI icons and standardised dialog layout and formatting
@@ -152,9 +150,9 @@
 - Removed `Strategy.action`; use `Game.get_behavior(player, strategy)[infoset]` (or `.get`),
   already the documented fuller form of the same lookup.
 - Removed `Strategy`. Strategies are now identified purely by label (`str`), as returned by
-  `Player.strategies`; a `Strategy` object carried no information a label didn't already
-  carry, now that strategy labels are unique within a player.  `GameStrategyRep` in the C++
-  core is unaffected by this change (a separate, later piece of work).
+  `Game.get_strategies(player)`; a `Strategy` object carried no information a label didn't
+  already carry, now that strategy labels are unique within a player.  `GameStrategyRep` in the
+  C++ core is unaffected by this change (a separate, later piece of work).
 - Removed `Player.infosets` and `Game.infosets`; use `Game.get_infosets(player)` instead.
 - Removed `Game.actions`/`Player.actions`; the total count/collection of actions across a
   game or player is now most directly available by iterating `Game.get_infosets(player)` and
@@ -301,21 +299,11 @@
   probabilities as forming the nodes of the event with the required distribution.  (#1009)
 - `Game.add_action` and `Game.delete_action` have been removed; use `Game.set_move_actions`
   or `Game.set_event_actions`.  (#1040)
-- The C++ `Game` interface's `SetPlayer`, `SetInfoset`, and `LeaveInfoset` methods have been
-  removed; they were non-orthogonal conveniences over `MakeInfoset`, and by this point were used
-  only in support of the corresponding GUI actions, which now build the equivalent `MakeInfoset`
-  calls directly.  `Game::Reveal` is kept, as a composite operation genuinely useful in its own
-  right, but is now implemented once in C++ rather than duplicated in `pygambit` and the GUI.
-  (#999)
-- The C++ `Game` interface's `SetChanceProbs` method has been removed, along with the
-  stub overrides it forced on the strategic, AGG, and BAGG representations; it was subsumed by
-  `MakeEvent`, and by this point was used only in support of the GUI's "Edit Move" dialog, which
-  now builds the equivalent `MakeEvent` call directly.  (#999)
-- The C++ `Game` interface's `InsertAction`, `DeleteAction`, and `NormalizeChanceProbs` methods
-  have been removed; they were subsumed by `SetMoveActions`/`SetEventActions`, and by this point
-  were used only in support of `pygambit`'s `add_action`/`delete_action` and the GUI's "Insert
-  action" command, which now build the equivalent `SetMoveActions`/`SetEventActions` call
-  directly.  (#1040)
+- The corresponding C++ `Game` interface methods (`SetPlayer`, `SetInfoset`, `LeaveInfoset`,
+  `SetChanceProbs`, `InsertAction`, `DeleteAction`, `NormalizeChanceProbs`) have likewise been
+  removed, subsumed by `MakeInfoset`/`MakeEvent`/`SetMoveActions`/`SetEventActions`; `Game::Reveal`
+  is kept as a genuinely useful composite operation, now implemented once in C++ rather than
+  duplicated in `pygambit` and the GUI.  (#999, #1040)
 
 ## [16.7.0] - 2026-07-11
 

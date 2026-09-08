@@ -168,14 +168,14 @@ class MixedStrategyProfile:
     numbers, or floating-point numbers.  These may not be combined in the same mixed
     strategy profile.
 
+    .. versionchanged:: 16.1.0
+        Profiles are accessed as dict-like objects; indexing by integer player or strategy
+        indices is no longer supported.
+
     .. versionchanged:: 17.0.0
         Indexing (`__getitem__`/`__setitem__`) is by player label only, operating on a
         player's whole distribution at once; indexing directly by an individual strategy
         is no longer supported.
-
-    .. versionchanged:: 16.1.0
-        Profiles are accessed as dict-like objects; indexing by integer player or strategy
-        indices is no longer supported.
 
     See Also
     --------

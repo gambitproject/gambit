@@ -488,12 +488,12 @@ def liap_solve(
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
 
-        .. versionadded: 16.2.0
+        .. versionadded:: 16.2.0
 
     maxiter : int, default 1000
         Maximum number of iterations in function minimization.
 
-        .. versionadded: 16.2.0
+        .. versionadded:: 16.2.0
 
     nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
@@ -630,7 +630,7 @@ def simpdiv_solve(
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
 
-        .. versionadded: 16.2.0
+        .. versionadded:: 16.2.0
 
     refine : int, default 2
         This controls the rate at which the triangulation of the space of mixed strategy

@@ -31,9 +31,7 @@ class ActionSupport(_LabelSet):
     does not reflect later changes to the profile. The information set is identified by
     the history that was resolved to reach it, accessible via `history`.
 
-    .. versionchanged:: 17.0.0
-        `infoset` (an ``Infoset``) replaced by `history` (the ``History`` of the
-        node that was resolved to identify the information set).
+    .. versionadded:: 17.0.0
     """
     @staticmethod
     @cython.cfunc
@@ -57,6 +55,8 @@ class BehaviorSupport:
     An immutable snapshot taken from a ``BehaviorSupportProfile`` at retrieval time: it
     does not reflect later changes to the profile. The player is accessible via
     `player`.
+
+    .. versionadded:: 17.0.0
     """
     _player = cython.declare(str)
     _values = cython.declare(dict)
@@ -140,6 +140,8 @@ class BehaviorSupportProfile:
     """A set-like object representing a subset of the actions in an extensive game.
     A BehaviorSupportProfile always contains at least one action for each information
     set belonging to a personal player in the game.
+
+    .. versionadded:: 17.0.0
     """
     profile = cython.declare(shared_ptr[c_BehaviorSupportProfile])
 

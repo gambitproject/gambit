@@ -328,9 +328,6 @@ class MixedBehavior:
 
             Previously iterated over individual actions and their probabilities; use
             ``MixedAction``'s own iteration for that at a specific information set.
-
-        .. versionchanged:: 17.0.0
-
             Yields the History of the information set's canonical member (its first,
             in pre-order depth-first order) instead of an ``Infoset``.
 
@@ -754,8 +751,7 @@ class MixedBehaviorProfile:
         """Returns the expected payoff to each player conditional on play reaching each
         node, if all players play according to the profile, grouped by player.
 
-        .. versionchanged:: 17.0.0
-            Keyed by each node's History rather than a ``Node`` object.
+        .. versionadded:: 17.0.0
         """
         self._check_validity()
         return NodeValuesVector({
@@ -810,8 +806,7 @@ class MixedBehaviorProfile:
         """Returns the probability with which each node is reached, if all players
         play according to the profile.
 
-        .. versionchanged:: 17.0.0
-            Keyed by each node's History rather than a ``Node`` object.
+        .. versionadded:: 17.0.0
         """
         self._check_validity()
         return RealizProbVector({
@@ -883,13 +878,12 @@ class MixedBehaviorProfile:
         `event_probs`, for a chance node), so a `None` belief corresponds exactly to
         that reach probability being zero.
 
+        .. versionadded:: 17.0.0
+
         See Also
         --------
         MixedBehaviorProfile.infoset_probs
         MixedBehaviorProfile.event_probs
-
-        .. versionchanged:: 17.0.0
-            Keyed by each node's History rather than a ``Node`` object.
         """
         self._check_validity()
         return BeliefVector({
