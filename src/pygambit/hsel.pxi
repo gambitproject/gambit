@@ -278,9 +278,10 @@ class HistoryView:
     """The object a `.filter(callable)`/`.by(callable)` predicate, or
     `Game.behavior_support_profile`'s `actions` callback, actually receives.
     Supports indexing/slicing like a `History` -- so each element is a
-    `HistoryTransition`, not a bare action label -- plus limited game-aware
-    navigation (`.last_action(player)`) -- but never exposes the `Node`/game
-    it's privately backed by.  Not constructible directly.
+    `HistoryTransition`, not a bare action label -- plus `.actions` (the
+    plain label-tuple projection) and limited game-aware navigation
+    (`.last_action(player)`) -- but never exposes the `Node`/game it's
+    privately backed by.  Not constructible directly.
 
     .. versionadded:: 17.0.0
     """
@@ -303,6 +304,12 @@ class HistoryView:
 
     def __getitem__(self, index: typing.Any) -> typing.Any:
         return self._history[index]
+
+    @property
+    def actions(self) -> tuple[str, ...]:
+        """The plain tuple of action labels, dropping the player/state context
+        each step also carries."""
+        return self._history.actions
 
     def last_action(self, player: str) -> str | None:
         """The label of the last action `player` took on the path to this
