@@ -48,7 +48,7 @@ const wxColour kNewLabelColour(0, 102, 0);      // new action: bold, dark green
 const wxColour kRenamedLabelColour(0, 51, 204); // renamed action: italic, strong blue
 } // namespace
 
-// An editable, variable-length list of the actions at an information set, colour-coded like
+// An editable, variable-length list of the actions at an infoset, colour-coded like
 // a source-control diff (added/renamed/deleted).
 //
 // Each row's *stable label* (its label before this dialog touched it, or a placeholder for a
@@ -459,7 +459,8 @@ wxString ActionPanel::ValidateLabels()
 
     if (invalid && message.empty()) {
       message = value.empty() ? _("Action labels cannot be empty.")
-                              : _("Action labels must be unique within the information set.");
+                : m_isChance  ? _("Action labels must be unique within the event.")
+                              : _("Action labels must be unique within the infoset.");
     }
   }
   return message;
@@ -528,8 +529,10 @@ EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const std::shared_ptr<GameDoc
   }
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(m_headerPanel, wxID_STATIC, _("Information set label")), 0,
-                  wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(7));
+  labelSizer->Add(new wxStaticText(m_headerPanel, wxID_STATIC,
+                                   p_infoset->IsChanceInfoset() ? _("Event label")
+                                                                : _("Information set label")),
+                  0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(7));
   m_infosetLabel =
       new LabelTextCtrl(m_headerPanel, wxID_ANY, wxString::FromUTF8(p_infoset->GetLabel()));
   m_infosetLabelDefaultBg = m_infosetLabel->GetBackgroundColour();
@@ -606,7 +609,9 @@ void EditMoveDialog::UpdateValidation()
   m_infosetLabel->SetBackgroundColour(infosetValid ? m_infosetLabelDefaultBg : kInvalidLabelBg);
   m_infosetLabel->Refresh();
   if (!infosetValid) {
-    message = _("Information set label must be unique for the player.");
+    message = m_infoset->IsChanceInfoset()
+                  ? _("Event label must be unique.")
+                  : _("Information set label must be unique for the player.");
   }
 
   const wxString actionMessage = m_actionPanel->ValidateLabels();

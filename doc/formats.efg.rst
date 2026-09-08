@@ -105,18 +105,21 @@ generates these numbers as 1, 2, etc. as they appear first in the
 file, but there are no requirements other than uniqueness. The same
 integer may be used to specify information sets for different players;
 this is not ambiguous since the player number appears as well.
+The chance player's events are numbered in the same way, uniquely among
+the events; since chance nodes carry no player number, an event number
+cannot be confused with an information set number.
 Finally, outcomes are also arbitrarily numbered in the file format in
 the same way in which information sets are, except for the special
 number 0 which is reserved to indicate the null outcome.
 Outcome 0 must not have a name or payoffs specified.
 
-Information sets and outcomes may (and frequently will) appear
+Information sets, events, and outcomes may (and frequently will) appear
 multiple times within a game. By convention, the second and subsequent
-times an information set or outcome appears, the file may omit the
-descriptive information for that information set or outcome.
+times an information set, event, or outcome appears, the file may omit the
+descriptive information for it.
 Alternatively, the file may specify the descriptive information again;
-however, it must precisely match the original declaration of the
-information set or outcome. Any mismatch in repeated declarations
+however, it must precisely match the original declaration.
+Any mismatch in repeated declarations
 is an error, and the file is not valid.
 If any part of the description is omitted, the whole description must be omitted.
 
@@ -138,8 +141,8 @@ with the character c . Following this, in order, are
 
 
 + a text string, giving the name of the node
-+ a positive integer specifying the information set number
-+ (optional) the name of the information set and a list of actions at the information set with their
++ a positive integer specifying the event number
++ (optional) the name of the event and a list of actions at the event with their
   corresponding probabilities
 + a nonnegative integer specifying the outcome
 + (optional) the name of the outcome and the payoffs to each player for the outcome

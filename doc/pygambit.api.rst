@@ -234,6 +234,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.node_values
    MixedBehaviorProfile.realiz_probs
    MixedBehaviorProfile.infoset_probs
+   MixedBehaviorProfile.event_probs
    MixedBehaviorProfile.beliefs
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
@@ -255,6 +256,7 @@ Probability distributions over behavior
    InfosetValueVector
    InfosetRegretVector
    InfosetProbVector
+   EventProbVector
    ActionValueVector
    ActionRegretVector
    ActionValuesVector

@@ -1163,6 +1163,7 @@ wxString AppendMovePopup::ValidateLabels()
 
     if (invalid && message.empty()) {
       message = value.empty() ? _("Action labels cannot be empty.")
+                : m_isChance  ? _("Action labels must be unique within the event.")
                               : _("Action labels must be unique within the information set.");
     }
   }
@@ -1509,11 +1510,13 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
     m_moveHeading->SetLabel(wxString::FromUTF8(mover->GetLabel()) + _(" to move"));
     m_nodeProbText->SetLabel(_("Pr(Node reached): ") +
                              wxString::FromUTF8(profiles.GetRealizProb(p_node)));
-    m_infosetProbText->SetLabel(_("Pr(Infoset reached): ") +
-                                wxString::FromUTF8(profiles.GetInfosetProb(p_node)));
+    m_infosetProbText->SetLabel(
+        (mover->IsChance() ? _("Pr(Event reached): ") : _("Pr(Information set reached): ")) +
+        wxString::FromUTF8(profiles.GetInfosetProb(p_node)));
     m_beliefText->SetLabel(_("Belief: ") + wxString::FromUTF8(profiles.GetBeliefProb(p_node)));
-    m_infosetValueText->SetLabel(_("Payoff | Infoset: ") +
-                                 wxString::FromUTF8(profiles.GetInfosetValue(p_node)));
+    m_infosetValueText->SetLabel(
+        (mover->IsChance() ? _("Payoff | Event: ") : _("Payoff | Information set: ")) +
+        wxString::FromUTF8(profiles.GetInfosetValue(p_node)));
   }
   m_contentPanel->GetSizer()->Show(m_moveSizer, showMove, true);
 

@@ -25,8 +25,8 @@ from cython.operator cimport dereference as deref
 
 @cython.cclass
 class InfosetIndexedVector(_LabeledVector):
-    """A read-only mapping from an information set to a computed value, one entry per
-    information set.
+    """A read-only mapping from an information set or event to a computed value, one
+    entry per information set or event.
 
     Since information sets don't reliably have unique persistent labels, this is indexed
     by a `Selector` (an `H`-built expression) resolving to a single node belonging to the
@@ -34,10 +34,13 @@ class InfosetIndexedVector(_LabeledVector):
     before lookup, so any member node is an equally valid key -- rather than by a label,
     unlike `NodeIndexedVector`.
 
+    Each subclass holds entries of one kind only, and overrides ``_label_kind`` so that
+    a failed lookup reports the kind it actually contains.
+
     .. versionchanged:: 17.0.0
         Indexed by a `Selector` rather than a `Node` object.
     """
-    _label_kind = "information set"
+    _label_kind = "information set or event"
     _game = cython.declare(Game)
 
     def __init__(self, game: Game, values: collections.abc.Mapping) -> None:
@@ -69,22 +72,33 @@ class InfosetIndexedVector(_LabeledVector):
 @cython.cclass
 class InfosetValueVector(InfosetIndexedVector):
     """The expected payoff to the player conditional on reaching each information set,
-    one entry per (non-chance) information set.
+    one entry per information set.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class InfosetRegretVector(InfosetIndexedVector):
     """The regret of playing the mixed action at each information set, one entry per
-    information set.
+    information set.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class InfosetProbVector(InfosetIndexedVector):
     """The probability with which each information set is reached, one entry per
-    information set.
+    information set.  Chance events are excluded; see `EventProbVector`.
     """
+    _label_kind = "information set"
+
+
+@cython.cclass
+class EventProbVector(InfosetIndexedVector):
+    """The probability with which each chance event is reached, one entry per event.
+    Personal players' information sets are excluded; see `InfosetProbVector`.
+    """
+    _label_kind = "event"
 
 
 @cython.cclass
@@ -103,15 +117,17 @@ class ActionRegretVector(StrategyIndexedVector):
 class ActionValuesVector(InfosetIndexedVector):
     """The expected payoff of playing each action, conditional on reaching it, grouped
     by information set; each value is an `ActionValueVector` for that information set's
-    actions.
+    actions.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class ActionRegretsVector(InfosetIndexedVector):
     """The regret of playing each action, grouped by information set; each value is an
-    `ActionValueVector` for that information set's actions.
+    `ActionValueVector` for that information set's actions.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
@@ -135,8 +151,8 @@ class NodeValueVector(NodeIndexedVector):
 
 @cython.cclass
 class NodeValuesVector(PlayerIndexedVector):
-    """The expected payoff to each (non-chance) player conditional on reaching each
-    node, grouped by player; each value is a `NodeValueVector` for that player.
+    """The expected payoff to each personal player conditional on reaching each node,
+    grouped by player; each value is a `NodeValueVector` for that player.
     """
 
 
@@ -461,19 +477,18 @@ class MixedBehaviorProfile:
             f"profile index must be str or Selector, not {index.__class__.__name__}"
         )
 
-    def _all_infosets(self) -> typing.Iterator[Node]:
-        """Iterates over a representative node of every information set and event in
-        the game."""
-        for player in self.game.players:
-            yield from self.game._get_infosets(player)
-        yield from self.game._get_events()
-
     def _personal_infosets(self) -> typing.Iterator[Node]:
         """Iterates over a representative node of every information set in the game
         belonging to a personal player, excluding the chance player's.
         """
         for player in self.game.players:
             yield from self.game._get_infosets(player)
+
+    def _events(self) -> typing.Iterator[Node]:
+        """Iterates over a representative node of every event of the chance player in
+        the game.
+        """
+        yield from self.game._get_events()
 
     # The public API above is implemented once here and dispatches to the hooks below,
     # each of which is implemented by a concrete dtype-specific subclass
@@ -823,14 +838,37 @@ class MixedBehaviorProfile:
         self._check_validity()
         return InfosetProbVector(self.game, {
             _canonical_history(node): self._infoset_prob(node)
-            for node in self._all_infosets()
+            for node in self._personal_infosets()
+        })
+
+    @property
+    def event_probs(self) -> EventProbVector:
+        """Returns the probability with which each chance event is reached, if all
+        players play according to the profile.
+
+        This is the counterpart of `infoset_probs` for the chance player: the
+        probability that the event is reached *at least once* under the profile, i.e.
+        the realization probability of its upper frontier.  For an event with a single
+        member node, which is the usual case, this is that node's realization
+        probability.
+
+        .. versionadded:: 17.0.0
+
+        See Also
+        --------
+        MixedBehaviorProfile.infoset_probs
+        MixedBehaviorProfile.beliefs
+        """
+        self._check_validity()
+        return EventProbVector(self.game, {
+            _canonical_history(node): self._infoset_prob(node) for node in self._events()
         })
 
     @property
     def beliefs(self) -> BeliefVector:
         """Returns, for each node, the conditional probability that the node is
-        reached, given that its information set is reached, if all players play
-        according to the profile.
+        reached, given that its information set (or, at a chance node, its event) is
+        reached, if all players play according to the profile.
 
         The conditioning event is that the information set is reached at least once,
         so beliefs are normalized by the upper-frontier probability returned by
@@ -841,12 +879,14 @@ class MixedBehaviorProfile:
 
         If a node's information set is reached with zero probability under the
         profile, the belief is not well-defined and the corresponding entry is `None`.
-        This is the same reach probability returned by `infoset_probs`, so a `None`
-        belief corresponds exactly to `infoset_probs` being zero there.
+        This is the same reach probability returned by `infoset_probs` (or by
+        `event_probs`, for a chance node), so a `None` belief corresponds exactly to
+        that reach probability being zero.
 
         See Also
         --------
         MixedBehaviorProfile.infoset_probs
+        MixedBehaviorProfile.event_probs
 
         .. versionchanged:: 17.0.0
             Keyed by each node's History rather than a ``Node`` object.
@@ -867,7 +907,7 @@ class MixedBehaviorProfile:
         always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded.
+        events are excluded.
 
         See Also
         --------
@@ -894,7 +934,7 @@ class MixedBehaviorProfile:
         By convention, the regret is always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded.
+        events are excluded.
 
         See Also
         --------

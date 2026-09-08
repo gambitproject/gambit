@@ -747,12 +747,31 @@ def test_absent_minded_infoset_prob(
 
 @pytest.mark.parametrize("rational_flag", [False, True])
 def test_nature_rooted_game_root_reached_with_certainty(rational_flag: bool):
-    """The chance root infoset is reached with probability one."""
+    """The chance event at the root is reached with probability one."""
     game = gbt.catalog.load("journals/geb/gilboa1997/fig2")
     profile = game.mixed_behavior_profile(rational=rational_flag)
     one = gbt.Rational(1) if rational_flag else 1.0
     assert profile.realiz_probs[()] == one
-    assert profile.infoset_probs[gbt.H.path()] == one
+    assert profile.event_probs[gbt.H.path()] == one
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+def test_infoset_probs_and_event_probs_partition_by_kind(rational_flag: bool):
+    """`infoset_probs` covers exactly the personal players' information sets and
+    `event_probs` exactly the chance player's events; each rejects the other kind."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    infoset_probs = profile.infoset_probs
+    event_probs = profile.event_probs
+    assert isinstance(event_probs, gbt.EventProbVector)
+    assert len(list(infoset_probs)) == len(games.all_infosets(game))
+    assert len(list(event_probs)) == len(game.get_events())
+    (event_node,) = game.get_events()
+    personal_node = games.all_infosets(game)[0]
+    with pytest.raises(KeyError, match="no information set for"):
+        infoset_probs[gbt.H.path(*event_node.actions)]
+    with pytest.raises(KeyError, match="no event for"):
+        event_probs[gbt.H.path(*personal_node.actions)]
 
 
 @pytest.mark.parametrize(
@@ -892,9 +911,9 @@ def test_agent_max_regret_consistency(game: gbt.Game, rational_flag: bool):
 )
 def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     """The vectorized payoffs/node_values/infoset_values/infoset_regrets/action_values/
-    action_regrets/realiz_probs/infoset_probs/beliefs properties are mathematically
-    consistent with each other (regret is the gap to the best response), and carry their
-    own type identity.
+    action_regrets/realiz_probs/infoset_probs/event_probs/beliefs properties are
+    mathematically consistent with each other (regret is the gap to the best response),
+    and carry their own type identity.
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
 
@@ -906,6 +925,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     action_regrets = profile.action_regrets
     realiz_probs = profile.realiz_probs
     infoset_probs = profile.infoset_probs
+    event_probs = profile.event_probs
     beliefs = profile.beliefs
 
     assert isinstance(payoffs, gbt.PayoffVector)
@@ -917,6 +937,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     assert isinstance(action_regrets, gbt.ActionRegretsVector)
     assert isinstance(realiz_probs, gbt.RealizProbVector)
     assert isinstance(infoset_probs, gbt.InfosetProbVector)
+    assert isinstance(event_probs, gbt.EventProbVector)
     assert isinstance(beliefs, gbt.BeliefVector)
 
     for player in game.players:
@@ -943,7 +964,12 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     for history in game.get_histories(gbt.H.after()):
         if not game.get_actions(gbt.H.path(*history.actions)):
             continue
-        if infoset_probs[gbt.H.path(*history.actions)] == 0:
+        selector = gbt.H.path(*history.actions)
+        node = games.node_at_history(game, history.actions)
+        reach_prob = (
+            infoset_probs[selector] if node.player in game.players else event_probs[selector]
+        )
+        if reach_prob == 0:
             assert beliefs[history] is None
         else:
             assert beliefs[history] is not None

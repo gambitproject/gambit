@@ -181,7 +181,8 @@ also names the player who moves there and shows the probability of
 reaching the node, the probability of reaching its information set, that
 player's belief about being at this particular node conditional on having
 reached the information set, and the information set's value to the
-player who moves there.
+player who moves there. For a node belonging to the chance player, the
+popup refers to its event instead of an information set throughout.
 
 The computed profiles can also be viewed in the reduced strategic
 game. Clicking on the strategic game icon changes the view to the
