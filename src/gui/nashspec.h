@@ -27,8 +27,11 @@
 #include <variant>
 
 #include "core/cancel.h"
-#include "solvers/nash.h"
+#include "core/matrix.h"
 #include "core/rational.h"
+#include "core/vector.h"
+#include "solvers/nash.h"
+#include "solvers/path/path.h"
 
 namespace Gambit::GUI {
 
@@ -94,6 +97,16 @@ struct IPANashSpec {
   std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
+struct HPNashSpec {
+  // Unlike GNM/IPA, a single prior yields at most one equilibrium (no internal
+  // path-tracing can surface more), so this defaults high, like LiapNashSpec's
+  // startingPoints, rather than to 1.
+  int priors{10};
+  double maxRegret{1.0e-8};
+
+  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+};
+
 struct LPNashSpec {
   std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
 };
@@ -115,7 +128,7 @@ struct LiapNashSpec {
 
 struct LogitNashSpec {
   double maxRegret{1.0e-8};
-  double omega{1.0};
+  PathTracer::TraceDirection direction{PathTracer::TraceDirection::Positive};
   double firstStep{0.03};
   double maxAcceleration{1.1};
 
@@ -132,9 +145,9 @@ struct SimpdivNashSpec {
   std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
 };
 
-using NashMethodSpec =
-    std::variant<EnumPureNashSpec, EnumMixedNashSpec, EnumPolyNashSpec, GNMNashSpec, IPANashSpec,
-                 LPNashSpec, LCPNashSpec, LiapNashSpec, LogitNashSpec, SimpdivNashSpec>;
+using NashMethodSpec = std::variant<EnumPureNashSpec, EnumMixedNashSpec, EnumPolyNashSpec,
+                                    GNMNashSpec, HPNashSpec, IPANashSpec, LPNashSpec, LCPNashSpec,
+                                    LiapNashSpec, LogitNashSpec, SimpdivNashSpec>;
 
 struct NashComputationSpec {
   NashRepresentation representation;
