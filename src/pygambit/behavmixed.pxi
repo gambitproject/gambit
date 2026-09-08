@@ -32,13 +32,12 @@ class InfosetIndexedVector(_LabeledVector):
     by a `Selector` (an `H`-built expression) resolving to a single node belonging to the
     information set -- resolved to the History of the information set's canonical member
     before lookup, so any member node is an equally valid key -- rather than by a label,
-    unlike `NodeIndexedVector`.
+    unlike `HistoryIndexedVector`.
 
     Each subclass holds entries of one kind only, and overrides ``_label_kind`` so that
     a failed lookup reports the kind it actually contains.
 
-    .. versionchanged:: 17.0.0
-        Indexed by a `Selector` rather than a `Node` object.
+    .. versionadded:: 17.0.0
     """
     _label_kind = "information set or event"
     _game = cython.declare(Game)
@@ -131,28 +130,28 @@ class ActionRegretsVector(InfosetIndexedVector):
 
 
 @cython.cclass
-class RealizProbVector(NodeIndexedVector):
+class RealizProbVector(HistoryIndexedVector):
     """The probability with which each node is reached, one entry per node."""
 
 
 @cython.cclass
-class BeliefVector(NodeIndexedVector):
+class BeliefVector(HistoryIndexedVector):
     """The conditional probability that each node is reached, given that its
     information set is reached, one entry per node.
     """
 
 
 @cython.cclass
-class NodeValueVector(NodeIndexedVector):
+class HistoryValueVector(HistoryIndexedVector):
     """The expected payoff to one player conditional on reaching each node, one entry
     per node.
     """
 
 
 @cython.cclass
-class NodeValuesVector(PlayerIndexedVector):
+class HistoryValuesVector(PlayerIndexedVector):
     """The expected payoff to each personal player conditional on reaching each node,
-    grouped by player; each value is a `NodeValueVector` for that player.
+    grouped by player; each value is a `HistoryValueVector` for that player.
     """
 
 
@@ -747,15 +746,15 @@ class MixedBehaviorProfile:
         return PayoffVector({p: self._payoff(p) for p in self.game.players})
 
     @property
-    def node_values(self) -> NodeValuesVector:
+    def history_values(self) -> HistoryValuesVector:
         """Returns the expected payoff to each player conditional on play reaching each
         node, if all players play according to the profile, grouped by player.
 
         .. versionadded:: 17.0.0
         """
         self._check_validity()
-        return NodeValuesVector({
-            p: NodeValueVector({
+        return HistoryValuesVector({
+            p: HistoryValueVector({
                 _history_of(n): self._node_value(p, n) for n in self.game._all_nodes()
             })
             for p in self.game.players

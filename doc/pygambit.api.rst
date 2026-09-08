@@ -162,9 +162,9 @@ Computed quantities
    StrategyIndexedVector.__iter__
    StrategyIndexedVector.__getitem__
 
-   NodeIndexedVector
-   NodeIndexedVector.__iter__
-   NodeIndexedVector.__getitem__
+   HistoryIndexedVector
+   HistoryIndexedVector.__iter__
+   HistoryIndexedVector.__getitem__
 
    InfosetIndexedVector
    InfosetIndexedVector.__iter__
@@ -223,7 +223,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.action_regrets
    MixedBehaviorProfile.infoset_values
    MixedBehaviorProfile.infoset_regrets
-   MixedBehaviorProfile.node_values
+   MixedBehaviorProfile.history_values
    MixedBehaviorProfile.realiz_probs
    MixedBehaviorProfile.infoset_probs
    MixedBehaviorProfile.event_probs
@@ -255,8 +255,8 @@ Probability distributions over behavior
    ActionRegretsVector
    RealizProbVector
    BeliefVector
-   NodeValueVector
-   NodeValuesVector
+   HistoryValueVector
+   HistoryValuesVector
 
 
 Representation of supports
