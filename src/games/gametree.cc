@@ -959,7 +959,7 @@ bool GameTreeRep::IsConstSum() const
     static void OnVisit(GameNode, int) {}
   };
 
-  ConstSumCallback callback{this};
+  ConstSumCallback callback{this, {}};
   WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
           TraversalOrder::Postorder, callback);
   return callback.m_isConstSum;
@@ -1000,7 +1000,7 @@ Rational GameTreeRep::AggregateSubtreePayoff(const GamePlayer &p_player,
     static void OnVisit(GameNode, int) {}
   };
 
-  AggregatePayoffCallback callback{p_player, std::move(p_aggregator)};
+  AggregatePayoffCallback callback{p_player, std::move(p_aggregator), {}};
 
   WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
           TraversalOrder::Postorder, callback);
@@ -1546,7 +1546,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
     SpanVisitor span_visitor{disc, hull};
     WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-    BridgeVisitor bridge_visitor{disc, hull, sd.m_subgamePostorder};
+    BridgeVisitor bridge_visitor{disc, hull, sd.m_subgamePostorder, {}};
     WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 
     // Phase 3: Build subgame tree with subgame differences
@@ -1599,8 +1599,8 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
     const std::unordered_set<GameNodeRep *> subgame_root_set(sd.m_subgamePostorder.begin(),
                                                              sd.m_subgamePostorder.end());
 
-    SubgameVisitor subgame_visitor{subgame_root_set, sd.m_subgameByRoot,
-                                   const_cast<GameTreeRep *>(this)};
+    SubgameVisitor subgame_visitor{
+        subgame_root_set, sd.m_subgameByRoot, const_cast<GameTreeRep *>(this), {}, {}};
     WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
     return sd;
   });
