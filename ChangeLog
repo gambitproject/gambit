@@ -1,6 +1,18 @@
 ## [17.0.0-beta.1] - unreleased
 
 ### Added
+- Added `History` and `HistoryTransition`, formalizing a node's identity as the sequence of
+  actions taken from the root to reach it, with each step's acting player and
+  information-set/event context; a `History` identifies an information set or event via its
+  canonical (first-encountered) member.
+- Added `Selector`, `GroupedSelector`, and `H`, a small expression language (`H.path(...)`,
+  `.by(...)`, `.after(...)`, `.plays`, `.filter(...)`, `.with_recall(...)`, and similar) for
+  selecting histories/nodes in an extensive game; this is now how every `Game` method that
+  queries or mutates the tree identifies its target(s).
+- Added `HistoryView`, the read-only view of a history passed to filter callables (an
+  `H`-expression's own `.filter`/`.by` predicate, or `Game.behavior_support_profile`'s
+  `actions` callback), exposing `.actions`, `.members`, and `.last_action(player)` without
+  exposing the underlying game or node.
 - Added the Herings-Peeters homotopy method to compute equilibria, as `hp_solve` in `pygambit`
   and `gambit-hp` as a command line tool; also available as a user-selectable method in
   the graphical interface.
@@ -32,6 +44,20 @@
   into a game's internal outcome list any longer.  `Game.outcomes` has been removed; use
   `Game.get_outcomes()`, `Game.get_outcome_payoffs()`, `Game.set_outcome_payoffs()`, and
   `Game.relabel_outcomes()` instead.
+- Removed `Node` as a public-facing class.  Every method that returned or accepted a `Node`
+  in earlier 17.0.0 pre-releases -- `Game.get_infosets`, `Game.get_events`, and the
+  tree-querying/-mutation methods added since alpha.1 -- now returns/accepts a `History` or
+  `Selector`/`GroupedSelector` instead (see Added, above).
+- Removed `Infoset` and `Event`, which alpha.3 (below) had turned into lazy, node-anchored
+  views; an information set or event is now identified purely by the `History` of one of its
+  members.
+- Removed `Branch`, added in alpha.3 (below) as a `(node, label)` pair replacing `Action`;
+  the equivalent is now a `HistoryTransition` within a `History`.
+- Removed `Subgame`.  `Game.subgames` and `Game.minimal_subgame` are renamed
+  `Game.get_subgame_roots` and `Game.get_minimal_subgame`, and now return the `History` of a
+  subgame's root rather than a `Subgame` object.
+- Removed `Sequence`.  A player's sequence at an information set is now identified by the
+  `History` of one of the information set's members.
 
 ### Fixed
 - `GameTableRep`'s constructor (used by `Game.from_arrays`/`Game.from_dict`, which build a
@@ -85,7 +111,7 @@
 ### Changed
 - Entities are increasingly identified by their `str` label rather than by dedicated proxy
   objects, continuing the shift completed below for `Player`, `Strategy`, and `Action`.
-  `Node.player`, `Infoset.player`/`Event.player`/`Sequence.player`,
+  `Node.player`, `Infoset.player`/`Event.player`,
   `StrategySupport.player`/`BehaviorSupport.player`, and
   `MixedStrategy.player`/`MixedBehavior.player` now return a label (`str`), or `None` where
   applicable, rather than a `Player` object; `Game.players` iterates labels directly (indexing
@@ -102,7 +128,7 @@
   `Game.append_infoset`, `Game.insert_infoset`, `Game.set_move_actions`, `Game.set_event_actions`,
   `Game.relabel_actions`, `Game.reveal`, and `Game.minimal_subgame` now identify an information
   set or event via a member `Node` (or its label) rather than an `Infoset` object.
-- `Infoset.actions`/`Event.actions`/`Node.actions`/`Sequence.actions` now return plain labels
+- `Infoset.actions`/`Event.actions`/`Node.actions` now return plain labels
   (`str`) rather than `Action` objects, and `Node.prior_action`/`Node.own_prior_action` return a
   `Branch` (a `(node, label)` pair) rather than an `Action`; `Game.behavior_support_profile`'s
   `actions` filter callable is called accordingly, as `actions(node, action)` with `action` a
