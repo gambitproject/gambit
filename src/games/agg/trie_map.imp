@@ -124,14 +124,12 @@ void trie_map<V>::multiply(const trie_map<V> &t1, const trie_map<V> &t2, size_t 
   static size_t i;
   static std::pair<std::vector<int>, V> v;
   const_iterator p1, p2;
-  // assert(this!=&t1 && this != &t2);
   v.first.resize(keylen);
   reset();
   for (p1 = t1.begin(); p1 != t1.end(); ++p1) {
     if ((*p1).second > static_cast<V>(0)) {
       for (p2 = t2.begin(); p2 != t2.end(); ++p2) {
         if ((*p2).second > static_cast<V>(0)) {
-          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
@@ -150,7 +148,8 @@ void trie_map<V>::multiply(const trie_map<V> &other, size_t keylen, std::vector<
   static size_t i;
 
   if (&other == this) {
-    std::runtime_error("Error: (in-place) multiply: other should not be the same object as self");
+    throw std::runtime_error(
+        "Error: (in-place) multiply: other should not be the same object as self");
   }
   std::list<typename trie_map<V>::value_type> data2;
   data2 = data;
@@ -195,13 +194,11 @@ void trie_map<V>::square(trie_map<V> &dest, size_t keylen, std::vector<projtype>
 {
   static std::pair<std::vector<int>, V> v;
   v.first.resize(keylen);
-  // assert(this!=&dest);
   dest.reset();
   for (auto p1 = begin(); p1 != end(); ++p1) {
     if ((*p1).second > static_cast<V>(0)) {
       for (auto p2 = p1; p2 != end(); ++p2) {
         if ((*p2).second > static_cast<V>(0)) {
-          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (size_t i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
@@ -228,7 +225,6 @@ template <class V> void trie_map<V>::square(size_t keylen, std::vector<projtype>
     if ((*p1).second > static_cast<V>(0)) {
       for (p2 = p1; p2 != data2.end(); ++p2) {
         if ((*p2).second > static_cast<V>(0)) {
-          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (size_t i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
@@ -247,7 +243,6 @@ template <class V>
 void trie_map<V>::power(size_t p, trie_map<V> &dest, trie_map<V> &scratch, size_t keylen,
                         std::vector<projtype> &f)
 {
-  // assert(p>0 && this!=&dest );
   if (p == 1) {
     dest = *this;
     return;
@@ -301,7 +296,6 @@ V trie_map<V>::inner_prod(const std::vector<int> &x, size_t keylen, std::vector<
   for (auto p = begin(); p != end(); ++p) {
     if ((*p).second > static_cast<V>(0)) {
       value_type y = *p;
-      // assert(y.first.size()==keylen);
       for (size_t i = 0; i < keylen; ++i) {
         y.first[i] = (*(f[i]))(y.first[i], x[i]);
       }
@@ -435,7 +429,6 @@ template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> 
     ptr = (*ptr)[conf[i]];
   }
   ptr->val->second += y;
-  // assert(ptr->val->second>-THRESH);
   if (static_cast<double>(ptr->val->second) <= -th) {
     std::stringstream str;
     str << "division (pivot=" << denom[pivot] << ") WARNING: discarding " << ptr->val->second
@@ -453,7 +446,6 @@ template <class V> void trie_map<V>::div_helper_mul::operator()(iterator p)
     return;
   }
   const size_t keylen = p->first.size();
-  // assert(keylen==denom.size());
   V null_prob(static_cast<V>(1) - denom[pivot]);
   // V th(THRESH);
   for (size_t i = pivot + 1; i < keylen; ++i) {
