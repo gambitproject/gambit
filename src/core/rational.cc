@@ -160,7 +160,7 @@ Rational::Rational(double x) : num(0), den(1)
       mantissa *= width;
       mantissa = modf(mantissa, &intpart);
       num <<= shift;
-      num += (long)intpart;
+      num += static_cast<long>(intpart);
       exponent -= shift;
     }
     if (exponent > 0) {
@@ -306,7 +306,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
   }
   while (ch >= '0' && ch <= '9') {
     num *= 10;
-    num += (int)(ch - '0');
+    num += (ch - '0');
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
@@ -321,7 +321,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
     }
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
-      denom += (int)(ch - '0');
+      denom += (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
         ch = ' ';
@@ -337,7 +337,7 @@ std::istream &operator>>(std::istream &f, Rational &y)
     while (ch >= '0' && ch <= '9') {
       denom *= 10;
       num *= 10;
-      num += (int)(ch - '0');
+      num += (ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
         ch = ' ';
@@ -529,7 +529,7 @@ template <> Rational lexical_cast(const std::string &f)
 
   while (ch >= '0' && ch <= '9' && index <= length) {
     num *= 10;
-    num += (int)(ch - '0');
+    num += (ch - '0');
     ch = f[index++];
   }
 
@@ -538,7 +538,7 @@ template <> Rational lexical_cast(const std::string &f)
     ch = f[index++];
     while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
-      denom += (int)(ch - '0');
+      denom += (ch - '0');
       ch = f[index++];
     }
   }
@@ -548,7 +548,7 @@ template <> Rational lexical_cast(const std::string &f)
     while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
       num *= 10;
-      num += (int)(ch - '0');
+      num += (ch - '0');
       ch = f[index++];
     }
 
@@ -562,7 +562,7 @@ template <> Rational lexical_cast(const std::string &f)
       }
       while (ch >= '0' && ch <= '9' && index <= length) {
         exponent *= 10;
-        exponent += (int)(ch - '0');
+        exponent += (ch - '0');
         ch = f[index++];
       }
       if (exponent * expsign > 0) {
@@ -589,7 +589,7 @@ template <> Rational lexical_cast(const std::string &f)
     }
     while (ch >= '0' && ch <= '9' && index <= length) {
       exponent *= 10;
-      exponent += (int)(ch - '0');
+      exponent += (ch - '0');
       ch = f[index++];
     }
     if (exponent * expsign > 0) {

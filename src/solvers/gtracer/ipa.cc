@@ -245,7 +245,7 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
   for (unsigned int iter = 1; iter <= maxiter; iter++) {
     p_cancel.Check();
     A.payoffMatrix(DG, sh, 0.0);
-    DG /= (double)(N - 1); // find the Jacobian of the approximating bimatrix game
+    DG /= (N - 1); // find the Jacobian of the approximating bimatrix game
 
     InitialiseLHTableau(T, A, DG, g);
 

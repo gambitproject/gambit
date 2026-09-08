@@ -219,7 +219,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       throw std::runtime_error("Error in game file: expected integer for type of function node #" +
                                std::to_string(i));
     }
-    projTypes[i] = make_proj_func((TypeEnum)pt, in, S, P);
+    projTypes[i] = make_proj_func(static_cast<TypeEnum>(pt), in, S, P);
   }
 
   vector<vector<ConfigDistribution<double>>> projS;
@@ -673,7 +673,7 @@ double AGG::getSymMixedPayoff(StrategyProfile<double> &s)
   }
 
   for (int node = 0; node < numActionNodes; ++node) {
-    if (s[node] > (double)0.0) {
+    if (s[node] > 0.0) {
       result += s[node] * getSymMixedPayoff(node, s);
     }
   }
@@ -715,12 +715,12 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
     if (neighbors[node][i] == node) {
       self = i;
     }
-    if (s[neighbors[node][i]] > (double)0) {
+    if (s[neighbors[node][i]] > 0) {
       support.push_back(i);
       null_prob -= s[neighbors[node][i]];
     }
   }
-  if (numNei < numActionNodes && null_prob > (double)0) {
+  if (numNei < numActionNodes && null_prob > 0) {
     support.push_back(-1);
   }
 
@@ -753,7 +753,7 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
     const double i_prob = (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
     const double d_prob = (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
     assert(i_prob > (double)0 && d_prob > (double)0);
-    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
+    prob *= (gc.get().at(gc.d) + 1) * i_prob / gc.get().at(gc.i) / d_prob;
 
   } // end while
 
@@ -785,7 +785,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     m_state.projectedStrat[node][player].reset();
     if (numPl > 0) {
       for (int j = 0; j < actions[player]; j++) {
-        if (s[j] > (double)0.0) {
+        if (s[j] > 0.0) {
           m_state.projectedStrat[node][player] += make_pair(projection[node][player][j], s[j]);
         }
       }
@@ -833,12 +833,12 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     }
 
     const int a = node2Action.at(neighbors[node][i]).at(p);
-    if (a >= 0 && s[a] > (double)0) {
+    if (a >= 0 && s[a] > 0) {
       support.push_back(i);
       null_prob -= s[a];
     }
   }
-  if (null_prob > (double)0) {
+  if (null_prob > 0) {
     support.push_back(-1);
   }
 
@@ -880,7 +880,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     const double d_prob =
         (support.at(gc.d) != -1) ? s[node2Action[neighbors[node][support[gc.d]]][p]] : null_prob;
     assert(i_prob > (double)0 && d_prob > (double)0);
-    prob *= ((double)(gc.get().at(gc.d) + 1)) * i_prob / (double)(gc.get().at(gc.i)) / d_prob;
+    prob *= (gc.get().at(gc.d) + 1) * i_prob / gc.get().at(gc.i) / d_prob;
 
   } // end while
 }
@@ -889,8 +889,8 @@ double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile<double>> 
 {
   double result = 0.0;
 
-  for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[playerClass][act] > (double)0.0) {
+  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+    if (s[playerClass][act] > 0.0) {
 
       result += s[playerClass][act] * getKSymMixedPayoff(playerClass, act, s);
     }
@@ -902,8 +902,8 @@ double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile<double> &s)
 {
   double result = 0.0;
 
-  for (int act = 0; act < (int)uniqueActionSets[playerClass].size(); act++) {
-    if (s[firstKSymAction(playerClass) + act] > (double)0.0) {
+  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+    if (s[firstKSymAction(playerClass) + act] > 0.0) {
 
       result += s[firstKSymAction(playerClass) + act] * getKSymMixedPayoff(s, playerClass, act);
     }

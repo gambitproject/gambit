@@ -44,7 +44,7 @@ double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, cmatri
     for (k = 0; k < MaxLNM; k++) {
       //      del = z - s - DG*s / (double)(numPlayers - 1) - g;
       DG.multiply(s, del);
-      del /= (double)(game.getNumPlayers() - 1);
+      del /= (game.getNumPlayers() - 1);
       del += g;
       del += s;
       del -= z;
@@ -174,7 +174,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
-  v /= (double)(N - 1);
+  v /= (N - 1);
 
   // Scale g until the equilibrium sigma calculated above
   // is in fact the one unique equilibrium, and set lambda
@@ -247,7 +247,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
 
       // Calculate payoff cvector
       DG.multiply(sigma, v);
-      v /= (double)(N - 1);
+      v /= (N - 1);
       ym1 = g;
       ym1 *= lambda;
       v += ym1;
@@ -386,7 +386,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
       } // already at the support boundary
 
       DG.multiply(sigma, err);
-      err /= (double)(N - 1);
+      err /= (N - 1);
       g0 = g;
       g0 *= lambda;
       err += g0;
@@ -401,7 +401,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
       if (ee > threshold) { // if we've accumulated too much error, either
         if (wobble) {       // wobble or quit.
           DG.multiply(sigma, ym1);
-          ym1 /= (double)(N - 1);
+          ym1 /= (N - 1);
           g = z;
           g -= sigma;
           g -= ym1;
@@ -459,7 +459,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
     if (N > 2 && wobble) {
       A.payoffMatrix(DG, sigma, fuzz);
       DG.multiply(sigma, ym1);
-      ym1 /= (double)(N - 1);
+      ym1 /= (N - 1);
       g = z;
       g -= sigma;
       g -= ym1;
