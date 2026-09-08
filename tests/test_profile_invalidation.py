@@ -114,7 +114,7 @@ def test_mixed_behavior_profile_game_structure_changed():
             # triggers error via __getitem__
             next(profile.__iter__())
         with pytest.raises(gbt.GameStructureChangedError):
-            _ = profile.node_values
+            _ = profile.history_values
         with pytest.raises(gbt.GameStructureChangedError):
             profile.normalize()
         with pytest.raises(gbt.GameStructureChangedError):

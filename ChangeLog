@@ -32,6 +32,10 @@
   `Game.relabel_strategies`.  Added `GameRep::RelabelOutcomes` in C++.
 
 ### Changed
+- `MixedBehaviorProfile.node_values` is renamed `history_values`, and `NodeValueVector`/
+  `NodeValuesVector`/`NodeIndexedVector` are renamed `HistoryValueVector`/`HistoryValuesVector`/
+  `HistoryIndexedVector`, matching `RealizProbVector`/`BeliefVector`, its other
+  `HistoryIndexedVector` subclasses, which were always keyed by `History`.
 - `MixedBehaviorProfile.infoset_probs` now covers only the personal players' information sets,
   as `infoset_values` and `infoset_regrets`; the chance player's events moved to `event_probs`.  (#1109)
 - `Game.make_outcome` now returns `None` instead of the `Outcome` created; use the `label`

@@ -910,7 +910,7 @@ def test_agent_max_regret_consistency(game: gbt.Game, rational_flag: bool):
     ],
 )
 def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
-    """The vectorized payoffs/node_values/infoset_values/infoset_regrets/action_values/
+    """The vectorized payoffs/history_values/infoset_values/infoset_regrets/action_values/
     action_regrets/realiz_probs/infoset_probs/event_probs/beliefs properties are
     mathematically consistent with each other (regret is the gap to the best response),
     and carry their own type identity.
@@ -918,7 +918,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
 
     payoffs = profile.payoffs
-    node_values = profile.node_values
+    history_values = profile.history_values
     infoset_values = profile.infoset_values
     infoset_regrets = profile.infoset_regrets
     action_values = profile.action_values
@@ -930,7 +930,7 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
 
     assert isinstance(payoffs, gbt.PayoffVector)
     assert isinstance(payoffs, gbt.PlayerIndexedVector)
-    assert isinstance(node_values, gbt.NodeValuesVector)
+    assert isinstance(history_values, gbt.HistoryValuesVector)
     assert isinstance(infoset_values, gbt.InfosetValueVector)
     assert isinstance(infoset_regrets, gbt.InfosetRegretVector)
     assert isinstance(action_values, gbt.ActionValuesVector)
@@ -941,9 +941,9 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
     assert isinstance(beliefs, gbt.BeliefVector)
 
     for player in game.players:
-        player_node_values = node_values[player]
-        assert isinstance(player_node_values, gbt.NodeValueVector)
-        assert player_node_values[()] == payoffs[player]
+        player_history_values = history_values[player]
+        assert isinstance(player_history_values, gbt.HistoryValueVector)
+        assert player_history_values[()] == payoffs[player]
 
         for infoset in games.player_infosets(game, player):
             selector = gbt.H.path(*infoset.actions)
@@ -1076,18 +1076,18 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_probs = profile.realiz_probs
-    node_values = profile.node_values
+    history_values = profile.history_values
     for history in game.get_histories(gbt.H.after()):
         player = game.get_player(gbt.H.path(*history.actions))
         if player is None or player == "Chance":
             continue
         expected_val = 0
         node_prob = realiz_probs[history]
-        player_node_values = node_values[player]
+        player_history_values = history_values[player]
         for child_history in game.get_histories(gbt.H.path(*history.actions, ...)):
             prob = realiz_probs[child_history] / node_prob
-            expected_val += prob * player_node_values[child_history]
-        assert player_node_values[history] == expected_val
+            expected_val += prob * player_history_values[child_history]
+        assert player_history_values[history] == expected_val
 
 
 @pytest.mark.parametrize(
@@ -1103,10 +1103,10 @@ def test_node_value_consistency(game: gbt.Game, rational_flag: bool):
     """Test that the profile's node value at the root for each player matches the profile's payoff
     for the respective player"""
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    node_values = profile.node_values
+    history_values = profile.history_values
     payoffs = profile.payoffs
     for player in game.players:
-        assert node_values[player][()] == payoffs[player]
+        assert history_values[player][()] == payoffs[player]
 
 
 @pytest.mark.parametrize(
@@ -1715,13 +1715,13 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             lambda x: _all_node_actions(x),
         ),
         ######################################################################################
-        # node_value
+        # history_value
         (
             games.read_from_file("mixed_behavior_game.efg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
-            lambda x, y: x.node_values[y[0]][y[1]],
+            lambda x, y: x.history_values[y[0]][y[1]],
             lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
@@ -1729,7 +1729,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.node_values[y[0]][y[1]],
+            lambda x, y: x.history_values[y[0]][y[1]],
             lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
@@ -1737,7 +1737,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1B_doub,
             PROBS_2B_doub,
             False,
-            lambda x, y: x.node_values[y[0]][y[1]],
+            lambda x, y: x.history_values[y[0]][y[1]],
             lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         (
@@ -1745,7 +1745,7 @@ PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
-            lambda x, y: x.node_values[y[0]][y[1]],
+            lambda x, y: x.history_values[y[0]][y[1]],
             lambda x: list(product(x.players, x.get_histories(gbt.H.after()))),
         ),
         ######################################################################################

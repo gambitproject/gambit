@@ -150,7 +150,7 @@ class StrategyIndexedVector(_LabeledVector):
 
 
 @cython.cclass
-class NodeIndexedVector(_LabeledVector):
+class HistoryIndexedVector(_LabeledVector):
     """A read-only mapping from a node's History to a computed value, one entry
     per node.
 
@@ -159,10 +159,9 @@ class NodeIndexedVector(_LabeledVector):
     value can genuinely differ between two nodes, even nodes belonging to the same
     information set.
 
-    .. versionchanged:: 17.0.0
-        Keyed by a node's History rather than a ``Node`` object.
+    .. versionadded:: 17.0.0
     """
-    _label_kind = "node"
+    _label_kind = "history"
 
 
 ######################
