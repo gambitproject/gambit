@@ -14,7 +14,7 @@ Representation of games
    :toctree: api/
 
    Game
-   Node
+   History
    TreeLayout
    TreeLayoutCoordinates
 
@@ -126,14 +126,6 @@ Information about the game
    Game.get_subgame_roots
    Game.get_minimal_subgame
    Game.get_strategy_unreachable
-
-.. autosummary::
-   :toctree: api/
-
-   Node.members
-   Node.actions
-   Node.action_probs
-   Node.player
 
 
 Player behavior

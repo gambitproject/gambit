@@ -350,10 +350,6 @@ class Game:
 
         .. versionadded:: 17.0.0
 
-        .. versionchanged:: 17.0.0
-            Returns each information set's representative as a History rather than a
-            ``Node`` object.
-
         Raises
         ------
         UndefinedOperationError
@@ -396,10 +392,6 @@ class Game:
             The History of one representative member per event.
 
         .. versionadded:: 17.0.0
-
-        .. versionchanged:: 17.0.0
-            Returns each event's representative as a History rather than a ``Node``
-            object.
 
         Raises
         ------
@@ -935,11 +927,10 @@ class Game:
 
         .. versionadded:: 16.7.0
         .. versionchanged:: 17.0.0
-            Renamed from `minimal_subgame`.  `node` (formerly `infoset`) is now a
-            `Selector`; a `Node` or `str` is no longer accepted directly -- build
-            one with `H`.
-        .. versionchanged:: 17.0.0
-            Returns the History of the subgame's root, instead of a `Subgame` object.
+            Renamed from `minimal_subgame`.  `history` (formerly `infoset`) is now
+            a `Selector`; a `Node` or `str` is no longer accepted directly -- build
+            one with `H`.  Returns the History of the subgame's root, instead of a
+            `Subgame` object.
 
         Parameters
         ----------
@@ -1094,15 +1085,6 @@ class Game:
         the label of the strategy played by that player.
 
         .. versionadded:: 17.0.0
-
-        .. versionchanged:: 17.0.0
-            For a tree game, `location` may now be a `Selector`, returning
-            the outcome's label (or `None`) directly, rather than raising
-            `UndefinedOperationError`.
-
-        .. versionchanged:: 17.0.0
-            Always returns the outcome's label (or `None`); previously
-            returned the `Outcome` object itself for a strategic game.
 
         Parameters
         ----------
@@ -1470,8 +1452,7 @@ class Game:
             `Selector.filter`) of a representative member of the information set; only
             actions for which it returns `True` are included.
 
-        .. versionchanged:: 17.0.0
-            ``actions`` is now called with a `HistoryView` rather than a `Node`.
+        .. versionadded:: 17.0.0
 
         Returns
         -------
@@ -2058,13 +2039,6 @@ class Game:
         distinct group, rather than one spanning every match.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
-            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
-        .. versionchanged:: 17.0.0
-            `actions` and `probs` are combined into a single mapping from action
-            label to probability, rather than a list of labels plus a separate
-            probability sequence or mapping.
 
         Parameters
         ----------
@@ -2217,13 +2191,6 @@ class Game:
         game) that must resolve to exactly one node.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `node` is now a `Selector`; a `Node` or `str` is no longer accepted
-            directly -- build one with `H`.
-        .. versionchanged:: 17.0.0
-            `actions` and `probs` are combined into a single mapping from action
-            label to probability, rather than a list of labels plus a separate
-            probability sequence or mapping.
 
         Parameters
         ----------
@@ -2434,9 +2401,6 @@ class Game:
         game) that must resolve to exactly one node.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `infoset` is now a `Selector`; a `Node` or `str` is no longer accepted
-            directly -- build one with `H`.
 
         Parameters
         ----------
@@ -2518,9 +2482,6 @@ class Game:
         game) that must resolve to exactly one node.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `event` is now a `Selector`; a `Node` or `str` is no longer accepted
-            directly -- build one with `H`.
 
         Parameters
         ----------
@@ -2610,12 +2571,6 @@ class Game:
         `nodes`' own resolution order.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
-            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
-        .. versionchanged:: 17.0.0
-            `probs` is now always a mapping from action label to probability; a
-            positional sequence is no longer accepted.
 
         Parameters
         ----------
@@ -2699,9 +2654,6 @@ class Game:
         game) that must resolve to exactly one node.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `infoset` is now a `Selector`; a `Node` or `str` is no longer accepted
-            directly -- build one with `H`.
 
         Parameters
         ----------
@@ -2777,9 +2729,6 @@ class Game:
         information set).
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            `nodes` is now a `Selector` or `GroupedSelector`; a `Node` or
-            `NodeReferenceSet` is no longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
@@ -3001,10 +2950,6 @@ class Game:
         operation: it is removed from the game, and `label` may reuse its label.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            For an extensive game, `location` is now a `Selector` or
-            `GroupedSelector`; a `Node`, `History`, or iterable of these is no
-            longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
@@ -3076,10 +3021,6 @@ class Game:
         Any outcome all of whose references are among `location` is removed from the game.
 
         .. versionadded:: 17.0.0
-        .. versionchanged:: 17.0.0
-            For an extensive game, `location` is now a `Selector` or
-            `GroupedSelector`; a `Node`, `History`, or iterable of these is no
-            longer accepted directly -- build one with `H`.
 
         Parameters
         ----------
