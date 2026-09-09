@@ -153,6 +153,7 @@
   installed: the drawing cells print a short note instead of raising `ImportError`, so the rest
   of the tutorial (which doesn't otherwise depend on `gtdraw`) still runs. `gtdraw` depends on a
   LaTeX installation, so this lets the tutorials be run without that heavier local setup.
+- Refined the perturbation approach in `path.cc` (logit solver) to better handle paths on games with bifurcations. (#492)
 
 ### Removed
 - `Game.add_outcome`, `Game.delete_outcome`, and `Game.set_outcome` have been removed; use
