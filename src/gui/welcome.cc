@@ -1,4 +1,3 @@
-
 #include <vector>
 
 #include <wx/bmpbndl.h>
@@ -41,18 +40,6 @@ constexpr int BUTTON_WIDTH = 340;
 constexpr int BUTTON_HEIGHT = 72;
 /// The width of the dropdown part of the "Open existing game" split button.
 constexpr int RECENT_BUTTON_WIDTH = 36;
-
-/// Drop `p_filename` from the application's most-recently-used list, if it is there.
-void RemoveFromFileHistory(const wxString &p_filename)
-{
-  const auto count = static_cast<int>(wxGetApp().GetHistoryCount());
-  for (int i = 0; i < count; i++) {
-    if (wxGetApp().GetHistoryFile(i) == p_filename) {
-      wxGetApp().RemoveHistoryFile(i);
-      return;
-    }
-  }
-}
 
 /// Write the user's home directory as "~".
 wxString AbbreviateHomeDirectory(const wxString &p_path)
@@ -312,14 +299,7 @@ RecentFilesPopup::RecentFilesPopup(WelcomePanel *p_panel, int p_width)
 
 bool RecentFilesPopup::Populate()
 {
-  std::vector<wxString> files;
-  const auto count = static_cast<int>(wxGetApp().GetHistoryCount());
-  for (int i = 0; i < count; i++) {
-    const wxString filename = wxGetApp().GetHistoryFile(i);
-    if (!filename.empty()) {
-      files.push_back(filename);
-    }
-  }
+  const auto files = wxGetApp().GetRecentFiles();
   m_list->SetFiles(files);
   GetSizer()->Fit(this);
   return !files.empty();
@@ -400,7 +380,7 @@ void WelcomePanel::CreateControls()
 
 void WelcomePanel::RefreshRecentFiles()
 {
-  const bool hasRecentFiles = wxGetApp().GetHistoryCount() > 0;
+  const bool hasRecentFiles = !wxGetApp().GetRecentFiles().empty();
   m_recentButton->Enable(hasRecentFiles);
   m_recentButton->SetToolTip(hasRecentFiles ? _("Recent games") : _("No recent games"));
 }
@@ -553,18 +533,12 @@ bool WelcomeFrame::DoOpen()
 
 bool WelcomeFrame::DoOpenRecent(const wxString &p_filename)
 {
-  if (!wxFileName::FileExists(p_filename)) {
-    wxMessageBox(wxString::Format(_("Gambit could not find the file %s.\n\n"
-                                    "It has been removed from the list of recent games."),
-                                  p_filename),
-                 _("File not found"), wxOK | wxICON_EXCLAMATION, this);
-    RemoveFromFileHistory(p_filename);
+  if (wxGetApp().LoadFile(p_filename, this) != AppLoadResult::Success) {
     m_panel->RefreshRecentFiles();
     return false;
   }
-
   wxGetApp().SetCurrentDir(wxPathOnly(p_filename));
-  return wxGetApp().LoadFile(p_filename, this) == AppLoadResult::Success;
+  return true;
 }
 
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)

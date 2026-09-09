@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GUI_APP_H
 #define GAMBIT_GUI_APP_H
 
+#include <vector>
+
 #include <wx/wx.h>
 #include <wx/config.h>  // for wxConfig
 #include <wx/docview.h> // for wxFileHistory
@@ -50,6 +52,8 @@ class Application final : public wxApp {
   bool OnInit() override;
   void DismissSplash();
   void OnSplashDismissTimer(wxTimerEvent &) { DismissSplash(); }
+  //! Drop `p_filename` from the recently-used list; returns whether it was there.
+  bool ForgetRecentFile(const wxString &p_filename);
 
   wxDECLARE_EVENT_TABLE();
 
@@ -60,13 +64,9 @@ public:
   const wxString &GetCurrentDir() { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
 
-  size_t GetHistoryCount() const { return m_fileHistory.GetCount(); }
   wxString GetHistoryFile(int index) const { return m_fileHistory.GetHistoryFile(index); }
-  void RemoveHistoryFile(int index)
-  {
-    m_fileHistory.RemoveFileFromHistory(index);
-    m_fileHistory.Save(*wxConfigBase::Get());
-  }
+  //! The recently-used files, most recent first.
+  std::vector<wxString> GetRecentFiles() const;
   void AddMenu(wxMenu *p_menu)
   {
     m_fileHistory.UseMenu(p_menu);
