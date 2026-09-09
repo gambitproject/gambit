@@ -274,7 +274,7 @@ TracePathResult PathTracer::TracePath(
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
         pert = c_pert;
-        pert_countdown = std::max(fabs(10.0 * h), min_pert_countdown);
+        pert_countdown = std::max(std::abs(10.0 * h), min_pert_countdown);
       }
       accept = false;
     }
