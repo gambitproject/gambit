@@ -1,8 +1,6 @@
 #ifndef GAMBIT_WELCOME_H
 #define GAMBIT_WELCOME_H
 
-#include <vector>
-
 #include <wx/frame.h>
 #include <wx/panel.h>
 #include <wx/event.h>
@@ -11,8 +9,7 @@
 
 class wxButton;
 class wxStaticText;
-class wxStaticLine;
-class wxBoxSizer;
+class RecentFilesPopup;
 
 enum class WelcomeNewProblemKind { NormalForm, ExtensiveForm };
 
@@ -24,7 +21,8 @@ class WelcomePanel : public wxPanel {
 public:
   explicit WelcomePanel(wxWindow *parent);
 
-  bool RefreshRecentFiles();
+  void RefreshRecentFiles();
+  void OpenRecentFile(const wxString &p_filename);
 
 private:
   void CreateControls();
@@ -33,23 +31,20 @@ private:
   void OnOpen(wxCommandEvent &p_event);
   void OnNewNormalForm(wxCommandEvent &p_event);
   void OnNewExtensiveForm(wxCommandEvent &p_event);
-  void OnOpenRecent(wxCommandEvent &p_event);
+  void OnShowRecent(wxCommandEvent &p_event);
 
   void SendOpenEvent();
   void SendNewEvent(WelcomeNewProblemKind p_kind);
-  void SendOpenRecentEvent(const wxString &p_filename);
 
   wxStaticBitmap *m_logoBitmap{nullptr};
   wxStaticText *m_titleText{nullptr};
 
   wxCommandLinkButton *m_openButton{nullptr};
+  wxButton *m_recentButton{nullptr};
   wxCommandLinkButton *m_newNormalFormButton{nullptr};
   wxCommandLinkButton *m_newExtensiveFormButton{nullptr};
 
-  wxStaticLine *m_recentLine{nullptr};
-  wxStaticText *m_recentHeading{nullptr};
-  wxPanel *m_recentPanel{nullptr};
-  std::vector<wxString> m_recentFiles;
+  RecentFilesPopup *m_recentPopup{nullptr};
 };
 
 class WelcomeFrame : public wxFrame {
@@ -59,7 +54,6 @@ public:
 private:
   void CreateControls();
   void LayoutControls();
-  void FitToContents();
 
   void OnWelcomeOpen(wxCommandEvent &p_event);
   void OnWelcomeNew(wxCommandEvent &p_event);
