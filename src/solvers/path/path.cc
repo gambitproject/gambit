@@ -146,7 +146,8 @@ TracePathResult PathTracer::TracePath(
   const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
-  const double c_orientTol = 1.0e-8; // tolerance for detecting change in orientation
+  const double min_pert_countdown = 0.05; // Minimum amount of perturbation to apply.
+  const double c_orientTol = 1.0e-8;      // tolerance for detecting change in orientation
 
   const double b_tol = 1.0e-10; // Tolerance for perturbing the b matrix in case of singularity
   const double b_pert = 1.0e-8; // Perturbation of the b matrix in case of singularity
@@ -229,7 +230,12 @@ TracePathResult PathTracer::TracePath(
       double dist;
 
       p_function(u, y);
-      y[1] += pert;
+      if (pert != 0.0) {
+        for (size_t i = 1; i <= y.size(); i++) {
+          // Symmetry breaking, perturbing all directions with an altenating sign
+          y[i] += pert * (i % 2 == 0 ? 1.0 : -1.0);
+        }
+      }
       NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
@@ -268,7 +274,7 @@ TracePathResult PathTracer::TracePath(
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
         pert = c_pert;
-        pert_countdown = std::abs(2 * h);
+        pert_countdown = std::max(std::abs(10.0 * h), min_pert_countdown);
       }
       accept = false;
     }
