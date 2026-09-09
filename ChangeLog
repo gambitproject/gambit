@@ -3,6 +3,8 @@
 ### Changed
 - Refined the perturbation approach in `path.cc` (logit and hp solvers) to better handle paths on games
   with bifurcations. (#492)
+- Nash solver algorithms now return a method-specific `Result` class, rather than a generic class,
+  with potentially richer information about the performance of the algorithm.
 
 ## [17.0.0-beta.1] - 2026-09-08
 

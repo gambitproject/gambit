@@ -49,9 +49,9 @@ std::string IPATerminationMessage(const IPAResult &p_result)
 
 namespace Gambit::Nash {
 
-std::list<MixedStrategyProfile<double>>
-IPAStrategySolve(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium,
-                 IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
+IPAStrategyResult IPAStrategySolve(const Game &p_game,
+                                   StrategyCallbackType<double> p_onEquilibrium,
+                                   IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (const auto &player : p_game->GetPlayers()) {
@@ -65,10 +65,9 @@ IPAStrategySolve(const Game &p_game, StrategyCallbackType<double> p_onEquilibriu
   return IPAStrategySolve(pert, p_onEquilibrium, p_onEvent, p_cancel);
 }
 
-std::list<MixedStrategyProfile<double>>
-IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                 StrategyCallbackType<double> p_onEquilibrium, IPAEventCallbackType p_onEvent,
-                 const CancelToken &p_cancel)
+IPAStrategyResult IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
+                                   StrategyCallbackType<double> p_onEquilibrium,
+                                   IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -98,24 +97,18 @@ IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
     result = IPA(*A, g, zh, ALPHA, EQERR, 100, onStep, p_cancel);
     p_onEvent(
         IPATerminationEvent{.reason = result.reason, .message = IPATerminationMessage(result)});
-    if (result.reason == IPATerminationReason::Converged) {
+    if (result.reason != IPATerminationReason::MaxIterationsReached) {
+      // Either converged, or hit a numerical breakdown that further restarts won't fix.
       break;
-    }
-    if (result.reason == IPATerminationReason::NonfiniteStrategy) {
-      throw std::runtime_error(
-          "IPA encountered a non-finite strategy profile; the perturbation vector "
-          "may not be suitable for this game");
     }
   }
   if (result.reason != IPATerminationReason::Converged) {
-    throw std::runtime_error("IPA failed to converge after " + std::to_string(MAX_RESTARTS) +
-                             " restarts");
+    return {std::nullopt, false, result.reason};
   }
 
-  std::list<MixedStrategyProfile<double>> solutions;
-  solutions.push_back(ToProfile(game, result.strategy));
-  p_onEquilibrium(solutions.back());
-  return solutions;
+  const MixedStrategyProfile<double> equilibrium = ToProfile(game, result.strategy);
+  p_onEquilibrium(equilibrium);
+  return {equilibrium, true, IPATerminationReason::Converged};
 }
 
 } // namespace Gambit::Nash

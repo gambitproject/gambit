@@ -384,7 +384,9 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
       NullCriterionFunction, NullCriterionBracketFunction, p_cancel);
   const auto &profiles = callback.GetProfiles();
-  p_onEquilibrium(profiles.back().GetProfile());
+  if (profiles.back().GetProfile().GetMaxRegret() < p_regret) {
+    p_onEquilibrium(profiles.back().GetProfile());
+  }
   return profiles;
 }
 

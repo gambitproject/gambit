@@ -119,8 +119,8 @@ def main(
         if verbose:
             click.echo(render_profile_csv(prior, "prior", decimals))
         result = gbt.nash.hp_solve(prior, maxregret=maxregret, event_callback=render_event)
-        for eq in result.equilibria:
-            click.echo(render_profile_csv(eq, "NE", decimals))
+        if result.equilibrium is not None:
+            click.echo(render_profile_csv(result.equilibrium, "NE", decimals))
 
 
 if __name__ == "__main__":

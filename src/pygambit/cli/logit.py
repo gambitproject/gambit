@@ -193,7 +193,7 @@ def main(
             first_step=first_step,
             max_accel=max_accel,
         )
-        click.echo(render_profile_csv(result.equilibria[-1], "NE", decimals, fixed=False))
+        click.echo(render_profile_csv(result.equilibrium, "NE", decimals, fixed=False))
         return
 
     result = gbt.nash.logit_solve(
@@ -204,7 +204,7 @@ def main(
         max_accel=max_accel,
         event_callback=stream,
     )
-    click.echo(render_profile_csv(result.equilibria[-1], "NE", decimals, fixed=False))
+    click.echo(render_profile_csv(result.equilibrium, "NE", decimals, fixed=False))
 
 
 if __name__ == "__main__":
