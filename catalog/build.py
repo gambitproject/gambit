@@ -10,11 +10,11 @@ from gtdraw import pdf, png, svg, tex
 
 import pygambit as gbt
 
-CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table.rst"
-CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
-MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
+CATALOG_RST_TABLE = Path(__file__).parent / "doc" / "_table.rst"
+CATALOG_DIR = Path(__file__).parent / "games"
+MAKEFILE_AM = Path(__file__).parent.parent / "Makefile.am"
 GTDRAW_SETTINGS_CONFIG = Path(__file__).parent / "gtdraw_settings.yaml"
-CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "catalog_hierarchy.yaml"
+CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "hierarchy.yaml"
 SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
 
 
@@ -60,8 +60,8 @@ def catalog_ef_file_variants(slug: str, catalog_dir: Path) -> list[dict] | None:
 
     File-naming convention::
 
-        catalog/{slug}.ef            primary variant → label "Default"
-        catalog/{slug}__{suffix}.ef  additional variant → label derived from suffix
+        catalog/games/{slug}.ef            primary variant → label "Default"
+        catalog/games/{slug}__{suffix}.ef  additional variant → label derived from suffix
 
     The suffix part (after ``__``) is title-cased with underscores replaced by
     spaces, e.g. ``fig1__very_wide.ef`` → label "Very Wide".
@@ -230,10 +230,10 @@ def _write_game_entry(
         for variant in ef_variants:
             vkey = variant["variant_key"]
             for ext in ["ef", "tex", "png", "pdf", "svg"]:
-                download_links.append(f":download:`{vkey}.{ext} <../catalog/img/{vkey}.{ext}>`")
+                download_links.append(f":download:`{vkey}.{ext} <../games/img/{vkey}.{ext}>`")
     else:
         for ext in all_exts:
-            download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
+            download_links.append(f":download:`{slug}.{ext} <../games/img/{slug}.{ext}>`")
     f.write(f"{i1}.. dropdown:: Download game and image files\n")
     f.write(f"{i1}   \n")
     f.write(f"{i2}{' '.join(download_links)}\n")
@@ -257,7 +257,7 @@ def _write_game_entry(
             f.write(f"{i4}import pygambit\n")
             f.write(f"{i4}from gtdraw import draw\n")
             if variant["ef_path"].exists():
-                f.write(f'{i4}draw("../catalog/{vkey}.ef", {settings_str})\n')
+                f.write(f'{i4}draw("../games/{vkey}.ef", {settings_str})\n')
             else:
                 f.write(f'{i4}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
             f.write(f"{i2}\n")
@@ -274,13 +274,13 @@ def _write_game_entry(
             )
             curated_ef = catalog_dir / f"{slug}.ef"
             if curated_ef.exists():
-                f.write(f'{i2}draw("../catalog/{slug}.ef", {settings_str})\n')
+                f.write(f'{i2}draw("../games/{slug}.ef", {settings_str})\n')
             else:
                 f.write(f'{i2}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
         elif row["Format"] == "nfg":
             f.write(
                 f'{i2}draw(pygambit.catalog.load("{slug}"), '
-                f'save_to="../catalog/img/{slug}.png")\n'
+                f'save_to="../games/img/{slug}.png")\n'
             )
         f.write(f"{i1}\n")
 
@@ -376,7 +376,7 @@ def update_makefile(
 
     game_files = []
     for slug in slugs:
-        game_files.append(f"catalog/{slug}")
+        game_files.append(f"catalog/games/{slug}")
     game_files.sort()
 
     if am_path.exists():
@@ -404,15 +404,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
             "Update Gambit catalog documentation and build files. "
-            "Always regenerates doc/catalog_table.rst from the current catalog. "
-            "Run from the repo root or build_support/catalog/."
+            "Always regenerates catalog/doc/_table.rst from the current catalog. "
+            "Run from the repo root or catalog/."
         )
     )
     parser.add_argument(
         "--build",
         action="store_true",
         help=(
-            "Also update build_support/catalog/catalog.am with the current list of "
+            "Also update catalog/catalog.am with the current list of "
             "catalog game files. Required after adding or removing games."
         ),
     )
@@ -425,13 +425,24 @@ if __name__ == "__main__":
             "gtdraw_settings.yaml."
         ),
     )
+    parser.add_argument(
+        "--skip-table",
+        action="store_true",
+        help=(
+            "Skip regenerating catalog/doc/_table.rst and any missing game images. "
+            "Table/image generation requires a LaTeX toolchain (gtdraw's tex/pdf/png/svg "
+            "functions); use this with --build in contexts (e.g. CI) that only need "
+            "catalog.am checked or updated."
+        ),
+    )
     args = parser.parse_args()
 
-    # Create RST list-table used by doc/catalog.rst
-    df = _catalog_games()
-    _warn_missing_descriptions(df)
-    generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
-    print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
+    if not args.skip_table:
+        # Create RST list-table used by catalog/doc/index.rst
+        df = _catalog_games()
+        _warn_missing_descriptions(df)
+        generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
+        print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
         # Update the Makefile.am with the current list of catalog files
         update_makefile()

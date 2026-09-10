@@ -3,7 +3,7 @@ NFG 1 R "von Stengel's 6x6 bimatrix game with 75 equilibria" { "1" "2" }
 { { "1" "2" "3" "4" "5" "6" }
 { "1" "2" "3" "4" "5" "6" }
 }
-"The example from :cite:p:`vS97` as referenced in :cite:p:`vS99`. 
+"The example from :cite:p:`vS97` as referenced in :cite:p:`vS99`.
 It is a 6x6 bimatrix game with 75 equilibria,
 which is more than the previously conjectured bound of :math:`2^6 - 1 = 63`."
 
