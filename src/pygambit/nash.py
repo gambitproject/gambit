@@ -51,6 +51,8 @@ from pygambit.gambit import (  # noqa: F401
     LpResult,
     MixedBehaviorEquilibriumSet,
     MixedStrategyEquilibriumSet,
+    NashComponent,
+    NashPolytope,
     NashResultBase,
     SimpdivResult,
 )
@@ -178,7 +180,7 @@ def enummixed_solve(
         nash_callback: Callable[
             [libgbt.MixedStrategyProfile], None
         ] | None = None,
-        cliques: bool = False,
+        components: bool = False,
 ) -> EnumMixedResult:
     """Compute all :ref:`mixed-strategy Nash equilibria <enummixed>`
     of a two-player game using the strategic representation.
@@ -205,10 +207,10 @@ def enummixed_solve(
 
         .. versionadded:: 17.0.0
 
-    cliques : bool, default False
-        If specified and True, also compute the sets of extreme equilibria which
-        are connected to one another, returned as `res.cliques`.  Not available
-        when `lrsnash_path` is specified.
+    components : bool, default False
+        If specified and True, also compute the connected components of the set of
+        extreme equilibria, returned as `res.components`.  Not available when
+        `lrsnash_path` is specified.
 
         .. versionadded:: 17.0.0
 
@@ -224,7 +226,7 @@ def enummixed_solve(
 
     ValueError
         If both `lrsnash_path` and `nash_callback` are specified, or both
-        `lrsnash_path` and `cliques` are specified.
+        `lrsnash_path` and `components` are specified.
 
     Notes
     -----
@@ -235,9 +237,9 @@ def enummixed_solve(
             raise ValueError(
                 "enummixed_solve(): nash_callback cannot be used with lrsnash_path"
             )
-        if cliques:
+        if components:
             raise ValueError(
-                "enummixed_solve(): cliques cannot be used with lrsnash_path"
+                "enummixed_solve(): components cannot be used with lrsnash_path"
             )
         equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
         return EnumMixedResult(
@@ -248,10 +250,10 @@ def enummixed_solve(
             equilibria=equilibria,
             success=True,
         )
-    if cliques:
+    if components:
         if rational:
-            return libgbt._enummixed_strategy_solve_cliques_rational(game, nash_callback)
-        return libgbt._enummixed_strategy_solve_cliques_double(game, nash_callback)
+            return libgbt._enummixed_strategy_solve_components_rational(game, nash_callback)
+        return libgbt._enummixed_strategy_solve_components_double(game, nash_callback)
     if rational:
         return libgbt._enummixed_strategy_solve_rational(game, nash_callback)
     return libgbt._enummixed_strategy_solve_double(game, nash_callback)

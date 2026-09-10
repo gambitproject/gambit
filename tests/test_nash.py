@@ -3784,3 +3784,61 @@ def test_enumpoly_solve_phcpack_reports_use_strategic_true(monkeypatch):
     monkeypatch.setattr("pygambit.nashphc.subprocess.run", _fake_run)
     res = gbt.nash.enumpoly_solve(game, phcpack_path="./phc")
     assert res.use_strategic is True
+
+
+@pytest.mark.parametrize("rational", [True, False])
+def test_enummixed_solve_components_structure(rational):
+    """`enummixed_solve(..., components=True)` on a game with a single, isolated
+    equilibrium should report exactly one component containing exactly one
+    polytope whose vertex is that equilibrium."""
+    game = gbt.Game.new_table([2, 2])
+    game.make_outcome({"1": "1", "2": "1"}, {"1": 1, "2": -1}, "a")
+    game.make_outcome({"1": "1", "2": "2"}, {"1": -1, "2": 1}, "b")
+    game.make_outcome({"1": "2", "2": "1"}, {"1": -1, "2": 1}, "c")
+    game.make_outcome({"1": "2", "2": "2"}, {"1": 1, "2": -1}, "d")
+
+    res = gbt.nash.enummixed_solve(game, rational=rational, components=True)
+
+    assert len(res.equilibria) == 1
+    assert len(res.components) == 1
+    component = res.components[0]
+    assert isinstance(component, gbt.nash.NashComponent)
+    assert len(component.polytopes) == 1
+    polytope = component.polytopes[0]
+    assert isinstance(polytope, gbt.nash.NashPolytope)
+    assert polytope.vertices == res.equilibria
+    assert component.vertices == res.equilibria
+
+
+def test_enummixed_solve_components_groups_polytopes_sharing_a_vertex():
+    """A component can be the union of more than one maximal-clique polytope,
+    glued together at a shared vertex; grouping by connectedness should collapse
+    those polytopes into a single `NashComponent` rather than reporting them as
+    unrelated cliques.  This game (found by random search) has three pure-strategy
+    equilibria that lie in one connected component made of two polytopes sharing
+    the equilibrium (player 1 plays strategy 3, player 2 plays strategy 1)."""
+    payoffs1 = [[1, 0, -2], [0, 2, -2], [1, 2, 0]]
+    payoffs2 = [[-1, -1, -2], [0, -2, -1], [0, -1, 0]]
+    game = gbt.Game.new_table([3, 3])
+    for i in range(3):
+        for j in range(3):
+            game.make_outcome(
+                {"1": str(i + 1), "2": str(j + 1)},
+                {"1": payoffs1[i][j], "2": payoffs2[i][j]},
+                f"o{i}{j}",
+            )
+
+    res = gbt.nash.enummixed_solve(game, rational=True, components=True)
+
+    assert len(res.equilibria) == 3
+    assert len(res.components) == 1
+    component = res.components[0]
+    assert len(component.polytopes) == 2
+
+    shared = [v for v in component.polytopes[0].vertices if v in component.polytopes[1].vertices]
+    assert len(shared) == 1
+
+    # The union of vertices across the two polytopes, deduplicated at the shared
+    # vertex, reproduces the full set of extreme equilibria.
+    assert len(component.vertices) == len(res.equilibria)
+    assert all(eq in component.vertices for eq in res.equilibria)

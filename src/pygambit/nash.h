@@ -28,18 +28,23 @@ using namespace std;
 using namespace Gambit;
 
 template <class T>
-std::pair<Nash::EnumMixedStrategyResult<T>, std::list<std::list<MixedStrategyProfile<T>>>>
-EnumMixedStrategySolveCliquesWrapper(
+std::pair<Nash::EnumMixedStrategyResult<T>,
+          std::list<std::list<std::list<MixedStrategyProfile<T>>>>>
+EnumMixedStrategySolveComponentsWrapper(
     const Game &p_game,
     Nash::StrategyCallbackType<T> p_onEquilibrium = Nash::NullStrategyCallback<T>)
 {
   auto solution = Nash::EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium);
-  std::list<std::list<MixedStrategyProfile<T>>> cliques;
-  for (auto &clique : solution->GetCliques()) {
-    cliques.emplace_back(clique.begin(), clique.end());
+  std::list<std::list<std::list<MixedStrategyProfile<T>>>> components;
+  for (auto &component : solution->GetComponents()) {
+    std::list<std::list<MixedStrategyProfile<T>>> polytopes;
+    for (auto &polytope : component) {
+      polytopes.emplace_back(polytope.begin(), polytope.end());
+    }
+    components.emplace_back(std::move(polytopes));
   }
   return {Nash::EnumMixedStrategyResult<T>{solution->GetExtremeEquilibria(), solution->success},
-          cliques};
+          components};
 }
 
 inline std::list<LogitQREMixedBehaviorProfile>

@@ -186,6 +186,43 @@ MixedStrategyEquilibriumSet = list[MixedStrategyProfile]
 MixedBehaviorEquilibriumSet = list[MixedBehaviorProfile]
 
 
+@dataclasses.dataclass(frozen=True)
+class NashPolytope:
+    """A maximal convex subset of a two-player game's set of Nash equilibria.
+
+    Attributes
+    ----------
+    vertices : MixedStrategyEquilibriumSet
+        The extreme equilibria which are the vertices of this polytope.
+    """
+    vertices: MixedStrategyEquilibriumSet
+
+
+@dataclasses.dataclass(frozen=True)
+class NashComponent:
+    """A connected component of a two-player game's set of Nash equilibria.
+
+    A component consists of one or more `NashPolytope` which touch one
+    another at a shared vertex; the component itself need not be convex.
+
+    Attributes
+    ----------
+    polytopes : list of NashPolytope
+        The maximal convex subsets making up this component.
+    """
+    polytopes: list[NashPolytope]
+
+    @property
+    def vertices(self) -> MixedStrategyEquilibriumSet:
+        """The union of vertices across this component's polytopes."""
+        result: MixedStrategyEquilibriumSet = []
+        for polytope in self.polytopes:
+            for vertex in polytope.vertices:
+                if vertex not in result:
+                    result.append(vertex)
+        return result
+
+
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class NashResultBase:
     """Common attributes shared by every result of a method which computes Nash
@@ -238,14 +275,14 @@ class EnumMixedResult(NashResultBase):
         Always True; enumeration always completes.
     lrsnash_path : pathlib.Path or str, optional
         Set if `lrsnash` was used to solve the systems of equations.
-    cliques : list of MixedStrategyEquilibriumSet, optional
-        Set if `cliques=True` was requested: the sets of extreme equilibria which
-        are connected to one another.
+    components : list of NashComponent, optional
+        Set if `components=True` was requested: the connected components of the
+        set of extreme equilibria.
     """
     equilibria: MixedStrategyEquilibriumSet
     success: bool
     lrsnash_path: pathlib.Path | str | None = None
-    cliques: list[MixedStrategyEquilibriumSet] | None = None
+    components: list[NashComponent] | None = None
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -885,36 +922,47 @@ def _enummixed_strategy_solve_rational(
     )
 
 
-def _enummixed_strategy_solve_cliques_double(
+def _enummixed_strategy_solve_components_double(
         game: Game, nash_callback: object = None
 ) -> EnumMixedResult:
     result: pair[
-        c_EnumMixedStrategyResult[float], stdlist[stdlist[c_MixedStrategyProfile[float]]]
-    ] = EnumMixedStrategySolveCliquesWrapper[double](
+        c_EnumMixedStrategyResult[float],
+        stdlist[stdlist[stdlist[c_MixedStrategyProfile[float]]]]
+    ] = EnumMixedStrategySolveComponentsWrapper[double](
         game.game, MakeStrategyCallback[double](nash_callback)
     )
     return EnumMixedResult(
         game=game, rational=False, use_strategic=True,
         equilibria=_convert_mspd(result.first.equilibria),
         success=result.first.success,
-        cliques=[_convert_mspd(clique) for clique in result.second],
+        components=[
+            NashComponent(polytopes=[
+                NashPolytope(vertices=_convert_mspd(polytope)) for polytope in component
+            ])
+            for component in result.second
+        ],
     )
 
 
-def _enummixed_strategy_solve_cliques_rational(
+def _enummixed_strategy_solve_components_rational(
         game: Game, nash_callback: object = None
 ) -> EnumMixedResult:
     result: pair[
         c_EnumMixedStrategyResult[c_Rational],
-        stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]
-    ] = EnumMixedStrategySolveCliquesWrapper[c_Rational](
+        stdlist[stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]]
+    ] = EnumMixedStrategySolveComponentsWrapper[c_Rational](
         game.game, MakeStrategyCallback[c_Rational](nash_callback)
     )
     return EnumMixedResult(
         game=game, rational=True, use_strategic=True,
         equilibria=_convert_mspr(result.first.equilibria),
         success=result.first.success,
-        cliques=[_convert_mspr(clique) for clique in result.second],
+        components=[
+            NashComponent(polytopes=[
+                NashPolytope(vertices=_convert_mspr(polytope)) for polytope in component
+            ])
+            for component in result.second
+        ],
     )
 
 

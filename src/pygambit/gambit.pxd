@@ -750,8 +750,9 @@ cdef extern from "solvers/logit/logit.h":
 
 cdef extern from "nash.h":
     pair[
-        c_EnumMixedStrategyResult[T], stdlist[stdlist[c_MixedStrategyProfile[T]]]
-    ] EnumMixedStrategySolveCliquesWrapper[T](
+        c_EnumMixedStrategyResult[T],
+        stdlist[stdlist[stdlist[c_MixedStrategyProfile[T]]]]
+    ] EnumMixedStrategySolveComponentsWrapper[T](
             c_Game, StrategyCallbackType[T]
     ) except +RuntimeError
     stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
