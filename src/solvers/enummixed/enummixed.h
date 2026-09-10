@@ -44,7 +44,7 @@ public:
     return m_extremeEquilibria;
   }
 
-  Array<Array<MixedStrategyProfile<T>>> GetCliques() const;
+  Array<Array<Array<MixedStrategyProfile<T>>>> GetComponents() const;
 
   Game m_game;
   std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
@@ -60,6 +60,12 @@ public:
   /// Representation of the connectedness of the extreme equilibria
   /// These are generated only on demand
   mutable Array<Array<int>> m_cliques1, m_cliques2;
+
+private:
+  /// Populates m_cliques1/m_cliques2 on first use.
+  void EnsureCliques() const;
+  /// Builds the vertex profiles for one maximal clique.
+  Array<MixedStrategyProfile<T>> BuildCliqueProfiles(size_t p_clique) const;
 };
 
 template <class T>
