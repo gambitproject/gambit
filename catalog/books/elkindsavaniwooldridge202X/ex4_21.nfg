@@ -1,0 +1,20 @@
+NFG 1 R "Example 4.21" { "1" "2" }
+
+{ { "T" "M" "B" }
+{ "L" "C" "R" }
+}
+"Example 4.21 from :cite:p:`ESW2X`, which is used as an example of Iterated Elimination of
+Dominated Strategies."
+
+{
+{ "" 4, 3 }
+{ "" 2, 1 }
+{ "" 3, 0 }
+{ "" 5, 1 }
+{ "" 8, 4 }
+{ "" 9, 6 }
+{ "" 6, 2 }
+{ "" 3, 6 }
+{ "" 2, 8 }
+}
+1 2 3 4 5 6 7 8 9

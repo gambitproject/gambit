@@ -1,0 +1,15 @@
+NFG 1 R "Figure 5.1: Matching Pennies" { "1" "2" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+"This is Figure 5.1 from :cite:p:`ESW2X`, the classic example of the zero-sum game
+Matching Pennies."
+
+{
+{ "" 1, -1 }
+{ "" -1, 1 }
+{ "" -1, 1 }
+{ "" 1, -1 }
+}
+1 2 3 4
