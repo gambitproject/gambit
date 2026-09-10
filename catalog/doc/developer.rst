@@ -119,6 +119,11 @@ Currently supported representations are:
 
       - If haven't done an editable install of ``pygambit`` in your python environment, you'll need to re-install it before running the build script to include new games in the catalog module.
       - Running the script with the ``--build`` flag updates ``catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
+      - The ``--build`` flag also regenerates ``catalog/games/manifest.json``, the catalog
+        manifest consumed by the GUI's catalog browser (title, citation-resolved description,
+        hierarchy grouping, and structural stats for each game). It's a **committed** file, unlike
+        ``catalog/doc/_table.rst``, since it needs to physically ship alongside the game files. A
+        CI check fails if it's out of sync with the current catalog.
 
    .. tip::
 
@@ -148,7 +153,7 @@ Currently supported representations are:
 6. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the `usual workflow <https://gambit.readthedocs.io/en/latest/developer.contributing.html#submit-contribution>`_.
-   Ensure that any additions and changes to game files, ``catalog/gtdraw_settings.yaml``, ``catalog/build.py`` and ``catalog/catalog.am`` are included.
+   Ensure that any additions and changes to game files, ``catalog/gtdraw_settings.yaml``, ``catalog/build.py``, ``catalog/catalog.am`` and ``catalog/games/manifest.json`` are included.
 
    .. important::
 

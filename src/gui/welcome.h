@@ -15,6 +15,7 @@ enum class WelcomeNewProblemKind { NormalForm, ExtensiveForm };
 
 wxDECLARE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
+wxDECLARE_EVENT(wxEVT_WELCOME_CATALOG, wxCommandEvent);
 
 class WelcomePanel : public wxPanel {
 public:
@@ -27,9 +28,11 @@ private:
   void OnOpen(wxCommandEvent &p_event);
   void OnNewNormalForm(wxCommandEvent &p_event);
   void OnNewExtensiveForm(wxCommandEvent &p_event);
+  void OnCatalog(wxCommandEvent &p_event);
 
   void SendOpenEvent();
   void SendNewEvent(WelcomeNewProblemKind p_kind);
+  void SendCatalogEvent();
 
   wxStaticBitmap *m_logoBitmap{nullptr};
   wxStaticText *m_titleText{nullptr};
@@ -37,6 +40,7 @@ private:
   wxCommandLinkButton *m_openButton{nullptr};
   wxCommandLinkButton *m_newNormalFormButton{nullptr};
   wxCommandLinkButton *m_newExtensiveFormButton{nullptr};
+  wxCommandLinkButton *m_catalogButton{nullptr};
 };
 
 class WelcomeFrame : public wxFrame {
@@ -49,10 +53,12 @@ private:
 
   void OnWelcomeOpen(wxCommandEvent &p_event);
   void OnWelcomeNew(wxCommandEvent &p_event);
+  void OnWelcomeCatalog(wxCommandEvent &p_event);
   void OnClose(wxCloseEvent &p_event);
 
   bool DoOpen();
   bool DoCreateNew(WelcomeNewProblemKind p_kind);
+  bool DoCatalog();
 
 private:
   WelcomePanel *m_panel{nullptr};
