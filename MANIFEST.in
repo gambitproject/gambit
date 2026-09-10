@@ -1,7 +1,7 @@
 recursive-include src/core *.cc *.h
 recursive-include src/games *.cc *.h *.imp
 recursive-include src/solvers *.cc *.h *.imp
-recursive-include catalog *
+recursive-include catalog/games *
 include src/gambit.h
 include src/games.h
 include src/solvers.h

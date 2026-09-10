@@ -66,8 +66,12 @@ jobs:
         run: |
           mkdir installer
           cp gambit* installer
-          "${WIX}bin/candle" -arch x64 build_support/msw/gambit.wxs
-          "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
+          cp -r catalog/games installer/catalog
+          "${WIX}bin/heat" dir installer/catalog -cg CatalogFiles -gg -scom -sreg -sfrag -srd \
+            -dr CATALOGFOLDER -var var.CatalogSourceDir -out build_support/msw/catalog.wxs
+          "${WIX}bin/candle" -arch x64 -dCatalogSourceDir=installer/catalog \
+            build_support/msw/gambit.wxs build_support/msw/catalog.wxs
+          "${WIX}bin/light" -ext WixUIExtension -out gambit.msi gambit.wixobj catalog.wixobj
       - uses: actions/upload-artifact@v7
         with:
           name: artifact-msw

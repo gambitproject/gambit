@@ -1,21 +1,27 @@
 import argparse
+import json
+import re
 import shutil
 import sys
 from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
+import pybtex.database
 import yaml
 from gtdraw import pdf, png, svg, tex
 
 import pygambit as gbt
 
-CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table.rst"
-CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
-MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
+CATALOG_RST_TABLE = Path(__file__).parent / "doc" / "_table.rst"
+CATALOG_DIR = Path(__file__).parent / "games"
+CATALOG_MANIFEST = Path(__file__).parent / "games" / "manifest.json"
+MAKEFILE_AM = Path(__file__).parent.parent / "Makefile.am"
 GTDRAW_SETTINGS_CONFIG = Path(__file__).parent / "gtdraw_settings.yaml"
-CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "catalog_hierarchy.yaml"
+CATALOG_HIERARCHY_CONFIG = Path(__file__).parent / "hierarchy.yaml"
+REFERENCES_BIB = Path(__file__).parent.parent / "doc" / "references.bib"
 SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
+_CITE_RE = re.compile(r":cite:p:`([^`]+)`")
 
 
 @contextmanager
@@ -60,8 +66,8 @@ def catalog_ef_file_variants(slug: str, catalog_dir: Path) -> list[dict] | None:
 
     File-naming convention::
 
-        catalog/{slug}.ef            primary variant → label "Default"
-        catalog/{slug}__{suffix}.ef  additional variant → label derived from suffix
+        catalog/games/{slug}.ef            primary variant → label "Default"
+        catalog/games/{slug}__{suffix}.ef  additional variant → label derived from suffix
 
     The suffix part (after ``__``) is title-cased with underscores replaced by
     spaces, e.g. ``fig1__very_wide.ef`` → label "Very Wide".
@@ -230,10 +236,10 @@ def _write_game_entry(
         for variant in ef_variants:
             vkey = variant["variant_key"]
             for ext in ["ef", "tex", "png", "pdf", "svg"]:
-                download_links.append(f":download:`{vkey}.{ext} <../catalog/img/{vkey}.{ext}>`")
+                download_links.append(f":download:`{vkey}.{ext} <../games/img/{vkey}.{ext}>`")
     else:
         for ext in all_exts:
-            download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
+            download_links.append(f":download:`{slug}.{ext} <../games/img/{slug}.{ext}>`")
     f.write(f"{i1}.. dropdown:: Download game and image files\n")
     f.write(f"{i1}   \n")
     f.write(f"{i2}{' '.join(download_links)}\n")
@@ -257,7 +263,7 @@ def _write_game_entry(
             f.write(f"{i4}import pygambit\n")
             f.write(f"{i4}from gtdraw import draw\n")
             if variant["ef_path"].exists():
-                f.write(f'{i4}draw("../catalog/{vkey}.ef", {settings_str})\n')
+                f.write(f'{i4}draw("../games/{vkey}.ef", {settings_str})\n')
             else:
                 f.write(f'{i4}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
             f.write(f"{i2}\n")
@@ -274,13 +280,13 @@ def _write_game_entry(
             )
             curated_ef = catalog_dir / f"{slug}.ef"
             if curated_ef.exists():
-                f.write(f'{i2}draw("../catalog/{slug}.ef", {settings_str})\n')
+                f.write(f'{i2}draw("../games/{slug}.ef", {settings_str})\n')
             else:
                 f.write(f'{i2}draw(pygambit.catalog.load("{slug}"), {settings_str})\n')
         elif row["Format"] == "nfg":
             f.write(
                 f'{i2}draw(pygambit.catalog.load("{slug}"), '
-                f'save_to="../catalog/img/{slug}.png")\n'
+                f'save_to="../games/img/{slug}.png")\n'
             )
         f.write(f"{i1}\n")
 
@@ -373,10 +379,14 @@ def update_makefile(
         if resource_path.is_file() and catalog_dir / "img" not in resource_path.parents:
             rel_path = resource_path.relative_to(catalog_dir)
             slugs.append(rel_path.as_posix())
+    for resource_path in sorted(catalog_dir.rglob("*.json")):
+        if resource_path.is_file():
+            rel_path = resource_path.relative_to(catalog_dir)
+            slugs.append(rel_path.as_posix())
 
     game_files = []
     for slug in slugs:
-        game_files.append(f"catalog/{slug}")
+        game_files.append(f"catalog/games/{slug}")
     game_files.sort()
 
     if am_path.exists():
@@ -400,20 +410,141 @@ def update_makefile(
         print(f"No changes to add to {str(am_path)}")
 
 
+def _format_citation(entry: pybtex.database.Entry) -> str:
+    """Return a short "(Author Year)" citation string for a single bibtex entry."""
+    persons = entry.persons.get("author", [])
+    last_names = [
+        " ".join(str(part) for part in p.prelast_names + p.last_names)
+        for p in persons
+        if p.last_names
+    ]
+    if len(last_names) == 0:
+        author_text = ""
+    elif len(last_names) == 1:
+        author_text = last_names[0]
+    elif len(last_names) == 2:
+        author_text = f"{last_names[0]} and {last_names[1]}"
+    else:
+        author_text = f"{last_names[0]} et al."
+    year = entry.fields.get("year", "")
+    if author_text and year:
+        return f"({author_text} {year})"
+    return f"({author_text or year})"
+
+
+def load_citation_texts(bib_path: Path | None = None) -> dict[str, str]:
+    """Return a mapping from bibtex citation key to a short "(Author Year)" citation string."""
+    bib_path = bib_path or REFERENCES_BIB
+    bib_data = pybtex.database.parse_file(str(bib_path), bib_format="bibtex")
+    return {key: _format_citation(entry) for key, entry in bib_data.entries.items()}
+
+
+def resolve_citations(description: str, citation_texts: dict[str, str]) -> str:
+    """Replace every ``:cite:p:`key``` occurrence in *description* with a short citation string.
+
+    Falls back to ``(key)`` for a key not found in *citation_texts*, so a manifest build
+    never silently drops a citation just because the bib entry couldn't be resolved.
+    """
+    return _CITE_RE.sub(lambda m: citation_texts.get(m.group(1), f"({m.group(1)})"), description)
+
+
+def _hierarchy_breadcrumbs(slug: str, labels: dict[str, str]) -> list[str]:
+    """Return the human-readable label for each ancestor group of *slug*, root to leaf."""
+    breadcrumbs = []
+    prefix = ""
+    for part in slug.split("/")[:-1]:
+        prefix = f"{prefix}/{part}" if prefix else part
+        breadcrumbs.append(_node_label(prefix, labels))
+    return breadcrumbs
+
+
+def _game_stats(game: gbt.Game) -> dict:
+    """Return a subset of *game*'s structural attributes, for catalog-browser filtering."""
+    return {
+        "n_players": len(game.players),
+        "is_tree": game.is_tree,
+        "is_const_sum": game.is_const_sum,
+        "n_strategies": sum(len(game.get_strategies(p)) for p in game.players),
+    }
+
+
+def build_manifest(
+    catalog_dir: Path | None = None,
+    bib_path: Path | None = None,
+) -> list[dict]:
+    """Build the GUI-facing catalog manifest.
+
+    One entry per game, with a citation-resolved plain-text description, hierarchy
+    breadcrumbs (for display/filtering), and a subset of structural stats mirroring
+    :func:`pygambit.catalog.games`'s filter parameters. Does not require gtdraw or a LaTeX
+    toolchain — unlike :func:`generate_rst_table`, it never renders an image.
+    """
+    catalog_dir = catalog_dir or CATALOG_DIR
+    df = _catalog_games(catalog_dir)
+    labels = load_hierarchy_labels()
+    citation_texts = load_citation_texts(bib_path)
+
+    entries = []
+    with _using_catalog_dir(catalog_dir):
+        for _, row in df.iterrows():
+            if row.get("Format") not in SUPPORTED_GAME_FORMATS:
+                continue
+            slug = row["Game"]
+            description = str(row.get("Description", "")).strip()
+            if not description:
+                continue
+            game = gbt.catalog.load(slug)
+            breadcrumbs = _hierarchy_breadcrumbs(slug, labels)
+            entries.append(
+                {
+                    "slug": slug,
+                    "title": row["Title"],
+                    "description": resolve_citations(description, citation_texts),
+                    "format": row["Format"],
+                    "category": breadcrumbs[0] if breadcrumbs else "",
+                    "group": breadcrumbs[-1] if breadcrumbs else "",
+                    "thumbnail": f"img/{slug}.png",
+                    **_game_stats(game),
+                }
+            )
+    entries.sort(key=lambda e: e["slug"])
+    return entries
+
+
+def write_manifest(entries: list[dict], manifest_path: Path | None = None) -> None:
+    """Write *entries* to *manifest_path* as JSON, only touching the file if content changed."""
+    manifest_path = manifest_path or CATALOG_MANIFEST
+    updated_content = json.dumps(entries, indent=2, ensure_ascii=False) + "\n"
+
+    if manifest_path.exists():
+        with open(manifest_path, encoding="utf-8") as f:
+            content = f.read()
+    else:
+        content = ""
+
+    if content != updated_content:
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            f.write(updated_content)
+        print(f"Updated {str(manifest_path)}")
+    else:
+        print(f"No changes to add to {str(manifest_path)}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
             "Update Gambit catalog documentation and build files. "
-            "Always regenerates doc/catalog_table.rst from the current catalog. "
-            "Run from the repo root or build_support/catalog/."
+            "Always regenerates catalog/doc/_table.rst from the current catalog. "
+            "Run from the repo root or catalog/."
         )
     )
     parser.add_argument(
         "--build",
         action="store_true",
         help=(
-            "Also update build_support/catalog/catalog.am with the current list of "
-            "catalog game files. Required after adding or removing games."
+            "Also update catalog/catalog.am with the current list of catalog game files, "
+            "and regenerate catalog/games/manifest.json (the GUI-facing catalog manifest). "
+            "Required after adding, removing, or editing games."
         ),
     )
     parser.add_argument(
@@ -425,13 +556,27 @@ if __name__ == "__main__":
             "gtdraw_settings.yaml."
         ),
     )
+    parser.add_argument(
+        "--skip-table",
+        action="store_true",
+        help=(
+            "Skip regenerating catalog/doc/_table.rst and any missing game images. "
+            "Table/image generation requires a LaTeX toolchain (gtdraw's tex/pdf/png/svg "
+            "functions); use this with --build in contexts (e.g. CI) that only need "
+            "catalog.am checked or updated."
+        ),
+    )
     args = parser.parse_args()
 
-    # Create RST list-table used by doc/catalog.rst
-    df = _catalog_games()
-    _warn_missing_descriptions(df)
-    generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
-    print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
+    if not args.skip_table:
+        # Create RST list-table used by catalog/doc/index.rst
+        df = _catalog_games()
+        _warn_missing_descriptions(df)
+        generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
+        print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
+        # Regenerate the GUI-facing manifest before catalog.am, so a brand-new
+        # manifest.json is already on disk when update_makefile() scans for *.json files.
+        write_manifest(build_manifest())
         # Update the Makefile.am with the current list of catalog files
         update_makefile()

@@ -66,6 +66,11 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
         bool Application::OnInit()
 {
+  // Fixes the name wxStandardPaths derives paths from (e.g. GetDataDir() on Linux,
+  // used to locate the installed games catalog; see src/gui/catalogdata.cc) so it
+  // doesn't depend on how the binary happens to have been invoked or renamed.
+  SetAppName("gambit");
+
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
   m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at

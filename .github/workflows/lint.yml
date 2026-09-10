@@ -63,3 +63,26 @@ jobs:
         run: python -m pip install cython-lint
       - name: cython-lint
         run: cython-lint .
+
+  catalog-am-sync:
+    name: catalog.am and manifest.json are up to date
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install pygambit (editable, picks up catalog/games directly)
+        run: |
+          python -m pip install -v -e ".[doc]"
+          pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
+      - name: Regenerate catalog/catalog.am and catalog/games/manifest.json
+        run: python catalog/build.py --build --skip-table
+      - name: Fail if catalog.am or manifest.json is out of sync with catalog/games
+        run: |
+          if ! git diff --exit-code -- catalog/catalog.am catalog/games/manifest.json; then
+            echo "::error::catalog/catalog.am or catalog/games/manifest.json is out of sync with catalog/games. Run 'python catalog/build.py --build' and commit the result."
+            exit 1
+          fi

@@ -1,4 +1,4 @@
-"""Tests for build_support/catalog/update.py.
+"""Tests for catalog/build.py.
 
 All catalog slugs used here are clearly fictional (e.g. ``"testgroup2000/fig1"``)
 and do not correspond to any game in the real catalog.  This is intentional: the
@@ -7,17 +7,17 @@ are completely isolated from the actual catalog on disk.
 
 Monkeypatching strategy
 -----------------------
-``update.py`` depends on four external resources that are replaced in tests:
+``build.py`` depends on four external resources that are replaced in tests:
 
 1. ``GTDRAW_SETTINGS_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
    ``catalog_gtdraw_settings`` reads controlled config without touching the
-   real ``gtdraw_settings.yaml``.  ``monkeypatch.setattr(update,
+   real ``gtdraw_settings.yaml``.  ``monkeypatch.setattr(build,
    "GTDRAW_SETTINGS_CONFIG", yaml_file)`` replaces the module-level path for
    the duration of a single test and restores it automatically on teardown.
 
 2. ``CATALOG_HIERARCHY_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
    ``load_hierarchy_labels`` reads controlled labels without touching the real
-   ``catalog_hierarchy.yaml``.  Swap via ``monkeypatch.setattr(update,
+   ``hierarchy.yaml``.  Swap via ``monkeypatch.setattr(build,
    "CATALOG_HIERARCHY_CONFIG", yaml_file)``.
 
 3. ``tex`` / ``png`` / ``pdf`` / ``svg``
@@ -33,15 +33,17 @@ Monkeypatching strategy
    temporary directory and avoiding any reads from or writes to the repo.
 """
 
+import json
 import textwrap
 
 import pytest
 
-pytest.importorskip("gtdraw")  # update.py imports gtdraw at module level
+pytest.importorskip("gtdraw")  # build.py imports gtdraw at module level
 pytest.importorskip("yaml")
 
 import pandas as pd  # noqa: E402
-import update  # noqa: E402
+
+import build  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Module-level test fixtures
@@ -89,10 +91,38 @@ def _write_yaml(path, content=_YAML_CONFIG):
     """Write *content* to *path* and return *path*.
 
     Used to create a temporary gtdraw_settings YAML file that can be
-    pointed at via ``monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG",
+    pointed at via ``monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG",
     path)`` without touching the real config file.
     """
     path.write_text(content, encoding="utf-8")
+    return path
+
+
+def _write_efg_game(path, title="Test Game", description=""):
+    """Write a minimal, valid, 2-player extensive-form game file to *path*."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f'EFG 2 R "{title}" {{ "P1" "P2" }}\n'
+        f'"{description}"\n'
+        'p "" 1 1 "" { "l" "r" } 0\n'
+        't "" 1 "" { 1, -1 }\n'
+        't "" 2 "" { 2, -2 }\n',
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_nfg_game(path, title="Test NFG Game", description=""):
+    """Write a minimal, valid, 2-player 2x2 normal-form game file to *path*."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f'NFG 1 R "{title}" {{ "P1" "P2" }}\n\n'
+        '{ { "1" "2" }\n{ "1" "2" }\n}\n'
+        f'"{description}"\n\n'
+        '{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n'
+        "1 2 3 4\n",
+        encoding="utf-8",
+    )
     return path
 
 
@@ -104,7 +134,7 @@ def _efg_row(slug, title="Test EFG Game", description="A description."):
         "Game": slug,
         "Title": title,
         "Description": description,
-        "Download": f":download:`{slug}.efg <../catalog/{slug}.efg>`",
+        "Download": f":download:`{slug}.efg <../games/{slug}.efg>`",
         "Format": "efg",
     }
 
@@ -115,7 +145,7 @@ def _nfg_row(slug, title="Test NFG Game", description="A description."):
         "Game": slug,
         "Title": title,
         "Description": description,
-        "Download": f":download:`{slug}.nfg <../catalog/{slug}.nfg>`",
+        "Download": f":download:`{slug}.nfg <../games/{slug}.nfg>`",
         "Format": "nfg",
     }
 
@@ -164,16 +194,16 @@ class TestCatalogResourceSelection:
         calls = []
 
         def fake_games(**kwargs):
-            calls.append((update.gbt.catalog._CATALOG_RESOURCE, kwargs))
+            calls.append((build.gbt.catalog._CATALOG_RESOURCE, kwargs))
             return _make_df(_efg_row("checkout/game1"))
 
-        monkeypatch.setattr(update.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
-        monkeypatch.setattr(update.gbt.catalog, "games", fake_games)
+        monkeypatch.setattr(build.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
+        monkeypatch.setattr(build.gbt.catalog, "games", fake_games)
 
-        df = update._catalog_games(checkout_dir)
+        df = build._catalog_games(checkout_dir)
 
         assert calls == [(checkout_dir, {"include_descriptions": True})]
-        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
+        assert stale_dir == build.gbt.catalog._CATALOG_RESOURCE
         assert list(df["Game"]) == ["checkout/game1"]
 
     def test_generate_rst_table_uses_requested_catalog_dir_while_rendering(
@@ -186,16 +216,16 @@ class TestCatalogResourceSelection:
         observed = []
 
         def fake_write_tree_level(*args, **kwargs):
-            observed.append(update.gbt.catalog._CATALOG_RESOURCE)
+            observed.append(build.gbt.catalog._CATALOG_RESOURCE)
 
-        monkeypatch.setattr(update.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
-        monkeypatch.setattr(update, "load_hierarchy_labels", lambda: {})
-        monkeypatch.setattr(update, "_write_tree_level", fake_write_tree_level)
+        monkeypatch.setattr(build.gbt.catalog, "_CATALOG_RESOURCE", stale_dir)
+        monkeypatch.setattr(build, "load_hierarchy_labels", lambda: {})
+        monkeypatch.setattr(build, "_write_tree_level", fake_write_tree_level)
 
-        update.generate_rst_table(_make_df(), tmp_path / "out.rst", catalog_dir=checkout_dir)
+        build.generate_rst_table(_make_df(), tmp_path / "out.rst", catalog_dir=checkout_dir)
 
         assert observed == [checkout_dir]
-        assert stale_dir == update.gbt.catalog._CATALOG_RESOURCE
+        assert stale_dir == build.gbt.catalog._CATALOG_RESOURCE
 
 
 # ---------------------------------------------------------------------------
@@ -215,24 +245,24 @@ class TestCatalogGtDrawSettings:
     def test_no_override_returns_defaults(self, tmp_path, monkeypatch):
         """A slug with no matching entry in ``overrides`` returns the defaults verbatim."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_gtdraw_settings("unknowngame/v1")
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = build.catalog_gtdraw_settings("unknowngame/v1")
         assert result == _YAML_DEFAULTS
 
     def test_exact_slug_override_applied(self, tmp_path, monkeypatch):
         """A key in ``overrides`` that exactly matches the slug is merged into defaults."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_gtdraw_settings("testgroup2000/fig2")
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = build.catalog_gtdraw_settings("testgroup2000/fig2")
         assert result["action_label_position"] == pytest.approx(0.4)
         assert result["color_scheme"] == "gambit"  # defaults still present
 
     def test_prefix_slug_override_applied(self, tmp_path, monkeypatch):
         """A group-level key (e.g. ``"testgroup2000"``) matches any slug that starts with it."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
         # "testgroup2000/fig1" is not listed explicitly; it matches the group prefix
-        result = update.catalog_gtdraw_settings("testgroup2000/fig1")
+        result = build.catalog_gtdraw_settings("testgroup2000/fig1")
         assert result["sublevel_scaling"] == 1
 
     def test_specific_key_wins_over_group(self, tmp_path, monkeypatch):
@@ -254,19 +284,19 @@ class TestCatalogGtDrawSettings:
                 sublevel_scaling: 2
         """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_gtdraw_settings("testgroup2000/fig2")
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = build.catalog_gtdraw_settings("testgroup2000/fig2")
         assert result["sublevel_scaling"] == 2
 
     def test_group_override_does_not_bleed_to_other_game(self, tmp_path, monkeypatch):
         """A group-level override applies only to games whose slug starts with that prefix."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
         # "othergroup1999" override sets shared_terminal_depth = False
-        result_other = update.catalog_gtdraw_settings("othergroup1999/fig1")
+        result_other = build.catalog_gtdraw_settings("othergroup1999/fig1")
         assert result_other["shared_terminal_depth"] is False
         # "testgroup2000" has a different override; shared_terminal_depth should be True (default)
-        result_test = update.catalog_gtdraw_settings("testgroup2000/fig1")
+        result_test = build.catalog_gtdraw_settings("testgroup2000/fig1")
         assert result_test["shared_terminal_depth"] is True
 
     def test_no_overrides_section_returns_defaults(self, tmp_path, monkeypatch):
@@ -277,8 +307,8 @@ class TestCatalogGtDrawSettings:
               sublevel_scaling: 0
         """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
-        monkeypatch.setattr(update, "GTDRAW_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_gtdraw_settings("anygame/v1")
+        monkeypatch.setattr(build, "GTDRAW_SETTINGS_CONFIG", yaml_file)
+        result = build.catalog_gtdraw_settings("anygame/v1")
         assert result == {"color_scheme": "gambit", "sublevel_scaling": 0}
 
 
@@ -312,7 +342,7 @@ class TestCatalogEfFileVariants:
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2000/fig1"
         self._game_dir(catalog_dir, slug)
-        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+        assert build.catalog_ef_file_variants(slug, catalog_dir) is None
 
     def test_single_ef_file_returns_none(self, tmp_path):
         """A single curated .ef file → returns None (single image, no tabs needed)."""
@@ -320,7 +350,7 @@ class TestCatalogEfFileVariants:
         slug = "fakevariant2000/fig1"
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1.ef").touch()
-        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+        assert build.catalog_ef_file_variants(slug, catalog_dir) is None
 
     def test_two_ef_files_returns_variant_list(self, tmp_path):
         """Two .ef files → 2-item list with correct label, ef_path, and variant_key."""
@@ -329,7 +359,7 @@ class TestCatalogEfFileVariants:
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1.ef").touch()
         (game_dir / "fig1__wide.ef").touch()
-        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        result = build.catalog_ef_file_variants(slug, catalog_dir)
         assert result is not None
         assert len(result) == 2
         assert {v["label"] for v in result} == {"Default", "Wide"}
@@ -343,7 +373,7 @@ class TestCatalogEfFileVariants:
         slug = "fakevariant2000/fig1"
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1__wide.ef").touch()
-        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        result = build.catalog_ef_file_variants(slug, catalog_dir)
         assert result is not None
         assert len(result) == 2
         assert {v["label"] for v in result} == {"Default", "Wide"}
@@ -357,7 +387,7 @@ class TestCatalogEfFileVariants:
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1.ef").touch()
         (game_dir / "fig1__compact.ef").touch()
-        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        result = build.catalog_ef_file_variants(slug, catalog_dir)
         assert {v["label"] for v in result} == {"Default", "Compact"}
 
     def test_multi_word_suffix_title_cased(self, tmp_path):
@@ -367,7 +397,7 @@ class TestCatalogEfFileVariants:
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1.ef").touch()
         (game_dir / "fig1__very_wide.ef").touch()
-        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        result = build.catalog_ef_file_variants(slug, catalog_dir)
         assert "Very Wide" in {v["label"] for v in result}
 
     def test_file_without_double_underscore_excluded(self, tmp_path):
@@ -382,7 +412,7 @@ class TestCatalogEfFileVariants:
         game_dir = self._game_dir(catalog_dir, slug)
         (game_dir / "fig1.ef").touch()
         (game_dir / "fig1extra.ef").touch()  # no __ separator — must be ignored
-        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+        assert build.catalog_ef_file_variants(slug, catalog_dir) is None
 
 
 # ---------------------------------------------------------------------------
@@ -399,7 +429,7 @@ class TestGenerateRstTable:
     from the real catalog directory.
 
     ``_mock_generates`` uses ``monkeypatch.setattr`` to replace each of the
-    four gtdraw functions in the ``update`` module's namespace with
+    four gtdraw functions in the ``build`` module's namespace with
     a no-op.  Because the replacement is scoped to the test, the originals are
     automatically restored afterward.
 
@@ -416,7 +446,7 @@ class TestGenerateRstTable:
     def _mock_generates(self, monkeypatch):
         """Replace all four gtdraw image-generation functions with no-ops."""
         for name in ["tex", "png", "pdf", "svg"]:
-            monkeypatch.setattr(update, name, self._no_op_generate)
+            monkeypatch.setattr(build, name, self._no_op_generate)
 
     def test_efg_row_produces_rst_with_slug_and_title(self, tmp_path, monkeypatch):
         """An EFG game row appears in the RST with its title, load call, and download links."""
@@ -426,7 +456,7 @@ class TestGenerateRstTable:
         _make_image_files(catalog_dir, slug, "efg")
         df = _make_df(_efg_row(slug, title="Fake Author (2000) Figure 1"))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "Fake Author (2000) Figure 1" in rst
         assert f'pygambit.catalog.load("{slug}")' in rst
@@ -441,9 +471,9 @@ class TestGenerateRstTable:
         _make_image_files(catalog_dir, slug, "nfg")
         df = _make_df(_nfg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        assert f'save_to="../catalog/img/{slug}.png"' in rst
+        assert f'save_to="../games/img/{slug}.png"' in rst
 
     def test_unknown_format_row_is_skipped(self, tmp_path, monkeypatch):
         """A row whose Format is not 'efg' or 'nfg' is silently omitted from the RST."""
@@ -459,7 +489,7 @@ class TestGenerateRstTable:
         }
         df = _make_df(row)
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "Fake Game" not in rst
 
@@ -470,7 +500,7 @@ class TestGenerateRstTable:
         catalog_dir.mkdir()
         df = _make_df(_efg_row("fakeauthor2000/fig1", description=""))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "fakeauthor2000/fig1" not in rst
 
@@ -481,17 +511,17 @@ class TestGenerateRstTable:
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor1999/fig1"
         _make_image_files(catalog_dir, slug, "efg")
-        # Place a curated .ef file alongside the game — this is what update.py checks for
+        # Place a curated .ef file alongside the game — this is what build.py checks for
         curated = catalog_dir / f"{slug}.ef"
         curated.parent.mkdir(parents=True, exist_ok=True)
         curated.touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         # Find the draw( call line in the jupyter-execute block
         draw_call = next(line for line in rst.splitlines() if "draw(" in line)
-        assert f'"../catalog/{slug}.ef"' in draw_call
+        assert f'"../games/{slug}.ef"' in draw_call
         assert "catalog.load" not in draw_call
 
     def test_images_not_regenerated_when_all_exist(self, tmp_path, monkeypatch):
@@ -499,41 +529,41 @@ class TestGenerateRstTable:
         False, none of the gtdraw image-generation functions are called."""
         calls = []
         # Replace generate_* with lambdas that record invocations
-        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(build, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(build, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(build, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(build, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")  # all images already exist
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
         assert calls == []
 
     def test_images_regenerated_when_flag_set(self, tmp_path, monkeypatch):
         """When ``regenerate_images=True``, all four generate functions are called even
         if the image files already exist.
 
-        A curated .ef file is placed in the catalog dir so ``update.py`` uses it
+        A curated .ef file is placed in the catalog dir so ``build.py`` uses it
         as the gtdraw source rather than calling ``gbt.catalog.load``, which
         would require the real catalog to be present.
         """
         calls = []
-        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(build, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(build, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(build, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(build, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")
-        # Place a curated .ef file alongside the game — this is what update.py checks for
+        # Place a curated .ef file alongside the game — this is what build.py checks for
         curated = catalog_dir / f"{slug}.ef"
         curated.parent.mkdir(parents=True, exist_ok=True)
         curated.touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
         assert set(calls) == {"tex", "png", "pdf", "svg"}
 
     def test_multi_variant_efg_produces_tab_set(self, tmp_path, monkeypatch):
@@ -551,7 +581,7 @@ class TestGenerateRstTable:
         (game_dir / "fig1__wide.ef").touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. tab-set::" in rst
         assert ".. tab-item:: Default" in rst
@@ -562,7 +592,7 @@ class TestGenerateRstTable:
         containing both a Default and the custom variant, calling catalog.load for the Default.
         """
         self._mock_generates(monkeypatch)
-        monkeypatch.setattr(update.gbt.catalog, "load", lambda slug: "dummy_game")
+        monkeypatch.setattr(build.gbt.catalog, "load", lambda slug: "dummy_game")
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2001/fig1"
         game_dir = catalog_dir / "fakevariant2001"
@@ -570,13 +600,13 @@ class TestGenerateRstTable:
         (game_dir / "fig1__wide.ef").touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. tab-set::" in rst
         assert ".. tab-item:: Default" in rst
         assert ".. tab-item:: Wide" in rst
         assert 'draw(pygambit.catalog.load("fakevariant2001/fig1")' in rst
-        assert 'draw("../catalog/fakevariant2001/fig1__wide.ef"' in rst
+        assert 'draw("../games/fakevariant2001/fig1__wide.ef"' in rst
 
     def test_single_variant_efg_produces_no_tab_set(self, tmp_path, monkeypatch):
         """A single curated .ef file (or no .ef file) does not produce a ``tab-set``."""
@@ -589,7 +619,7 @@ class TestGenerateRstTable:
         (game_dir / "fig1.ef").touch()  # only one .ef — no tabs
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. tab-set::" not in rst
 
@@ -599,10 +629,10 @@ class TestGenerateRstTable:
         Two variants × four generate functions = eight total calls.
         """
         calls = []
-        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(build, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(build, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(build, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(build, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2001/fig1"
         game_dir = catalog_dir / "fakevariant2001"
@@ -611,17 +641,17 @@ class TestGenerateRstTable:
         (game_dir / "fig1__wide.ef").touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
         assert len(calls) == 8  # 4 functions × 2 variants
 
     def test_per_variant_images_not_regenerated_when_all_exist(self, tmp_path, monkeypatch):
         """If all variant image files already exist and ``regenerate_images`` is False,
         generate functions are not called."""
         calls = []
-        monkeypatch.setattr(update, "tex", lambda *a, **k: calls.append("tex"))
-        monkeypatch.setattr(update, "png", lambda *a, **k: calls.append("png"))
-        monkeypatch.setattr(update, "pdf", lambda *a, **k: calls.append("pdf"))
-        monkeypatch.setattr(update, "svg", lambda *a, **k: calls.append("svg"))
+        monkeypatch.setattr(build, "tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(build, "png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(build, "pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(build, "svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
         slug = "fakevariant2001/fig1"
         game_dir = catalog_dir / "fakevariant2001"
@@ -633,7 +663,7 @@ class TestGenerateRstTable:
             _make_image_files(catalog_dir, vkey, "efg")
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
         assert calls == []
 
 
@@ -641,7 +671,7 @@ class TestGenerateRstTable:
 # Tests for hierarchy helpers and hierarchical RST output
 # ---------------------------------------------------------------------------
 
-# A minimal catalog_hierarchy.yaml used by hierarchy tests.
+# A minimal hierarchy.yaml used by hierarchy tests.
 _HIERARCHY_YAML = textwrap.dedent("""\
     labels:
       cat: "My Category"
@@ -657,8 +687,8 @@ class TestHierarchyHelpers:
         """``load_hierarchy_labels`` returns the labels dict from the YAML."""
         yaml_file = tmp_path / "hier.yaml"
         yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
-        labels = update.load_hierarchy_labels()
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
         assert labels["cat"] == "My Category"
         assert labels["cat/src"] == "My Source"
 
@@ -666,22 +696,22 @@ class TestHierarchyHelpers:
         """``_node_label`` returns the YAML label when the prefix is present."""
         yaml_file = tmp_path / "hier.yaml"
         yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
-        labels = update.load_hierarchy_labels()
-        assert update._node_label("cat", labels) == "My Category"
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._node_label("cat", labels) == "My Category"
 
     def test_node_label_fallback_title_case(self, tmp_path, monkeypatch):
         """``_node_label`` falls back to title-casing the last component."""
         yaml_file = tmp_path / "hier.yaml"
         yaml_file.write_text(_HIERARCHY_YAML, encoding="utf-8")
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", yaml_file)
-        labels = update.load_hierarchy_labels()
-        assert update._node_label("cat/unknownsrc", labels) == "Unknownsrc"
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._node_label("cat/unknownsrc", labels) == "Unknownsrc"
 
     def test_build_slug_tree_single_game(self):
         """A single-slug DataFrame builds a 2-level tree."""
         df = _make_df(_efg_row("cat/src/game1"))
-        tree = update._build_slug_tree(df)
+        tree = build._build_slug_tree(df)
         assert "cat" in tree
         assert "src" in tree["cat"]
         assert "game1" in tree["cat"]["src"]
@@ -689,19 +719,19 @@ class TestHierarchyHelpers:
     def test_build_slug_tree_groups_siblings(self):
         """Two slugs sharing a prefix are grouped under the same intermediate node."""
         df = _make_df(_efg_row("cat/src/game1"), _efg_row("cat/src/game2"))
-        tree = update._build_slug_tree(df)
+        tree = build._build_slug_tree(df)
         assert set(tree["cat"]["src"].keys()) == {"game1", "game2"}
 
     def test_build_slug_tree_skips_unknown_format(self):
         """Rows with unrecognised Format are excluded from the tree."""
         row = {**_efg_row("cat/src/game1"), "Format": "xyz"}
         df = _make_df(row)
-        assert update._build_slug_tree(df) == {}
+        assert build._build_slug_tree(df) == {}
 
     def test_build_slug_tree_skips_empty_description(self):
         """Rows with an empty description are excluded from the tree."""
         df = _make_df(_efg_row("cat/src/game1", description=""))
-        assert update._build_slug_tree(df) == {}
+        assert build._build_slug_tree(df) == {}
 
 
 @pytest.mark.catalog_update
@@ -710,7 +740,7 @@ class TestHierarchicalRstOutput:
 
     def _mock_generates(self, monkeypatch):
         for name in ["tex", "png", "pdf", "svg"]:
-            monkeypatch.setattr(update, name, lambda *a, **k: None)
+            monkeypatch.setattr(build, name, lambda *a, **k: None)
 
     def _write_hierarchy_yaml(self, tmp_path, content=_HIERARCHY_YAML):
         yaml_file = tmp_path / "hier.yaml"
@@ -721,13 +751,13 @@ class TestHierarchicalRstOutput:
         """Top-level category dropdowns carry ``:open:`` so the first level is visible."""
         self._mock_generates(monkeypatch)
         hier_yaml = self._write_hierarchy_yaml(tmp_path)
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
         catalog_dir = tmp_path / "catalog"
         slug = "cat/src/game1"
         _make_image_files(catalog_dir, slug, "efg")
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. dropdown:: My Category\n   :open:" in rst
 
@@ -735,13 +765,13 @@ class TestHierarchicalRstOutput:
         """Sub-category dropdowns do NOT carry ``:open:`` so they are collapsed by default."""
         self._mock_generates(monkeypatch)
         hier_yaml = self._write_hierarchy_yaml(tmp_path)
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
         catalog_dir = tmp_path / "catalog"
         slug = "cat/src/game1"
         _make_image_files(catalog_dir, slug, "efg")
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "   .. dropdown:: My Source\n   \n" in rst
         # Confirm :open: does not immediately follow the second-level dropdown
@@ -752,13 +782,13 @@ class TestHierarchicalRstOutput:
         """Individual game dropdowns carry ``:open:`` so game content is visible on expand."""
         self._mock_generates(monkeypatch)
         hier_yaml = self._write_hierarchy_yaml(tmp_path)
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
         catalog_dir = tmp_path / "catalog"
         slug = "cat/src/game1"
         _make_image_files(catalog_dir, slug, "efg")
         df = _make_df(_efg_row(slug, title="My Game Title"))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert "      .. dropdown:: My Game Title\n         :open:" in rst
 
@@ -766,7 +796,7 @@ class TestHierarchicalRstOutput:
         """Two games sharing a source prefix both appear nested under the source dropdown."""
         self._mock_generates(monkeypatch)
         hier_yaml = self._write_hierarchy_yaml(tmp_path)
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
         catalog_dir = tmp_path / "catalog"
         for slug in ["cat/src/game1", "cat/src/game2"]:
             _make_image_files(catalog_dir, slug, "efg")
@@ -775,7 +805,7 @@ class TestHierarchicalRstOutput:
             _efg_row("cat/src/game2", title="Game Two"),
         )
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. dropdown:: My Category" in rst
         assert "   .. dropdown:: My Source" in rst
@@ -786,13 +816,13 @@ class TestHierarchicalRstOutput:
         """The new output does not use ``.. list-table::`` (replaced by nested dropdowns)."""
         self._mock_generates(monkeypatch)
         hier_yaml = self._write_hierarchy_yaml(tmp_path)
-        monkeypatch.setattr(update, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", hier_yaml)
         catalog_dir = tmp_path / "catalog"
         slug = "cat/src/game1"
         _make_image_files(catalog_dir, slug, "efg")
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
-        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        build.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
         assert ".. list-table::" not in rst
         assert ".. contents::" not in rst
@@ -817,10 +847,10 @@ class TestUpdateMakefile:
         (tmp_path / "subfolder").mkdir()
         (tmp_path / "subfolder" / "matrix.nfg").touch()
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
-        assert "catalog/standalone.efg" in content
-        assert "catalog/subfolder/matrix.nfg" in content
+        assert "catalog/games/standalone.efg" in content
+        assert "catalog/games/subfolder/matrix.nfg" in content
 
     def test_curated_ef_included(self, tmp_path):
         """A curated .ef file committed alongside a game file appears in catalog.am."""
@@ -828,9 +858,9 @@ class TestUpdateMakefile:
         (tmp_path / "fakegame" / "fig1.efg").touch()
         (tmp_path / "fakegame" / "fig1.ef").touch()  # curated layout file
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
-        assert "catalog/fakegame/fig1.ef" in content
+        assert "catalog/games/fakegame/fig1.ef" in content
 
     def test_ef_in_img_dir_excluded(self, tmp_path):
         """Generated .ef files under the img/ subdirectory are excluded from catalog.am."""
@@ -838,7 +868,7 @@ class TestUpdateMakefile:
         img.mkdir(parents=True)
         (img / "fig1.ef").touch()  # generated artifact — should not be distributed
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert "img" not in content
 
@@ -847,7 +877,7 @@ class TestUpdateMakefile:
         (tmp_path / "fakegame.efg_2").touch()  # hidden/renamed file
         (tmp_path / "README.txt").touch()
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert "efg_2" not in content
         assert "README" not in content
@@ -861,15 +891,15 @@ class TestUpdateMakefile:
         """
         (tmp_path / "standalone.efg").touch()
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         mtime_after_first_write = am.stat().st_mtime
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         assert am.stat().st_mtime == mtime_after_first_write
 
     def test_empty_catalog_produces_valid_am(self, tmp_path):
         """An empty catalog directory produces a catalog.am with a valid (empty) CATALOG_FILES."""
         am = tmp_path / "catalog.am"
-        update.update_makefile(catalog_dir=tmp_path, am_path=am)
+        build.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert content.startswith("CATALOG_FILES =")
 
@@ -885,7 +915,7 @@ class TestWarnMissingDescriptions:
     def test_game_without_description_warns(self, capsys):
         """A game with an empty description produces a WARNING on stderr."""
         df = _make_df(_efg_row("journals/nobody2025/fig1", description=""))
-        update._warn_missing_descriptions(df)
+        build._warn_missing_descriptions(df)
         err = capsys.readouterr().err
         assert "WARNING" in err
         assert "journals/nobody2025/fig1" in err
@@ -893,6 +923,211 @@ class TestWarnMissingDescriptions:
     def test_game_with_description_does_not_warn(self, capsys):
         """A game with a non-empty description produces no output."""
         df = _make_df(_efg_row("journals/nobody2025/fig1"))
-        update._warn_missing_descriptions(df)
+        build._warn_missing_descriptions(df)
         err = capsys.readouterr().err
         assert err == ""
+
+
+# ---------------------------------------------------------------------------
+# Tests for the GUI-facing manifest (citation resolution, stats, build/write)
+# ---------------------------------------------------------------------------
+
+_TEST_BIB = textwrap.dedent("""\
+    @article{Solo2020,
+      author = {Solo, A.},
+      year = {2020},
+    }
+    @article{Duo2019,
+      author = {First, A. and Second, B.},
+      year = {2019},
+    }
+    @article{Trio2018,
+      author = {One, A. and Two, B. and Three, C.},
+      year = {2018},
+    }
+    @article{VonParticle2021,
+      author = {von Particle, X.},
+      year = {2021},
+    }
+""")
+
+
+def _write_bib(path, content=_TEST_BIB):
+    path.write_text(content, encoding="utf-8")
+    return path
+
+
+@pytest.mark.catalog_update
+class TestCitationResolution:
+    """Tests for ``load_citation_texts`` and ``resolve_citations``."""
+
+    def test_single_author(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Solo2020"] == "(Solo 2020)"
+
+    def test_two_authors(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Duo2019"] == "(First and Second 2019)"
+
+    def test_three_or_more_authors_uses_et_al(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Trio2018"] == "(One et al. 2018)"
+
+    def test_von_particle_kept_with_last_name(self, tmp_path):
+        """A "von"-style name particle must not be dropped (gambit's own bibliography
+        is full of these, e.g. "von Stengel")."""
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["VonParticle2021"] == "(von Particle 2021)"
+
+    def test_resolve_citations_substitutes_known_keys(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        result = build.resolve_citations("See :cite:p:`Solo2020` for details.", texts)
+        assert result == "See (Solo 2020) for details."
+
+    def test_resolve_citations_substitutes_multiple_keys(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        result = build.resolve_citations(
+            "Compare :cite:p:`Solo2020` and :cite:p:`Duo2019`.", texts
+        )
+        assert result == "Compare (Solo 2020) and (First and Second 2019)."
+
+    def test_resolve_citations_falls_back_for_unknown_key(self):
+        result = build.resolve_citations("See :cite:p:`Missing2099`.", {})
+        assert result == "See (Missing2099)."
+
+    def test_resolve_citations_no_markup_is_unchanged(self):
+        assert build.resolve_citations("Plain text, no citations.", {}) == (
+            "Plain text, no citations."
+        )
+
+
+@pytest.mark.catalog_update
+class TestHierarchyBreadcrumbs:
+    """Tests for ``_hierarchy_breadcrumbs``."""
+
+    def test_breadcrumbs_use_yaml_labels(self, tmp_path, monkeypatch):
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("cat/src/game1", labels) == [
+            "My Category",
+            "My Source",
+        ]
+
+    def test_breadcrumbs_fallback_for_unknown_prefix(self, tmp_path, monkeypatch):
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("other/unknown_group/game1", labels) == [
+            "Other",
+            "Unknown Group",
+        ]
+
+    def test_breadcrumbs_empty_for_top_level_slug(self, tmp_path, monkeypatch):
+        """A slug with no parent directories has no breadcrumbs."""
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("game1", labels) == []
+
+
+@pytest.mark.catalog_update
+class TestGameStats:
+    """Tests for ``_game_stats``."""
+
+    def test_stats_of_extensive_form_game(self, tmp_path):
+        """Player 1 has 2 strategies (one decision, two actions); player 2 has no
+        decision nodes at all, so the reduced normal form gives them a single
+        trivial strategy — 2 + 1 = 3 total, not 2x2=4."""
+        efg_path = _write_efg_game(tmp_path / "game1.efg")
+        game = build.gbt.read_efg(str(efg_path))
+        stats = build._game_stats(game)
+        assert stats == {
+            "n_players": 2,
+            "is_tree": True,
+            "is_const_sum": True,
+            "n_strategies": 3,
+        }
+
+    def test_stats_of_strategic_form_game(self, tmp_path):
+        nfg_path = _write_nfg_game(tmp_path / "game1.nfg")
+        game = build.gbt.read_nfg(str(nfg_path))
+        stats = build._game_stats(game)
+        assert stats["n_players"] == 2
+        assert stats["is_tree"] is False
+        assert stats["n_strategies"] == 4
+
+
+@pytest.mark.catalog_update
+class TestBuildManifest:
+    """Tests for ``build_manifest`` and ``write_manifest``."""
+
+    def _make_catalog(self, tmp_path):
+        """Build a small fake catalog dir with one EFG and one NFG game."""
+        catalog_dir = tmp_path / "catalog"
+        _write_efg_game(
+            catalog_dir / "books" / "author2020" / "game1.efg",
+            title="Tree Game",
+            description="A tree game from :cite:p:`Solo2020`.",
+        )
+        _write_nfg_game(
+            catalog_dir / "journals" / "geb" / "author2019" / "game2.nfg",
+            title="Table Game",
+            description="A table game from :cite:p:`Duo2019`.",
+        )
+        return catalog_dir
+
+    def test_build_manifest_entries(self, tmp_path):
+        catalog_dir = self._make_catalog(tmp_path)
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        by_slug = {e["slug"]: e for e in entries}
+        assert set(by_slug) == {"books/author2020/game1", "journals/geb/author2019/game2"}
+
+        efg_entry = by_slug["books/author2020/game1"]
+        assert efg_entry["title"] == "Tree Game"
+        assert efg_entry["description"] == "A tree game from (Solo 2020)."
+        assert efg_entry["format"] == "efg"
+        assert efg_entry["is_tree"] is True
+        assert efg_entry["thumbnail"] == "img/books/author2020/game1.png"
+        assert efg_entry["category"] == "Books"
+
+        nfg_entry = by_slug["journals/geb/author2019/game2"]
+        assert nfg_entry["format"] == "nfg"
+        assert nfg_entry["is_tree"] is False
+        assert nfg_entry["description"] == "A table game from (First and Second 2019)."
+
+    def test_build_manifest_skips_games_without_description(self, tmp_path):
+        catalog_dir = tmp_path / "catalog"
+        _write_efg_game(catalog_dir / "nodesc" / "game1.efg", description="")
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        assert entries == []
+
+    def test_build_manifest_sorted_by_slug(self, tmp_path):
+        catalog_dir = self._make_catalog(tmp_path)
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        assert [e["slug"] for e in entries] == sorted(e["slug"] for e in entries)
+
+    def test_write_manifest_creates_file(self, tmp_path):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        assert json.loads(manifest_path.read_text(encoding="utf-8")) == [{"slug": "a/b"}]
+
+    def test_write_manifest_no_op_when_unchanged(self, tmp_path, capsys):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        capsys.readouterr()
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        assert "No changes" in capsys.readouterr().out
+
+    def test_write_manifest_updates_on_change(self, tmp_path, capsys):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        capsys.readouterr()
+        build.write_manifest([{"slug": "a/c"}], manifest_path=manifest_path)
+        assert "Updated" in capsys.readouterr().out

@@ -41,7 +41,7 @@ See the :ref:`algorithm description <enummixed>` for full details.
 Computing the equilibria, in mixed strategies, of
 the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-enummixed catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-enummixed catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by enumerating extreme points
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
@@ -53,7 +53,7 @@ In fact, this game has a one-dimensional continuum of
 equilibria.  This fact can be observed by examining the connectedness
 information using the ``-c`` switch::
 
-   $ gambit-enummixed -c catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-enummixed -c catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by enumerating extreme points
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

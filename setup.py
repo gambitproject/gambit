@@ -84,7 +84,7 @@ class GambitBuildPy(setuptools.command.build_py.build_py):
     def run(self) -> None:
         super().run()
 
-        catalog_source = pathlib.Path("catalog")
+        catalog_source = pathlib.Path("catalog") / "games"
         catalog_target = pathlib.Path(self.build_lib) / "pygambit/catalog_data"
         if catalog_target.exists():
             shutil.rmtree(catalog_target)

@@ -1,14 +1,12 @@
-.. _catalog:
+.. _catalog-generators:
 
-Catalog of games
-================
+Generating games for the catalog
+=================================
 
-Below is a complete list of games included in Gambit's catalog.
-Check out the :ref:`pygambit API reference <pygambit-catalog>` for instructions on how to search and load these games in Python, and the :ref:`Updating the games catalog <updating-catalog>` guide for instructions on how to contribute new games to the catalog.
-Games from the OpenSpiel library are also available; see :ref:`Loading OpenSpiel games <catalog-openspiel>`.
-Games can also be generated on the fly from the GAMUT suite; see :ref:`Generating GAMUT games <catalog-gamut>`.
-
-.. include:: catalog_table.rst
+Alongside the curated catalog of games (built and hosted separately; see the
+`catalog's developer guide <https://gambit-catalog.readthedocs.io/en/latest/developer.html>`_
+for how to contribute new games), pygambit can generate games on the fly from two
+external sources: the OpenSpiel library and the GAMUT suite.
 
 .. _catalog-openspiel:
 

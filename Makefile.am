@@ -20,7 +20,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-include build_support/catalog/catalog.am
+include catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/GAMBIT_VERSION \
@@ -357,6 +357,16 @@ endif
 
 if WITH_GUI
 bin_PROGRAMS = gambit
+
+# Install the games catalog alongside the GUI so its catalog browser can find it via
+# wxStandardPaths::GetDataDir() (see src/gui/catalogdata.cc). Only the GUI build needs
+# this; a CLI-only build has nothing that reads it.
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/catalog
+	cp -r $(top_srcdir)/catalog/games/. $(DESTDIR)$(pkgdatadir)/catalog/
+
+uninstall-local:
+	rm -rf $(DESTDIR)$(pkgdatadir)/catalog
 endif
 
 # Define VERSION for all C++ compilations and set include paths
@@ -386,12 +396,16 @@ gambit_SOURCES = \
 	src/gui/analysis.h \
 	src/gui/app.cc \
 	src/gui/app.h \
+	src/gui/catalogdata.cc \
+	src/gui/catalogdata.h \
 	src/gui/editlabel.cc \
 	src/gui/editlabel.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
+	src/gui/dlcatalog.cc \
+	src/gui/dlcatalog.h \
 	src/gui/dleditmove.cc \
 	src/gui/dleditmove.h \
 	src/gui/dleditnode.cc \
@@ -454,7 +468,9 @@ gambit_SOURCES = \
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
-gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
+# GAMBIT_SRCDIR lets the GUI find catalog/games in a developer's own checkout when
+# running straight out of the build tree, without needing any packaging step.
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -DGAMBIT_SRCDIR=\"$(abs_top_srcdir)\"
 
 gambit_LDADD_LIBS = libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
@@ -479,6 +495,7 @@ osx-bundle:
 	-mkdir Gambit.app/Contents/Resources
 	cp build_support/osx/Info.plist Gambit.app/Contents
 	cp ${top_srcdir}/build_support/osx/gambit.icns Gambit.app/Contents/Resources/gambit.icns
+	cp -r ${top_srcdir}/catalog/games Gambit.app/Contents/Resources/catalog
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
@@ -489,8 +506,13 @@ osx-dmg:  osx-bundle
 msw-msi:
 	-mkdir installer
 	cp gambit* installer
-	candle build_support/msw/gambit.wxs
-	light -ext WixUIExtension gambit.wixobj
+	-rm -rf installer/catalog
+	cp -r ${top_srcdir}/catalog/games installer/catalog
+	heat dir installer/catalog -cg CatalogFiles -gg -scom -sreg -sfrag -srd \
+	  -dr CATALOGFOLDER -var var.CatalogSourceDir -out build_support/msw/catalog.wxs
+	candle -arch x64 -dCatalogSourceDir=installer/catalog \
+	  build_support/msw/gambit.wxs build_support/msw/catalog.wxs
+	light -ext WixUIExtension -out gambit.msi gambit.wixobj catalog.wixobj
 
 clang-tidy:
 	clang-tidy ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion
