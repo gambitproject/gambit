@@ -550,60 +550,137 @@ cdef extern from "callback.h":
     EnumPolyEventCallbackType[T] MakeEnumPolyEventCallback[T](object)
 
 cdef extern from "solvers/enumpure/enumpure.h":
-    stdlist[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(
+    cdef cppclass c_EnumPureStrategyResult "Gambit::Nash::EnumPureStrategyResult":
+        stdlist[c_MixedStrategyProfile[c_Rational]] equilibria
+        bool success
+    cdef cppclass c_EnumPureAgentResult "Gambit::Nash::EnumPureAgentResult":
+        stdlist[c_MixedBehaviorProfile[c_Rational]] equilibria
+        bool success
+    c_EnumPureStrategyResult EnumPureStrategySolve(
             c_Game, StrategyCallbackType[c_Rational]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(
+    c_EnumPureAgentResult EnumPureAgentSolve(
             c_Game, BehaviorCallbackType[c_Rational]
     ) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    stdlist[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](
+    cdef cppclass c_EnumMixedStrategyResult "Gambit::Nash::EnumMixedStrategyResult"[T]:
+        stdlist[c_MixedStrategyProfile[T]] equilibria
+        bool success
+    c_EnumMixedStrategyResult[T] EnumMixedStrategySolve[T](
             c_Game, StrategyCallbackType[T]
     ) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
-    stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
+    cdef cppclass c_LcpStrategyResult "Gambit::Nash::LcpStrategyResult"[T]:
+        stdlist[c_MixedStrategyProfile[T]] equilibria
+        bool success
+    cdef cppclass c_LcpBehaviorResult "Gambit::Nash::LcpBehaviorResult"[T]:
+        optional[c_MixedBehaviorProfile[T]] equilibrium
+        bool success
+    c_LcpStrategyResult[T] LcpStrategySolve[T](
             c_Game, optional[size_t] p_stopAfter, int p_maxDepth, StrategyCallbackType[T]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
+    c_LcpBehaviorResult[T] LcpBehaviorSolve[T](
             c_Game, BehaviorCallbackType[T]
     ) except +RuntimeError
 
 cdef extern from "solvers/lp/lp.h":
-    stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](
+    cdef cppclass c_LpStrategyResult "Gambit::Nash::LpStrategyResult"[T]:
+        optional[c_MixedStrategyProfile[T]] equilibrium
+        bool success
+    cdef cppclass c_LpBehaviorResult "Gambit::Nash::LpBehaviorResult"[T]:
+        optional[c_MixedBehaviorProfile[T]] equilibrium
+        bool success
+    c_LpStrategyResult[T] LpStrategySolve[T](
             c_Game, StrategyCallbackType[T]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](
+    c_LpBehaviorResult[T] LpBehaviorSolve[T](
             c_Game, BehaviorCallbackType[T]
     ) except +RuntimeError
 
+cdef extern from "solvers/liap/liap.h" namespace "Gambit::Nash":
+    cdef enum class c_LiapTerminationReason "Gambit::Nash::LiapTerminationReason":
+        Converged
+        MinimizerFailed
+        RegretTargetNotReached
+
 cdef extern from "solvers/liap/liap.h":
-    stdlist[c_MixedStrategyProfile[double]] LiapStrategySolve(
+    cdef cppclass c_LiapStrategyResult "Gambit::Nash::LiapStrategyResult":
+        optional[c_MixedStrategyProfile[double]] equilibrium
+        bool success
+        c_LiapTerminationReason reason
+    cdef cppclass c_LiapAgentResult "Gambit::Nash::LiapAgentResult":
+        optional[c_MixedBehaviorProfile[double]] equilibrium
+        bool success
+        c_LiapTerminationReason reason
+    c_LiapStrategyResult LiapStrategySolve(
             c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN,
             StrategyCallbackType[double], LiapEventCallbackType[c_MixedStrategyProfile[double]]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[double]] LiapAgentSolve(
+    c_LiapAgentResult LiapAgentSolve(
             c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN,
             BehaviorCallbackType[double], LiapEventCallbackType[c_MixedBehaviorProfile[double]]
     ) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
-    stdlist[c_MixedStrategyProfile[c_Rational]] SimpdivStrategySolve(
+    cdef cppclass c_SimpdivStrategyResult "Gambit::Nash::SimpdivStrategyResult":
+        optional[c_MixedStrategyProfile[c_Rational]] equilibrium
+        bool success
+    c_SimpdivStrategyResult SimpdivStrategySolve(
             c_MixedStrategyProfile[c_Rational] start, c_Rational p_maxregret, int p_gridResize,
             int p_leashLength, StrategyCallbackType[c_Rational], SimpdivEventCallbackType
     ) except +RuntimeError
 
+cdef extern from "solvers/gtracer/gtracer.h" namespace "Gambit::gametracer":
+    cdef enum class c_IPATerminationReason "Gambit::gametracer::IPATerminationReason":
+        Converged
+        MaxIterationsReached
+        NonfiniteStrategy
+
 cdef extern from "solvers/ipa/ipa.h":
-    stdlist[c_MixedStrategyProfile[double]] IPAStrategySolve(
+    cdef cppclass c_IPAStrategyResult "Gambit::Nash::IPAStrategyResult":
+        optional[c_MixedStrategyProfile[double]] equilibrium
+        bool success
+        c_IPATerminationReason reason
+    c_IPAStrategyResult IPAStrategySolve(
             c_MixedStrategyProfile[double], StrategyCallbackType[double], IPAEventCallbackType
     ) except +RuntimeError
 
+cdef extern from "solvers/gtracer/gtracer.h" namespace "Gambit::gametracer":
+    cdef enum class c_GNMTerminationReason "Gambit::gametracer::GNMTerminationReason":
+        NoMoreBoundaries
+        NoNextBoundary
+        NonfiniteStrategy
+        LambdaOutOfRange
+        ExcessiveError
+
 cdef extern from "solvers/gnm/gnm.h":
-    stdlist[c_MixedStrategyProfile[double]] GNMStrategySolve(
+    cdef cppclass c_GNMStrategyResult "Gambit::Nash::GNMStrategyResult":
+        stdlist[c_MixedStrategyProfile[double]] equilibria
+        bool success
+        c_GNMTerminationReason reason
+    c_GNMStrategyResult GNMStrategySolve(
             c_MixedStrategyProfile[double], double p_endLambda, int p_steps,
             int p_localNewtonInterval, int p_localNewtonMaxits,
             StrategyCallbackType[double], GNMEventCallbackType
+    ) except +RuntimeError
+
+cdef extern from "solvers/hp/hp.h" namespace "Gambit::Nash":
+    cdef enum class c_HPTerminationReason "Gambit::Nash::HPTerminationReason":
+        Converged
+        TraceFailed
+        PolishFailed
+        RegretTargetNotReached
+
+cdef extern from "solvers/hp/hp.h":
+    cdef cppclass c_HPStrategyResult "Gambit::Nash::HPStrategyResult":
+        optional[c_MixedStrategyProfile[double]] equilibrium
+        bool success
+        c_HPTerminationReason reason
+    c_HPStrategyResult HPStrategySolve(
+            c_MixedStrategyProfile[double], double, StrategyCallbackType[double],
+            HPEventCallbackType
     ) except +RuntimeError
 
 cdef extern from "solvers/nashsupport/nashsupport.h":
@@ -612,11 +689,17 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
         optional[c_StrategySupportProfile] Next() except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
-    stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
+    cdef cppclass c_EnumPolyStrategyResult "Gambit::Nash::EnumPolyStrategyResult":
+        stdlist[c_MixedStrategyProfile[double]] equilibria
+        bool success
+    cdef cppclass c_EnumPolyBehaviorResult "Gambit::Nash::EnumPolyBehaviorResult":
+        stdlist[c_MixedBehaviorProfile[double]] equilibria
+        bool success
+    c_EnumPolyStrategyResult EnumPolyStrategySolve(
             c_Game, optional[size_t], float, size_t,
             StrategyCallbackType[double], EnumPolyEventCallbackType[c_StrategySupportProfile]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
+    c_EnumPolyBehaviorResult EnumPolyBehaviorSolve(
             c_Game, optional[size_t], float, size_t,
             BehaviorCallbackType[double], EnumPolyEventCallbackType[c_BehaviorSupportProfile]
     ) except +RuntimeError
@@ -642,16 +725,35 @@ cdef extern from "solvers/logit/logit.h":
         int size() except +
         double getitem "operator[]"(int) except +IndexError
 
+    cdef enum class c_LogitTerminationReason "Gambit::LogitTerminationReason":
+        Converged
+        RegretTargetNotReached
+
+    cdef cppclass c_LogitStrategyResult "Gambit::LogitStrategyResult":
+        optional[c_MixedStrategyProfile[double]] equilibrium
+        bool success
+        c_LogitTerminationReason reason
+    cdef cppclass c_LogitBehaviorResult "Gambit::LogitBehaviorResult":
+        optional[c_MixedBehaviorProfile[double]] equilibrium
+        bool success
+        c_LogitTerminationReason reason
+
+    c_LogitStrategyResult LogitStrategySolveEquilibrium(
+            c_LogitQREMixedStrategyProfile, double, double, double,
+            LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
+    ) except +RuntimeError
+    c_LogitBehaviorResult LogitBehaviorSolveEquilibrium(
+            c_LogitQREMixedBehaviorProfile, double, double, double,
+            LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
+    ) except +RuntimeError
+
 
 cdef extern from "nash.h":
     pair[
-        stdlist[c_MixedStrategyProfile[T]], stdlist[stdlist[c_MixedStrategyProfile[T]]]
+        c_EnumMixedStrategyResult[T], stdlist[stdlist[c_MixedStrategyProfile[T]]]
     ] EnumMixedStrategySolveCliquesWrapper[T](
             c_Game, StrategyCallbackType[T]
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
-            c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
-    ) except +
     stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
@@ -662,9 +764,6 @@ cdef extern from "nash.h":
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
             shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double,
             LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
-    ) except +
-    stdlist[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
-            c_Game, double, double, double, LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
     stdlist[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
@@ -677,6 +776,3 @@ cdef extern from "nash.h":
             shared_ptr[c_MixedStrategyProfile[double]], bool, double, double,
             LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +
-    stdlist[c_MixedStrategyProfile[double]] HPStrategySolveWrapper(
-            c_MixedStrategyProfile[double], double, HPEventCallbackType
-    ) except +RuntimeError

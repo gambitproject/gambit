@@ -29,12 +29,22 @@ def _action_prob(profile: gbt.MixedBehaviorProfile, history: gbt.History, label:
     return profile[gbt.H.path(*history.actions)][label]
 
 
+def _equilibria(result: gbt.nash.NashResultBase) -> list:
+    """Normalize a Nash result's found equilibria to a list, regardless of whether the
+    underlying method can produce many (`result.equilibria`) or at most one
+    (`result.equilibrium`).
+    """
+    if hasattr(result, "equilibria"):
+        return result.equilibria
+    return [result.equilibrium] if result.equilibrium is not None else []
+
+
 @dataclasses.dataclass
 class EquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashResultBase]
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
     prob_tol: float | gbt.Rational = Q(0)
@@ -46,7 +56,7 @@ class EquilibriumTestCaseWithStart:
     that needs a starting profile."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashResultBase]
     start_data: None | list
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
@@ -1608,9 +1618,10 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
@@ -1645,14 +1656,14 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
 
     rational_result = solver(_one_hot_perturbation(rational=True))
     double_result = solver(_one_hot_perturbation(rational=False))
+    rational_equilibria = _equilibria(rational_result)
+    double_equilibria = _equilibria(double_result)
     with subtests.test("perturbation converted to double precision"):
-        assert isinstance(
-            rational_result.parameters["perturbation"], gbt.MixedStrategyProfileDouble
-        )
+        assert isinstance(rational_result.perturbation, gbt.MixedStrategyProfileDouble)
     with subtests.test("number of equilibria found"):
-        assert len(rational_result.equilibria) == len(double_result.equilibria)
+        assert len(rational_equilibria) == len(double_equilibria)
     for i, (rational_eq, double_eq) in enumerate(
-        zip(rational_result.equilibria, double_result.equilibria, strict=True)
+        zip(rational_equilibria, double_equilibria, strict=True)
     ):
         with subtests.test(eq=i, check="strategy_profile"):
             for player in game.players:
@@ -1765,9 +1776,10 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
     game = test_case.factory()
     start = game.mixed_strategy_profile(**test_case.start_data)
     result = test_case.solver(start)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
@@ -3245,9 +3257,10 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3317,9 +3330,10 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
 
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, eq in enumerate(result.equilibria):
+        assert len(equilibria) == len(test_case.expected)
+    for i, eq in enumerate(equilibria):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3464,9 +3478,10 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.agent_max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3532,9 +3547,10 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
     game = test_case.factory()
     start = game.mixed_behavior_profile(**test_case.start_data)
     result = test_case.solver(start)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.agent_max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):

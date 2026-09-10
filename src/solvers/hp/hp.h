@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <list>
+#include <optional>
 #include <variant>
 
 #include "solvers/nash.h"
@@ -42,9 +43,25 @@ using HPEventCallbackType = std::function<void(const HPEvent &)>;
 
 inline void NullHPEventCallback(const HPEvent &) {}
 
+/// @brief Why a call to HPStrategySolve() did not return an accepted equilibrium
+enum class HPTerminationReason {
+  Converged,    // the accepted equilibrium satisfies maxRegret
+  TraceFailed,  // the homotopy path tracer could not make progress towards t=1
+  PolishFailed, // the tracer reached t=1, but polishing to reduce regret there did not converge
+  RegretTargetNotReached, // polishing converged, but the resulting point still exceeds maxRegret
+};
+
+/// @brief The result of computing a Nash equilibrium via the homotopy method of
+///        Herings and Peeters (2001)
+struct HPStrategyResult {
+  std::optional<MixedStrategyProfile<double>> equilibrium;
+  bool success{false};
+  HPTerminationReason reason{HPTerminationReason::TraceFailed};
+};
+
 /// @brief Compute a Nash equilibrium of a game using the homotopy method of
 /// Herings and Peeters (2001)
-std::list<MixedStrategyProfile<double>>
+HPStrategyResult
 HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret = 1.0e-8,
                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                 HPEventCallbackType p_onEvent = NullHPEventCallback,

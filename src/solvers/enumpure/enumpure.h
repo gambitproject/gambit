@@ -42,11 +42,17 @@ inline bool IsNash(const PureStrategyProfile &p_profile)
   return true;
 }
 
+/// @brief The result of enumerating pure-strategy Nash equilibria of a game
+struct EnumPureStrategyResult {
+  std::list<MixedStrategyProfile<Rational>> equilibria;
+  bool success{true};
+};
+
 ///
 /// Enumerate pure-strategy Nash equilibria of a game.  By definition,
 /// pure-strategy equilibrium uses the strategic representation of a game.
 ///
-inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
+inline EnumPureStrategyResult EnumPureStrategySolve(
     const Game &p_game,
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
     const CancelToken &p_cancel = CancelToken())
@@ -55,15 +61,15 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::list<MixedStrategyProfile<Rational>> solutions;
+  EnumPureStrategyResult result;
   for (const auto &profile : StrategyContingencies(p_game)) {
     p_cancel.Check();
     if (IsNash(profile)) {
-      solutions.push_back(profile->ToMixedStrategyProfile());
-      p_onEquilibrium(solutions.back());
+      result.equilibria.push_back(profile->ToMixedStrategyProfile());
+      p_onEquilibrium(result.equilibria.back());
     }
   }
-  return solutions;
+  return result;
 }
 
 inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
@@ -83,6 +89,12 @@ inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
   return true;
 }
 
+/// @brief The result of enumerating pure-strategy agent Nash equilibria of a game
+struct EnumPureAgentResult {
+  std::list<MixedBehaviorProfile<Rational>> equilibria;
+  bool success{true};
+};
+
 ///
 /// Enumerate pure-strategy agent Nash equilibria of a game.  This uses
 /// the extensive representation.  Agent Nash equilibria are not necessarily
@@ -90,19 +102,19 @@ inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-inline std::list<MixedBehaviorProfile<Rational>>
+inline EnumPureAgentResult
 EnumPureAgentSolve(const Game &p_game,
                    BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
 {
-  std::list<MixedBehaviorProfile<Rational>> solutions;
+  EnumPureAgentResult result;
   const BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (IsAgentNash(citer)) {
-      solutions.push_back(citer.ToMixedBehaviorProfile());
-      p_onEquilibrium(solutions.back());
+      result.equilibria.push_back(citer.ToMixedBehaviorProfile());
+      p_onEquilibrium(result.equilibria.back());
     }
   }
-  return solutions;
+  return result;
 }
 
 } // end namespace Gambit::Nash

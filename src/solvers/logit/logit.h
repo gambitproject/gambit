@@ -24,6 +24,7 @@
 #define GAMBIT_SOLVERS_LOGIT_LOGIT_H
 
 #include <functional>
+#include <optional>
 #include <variant>
 
 #include "solvers/nash.h"
@@ -92,6 +93,15 @@ template <class QRE> using LogitEventCallbackType = std::function<void(const Log
 
 template <class QRE> void NullLogitEventCallback(const LogitEvent<QRE> &) {}
 
+/// @brief Why a call to LogitStrategySolveEquilibrium()/LogitBehaviorSolveEquilibrium() did
+///        not return an accepted equilibrium
+enum class LogitTerminationReason {
+  Converged,              // the traced point satisfies the requested regret criterion
+  RegretTargetNotReached, // tracing along the principal branch ended without reaching that
+                          // criterion, whether from stalling near a bifurcation or simply running
+                          // out of path
+};
+
 std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
     const LogitQREMixedStrategyProfile &p_start, double p_regret,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
@@ -99,6 +109,36 @@ std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
         NullLogitEventCallback<LogitQREMixedStrategyProfile>,
     const CancelToken &p_cancel = CancelToken());
+
+/// @brief The result of tracing the logit QRE correspondence for a strategic game to an
+///        accepted approximate Nash equilibrium
+struct LogitStrategyResult {
+  std::optional<MixedStrategyProfile<double>> equilibrium;
+  bool success{false};
+  LogitTerminationReason reason{LogitTerminationReason::RegretTargetNotReached};
+};
+
+/// @brief Trace the principal branch of the logit QRE correspondence for a strategic game,
+///        starting at lambda=0, to an approximate Nash equilibrium satisfying \p p_regret
+inline LogitStrategyResult LogitStrategySolveEquilibrium(
+    const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_firstStep,
+    double p_maxAccel,
+    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
+        NullLogitEventCallback<LogitQREMixedStrategyProfile>,
+    PathTracer::TraceDirection p_direction = PathTracer::TraceDirection::Positive,
+    const CancelToken &p_cancel = CancelToken())
+{
+  const auto profiles =
+      LogitStrategySolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
+                         Nash::NullStrategyCallback<double>, p_onEvent, p_cancel);
+  const MixedStrategyProfile<double> &candidate = profiles.back().GetProfile();
+  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
+  if (candidate.GetMaxRegret() > regret) {
+    return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached};
+  }
+  return {candidate, true, LogitTerminationReason::Converged};
+}
 
 std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
     const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
@@ -122,6 +162,36 @@ std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
         NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
     const CancelToken &p_cancel = CancelToken());
+
+/// @brief The result of tracing the logit QRE correspondence for an extensive game to an
+///        accepted approximate Nash equilibrium
+struct LogitBehaviorResult {
+  std::optional<MixedBehaviorProfile<double>> equilibrium;
+  bool success{false};
+  LogitTerminationReason reason{LogitTerminationReason::RegretTargetNotReached};
+};
+
+/// @brief Trace the principal branch of the logit QRE correspondence for an extensive game,
+///        starting at lambda=0, to an approximate Nash equilibrium satisfying \p p_regret
+inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
+    const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_firstStep,
+    double p_maxAccel,
+    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
+        NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
+    PathTracer::TraceDirection p_direction = PathTracer::TraceDirection::Positive,
+    const CancelToken &p_cancel = CancelToken())
+{
+  const auto profiles =
+      LogitBehaviorSolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
+                         Nash::NullBehaviorCallback<double>, p_onEvent, p_cancel);
+  const MixedBehaviorProfile<double> &candidate = profiles.back().GetProfile();
+  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
+  if (candidate.GetAgentMaxRegret() > regret) {
+    return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached};
+  }
+  return {candidate, true, LogitTerminationReason::Converged};
+}
 
 std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
     const LogitQREMixedBehaviorProfile &p_start, const std::list<double> &p_targetLambda,

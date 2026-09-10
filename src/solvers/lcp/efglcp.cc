@@ -178,9 +178,8 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
 // as refined by Eaves for degenerate problems, starting from the primary ray.
 //
 template <class T>
-std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
-                                                    BehaviorCallbackType<T> p_onEquilibrium,
-                                                    const CancelToken &p_cancel)
+LcpBehaviorResult<T> LcpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> p_onEquilibrium,
+                                      const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -202,14 +201,12 @@ std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile);
 
-  std::list<MixedBehaviorProfile<T>> equilibria;
-  equilibria.push_back(profile);
-  return equilibria;
+  return {profile, true};
 }
 
-template std::list<MixedBehaviorProfile<double>>
-LcpBehaviorSolve(const Game &, BehaviorCallbackType<double>, const CancelToken &);
-template std::list<MixedBehaviorProfile<Rational>>
-LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>, const CancelToken &);
+template LcpBehaviorResult<double> LcpBehaviorSolve(const Game &, BehaviorCallbackType<double>,
+                                                    const CancelToken &);
+template LcpBehaviorResult<Rational> LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>,
+                                                      const CancelToken &);
 
 } // end namespace Gambit::Nash
