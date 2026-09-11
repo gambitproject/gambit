@@ -20,7 +20,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-include build_support/catalog/catalog.am
+include catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/GAMBIT_VERSION \

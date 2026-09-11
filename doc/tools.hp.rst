@@ -73,7 +73,7 @@ Figure 2 of :cite:p:`Sel75`, starting from the prior in which player 1
 plays (0.5, 0.3, 0.2) and player 2 plays (0.6, 0.4)::
 
    $ echo "0.5,0.3,0.2,0.6,0.4" > prior.csv
-   $ gambit-hp -s prior.csv catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-hp -s prior.csv catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute a Nash equilibrium using the Herings-Peeters (2001) homotopy method
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
