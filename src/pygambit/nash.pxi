@@ -22,6 +22,7 @@
 import cython
 import dataclasses
 import enum
+import pathlib
 from libcpp.memory cimport shared_ptr, make_shared
 from cython.operator cimport dereference as deref
 from libcpp.list cimport list as stdlist
@@ -130,6 +131,71 @@ class IPATerminationEvent:
     message: str
 
 
+class HPTerminationReason(enum.Enum):
+    """Why a call to :ref:`the homotopy method of Herings and Peeters <hp>` did not
+    return an accepted equilibrium.
+    """
+    CONVERGED = 0
+    TRACE_FAILED = 1
+    POLISH_FAILED = 2
+    REGRET_TARGET_NOT_REACHED = 3
+
+
+class LiapTerminationReason(enum.Enum):
+    """Why a call to :ref:`Lyapunov function minimization <liap>` did not return an
+    accepted equilibrium.
+    """
+    CONVERGED = 0
+    MINIMIZER_FAILED = 1
+    REGRET_TARGET_NOT_REACHED = 2
+
+
+class LogitTerminationReason(enum.Enum):
+    """Why tracing the :ref:`logit QRE correspondence <logit>` to an equilibrium did
+    not return an accepted equilibrium.
+    """
+    CONVERGED = 0
+    REGRET_TARGET_NOT_REACHED = 1
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitPathEvent:
+    """Reports one point traced along the principal branch of the logit QRE
+    correspondence.
+    """
+    qre: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitBifurcationEvent:
+    """Reports a bifurcation the moment it is detected while tracing the logit QRE
+    correspondence, bracketed by the last point before, and first point after, the
+    change in branch orientation.
+    """
+    before: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+    after: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitPerturbationEvent:
+    """Reports the tracer switching a symmetry-breaking perturbation on or off while
+    attempting to cross a suspected bifurcation.
+    """
+    active: bool
+    qre: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitBifurcation:
+    """Reports a bifurcation detected while tracing the logit QRE correspondence,
+    bracketed by the last point before, and first point after, the change in branch
+    orientation. Unlike `LogitBifurcationEvent`, this is not reported through
+    `event_callback` but accumulated into `LogitResult.bifurcations`.
+    """
+    before: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+    after: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
 @dataclasses.dataclass(frozen=True)
 class EnumPolyCandidateSupportEvent:
     """Reports a support profile examined by :ref:`enumpoly <enumpoly>` as a candidate
@@ -152,6 +218,328 @@ class EnumPolyBudgetExceededSupportEvent:
     rectangle budget before completing the search for roots.
     """
     support: StrategySupportProfile | BehaviorSupportProfile
+
+
+MixedStrategyEquilibriumSet = list[MixedStrategyProfile]
+MixedBehaviorEquilibriumSet = list[MixedBehaviorProfile]
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class NashResultBase:
+    """Common attributes shared by every result of a method which computes Nash
+    equilibria in a game.  Each solution method returns its own dataclass, derived
+    from this one, whose additional attributes reflect that method's own parameters
+    and the way it can succeed or fail.
+
+    Attributes
+    ----------
+    game : Game
+        The game on which the method was run.
+    rational : bool
+        Whether the calculation used exact rational arithmetic (True) or floating-point
+        (False).
+    use_strategic : bool
+        Whether the method solved using the strategic representation (True) or the
+        extensive representation (False).
+    """
+    game: Game = dataclasses.field(repr=False)
+    rational: bool
+    use_strategic: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class EnumPureResult(NashResultBase):
+    """The result of enumerating pure-strategy Nash equilibria (`enumpure_solve`) or
+    pure-strategy agent Nash equilibria (`enumpure_agent_solve`).
+
+    Attributes
+    ----------
+    equilibria : MixedStrategyEquilibriumSet or MixedBehaviorEquilibriumSet
+        The pure-strategy equilibria found, represented as degenerate mixed profiles.
+    success : bool
+        Always True; enumeration always completes (an empty `equilibria` means the
+        game genuinely has no pure-strategy equilibrium of this kind, not a failure).
+    """
+    equilibria: MixedStrategyEquilibriumSet | MixedBehaviorEquilibriumSet
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class EnumMixedResult(NashResultBase):
+    """The result of `enummixed_solve`.
+
+    Attributes
+    ----------
+    equilibria : MixedStrategyEquilibriumSet
+        The extreme equilibria found.
+    success : bool
+        Always True; enumeration always completes.
+    lrsnash_path : pathlib.Path or str, optional
+        Set if `lrsnash` was used to solve the systems of equations.
+    cliques : list of MixedStrategyEquilibriumSet, optional
+        Set if `cliques=True` was requested: the sets of extreme equilibria which
+        are connected to one another.
+    """
+    equilibria: MixedStrategyEquilibriumSet
+    success: bool
+    lrsnash_path: pathlib.Path | str | None = None
+    cliques: list[MixedStrategyEquilibriumSet] | None = None
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LcpStrategyResult(NashResultBase):
+    """The result of `lcp_solve` when solving on the strategic representation.
+
+    Attributes
+    ----------
+    stop_after : int, optional
+        The maximum number of equilibria which were to be computed, if specified.
+    max_depth : int, optional
+        The maximum depth of recursion in the search, if specified.
+    equilibria : MixedStrategyEquilibriumSet
+        The equilibria found.
+    success : bool
+        False if `max_depth` caused the search to be pruned before it could
+        establish it had found all accessible equilibria; True otherwise.
+    """
+    stop_after: int | None
+    max_depth: int | None
+    equilibria: MixedStrategyEquilibriumSet
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LcpBehaviorResult(NashResultBase):
+    """The result of `lcp_solve` when solving on the extensive representation.
+
+    Attributes
+    ----------
+    equilibrium : MixedBehaviorProfile, optional
+        The equilibrium found.  Lemke's algorithm on the extensive form always
+        finds exactly one equilibrium, so this is never None.
+    success : bool
+        Always True.
+    """
+    equilibrium: MixedBehaviorProfile | None
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LpResult(NashResultBase):
+    """The result of `lp_solve`.
+
+    Attributes
+    ----------
+    equilibrium : MixedStrategyProfile or MixedBehaviorProfile, optional
+        The equilibrium found.  Linear programming always finds exactly one
+        equilibrium, so this is never None.
+    success : bool
+        Always True.
+    """
+    equilibrium: MixedStrategyProfile | MixedBehaviorProfile | None
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LiapResult(NashResultBase):
+    """The result of `liap_solve` or `liap_agent_solve`.
+
+    Attributes
+    ----------
+    start : MixedStrategyProfileDouble or MixedBehaviorProfileDouble
+        The starting profile function minimization was run from.
+    maxregret : float
+        The acceptance criterion for approximate Nash equilibrium which was used.
+    maxiter : int
+        The maximum number of iterations in function minimization which was allowed.
+    equilibrium : MixedStrategyProfileDouble or MixedBehaviorProfileDouble, optional
+        The equilibrium found, or None if minimization did not reach an accepted
+        equilibrium.
+    success : bool
+        Whether `equilibrium` was accepted.
+    reason : LiapTerminationReason
+        Why minimization did not reach an accepted equilibrium, if it did not.
+    """
+    start: MixedStrategyProfileDouble | MixedBehaviorProfileDouble
+    maxregret: float
+    maxiter: int
+    equilibrium: MixedStrategyProfileDouble | MixedBehaviorProfileDouble | None
+    success: bool
+    reason: LiapTerminationReason
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class SimpdivResult(NashResultBase):
+    """The result of `simpdiv_solve`.
+
+    Attributes
+    ----------
+    start : MixedStrategyProfileRational
+        The starting profile the algorithm was run from.
+    maxregret : Rational
+        The acceptance criterion for approximate Nash equilibrium which was used.
+    refine : int
+        The rate at which the triangulation was refined at each iteration.
+    leash : int, optional
+        The maximum number of grid steps the method was allowed to explore, if
+        specified.
+    equilibrium : MixedStrategyProfileRational, optional
+        The equilibrium found.  Simplicial subdivision is guaranteed to converge,
+        so this is never None unless `leash` caused the search to be cut short.
+    success : bool
+        False only if `leash` was reached before converging; True otherwise.
+    """
+    start: MixedStrategyProfileRational
+    maxregret: Rational
+    refine: int
+    leash: int | None
+    equilibrium: MixedStrategyProfileRational | None
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class IPAResult(NashResultBase):
+    """The result of `ipa_solve`.
+
+    Attributes
+    ----------
+    perturbation : MixedStrategyProfileDouble
+        The perturbation vector the iteration was run from.
+    equilibrium : MixedStrategyProfileDouble, optional
+        The equilibrium found, or None if iteration did not reach an accepted
+        equilibrium.
+    success : bool
+        Whether `equilibrium` was accepted.
+    reason : IPATerminationReason
+        Why iteration did not reach an accepted equilibrium, if it did not.
+    """
+    perturbation: MixedStrategyProfileDouble
+    equilibrium: MixedStrategyProfileDouble | None
+    success: bool
+    reason: IPATerminationReason
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class GNMResult(NashResultBase):
+    """The result of `gnm_solve`.
+
+    Attributes
+    ----------
+    perturbation : MixedStrategyProfileDouble
+        The perturbation vector the path-following run was traced from.
+    end_lambda : float
+        The value of the perturbation magnitude lambda at which tracing was set
+        to terminate.
+    steps : int
+        The number of steps taken within a support cell which was used.
+    local_newton_interval : int
+        The frequency of local Newton method correction steps which was used.
+    local_newton_maxits : int
+        The maximum number of iterations in a local Newton method step which
+        was allowed.
+    equilibria : MixedStrategyEquilibriumSet
+        The equilibria found along the path.
+    success : bool
+        False if the run ended in a numerical breakdown (see `reason`); True if
+        it ended normally (whether or not further equilibria might exist beyond
+        where tracing stopped).
+    reason : GNMTerminationReason
+        Why path-following terminated.
+    """
+    perturbation: MixedStrategyProfileDouble
+    end_lambda: float
+    steps: int
+    local_newton_interval: int
+    local_newton_maxits: int
+    equilibria: MixedStrategyEquilibriumSet
+    success: bool
+    reason: GNMTerminationReason
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class EnumPolyResult(NashResultBase):
+    """The result of `enumpoly_solve`.
+
+    Attributes
+    ----------
+    stop_after : int, optional
+        The maximum number of equilibria which were to be computed, if specified.
+    maxregret : float
+        The acceptance criterion for approximate Nash equilibrium which was used.
+    max_rectangles : int, optional
+        The maximum number of rectangles examined per support which was allowed.
+        Not set when `phcpack_path` was used.
+    phcpack_path : pathlib.Path or str, optional
+        Set if PHCpack was used to solve the systems of equations.
+    equilibria : MixedStrategyEquilibriumSet or MixedBehaviorEquilibriumSet
+        The equilibria found.
+    success : bool
+        Always True.  (A support being skipped as singular, or exhausting its
+        rectangle budget, is reported only via `event_callback`; it is not yet
+        reflected here.)
+    """
+    stop_after: int | None
+    maxregret: float
+    max_rectangles: int | None
+    phcpack_path: pathlib.Path | str | None = None
+    equilibria: MixedStrategyEquilibriumSet | MixedBehaviorEquilibriumSet
+    success: bool
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LogitResult(NashResultBase):
+    """The result of `logit_solve`.
+
+    Attributes
+    ----------
+    maxregret : float
+        The acceptance criterion for approximate Nash equilibrium which was used.
+    first_step : float
+        The arclength of the initial step which was used.
+    max_accel : float
+        The maximum rate at which the arclength step size was allowed to lengthen.
+    equilibrium : MixedStrategyProfileDouble or MixedBehaviorProfileDouble, optional
+        The equilibrium found, or None if tracing did not reach an accepted
+        equilibrium.
+    success : bool
+        Whether `equilibrium` was accepted.
+    reason : LogitTerminationReason
+        Why tracing did not reach an accepted equilibrium, if it did not.
+    bifurcations : list of LogitBifurcation
+        Any bifurcations detected while tracing towards `equilibrium`.
+    """
+    maxregret: float
+    first_step: float
+    max_accel: float
+    equilibrium: MixedStrategyProfileDouble | MixedBehaviorProfileDouble | None
+    success: bool
+    reason: LogitTerminationReason
+    bifurcations: list[LogitBifurcation]
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class HPResult(NashResultBase):
+    """The result of `hp_solve`.
+
+    Attributes
+    ----------
+    prior : MixedStrategyProfileDouble
+        The prior distribution the homotopy path was traced from.
+    maxregret : float
+        The acceptance criterion for approximate Nash equilibrium which was used.
+    equilibrium : MixedStrategyProfileDouble, optional
+        The equilibrium found, or None if tracing did not reach an accepted
+        equilibrium.
+    success : bool
+        Whether `equilibrium` was accepted.
+    reason : HPTerminationReason
+        Why tracing did not reach an accepted equilibrium, if it did not.
+    """
+    prior: MixedStrategyProfileDouble
+    maxregret: float
+    equilibrium: MixedStrategyProfileDouble | None
+    success: bool
+    reason: HPTerminationReason
 
 
 cdef public string InvokeStrategyCallbackDouble(
@@ -194,21 +582,73 @@ cdef public string InvokeBehaviorCallbackRational(
     return b""
 
 
-cdef public string InvokeLogitStrategyEventCallback(
+cdef public string InvokeLogitStrategyPathEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
 ):
     try:
-        callback(LogitQREMixedStrategyProfile.wrap(qre))
+        callback(LogitPathEvent(qre=LogitQREMixedStrategyProfile.wrap(qre)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
 
 
-cdef public string InvokeLogitBehaviorEventCallback(
+cdef public string InvokeLogitBehaviorPathEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedBehaviorProfile]
 ):
     try:
-        callback(LogitQREMixedBehaviorProfile.wrap(qre))
+        callback(LogitPathEvent(qre=LogitQREMixedBehaviorProfile.wrap(qre)))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitStrategyBifurcationEventCallback(
+        callback, before: shared_ptr[c_LogitQREMixedStrategyProfile],
+        after: shared_ptr[c_LogitQREMixedStrategyProfile]
+):
+    try:
+        callback(LogitBifurcationEvent(
+            before=LogitQREMixedStrategyProfile.wrap(before),
+            after=LogitQREMixedStrategyProfile.wrap(after),
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitBehaviorBifurcationEventCallback(
+        callback, before: shared_ptr[c_LogitQREMixedBehaviorProfile],
+        after: shared_ptr[c_LogitQREMixedBehaviorProfile]
+):
+    try:
+        callback(LogitBifurcationEvent(
+            before=LogitQREMixedBehaviorProfile.wrap(before),
+            after=LogitQREMixedBehaviorProfile.wrap(after),
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitStrategyPerturbationEventCallback(
+        callback, active: bool, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
+):
+    try:
+        callback(LogitPerturbationEvent(
+            active=active, qre=LogitQREMixedStrategyProfile.wrap(qre)
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitBehaviorPerturbationEventCallback(
+        callback, active: bool, qre: shared_ptr[c_LogitQREMixedBehaviorProfile]
+):
+    try:
+        callback(LogitPerturbationEvent(
+            active=active, qre=LogitQREMixedBehaviorProfile.wrap(qre)
+        ))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -452,186 +892,318 @@ def _convert_mbpr(
             for profile in make_list_of_pointer(inlist)]
 
 
-def _enumpure_strategy_solve(
-        game: Game, nash_callback: object = None
-) -> list[MixedStrategyProfile[c_Rational]]:
-    return _convert_mspr(
-        EnumPureStrategySolve(game.game, MakeStrategyCallback[c_Rational](nash_callback))
+@cython.cfunc
+def _convert_msp_opt_d(
+        opt: optional[c_MixedStrategyProfile[float]]
+) -> MixedStrategyProfile[double] | None:
+    if not opt.has_value():
+        return None
+    return MixedStrategyProfileDouble.wrap(
+        make_shared[c_MixedStrategyProfile[double]](opt.value())
     )
 
 
-def _enumpure_agent_solve(
-        game: Game, nash_callback: object = None
-) -> list[MixedBehaviorProfileRational]:
-    return _convert_mbpr(
-        EnumPureAgentSolve(game.game, MakeBehaviorCallback[c_Rational](nash_callback))
+@cython.cfunc
+def _convert_msp_opt_r(
+        opt: optional[c_MixedStrategyProfile[c_Rational]]
+) -> MixedStrategyProfile[c_Rational] | None:
+    if not opt.has_value():
+        return None
+    return MixedStrategyProfileRational.wrap(
+        make_shared[c_MixedStrategyProfile[c_Rational]](opt.value())
     )
 
 
-def _enummixed_strategy_solve_double(
-        game: Game, nash_callback: object = None
-) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(
-        EnumMixedStrategySolve[double](game.game, MakeStrategyCallback[double](nash_callback))
+@cython.cfunc
+def _convert_mbp_opt_d(
+        opt: optional[c_MixedBehaviorProfile[float]]
+) -> MixedBehaviorProfile[double] | None:
+    if not opt.has_value():
+        return None
+    return MixedBehaviorProfileDouble.wrap(
+        make_shared[c_MixedBehaviorProfile[double]](opt.value())
+    )
+
+
+@cython.cfunc
+def _convert_mbp_opt_r(
+        opt: optional[c_MixedBehaviorProfile[c_Rational]]
+) -> MixedBehaviorProfile[c_Rational] | None:
+    if not opt.has_value():
+        return None
+    return MixedBehaviorProfileRational.wrap(
+        make_shared[c_MixedBehaviorProfile[c_Rational]](opt.value())
+    )
+
+
+@cython.cfunc
+def _convert_logit_bifurcations_strategy(
+        bifurcations: stdvector[c_LogitBifurcationStrategy]
+) -> list:
+    # Indexed rather than a `for b in bifurcations` loop: Cython would declare a
+    # by-value loop variable of type c_LogitBifurcationStrategy, which (like QRE
+    # itself) has no default constructor.
+    return [
+        LogitBifurcation(
+            before=LogitQREMixedStrategyProfile.wrap(
+                make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].before)
+            ),
+            after=LogitQREMixedStrategyProfile.wrap(
+                make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].after)
+            ),
+        )
+        for i in range(bifurcations.size())
+    ]
+
+
+@cython.cfunc
+def _convert_logit_bifurcations_behavior(
+        bifurcations: stdvector[c_LogitBifurcationBehavior]
+) -> list:
+    return [
+        LogitBifurcation(
+            before=LogitQREMixedBehaviorProfile.wrap(
+                make_shared[c_LogitQREMixedBehaviorProfile](bifurcations[i].before)
+            ),
+            after=LogitQREMixedBehaviorProfile.wrap(
+                make_shared[c_LogitQREMixedBehaviorProfile](bifurcations[i].after)
+            ),
+        )
+        for i in range(bifurcations.size())
+    ]
+
+
+def _enumpure_strategy_solve(game: Game, nash_callback: object = None) -> EnumPureResult:
+    result: c_EnumPureStrategyResult = EnumPureStrategySolve(
+        game.game, MakeStrategyCallback[c_Rational](nash_callback)
+    )
+    return EnumPureResult(
+        game=game, rational=True, use_strategic=True,
+        equilibria=_convert_mspr(result.equilibria), success=result.success,
+    )
+
+
+def _enumpure_agent_solve(game: Game, nash_callback: object = None) -> EnumPureResult:
+    result: c_EnumPureAgentResult = EnumPureAgentSolve(
+        game.game, MakeBehaviorCallback[c_Rational](nash_callback)
+    )
+    return EnumPureResult(
+        game=game, rational=True, use_strategic=False,
+        equilibria=_convert_mbpr(result.equilibria), success=result.success,
+    )
+
+
+def _enummixed_strategy_solve_double(game: Game, nash_callback: object = None) -> EnumMixedResult:
+    result: c_EnumMixedStrategyResult[float] = EnumMixedStrategySolve[double](
+        game.game, MakeStrategyCallback[double](nash_callback)
+    )
+    return EnumMixedResult(
+        game=game, rational=False, use_strategic=True,
+        equilibria=_convert_mspd(result.equilibria), success=result.success,
     )
 
 
 def _enummixed_strategy_solve_rational(
         game: Game, nash_callback: object = None
-) -> list[MixedStrategyProfileRational]:
-    return _convert_mspr(
-        EnumMixedStrategySolve[c_Rational](
-            game.game, MakeStrategyCallback[c_Rational](nash_callback)
-        )
+) -> EnumMixedResult:
+    result: c_EnumMixedStrategyResult[c_Rational] = EnumMixedStrategySolve[c_Rational](
+        game.game, MakeStrategyCallback[c_Rational](nash_callback)
+    )
+    return EnumMixedResult(
+        game=game, rational=True, use_strategic=True,
+        equilibria=_convert_mspr(result.equilibria), success=result.success,
     )
 
 
 def _enummixed_strategy_solve_cliques_double(
         game: Game, nash_callback: object = None
-) -> tuple[list[MixedStrategyProfileDouble], list[list[MixedStrategyProfileDouble]]]:
+) -> EnumMixedResult:
     result: pair[
-        stdlist[c_MixedStrategyProfile[float]], stdlist[stdlist[c_MixedStrategyProfile[float]]]
+        c_EnumMixedStrategyResult[float], stdlist[stdlist[c_MixedStrategyProfile[float]]]
     ] = EnumMixedStrategySolveCliquesWrapper[double](
         game.game, MakeStrategyCallback[double](nash_callback)
     )
-    return (
-        _convert_mspd(result.first),
-        [_convert_mspd(clique) for clique in result.second],
+    return EnumMixedResult(
+        game=game, rational=False, use_strategic=True,
+        equilibria=_convert_mspd(result.first.equilibria),
+        success=result.first.success,
+        cliques=[_convert_mspd(clique) for clique in result.second],
     )
 
 
 def _enummixed_strategy_solve_cliques_rational(
         game: Game, nash_callback: object = None
-) -> tuple[list[MixedStrategyProfileRational], list[list[MixedStrategyProfileRational]]]:
+) -> EnumMixedResult:
     result: pair[
-        stdlist[c_MixedStrategyProfile[c_Rational]],
+        c_EnumMixedStrategyResult[c_Rational],
         stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]
     ] = EnumMixedStrategySolveCliquesWrapper[c_Rational](
         game.game, MakeStrategyCallback[c_Rational](nash_callback)
     )
-    return (
-        _convert_mspr(result.first),
-        [_convert_mspr(clique) for clique in result.second],
+    return EnumMixedResult(
+        game=game, rational=True, use_strategic=True,
+        equilibria=_convert_mspr(result.first.equilibria),
+        success=result.first.success,
+        cliques=[_convert_mspr(clique) for clique in result.second],
     )
 
 
-def _lcp_behavior_solve_double(
-        game: Game, nash_callback: object = None
-) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(
-        LcpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](nash_callback))
+def _lcp_behavior_solve_double(game: Game, nash_callback: object = None) -> LcpBehaviorResult:
+    result: c_LcpBehaviorResult[float] = LcpBehaviorSolve[double](
+        game.game, MakeBehaviorCallback[double](nash_callback)
+    )
+    return LcpBehaviorResult(
+        game=game, rational=False, use_strategic=False,
+        equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
     )
 
 
-def _lcp_behavior_solve_rational(
-        game: Game, nash_callback: object = None
-) -> list[MixedBehaviorProfileRational]:
-    return _convert_mbpr(
-        LcpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](nash_callback))
+def _lcp_behavior_solve_rational(game: Game, nash_callback: object = None) -> LcpBehaviorResult:
+    result: c_LcpBehaviorResult[c_Rational] = LcpBehaviorSolve[c_Rational](
+        game.game, MakeBehaviorCallback[c_Rational](nash_callback)
+    )
+    return LcpBehaviorResult(
+        game=game, rational=True, use_strategic=False,
+        equilibrium=_convert_mbp_opt_r(result.equilibrium), success=result.success,
     )
 
 
 def _lcp_strategy_solve_double(
         game: Game, stop_after, max_depth: int, nash_callback: object = None
-) -> list[MixedStrategyProfileDouble]:
+) -> LcpStrategyResult:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
-    return _convert_mspd(
-        LcpStrategySolve[double](
-            game.game, c_stop_after, max_depth, MakeStrategyCallback[double](nash_callback)
-        )
+    result: c_LcpStrategyResult[float] = LcpStrategySolve[double](
+        game.game, c_stop_after, max_depth, MakeStrategyCallback[double](nash_callback)
+    )
+    return LcpStrategyResult(
+        game=game, rational=False, use_strategic=True,
+        stop_after=stop_after, max_depth=max_depth or None,
+        equilibria=_convert_mspd(result.equilibria), success=result.success,
     )
 
 
 def _lcp_strategy_solve_rational(
         game: Game, stop_after, max_depth: int, nash_callback: object = None
-) -> list[MixedStrategyProfileRational]:
+) -> LcpStrategyResult:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
-    return _convert_mspr(
-        LcpStrategySolve[c_Rational](
-            game.game, c_stop_after, max_depth, MakeStrategyCallback[c_Rational](nash_callback)
-        )
+    result: c_LcpStrategyResult[c_Rational] = LcpStrategySolve[c_Rational](
+        game.game, c_stop_after, max_depth, MakeStrategyCallback[c_Rational](nash_callback)
+    )
+    return LcpStrategyResult(
+        game=game, rational=True, use_strategic=True,
+        stop_after=stop_after, max_depth=max_depth or None,
+        equilibria=_convert_mspr(result.equilibria), success=result.success,
     )
 
 
-def _lp_behavior_solve_double(
-        game: Game, nash_callback: object = None
-) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(
-        LpBehaviorSolve[double](game.game, MakeBehaviorCallback[double](nash_callback))
+def _lp_behavior_solve_double(game: Game, nash_callback: object = None) -> LpResult:
+    result: c_LpBehaviorResult[float] = LpBehaviorSolve[double](
+        game.game, MakeBehaviorCallback[double](nash_callback)
+    )
+    return LpResult(
+        game=game, rational=False, use_strategic=False,
+        equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
     )
 
 
-def _lp_behavior_solve_rational(
-        game: Game, nash_callback: object = None
-) -> list[MixedBehaviorProfileRational]:
-    return _convert_mbpr(
-        LpBehaviorSolve[c_Rational](game.game, MakeBehaviorCallback[c_Rational](nash_callback))
+def _lp_behavior_solve_rational(game: Game, nash_callback: object = None) -> LpResult:
+    result: c_LpBehaviorResult[c_Rational] = LpBehaviorSolve[c_Rational](
+        game.game, MakeBehaviorCallback[c_Rational](nash_callback)
+    )
+    return LpResult(
+        game=game, rational=True, use_strategic=False,
+        equilibrium=_convert_mbp_opt_r(result.equilibrium), success=result.success,
     )
 
 
-def _lp_strategy_solve_double(
-        game: Game, nash_callback: object = None
-) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(
-        LpStrategySolve[double](game.game, MakeStrategyCallback[double](nash_callback))
+def _lp_strategy_solve_double(game: Game, nash_callback: object = None) -> LpResult:
+    result: c_LpStrategyResult[float] = LpStrategySolve[double](
+        game.game, MakeStrategyCallback[double](nash_callback)
+    )
+    return LpResult(
+        game=game, rational=False, use_strategic=True,
+        equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
     )
 
 
-def _lp_strategy_solve_rational(
-        game: Game, nash_callback: object = None
-) -> list[MixedStrategyProfileRational]:
-    return _convert_mspr(
-        LpStrategySolve[c_Rational](game.game, MakeStrategyCallback[c_Rational](nash_callback))
+def _lp_strategy_solve_rational(game: Game, nash_callback: object = None) -> LpResult:
+    result: c_LpStrategyResult[c_Rational] = LpStrategySolve[c_Rational](
+        game.game, MakeStrategyCallback[c_Rational](nash_callback)
+    )
+    return LpResult(
+        game=game, rational=True, use_strategic=True,
+        equilibrium=_convert_msp_opt_r(result.equilibrium), success=result.success,
     )
 
 
-def _liap_strategy_solve(start: MixedStrategyProfileDouble,
-                         maxregret: float,
-                         maxiter: int,
-                         nash_callback: object = None,
-                         event_callback: object = None) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(LiapStrategySolve(
+def _liap_strategy_solve(
+        start: MixedStrategyProfileDouble, maxregret: float, maxiter: int,
+        nash_callback: object = None, event_callback: object = None
+) -> LiapResult:
+    result: c_LiapStrategyResult = LiapStrategySolve(
         deref(start.profile), maxregret, maxiter,
         MakeStrategyCallback[double](nash_callback),
         MakeLiapEventCallback[c_MixedStrategyProfile[double]](event_callback)
-    ))
+    )
+    return LiapResult(
+        game=start.game, rational=False, use_strategic=True,
+        start=start, maxregret=maxregret, maxiter=maxiter,
+        equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
+        reason=LiapTerminationReason(<int>result.reason),
+    )
 
 
-def _liap_behavior_solve(start: MixedBehaviorProfileDouble,
-                         maxregret: float,
-                         maxiter: int,
-                         nash_callback: object = None,
-                         event_callback: object = None) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LiapAgentSolve(
+def _liap_behavior_solve(
+        start: MixedBehaviorProfileDouble, maxregret: float, maxiter: int,
+        nash_callback: object = None, event_callback: object = None
+) -> LiapResult:
+    result: c_LiapAgentResult = LiapAgentSolve(
         deref(start.profile), maxregret, maxiter,
         MakeBehaviorCallback[double](nash_callback),
         MakeLiapEventCallback[c_MixedBehaviorProfile[double]](event_callback)
-    ))
+    )
+    return LiapResult(
+        game=start.game, rational=False, use_strategic=False,
+        start=start, maxregret=maxregret, maxiter=maxiter,
+        equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
+        reason=LiapTerminationReason(<int>result.reason),
+    )
 
 
 def _simpdiv_strategy_solve(
         start: MixedStrategyProfileRational, maxregret: Rational, gridstep: int, leash: int,
         nash_callback: object = None, event_callback: object = None
-) -> list[MixedStrategyProfileRational]:
-    return _convert_mspr(SimpdivStrategySolve(
+) -> SimpdivResult:
+    result: c_SimpdivStrategyResult = SimpdivStrategySolve(
         deref(start.profile), to_rational(str(maxregret).encode("ascii")), gridstep, leash,
         MakeStrategyCallback[c_Rational](nash_callback), MakeSimpdivEventCallback(event_callback)
-    ))
+    )
+    return SimpdivResult(
+        game=start.game, rational=True, use_strategic=True,
+        start=start, maxregret=maxregret, refine=gridstep, leash=leash or None,
+        equilibrium=_convert_msp_opt_r(result.equilibrium), success=result.success,
+    )
 
 
 def _ipa_strategy_solve(
         pert: MixedStrategyProfileDouble, nash_callback: object = None,
         event_callback: object = None
-) -> list[MixedStrategyProfileDouble]:
+) -> IPAResult:
     try:
-        return _convert_mspd(IPAStrategySolve(
+        result: c_IPAStrategyResult = IPAStrategySolve(
             deref(pert.profile),
             MakeStrategyCallback[double](nash_callback), MakeIPAEventCallback(event_callback)
-        ))
+        )
+        return IPAResult(
+            game=pert.game, rational=False, use_strategic=True,
+            perturbation=pert,
+            equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
+            reason=IPATerminationReason(<int>result.reason),
+        )
     except RuntimeError as e:
         if "does not have unique maximizer" in str(e):
             raise ValueError(str(e)) from None
@@ -646,12 +1218,20 @@ def _gnm_strategy_solve(
         local_newton_maxits: int,
         nash_callback: object = None,
         event_callback: object = None,
-) -> list[MixedStrategyProfileDouble]:
+) -> GNMResult:
     try:
-        return _convert_mspd(GNMStrategySolve(
+        result: c_GNMStrategyResult = GNMStrategySolve(
             deref(pert.profile), end_lambda, steps, local_newton_interval, local_newton_maxits,
             MakeStrategyCallback[double](nash_callback), MakeGNMEventCallback(event_callback)
-        ))
+        )
+        return GNMResult(
+            game=pert.game, rational=False, use_strategic=True,
+            perturbation=pert, end_lambda=end_lambda, steps=steps,
+            local_newton_interval=local_newton_interval,
+            local_newton_maxits=local_newton_maxits,
+            equilibria=_convert_mspd(result.equilibria), success=result.success,
+            reason=GNMTerminationReason(<int>result.reason),
+        )
     except RuntimeError as e:
         if "does not have unique maximizer" in str(e):
             raise ValueError(str(e)) from None
@@ -681,15 +1261,20 @@ def _enumpoly_strategy_solve(
         max_rectangles: int,
         nash_callback: object = None,
         event_callback: object = None,
-) -> list[MixedStrategyProfileDouble]:
+) -> EnumPolyResult:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
-    return _convert_mspd(EnumPolyStrategySolve(
+    result: c_EnumPolyStrategyResult = EnumPolyStrategySolve(
         game.game, c_stop_after, maxregret, max_rectangles,
         MakeStrategyCallback[double](nash_callback),
         MakeEnumPolyEventCallback[c_StrategySupportProfile](event_callback)
-    ))
+    )
+    return EnumPolyResult(
+        game=game, rational=False, use_strategic=True,
+        stop_after=stop_after, maxregret=maxregret, max_rectangles=max_rectangles,
+        equilibria=_convert_mspd(result.equilibria), success=result.success,
+    )
 
 
 def _enumpoly_behavior_solve(
@@ -699,35 +1284,56 @@ def _enumpoly_behavior_solve(
         max_rectangles: int,
         nash_callback: object = None,
         event_callback: object = None,
-) -> list[MixedBehaviorProfileDouble]:
+) -> EnumPolyResult:
     cdef optional[size_t] c_stop_after
     if stop_after is not None:
         c_stop_after = <size_t>stop_after
-    return _convert_mbpd(EnumPolyBehaviorSolve(
+    result: c_EnumPolyBehaviorResult = EnumPolyBehaviorSolve(
         game.game, c_stop_after, maxregret, max_rectangles,
         MakeBehaviorCallback[double](nash_callback),
         MakeEnumPolyEventCallback[c_BehaviorSupportProfile](event_callback)
-    ))
+    )
+    return EnumPolyResult(
+        game=game, rational=False, use_strategic=False,
+        stop_after=stop_after, maxregret=maxregret, max_rectangles=max_rectangles,
+        equilibria=_convert_mbpd(result.equilibria), success=result.success,
+    )
 
 
 def _logit_strategy_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
         event_callback: object = None,
-) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(LogitStrategySolveWrapper(
-        game.game, maxregret, first_step, max_accel,
+) -> LogitResult:
+    result: c_LogitStrategyResult = LogitStrategySolveEquilibrium(
+        deref(make_shared[c_LogitQREMixedStrategyProfile](game.game)),
+        maxregret, first_step, max_accel,
         MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
-    ))
+    )
+    return LogitResult(
+        game=game, rational=False, use_strategic=True,
+        maxregret=maxregret, first_step=first_step, max_accel=max_accel,
+        equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
+        reason=LogitTerminationReason(<int>result.reason),
+        bifurcations=_convert_logit_bifurcations_strategy(result.bifurcations),
+    )
 
 
 def _logit_behavior_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
         event_callback: object = None,
-) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LogitBehaviorSolveWrapper(
-        game.game, maxregret, first_step, max_accel,
+) -> LogitResult:
+    result: c_LogitBehaviorResult = LogitBehaviorSolveEquilibrium(
+        deref(make_shared[c_LogitQREMixedBehaviorProfile](game.game)),
+        maxregret, first_step, max_accel,
         MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
-    ))
+    )
+    return LogitResult(
+        game=game, rational=False, use_strategic=False,
+        maxregret=maxregret, first_step=first_step, max_accel=max_accel,
+        equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
+        reason=LogitTerminationReason(<int>result.reason),
+        bifurcations=_convert_logit_bifurcations_behavior(result.bifurcations),
+    )
 
 
 @cython.cclass
@@ -916,7 +1522,14 @@ def _hp_strategy_solve(
         prior: MixedStrategyProfileDouble,
         maxregret: float,
         event_callback: object = None,
-) -> list[MixedStrategyProfileDouble]:
-    return _convert_mspd(HPStrategySolveWrapper(
-        deref(prior.profile), maxregret, MakeHPEventCallback(event_callback)
-    ))
+) -> HPResult:
+    result: c_HPStrategyResult = HPStrategySolve(
+        deref(prior.profile), maxregret, MakeStrategyCallback[double](None),
+        MakeHPEventCallback(event_callback)
+    )
+    return HPResult(
+        game=prior.game, rational=False, use_strategic=True,
+        prior=prior, maxregret=maxregret,
+        equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
+        reason=HPTerminationReason(<int>result.reason),
+    )

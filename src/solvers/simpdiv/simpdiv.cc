@@ -545,15 +545,17 @@ MixedStrategyProfile<Rational> SimpdivDefaultStart(const Game &p_game)
   return start;
 }
 
-std::list<MixedStrategyProfile<Rational>>
-SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
-                     int p_gridResize, int p_leashLength,
-                     StrategyCallbackType<Rational> p_onEquilibrium,
-                     SimpdivEventCallbackType p_onEvent, const CancelToken &p_cancel)
+SimpdivStrategyResult SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start,
+                                           const Rational &p_maxregret, int p_gridResize,
+                                           int p_leashLength,
+                                           StrategyCallbackType<Rational> p_onEquilibrium,
+                                           SimpdivEventCallbackType p_onEvent,
+                                           const CancelToken &p_cancel)
 {
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium,
-                                   p_onEvent, p_cancel)
-      .Solve(p_start);
+  const auto solutions = NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
+                                                   p_onEquilibrium, p_onEvent, p_cancel)
+                             .Solve(p_start);
+  return {solutions.back(), true};
 }
 
 } // end namespace Gambit::Nash

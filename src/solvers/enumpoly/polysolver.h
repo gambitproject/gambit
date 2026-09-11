@@ -23,6 +23,8 @@
 #ifndef GAMBIT_SOLVERS_ENUMPOLY_POLYSOLVER_H
 #define GAMBIT_SOLVERS_ENUMPOLY_POLYSOLVER_H
 
+#include <stdexcept>
+
 #include "core/cancel.h"
 #include "core/core.h"
 #include "rectangle.h"
@@ -30,6 +32,19 @@
 #include "polypartial.h"
 
 namespace Gambit {
+
+/// @brief Thrown by PolynomialSystemSolver when a candidate root, after refinement, turns out
+///        to lie outside the rectangle being searched.  This is a local degeneracy of the
+///        search at that point, akin to a singular Jacobian, not evidence of a defect
+///        elsewhere in the solver.
+class RootOutsideRectangleException final : public std::domain_error {
+public:
+  RootOutsideRectangleException()
+    : std::domain_error("Point not in rectangle after Newton refinement")
+  {
+  }
+  ~RootOutsideRectangleException() noexcept override = default;
+};
 
 /// @brief Find the roots of a system of polynomials and inequalities, with
 ///        equal numbers of equations and unknowns, that lie inside a given

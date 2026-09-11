@@ -328,7 +328,6 @@ Computation of Nash equilibria
 .. autosummary::
    :toctree: api/
 
-   NashComputationResult
    enumpure_solve
    enumpure_agent_solve
    enummixed_solve
@@ -342,6 +341,25 @@ Computation of Nash equilibria
    ipa_solve
    gnm_solve
    hp_solve
+
+Each of these returns its own result type, documented below:
+
+.. autosummary::
+   :toctree: api/
+
+   NashResultBase
+   EnumPureResult
+   EnumMixedResult
+   EnumPolyResult
+   LpResult
+   LcpStrategyResult
+   LcpBehaviorResult
+   LiapResult
+   LogitResult
+   SimpdivResult
+   IPAResult
+   GNMResult
+   HPResult
 
 
 Computation of quantal response equilibria

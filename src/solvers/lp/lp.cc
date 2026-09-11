@@ -211,9 +211,8 @@ void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int neq
 }
 
 template <class T>
-std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
-                                                   BehaviorCallbackType<T> p_onEquilibrium,
-                                                   const CancelToken &p_cancel)
+LpBehaviorResult<T> LpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> p_onEquilibrium,
+                                    const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -238,20 +237,17 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile);
 
-  std::list<MixedBehaviorProfile<T>> solution;
-  solution.push_back(profile);
-  return solution;
+  return {profile, true};
 }
 
-template std::list<MixedBehaviorProfile<double>>
-LpBehaviorSolve(const Game &, BehaviorCallbackType<double>, const CancelToken &);
-template std::list<MixedBehaviorProfile<Rational>>
-LpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>, const CancelToken &);
+template LpBehaviorResult<double> LpBehaviorSolve(const Game &, BehaviorCallbackType<double>,
+                                                  const CancelToken &);
+template LpBehaviorResult<Rational> LpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>,
+                                                    const CancelToken &);
 
 template <class T>
-std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
-                                                   StrategyCallbackType<T> p_onEquilibrium,
-                                                   const CancelToken &p_cancel)
+LpStrategyResult<T> LpStrategySolve(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium,
+                                    const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -303,14 +299,12 @@ std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
     eqm[p_game->GetPlayer(2)->GetStrategy(j)] = dual[j];
   }
   p_onEquilibrium(eqm);
-  std::list<MixedStrategyProfile<T>> solution;
-  solution.push_back(eqm);
-  return solution;
+  return {eqm, true};
 }
 
-template std::list<MixedStrategyProfile<double>>
-LpStrategySolve(const Game &, StrategyCallbackType<double>, const CancelToken &);
-template std::list<MixedStrategyProfile<Rational>>
-LpStrategySolve(const Game &, StrategyCallbackType<Rational>, const CancelToken &);
+template LpStrategyResult<double> LpStrategySolve(const Game &, StrategyCallbackType<double>,
+                                                  const CancelToken &);
+template LpStrategyResult<Rational> LpStrategySolve(const Game &, StrategyCallbackType<Rational>,
+                                                    const CancelToken &);
 
 } // end namespace Gambit::Nash

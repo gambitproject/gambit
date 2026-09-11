@@ -126,8 +126,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   catch (const SingularMatrixException &) {
     is_singular = true;
   }
-  catch (const std::domain_error &) {
-    // std::cerr << "Assertion warning: " << e.what() << std::endl;
+  catch (const RootOutsideRectangleException &) {
     is_singular = true;
   }
 
@@ -141,7 +140,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   return solutions;
 }
 
-std::list<MixedStrategyProfile<double>>
+EnumPolyStrategyResult
 EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles, StrategyCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent,
@@ -189,7 +188,7 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return ret;
+  return {ret, true};
 }
 
 } // namespace Gambit::Nash

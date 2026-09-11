@@ -252,19 +252,48 @@ public:
   ~TracingCallbackFunction() = default;
 
   void AppendPoint(const Vector<double> &p_point);
+  void OnBifurcation(const Vector<double> &p_before, const Vector<double> &p_after);
+  void OnPerturbation(bool p_active, const Vector<double> &p_point);
   const std::list<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
+  const std::vector<LogitBifurcation<LogitQREMixedBehaviorProfile>> &GetBifurcations() const
+  {
+    return m_bifurcations;
+  }
 
 private:
+  LogitQREMixedBehaviorProfile PointToQRE(const Vector<double> &p_point) const;
+
   Game m_game;
   LogitEventCallbackType<LogitQREMixedBehaviorProfile> m_onEvent;
   std::list<LogitQREMixedBehaviorProfile> m_profiles;
+  std::vector<LogitBifurcation<LogitQREMixedBehaviorProfile>> m_bifurcations;
 };
+
+LogitQREMixedBehaviorProfile
+TracingCallbackFunction::PointToQRE(const Vector<double> &p_point) const
+{
+  return {PointToProfile(m_game, p_point), p_point.back(), 1.0};
+}
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
-  const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
-  m_profiles.emplace_back(profile, p_point.back(), 1.0);
+  m_profiles.push_back(PointToQRE(p_point));
   m_onEvent(LogitPathEvent<LogitQREMixedBehaviorProfile>{m_profiles.back()});
+}
+
+void TracingCallbackFunction::OnBifurcation(const Vector<double> &p_before,
+                                            const Vector<double> &p_after)
+{
+  m_bifurcations.push_back({PointToQRE(p_before), PointToQRE(p_after)});
+  const auto &bifurcation = m_bifurcations.back();
+  m_onEvent(
+      LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{bifurcation.before, bifurcation.after});
+}
+
+void TracingCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
+{
+  const auto qre = PointToQRE(p_point);
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{p_active, qre});
 }
 
 class EstimatorCallbackFunction {
@@ -274,9 +303,13 @@ public:
   ~EstimatorCallbackFunction() = default;
 
   void EvaluatePoint(const Vector<double> &p_point);
+  void OnBifurcation(const Vector<double> &p_before, const Vector<double> &p_after);
+  void OnPerturbation(bool p_active, const Vector<double> &p_point);
   const LogitQREMixedBehaviorProfile &GetMaximizer() const { return m_bestProfile; }
 
 private:
+  LogitQREMixedBehaviorProfile PointToQRE(const Vector<double> &p_point) const;
+
   Game m_game;
   const Vector<double> &m_frequencies;
   LogitEventCallbackType<LogitQREMixedBehaviorProfile> m_onEvent;
@@ -293,23 +326,42 @@ EstimatorCallbackFunction::EstimatorCallbackFunction(
 {
 }
 
-void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
+LogitQREMixedBehaviorProfile
+EstimatorCallbackFunction::PointToQRE(const Vector<double> &p_point) const
 {
   const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
-  auto qre = LogitQREMixedBehaviorProfile(
-      profile, p_point.back(),
-      LogLike(m_frequencies, static_cast<const Vector<double> &>(profile)));
+  return {profile, p_point.back(),
+          LogLike(m_frequencies, static_cast<const Vector<double> &>(profile))};
+}
+
+void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
+{
+  auto qre = PointToQRE(p_point);
   m_onEvent(LogitPathEvent<LogitQREMixedBehaviorProfile>{qre});
   if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
     m_bestProfile = qre;
   }
 }
 
+void EstimatorCallbackFunction::OnBifurcation(const Vector<double> &p_before,
+                                              const Vector<double> &p_after)
+{
+  const auto before = PointToQRE(p_before);
+  const auto after = PointToQRE(p_after);
+  m_onEvent(LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{before, after});
+}
+
+void EstimatorCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
+{
+  const auto qre = PointToQRE(p_point);
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{p_active, qre});
+}
+
 } // namespace
 
 namespace Gambit {
 
-std::list<LogitQREMixedBehaviorProfile>
+LogitTrace<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
                    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
                    Nash::BehaviorCallbackType<double> p_onEquilibrium,
@@ -317,7 +369,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
                    const CancelToken &p_cancel)
 {
   if (p_start.size() == 0) {
-    return {p_start};
+    return {{p_start}, {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
@@ -343,10 +395,18 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         return RegretTerminationFunction(game, p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
-      NullCriterionFunction, NullCriterionBracketFunction, p_cancel);
+      NullCriterionFunction, NullCriterionBracketFunction, p_cancel,
+      [&callback](const Vector<double> &p_before, const Vector<double> &p_after) {
+        callback.OnBifurcation(p_before, p_after);
+      },
+      [&callback](bool p_active, const Vector<double> &p_point) {
+        callback.OnPerturbation(p_active, p_point);
+      });
   const auto &profiles = callback.GetProfiles();
-  p_onEquilibrium(profiles.back().GetProfile());
-  return profiles;
+  if (profiles.back().GetProfile().GetAgentMaxRegret() < p_regret) {
+    p_onEquilibrium(profiles.back().GetProfile());
+  }
+  return {profiles, callback.GetBifurcations()};
 }
 
 std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
@@ -378,6 +438,13 @@ std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
         [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
         [lam](const Vector<double> &x, const Vector<double> &) -> double {
           return x.back() - lam;
+        },
+        NullCriterionBracketFunction, CancelToken(),
+        [&callback](const Vector<double> &p_before, const Vector<double> &p_after) {
+          callback.OnBifurcation(p_before, p_after);
+        },
+        [&callback](bool p_active, const Vector<double> &p_point) {
+          callback.OnPerturbation(p_active, p_point);
         });
     ret.push_back(callback.GetProfiles().back());
   }
@@ -421,6 +488,13 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
         },
         [&restart](const Vector<double> &, const Vector<double> &p_restart) -> void {
           restart = p_restart;
+        },
+        CancelToken(),
+        [&callback](const Vector<double> &p_before, const Vector<double> &p_after) {
+          callback.OnBifurcation(p_before, p_after);
+        },
+        [&callback](bool p_active, const Vector<double> &p_point) {
+          callback.OnPerturbation(p_active, p_point);
         });
     if (p_stopAtLocal || x.back() >= p_maxLambda) {
       break;

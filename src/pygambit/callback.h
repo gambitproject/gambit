@@ -59,11 +59,23 @@ std::string InvokeBehaviorCallbackRational(
     PyObject *p_callback,
     std::shared_ptr<Gambit::MixedBehaviorProfile<Gambit::Rational>> p_profile);
 std::string
-InvokeLogitStrategyEventCallback(PyObject *p_callback,
-                                 std::shared_ptr<Gambit::LogitQREMixedStrategyProfile> p_qre);
+InvokeLogitStrategyPathEventCallback(PyObject *p_callback,
+                                     std::shared_ptr<Gambit::LogitQREMixedStrategyProfile> p_qre);
 std::string
-InvokeLogitBehaviorEventCallback(PyObject *p_callback,
-                                 std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_qre);
+InvokeLogitBehaviorPathEventCallback(PyObject *p_callback,
+                                     std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_qre);
+std::string InvokeLogitStrategyBifurcationEventCallback(
+    PyObject *p_callback, std::shared_ptr<Gambit::LogitQREMixedStrategyProfile> p_before,
+    std::shared_ptr<Gambit::LogitQREMixedStrategyProfile> p_after);
+std::string InvokeLogitBehaviorBifurcationEventCallback(
+    PyObject *p_callback, std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_before,
+    std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_after);
+std::string InvokeLogitStrategyPerturbationEventCallback(
+    PyObject *p_callback, bool p_active,
+    std::shared_ptr<Gambit::LogitQREMixedStrategyProfile> p_qre);
+std::string InvokeLogitBehaviorPerturbationEventCallback(
+    PyObject *p_callback, bool p_active,
+    std::shared_ptr<Gambit::LogitQREMixedBehaviorProfile> p_qre);
 std::string
 InvokeHPStrategyEventCallback(PyObject *p_callback,
                               std::shared_ptr<Gambit::MixedStrategyProfile<double>> p_profile,
@@ -195,10 +207,11 @@ MakeBehaviorCallback<Gambit::Rational>(PyObject *p_callback)
 }
 
 ///
-/// Builds a LogitEventCallbackType<QRE> which, when invoked with a
-/// path-tracing event, calls a Python callable with the QRE point traced so
-/// far. A null callback (Python `None`) yields the solver's own no-op
-/// default.
+/// Builds a LogitEventCallbackType<QRE> which, when invoked, dispatches to whichever
+/// Invoke*EventCallback trampoline matches the alternative held by the event (an ordinary
+/// traced point, a detected bifurcation, or a perturbation switching on/off), calling a
+/// Python callable with the corresponding pygambit event object. A null callback (Python
+/// `None`) yields the solver's own no-op default.
 ///
 template <class QRE>
 Gambit::LogitEventCallbackType<QRE> MakeLogitEventCallback(PyObject *p_callback);
@@ -211,10 +224,28 @@ MakeLogitEventCallback<Gambit::LogitQREMixedStrategyProfile>(PyObject *p_callbac
     return Gambit::NullLogitEventCallback<Gambit::LogitQREMixedStrategyProfile>;
   }
   return [p_callback](const Gambit::LogitEvent<Gambit::LogitQREMixedStrategyProfile> &p_event) {
-    const auto &qre =
-        std::get<Gambit::LogitPathEvent<Gambit::LogitQREMixedStrategyProfile>>(p_event).qre;
-    Gambit::ThrowIfPythonError(InvokeLogitStrategyEventCallback(
-        p_callback, std::make_shared<Gambit::LogitQREMixedStrategyProfile>(qre)));
+    using Gambit::LogitQREMixedStrategyProfile;
+    std::visit(
+        [p_callback]<typename Event>(const Event &event) {
+          if constexpr (std::is_same_v<Event,
+                                       Gambit::LogitPathEvent<LogitQREMixedStrategyProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitStrategyPathEventCallback(
+                p_callback, std::make_shared<LogitQREMixedStrategyProfile>(event.qre)));
+          }
+          else if constexpr (std::is_same_v<Event, Gambit::LogitBifurcationEvent<
+                                                       LogitQREMixedStrategyProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitStrategyBifurcationEventCallback(
+                p_callback, std::make_shared<LogitQREMixedStrategyProfile>(event.before),
+                std::make_shared<LogitQREMixedStrategyProfile>(event.after)));
+          }
+          else if constexpr (std::is_same_v<Event, Gambit::LogitPerturbationEvent<
+                                                       LogitQREMixedStrategyProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitStrategyPerturbationEventCallback(
+                p_callback, event.active,
+                std::make_shared<LogitQREMixedStrategyProfile>(event.qre)));
+          }
+        },
+        p_event);
   };
 }
 
@@ -226,10 +257,28 @@ MakeLogitEventCallback<Gambit::LogitQREMixedBehaviorProfile>(PyObject *p_callbac
     return Gambit::NullLogitEventCallback<Gambit::LogitQREMixedBehaviorProfile>;
   }
   return [p_callback](const Gambit::LogitEvent<Gambit::LogitQREMixedBehaviorProfile> &p_event) {
-    const auto &qre =
-        std::get<Gambit::LogitPathEvent<Gambit::LogitQREMixedBehaviorProfile>>(p_event).qre;
-    Gambit::ThrowIfPythonError(InvokeLogitBehaviorEventCallback(
-        p_callback, std::make_shared<Gambit::LogitQREMixedBehaviorProfile>(qre)));
+    using Gambit::LogitQREMixedBehaviorProfile;
+    std::visit(
+        [p_callback]<typename Event>(const Event &event) {
+          if constexpr (std::is_same_v<Event,
+                                       Gambit::LogitPathEvent<LogitQREMixedBehaviorProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitBehaviorPathEventCallback(
+                p_callback, std::make_shared<LogitQREMixedBehaviorProfile>(event.qre)));
+          }
+          else if constexpr (std::is_same_v<Event, Gambit::LogitBifurcationEvent<
+                                                       LogitQREMixedBehaviorProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitBehaviorBifurcationEventCallback(
+                p_callback, std::make_shared<LogitQREMixedBehaviorProfile>(event.before),
+                std::make_shared<LogitQREMixedBehaviorProfile>(event.after)));
+          }
+          else if constexpr (std::is_same_v<Event, Gambit::LogitPerturbationEvent<
+                                                       LogitQREMixedBehaviorProfile>>) {
+            Gambit::ThrowIfPythonError(InvokeLogitBehaviorPerturbationEventCallback(
+                p_callback, event.active,
+                std::make_shared<LogitQREMixedBehaviorProfile>(event.qre)));
+          }
+        },
+        p_event);
   };
 }
 

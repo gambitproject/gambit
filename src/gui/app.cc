@@ -26,6 +26,7 @@
 #endif // WX_PRECOMP
 #include <wx/artprov.h>
 #include <wx/display.h>
+#include <wx/filename.h>
 #include <wx/image.h>
 
 #include "games.h"
@@ -183,9 +184,17 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
 
   switch (result) {
   case GameDocument::LoadResult::OpenFailed:
-    FileErrorDialog(p_parent, _("Unable to open file"),
-                    _("Gambit could not open this file for reading."), p_filename)
-        .ShowModal();
+    if (!wxFileName::FileExists(p_filename) && ForgetRecentFile(p_filename)) {
+      FileErrorDialog(p_parent, _("File not found"), _("This file no longer exists."),
+                      p_filename + "\n\n" +
+                          _("It has been removed from the list of recent games."))
+          .ShowModal();
+    }
+    else {
+      FileErrorDialog(p_parent, _("Unable to open file"),
+                      _("Gambit could not open this file for reading."), p_filename)
+          .ShowModal();
+    }
     return AppLoadResult::OpenFailed;
 
   case GameDocument::LoadResult::ParseFailed:
@@ -208,6 +217,27 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
     (void)new GameFrame(nullptr, doc);
     return AppLoadResult::Success;
   }
+}
+
+std::vector<wxString> Application::GetRecentFiles() const
+{
+  std::vector<wxString> files;
+  for (size_t i = 0; i < m_fileHistory.GetCount(); i++) {
+    files.push_back(m_fileHistory.GetHistoryFile(i));
+  }
+  return files;
+}
+
+bool Application::ForgetRecentFile(const wxString &p_filename)
+{
+  for (size_t i = 0; i < m_fileHistory.GetCount(); i++) {
+    if (m_fileHistory.GetHistoryFile(i) == p_filename) {
+      m_fileHistory.RemoveFileFromHistory(i);
+      m_fileHistory.Save(*wxConfigBase::Get());
+      return true;
+    }
+  }
+  return false;
 }
 
 void Application::SetCurrentDir(const wxString &p_dir)

@@ -125,12 +125,15 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
-TracePathResult PathTracer::TracePath(
-    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
-    TraceDirection p_direction, size_t p_trackingIndex, TerminationFunctionType p_terminate,
-    CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
-    CriterionBracketFunctionType p_criterionBracket, const CancelToken &p_cancel) const
+TracePathResult
+PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+                      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+                      Vector<double> &x, TraceDirection p_direction, size_t p_trackingIndex,
+                      TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
+                      CriterionFunctionType p_criterion,
+                      CriterionBracketFunctionType p_criterionBracket, const CancelToken &p_cancel,
+                      BifurcationBracketFunctionType p_onBifurcation,
+                      PerturbationEventFunctionType p_onPerturbation) const
 {
   const double c_tol = 1.0e-4;       // tolerance for corrector iteration
   const double c_maxDist = 0.4;      // maximal distance to curve
@@ -273,8 +276,10 @@ TracePathResult PathTracer::TracePath(
       // Switch on perturbation and attempt to continue following the branch that
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
+        p_onBifurcation(x, u);
         pert = c_pert;
         pert_countdown = std::max(std::abs(10.0 * h), min_pert_countdown);
+        p_onPerturbation(true, x);
       }
       accept = false;
     }
@@ -323,6 +328,7 @@ TracePathResult PathTracer::TracePath(
       if (pert_countdown < 0.0) {
         pert = 0.0;
         pert_countdown = 0.0;
+        p_onPerturbation(false, x);
       }
     }
   }
