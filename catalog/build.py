@@ -404,7 +404,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
             "Update Gambit catalog documentation and build files. "
-            "Always regenerates catalog/doc/_table.rst from the current catalog. "
+            "Regenerates catalog/doc/_table.rst from the current catalog by default; "
+            "pass --skip-table to skip this (it requires a LaTeX toolchain via gtdraw). "
             "Run from the repo root or catalog/."
         )
     )

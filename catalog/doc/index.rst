@@ -4,7 +4,7 @@ Catalog of games
 ================
 
 Below is a complete list of games included in Gambit's catalog.
-See the main `pygambit documentation <https://gambit.readthedocs.io/>`_ for the
+See the main `pygambit documentation <https://gambitproject.readthedocs.io/>`_ for the
 :mod:`pygambit.catalog` API reference (including how to load these games in Python),
 for loading games from the OpenSpiel library, and for generating games on the fly
 from the GAMUT suite.
