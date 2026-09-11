@@ -136,11 +136,15 @@ Currently supported representations are:
 5. **[Optional] Test your updates to the documentation locally:**
 
    The previous step will (re)build your local copy of the Gambit Catalog RST page used by the documentation.
-   The catalog is its own Sphinx project, built independently of the main Gambit docs:
+   The catalog is its own Sphinx project, built independently of the main Gambit docs.
+   Run the build from inside ``catalog/doc`` itself, not the repo root: the generated table
+   embeds ``draw(...)`` calls whose paths are resolved relative to the current working
+   directory, so building from anywhere else raises a file-not-found error.
 
    .. code-block:: bash
 
-      sphinx-build -b html catalog/doc catalog/doc/_build/html
+      cd catalog/doc
+      sphinx-build -b html . _build/html
 
    Open ``catalog/doc/_build/html/index.html`` to view your changes.
    Iterate steps 2-4 as required.
