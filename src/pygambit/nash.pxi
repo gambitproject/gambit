@@ -159,6 +159,44 @@ class LogitTerminationReason(enum.Enum):
 
 
 @dataclasses.dataclass(frozen=True)
+class LogitPathEvent:
+    """Reports one point traced along the principal branch of the logit QRE
+    correspondence.
+    """
+    qre: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitBifurcationEvent:
+    """Reports a bifurcation the moment it is detected while tracing the logit QRE
+    correspondence, bracketed by the last point before, and first point after, the
+    change in branch orientation.
+    """
+    before: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+    after: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitPerturbationEvent:
+    """Reports the tracer switching a symmetry-breaking perturbation on or off while
+    attempting to cross a suspected bifurcation.
+    """
+    active: bool
+    qre: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
+class LogitBifurcation:
+    """Reports a bifurcation detected while tracing the logit QRE correspondence,
+    bracketed by the last point before, and first point after, the change in branch
+    orientation. Unlike `LogitBifurcationEvent`, this is not reported through
+    `event_callback` but accumulated into `LogitResult.bifurcations`.
+    """
+    before: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+    after: "LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile"
+
+
+@dataclasses.dataclass(frozen=True)
 class EnumPolyCandidateSupportEvent:
     """Reports a support profile examined by :ref:`enumpoly <enumpoly>` as a candidate
     to contain a totally-mixed equilibrium.
@@ -467,6 +505,8 @@ class LogitResult(NashResultBase):
         Whether `equilibrium` was accepted.
     reason : LogitTerminationReason
         Why tracing did not reach an accepted equilibrium, if it did not.
+    bifurcations : list of LogitBifurcation
+        Any bifurcations detected while tracing towards `equilibrium`.
     """
     maxregret: float
     first_step: float
@@ -474,6 +514,7 @@ class LogitResult(NashResultBase):
     equilibrium: MixedStrategyProfileDouble | MixedBehaviorProfileDouble | None
     success: bool
     reason: LogitTerminationReason
+    bifurcations: list[LogitBifurcation]
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -541,21 +582,73 @@ cdef public string InvokeBehaviorCallbackRational(
     return b""
 
 
-cdef public string InvokeLogitStrategyEventCallback(
+cdef public string InvokeLogitStrategyPathEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
 ):
     try:
-        callback(LogitQREMixedStrategyProfile.wrap(qre))
+        callback(LogitPathEvent(qre=LogitQREMixedStrategyProfile.wrap(qre)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
 
 
-cdef public string InvokeLogitBehaviorEventCallback(
+cdef public string InvokeLogitBehaviorPathEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedBehaviorProfile]
 ):
     try:
-        callback(LogitQREMixedBehaviorProfile.wrap(qre))
+        callback(LogitPathEvent(qre=LogitQREMixedBehaviorProfile.wrap(qre)))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitStrategyBifurcationEventCallback(
+        callback, before: shared_ptr[c_LogitQREMixedStrategyProfile],
+        after: shared_ptr[c_LogitQREMixedStrategyProfile]
+):
+    try:
+        callback(LogitBifurcationEvent(
+            before=LogitQREMixedStrategyProfile.wrap(before),
+            after=LogitQREMixedStrategyProfile.wrap(after),
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitBehaviorBifurcationEventCallback(
+        callback, before: shared_ptr[c_LogitQREMixedBehaviorProfile],
+        after: shared_ptr[c_LogitQREMixedBehaviorProfile]
+):
+    try:
+        callback(LogitBifurcationEvent(
+            before=LogitQREMixedBehaviorProfile.wrap(before),
+            after=LogitQREMixedBehaviorProfile.wrap(after),
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitStrategyPerturbationEventCallback(
+        callback, active: bool, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
+):
+    try:
+        callback(LogitPerturbationEvent(
+            active=active, qre=LogitQREMixedStrategyProfile.wrap(qre)
+        ))
+    except BaseException as e:
+        return f"{type(e).__name__}: {e}".encode("utf-8")
+    return b""
+
+
+cdef public string InvokeLogitBehaviorPerturbationEventCallback(
+        callback, active: bool, qre: shared_ptr[c_LogitQREMixedBehaviorProfile]
+):
+    try:
+        callback(LogitPerturbationEvent(
+            active=active, qre=LogitQREMixedBehaviorProfile.wrap(qre)
+        ))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -841,6 +934,43 @@ def _convert_mbp_opt_r(
     return MixedBehaviorProfileRational.wrap(
         make_shared[c_MixedBehaviorProfile[c_Rational]](opt.value())
     )
+
+
+@cython.cfunc
+def _convert_logit_bifurcations_strategy(
+        bifurcations: stdvector[c_LogitBifurcationStrategy]
+) -> list:
+    # Indexed rather than a `for b in bifurcations` loop: Cython would declare a
+    # by-value loop variable of type c_LogitBifurcationStrategy, which (like QRE
+    # itself) has no default constructor.
+    return [
+        LogitBifurcation(
+            before=LogitQREMixedStrategyProfile.wrap(
+                make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].before)
+            ),
+            after=LogitQREMixedStrategyProfile.wrap(
+                make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].after)
+            ),
+        )
+        for i in range(bifurcations.size())
+    ]
+
+
+@cython.cfunc
+def _convert_logit_bifurcations_behavior(
+        bifurcations: stdvector[c_LogitBifurcationBehavior]
+) -> list:
+    return [
+        LogitBifurcation(
+            before=LogitQREMixedBehaviorProfile.wrap(
+                make_shared[c_LogitQREMixedBehaviorProfile](bifurcations[i].before)
+            ),
+            after=LogitQREMixedBehaviorProfile.wrap(
+                make_shared[c_LogitQREMixedBehaviorProfile](bifurcations[i].after)
+            ),
+        )
+        for i in range(bifurcations.size())
+    ]
 
 
 def _enumpure_strategy_solve(game: Game, nash_callback: object = None) -> EnumPureResult:
@@ -1184,6 +1314,7 @@ def _logit_strategy_solve(
         maxregret=maxregret, first_step=first_step, max_accel=max_accel,
         equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
         reason=LogitTerminationReason(<int>result.reason),
+        bifurcations=_convert_logit_bifurcations_strategy(result.bifurcations),
     )
 
 
@@ -1201,6 +1332,7 @@ def _logit_behavior_solve(
         maxregret=maxregret, first_step=first_step, max_accel=max_accel,
         equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
         reason=LogitTerminationReason(<int>result.reason),
+        bifurcations=_convert_logit_bifurcations_behavior(result.bifurcations),
     )
 
 

@@ -74,6 +74,16 @@ See the :ref:`algorithm description <logit>` for full details.
    this switch is specified, only the approximation to the Nash
    equilibrium at the end of the branch is output.
 
+.. cmdoption:: -b
+
+   .. versionadded:: 17.0.0
+
+   Report any bifurcations detected while tracing, as comment lines giving the
+   bracketing values of lambda.  Bifurcations are reported inline, interleaved
+   with the trace, as soon as each is detected.  This switch has no additional
+   effect unless :option:`-e` is also given, since bifurcations are already
+   reported as part of the full trace otherwise.
+
 Computing the principal branch, in mixed strategies, of
 the reduced strategic form of the example
 in Figure 2 of :cite:p:`Sel75`::

@@ -110,6 +110,44 @@ def test_maximum_likelihood_estimate_requires_readable_frequency_file(
     assert result.stderr == f"Error: Error reading strategy frequencies from '{missing}'.\n"
 
 
+def test_bifurcation_and_perturbation_are_reported_inline(cli_runner, nfg_coordination_text):
+    """The 2x2 symmetric coordination game's logit QRE correspondence has a
+    well-known bifurcation; tracing far enough past it (via -l) should report it,
+    and the perturbation used to cross it, interleaved with the ordinary trace as
+    soon as each is detected -- not only in a summary at the end.
+    """
+    result = cli_runner.invoke(logit.main, ["-q", "-l", "20"], input=nfg_coordination_text)
+    assert result.exit_code == 0
+    lines = result.stdout.strip().splitlines()
+    bifurcation_lines = [i for i, line in enumerate(lines) if line.startswith("# bifurcation:")]
+    started_lines = [i for i, line in enumerate(lines) if "perturbation started" in line]
+    ended_lines = [i for i, line in enumerate(lines) if "perturbation ended" in line]
+    assert len(bifurcation_lines) == 1
+    assert len(started_lines) == 1
+    assert len(ended_lines) == 1
+    # Detected mid-trace, not just tacked on to the end of the output.
+    assert bifurcation_lines[0] < len(lines) - 1
+    assert started_lines[0] < ended_lines[0]
+
+
+def test_report_bifurcations_flag_works_under_terminal_only(cli_runner, nfg_coordination_text):
+    without_flag = cli_runner.invoke(
+        logit.main, ["-q", "-e", "-l", "20"], input=nfg_coordination_text
+    )
+    with_flag = cli_runner.invoke(
+        logit.main, ["-q", "-e", "-b", "-l", "20"], input=nfg_coordination_text
+    )
+    assert without_flag.exit_code == 0
+    assert with_flag.exit_code == 0
+    assert not any(
+        line.startswith("# bifurcation:") for line in without_flag.stdout.splitlines()
+    )
+    with_flag_lines = with_flag.stdout.strip().splitlines()
+    assert len(with_flag_lines) == 2
+    assert with_flag_lines[0].startswith("# bifurcation:")
+    assert with_flag_lines[1].startswith("20.000000,")
+
+
 def test_imperfect_recall_is_rejected(cli_runner):
     imperfect_recall_efg = pathlib.Path("tests/test_games/gilboa_two_am_agents.efg").read_text()
     result = cli_runner.invoke(logit.main, ["-q"], input=imperfect_recall_efg)

@@ -265,6 +265,23 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     return g
 
 
+def create_2x2_symmetric_coordination_nfg() -> gbt.Game:
+    """A 2x2 symmetric coordination table game. Its logit QRE correspondence has a
+    well-known bifurcation partway along the principal branch, useful for
+    exercising bifurcation/perturbation detection and reporting in the logit
+    solvers.
+    """
+    game = gbt.Game.new_table([2, 2])
+    p1, p2 = game.players
+    s1a, s1b = game.get_strategies(p1)
+    s2a, s2b = game.get_strategies(p2)
+    game.make_outcome({p1: s1a, p2: s2a}, {p1: 1, p2: 1}, "aA")
+    game.make_outcome({p1: s1a, p2: s2b}, {p1: 0, p2: 0}, "aB")
+    game.make_outcome({p1: s1b, p2: s2a}, {p1: 0, p2: 0}, "bA")
+    game.make_outcome({p1: s1b, p2: s2b}, {p1: 1, p2: 1}, "bB")
+    return game
+
+
 def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
