@@ -47,7 +47,8 @@ LogitBehaviorPrincipalBranchWrapper(const Game &p_game, double p_regret, double 
                                     double p_maxAccel)
 {
   return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
+      .profiles;
 }
 
 std::shared_ptr<LogitQREMixedBehaviorProfile>
@@ -82,7 +83,8 @@ LogitStrategyPrincipalBranchWrapper(const Game &p_game, double p_regret, double 
                                     double p_maxAccel)
 {
   return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
+      .profiles;
 }
 
 std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>

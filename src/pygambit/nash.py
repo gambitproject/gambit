@@ -925,7 +925,8 @@ def logit_solve(
         first_step: float = .03,
         max_accel: float = 1.1,
         event_callback: Callable[
-            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+            [libgbt.LogitPathEvent | libgbt.LogitBifurcationEvent | libgbt.LogitPerturbationEvent],
+            None,
         ] | None = None,
 ) -> LogitResult:
     """Compute a Nash equilibrium of a game using :ref:`the logit quantal response
@@ -960,17 +961,21 @@ def logit_solve(
 
         .. versionadded:: 16.2.0
 
-    event_callback : Callable[[LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile], \
-None], optional
-        If specified, called with each point traced along the principal
-        branch on the way to the returned equilibrium.
+    event_callback : Callable[[LogitPathEvent | LogitBifurcationEvent | \
+LogitPerturbationEvent], None], optional
+        If specified, called with each point traced along the principal branch on the
+        way to the returned equilibrium (``LogitPathEvent``), the moment a bifurcation
+        is detected (``LogitBifurcationEvent``), and each time the tracer switches a
+        symmetry-breaking perturbation on or off while crossing one
+        (``LogitPerturbationEvent``).
 
         .. versionadded:: 17.0.0
 
     Returns
     -------
     res : LogitResult
-        The result represented as a ``LogitResult`` object.
+        The result represented as a ``LogitResult`` object. Any bifurcations detected
+        while tracing are also available afterward via ``res.bifurcations``.
     """
     if maxregret <= 0.0:
         raise ValueError("logit_solve(): maxregret argument must be positive")

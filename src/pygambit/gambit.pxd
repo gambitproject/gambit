@@ -729,14 +729,23 @@ cdef extern from "solvers/logit/logit.h":
         Converged
         RegretTargetNotReached
 
+    cdef cppclass c_LogitBifurcationStrategy "LogitBifurcation<LogitQREMixedStrategyProfile>":
+        c_LogitQREMixedStrategyProfile before
+        c_LogitQREMixedStrategyProfile after
+    cdef cppclass c_LogitBifurcationBehavior "LogitBifurcation<LogitQREMixedBehaviorProfile>":
+        c_LogitQREMixedBehaviorProfile before
+        c_LogitQREMixedBehaviorProfile after
+
     cdef cppclass c_LogitStrategyResult "Gambit::LogitStrategyResult":
         optional[c_MixedStrategyProfile[double]] equilibrium
         bool success
         c_LogitTerminationReason reason
+        stdvector[c_LogitBifurcationStrategy] bifurcations
     cdef cppclass c_LogitBehaviorResult "Gambit::LogitBehaviorResult":
         optional[c_MixedBehaviorProfile[double]] equilibrium
         bool success
         c_LogitTerminationReason reason
+        stdvector[c_LogitBifurcationBehavior] bifurcations
 
     c_LogitStrategyResult LogitStrategySolveEquilibrium(
             c_LogitQREMixedStrategyProfile, double, double, double,

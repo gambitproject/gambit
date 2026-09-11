@@ -3745,6 +3745,27 @@ def test_logit_solve_branch_and_lambda_on_extensive_game():
     assert len(events) > 0
 
 
+def test_logit_solve_lambda_reports_bifurcation_and_perturbation_events():
+    """The 2x2 symmetric coordination game's logit QRE correspondence has a
+    well-known bifurcation; tracing far enough past it should report it via
+    `event_callback` as a `LogitBifurcationEvent`, bracketed by matching
+    `LogitPerturbationEvent(active=True)`/`(active=False)` events around it,
+    interleaved with the ordinary `LogitPathEvent`s traced along the way."""
+    game = games.create_2x2_symmetric_coordination_nfg()
+    events = []
+    gbt.qre.logit_solve_lambda(game, lam=20.0, event_callback=events.append)
+
+    bifurcations = [e for e in events if isinstance(e, gbt.LogitBifurcationEvent)]
+    perturbations = [e for e in events if isinstance(e, gbt.LogitPerturbationEvent)]
+    assert any(isinstance(e, gbt.LogitPathEvent) for e in events)
+    assert len(bifurcations) == 1
+    assert [p.active for p in perturbations] == [True, False]
+    assert bifurcations[0].before.lam < bifurcations[0].after.lam
+    assert perturbations[0].qre.lam == pytest.approx(bifurcations[0].before.lam)
+    # Detected in the order it happened, not just collected unordered.
+    assert events.index(bifurcations[0]) < events.index(perturbations[1])
+
+
 def test_lp_solve_reports_use_strategic_for_native_strategic_game():
     """A game that is natively strategic (`is_tree` is False) is always solved on the
     strategic representation, regardless of the `use_strategic` argument -- the

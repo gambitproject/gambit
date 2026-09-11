@@ -59,6 +59,19 @@ using CallbackFunctionType = std::function<void(const Vector<double> &)>;
 
 inline void NullCallbackFunction(const Vector<double> &) {}
 
+// Called once per detected bifurcation, with the last-accepted point and the
+// rejected point where the change in tangent orientation was observed.
+using BifurcationBracketFunctionType =
+    std::function<void(const Vector<double> &, const Vector<double> &)>;
+
+inline void NullBifurcationBracketFunction(const Vector<double> &, const Vector<double> &) {}
+
+// Called when the symmetry-breaking perturbation used to traverse a suspected
+// bifurcation is switched on (true) or off (false), with the current point.
+using PerturbationEventFunctionType = std::function<void(bool, const Vector<double> &)>;
+
+inline void NullPerturbationEventFunction(bool, const Vector<double> &) {}
+
 struct TracePathResult {
   Vector<double> final_point;
   bool status; // true if path tracing terminated successfully, false if it terminated due to error
@@ -97,7 +110,9 @@ public:
             CallbackFunctionType p_callback = NullCallbackFunction,
             CriterionFunctionType p_criterion = NullCriterionFunction,
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction,
-            const CancelToken &p_cancel = CancelToken()) const;
+            const CancelToken &p_cancel = CancelToken(),
+            BifurcationBracketFunctionType p_onBifurcation = NullBifurcationBracketFunction,
+            PerturbationEventFunctionType p_onPerturbation = NullPerturbationEventFunction) const;
 
 private:
   double m_maxDecel{1.1}, m_hStart{0.03};
