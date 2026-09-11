@@ -60,7 +60,17 @@ using GNMEventCallbackType = std::function<void(const GNMEvent &)>;
 
 inline void NullGNMEventCallback(const GNMEvent &) {}
 
-std::list<MixedStrategyProfile<double>>
+/// @brief The result of computing Nash equilibria via the global Newton method
+struct GNMStrategyResult {
+  std::list<MixedStrategyProfile<double>> equilibria;
+  bool success{true};
+  /// Why the path-following run terminated; this is the same event reported to
+  /// GNMEventCallbackType via GNMTerminationEvent.  A value other than NoMoreBoundaries,
+  /// NoNextBoundary, or LambdaOutOfRange indicates a numerical breakdown, and success is false.
+  gametracer::GNMTerminationReason reason{gametracer::GNMTerminationReason::NoMoreBoundaries};
+};
+
+GNMStrategyResult
 GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
                  int p_localNewtonMaxits,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
@@ -69,7 +79,7 @@ GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_loca
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
-std::list<MixedStrategyProfile<double>>
+GNMStrategyResult
 GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
                  int p_localNewtonInterval, int p_localNewtonMaxits,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,

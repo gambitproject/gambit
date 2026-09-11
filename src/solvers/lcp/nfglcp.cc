@@ -296,21 +296,20 @@ std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p
 }
 
 template <class T>
-std::list<MixedStrategyProfile<T>>
-LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_maxDepth,
-                 StrategyCallbackType<T> p_onEquilibrium, const CancelToken &p_cancel)
+LcpStrategyResult<T> LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter,
+                                      int p_maxDepth, StrategyCallbackType<T> p_onEquilibrium,
+                                      const CancelToken &p_cancel)
 {
-  return NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium, p_cancel)
-      .Solve(p_game);
+  return {
+      NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium, p_cancel).Solve(p_game),
+      true};
 }
 
-template std::list<MixedStrategyProfile<double>> LcpStrategySolve(const Game &,
-                                                                  std::optional<size_t>, int,
-                                                                  StrategyCallbackType<double>,
-                                                                  const CancelToken &);
-template std::list<MixedStrategyProfile<Rational>> LcpStrategySolve(const Game &,
-                                                                    std::optional<size_t>, int,
-                                                                    StrategyCallbackType<Rational>,
-                                                                    const CancelToken &);
+template LcpStrategyResult<double> LcpStrategySolve(const Game &, std::optional<size_t>, int,
+                                                    StrategyCallbackType<double>,
+                                                    const CancelToken &);
+template LcpStrategyResult<Rational> LcpStrategySolve(const Game &, std::optional<size_t>, int,
+                                                      StrategyCallbackType<Rational>,
+                                                      const CancelToken &);
 
 } // end namespace Gambit::Nash

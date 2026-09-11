@@ -29,14 +29,26 @@
 
 namespace Gambit::Nash {
 
+/// @brief The result of computing Nash equilibria of a strategic game via LCP
+template <class T> struct LcpStrategyResult {
+  std::list<MixedStrategyProfile<T>> equilibria;
+  bool success{true};
+};
+
 template <class T>
-std::list<MixedStrategyProfile<T>>
+LcpStrategyResult<T>
 LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_maxDepth,
                  StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                  const CancelToken &p_cancel = CancelToken());
 
+/// @brief The result of computing a Nash equilibrium of an extensive game via LCP
+template <class T> struct LcpBehaviorResult {
+  std::optional<MixedBehaviorProfile<T>> equilibrium;
+  bool success{true};
+};
+
 template <class T>
-std::list<MixedBehaviorProfile<T>>
+LcpBehaviorResult<T>
 LcpBehaviorSolve(const Game &p_game,
                  BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
                  const CancelToken &p_cancel = CancelToken());
