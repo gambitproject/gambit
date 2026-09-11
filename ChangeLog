@@ -1,6 +1,8 @@
 ## [17.0.0-beta.2] - unreleased
 
 ### Added
+- The "Open existing game" button on the GUI's welcome screen now has a dropdown listing the most
+  recently opened games.  (#1108)
 - Details on bifurcations found and actions taken to resolve them (by perturbation) are now reported
   by `nash.logit_solve` (and related functions)  (#186)
 
