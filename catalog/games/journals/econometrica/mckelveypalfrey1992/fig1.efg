@@ -1,0 +1,13 @@
+EFG 2 R "Centipede game, 4 move" { "Player 1" "Player 2" }
+"The 4-move centipede game (Figure 1) from the experiment in :cite:p:`McKPal92`,
+reanalyzed using agent quantal response equilibrium in :cite:p:`McKPal98`."
+
+p "" 1 1 "(1,1)" { "TAKE" "PASS" } 0
+t "" 1 "Outcome 1" { 0.40, 0.10 }
+p "" 2 1 "(2,1)" { "TAKE" "PASS" } 0
+t "" 2 "Outcome 2" { 0.20, 0.80 }
+p "" 1 2 "(1,2)" { "TAKE" "PASS" } 0
+t "" 3 "Outcome 3" { 1.60, 0.40 }
+p "" 2 2 "(2,2)" { "TAKE" "PASS" } 0
+t "" 4 "Outcome 4" { 0.80, 3.20 }
+t "" 5 "Outcome 5" { 6.40, 1.60 }
