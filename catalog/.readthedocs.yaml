@@ -1,7 +1,7 @@
 version: 2
 
 # This config file is for a SEPARATE ReadTheDocs project from the main Gambit docs
-# (which use the root-level .readthedocs.yml). Setting it up requires creating a second
+# (which use the root-level .readthedocs.yaml). Setting it up requires creating a second
 # project in the ReadTheDocs dashboard for this same GitHub repo, configured to use this
 # file instead of the root one — that dashboard step is not something a git commit can do.
 
