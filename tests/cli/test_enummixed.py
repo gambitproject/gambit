@@ -41,3 +41,21 @@ def test_without_cliques_flag_no_convex_lines_appear(cli_runner, nfg_coordinatio
     result = cli_runner.invoke(enummixed.main, ["-q"], input=nfg_coordination_text)
     assert result.exit_code == 0
     assert "convex" not in result.stdout
+
+
+def test_cliques_flag_does_not_merge_polytopes_sharing_a_vertex(
+    cli_runner, nfg_multi_polytope_component_text
+):
+    """Two polytopes that touch at a shared vertex are connected but their union is
+    not itself convex -- `-c` must keep labeling them as separate convex-N sets,
+    not merge them under one label just because they belong to the same connected
+    component."""
+    result = cli_runner.invoke(
+        enummixed.main, ["-q", "-c"], input=nfg_multi_polytope_component_text
+    )
+    assert result.exit_code == 0
+    labels = [line.split(",")[0] for line in result.stdout.strip().splitlines()]
+    assert labels.count("NE") == 3
+    assert set(labels) == {"NE", "convex-1", "convex-2"}
+    assert labels.count("convex-1") == 2
+    assert labels.count("convex-2") == 2

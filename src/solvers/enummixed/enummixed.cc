@@ -20,6 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+#include <map>
+#include <numeric>
+
 #include "games.h"
 #include "solvers/linalg/vertenum.h"
 #include "solvers/enummixed/enummixed.h"
@@ -37,8 +41,36 @@ bool EqZero(const double &x)
 
 bool EqZero(const Rational &x) { return x == Rational(0); }
 
-template <class T>
-Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
+namespace {
+
+int FindRoot(std::vector<int> &p_parent, int p_node)
+{
+  while (p_parent[p_node] != p_node) {
+    p_parent[p_node] = p_parent[p_parent[p_node]];
+    p_node = p_parent[p_node];
+  }
+  return p_node;
+}
+
+void UnionNodes(std::vector<int> &p_parent, int p_node1, int p_node2)
+{
+  const int root1 = FindRoot(p_parent, p_node1);
+  const int root2 = FindRoot(p_parent, p_node2);
+  if (root1 != root2) {
+    p_parent[root1] = root2;
+  }
+}
+
+bool SharesElement(const Array<int> &p_a, const Array<int> &p_b)
+{
+  return std::any_of(p_a.begin(), p_a.end(), [&](const int p_element) {
+    return std::find(p_b.begin(), p_b.end(), p_element) != p_b.end();
+  });
+}
+
+} // end anonymous namespace
+
+template <class T> void EnumMixedStrategySolution<T>::EnsureCliques() const
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
@@ -56,25 +88,61 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
   }
+}
 
-  Array<Array<MixedStrategyProfile<T>>> solution;
-  for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
-    solution.push_back(Array<MixedStrategyProfile<T>>());
-    for (size_t i = 1; i <= m_cliques1[cl].size(); i++) {
-      for (size_t j = 1; j <= m_cliques2[cl].size(); j++) {
-        MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
+template <class T>
+Array<MixedStrategyProfile<T>>
+EnumMixedStrategySolution<T>::BuildCliqueProfiles(size_t p_clique) const
+{
+  Array<MixedStrategyProfile<T>> profiles;
+  for (size_t i = 1; i <= m_cliques1[p_clique].size(); i++) {
+    for (size_t j = 1; j <= m_cliques2[p_clique].size(); j++) {
+      MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-        for (size_t k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
-          profile[k] = m_key1[m_cliques1[cl][i]][k];
-        }
-        for (size_t k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
-          profile[k + m_key1[m_cliques1[cl][i]].size()] = m_key2[m_cliques2[cl][j]][k];
-        }
-        solution[cl].push_back(profile);
+      for (size_t k = 1; k <= m_key1[m_cliques1[p_clique][i]].size(); k++) {
+        profile[k] = m_key1[m_cliques1[p_clique][i]][k];
+      }
+      for (size_t k = 1; k <= m_key2[m_cliques2[p_clique][j]].size(); k++) {
+        profile[k + m_key1[m_cliques1[p_clique][i]].size()] = m_key2[m_cliques2[p_clique][j]][k];
+      }
+      profiles.push_back(profile);
+    }
+  }
+  return profiles;
+}
+
+template <class T>
+Array<Array<Array<MixedStrategyProfile<T>>>> EnumMixedStrategySolution<T>::GetComponents() const
+{
+  EnsureCliques();
+
+  const auto numCliques = m_cliques1.size();
+  std::vector<int> parent(numCliques + 1);
+  std::iota(parent.begin(), parent.end(), 0);
+  for (size_t cl = 1; cl <= numCliques; cl++) {
+    for (size_t other = cl + 1; other <= numCliques; other++) {
+      if (SharesElement(m_cliques1[cl], m_cliques1[other]) ||
+          SharesElement(m_cliques2[cl], m_cliques2[other])) {
+        UnionNodes(parent, static_cast<int>(cl), static_cast<int>(other));
       }
     }
   }
-  return solution;
+
+  std::map<int, Array<Array<MixedStrategyProfile<T>>>> componentsByRoot;
+  std::vector<int> rootOrder;
+  for (size_t cl = 1; cl <= numCliques; cl++) {
+    const int root = FindRoot(parent, static_cast<int>(cl));
+    if (componentsByRoot.find(root) == componentsByRoot.end()) {
+      rootOrder.push_back(root);
+    }
+    componentsByRoot[root].push_back(BuildCliqueProfiles(cl));
+  }
+
+  Array<Array<Array<MixedStrategyProfile<T>>>> components;
+  for (const int root : rootOrder) {
+    components.push_back(componentsByRoot[root]);
+  }
+  return components;
 }
 
 template <class T>

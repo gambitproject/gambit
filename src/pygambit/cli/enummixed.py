@@ -69,12 +69,15 @@ def main(file: str | None, decimals: int | None, cliques: bool, quiet: bool) -> 
         game,
         rational=rational,
         nash_callback=render,
-        cliques=cliques,
+        components=cliques,
     )
     if cliques:
-        for index, clique in enumerate(result.cliques, start=1):
+        polytopes = [
+            polytope for component in result.components for polytope in component.polytopes
+        ]
+        for index, polytope in enumerate(polytopes, start=1):
             label = f"convex-{index}"
-            for profile in clique:
+            for profile in polytope.vertices:
                 click.echo(render_profile_csv(profile, label, decimals or 0))
 
 
