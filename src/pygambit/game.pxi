@@ -520,6 +520,40 @@ class Game:
             )
         return [Node.wrap(node) for node in self.game.deref().GetNodes()]
 
+    def _all_histories(self) -> dict:
+        """The History of every node in the game, computed in one linear sweep.
+        Not part of the public API; used where most or all of a possibly-large
+        game's nodes are wanted at once, in place of one `_history_of`/
+        `_canonical_history` call per node.
+
+        `_all_nodes()` yields nodes in the same pre-order the C++ core uses to
+        number nodes -- and hence to pick each information set's/event's
+        canonical member (`GetMember(1)`) -- so a node's canonical member is
+        always already a key in the result by the time the node itself is
+        reached. Building each node's History as its parent's (already-known)
+        History plus one more transition, in that order, computes every node's
+        History exactly once, with none of the repeated backward walking or
+        redundant canonical-history recomputation that a `_history_of`/
+        `_canonical_history` call per node would do.
+        """
+        histories: dict = {}
+        for node in self._all_nodes():
+            parent = cython.cast(Node, node)._parent()
+            if parent is None:
+                histories[node] = History(())
+                continue
+            branch = cython.cast(Node, node)._prior_action()
+            canonical_infoset: c_GameInfoset = cython.cast(Node, branch.node)._infoset_handle()
+            canonical: Node = Node.wrap(canonical_infoset.deref().GetMember(1))
+            histories[node] = History(histories[parent] + (
+                HistoryTransition(
+                    player=branch.node.player,
+                    state=histories[canonical],
+                    action=branch.label,
+                ),
+            ))
+        return histories
+
     def _get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
 
@@ -993,7 +1027,7 @@ class Game:
                 "with a tree representation"
             )
         return [
-            _history_of(node) for node in self._all_nodes()
+            history for node, history in self._all_histories().items()
             if not cython.cast(Node, node)._is_strategy_reachable()
         ]
 
@@ -3449,8 +3483,8 @@ class TreeLayout:
 def _layout_tree(game: Game) -> object:
     layout = CreateLayout(game.game)
     data = {}
-    for node in game._all_nodes():
-        data[_history_of(node)] = TreeLayoutCoordinates(
+    for node, history in game._all_histories().items():
+        data[history] = TreeLayoutCoordinates(
             deref(layout).GetNodeLevel(cython.cast(Node, node).node),
             deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
             deref(layout).GetNodeOffset(cython.cast(Node, node).node))
