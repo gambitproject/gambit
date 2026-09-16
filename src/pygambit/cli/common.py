@@ -293,8 +293,8 @@ def _render_strategy_detail(
     profile: gbt.MixedStrategyProfile, decimals: int, fixed: bool = True, as_float: bool = False
 ) -> str:
     lines = []
-    for number, player in enumerate(profile.game.players, start=1):
-        lines.append(f"Strategy profile for player {number}:")
+    for player in profile.game.players:
+        lines.append(f"Strategy profile for {player}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
         probs = profile[player]
@@ -313,8 +313,8 @@ def _render_behavior_detail(
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
-    for number, player in enumerate(profile.game.players, start=1):
-        lines.append(f"Behavior profile for player {number}:")
+    for player in profile.game.players:
+        lines.append(f"Behavior profile for {player}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
         # Numbered by position among the player's information sets -- a compact key

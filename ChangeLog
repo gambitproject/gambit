@@ -14,6 +14,8 @@
   with potentially richer information about the performance of the algorithm.
 - The command-line tools' `-D` (detail) report for behavior profiles now identifies each node by its
   `History` (the actions from the root, comma-joined).
+- The command-line tools' `-D` report now identifies each player by their own label, rather than by
+  their position among the game's players.
 
 ## [17.0.0-beta.1] - 2026-09-08
 
