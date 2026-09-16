@@ -965,9 +965,9 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
         if not game.get_actions(gbt.H.path(*history.actions)):
             continue
         selector = gbt.H.path(*history.actions)
-        node = games.node_at_history(game, history.actions)
+        mover = game.get_player(selector)
         reach_prob = (
-            infoset_probs[selector] if node.player in game.players else event_probs[selector]
+            infoset_probs[selector] if mover in game.players else event_probs[selector]
         )
         if reach_prob == 0:
             assert beliefs[history] is None

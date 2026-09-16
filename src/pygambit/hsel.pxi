@@ -295,6 +295,34 @@ def _canonical_history_cached(node: Node, cache: dict) -> History:
     return _history_of_cached(Node.wrap(resolved.deref().GetMember(1)), cache)
 
 
+@cython.cfunc
+def _node_last_action(node: c_GameNode, player: str) -> object:
+    """The label of the last action `player` took on the path to `node`
+    (a raw handle, not a `Node`), wherever it fell -- `None` if `player`
+    hasn't acted yet. The `c_GameNode`-only core of `_last_action`, used
+    directly by `HistoryView`, which must never hold a `Node`."""
+    current: c_GameNode = node
+    parent: c_GameNode = current.deref().GetParent()
+    while parent != cython.cast(c_GameNode, NULL):
+        player_handle: c_GamePlayer = parent.deref().GetPlayer()
+        if (
+            player_handle != cython.cast(c_GamePlayer, NULL) and
+            player_handle.deref().GetLabel().decode("utf-8") == player
+        ):
+            return current.deref().GetPriorAction().deref().GetLabel().decode("utf-8")
+        current = parent
+        parent = current.deref().GetParent()
+    return None
+
+
+def _last_action(node: Node, player: str) -> str | None:
+    """The label of the last action `player` took on the path to `node`,
+    wherever it fell -- `None` if `player` hasn't acted yet. Used by
+    `.with_recall(player)`'s evaluation, which still works in terms of `Node`."""
+    return _node_last_action(cython.cast(Node, node).node, player)
+
+
+@cython.cclass
 class HistoryView:
     """The object a `.filter(callable)`/`.by(callable)` predicate, or
     `Game.behavior_support_profile`'s `actions` callback, actually receives.
@@ -304,16 +332,27 @@ class HistoryView:
     (`.last_action(player)`) -- but never exposes the `Node`/game it's
     privately backed by.  Not constructible directly.
 
+    A Cython extension type holding a raw `c_GameNode` handle, not a `Node`
+    object: `_node`/`_history` are C-level fields, not `__dict__` entries, so
+    a predicate/callback cannot read them back out via `view._node`; and
+    since `c_GameNode` is a C++ value with no Python identity, there is no
+    Python object here for `gc.get_referents()` to find either, unlike a
+    cclass holding a `Node` (or any other Python-object field), which Cython
+    would still make reachable that way regardless of attribute access.
+
     .. versionadded:: 17.0.0
     """
+    _node = cython.declare(c_GameNode)
+    _history = cython.declare(object)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a HistoryView directly.")
 
     @staticmethod
+    @cython.cfunc
     def _wrap(node: Node, history: History) -> HistoryView:
         obj: HistoryView = HistoryView.__new__(HistoryView)
-        obj._node = node
+        obj._node = cython.cast(Node, node).node
         obj._history = history
         return obj
 
@@ -335,7 +374,7 @@ class HistoryView:
     def last_action(self, player: str) -> str | None:
         """The label of the last action `player` took on the path to this
         history, wherever it fell -- `None` if `player` hasn't acted yet."""
-        return _last_action(self._node, player)
+        return _node_last_action(self._node, player)
 
     @property
     def members(self) -> list[History]:
@@ -348,19 +387,10 @@ class HistoryView:
             If this history currently belongs to no information set or event (a
             terminal node).
         """
-        return [_history_of(member) for member in self._node.members]
-
-
-def _last_action(node: Node, player: str) -> str | None:
-    """The label of the last action `player` took on the path to `node`,
-    wherever it fell -- `None` if `player` hasn't acted yet. Shared between
-    `HistoryView.last_action` and `.with_recall(player)`'s evaluation."""
-    current: Node = node
-    while current._parent() is not None:
-        if current._parent().player == player:
-            return current._prior_action().label
-        current = current._parent()
-    return None
+        infoset_handle: c_GameInfoset = self._node.deref().GetInfoset()
+        if infoset_handle == cython.cast(c_GameInfoset, NULL):
+            raise AttributeError("node currently belongs to no information set or event")
+        return [_history_of(Node.wrap(member)) for member in infoset_handle.deref().GetMembers()]
 
 
 class H:

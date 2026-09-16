@@ -312,6 +312,7 @@ class Game:
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
 
+    @cython.cfunc
     def _get_infosets(self, player: str) -> list[Node]:
         """Internal: like `get_infosets`, but keeps `Node` objects rather than
         materializing each into a History -- used internally where the actual node
@@ -500,6 +501,7 @@ class Game:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
 
+    @cython.cfunc
     def _root(self) -> Node:
         """The root node of the game. Not part of the public API; the public
         equivalent is the trivial empty History, `()`, or `H.path()` as a Selector.
@@ -510,6 +512,7 @@ class Game:
             )
         return Node.wrap(self.game.deref().GetRoot())
 
+    @cython.cfunc
     def _all_nodes(self) -> list:
         """All nodes in the game, in depth-first traversal order. Not part of
         the public API; the public equivalent is `Game.get_histories(H.after())`.
@@ -520,6 +523,7 @@ class Game:
             )
         return [Node.wrap(node) for node in self.game.deref().GetNodes()]
 
+    @cython.cfunc
     def _all_histories(self) -> dict:
         """The History of every node in the game, computed in one linear sweep.
         Not part of the public API; used where most or all of a possibly-large
@@ -554,6 +558,7 @@ class Game:
             ))
         return histories
 
+    @cython.cfunc
     def _get_nodes(self, selector: Selector) -> list[Node]:
         """Evaluate `selector` (an `H`-built expression) against this game.
 
@@ -787,6 +792,7 @@ class Game:
             )
         return [_history_of(member) for member in self._get_members(history)]
 
+    @cython.cfunc
     def _get_members(self, history: Selector) -> list[Node]:
         """Internal: like `get_members`, but keeps `Node` objects rather than
         materializing each into a History -- used internally where the actual node
@@ -799,6 +805,7 @@ class Game:
             return []
         return [Node.wrap(member) for member in infoset_handle.deref().GetMembers()]
 
+    @cython.cfunc
     def _group_nodes(self, grouped: GroupedSelector) -> dict:
         """Internal: like `_get_groups`, but keeps `Node` objects rather than
         materializing each into a `History` -- used by mutation methods that
@@ -1718,16 +1725,17 @@ class Game:
                 return outcome
         raise KeyError(f"{funcname}(): no outcome with label '{label}'")
 
-    def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
-        """Resolve an attempt to reference a node of the game. A bare `Node` is not
-        accepted -- every public method that reaches this already requires a
-        `Selector` (or, for internal callers, an already-resolved `Node`, never
-        routed back through here).
+    @cython.cfunc
+    def _resolve_node(self, node: Selector, funcname: str, argname: str = "node") -> Node:
+        """Resolve an attempt to reference a node of the game. Every public method
+        that reaches this already requires a `Selector` (or, for internal callers,
+        an already-resolved `Node`, never routed back through here).
 
         Parameters
         ----------
-        node : Any
-            An object to resolve as a reference to a node.
+        node : Selector
+            An `H`-built expression, evaluated against this game, that must resolve
+            to exactly one node.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'node'
@@ -1735,38 +1743,18 @@ class Game:
 
         Raises
         ------
-        KeyError
-            If `node` is a string and no node in the game has that label.
-        TypeError
-            If `node` is not a `Selector`, `tuple`, or `str`
         ValueError
-            If `node` is an empty `str` or all spaces
+            If `node` does not resolve to exactly one node.
         """
-        if isinstance(node, Selector):
-            resolved = self._get_nodes(node)
-            if len(resolved) != 1:
-                raise ValueError(
-                    f"{funcname}(): {argname} selector must resolve to exactly one "
-                    f"node, resolved to {len(resolved)}"
-                )
-            return resolved[0]
-        elif isinstance(node, tuple):
-            # A History -- the manual fallback: root-anchored, every step exact.
-            return self._resolve_node(Selector().path(*node), funcname, argname)
-        elif isinstance(node, str):
-            if not node.strip():
-                raise ValueError(
-                    f"{funcname}(): {argname} cannot be an empty string or all spaces"
-                )
-            for n in self._all_nodes():
-                if cython.cast(Node, n)._label == node:
-                    return n
-            raise KeyError(f"{funcname}(): no node with label '{node}'")
-        raise TypeError(
-            f"{funcname}(): {argname} must be Selector, tuple, or str, "
-            f"not {node.__class__.__name__}"
-        )
+        resolved = self._get_nodes(node)
+        if len(resolved) != 1:
+            raise ValueError(
+                f"{funcname}(): {argname} selector must resolve to exactly one "
+                f"node, resolved to {len(resolved)}"
+            )
+        return resolved[0]
 
+    @cython.cfunc
     def _resolve_nodes(self,
                        nodes: typing.Any,
                        funcname: str,
@@ -1789,16 +1777,17 @@ class Game:
             raise ValueError(f"{funcname}(): Each node must be referenced only once")
         return resolved_nodes
 
+    @cython.cfunc
     def _resolve_infoset(self,
-                         infoset: typing.Any, funcname: str, argname: str = "infoset") -> Node:
+                         infoset: Selector, funcname: str, argname: str = "infoset") -> Node:
         """Resolve an attempt to reference a personal player's information set of the
-        game, via a `Selector` resolving to a member node, or such a node's label.
+        game, via a `Selector` resolving to a member node.
 
         Parameters
         ----------
-        infoset : Selector, tuple, or str
-            A `Selector`/History resolving to a node belonging to the information
-            set, or such a node's label.
+        infoset : Selector
+            An `H`-built expression, evaluated against this game, that must resolve
+            to a node belonging to the information set.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1812,13 +1801,10 @@ class Game:
 
         Raises
         ------
-        KeyError
-            If `infoset` is a string and no node in the game has that label.
-        TypeError
-            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
-            If `infoset` resolves to a chance event rather than a personal player's
-            information set, or to no information set at all (the node is terminal).
+            If `infoset` does not resolve to exactly one node, or the node resolves
+            to a chance event rather than a personal player's information set, or to
+            no information set at all (the node is terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
         is_personal, is_chance = _node_infoset_kind(resolved_node)
@@ -1828,16 +1814,17 @@ class Game:
             funcname, argname
         )
 
+    @cython.cfunc
     def _resolve_event(self,
-                       event: typing.Any, funcname: str, argname: str = "event") -> Node:
+                       event: Selector, funcname: str, argname: str = "event") -> Node:
         """Resolve an attempt to reference a chance event of the game, via a
-        `Selector` resolving to a member node, or such a node's label.
+        `Selector` resolving to a member node.
 
         Parameters
         ----------
-        event : Selector, tuple, or str
-            A `Selector`/History resolving to a node belonging to the event, or
-            such a node's label.
+        event : Selector
+            An `H`-built expression, evaluated against this game, that must resolve
+            to a node belonging to the event.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'event'
@@ -1851,13 +1838,10 @@ class Game:
 
         Raises
         ------
-        KeyError
-            If `event` is a string and no node in the game has that label.
-        TypeError
-            If `event` is not a `Selector`, `tuple`, or `str`
         ValueError
-            If `event` resolves to a personal player's information set rather than a
-            chance event, or to no event at all (the node is terminal).
+            If `event` does not resolve to exactly one node, or the node resolves to
+            a personal player's information set rather than a chance event, or to no
+            event at all (the node is terminal).
         """
         resolved_node = self._resolve_node(event, funcname, argname)
         is_personal, is_chance = _node_infoset_kind(resolved_node)
@@ -1867,20 +1851,21 @@ class Game:
             funcname, argname
         )
 
+    @cython.cfunc
     def _resolve_infoset_or_event(self,
-                                  infoset: typing.Any,
+                                  infoset: Selector,
                                   funcname: str,
                                   argname: str = "infoset") -> Node:
         """Resolve an attempt to reference an information set or event of the game
-        (whichever applies), via a `Selector` resolving to a member node, or such a
-        node's label. For operations that apply uniformly to either, such as
-        attaching to an existing one.
+        (whichever applies), via a `Selector` resolving to a member node. For
+        operations that apply uniformly to either, such as attaching to an existing
+        one.
 
         Parameters
         ----------
-        infoset : Selector, tuple, or str
-            A `Selector`/History resolving to a node belonging to the information
-            set or event, or such a node's label.
+        infoset : Selector
+            An `H`-built expression, evaluated against this game, that must resolve
+            to a node belonging to the information set or event.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'infoset'
@@ -1894,13 +1879,9 @@ class Game:
 
         Raises
         ------
-        KeyError
-            If `infoset` is a string and no node in the game has that label.
-        TypeError
-            If `infoset` is not a `Selector`, `tuple`, or `str`
         ValueError
-            If `infoset` resolves to no information set or event (the node is
-            terminal).
+            If `infoset` does not resolve to exactly one node, or resolves to no
+            information set or event (the node is terminal).
         """
         resolved_node = self._resolve_node(infoset, funcname, argname)
         is_personal, is_chance = _node_infoset_kind(resolved_node)

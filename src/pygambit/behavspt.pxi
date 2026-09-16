@@ -127,7 +127,9 @@ class BehaviorSupport:
             raise TypeError(
                 f"BehaviorSupport index must be Selector, not {selector.__class__.__name__}"
             )
-        resolved_node = self._game._resolve_infoset(selector, "BehaviorSupport.__getitem__")
+        resolved_node = cython.cast(Game, self._game)._resolve_infoset(
+            selector, "BehaviorSupport.__getitem__"
+        )
         if resolved_node.player != self._player:
             raise MismatchError(
                 "selector must resolve to an information set belonging to this player"
@@ -212,11 +214,11 @@ class BehaviorSupportProfile:
         if isinstance(index, str):
             values = {
                 _canonical_history(node): self._action_support_at(node)
-                for node in self.game._get_infosets(index)
+                for node in cython.cast(Game, self.game)._get_infosets(index)
             }
             return BehaviorSupport.wrap(self.game, index, values)
         if isinstance(index, Selector):
-            resolved_node = self.game._resolve_infoset(
+            resolved_node = cython.cast(Game, self.game)._resolve_infoset(
                 index, "BehaviorSupportProfile.__getitem__"
             )
             return self._action_support_at(resolved_node)
@@ -297,7 +299,7 @@ class BehaviorSupportProfile:
             raise TypeError(
                 f"profile index must be Selector, not {infoset.__class__.__name__}"
             )
-        resolved_node = self.game._resolve_infoset(
+        resolved_node = cython.cast(Game, self.game)._resolve_infoset(
             infoset, "BehaviorSupportProfile.__setitem__"
         )
         self._set_support(resolved_node, actions)
@@ -336,5 +338,7 @@ class BehaviorSupportProfile:
                 f"is_infoset_reachable(): infoset must be a Selector, "
                 f"not {infoset.__class__.__name__}"
             )
-        resolved_node: Node = self.game._resolve_infoset(infoset, "is_infoset_reachable")
+        resolved_node: Node = cython.cast(Game, self.game)._resolve_infoset(
+            infoset, "is_infoset_reachable"
+        )
         return deref(self.profile).IsReachable(resolved_node._infoset_handle())
