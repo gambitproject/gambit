@@ -11,6 +11,8 @@
   with bifurcations. (#492)
 - Nash solver algorithms now return a method-specific `Result` class, rather than a generic class,
   with potentially richer information about the performance of the algorithm.
+- The command-line tools' `-D` (detail) report for behavior profiles now identifies each node by its
+  `History` (the actions from the root, comma-joined).
 
 ## [17.0.0-beta.1] - 2026-09-08
 
