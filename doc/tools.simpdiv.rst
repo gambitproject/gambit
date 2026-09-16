@@ -83,6 +83,16 @@ options to specify additional starting points for the algorithm.
    this option sacrifices some precision in reporting the output of the method, in exchange for
    probabilities which are more human-readable.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed, respecting :option:`-d` the same way.
+
 .. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, initial points, as well as

@@ -266,14 +266,17 @@ def render_support_csv(
 def render_profile_detail(
     profile: gbt.MixedStrategyProfile | gbt.MixedBehaviorProfile,
     decimals: int,
+    fixed: bool = True,
+    as_float: bool = False,
 ) -> str:
     """Render a strategy or behavior profile as a human-readable description,
     matching `MixedStrategyProfileDetailRenderer` and
-    `MixedBehaviorProfileDetailRenderer` in the C++ tools.
+    `MixedBehaviorProfileDetailRenderer` in the C++ tools.  See `format_value` for
+    the meaning of `fixed` and `as_float`.
     """
     if _is_behavior_profile(profile):
-        return _render_behavior_detail(profile, decimals)
-    return _render_strategy_detail(profile, decimals)
+        return _render_behavior_detail(profile, decimals, fixed, as_float)
+    return _render_strategy_detail(profile, decimals, fixed, as_float)
 
 
 def _render_history(actions: tuple[str, ...]) -> str:
@@ -286,7 +289,9 @@ def _render_history(actions: tuple[str, ...]) -> str:
     return buf.getvalue() or "(root)"
 
 
-def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
+def _render_strategy_detail(
+    profile: gbt.MixedStrategyProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
     for number, player in enumerate(profile.game.players, start=1):
         lines.append(f"Strategy profile for player {number}:")
@@ -295,13 +300,15 @@ def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) ->
         probs = profile[player]
         values = profile.strategy_values[player]
         for strategy in profile.game.get_strategies(player):
-            prob = format_value(probs[strategy], decimals)
-            value = format_value(values[strategy], decimals)
+            prob = format_value(probs[strategy], decimals, fixed, as_float)
+            value = format_value(values[strategy], decimals, fixed, as_float)
             lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
 
 
-def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) -> str:
+def _render_behavior_detail(
+    profile: gbt.MixedBehaviorProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
     action_values = profile.action_values
     beliefs = profile.beliefs
@@ -321,10 +328,12 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
             for action in profile.game.get_actions(selector):
                 prob = mixed_action[action]
                 value = values[action]
-                value_text = format_value(value, decimals) if value is not None else ""
+                value_text = (
+                    format_value(value, decimals, fixed, as_float) if value is not None else ""
+                )
                 lines.append(
                     f"{infoset_number:>7}    {action:>7}   "
-                    f"{format_value(prob, decimals):>11}   {value_text:>11}"
+                    f"{format_value(prob, decimals, fixed, as_float):>11}   {value_text:>11}"
                 )
         lines.append("")
         # One row per member of each of the player's information sets, identified by
@@ -344,10 +353,12 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
         lines.append(f"Infoset    {'History':<{history_width}}    Belief        Prob")
         lines.append(f"-------    {'-' * history_width}    -----------   -----------")
         for infoset_number, history_text, belief, realiz in rows:
-            belief_text = format_value(belief, decimals) if belief is not None else ""
+            belief_text = (
+                format_value(belief, decimals, fixed, as_float) if belief is not None else ""
+            )
             lines.append(
                 f"{infoset_number:>7}    {history_text:<{history_width}}    "
-                f"{belief_text:>11}   {format_value(realiz, decimals):>11}"
+                f"{belief_text:>11}   {format_value(realiz, decimals, fixed, as_float):>11}"
             )
         lines.append("")
     return "\n".join(lines)

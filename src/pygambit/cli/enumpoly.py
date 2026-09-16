@@ -40,6 +40,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     render_support_csv,
     validate_stop_after,
     version_option,
@@ -92,6 +93,7 @@ PROG_NAME = "gambit-enumpoly"
     help="maximum number of rectangles to examine when searching for roots on a "
     "single support, before giving up on that support",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -108,6 +110,7 @@ def main(
     maxregret: float,
     stop_after: int | None,
     max_rectangles: int,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
@@ -116,7 +119,10 @@ def main(
         raise ValueError("Computing equilibria of games with imperfect recall is not supported.")
 
     def render(profile) -> None:
-        click.echo(render_profile_csv(profile, "NE", decimals))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, "NE", decimals))
 
     def render_event(event) -> None:
         if not verbose:
