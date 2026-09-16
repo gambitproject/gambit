@@ -240,6 +240,18 @@ def _history_of(node: Node) -> History:
     """The History for `node` -- walks back to the root via the private
     `Node._parent`/`._prior_action` navigation, recording a `HistoryTransition`
     per step."""
+    return _history_of_cached(node, {})
+
+
+@cython.cfunc
+def _history_of_cached(node: Node, cache: dict) -> History:
+    """Internal: `_history_of`, memoized on `cache` (keyed by `Node`) for the
+    duration of one top-level call. Without this, each `HistoryTransition.state`
+    triggers a fresh `_canonical_history`/`_history_of` walk of its own, and since
+    that walk repeats for every ancestor, the total cost is exponential in tree
+    depth rather than linear."""
+    if node in cache:
+        return cache[node]
     transitions: list = []
     current: Node = node
     while current._parent() is not None:
@@ -247,13 +259,15 @@ def _history_of(node: Node) -> History:
         transitions.append(
             HistoryTransition(
                 player=branch.node.player,
-                state=_canonical_history(branch.node),
+                state=_canonical_history_cached(branch.node, cache),
                 action=branch.label,
             )
         )
         current = branch.node
     transitions.reverse()
-    return History(transitions)
+    result: History = History(transitions)
+    cache[node] = result
+    return result
 
 
 def _canonical_history(node: Node) -> History:
@@ -268,10 +282,17 @@ def _canonical_history(node: Node) -> History:
     AttributeError
         If `node` currently belongs to no information set or event (a terminal node).
     """
+    return _canonical_history_cached(node, {})
+
+
+@cython.cfunc
+def _canonical_history_cached(node: Node, cache: dict) -> History:
+    """Internal: `_canonical_history`, threading the same `cache` used by
+    `_history_of_cached` through to its own `_history_of_cached` call."""
     resolved: c_GameInfoset = node._infoset_handle()
     if resolved == cython.cast(c_GameInfoset, NULL):
         raise AttributeError("node currently belongs to no information set or event")
-    return _history_of(Node.wrap(resolved.deref().GetMember(1)))
+    return _history_of_cached(Node.wrap(resolved.deref().GetMember(1)), cache)
 
 
 class HistoryView:

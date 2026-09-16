@@ -753,9 +753,10 @@ class MixedBehaviorProfile:
         .. versionadded:: 17.0.0
         """
         self._check_validity()
+        histories: dict = self.game._all_histories()
         return HistoryValuesVector({
             p: HistoryValueVector({
-                _history_of(n): self._node_value(p, n) for n in self.game._all_nodes()
+                history: self._node_value(p, n) for n, history in histories.items()
             })
             for p in self.game.players
         })
@@ -809,7 +810,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return RealizProbVector({
-            _history_of(n): self._realiz_prob(n) for n in self.game._all_nodes()
+            history: self._realiz_prob(n) for n, history in self.game._all_histories().items()
         })
 
     @property
@@ -886,7 +887,7 @@ class MixedBehaviorProfile:
         """
         self._check_validity()
         return BeliefVector({
-            _history_of(n): self._belief(n) for n in self.game._all_nodes()
+            history: self._belief(n) for n, history in self.game._all_histories().items()
         })
 
     @property
