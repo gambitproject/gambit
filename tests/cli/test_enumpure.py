@@ -27,8 +27,8 @@ def test_detail_flag_switches_to_multiline_report(cli_runner, nfg_coordination_t
     detail_result = cli_runner.invoke(enumpure.main, ["-q", "-D"], input=nfg_coordination_text)
     assert detail_result.exit_code == 0
     assert "NE," not in detail_result.stdout
-    assert "Strategy profile for player 1:" in detail_result.stdout
-    assert "Strategy profile for player 2:" in detail_result.stdout
+    assert "Strategy profile for 1:" in detail_result.stdout
+    assert "Strategy profile for 2:" in detail_result.stdout
     assert len(detail_result.stdout.splitlines()) > len(csv_result.stdout.splitlines())
 
 

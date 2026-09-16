@@ -361,6 +361,19 @@ def _render_behavior_detail(
                 f"{belief_text:>11}   {format_value(realiz, decimals, fixed, as_float):>11}"
             )
         lines.append("")
+    # The probability distribution over plays: not player-specific (unlike the tables
+    # above), so printed once for the whole profile rather than once per player.
+    plays = [
+        (_render_history(play.actions), realiz_probs[play])
+        for play in profile.game.get_histories(gbt.H.plays)
+    ]
+    play_width = max([len("Play")] + [len(text) for text, _ in plays])
+    lines.append("Probability distribution over full histories:")
+    lines.append(f"{'Play':<{play_width}}    Prob")
+    lines.append(f"{'-' * play_width}    -----------")
+    for play_text, prob in plays:
+        prob_text = format_value(prob, decimals, fixed, as_float)
+        lines.append(f"{play_text:<{play_width}}    {prob_text:>11}")
     return "\n".join(lines)
 
 
