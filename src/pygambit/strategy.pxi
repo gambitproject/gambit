@@ -82,7 +82,9 @@ class StrategyBehavior:
             raise TypeError(
                 f"StrategyBehavior key must be Selector, not {key.__class__.__name__}"
             )
-        resolved_node = self._game._resolve_infoset(key, "StrategyBehavior", "key")
+        resolved_node = cython.cast(Game, self._game)._resolve_infoset(
+            key, "StrategyBehavior", "key"
+        )
         if resolved_node.player != self._player_label:
             raise ValueError(
                 f"Player '{self._player_label}' does not have the move at {resolved_node}."
@@ -134,7 +136,7 @@ class StrategyBehavior:
     def _reachable_nodes(self) -> typing.Iterator[Node]:
         """The representative nodes of the player's information sets at which the
         strategy prescribes an action, in the player's information set order."""
-        for node in self._game._get_infosets(self._player_label):
+        for node in cython.cast(Game, self._game)._get_infosets(self._player_label):
             if self._action_at(node) is not None:
                 yield node
 

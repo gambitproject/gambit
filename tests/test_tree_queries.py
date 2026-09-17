@@ -456,8 +456,9 @@ def test_get_behavior_prescribed_action_undefined_returns_none(
 ):
     """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
     if infoset_label is not None:
-        node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
-        selector = games.selector_for_node(node)
+        canonical_history = games.infoset_history_in_game(game, infoset_label)
+        member = next(iter(game.get_members(gbt.H.path(*canonical_history))))
+        selector = gbt.H.path(*member.actions)
     else:
         selector = gbt.H.path(*infoset_path)
 
