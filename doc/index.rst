@@ -106,6 +106,7 @@ construction and analysis of finite extensive and strategic games.
    :maxdepth: 1
 
    install
+   concepts
    algorithms
    pygambit
    tools

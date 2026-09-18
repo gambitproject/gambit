@@ -14,6 +14,10 @@ You can run the tutorials interactively as Jupyter notebooks, see :ref:`local_tu
 Installing PyGambit also installs Gambit's :ref:`command-line tools <command-line>`
 for computing Nash equilibria from the shell or from scripts.
 
+Before working through the tutorials, it may help to read :doc:`concepts`, which sets
+out the terminology and modeling conventions used throughout this documentation and the
+PyGambit API.
+
 New user tutorials
 ------------------
 
