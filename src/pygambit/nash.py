@@ -313,7 +313,7 @@ def lcp_solve(
     ValueError
         If stop_after or max_depth are supplied for use on the tree representation.
     """
-    if game.is_tree and not use_strategic:
+    if isinstance(game, libgbt.ExtensiveGame) and not use_strategic:
         if stop_after is not None:
             raise ValueError(
                 "lcp_solve(): stop_after can only be used on the strategic representation"
@@ -323,7 +323,7 @@ def lcp_solve(
                 "lcp_solve(): max_depth can only be used on the strategic representation"
             )
     _validate_stop_after("lcp_solve", stop_after)
-    use_strategic = not game.is_tree or use_strategic
+    use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if use_strategic:
         if rational:
             return libgbt._lcp_strategy_solve_rational(
@@ -375,7 +375,7 @@ def lp_solve(
     RuntimeError
         If game has more than two players or is not constant sum.
     """
-    use_strategic = not game.is_tree or use_strategic
+    use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if use_strategic:
         if rational:
             return libgbt._lp_strategy_solve_rational(game, nash_callback)
@@ -884,7 +884,7 @@ def enumpoly_solve(
             f"enumpoly_solve(): "
             f"max_rectangles argument must be a positive number; got {max_rectangles}"
         )
-    use_strategic = not game.is_tree or use_strategic
+    use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if phcpack_path is not None:
         if not use_strategic:
             raise ValueError(
@@ -983,7 +983,7 @@ LogitPerturbationEvent], None], optional
         raise ValueError("logit_solve(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
-    use_strategic = not game.is_tree or use_strategic
+    use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if use_strategic:
         return libgbt._logit_strategy_solve(game, maxregret, first_step, max_accel, event_callback)
     return libgbt._logit_behavior_solve(game, maxregret, first_step, max_accel, event_callback)

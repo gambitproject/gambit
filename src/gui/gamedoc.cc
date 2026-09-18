@@ -25,6 +25,9 @@
 #include <set>
 
 #include "games.h"
+#include "games/gametree.h"
+#include "games/gameagg.h"
+#include "games/gamebagg.h"
 #include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()
@@ -241,7 +244,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
   input.seekg(0);
   try {
     const Game game = ReadGame(input);
-    if (game->IsAgg()) {
+    if (As<GameAGGRep>(game) || As<GameBAGGRep>(game)) {
       return {LoadResult::UnsupportedRepresentation, nullptr};
     }
     auto doc = std::make_shared<GameDocument>(game);
@@ -257,8 +260,8 @@ void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
   LegacyWorkspaceFile workspace;
   m_style.Save(workspace);
-  workspace.game_format = m_game->IsTree() ? "efg" : "nfg";
-  if (!m_game->IsTree()) {
+  workspace.game_format = As<GameTreeRep>(m_game) ? "efg" : "nfg";
+  if (!As<GameTreeRep>(m_game)) {
     workspace.layout.reset();
     workspace.labels.reset();
   }
@@ -346,7 +349,7 @@ void GameDocument::PostPendingChanges()
 
 void GameDocument::BuildNfg()
 {
-  if (m_game->IsTree()) {
+  if (As<GameTreeRep>(m_game)) {
     m_workspace.BuildNfg();
   }
 }

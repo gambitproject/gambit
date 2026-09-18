@@ -22,6 +22,7 @@
 //
 
 #include "games.h"
+#include "games/gametree.h"
 #include "solvers/linalg/lemketab.h"
 #include "solvers/lcp/lcp.h"
 

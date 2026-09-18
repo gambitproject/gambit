@@ -19,7 +19,7 @@ def _branching_game() -> gbt.Game:
     """A small tree where P1 chooses L/R, each leading to a separate P2 decision, so
     that removing an action can make a whole subtree's information set unreachable.
     """
-    game = gbt.Game.new_tree(players=["P1", "P2"])
+    game = gbt.ExtensiveGame(players=["P1", "P2"])
     game.append_move(gbt.H.path(), "P1", ["L", "R"])
     game.append_move(gbt.H.path("L"), "P2", ["A", "B"])
     game.append_move(gbt.H.path("R"), "P2", ["A", "B"])

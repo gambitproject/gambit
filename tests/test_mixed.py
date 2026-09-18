@@ -1426,7 +1426,7 @@ def test_linearity_payoff_property(
             False,
         ),
         (
-            gbt.Game.from_arrays([[1, 2], [-3, 4]], [[-4, 3], [2, 1]]),
+            gbt.StrategicGame.from_arrays([[1, 2], [-3, 4]], [[-4, 3], [2, 1]]),
             [[1 / 2, 1 / 2], [3 / 5, 2 / 5]],
             TOL,
             False,

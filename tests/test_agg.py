@@ -44,6 +44,20 @@ def test_agg_bagg_to_nfg(game_path):
     assert serialized_game[:3] == "NFG"
 
 
+@pytest.mark.parametrize("game_path", AGG_BAGG_GAME_PATHS)
+@pytest.mark.parametrize(
+    "attr", ["set_players", "relabel_strategies", "set_strategies", "behavior_support_profile"]
+)
+def test_agg_bagg_missing_extensive_and_strategic_only_attrs(game_path, attr):
+    """`set_players`, `relabel_strategies`, `set_strategies`, and
+    `behavior_support_profile` are each implemented (in C++) only for the tree and/or
+    strategic representations, not for AGG/BAGG -- they must not exist as attributes
+    on an `ActionGraphGame`/`BayesianActionGraphGame` at all, rather than existing and
+    raising when called."""
+    game = games.read_from_file(game_path)
+    assert not hasattr(game, attr)
+
+
 def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
     """Payoffs written in an .agg file as a fraction ("1/3") or a decimal needing more than
     double's ~15-17 significant digits of precision to round-trip are parsed into exact

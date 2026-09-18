@@ -217,7 +217,7 @@ def main(
     # Maximum-likelihood estimation, like the C++ tool, is only defined over the
     # strategic representation, since the observed frequencies are read as a flat
     # list of strategy counts.
-    if mle_file is not None and (strategic or not game.is_tree):
+    if mle_file is not None and (strategic or not isinstance(game, gbt.ExtensiveGame)):
         frequencies = _read_frequencies(mle_file, game)
         result = gbt.qre.logit_estimate(
             frequencies,

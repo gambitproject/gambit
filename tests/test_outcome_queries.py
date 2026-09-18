@@ -9,7 +9,7 @@ def _labeled_table_game() -> gbt.Game:
     """A 2x2 table game whose two outcomes are each given a distinct, nonempty
     label at creation, so they can be addressed by `relabel_outcomes`/
     `get_outcome_payoffs`/`set_outcome_payoffs`."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 0, "2": 0}, "o1")
     game.make_outcome([{"1": "1", "2": "2"}, {"1": "2", "2": "1"}, {"1": "2", "2": "2"}],
                       {"1": 0, "2": 0}, "o2")
@@ -39,7 +39,7 @@ def test_outcome_relabel_unicode_accepted(label: str):
 
 
 @pytest.mark.parametrize(
-    "game", [gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])]
+    "game", [gbt.StrategicGame.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])]
 )
 def test_outcome_payoffs_unmatched_label_raises_keyerror(game: gbt.Game):
     with pytest.raises(KeyError):
@@ -47,7 +47,7 @@ def test_outcome_payoffs_unmatched_label_raises_keyerror(game: gbt.Game):
 
 
 @pytest.mark.parametrize(
-    "game", [gbt.Game.new_table([2, 2])]
+    "game", [gbt.StrategicGame([2, 2])]
 )
 def test_outcome_payoffs_invalid_label_type_raises_typeerror(game: gbt.Game):
     with pytest.raises(TypeError):
@@ -57,14 +57,14 @@ def test_outcome_payoffs_invalid_label_type_raises_typeerror(game: gbt.Game):
 @pytest.mark.parametrize(
     "game",
     [
-        gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]]),
-        gbt.Game.from_dict({"a": [[0, 0], [0, 0]], "b": [[0, 0], [0, 0]]}),
+        gbt.StrategicGame.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]]),
+        gbt.StrategicGame.from_dict({"a": [[0, 0], [0, 0]], "b": [[0, 0], [0, 0]]}),
     ],
     ids=["from_arrays", "from_dict"],
 )
 def test_outcomes_have_unique_nonempty_labels_at_construction(game: gbt.Game):
     """`from_arrays`/`from_dict` eagerly create one outcome per contingency
-    (unlike the sparse-by-default `Game.new_table`); each of those must still
+    (unlike the sparse-by-default `StrategicGame` constructor); each of those must still
     satisfy the invariant that every non-null outcome has a unique, nonempty
     label."""
     labels = game.get_outcomes()

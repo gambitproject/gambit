@@ -1364,7 +1364,7 @@ class LogitQREMixedStrategyProfile:
     @property
     def game(self) -> Game:
         """The game on which this mixed strategy profile is defined."""
-        return Game.wrap(deref(self.thisptr).GetGame())
+        return Game._wrap(deref(self.thisptr).GetGame())
 
     @property
     def lam(self) -> double:
@@ -1455,7 +1455,7 @@ class LogitQREMixedBehaviorProfile:
     @property
     def game(self) -> Game:
         """The game on which this mixed strategy profile is defined."""
-        return Game.wrap(deref(self.thisptr).GetGame())
+        return Game._wrap(deref(self.thisptr).GetGame())
 
     @property
     def lam(self) -> double:

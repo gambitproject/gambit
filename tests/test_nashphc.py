@@ -20,7 +20,7 @@ from pygambit.nashphc import (
 
 @pytest.fixture
 def matching_pennies():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 1, "2": -1}, "a")
     game.make_outcome({"1": "1", "2": "2"}, {"1": -1, "2": 1}, "b")
     game.make_outcome({"1": "2", "2": "1"}, {"1": -1, "2": 1}, "c")

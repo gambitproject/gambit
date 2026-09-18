@@ -127,7 +127,7 @@ def main(
     verbose: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
-    use_agent = agent and game.is_tree
+    use_agent = agent and isinstance(game, gbt.ExtensiveGame)
 
     def render(profile, label: str = "NE") -> None:
         if detail:

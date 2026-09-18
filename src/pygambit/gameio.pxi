@@ -39,7 +39,7 @@ def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
         with open(filepath_or_buffer, "rb") as f:
             data = f.read()
     try:
-        g = Game.wrap(parser(data))
+        g = Game._wrap(parser(data))
     except Exception as exc:
         raise ValueError(f"Parse error in game file: {exc}") from None
     return g

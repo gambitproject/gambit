@@ -2015,10 +2015,10 @@ def test_profile_data_error(game: gbt.Game, rational_flag: bool, data: list):
     ],
 )
 def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: list):
-    """Test to ensure a pygambit.UndefinedOperationError is raised when the game
-    to create a mixed behavior profile does not have a tree representation.
+    """`mixed_behavior_profile` does not exist on a game that does not have a tree
+    representation.
     """
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.mixed_behavior_profile(rational=rational_flag, data=data)
 
 
