@@ -746,7 +746,13 @@ class Game:
                 f"{history.__class__.__name__}"
             )
         resolved_node = self._resolve_node(history, "get_action_probs")
-        infoset_handle: c_GameInfoset = cython.cast(Node, resolved_node)._infoset_handle()
+        return self._action_probs(cython.cast(Node, resolved_node))
+
+    def _action_probs(self, node: Node) -> dict:
+        """Return the probability of each action at `node`'s event, keyed by
+        label, or an empty dict if `node` does not currently belong to a
+        chance event."""
+        infoset_handle: c_GameInfoset = node._infoset_handle()
         if (
             infoset_handle == cython.cast(c_GameInfoset, NULL)
             or not infoset_handle.deref().IsChanceInfoset()
@@ -1892,26 +1898,6 @@ class Game:
             f"(the node is terminal)"
         )
 
-    def _resolve_probs(self,
-                       probs: typing.Sequence | typing.Mapping,
-                       action_labels: list[str],
-                       funcname: str) -> list:
-        """Resolve a probability specification against an ordered list of action labels.
-
-        `probs` may be a sequence (positional; must have exactly one entry per action)
-        or a mapping from action labels to values (may be sparse; omitted labels are
-        assigned zero).  Returns a dense list of values in action order.
-        """
-        if isinstance(probs, typing.Mapping):
-            unknown = [k for k in probs if k not in action_labels]
-            if unknown:
-                raise KeyError(f"{funcname}(): no action with label '{unknown[0]}'")
-            return [probs.get(label, 0) for label in action_labels]
-        probs = list(probs)
-        if len(probs) != len(action_labels):
-            raise IndexError(f"{funcname}(): must specify exactly one probability per action")
-        return probs
-
     def append_move(self, nodes: Selector | GroupedSelector,
                     player: str,
                     actions: list[str]) -> None:
@@ -2565,25 +2551,26 @@ class Game:
 
     def make_event(self,
                    nodes: Selector | GroupedSelector,
-                   probs: typing.Mapping,
                    label: str | None = None) -> None:
-        """Form `nodes` into a single event with distribution `probs`.
+        """Form `nodes` into a single event.
 
-        `nodes` must all be nonterminal nodes of this game with the same actions, with the same
-        labels in the same order.  They need not be chance nodes; personal nodes are
-        converted, and the move is thereafter resolved by chance.  Nodes are removed from
-        whatever information sets or events they currently belong to; any of those which
-        retain members survive, keeping their labels, and those left with no members are deleted.
-        The resulting event's members, actions, and player are accessible via
+        `nodes` must all be nonterminal nodes of this game currently belonging to a
+        chance event, with the same actions, with the same labels in the same order,
+        and the same probability distribution over those actions.  Nodes are removed
+        from whatever events they currently belong to; any of those which retain
+        members survive, keeping their labels, and those left with no members are
+        deleted.  The resulting event's members, actions, and player are accessible via
         ``Node.members``/``Node.actions``/``Node.player`` for any node in `nodes`.
+
+        To pool nodes whose actions or probabilities do not yet agree, first bring
+        them into conformance with `set_event_actions`.
 
         `nodes` is a `Selector` (an `H`-built expression, evaluated against this game
         and treated as a flat set of nodes) or a `GroupedSelector` (an `H`-built
         `.by(...)` expression, whose groups are pooled together into the one event).
 
         Which resolved node is treated as "first", determining the action order of
-        the event and the frame against which keys of `probs` are resolved, follows
-        `nodes`' own resolution order.
+        the event, follows `nodes`' own resolution order.
 
         .. versionadded:: 17.0.0
 
@@ -2591,11 +2578,6 @@ class Game:
         ----------
         nodes : Selector or GroupedSelector
             The nonempty set of nonterminal nodes to place in the event.
-        probs : Mapping
-            The probability distribution over the actions of the event, as a mapping
-            from action label to probability.  May be sparse; omitted actions are
-            assigned probability zero.  Probabilities are non-negative and sum to
-            exactly one.
         label : str, optional
             The label of the new event.  If specified, must be unique among the events
             of the game after the operation.  A label currently held by another event
@@ -2604,17 +2586,19 @@ class Game:
         Raises
         ------
         TypeError
-            If `nodes` is not a `Selector` or `GroupedSelector`, or `probs` is not a
-            mapping.
-        KeyError
-            If a key of `probs` matches no action label of the event.
+            If `nodes` is not a `Selector` or `GroupedSelector`.
         UndefinedOperationError
-            If any of `nodes` is a terminal node, or the game is not a tree.
+            If any of `nodes` is a terminal node, does not currently belong to a
+            chance event, or the game is not a tree.
         ValueError
             If `nodes` is empty or contains a repeated node; if the nodes do not
-            all have the same actions in the same order; if `probs` are not
-            non-negative numbers summing to exactly one; or if `label` is not
-            unique among the game's events after the operation.
+            all have the same actions in the same order, or the same probability
+            distribution over those actions; or if `label` is not unique among the
+            game's events after the operation.
+
+        See Also
+        --------
+        set_event_actions : Adjust an event's actions and probability distribution.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -2627,10 +2611,6 @@ class Game:
                 f"make_event(): nodes must be a Selector or GroupedSelector, "
                 f"not {nodes.__class__.__name__}"
             )
-        if not isinstance(probs, typing.Mapping):
-            raise TypeError(
-                f"make_event(): probs must be a mapping, not {probs.__class__.__name__}"
-            )
         resolved_nodes = self._resolve_nodes(nodes, "make_event")
         if any(cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
             raise UndefinedOperationError(
@@ -2638,19 +2618,29 @@ class Game:
             )
         resolved_node = cython.cast(Node, resolved_nodes[0])
         action_labels = list(resolved_node.actions)
-        if any(list(n.actions) != action_labels
-               for n in resolved_nodes[1:]):
-            raise ValueError(
-                "make_event(): all nodes must have the same actions, "
-                "with the same labels in the same order"
+        reference_probs = self._action_probs(resolved_node)
+        if not reference_probs:
+            raise UndefinedOperationError(
+                "make_event(): all nodes must currently belong to a chance event"
             )
-        resolved_probs = self._resolve_probs(probs, action_labels, "make_event")
+        for n in resolved_nodes[1:]:
+            node = cython.cast(Node, n)
+            if list(node.actions) != action_labels:
+                raise ValueError(
+                    "make_event(): all nodes must have the same actions, "
+                    "with the same labels in the same order"
+                )
+            if self._action_probs(node) != reference_probs:
+                raise ValueError(
+                    "make_event(): all nodes must have the same probability "
+                    "distribution over their actions"
+                )
         c_nodes = stdvector[c_GameNode]()
         for n in resolved_nodes:
             c_nodes.push_back(cython.cast(Node, n).node)
         c_probs = stdvector[c_Number]()
-        for p in resolved_probs:
-            c_probs.push_back(_to_number(p))
+        for label_ in action_labels:
+            c_probs.push_back(_to_number(reference_probs[label_]))
         self.game.deref().MakeEvent(c_nodes, c_probs, (label or "").encode("utf-8"))
 
     def relabel_actions(self,
