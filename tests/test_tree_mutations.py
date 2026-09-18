@@ -531,91 +531,83 @@ def test_set_move_actions_add_preserves_existing_action_order():
     assert game.get_actions(gbt.H.path())[1:-1] == labels
 
 
-@pytest.mark.parametrize(
-    "inprobs,outprobs",
-    [
-        ({"King": "1/4", "Queen": "3/4"}, [gbt.Rational("1/4"), gbt.Rational("3/4")]),
-        ({"King": 0.75, "Queen": 0.25}, [0.75, 0.25]),
-        ({"King": 1}, [1, 0]),
-    ],
-)
-def test_make_event_sets_probabilities(inprobs, outprobs):
-    """Probabilities are given as a mapping from action label to probability,
-    which may be sparse: an omitted action is assigned probability zero.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    game.make_event(gbt.H.path(), inprobs, "Deal")
-    probs = game.get_action_probs(gbt.H.path())
-    for action, prob in zip(game.get_actions(gbt.H.path()), outprobs, strict=True):
-        assert probs[action] == prob
+def _two_matching_events(probs_a="1/2", probs_b="1/2"):
+    """A tree with a personal move "a"/"b", each leading to its own chance event
+    over actions "x"/"y", with the given probability of "x" at each."""
+    game = gbt.Game.new_tree(players=["1"])
+    game.append_move(gbt.H.path(), "1", ["a", "b"])
+    one = gbt.Rational(1)
+    game.append_event(gbt.H.path("a"), {"x": probs_a, "y": one - gbt.Rational(probs_a)})
+    game.append_event(gbt.H.path("b"), {"x": probs_b, "y": one - gbt.Rational(probs_b)})
+    return game
 
 
-@pytest.mark.parametrize("probs", [["1/4", "3/4"], [0.75, 0.25]])
-def test_make_event_probs_not_a_mapping_raises_typeerror(probs):
-    """A positional sequence of probabilities is no longer accepted."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(TypeError):
-        game.make_event(gbt.H.path(), probs, "Deal")
-
-
-def test_make_event_pools_nodes_from_different_infosets():
-    """Nodes in distinct information sets are formed into a single event."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    king, queen = ("King",), ("Queen",)
-    game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert king in [m.actions for m in game.get_members(gbt.H.path(*queen))]
-    assert list(game.get_action_probs(gbt.H.path(*king)).values()) == [
-        gbt.Rational("1/4"), gbt.Rational("3/4")
+def test_make_event_pools_nodes_from_separate_events():
+    """Nodes already belonging to distinct events, with the same actions and the
+    same probability distribution, are formed into a single event."""
+    game = _two_matching_events()
+    a, b = ("a",), ("b",)
+    game.make_event(
+        gbt.H.after().filter(lambda h: h[:].actions in (a, b)), "Coin"
+    )
+    assert b in [m.actions for m in game.get_members(gbt.H.path(*a))]
+    assert list(game.get_action_probs(gbt.H.path(*a)).values()) == [
+        gbt.Rational("1/2"), gbt.Rational("1/2")
     ]
-    assert not game.get_infosets("Alice")
 
 
 def test_make_event_requires_matching_action_labels():
     """Nodes must have the same actions, with the same labels in the same order."""
     game = games.read_from_file("stripped_down_poker.efg")
-    # King node has actions Bet, Fold; its own Bet-child has actions Call, Fold.
+    # The root's actions are King, Queen; the King child's are Bet, Fold.
     with pytest.raises(ValueError):
         game.make_event(
-            gbt.H.after().filter(lambda h: h[:].actions in (("King",), ("King", "Bet"))),
-            {"Bet": "1/2", "Fold": "1/2"}
+            gbt.H.after().filter(lambda h: h[:].actions in ((), ("King",)))
         )
 
 
-def test_make_event_converts_personal_node():
-    """A personal decision node becomes a chance node carrying the probabilities given."""
+def test_make_event_requires_matching_probabilities():
+    """Nodes must have the same probability distribution over their actions,
+    not merely the same action labels."""
+    game = _two_matching_events(probs_a="1/2", probs_b="1/4")
+    a, b = ("a",), ("b",)
+    with pytest.raises(ValueError):
+        game.make_event(gbt.H.after().filter(lambda h: h[:].actions in (a, b)))
+
+
+def test_make_event_requires_chance_events():
+    """A personal decision node is no longer converted to chance by `make_event`;
+    it must already belong to a chance event."""
     game = games.read_from_file("stripped_down_poker.efg")
-    game.make_event(gbt.H.path("King"), {"Bet": "1/4", "Fold": "3/4"})
-    assert game.get_player(gbt.H.path("King")) == "Chance"
-    assert list(game.get_action_probs(gbt.H.path("King")).values()) == [
-        gbt.Rational("1/4"), gbt.Rational("3/4")
-    ]
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.make_event(gbt.H.path("King"))
 
 
 def test_make_event_terminal_node_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_event(gbt.H.path("King", "Fold"), {"a": "1/2", "b": "1/2"})
+        game.make_event(gbt.H.path("King", "Fold"))
 
 
 def test_make_event_strategic_game_raises():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(gbt.UndefinedOperationError):
-        game.make_event(gbt.H.path(), {"a": 1})
+        game.make_event(gbt.H.path())
 
 
 def test_make_event_empty_nodes_raises():
     game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        game.make_event(gbt.H.path(...).filter(lambda h: False), {"a": "1/2", "b": "1/2"})
+        game.make_event(gbt.H.path(...).filter(lambda h: False))
 
 
 def test_make_event_label_held_by_rump_raises():
     """A label may be reused only if all members of the event holding it are absorbed."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    game.make_event(gbt.H.path(...), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
+    game = _two_matching_events()
+    game.make_event(gbt.H.path("a"), "Coin")
     before = game.to_efg()
     with pytest.raises(ValueError):
-        game.make_event(gbt.H.path("King"), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
+        game.make_event(gbt.H.path("b"), "Coin")
     assert game.to_efg() == before
 
 
@@ -623,32 +615,11 @@ def test_make_event_label_reused_when_fully_absorbed():
     """A label held by an existing event may be reused once all of that
     event's members are absorbed into the new one; the old event is not left behind.
     """
-    game = games.read_from_file("stripped_down_poker.efg")
-    king, queen = ("King",), ("Queen",)
-    game.make_event(gbt.H.path(...), {"Bet": "1/2", "Fold": "1/2"}, "Coin")
-    game.make_event(gbt.H.path(...), {"Bet": "1/4", "Fold": "3/4"}, "Coin")
-    assert king in [m.actions for m in game.get_members(gbt.H.path(*queen))]
-    assert list(game.get_action_probs(gbt.H.path(*king)).values()) == [
-        gbt.Rational("1/4"), gbt.Rational("3/4")
-    ]
-
-
-@pytest.mark.parametrize(
-    "probs", [{"King": "3/4", "Queen": "-1/2"}, {"King": 0.75, "Queen": 0.40},
-              {"King": "foo", "Queen": "bar"}]
-)
-def test_make_event_invalid_probs_raises(probs):
-    """Values must be numbers, non-negative, and sum to exactly one."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(ValueError):
-        game.make_event(gbt.H.path(), probs)
-
-
-def test_make_event_malformed_probs_raises():
-    """An unknown action label as a mapping key raises KeyError."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(KeyError):
-        game.make_event(gbt.H.path(), {"Jack": 1})
+    game = _two_matching_events()
+    a, b = ("a",), ("b",)
+    game.make_event(gbt.H.path("a"), "Coin")
+    game.make_event(gbt.H.after().filter(lambda h: h[:].actions in (a, b)), "Coin")
+    assert b in [m.actions for m in game.get_members(gbt.H.path(*a))]
 
 
 def _bagwell_p2_histories(game: gbt.Game) -> tuple[tuple, tuple, tuple, tuple]:
