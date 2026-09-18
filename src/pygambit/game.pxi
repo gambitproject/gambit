@@ -46,7 +46,16 @@ class Game:
     @staticmethod
     @cython.cfunc
     def wrap(game: c_Game) -> Game:
-        obj: Game = Game.__new__(Game)
+        cls: type = Game
+        if As[c_GameTreeRep](game).get() != NULL:
+            cls = ExtensiveGame
+        elif As[c_GameTableRep](game).get() != NULL:
+            cls = StrategicGame
+        elif As[c_GameAGGRep](game).get() != NULL:
+            cls = ActionGraphGame
+        elif As[c_GameBAGGRep](game).get() != NULL:
+            cls = BayesianActionGraphGame
+        obj: Game = cls.__new__(cls)
         obj.game = game
         return obj
 
@@ -3415,6 +3424,26 @@ class Game:
         for old, new in remap.items():
             c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelPlayers(c_labels)
+
+
+@cython.cclass
+class ExtensiveGame(Game):
+    """A `Game` with an extensive (game tree) representation."""
+
+
+@cython.cclass
+class StrategicGame(Game):
+    """A `Game` with a strategic (payoff table) representation."""
+
+
+@cython.cclass
+class ActionGraphGame(Game):
+    """A `Game` with an action-graph game representation."""
+
+
+@cython.cclass
+class BayesianActionGraphGame(Game):
+    """A `Game` with a Bayesian action-graph game representation."""
 
 
 @dataclasses.dataclass

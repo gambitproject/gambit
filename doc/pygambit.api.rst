@@ -14,6 +14,10 @@ Representation of games
    :toctree: api/
 
    Game
+   ExtensiveGame
+   StrategicGame
+   ActionGraphGame
+   BayesianActionGraphGame
    History
    TreeLayout
    TreeLayoutCoordinates

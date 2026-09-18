@@ -68,6 +68,13 @@ using GameSubgame = GameObjectPtr<GameSubgameRep>;
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
+/// Attempt to view a game as a specific concrete representation, returning null if
+/// the game is not of that representation.
+template <class T> std::shared_ptr<T> As(const Game &p_game)
+{
+  return std::dynamic_pointer_cast<T>(p_game);
+}
+
 //
 // Forward declarations of classes defined elsewhere.
 //
