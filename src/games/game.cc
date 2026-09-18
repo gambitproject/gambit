@@ -192,6 +192,23 @@ void GameRep::IndexStrategies() const
   }
 }
 
+void GameRep::CheckPlayerLabel(const std::string &p_label,
+                               const std::set<const GamePlayerRep *> &p_ignore) const
+{
+  if (p_label.empty()) {
+    throw ValueException("Player label must not be empty");
+  }
+  CheckLabel(p_label);
+  if (dynamic_cast<const GameTreeRep *>(this) && p_label == GetChance()->GetLabel()) {
+    throw ValueException("Player label must not be the reserved chance player label");
+  }
+  for (const auto &player : m_players) {
+    if (p_ignore.count(player.get()) == 0 && player->GetLabel() == p_label) {
+      throw ValueException("Player label must be unique within the game");
+    }
+  }
+}
+
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------
@@ -255,7 +272,7 @@ void GameRep::RelabelPlayers(const std::map<std::string, std::string> &p_labels)
       }
     }
     if (!match) {
-      if (IsTree() && old_label == GetChance()->GetLabel()) {
+      if (dynamic_cast<GameTreeRep *>(this) && old_label == GetChance()->GetLabel()) {
         throw ValueException("The chance player's label cannot be changed");
       }
       throw ValueException("No player with label '" + old_label + "' in this game");

@@ -29,6 +29,9 @@
 
 #include <wx/grid.h>
 
+#include "games.h"
+#include "games/gametree.h"
+
 #include "gamedoc.h"
 #include "nfgpanel.h"
 #include "nfgtable.h"
@@ -70,7 +73,7 @@ static void DrawGridToDC(wxGrid *p_grid, wxDC &p_dc)
 //                      TableWidget: Lifecycle
 //=========================================================================
 
-bool TableWidget::IsReadOnly() const { return m_doc->GetGame()->IsTree(); }
+bool TableWidget::IsReadOnly() const { return As<GameTreeRep>(m_doc->GetGame()) != nullptr; }
 
 wxColour TableWidget::GetPlayerColor(int player) const
 {

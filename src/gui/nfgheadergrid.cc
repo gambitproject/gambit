@@ -30,6 +30,9 @@
 
 #include <wx/grid.h>
 
+#include "games.h"
+#include "games/gametree.h"
+
 #include "gamedoc.h"
 #include "nfgtable.h"
 #include "dlexcept.h"
@@ -225,7 +228,7 @@ void RowPlayerTable::OnUpdate()
 namespace {
 wxString GetStrategyDescription(const GameStrategy &p_strategy)
 {
-  if (!p_strategy->GetGame()->IsTree()) {
+  if (!As<GameTreeRep>(p_strategy->GetGame())) {
     return {};
   }
 

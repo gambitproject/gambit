@@ -111,13 +111,13 @@ def test_catalog_games_filter_is_not_perfect_recall(all_games):
 
 
 def test_catalog_games_filter_is_not_tree(all_games):
-    """Test games() function can filter on boolean gbt.Game attribute 'is_tree'"""
+    """Test games() function can filter on the 'is_tree' query parameter"""
     filtered_games = gbt.catalog.games(is_tree=False)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert not g.is_tree
+        assert not isinstance(g, gbt.ExtensiveGame)
 
 
 def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):

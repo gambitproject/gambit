@@ -265,7 +265,7 @@ class Game:
             return f"Game(id={hash(self)}"
 
     def _repr_html_(self):
-        if self.is_tree:
+        if isinstance(self, ExtensiveGame):
             return repr(self)
         else:
             return self.to_html()
@@ -278,11 +278,6 @@ class Game:
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.game.deref())
-
-    @property
-    def is_tree(self) -> bool:
-        """Return whether a game has a tree-based representation."""
-        return self.game.deref().IsTree()
 
     @property
     def title(self) -> str:
@@ -327,7 +322,7 @@ class Game:
         materializing each into a History -- used internally where the actual node
         (not just its identifying History) is needed.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
@@ -377,7 +372,7 @@ class Game:
         materializing each into a History -- used internally where the actual node
         (not just its identifying History) is needed.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
@@ -515,7 +510,7 @@ class Game:
         """The root node of the game. Not part of the public API; the public
         equivalent is the trivial empty History, `()`, or `H.path()` as a Selector.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "root: only games with a tree representation have a root node"
             )
@@ -526,7 +521,7 @@ class Game:
         """All nodes in the game, in depth-first traversal order. Not part of
         the public API; the public equivalent is `Game.get_histories(H.after())`.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
@@ -958,7 +953,7 @@ class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "get_subgame_roots(): operation only defined for games "
                 "with a tree representation"
@@ -1004,7 +999,7 @@ class Game:
             If `history` does not resolve to exactly one node, or belongs to no
             information set or event (it is terminal).
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "get_minimal_subgame(): operation only defined for games "
                 "with a tree representation"
@@ -1037,7 +1032,7 @@ class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "get_strategy_unreachable(): operation only defined for games "
                 "with a tree representation"
@@ -1073,7 +1068,7 @@ class Game:
             If no player has the label `player`, or `player` has no strategy with
             the label `strategy`.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "get_behavior(): only defined for games with a tree representation"
             )
@@ -1166,7 +1161,7 @@ class Game:
             If the game is in neither a tree nor a strategic (table)
             representation.
         """
-        if self.is_tree:
+        if isinstance(self, ExtensiveGame):
             if not isinstance(location, Selector):
                 raise TypeError(
                     f"get_outcome(): location must be a Selector, not "
@@ -1190,7 +1185,7 @@ class Game:
         strategic (table) game, as a raw C++ handle. Not part of the public API;
         used internally by `get_outcome`, `from_arrays`, and `from_dict`.
         """
-        if self.game.deref().IsAgg():
+        if isinstance(self, (ActionGraphGame, BayesianActionGraphGame)):
             raise UndefinedOperationError(
                 f"{funcname}(): operation not defined for games not in "
                 f"strategic (table) representation"
@@ -1394,7 +1389,7 @@ class Game:
         random_behavior_profile :
            Create a `MixedBehaviorProfile` with randomly-drawn probabilities.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Game must have a tree representation to create a mixed behavior profile"
             )
@@ -1437,7 +1432,7 @@ class Game:
         --------
         mixed_behavior_profile : Create a `MixedBehaviorProfile` with specified probabilities.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Game must have a tree representation to create a mixed behavior profile"
             )
@@ -2625,7 +2620,7 @@ class Game:
             non-negative numbers summing to exactly one; or if `label` is not
             unique among the game's events after the operation.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "make_event(): operation only defined for games with a tree representation"
             )
@@ -2781,7 +2776,7 @@ class Game:
             have the same actions in the same order; or if `label` is not unique among
             `player`'s information sets after the operation.
         """
-        if not self.is_tree:
+        if not isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "make_infoset(): operation only defined for games with a tree representation"
             )
@@ -2867,12 +2862,12 @@ class Game:
             "game", "player", "players", "their payoffs at every outcome"
         )
         for label in missing:
-            if self.is_tree and len(self.get_infosets(label)) > 0:
+            if isinstance(self, ExtensiveGame) and len(self.get_infosets(label)) > 0:
                 raise UndefinedOperationError(
                     f"set_players(): player '{label}' has decisions in the game "
                     f"and cannot be deleted"
                 )
-            if not self.is_tree and len(self.get_strategies(label)) != 1:
+            if not isinstance(self, ExtensiveGame) and len(self.get_strategies(label)) != 1:
                 raise UndefinedOperationError(
                     f"set_players(): player '{label}' has more than one strategy "
                     f"and cannot be deleted"
@@ -2901,7 +2896,7 @@ class Game:
             If `location` is empty or contains a repeat, or (strategic game only) if
             a contingency does not specify exactly one strategy for each player.
         """
-        if self.is_tree:
+        if isinstance(self, ExtensiveGame):
             if isinstance(location, GroupedSelector):
                 location = [n for group in self._group_nodes(location).values() for n in group]
             elif not isinstance(location, Selector):
@@ -3007,7 +3002,7 @@ class Game:
         set_outcome_payoffs : Set the payoffs at an outcome.
         relabel_outcomes : Change the labels of the game's outcomes.
         """
-        if self.game.deref().IsAgg():
+        if isinstance(self, (ActionGraphGame, BayesianActionGraphGame)):
             raise UndefinedOperationError(
                 "make_outcome(): operation not defined for games in action-graph representation"
             )
@@ -3064,7 +3059,7 @@ class Game:
             If the game is in action-graph representation, where outcomes are not
             represented explicitly.
         """
-        if self.game.deref().IsAgg():
+        if isinstance(self, (ActionGraphGame, BayesianActionGraphGame)):
             raise UndefinedOperationError(
                 "make_outcome_null(): operation not defined for games in "
                 "action-graph representation"
@@ -3122,7 +3117,7 @@ class Game:
         relabel_players : Simultaneously reassign the labels of the game's players.
         relabel_strategies : Change the labels of a player's strategies.
         """
-        if self.game.deref().IsAgg():
+        if isinstance(self, (ActionGraphGame, BayesianActionGraphGame)):
             raise UndefinedOperationError(
                 "relabel_outcomes(): operation not defined for games in "
                 "action-graph representation"
@@ -3262,7 +3257,7 @@ class Game:
         --------
         relabel_actions : Change the labels of actions at an information set.
         """
-        if self.is_tree:
+        if isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Relabelling strategies is only applicable to games in strategic form"
             )
@@ -3338,7 +3333,7 @@ class Game:
         relabel_strategies : Change the labels of strategies, keeping the table unchanged.
         set_actions : The analogous operation on the actions of an information set.
         """
-        if self.is_tree:
+        if isinstance(self, ExtensiveGame):
             raise UndefinedOperationError(
                 "Setting strategies is only applicable to games in strategic form"
             )
@@ -3411,7 +3406,7 @@ class Game:
         current = list(self.players)
         chance_label = (
             self.game.deref().GetChance().deref().GetLabel().decode("utf-8")
-            if self.is_tree else None
+            if isinstance(self, ExtensiveGame) else None
         )
         remap = _compute_relabeling(
             current, labels, "relabel_players", "player", strict,

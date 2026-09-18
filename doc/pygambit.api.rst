@@ -111,7 +111,6 @@ Information about the game
    Game.title
    Game.description
    Game.is_const_sum
-   Game.is_tree
    Game.is_perfect_recall
    Game.has_perfect_recall
    Game.players

@@ -39,6 +39,7 @@
 #endif
 
 #include "gambit.h"
+#include "games/gametree.h"
 #include "gamedoc.h"
 #include "dlgameprop.h"
 #include "editlabel.h"
@@ -241,7 +242,7 @@ wxString PlayerPanel::BlockedDeleteReason(const Row &row) const
   if (row.isNew) {
     return {}; // nothing has been committed yet -- freely removable
   }
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     if (row.player->GetInfosets().size() > 0) {
       return _("This player has decisions in the game and cannot be deleted.");
     }
@@ -599,7 +600,7 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
         wxALL, S);
   }
 
-  if (game->IsTree()) {
+  if (As<GameTreeRep>(game)) {
     if (game->IsPerfectRecall()) {
       boxSizer->Add(
           new wxStaticText(generalPanel, wxID_STATIC, _("This is a game of perfect recall")), 0,
@@ -619,7 +620,7 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
   auto *playersPanel = new wxPanel(notebook);
   auto *playersSizer = new wxBoxSizer(wxVERTICAL);
 
-  if (game->IsTree()) {
+  if (As<GameTreeRep>(game)) {
     m_chanceColor = m_doc->GetStyle().ChanceColor();
     auto *chanceSizer = new wxBoxSizer(wxHORIZONTAL);
     m_chanceColorButton = MakeChanceColorButton(playersPanel);

@@ -3767,12 +3767,12 @@ def test_logit_solve_lambda_reports_bifurcation_and_perturbation_events():
 
 
 def test_lp_solve_reports_use_strategic_for_native_strategic_game():
-    """A game that is natively strategic (`is_tree` is False) is always solved on the
-    strategic representation, regardless of the `use_strategic` argument -- the
+    """A game that is natively strategic (not a `gbt.ExtensiveGame`) is always solved on
+    the strategic representation, regardless of the `use_strategic` argument -- the
     reported `use_strategic` on the result must reflect that, not just echo the
     argument as passed."""
     game = games.read_from_file("const_sum_game.nfg")
-    assert not game.is_tree
+    assert not isinstance(game, gbt.ExtensiveGame)
     res = gbt.nash.lp_solve(game, use_strategic=False)
     assert res.use_strategic is True
 

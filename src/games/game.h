@@ -1207,12 +1207,6 @@ public:
 
   /// @name General data access
   //@{
-  /// Returns true if the game has a game tree representation
-  virtual bool IsTree() const = 0;
-
-  /// Returns true if the game has an action-graph game representation
-  virtual bool IsAgg() const { return false; }
-
   /// Get the text label associated with the game
   virtual const std::string &GetTitle() const { return m_title; }
   /// Set the text label associated with the game
@@ -1659,22 +1653,6 @@ inline void GameInfosetRep::SetLabel(const std::string &p_label)
   }
   m_player->CheckInfosetLabel(p_label, {this});
   m_label = p_label;
-}
-inline void GameRep::CheckPlayerLabel(const std::string &p_label,
-                                      const std::set<const GamePlayerRep *> &p_ignore) const
-{
-  if (p_label.empty()) {
-    throw ValueException("Player label must not be empty");
-  }
-  CheckLabel(p_label);
-  if (IsTree() && p_label == GetChance()->GetLabel()) {
-    throw ValueException("Player label must not be the reserved chance player label");
-  }
-  for (const auto &player : m_players) {
-    if (p_ignore.count(player.get()) == 0 && player->GetLabel() == p_label) {
-      throw ValueException("Player label must be unique within the game");
-    }
-  }
 }
 inline void GameRep::CheckOutcomeLabel(const std::string &p_label,
                                        const std::set<const GameOutcomeRep *> &p_ignore) const

@@ -109,7 +109,6 @@ public:
 
   /// @name General data access
   //@{
-  bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
   bool HasPerfectRecall(const GamePlayer &p_player) const override;

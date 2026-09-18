@@ -68,7 +68,6 @@ public:
 
   /// @name General data access
   //@{
-  bool IsTree() const override { return false; }
   bool IsConstSum() const override;
 
   /// Returns the smallest payoff to the player in any play of the game

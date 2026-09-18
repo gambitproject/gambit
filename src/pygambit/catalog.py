@@ -419,7 +419,7 @@ def games(
 
     def check_filters(game: gbt.Game) -> bool:
         if n_actions is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
             n_game_actions = sum(
                 len(game.get_actions(gbt.H.path(*history.actions)))
@@ -431,7 +431,7 @@ def games(
         if n_contingencies is not None and len(game.contingencies) != n_contingencies:
             return False
         if n_infosets is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
             if sum(len(game.get_infosets(p)) for p in game.players) != n_infosets:
                 return False
@@ -439,14 +439,14 @@ def games(
             return False
         if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
             return False
-        if is_tree is not None and game.is_tree != is_tree:
+        if is_tree is not None and isinstance(game, gbt.ExtensiveGame) != is_tree:
             return False
         if min_payoff is not None and game.min_payoff < min_payoff:
             return False
         if max_payoff is not None and game.max_payoff > max_payoff:
             return False
         if n_nodes is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
             if len(game.get_histories(gbt.H.after())) != n_nodes:
                 return False
@@ -467,7 +467,7 @@ def games(
         }
         if include_descriptions:
             record["Description"] = game.description
-            ext = "efg" if game.is_tree else "nfg"
+            ext = "efg" if isinstance(game, gbt.ExtensiveGame) else "nfg"
             record["Download"] = f":download:`{slug}.{ext} <../games/{slug}.{ext}>`"
             record["Format"] = ext
         records.append(record)

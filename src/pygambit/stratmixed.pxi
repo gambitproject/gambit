@@ -472,7 +472,7 @@ class MixedStrategyProfile:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        if not self.game.is_tree:
+        if not isinstance(self.game, ExtensiveGame):
             raise UndefinedOperationError(
                 "Mixed behavior profiles are not defined for strategic games"
             )
