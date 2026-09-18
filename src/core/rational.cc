@@ -562,6 +562,9 @@ template <> Rational lexical_cast(const std::string &f)
         expsign = -1;
         ch = f[index++];
       }
+      else if (ch == '+') {
+        ch = f[index++];
+      }
       while (ch >= '0' && ch <= '9' && index <= length) {
         exponent *= 10;
         exponent += (ch - '0');
@@ -587,6 +590,9 @@ template <> Rational lexical_cast(const std::string &f)
     ch = f[index++];
     if (ch == '-') {
       expsign = -1;
+      ch = f[index++];
+    }
+    else if (ch == '+') {
       ch = f[index++];
     }
     while (ch >= '0' && ch <= '9' && index <= length) {
