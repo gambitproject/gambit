@@ -1,11 +1,12 @@
 EFG 2 R "Banks-Camerer-Porter (GEB 94), Game 2" { "Player 1" "Player 2" }
-""
+"Game 2 of the sender-receiver signaling game experiment in :cite:p:`BanCamPor94`,
+reanalyzed using agent quantal response equilibrium in :cite:p:`McKPal98`."
 
 c "" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
 p "" 1 1 "(1,1)" { "m1" "m2" "m3" } 0
 p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
 t "" 1 "a" { 1, 2 }
-t "" 2 "b" { 2, 1 }
+t "" 2 "b" { 2, 2 }
 t "" 3 "c" { 0, 3 }
 p "" 2 2 "(2,2)" { "a1" "a2" "a3" } 0
 t "" 4 "d" { 1, 2 }
