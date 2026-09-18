@@ -30,7 +30,6 @@
 #include "core/segment.h"
 #include "games/game.h"
 #include "games/stratspt.h"
-#include "games/gamebagg.h"
 
 namespace Gambit {
 

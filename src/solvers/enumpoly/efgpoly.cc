@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "games/gametree.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "polysystem.h"

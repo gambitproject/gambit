@@ -33,6 +33,7 @@
 #include <wx/thread.h>
 #include <wx/grid.h>
 
+#include "games/gametree.h"
 #include "gamedoc.h"
 #include "solvers/logit/logit.h"
 

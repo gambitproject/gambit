@@ -28,7 +28,9 @@
 #include <algorithm>
 
 #include "games.h"
+#include "gametree.h"
 #include "gameagg.h"
+#include "gamebagg.h"
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code

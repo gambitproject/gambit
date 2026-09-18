@@ -24,6 +24,7 @@
 #include <cmath>
 
 #include "games.h"
+#include "games/gametree.h"
 #include "logit.h"
 #include "logbehav.imp"
 #include "solvers/path/path.h"

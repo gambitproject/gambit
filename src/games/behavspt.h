@@ -27,6 +27,7 @@
 #include <map>
 #include "core/lazy.h"
 #include "game.h"
+#include "gametree.h"
 #include "seqpure.h"
 
 namespace Gambit {
