@@ -7,7 +7,7 @@ from . import games
 
 def test_strategic_game_get_infosets():
     """`get_infosets` does not exist on a game with a strategic representation."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     with pytest.raises(AttributeError):
         _ = game.get_infosets(player)
@@ -17,7 +17,7 @@ def test_strategic_game_get_histories_root_raises():
     """A bare `H.path()` (the root) still resolves through the same
     tree-only restriction as `H.after()`, just via a different internal path:
     `get_histories` does not exist on a strategic game."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(AttributeError):
         _ = game.get_histories(gbt.H.path())
 
@@ -25,7 +25,7 @@ def test_strategic_game_get_histories_root_raises():
 def test_game_behav_profile_error():
     """`mixed_behavior_profile` does not exist on a game with a strategic
     representation."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(AttributeError):
         _ = game.mixed_behavior_profile()
 
@@ -51,13 +51,13 @@ def test_game_get_max_payoff():
 
 
 def test_game_get_outcome():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 0, "2": 0}, "top left")
     assert game.get_outcome({"1": "1", "2": "1"}) == "top left"
 
 
 def test_game_get_outcome_by_relabeled_strategies():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     pl1, pl2 = game.players
     game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
     game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
@@ -66,37 +66,37 @@ def test_game_get_outcome_by_relabeled_strategies():
 
 
 def test_game_get_outcome_incomplete_contingency_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(ValueError):
         _ = game.get_outcome({"1": "1"})
 
 
 def test_game_get_outcome_unknown_player_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(KeyError):
         _ = game.get_outcome({"1": "1", "2": "1", "3": "1"})
 
 
 def test_game_get_outcome_non_mapping_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(TypeError):
         _ = game.get_outcome(42)
 
 
 def test_game_get_outcome_non_str_value_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(TypeError):
         _ = game.get_outcome({"1": 1.23, "2": "1"})
 
 
 def test_game_get_outcome_unknown_strategy_label_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     with pytest.raises(KeyError):
         _ = game.get_outcome({"1": "1", "2": "99"})
 
 
 def test_game_get_outcome_unmatched_label_after_relabel_raises():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     pl1, pl2 = game.players
     game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
     game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
@@ -107,14 +107,14 @@ def test_game_get_outcome_unmatched_label_after_relabel_raises():
 def test_game_get_outcome_tree_rejects_contingency():
     """A pure-strategy contingency (a Mapping) is only meaningful for a
     strategic game; for a tree game, `location` must be a `Selector`."""
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     with pytest.raises(TypeError):
         _ = game.get_outcome({"Alice": "a"})
 
 
 def test_game_get_payoffs():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 3, "2": -3}, "top left")
     payoffs = game.get_payoffs({"1": "1", "2": "1"})
     assert payoffs["1"] == 3
@@ -122,7 +122,7 @@ def test_game_get_payoffs():
 
 
 def test_game_get_payoffs_tree():
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     selector = gbt.H.path()
     strategy = next(

@@ -3783,7 +3783,7 @@ def test_enumpoly_solve_phcpack_reports_use_strategic_true(monkeypatch):
     reported `use_strategic` must say so, not hardcode a stale `False`."""
     import pathlib
 
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome({"1": "1", "2": "1"}, {"1": 1, "2": -1}, "a")
     game.make_outcome({"1": "1", "2": "2"}, {"1": -1, "2": 1}, "b")
     game.make_outcome({"1": "2", "2": "1"}, {"1": -1, "2": 1}, "c")

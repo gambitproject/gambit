@@ -7,7 +7,7 @@ from . import games
 
 def test_relabel_strategies_swap():
     """Swap is well-defined; strategies keep their positions."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     a, b = game.get_strategies(player)
     game.relabel_strategies(player, {a: b, b: a})
@@ -18,7 +18,7 @@ def test_relabel_strategies_duplicate_raises_valueerror():
     """A replacement colliding with an untouched strategy, and two replacements
     colliding with each other, are both rejected; checking each against the
     untouched strategies alone would let the second through."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     a, b = game.get_strategies(player)
     with pytest.raises(ValueError):
@@ -30,7 +30,7 @@ def test_relabel_strategies_duplicate_raises_valueerror():
 @pytest.mark.parametrize("bad", ["", " x"])
 def test_relabel_strategies_bad_label_raises_and_leaves_game_unchanged(bad: str):
     """The whole mapping is validated before any label is written."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     a, b = game.get_strategies(player)
     with pytest.raises(ValueError):
@@ -39,7 +39,7 @@ def test_relabel_strategies_bad_label_raises_and_leaves_game_unchanged(bad: str)
 
 
 def test_relabel_strategies_unknown_label_strictness():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     a = next(iter(game.get_strategies(player)))
     with pytest.raises(KeyError):
@@ -50,7 +50,7 @@ def test_relabel_strategies_unknown_label_strictness():
 
 def test_relabel_strategies_scope_is_the_player():
     """Strategy labels are unique within a player, not within the game."""
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     one, two = game.players
     game.relabel_strategies(one, {next(iter(game.get_strategies(one))): "X"})
     game.relabel_strategies(two, {next(iter(game.get_strategies(two))): "X"})
@@ -77,7 +77,7 @@ def _payoffs_by_label(game: gbt.Game) -> dict:
 def test_set_strategies_reorder_carries_outcomes():
     """Reordering permutes the payoff table: each contingency keeps the outcome
     it had, identified by the labels of its strategies."""
-    game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
+    game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     player, _ = game.players
     a, b = game.get_strategies(player)
     kept = list(game.get_strategies(player))
@@ -91,7 +91,7 @@ def test_set_strategies_reorder_carries_outcomes():
 def test_set_strategies_add_drop_and_reorder_together():
     """A single call can create, delete, and reorder; the surviving strategy keeps
     the outcomes at its contingencies."""
-    game = gbt.Game.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
+    game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     player, other = game.players
     a, b = game.get_strategies(player)
     kept = {
@@ -107,7 +107,7 @@ def test_set_strategies_add_drop_and_reorder_together():
 
 
 def test_set_strategies_unconfirmed_drop_and_disabled_add_raise():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     player, _ = game.players
     a, b = game.get_strategies(player)
     with pytest.raises(ValueError):

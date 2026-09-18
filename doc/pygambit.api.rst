@@ -35,11 +35,9 @@ Creating, reading, and writing games
    read_agg
    read_bagg
 
-   Game.new_tree
-   Game.new_table
-   Game.from_arrays
+   StrategicGame.from_arrays
    Game.to_arrays
-   Game.from_dict
+   StrategicGame.from_dict
    Game.to_efg
    Game.to_nfg
    Game.to_html

@@ -40,12 +40,12 @@ class Game:
     """
     game = cython.declare(c_Game)
 
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Use Game.new_tree() or Game.new_table() to create a new game")
+    def __init__(self) -> None:
+        raise ValueError("Use ExtensiveGame(...) or StrategicGame(...) to create a new game")
 
     @staticmethod
     @cython.cfunc
-    def wrap(game: c_Game) -> Game:
+    def _wrap(game: c_Game) -> Game:
         cls: type = Game
         if As[c_GameTreeRep](game).get() != NULL:
             cls = ExtensiveGame
@@ -58,114 +58,6 @@ class Game:
         obj: Game = cls.__new__(cls)
         obj.game = game
         return obj
-
-    @classmethod
-    def new_tree(cls,
-                 players: list[str] | None = None,
-                 title: str = "Untitled extensive game") -> Game:
-        """Create a new ``Game`` consisting of a trivial game tree,
-        with one node, which is both root and terminal.
-
-        .. versionchanged:: 16.1.0
-            Added the `players` and `title` parameters
-
-        Parameters
-        ----------
-        players : list of str, optional
-            A list of labels for the (strategic) players of the game.  If `players`
-            is not specified, the game initially has no players defined other than
-            the chance player.
-        title : str, optional
-            The title of the game.  If no title is specified, "Untitled extensive game"
-            is used.
-
-        Returns
-        -------
-        Game
-            The newly-created extensive game.
-        """
-        c_labels = stdvector[string]()
-        for player in (players or []):
-            c_labels.push_back(str(player).encode("utf-8"))
-        g = Game.wrap(NewTree(c_labels))
-        g.title = title
-        return g
-
-    @classmethod
-    def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
-        """Create a new ``Game`` with a strategic representation.
-
-        Players are labeled ``"1"``, ``"2"``, and so on;
-        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
-
-        .. versionchanged:: 16.1.0
-            Added the `title` parameter.
-
-        Parameters
-        ----------
-        dim : array-like
-            A list specifying the number of strategies for each player.
-        title : str, optional
-            The title of the game.  If no title is specified, "Untitled strategic game"
-            is used.
-
-        Returns
-        -------
-        Game
-            The newly-created strategic game.
-        """
-        g = Game.wrap(NewTable(list(dim), True))
-        g.title = title
-        return g
-
-    @classmethod
-    def from_arrays(cls, *arrays, title: str = "Untitled strategic game") -> Game:
-        """Create a new ``Game`` with a strategic representation.
-
-        Each entry in `arrays` gives the payoff matrix for the
-        corresponding player.  The arrays must all have the same shape,
-        and have the same number of dimensions as the total number of
-        players.
-
-        Players are labeled ``"1"``, ``"2"``, and so on;
-        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
-
-        .. versionchanged:: 16.1.0
-            Added the `title` parameter.
-
-        Parameters
-        ----------
-        arrays : array-like of array-like
-            The payoff matrices for the players.
-        title : str, optional
-            The title of the game.  If no title is specified, "Untitled strategic game"
-            is used.
-
-        Returns
-        -------
-        Game
-            The newly-created strategic game.
-
-        See Also
-        --------
-        from_dict : Create strategic game and set player labels
-        to_array: Generate the payoff tables for players represented as numpy arrays
-        """
-        arrays = [np.array(a) for a in arrays]
-        if len(set(a.shape for a in arrays)) > 1:
-            raise ValueError("All specified arrays must have the same shape")
-        shape = arrays[0].shape
-        g: StrategicGame = cython.cast(StrategicGame, Game.wrap(NewTable(list(shape), False)))
-        players = list(g.players)
-        for profile in itertools.product(*(range(s) for s in shape)):
-            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            resolved_outcome = g._get_contingency_outcome(contingency, "from_arrays")
-            for array, player in zip(arrays, players, strict=True):
-                resolved_outcome.deref().SetPayoff(
-                    g._resolve_player(player, "from_arrays"), _to_number(array[profile])
-                )
-        g.title = title
-        return g
 
     def to_arrays(self, dtype: typing.Type = Rational) -> list[np.array]:
         """Generate the payoff tables for players represented as numpy arrays.
@@ -182,7 +74,7 @@ class Game:
 
         See Also
         --------
-        from_arrays : Create game from list-like of array-like
+        StrategicGame.from_arrays : Create game from list-like of array-like
         """
         arrays = []
 
@@ -206,57 +98,6 @@ class Game:
                         ) from None
             arrays.append(array)
         return arrays
-
-    @classmethod
-    def from_dict(cls, payoffs, title: str = "Untitled strategic game") -> Game:
-        """Create a new ``Game`` with a strategic representation.
-
-        Each entry in `payoffs` is a key-value pair
-        giving the label and the payoff matrix for a player.
-        The payoff matrices must all have the same shape,
-        and have the same number of dimensions as the total number of
-        players.
-
-        The players are labeled with the keys of `payoffs`, and therefore
-        must be valid player labels.  Each player's strategies are labeled
-        ``"1"``, ``"2"``, and so on.
-
-        Parameters
-        ----------
-        payoffs : dict-like mapping str to array-like
-            The names and corresponding payoff matrices for the players.
-        title : str, optional
-            The title of the game.  If no title is specified, "Untitled strategic game"
-            is used.
-
-        Returns
-        -------
-        Game
-            The newly-created strategic game.
-
-        See Also
-        --------
-        from_arrays : Create game from list-like of array-like
-        """
-        payoffs = {k: np.array(v) for k, v in payoffs.items()}
-        if len(set(a.shape for a in payoffs.values())) > 1:
-            raise ValueError("All specified arrays must have the same shape")
-        arrays = list(payoffs.values())
-        shape = arrays[0].shape
-        g: StrategicGame = cython.cast(StrategicGame, Game.wrap(NewTable(list(shape), False)))
-        g.relabel_players(
-            {player: label for player, label in zip(g.players, payoffs, strict=True)}
-        )
-        players = list(g.players)
-        for profile in itertools.product(*(range(s) for s in shape)):
-            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
-            resolved_outcome = g._get_contingency_outcome(contingency, "from_dict")
-            for array, player in zip(arrays, players, strict=True):
-                resolved_outcome.deref().SetPayoff(
-                    g._resolve_player(player, "from_dict"), _to_number(array[profile])
-                )
-        g.title = title
-        return g
 
     def __repr__(self) -> str:
         if self.title:
@@ -1150,7 +991,35 @@ class Game:
 
 @cython.cclass
 class ExtensiveGame(Game):
-    """A `Game` with an extensive (game tree) representation."""
+    """A `Game` with an extensive (game tree) representation.
+
+    Constructing ``ExtensiveGame(players, title)`` creates a trivial game tree,
+    with one node, which is both root and terminal.
+
+    .. versionchanged:: 16.1.0
+        Added the `players` and `title` parameters
+    .. versionchanged:: 17.0.0
+        Replaces `Game.new_tree`.
+
+    Parameters
+    ----------
+    players : list of str, optional
+        A list of labels for the (strategic) players of the game.  If `players`
+        is not specified, the game initially has no players defined other than
+        the chance player.
+    title : str, optional
+        The title of the game.  If no title is specified, "Untitled extensive game"
+        is used.
+    """
+
+    def __init__(self,
+                 players: list[str] | None = None,
+                 title: str = "Untitled extensive game") -> None:
+        c_labels = stdvector[string]()
+        for player in (players or []):
+            c_labels.push_back(str(player).encode("utf-8"))
+        self.game = NewTree(c_labels)
+        self.title = title
 
     @cython.cfunc
     def _get_infosets(self, player: str) -> list[Node]:
@@ -3145,7 +3014,136 @@ class ExtensiveGame(Game):
 
 @cython.cclass
 class StrategicGame(Game):
-    """A `Game` with a strategic (payoff table) representation."""
+    """A `Game` with a strategic (payoff table) representation.
+
+    Constructing ``StrategicGame(dim, title)`` creates a new game with a strategic
+    representation. Players are labeled ``"1"``, ``"2"``, and so on; each player's
+    strategies are likewise labeled ``"1"``, ``"2"``, and so on.
+
+    .. versionchanged:: 16.1.0
+        Added the `title` parameter.
+    .. versionchanged:: 17.0.0
+        Replaces `Game.new_table`.
+
+    Parameters
+    ----------
+    dim : array-like
+        A list specifying the number of strategies for each player.
+    title : str, optional
+        The title of the game.  If no title is specified, "Untitled strategic game"
+        is used.
+    """
+
+    def __init__(self, dim, title: str = "Untitled strategic game") -> None:
+        self.game = NewTable(list(dim), True)
+        self.title = title
+
+    @classmethod
+    def from_arrays(cls, *arrays, title: str = "Untitled strategic game") -> StrategicGame:
+        """Create a new strategic game from payoff arrays.
+
+        Each entry in `arrays` gives the payoff matrix for the
+        corresponding player.  The arrays must all have the same shape,
+        and have the same number of dimensions as the total number of
+        players.
+
+        Players are labeled ``"1"``, ``"2"``, and so on;
+        each player's strategies are likewise labeled ``"1"``, ``"2"``, and so on.
+
+        .. versionchanged:: 16.1.0
+            Added the `title` parameter.
+        .. versionchanged:: 17.0.0
+            Replaces `Game.from_arrays`.
+
+        Parameters
+        ----------
+        arrays : array-like of array-like
+            The payoff matrices for the players.
+        title : str, optional
+            The title of the game.  If no title is specified, "Untitled strategic game"
+            is used.
+
+        Returns
+        -------
+        StrategicGame
+            The newly-created strategic game.
+
+        See Also
+        --------
+        from_dict : Create strategic game and set player labels
+        Game.to_arrays: Generate the payoff tables for players represented as numpy arrays
+        """
+        arrays = [np.array(a) for a in arrays]
+        if len(set(a.shape for a in arrays)) > 1:
+            raise ValueError("All specified arrays must have the same shape")
+        shape = arrays[0].shape
+        g: StrategicGame = StrategicGame.__new__(StrategicGame)
+        g.game = NewTable(list(shape), False)
+        players = list(g.players)
+        for profile in itertools.product(*(range(s) for s in shape)):
+            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
+            resolved_outcome = g._get_contingency_outcome(contingency, "from_arrays")
+            for array, player in zip(arrays, players, strict=True):
+                resolved_outcome.deref().SetPayoff(
+                    g._resolve_player(player, "from_arrays"), _to_number(array[profile])
+                )
+        g.title = title
+        return g
+
+    @classmethod
+    def from_dict(cls, payoffs, title: str = "Untitled strategic game") -> StrategicGame:
+        """Create a new strategic game from a dict of payoff arrays.
+
+        Each entry in `payoffs` is a key-value pair
+        giving the label and the payoff matrix for a player.
+        The payoff matrices must all have the same shape,
+        and have the same number of dimensions as the total number of
+        players.
+
+        The players are labeled with the keys of `payoffs`, and therefore
+        must be valid player labels.  Each player's strategies are labeled
+        ``"1"``, ``"2"``, and so on.
+
+        .. versionchanged:: 17.0.0
+            Replaces `Game.from_dict`.
+
+        Parameters
+        ----------
+        payoffs : dict-like mapping str to array-like
+            The names and corresponding payoff matrices for the players.
+        title : str, optional
+            The title of the game.  If no title is specified, "Untitled strategic game"
+            is used.
+
+        Returns
+        -------
+        StrategicGame
+            The newly-created strategic game.
+
+        See Also
+        --------
+        from_arrays : Create game from list-like of array-like
+        """
+        payoffs = {k: np.array(v) for k, v in payoffs.items()}
+        if len(set(a.shape for a in payoffs.values())) > 1:
+            raise ValueError("All specified arrays must have the same shape")
+        arrays = list(payoffs.values())
+        shape = arrays[0].shape
+        g: StrategicGame = StrategicGame.__new__(StrategicGame)
+        g.game = NewTable(list(shape), False)
+        g.relabel_players(
+            {player: label for player, label in zip(g.players, payoffs, strict=True)}
+        )
+        players = list(g.players)
+        for profile in itertools.product(*(range(s) for s in shape)):
+            contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
+            resolved_outcome = g._get_contingency_outcome(contingency, "from_dict")
+            for array, player in zip(arrays, players, strict=True):
+                resolved_outcome.deref().SetPayoff(
+                    g._resolve_player(player, "from_dict"), _to_number(array[profile])
+                )
+        g.title = title
+        return g
 
     @cython.cfunc
     def _get_contingency_outcome(

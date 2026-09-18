@@ -170,7 +170,7 @@ class Node:
         """The `Game` to which the node belongs. Not part of the public API; a
         `Node` is otherwise only obtained already scoped to a particular `Game`.
         """
-        return Game.wrap(self.node.deref().GetGame())
+        return Game._wrap(self.node.deref().GetGame())
 
     @cython.cfunc
     def _infoset_handle(self) -> c_GameInfoset:

@@ -151,7 +151,7 @@ def create_efg_corresponding_to_bimatrix_game_arrays(
     """
     assert A.shape == B.shape
     m, n = A.shape
-    g = gbt.Game.new_tree(players=["1", "2"], title=title)
+    g = gbt.ExtensiveGame(players=["1", "2"], title=title)
     actions1 = [str(i) for i in range(m)]
     actions2 = [str(i) for i in range(n)]
     g.append_move(gbt.H.path(), "1", actions1)
@@ -178,7 +178,7 @@ def create_hs1988_base_game() -> gbt.Game:
     """
     p1_payoffs = np.array([[2, 0], [0, 1]])
     p2_payoffs = np.array([[1, 0], [0, 4]])
-    return gbt.Game.from_arrays(p1_payoffs, p2_payoffs, title="HS 1988 Base Game")
+    return gbt.StrategicGame.from_arrays(p1_payoffs, p2_payoffs, title="HS 1988 Base Game")
 
 
 ################################################################################################
@@ -216,7 +216,7 @@ def create_2x2_symmetric_coordination_nfg() -> gbt.Game:
     exercising bifurcation/perturbation detection and reporting in the logit
     solvers.
     """
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     p1, p2 = game.players
     s1a, s1b = game.get_strategies(p1)
     s2a, s2b = game.get_strategies(p2)
@@ -243,7 +243,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     if not nonterm_outcomes:
         return read_from_file("stripped_down_poker.efg")
 
-    g = gbt.Game.new_tree(
+    g = gbt.ExtensiveGame(
         players=["Alice", "Bob"],
         title="Stripped-Down Poker: a simple game of one-card\
                                             poker from Reiley et al (2008).",
@@ -276,7 +276,7 @@ def _create_kuhn_poker_efg_without_outcomes():
     """
     Used in create_kuhn_poker_efg()
     """
-    g = gbt.Game.new_tree(players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player")
+    g = gbt.ExtensiveGame(players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player")
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
@@ -508,7 +508,7 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
     the Seller plays Abuse.
     """
-    g = gbt.Game.new_tree(
+    g = gbt.ExtensiveGame(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
     g.append_move(gbt.H.path(), "Buyer", ["Trust", "Not trust"])
@@ -637,7 +637,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
         self.m1 = params["m1"]
 
     def gbt_game(self):
-        g = gbt.Game.new_tree(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
+        g = gbt.ExtensiveGame(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
         current_player = "1"
         for t in range(self.N):
             g.append_move(gbt.H.path(*(["Push"] * t)), current_player, ["Take", "Push"])
@@ -788,7 +788,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
                 self.create_binary_tree(g, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
-        g = gbt.Game.new_tree(
+        g = gbt.ExtensiveGame(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )

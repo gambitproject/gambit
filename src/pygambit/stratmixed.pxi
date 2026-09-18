@@ -695,7 +695,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())
 
 
 @cython.cclass
@@ -803,4 +803,4 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())

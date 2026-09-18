@@ -188,7 +188,7 @@ def test_catalog_games_include_descriptions():
 # OpenSpiel dynamic loading tests (all mocked; open_spiel need not be installed)
 # ---------------------------------------------------------------------------
 
-_MOCK_NFG = gbt.Game.new_table([2, 2]).to_nfg()
+_MOCK_NFG = gbt.StrategicGame([2, 2]).to_nfg()
 _MOCK_EFG = gbt.catalog.load("journals/geb/bagwell1995").to_efg()
 
 

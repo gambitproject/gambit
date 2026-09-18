@@ -176,7 +176,7 @@ SUBGAME_ROOTS_CASES = [
         # unlike `IsSubgameRoot()` (which special-cases it as trivially its own subgame) --
         # a known, narrow C++-core discrepancy (`GameTreeRep::GetSubgameData()`'s early
         # return for `m_root->IsTerminal()`), not something to paper over here.
-        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[]),
+        SubgameRootsTestCase(factory=gbt.ExtensiveGame, expected_paths=[]),
         id="empty_tree"
     ),
     # ------------------------------------------------------------------------
@@ -502,7 +502,7 @@ def test_get_behavior_raises_value_error_for_wrong_player(
         pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig1")),
         pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig2")),
         pytest.param(games.read_from_file("stripped_down_poker.efg")),
-        pytest.param(gbt.Game.new_tree()),
+        pytest.param(gbt.ExtensiveGame()),
     ],
 )
 def test_get_histories_after_iteration_order(game_obj: gbt.Game):
