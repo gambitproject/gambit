@@ -61,16 +61,16 @@ Transforming game trees
 .. autosummary::
    :toctree: api/
 
-   Game.append_move
-   Game.append_infoset
-   Game.append_event
-   Game.insert_move
-   Game.insert_infoset
-   Game.insert_event
-   Game.copy_tree
-   Game.move_tree
-   Game.delete_parent
-   Game.delete_tree
+   ExtensiveGame.append_move
+   ExtensiveGame.append_infoset
+   ExtensiveGame.append_event
+   ExtensiveGame.insert_move
+   ExtensiveGame.insert_infoset
+   ExtensiveGame.insert_event
+   ExtensiveGame.copy_tree
+   ExtensiveGame.move_tree
+   ExtensiveGame.delete_parent
+   ExtensiveGame.delete_tree
 
 
 Transforming game information structure
@@ -79,11 +79,11 @@ Transforming game information structure
 .. autosummary::
    :toctree: api/
 
-   Game.make_infoset
-   Game.make_event
-   Game.relabel_actions
-   Game.set_move_actions
-   Game.set_event_actions
+   ExtensiveGame.make_infoset
+   ExtensiveGame.make_event
+   ExtensiveGame.relabel_actions
+   ExtensiveGame.set_move_actions
+   ExtensiveGame.set_event_actions
 
 
 Transforming game components
@@ -93,12 +93,16 @@ Transforming game components
    :toctree: api/
 
    Game.relabel_players
-   Game.set_players
-   Game.relabel_strategies
-   Game.set_strategies
-   Game.make_outcome
-   Game.make_outcome_null
-   Game.relabel_outcomes
+   ExtensiveGame.set_players
+   StrategicGame.set_players
+   StrategicGame.relabel_strategies
+   StrategicGame.set_strategies
+   ExtensiveGame.make_outcome
+   StrategicGame.make_outcome
+   ExtensiveGame.make_outcome_null
+   StrategicGame.make_outcome_null
+   ExtensiveGame.relabel_outcomes
+   StrategicGame.relabel_outcomes
    Game.set_outcome_payoffs
 
 
@@ -118,17 +122,18 @@ Information about the game
    Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
-   Game.get_infosets
-   Game.get_events
+   ExtensiveGame.get_infosets
+   ExtensiveGame.get_events
    Game.get_strategies
    Game.contingencies
-   Game.get_outcome
+   ExtensiveGame.get_outcome
+   StrategicGame.get_outcome
    Game.get_outcomes
    Game.get_outcome_payoffs
    Game.get_payoffs
-   Game.get_subgame_roots
-   Game.get_minimal_subgame
-   Game.get_strategy_unreachable
+   ExtensiveGame.get_subgame_roots
+   ExtensiveGame.get_minimal_subgame
+   ExtensiveGame.get_strategy_unreachable
 
 
 Player behavior
@@ -139,10 +144,11 @@ Player behavior
 
    Game.mixed_strategy_profile
    Game.random_strategy_profile
-   Game.mixed_behavior_profile
-   Game.random_behavior_profile
+   ExtensiveGame.get_behavior
+   ExtensiveGame.mixed_behavior_profile
+   ExtensiveGame.random_behavior_profile
    Game.strategy_support_profile
-   Game.behavior_support_profile
+   ExtensiveGame.behavior_support_profile
 
 
 Representation of strategic behavior

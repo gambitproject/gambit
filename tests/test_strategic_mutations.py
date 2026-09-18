@@ -58,8 +58,9 @@ def test_relabel_strategies_scope_is_the_player():
 
 
 def test_relabel_strategies_tree_game_raises():
+    """`relabel_strategies` does not exist on a game with a tree representation."""
     game = games.read_from_file("stripped_down_poker.efg")
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.relabel_strategies("Alice", {"11": "XY"})
 
 

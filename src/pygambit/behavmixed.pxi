@@ -59,7 +59,7 @@ class InfosetIndexedVector(_LabeledVector):
         # as the KeyError below, from _values simply not having that entry -- not as a
         # resolution-time error that would also wrongly block a valid chance lookup in
         # infoset_probs.
-        resolved_node = cython.cast(Game, self._game)._resolve_infoset_or_event(
+        resolved_node = cython.cast(ExtensiveGame, self._game)._resolve_infoset_or_event(
             selector, f"{type(self).__name__}.__getitem__"
         )
         try:
@@ -362,7 +362,7 @@ class MixedBehavior:
             raise TypeError(
                 f"MixedBehavior index must be Selector, not {selector.__class__.__name__}"
             )
-        infoset = cython.cast(Game, self._game)._resolve_infoset(
+        infoset = cython.cast(ExtensiveGame, self._game)._resolve_infoset(
             selector, "MixedBehavior.__getitem__"
         )
         if infoset.player != self._player:
@@ -463,11 +463,11 @@ class MixedBehaviorProfile:
         if isinstance(index, str):
             values = {
                 _canonical_history(node): self._mixed_action_at(node)
-                for node in cython.cast(Game, self.game)._get_infosets(index)
+                for node in cython.cast(ExtensiveGame, self.game)._get_infosets(index)
             }
             return MixedBehavior.wrap(self.game, index, values)
         if isinstance(index, Selector):
-            resolved_infoset = cython.cast(Game, self.game)._resolve_infoset(
+            resolved_infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
                 index, "MixedBehaviorProfile.__getitem__"
             )
             return self._mixed_action_at(resolved_infoset)
@@ -480,7 +480,7 @@ class MixedBehaviorProfile:
         belonging to a personal player, excluding the chance player's.
         """
         for player in self.game.players:
-            yield from cython.cast(Game, self.game)._get_infosets(player)
+            yield from cython.cast(ExtensiveGame, self.game)._get_infosets(player)
 
     def _events(self) -> typing.Iterator[Node]:
         """Iterates over a representative node of every event of the chance player in
@@ -682,7 +682,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         if not isinstance(index, Selector):
             raise TypeError(f"profile index must be Selector, not {index.__class__.__name__}")
-        infoset = cython.cast(Game, self.game)._resolve_infoset(
+        infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
             index, "MixedBehaviorProfile.__setitem__"
         )
         self._setprob_infoset(infoset, distribution, sparse=True)
@@ -735,7 +735,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         if not isinstance(index, Selector):
             raise TypeError(f"profile index must be Selector, not {index.__class__.__name__}")
-        infoset = cython.cast(Game, self.game)._resolve_infoset(
+        infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
             index, "MixedBehaviorProfile.set_mixed_action"
         )
         self._setprob_infoset(infoset, distribution, sparse=sparse)
@@ -759,7 +759,7 @@ class MixedBehaviorProfile:
         .. versionadded:: 17.0.0
         """
         self._check_validity()
-        histories: dict = cython.cast(Game, self.game)._all_histories()
+        histories: dict = cython.cast(ExtensiveGame, self.game)._all_histories()
         return HistoryValuesVector({
             p: HistoryValueVector({
                 history: self._node_value(p, n) for n, history in histories.items()
@@ -817,7 +817,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return RealizProbVector({
             history: self._realiz_prob(n)
-            for n, history in cython.cast(Game, self.game)._all_histories().items()
+            for n, history in cython.cast(ExtensiveGame, self.game)._all_histories().items()
         })
 
     @property
@@ -895,7 +895,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return BeliefVector({
             history: self._belief(n)
-            for n, history in cython.cast(Game, self.game)._all_histories().items()
+            for n, history in cython.cast(ExtensiveGame, self.game)._all_histories().items()
         })
 
     @property
@@ -1115,7 +1115,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             return float(Rational(normalized))
 
     def _payoff(self, player: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: Game = cython.cast(ExtensiveGame, self.game)
         return deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff"))
 
     def _belief(self, node: Node) -> float:
@@ -1139,7 +1139,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return None
 
     def _node_value(self, player: str, node: Node) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: Game = cython.cast(ExtensiveGame, self.game)
         resolved_player = game._resolve_player(player, "_node_value")
         return deref(self.profile).GetPayoff(resolved_player, node.node)
 
@@ -1247,7 +1247,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return Rational(_to_number_string(value))
 
     def _payoff(self, player: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: Game = cython.cast(ExtensiveGame, self.game)
         return rat_to_py(deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff")))
 
     def _belief(self, node: Node) -> Rational:
@@ -1273,7 +1273,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return None
 
     def _node_value(self, player: str, node: Node) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: Game = cython.cast(ExtensiveGame, self.game)
         resolved_player = game._resolve_player(player, "_node_value")
         return rat_to_py(deref(self.profile).GetPayoff(resolved_player, node.node))
 
@@ -1316,7 +1316,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
-            for node in cython.cast(Game, self.game)._get_infosets(player):
+            for node in cython.cast(ExtensiveGame, self.game)._get_infosets(player):
                 profile._setprob_infoset(
                     node,
                     {

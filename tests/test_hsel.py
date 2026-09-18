@@ -102,9 +102,10 @@ def test_get_histories_empty():
 
 def test_get_histories_after_strategic_game_raises():
     """`H.after()`, used bare, enumerates every node -- the replacement for the
-    removed `Game.nodes` -- so it inherits the same tree-only restriction."""
+    removed `Game.nodes` -- so `get_histories` inherits the same tree-only
+    restriction: it does not exist on a strategic game."""
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.get_histories(gbt.H.after())
 
 

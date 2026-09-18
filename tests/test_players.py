@@ -183,8 +183,9 @@ def test_strategic_game_set_strategies_add():
 
 
 def test_extensive_game_set_strategies():
+    """`set_strategies` does not exist on a game with a tree representation."""
     game = gbt.Game.new_tree(["Alice"])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.set_strategies("Alice", ["new strategy"])
 
 

@@ -6,23 +6,27 @@ from . import games
 
 
 def test_strategic_game_get_infosets():
+    """`get_infosets` does not exist on a game with a strategic representation."""
     game = gbt.Game.new_table([2, 2])
     player, _ = game.players
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         _ = game.get_infosets(player)
 
 
 def test_strategic_game_get_histories_root_raises():
     """A bare `H.path()` (the root) still resolves through the same
-    tree-only guard as `H.after()`, just via a different internal path."""
+    tree-only restriction as `H.after()`, just via a different internal path:
+    `get_histories` does not exist on a strategic game."""
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         _ = game.get_histories(gbt.H.path())
 
 
 def test_game_behav_profile_error():
+    """`mixed_behavior_profile` does not exist on a game with a strategic
+    representation."""
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         _ = game.mixed_behavior_profile()
 
 

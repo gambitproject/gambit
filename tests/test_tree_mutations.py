@@ -514,9 +514,9 @@ def test_make_infoset_empty_nodes_raises():
 
 
 def test_make_infoset_strategic_game_raises():
-    """`make_infoset` is only defined for games with a tree representation."""
+    """`make_infoset` does not exist on a game with a strategic representation."""
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.make_infoset(gbt.H.path(), "1")
 
 
@@ -598,8 +598,9 @@ def test_make_event_terminal_node_raises():
 
 
 def test_make_event_strategic_game_raises():
+    """`make_event` does not exist on a game with a strategic representation."""
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.make_event(gbt.H.path(), {"a": 1})
 
 
