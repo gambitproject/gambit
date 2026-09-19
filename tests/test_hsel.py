@@ -117,3 +117,63 @@ def test_get_histories_requires_selector():
         game.get_histories(())
     with pytest.raises(TypeError):
         game.get_histories("U")
+
+
+def test_last_action_raises_on_invalid_player():
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+    game.append_move(gbt.H.plays, "B", ["x", "y"])
+
+    def key(h):
+        with pytest.raises(KeyError):
+            h.last_action("NoSuchPlayer")
+        return None
+
+    game._get_groups(gbt.H.plays.by(key))
+
+
+def test_last_action_raises_on_non_str_player():
+    game = gbt.ExtensiveGame(players=["A"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+
+    def key(h):
+        with pytest.raises(TypeError):
+            h.last_action(1)
+        return None
+
+    game._get_groups(gbt.H.plays.by(key))
+
+
+def test_last_action_raises_on_empty_player():
+    game = gbt.ExtensiveGame(players=["A"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+
+    def key(h):
+        with pytest.raises(ValueError):
+            h.last_action("  ")
+        return None
+
+    game._get_groups(gbt.H.plays.by(key))
+
+
+def test_with_recall_raises_on_invalid_player():
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+    game.append_move(gbt.H.plays, "B", ["x", "y"])
+
+    grouped = gbt.H.path().by(lambda h: None).with_recall("NoSuchPlayer").plays
+    with pytest.raises(KeyError):
+        game._get_groups(grouped)
+
+
+def test_with_recall_refines_key_by_last_action():
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+    game.append_move(gbt.H.plays, "B", ["x", "y"])
+
+    grouped = gbt.H.path().by(lambda h: None).with_recall("A").plays
+    groups = game._get_groups(grouped)
+    assert {k: [h.actions for h in v] for k, v in groups.items()} == {
+        (None, "U"): [("U", "x"), ("U", "y")],
+        (None, "D"): [("D", "x"), ("D", "y")],
+    }

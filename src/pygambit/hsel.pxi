@@ -300,7 +300,19 @@ def _node_last_action(node: c_GameNode, player: str) -> object:
     """The label of the last action `player` took on the path to `node`
     (a raw handle, not a `Node`), wherever it fell -- `None` if `player`
     hasn't acted yet. The `c_GameNode`-only core of `_last_action`, used
-    directly by `HistoryView`, which must never hold a `Node`."""
+    directly by `HistoryView`, which must never hold a `Node`.
+
+    Raises
+    ------
+    KeyError
+        If no player in the game has label `player`.
+    TypeError
+        If `player` is not a `str`.
+    ValueError
+        If `player` is an empty string or all spaces.
+    """
+    game: Game = Game._wrap(node.deref().GetGame())
+    game._resolve_player(player, "last_action")
     current: c_GameNode = node
     parent: c_GameNode = current.deref().GetParent()
     while parent != cython.cast(c_GameNode, NULL):
@@ -373,7 +385,17 @@ class HistoryView:
 
     def last_action(self, player: str) -> str | None:
         """The label of the last action `player` took on the path to this
-        history, wherever it fell -- `None` if `player` hasn't acted yet."""
+        history, wherever it fell -- `None` if `player` hasn't acted yet.
+
+        Raises
+        ------
+        KeyError
+            If no player in the game has label `player`.
+        TypeError
+            If `player` is not a `str`.
+        ValueError
+            If `player` is an empty string or all spaces.
+        """
         return _node_last_action(self._node, player)
 
     @property
