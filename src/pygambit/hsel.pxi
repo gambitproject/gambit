@@ -183,15 +183,25 @@ class GroupedSelector:
     chain onto a plain `Selector`, but apply per-group: each group's own
     members are expanded/filtered independently, and the group's key is left
     untouched -- expanding past a decision point doesn't retroactively change
-    what a group was keyed by. `.with_recall(player)` is the one exception:
-    once set, every subsequent `.plays` on this selector *also* refines each
-    group's key by folding in `player`'s last action at that point, so a
-    partition built for one decision stays a valid recall-respecting
-    partition when reused for a later one, without the caller needing to
-    re-derive or manually re-key it. Scoped to `.plays` specifically for now
-    (not every expand-style op) -- narrower than the full "any expand-style
-    step" idea from the design notes, not yet stress-tested against a shape
-    that would need more.
+    what a group was keyed by. `.by_last_action(player)` is the one
+    exception: once set, every subsequent `.plays` on this selector *also*
+    refines each group's key by folding in `player`'s last action at that
+    point -- keyed on the `(infoset, label)` pair identifying that action,
+    not the label alone, so two infosets that happen to share an action
+    label stay distinct groups -- so a partition built for one decision
+    stays a valid recall-respecting partition when reused for a later one,
+    without the caller needing to re-derive or manually re-key it. Scoped to
+    `.plays` specifically for now (not every expand-style op) -- narrower
+    than the full "any expand-style step" idea from the design notes, not
+    yet stress-tested against a shape that would need more.
+
+    The refinement is relative to this selector chain, not a general recall
+    guarantee: it only folds in the action taken at the `.plays` step
+    immediately before it. A `.plays` that jumps past more than one of
+    `player`'s decisions, or a base partition that already pools together
+    histories differing in an earlier one of `player`'s actions, will
+    silently under-refine -- `.by_last_action` cannot recover information
+    the selector chain already discarded.
 
     .. versionadded:: 17.0.0
     """
@@ -201,27 +211,29 @@ class GroupedSelector:
         base: Selector,
         key: typing.Callable,
         post_ops: tuple = (),
-        recall_player: str = None,
+        last_action_player: str = None,
     ) -> None:
         self.base = base
         self.key = key
         self.post_ops = post_ops
-        self.recall_player = recall_player
+        self.last_action_player = last_action_player
 
     def __repr__(self) -> str:
         return (
             f"GroupedSelector(base={self.base!r}, key={self.key!r}, "
-            f"post_ops={self.post_ops!r}, recall_player={self.recall_player!r})"
+            f"post_ops={self.post_ops!r}, last_action_player={self.last_action_player!r})"
         )
 
     def _extend(self, op) -> GroupedSelector:
-        return GroupedSelector(self.base, self.key, self.post_ops + (op,), self.recall_player)
+        return GroupedSelector(
+            self.base, self.key, self.post_ops + (op,), self.last_action_player
+        )
 
     @property
     def plays(self) -> GroupedSelector:
         """The current terminal frontier of each group, independently --
         see the class docstring for how this interacts with
-        `.with_recall(player)`."""
+        `.by_last_action(player)`."""
         return self._extend(_PlaysStep())
 
     def after(self, *labels: str) -> GroupedSelector:
@@ -229,7 +241,7 @@ class GroupedSelector:
         are exactly `labels`, whatever came before them."""
         return self._extend(_AfterStep(labels))
 
-    def with_recall(self, player: str) -> GroupedSelector:
+    def by_last_action(self, player: str) -> GroupedSelector:
         """From here on, every `.plays` on this selector also refines each
         group's key by folding in `player`'s last action at that point --
         see the class docstring."""
@@ -296,11 +308,12 @@ def _canonical_history_cached(node: Node, cache: dict) -> History:
 
 
 @cython.cfunc
-def _node_last_action(node: c_GameNode, player: str) -> object:
-    """The label of the last action `player` took on the path to `node`
-    (a raw handle, not a `Node`), wherever it fell -- `None` if `player`
-    hasn't acted yet. The `c_GameNode`-only core of `_last_action`, used
-    directly by `HistoryView`, which must never hold a `Node`.
+def _node_last_acted_child(node: c_GameNode, player: str) -> c_GameNode:
+    """Internal: the child (a raw handle, not a `Node`) reached by `player`'s
+    last action on the path to `node` -- i.e. the node whose parent is where
+    `player` acted -- or a null handle if `player` hasn't acted yet. Shared
+    by `_node_last_action` (the action's label) and `_node_last_action_key`
+    (the `(infoset, label)` pair `.by_last_action(player)` keys on).
 
     Raises
     ------
@@ -321,17 +334,68 @@ def _node_last_action(node: c_GameNode, player: str) -> object:
             player_handle != cython.cast(c_GamePlayer, NULL) and
             player_handle.deref().GetLabel().decode("utf-8") == player
         ):
-            return current.deref().GetPriorAction().deref().GetLabel().decode("utf-8")
+            return current
         current = parent
         parent = current.deref().GetParent()
+    return cython.cast(c_GameNode, NULL)
+
+
+@cython.cfunc
+def _node_last_action(node: c_GameNode, player: str) -> object:
+    """The label of the last action `player` took on the path to `node`
+    (a raw handle, not a `Node`), wherever it fell -- `None` if `player`
+    hasn't acted yet. The `c_GameNode`-only core of `_last_action`, used
+    directly by `HistoryView`, which must never hold a `Node`.
+
+    Raises
+    ------
+    KeyError
+        If no player in the game has label `player`.
+    TypeError
+        If `player` is not a `str`.
+    ValueError
+        If `player` is an empty string or all spaces.
+    """
+    child: c_GameNode = _node_last_acted_child(node, player)
+    if child != cython.cast(c_GameNode, NULL):
+        return child.deref().GetPriorAction().deref().GetLabel().decode("utf-8")
     return None
 
 
-def _last_action(node: Node, player: str) -> str | None:
-    """The label of the last action `player` took on the path to `node`,
-    wherever it fell -- `None` if `player` hasn't acted yet. Used by
-    `.with_recall(player)`'s evaluation, which still works in terms of `Node`."""
-    return _node_last_action(cython.cast(Node, node).node, player)
+@cython.cfunc
+def _node_last_action_key(node: c_GameNode, player: str) -> object:
+    """The `(infoset, label)` pair identifying `player`'s last action on the
+    path to `node` (a raw handle, not a `Node`), wherever it fell -- `None`
+    if `player` hasn't acted yet. `infoset` is the canonical `History` of the
+    infoset at which the action was taken (see `_canonical_history`,
+    matching `HistoryTransition.state`), so two infosets that happen to
+    share an action label are still told apart. Used by
+    `.by_last_action(player)`'s evaluation, via `_last_action_key`.
+
+    Raises
+    ------
+    KeyError
+        If no player in the game has label `player`.
+    TypeError
+        If `player` is not a `str`.
+    ValueError
+        If `player` is an empty string or all spaces.
+    """
+    child: c_GameNode = _node_last_acted_child(node, player)
+    if child != cython.cast(c_GameNode, NULL):
+        return (
+            _canonical_history(Node.wrap(child.deref().GetParent())),
+            child.deref().GetPriorAction().deref().GetLabel().decode("utf-8"),
+        )
+    return None
+
+
+def _last_action_key(node: Node, player: str) -> tuple | None:
+    """The `(infoset, label)` pair identifying `player`'s last action on the
+    path to `node`, wherever it fell -- `None` if `player` hasn't acted yet.
+    Used by `.by_last_action(player)`'s evaluation, which still works in
+    terms of `Node`."""
+    return _node_last_action_key(cython.cast(Node, node).node, player)
 
 
 @cython.cclass
