@@ -34,6 +34,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     resolve_strategy_starts,
     version_option,
 )
@@ -88,6 +89,7 @@ PROG_NAME = "gambit-hp"
     type=float,
     help="maximum regret acceptable as a proportion of the range of payoffs in the game",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -104,23 +106,30 @@ def main(
     seed: int | None,
     start_file: str | None,
     maxregret: float,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     priors = resolve_strategy_starts(game, n_priors, seed, start_file)
 
+    def render(profile, label: str) -> None:
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals))
+
     def render_event(event: gbt.HPStepEvent) -> None:
         if verbose:
-            click.echo(render_profile_csv(event.profile, f"{event.t:.6g}", decimals))
+            render(event.profile, f"{event.t:.6g}")
 
     for prior in priors:
         prior = prior.as_float()
         if verbose:
-            click.echo(render_profile_csv(prior, "prior", decimals))
+            render(prior, "prior")
         result = gbt.nash.hp_solve(prior, maxregret=maxregret, event_callback=render_event)
         if result.equilibrium is not None:
-            click.echo(render_profile_csv(result.equilibrium, "NE", decimals))
+            render(result.equilibrium, "NE")
 
 
 if __name__ == "__main__":

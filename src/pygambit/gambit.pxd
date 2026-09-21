@@ -262,9 +262,6 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
-        bool IsTree() except +
-        bool IsAgg() except +
-
         string GetTitle() except +
         void SetTitle(string) except +ValueError
 
@@ -339,6 +336,28 @@ cdef extern from "games/game.h":
 
     c_Game NewTree(stdvector[string]) except +ValueError
     c_Game NewTable(stdvector[int], bool) except +
+
+    shared_ptr[T] As[T](const c_Game &)
+
+
+cdef extern from "games/gametree.h":
+    cdef cppclass c_GameTreeRep "GameTreeRep" (c_GameRep):
+        pass
+
+
+cdef extern from "games/gametable.h":
+    cdef cppclass c_GameTableRep "GameTableRep" (c_GameRep):
+        pass
+
+
+cdef extern from "games/gameagg.h":
+    cdef cppclass c_GameAGGRep "GameAGGRep" (c_GameRep):
+        pass
+
+
+cdef extern from "games/gamebagg.h":
+    cdef cppclass c_GameBAGGRep "GameBAGGRep" (c_GameRep):
+        pass
 
 
 cdef extern from "games/stratpure.h":

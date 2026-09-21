@@ -5,12 +5,19 @@
   recently opened games.  (#1108)
 - Details on bifurcations found and actions taken to resolve them (by perturbation) are now reported
   by `nash.logit_solve` (and related functions)  (#186)
+- `-D`/`--detail` is now available on every `gambit-*` command-line tool that reports equilibria.
+- The command-line tools' `-D` report for behavior profiles now includes the probability
+  distribution over full histories (discussion #1094)
 
 ### Changed
 - Refined the perturbation approach in `path.cc` (logit and hp solvers) to better handle paths on games
   with bifurcations. (#492)
 - Nash solver algorithms now return a method-specific `Result` class, rather than a generic class,
   with potentially richer information about the performance of the algorithm.
+- The command-line tools' `-D` (detail) report for behavior profiles now identifies each node by its
+  `History` (the actions from the root, comma-joined).
+- The command-line tools' `-D` report now identifies each player by their own label, rather than by
+  their position among the game's players.
 
 ## [17.0.0-beta.1] - 2026-09-08
 

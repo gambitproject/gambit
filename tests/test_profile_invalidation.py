@@ -6,7 +6,7 @@ from . import games
 
 
 def test_mixed_strategy_profile_game_structure_changed_no_tree():
-    game = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
+    game = gbt.StrategicGame.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
     player = next(iter(game.players))
     distribution = {s: 0 for s in game.get_strategies(player)}

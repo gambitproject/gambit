@@ -965,9 +965,9 @@ def test_vectorized_quantities_consistency(game: gbt.Game, rational_flag: bool):
         if not game.get_actions(gbt.H.path(*history.actions)):
             continue
         selector = gbt.H.path(*history.actions)
-        node = games.node_at_history(game, history.actions)
+        mover = game.get_player(selector)
         reach_prob = (
-            infoset_probs[selector] if node.player in game.players else event_probs[selector]
+            infoset_probs[selector] if mover in game.players else event_probs[selector]
         )
         if reach_prob == 0:
             assert beliefs[history] is None
@@ -2015,10 +2015,10 @@ def test_profile_data_error(game: gbt.Game, rational_flag: bool, data: list):
     ],
 )
 def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: list):
-    """Test to ensure a pygambit.UndefinedOperationError is raised when the game
-    to create a mixed behavior profile does not have a tree representation.
+    """`mixed_behavior_profile` does not exist on a game that does not have a tree
+    representation.
     """
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(AttributeError):
         game.mixed_behavior_profile(rational=rational_flag, data=data)
 
 

@@ -38,6 +38,7 @@
 #include <wx/artprov.h>
 
 #include "games.h"
+#include "games/gametree.h"
 
 #include "app.h" // for wxGetApp()
 #include "gameframe.h"
@@ -82,7 +83,7 @@ ProfileListPanel::ProfileListPanel(wxWindow *p_parent, const std::shared_ptr<Gam
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  if (p_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(p_doc->GetGame())) {
     m_behavProfiles = new MixedBehaviorProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
@@ -282,7 +283,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
-  if (p_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(p_doc->GetGame())) {
     m_efgPanel = new EfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);
     m_splitter->Initialize(m_efgPanel);
@@ -309,7 +310,7 @@ GameFrame::GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_
   SetSizer(topSizer);
   wxTopLevelWindowBase::Layout();
 
-  if (p_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(p_doc->GetGame())) {
     m_efgPanel->SetFocus();
   }
   else {
@@ -445,7 +446,7 @@ void GameFrame::MakeMenus()
 
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
                    wxT("Display the reduced strategic representation ") wxT("of the game"), true);
-  if (!m_doc->GetGame()->IsTree()) {
+  if (!As<GameTreeRep>(m_doc->GetGame())) {
     viewMenu->Check(GBT_MENU_VIEW_STRATEGIC, true);
     viewMenu->Enable(GBT_MENU_VIEW_STRATEGIC, false);
   }
@@ -458,7 +459,7 @@ void GameFrame::MakeMenus()
   auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
                     true);
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
   }
   toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
@@ -514,7 +515,7 @@ void GameFrame::MakeToolbar()
 
   toolBar->AddSeparator();
 
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxEmptyString,
                      wxBitmapBundle::FromSVG(table_svg, TOOLBAR_ICON_SIZE), wxBitmapBundle(),
                      wxITEM_CHECK, _("Display the reduced strategic representation of the game"),
@@ -568,8 +569,7 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
   const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
 
-  // Rename this predicate as appropriate for your game model.
-  const bool isExtensiveGame = m_doc->GetGame()->IsTree();
+  const bool isExtensiveGame = As<GameTreeRep>(m_doc->GetGame()) != nullptr;
 
   auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
@@ -887,7 +887,7 @@ void GameFrame::OnEditGame(wxCommandEvent &)
       }
 
       TreeRenderConfig style = m_doc->GetStyle();
-      if (m_doc->GetGame()->IsTree()) {
+      if (As<GameTreeRep>(m_doc->GetGame())) {
         style.SetChanceColor(dialog.GetChanceColor());
       }
       // Colors are assigned by position among the surviving rows, which matches the players'

@@ -94,7 +94,7 @@ def main(
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     rational = decimals is None
     render_decimals = decimals or 0
-    use_strategic = strategic or not game.is_tree
+    use_strategic = strategic or not isinstance(game, gbt.ExtensiveGame)
 
     def render(profile) -> None:
         if detail:

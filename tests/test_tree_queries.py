@@ -176,7 +176,7 @@ SUBGAME_ROOTS_CASES = [
         # unlike `IsSubgameRoot()` (which special-cases it as trivially its own subgame) --
         # a known, narrow C++-core discrepancy (`GameTreeRep::GetSubgameData()`'s early
         # return for `m_root->IsTerminal()`), not something to paper over here.
-        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[]),
+        SubgameRootsTestCase(factory=gbt.ExtensiveGame, expected_paths=[]),
         id="empty_tree"
     ),
     # ------------------------------------------------------------------------
@@ -456,8 +456,9 @@ def test_get_behavior_prescribed_action_undefined_returns_none(
 ):
     """Verify `Game.get_behavior` returns None when called on an unreached player's infoset"""
     if infoset_label is not None:
-        node = next(iter(games.find_infoset_in_game(game, infoset_label).members))
-        selector = games.selector_for_node(node)
+        canonical_history = games.infoset_history_in_game(game, infoset_label)
+        member = next(iter(game.get_members(gbt.H.path(*canonical_history))))
+        selector = gbt.H.path(*member.actions)
     else:
         selector = gbt.H.path(*infoset_path)
 
@@ -501,7 +502,7 @@ def test_get_behavior_raises_value_error_for_wrong_player(
         pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig1")),
         pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig2")),
         pytest.param(games.read_from_file("stripped_down_poker.efg")),
-        pytest.param(gbt.Game.new_tree()),
+        pytest.param(gbt.ExtensiveGame()),
     ],
 )
 def test_get_histories_after_iteration_order(game_obj: gbt.Game):

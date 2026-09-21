@@ -226,6 +226,7 @@ game_SOURCES = \
 	src/games/stratspt.h \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
+	src/games/stratmixed.cc \
 	src/games/file.cc \
 	src/games/workspace.cc \
 	src/games/workspace.h \
@@ -244,7 +245,6 @@ game_SOURCES = \
 	src/games/agg/bagg.h \
 	src/games/agg/proj_func.h \
 	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp \
     src/games/agg/trie_map.cc
 
 linalg_SOURCES = \
@@ -318,7 +318,7 @@ path_SOURCES = \
 
 logit_SOURCES = \
 	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.imp \
+	src/solvers/logit/logbehav.cc \
     src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc
@@ -342,7 +342,7 @@ enumpoly_SOURCES = \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \
     src/solvers/enumpoly/polypartial.h \
-    src/solvers/enumpoly/polypartial.imp \
+    src/solvers/enumpoly/polypartial.cc \
 	src/solvers/enumpoly/polysolver.cc \
 	src/solvers/enumpoly/polysolver.h \
 	src/solvers/enumpoly/efgpoly.cc \

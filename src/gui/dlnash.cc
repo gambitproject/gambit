@@ -30,6 +30,9 @@
 #endif // WX_PRECOMP
 #include <wx/stdpaths.h>
 
+#include "games.h"
+#include "games/gametree.h"
+
 #include "dlnash.h"
 
 namespace Gambit::GUI {
@@ -353,7 +356,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, S);
 
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     wxString repChoices[] = {wxT("using the extensive game"), wxT("using the strategic game")};
     m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
     m_repChoice->SetSelection(0);

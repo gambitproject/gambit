@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "game.h"
+#include "gametree.h"
 #include "behavspt.h"
 #include "seqmixed.h"
 

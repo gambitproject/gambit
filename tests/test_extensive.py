@@ -10,7 +10,7 @@ from . import games
     "players,title", [([], "New game"), (["Alice", "Bob"], "A poker game")]
 )
 def test_new_tree(players: list, title: str | None):
-    game = gbt.Game.new_tree(players=players, title=title)
+    game = gbt.ExtensiveGame(players=players, title=title)
     assert len(game.players) == len(players)
     for player, label in zip(game.players, players, strict=True):
         assert player == label
@@ -19,7 +19,7 @@ def test_new_tree(players: list, title: str | None):
 
 @pytest.mark.parametrize("title", ["My game's new title"])
 def test_game_title(title: str):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.title = title
     assert game.title == title
 
@@ -28,7 +28,7 @@ def test_game_title(title: str):
     "description", ["This describes the game in more detail than the title"]
 )
 def test_game_description(description: str):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.description = description
     assert game.description == description
 
@@ -44,7 +44,7 @@ def test_game_description(description: str):
 def test_game_title_accepts_text_invalid_for_a_label(text: str):
     """Title/description have no printable-character or spacing restriction (#862):
     only well-formedness of the UTF-8 text is required, unlike object labels."""
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.title = text
     game.description = text
     assert game.title == text
@@ -53,7 +53,7 @@ def test_game_title_accepts_text_invalid_for_a_label(text: str):
 
 @pytest.mark.parametrize("players", [["Alice"], ["Oscar", "Felix"]])
 def test_game_set_players_label(players: list):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.set_players(players)
     for player, label in zip(game.players, players, strict=True):
         assert player == label
@@ -117,7 +117,7 @@ def test_has_perfect_recall(game_input, expected_result: dict):
 
 
 def test_has_perfect_recall_trivial_game():
-    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    game = gbt.ExtensiveGame(players=["Alice", "Bob"])
     assert game.has_perfect_recall("Alice")
     assert game.has_perfect_recall("Bob")
 

@@ -17,22 +17,10 @@ def all_infosets(game: gbt.Game) -> list[tuple]:
     return [h for p in game.players for h in game.get_infosets(p)]
 
 
-def all_nodes(game: gbt.Game) -> list[gbt.Node]:
-    """Every node in the game, in depth-first traversal order, matching
-    `Game.nodes` before its removal (17.0.0)."""
-    return game._all_nodes()
-
-
 def children_histories(game: gbt.Game, history: tuple) -> list[tuple]:
     """The Histories of the children of the node at `history` -- the standard way
     to enumerate a node's children now that `Node.children` is removed (17.0.0)."""
     return [(*history, action) for action in game.get_actions(gbt.H.path(*history))]
-
-
-def children_of(game: gbt.Game, history: tuple) -> list[gbt.Node]:
-    """The children of the node at `history`, as real Nodes -- for callers that
-    need actual `Node` objects (e.g. `.members`/`.player`), not just Histories."""
-    return [node_at_history(game, h) for h in children_histories(game, history)]
 
 
 def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
@@ -44,9 +32,9 @@ def player_infosets(game: gbt.Game, player: str) -> list[tuple]:
 
 # (game.title, infoset label) -> the History of a member node, hand-verified against
 # each fixture file before `Infoset.label` (and thus by-label lookup) was removed
-# (17.0.0). `find_infoset`/`find_infoset_in_game` are a fixed stand-in for that
-# removed lookup, recognizing only the fixture games this test suite happens to use
-# it with; add an entry here if a new fixture/label combination is needed.
+# (17.0.0). `infoset_history_in_game` is a fixed stand-in for that removed lookup,
+# recognizing only the fixture games this test suite happens to use it with; add an
+# entry here if a new fixture/label combination is needed.
 _INFOSET_LABEL_HISTORIES = {
     ("Test Extensive Form Game", "Infoset 1:1"): (),
     ("Test Extensive Form Game", "Infoset 2:1"): ("U1",),
@@ -92,61 +80,18 @@ _INFOSET_LABEL_HISTORIES = {
 }
 
 
-def node_at_history(game: gbt.Game, history: tuple) -> gbt.Node:
-    """The Node reached by following `history` (a tuple of action labels) from
-    the root -- the standard way to obtain a `Node` now that `Game.root` is
-    removed (17.0.0): `H.path(*history)` always resolves to exactly one node."""
-    return game._get_nodes(gbt.H.path(*history))[0]
-
-
-def find_infoset(game: gbt.Game, player: str, label: str) -> gbt.Node:
-    """The representative node of `player`'s information set historically identified
-    by `label`, matching `Player.infosets[label]` before its removal (17.0.0)."""
-    node = node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
-    assert node.player == player
-    return node
-
-
-def find_infoset_in_game(game: gbt.Game, label: str) -> gbt.Node:
-    """The representative node of the information set historically identified by
-    `label`, searching across all (personal) players, matching
+def infoset_history_in_game(game: gbt.Game, label: str) -> tuple:
+    """The History of the representative member of the information set historically
+    identified by `label`, searching across all (personal) players, matching
     `Game.infosets[label]` before its removal (17.0.0)."""
-    return node_at_history(game, _INFOSET_LABEL_HISTORIES[(game.title, label)])
-
-
-def _node_history(node: gbt.Node) -> tuple:
-    """The plain-tuple history of `node`, walked via the private
-    `Node._parent`/`._prior_action`."""
-    labels = []
-    current = node
-    while current._parent() is not None:
-        labels.append(current._prior_action().label)
-        current = current._parent()
-    labels.reverse()
-    return tuple(labels)
-
-
-def selector_for_nodes(nodes: list[gbt.Node]) -> gbt.Selector:
-    """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
-    nodes -- for adapting fixtures that compute a `Node` list dynamically to the
-    `H`-only mutation methods."""
-    histories = frozenset(_node_history(n) for n in nodes)
-    return gbt.H.after().filter(lambda h: h[:].actions in histories)
+    return _INFOSET_LABEL_HISTORIES[(game.title, label)]
 
 
 def selector_for_histories(histories: list[tuple]) -> gbt.Selector:
     """A `Selector` matching exactly the given (possibly scattered, mixed-depth)
-    Histories -- the History-only counterpart to `selector_for_nodes`, for
-    fixtures that already work in terms of `History` rather than `Node`."""
+    Histories."""
     histories = frozenset(histories)
     return gbt.H.after().filter(lambda h: h[:].actions in histories)
-
-
-def selector_for_node(node: gbt.Node) -> gbt.Selector:
-    """A root-anchored `Selector` matching exactly `node`'s own path of action
-    labels -- for adapting a fixture's `Node` (e.g. one from `Game.get_infosets`)
-    to profile indexing, which is `Selector`-only."""
-    return gbt.H.path(*_node_history(node))
 
 
 # Label-validation fixtures.
@@ -206,7 +151,7 @@ def create_efg_corresponding_to_bimatrix_game_arrays(
     """
     assert A.shape == B.shape
     m, n = A.shape
-    g = gbt.Game.new_tree(players=["1", "2"], title=title)
+    g = gbt.ExtensiveGame(players=["1", "2"], title=title)
     actions1 = [str(i) for i in range(m)]
     actions2 = [str(i) for i in range(n)]
     g.append_move(gbt.H.path(), "1", actions1)
@@ -233,7 +178,7 @@ def create_hs1988_base_game() -> gbt.Game:
     """
     p1_payoffs = np.array([[2, 0], [0, 1]])
     p2_payoffs = np.array([[1, 0], [0, 4]])
-    return gbt.Game.from_arrays(p1_payoffs, p2_payoffs, title="HS 1988 Base Game")
+    return gbt.StrategicGame.from_arrays(p1_payoffs, p2_payoffs, title="HS 1988 Base Game")
 
 
 ################################################################################################
@@ -271,7 +216,7 @@ def create_2x2_symmetric_coordination_nfg() -> gbt.Game:
     exercising bifurcation/perturbation detection and reporting in the logit
     solvers.
     """
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     p1, p2 = game.players
     s1a, s1b = game.get_strategies(p1)
     s2a, s2b = game.get_strategies(p2)
@@ -298,7 +243,7 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     if not nonterm_outcomes:
         return read_from_file("stripped_down_poker.efg")
 
-    g = gbt.Game.new_tree(
+    g = gbt.ExtensiveGame(
         players=["Alice", "Bob"],
         title="Stripped-Down Poker: a simple game of one-card\
                                             poker from Reiley et al (2008).",
@@ -331,7 +276,7 @@ def _create_kuhn_poker_efg_without_outcomes():
     """
     Used in create_kuhn_poker_efg()
     """
-    g = gbt.Game.new_tree(players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player")
+    g = gbt.ExtensiveGame(players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player")
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
@@ -383,14 +328,7 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
     """
     g = _create_kuhn_poker_efg_without_outcomes()
 
-    def calculate_payoffs(term_node):
-        def get_path(node):
-            path = []
-            while node._parent():
-                path.append(node._prior_action().label)
-                node = node._parent()
-            return path
-
+    def calculate_payoffs(term_history):
         def showdown(deal, payoffs, pot):
             payoffs[_kuhn_showdown_winner(deal)] += pot
             return payoffs
@@ -400,23 +338,23 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
             pot += 1
             return payoffs, pot
 
-        path = get_path(term_node)
-        deal = path.pop()  # needed if there is a showdown
+        path = list(term_history.actions)
+        deal = path.pop(0)  # needed if there is a showdown
         payoffs = dict(Alice=-1, Bob=-1)  # ante of 1 for both players
         pot = 2
-        if path.pop() == "Check":  # Alice checks
-            if path.pop() == "Check":  # Bob checks
+        if path.pop(0) == "Check":  # Alice checks
+            if path.pop(0) == "Check":  # Bob checks
                 payoffs = showdown(deal, payoffs, pot)
             else:  # Bob bets
                 payoffs, pot = bet("Bob", payoffs, pot)
-                if path.pop() == "Fold":  # Alice folds
+                if path.pop(0) == "Fold":  # Alice folds
                     payoffs["Bob"] += pot
                 else:  # Alice calls
                     payoffs, pot = bet("Alice", payoffs, pot)
                     payoffs = showdown(deal, payoffs, pot)
         else:  # Alice bets
             payoffs, pot = bet("Alice", payoffs, pot)
-            if path.pop() == "Fold":  # Bob
+            if path.pop(0) == "Fold":  # Bob
                 payoffs["Alice"] += pot
             else:  # Bob calls
                 payoffs, pot = bet("Bob", payoffs, pot)
@@ -424,20 +362,21 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
 
         return tuple(payoffs.values())
 
-    # group terminal nodes by their payoffs, so each of the 4 possible outcomes is created once
+    # group terminal histories by their payoffs, so each of the 4 possible outcomes is
+    # created once
     payoff_labels = {
         (1, -1): "Alice wins 1",
         (2, -2): "Alice wins 2",
         (-1, 1): "Bob wins 1",
         (-2, 2): "BOb wins 2",
     }
-    nodes_by_payoff = {payoffs: [] for payoffs in payoff_labels}
-    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
-        nodes_by_payoff[calculate_payoffs(term_node)].append(term_node)
+    histories_by_payoff = {payoffs: [] for payoffs in payoff_labels}
+    for term_history in g.get_histories(gbt.H.plays):
+        histories_by_payoff[calculate_payoffs(term_history)].append(term_history.actions)
 
-    for payoffs, nodes in nodes_by_payoff.items():
+    for payoffs, histories in histories_by_payoff.items():
         g.make_outcome(
-            selector_for_nodes(nodes), {"Alice": payoffs[0], "Bob": payoffs[1]},
+            selector_for_histories(histories), {"Alice": payoffs[0], "Bob": payoffs[1]},
             payoff_labels[payoffs]
         )
 
@@ -462,52 +401,45 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         payoffs_by_key[f"{player} calls and wins"] = (3, 0) if player == "Alice" else (0, 3)
         payoffs_by_key[f"{player} calls and loses"] = (-1, 4) if player == "Alice" else (4, -1)
 
-    nodes_by_key = {key: [] for key in payoffs_by_key}
-    nodes_by_key["Ante"].append(node_at_history(g, ()))
+    histories_by_key = {key: [] for key in payoffs_by_key}
+    histories_by_key["Ante"].append(())
 
-    def collect_nodes(term_node):
-        def get_path(node):
-            path = []
-            while node._parent():
-                path.append((node, node._prior_action().label))
-                node = node._parent()
-            return path
-
-        path = get_path(term_node)
-        _, deal = path.pop()
+    def collect_histories(term_history):
+        # Each prefix of `actions` identifies one node on the path from the root to
+        # the terminal history, exactly as the corresponding depth's node would --
+        # a node is nothing more than the sequence of actions that reaches it.
+        actions = term_history.actions
+        deal = actions[0]
         winner = _kuhn_showdown_winner(deal)  # needed if there is a showdown
 
-        n, label = path.pop()
-        if label == "Check":  # Alice checks
-            n, label = path.pop()
-            if label == "Check":  # Bob checks
-                nodes_by_key[f"{winner} wins showdown for pot of 2"].append(n)
+        if actions[1] == "Check":  # Alice checks
+            if actions[2] == "Check":  # Bob checks
+                histories_by_key[f"{winner} wins showdown for pot of 2"].append(actions[:3])
             else:  # Bob bets
-                nodes_by_key["Bob bets"].append(n)
-                n, label = path.pop()
-                if label == "Fold":  # Alice folds
-                    nodes_by_key["Alice folds"].append(n)
+                histories_by_key["Bob bets"].append(actions[:3])
+                if actions[3] == "Fold":  # Alice folds
+                    histories_by_key["Alice folds"].append(actions[:4])
                 else:  # Alice calls
                     tmp = "wins" if winner == "Alice" else "loses"
-                    nodes_by_key[f"Alice calls and {tmp}"].append(n)
+                    histories_by_key[f"Alice calls and {tmp}"].append(actions[:4])
         else:  # Alice bets
-            nodes_by_key["Alice bets"].append(n)
-            n, label = path.pop()
-            if label == "Fold":  # Bob
-                nodes_by_key["Bob folds"].append(n)
+            histories_by_key["Alice bets"].append(actions[:2])
+            if actions[2] == "Fold":  # Bob folds
+                histories_by_key["Bob folds"].append(actions[:3])
             else:  # Bob calls
                 tmp = "wins" if winner == "Bob" else "loses"
-                nodes_by_key[f"Bob calls and {tmp}"].append(n)
+                histories_by_key[f"Bob calls and {tmp}"].append(actions[:3])
 
-    for term_node in [n for n in all_nodes(g) if not g.get_actions(selector_for_node(n))]:
-        collect_nodes(term_node)
+    for term_history in g.get_histories(gbt.H.plays):
+        collect_histories(term_history)
 
-    for key, nodes in nodes_by_key.items():
+    for key, histories in histories_by_key.items():
         # the same non-terminal node is revisited once per terminal descendant walked above
-        deduped_nodes = list(dict.fromkeys(nodes))
+        deduped_histories = list(dict.fromkeys(histories))
         alice_payoff, bob_payoff = payoffs_by_key[key]
         g.make_outcome(
-            selector_for_nodes(deduped_nodes), {"Alice": alice_payoff, "Bob": bob_payoff}, key
+            selector_for_histories(deduped_histories),
+            {"Alice": alice_payoff, "Bob": bob_payoff}, key
         )
 
     return g
@@ -576,7 +508,7 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
     the Seller plays Abuse.
     """
-    g = gbt.Game.new_tree(
+    g = gbt.ExtensiveGame(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
     g.append_move(gbt.H.path(), "Buyer", ["Trust", "Not trust"])
@@ -705,7 +637,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
         self.m1 = params["m1"]
 
     def gbt_game(self):
-        g = gbt.Game.new_tree(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
+        g = gbt.ExtensiveGame(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
         current_player = "1"
         for t in range(self.N):
             g.append_move(gbt.H.path(*(["Push"] * t)), current_player, ["Take", "Push"])
@@ -856,18 +788,20 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
                 self.create_binary_tree(g, (*path, label), whose_turn, depth + 1, max_depth)
 
     def gbt_game(self):
-        g = gbt.Game.new_tree(
+        g = gbt.ExtensiveGame(
             players=[str(p) for p in self.players],
             title=f"Binary Tree Game (L={self.level})",
         )
         self.create_binary_tree(g, (), 0, 0, self.level)
-        for n in all_nodes(g):
-            history = _node_history(n)
-            if g.get_actions(gbt.H.path(*history)) and g.get_actions(gbt.H.path(*history, "L")):
-                left, right = children_of(g, history)
+        for history in g.get_histories(gbt.H.after()):
+            actions = history.actions
+            if g.get_actions(gbt.H.path(*actions)) and g.get_actions(gbt.H.path(*actions, "L")):
+                left_actions = (*actions, "L")
+                right_actions = (*actions, "R")
+                left_members = g.get_members(gbt.H.path(*left_actions))
                 g.make_infoset(
-                    selector_for_nodes(list(left.members) + [right]),
-                    left.player,
+                    selector_for_histories([m.actions for m in left_members] + [right_actions]),
+                    g.get_player(gbt.H.path(*left_actions)),
                 )
         return g
 

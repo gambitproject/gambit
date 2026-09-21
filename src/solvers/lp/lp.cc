@@ -21,6 +21,7 @@
 //
 
 #include "games.h"
+#include "games/gametree.h"
 #include "solvers/lp/lp.h"
 #include "solvers/linalg/lpsolve.h"
 

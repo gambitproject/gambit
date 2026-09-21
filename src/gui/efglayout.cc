@@ -29,6 +29,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
+#include "games/gametree.h"
 #include "efglayout.h"
 
 namespace Gambit::GUI {

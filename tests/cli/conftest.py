@@ -15,7 +15,7 @@ def cli_runner() -> CliRunner:
 
 
 def _table_game(payoffs: dict, title: str) -> gbt.Game:
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.title = title
     p1, p2 = game.players
     s1a, s1b = game.get_strategies(p1)
@@ -96,7 +96,7 @@ def efg_asymmetric_tree_text() -> str:
     player 2 plays "x" after it; player 2's action after the off-path "R" is
     payoff-irrelevant and so free to vary across equilibria).
     """
-    game = gbt.Game.new_tree(players=["1", "2"], title="Asymmetric multi-infoset game")
+    game = gbt.ExtensiveGame(players=["1", "2"], title="Asymmetric multi-infoset game")
     game.append_move(gbt.H.path(), "1", ["L", "R"])
     game.append_move(gbt.H.path("L"), "2", ["x", "y", "z"])
     game.append_move(gbt.H.path("R"), "2", ["p", "q"])

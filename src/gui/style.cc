@@ -27,6 +27,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
+#include "games/gametree.h"
 #include "style.h"
 #include "gamedoc.h" // for AnalysisWorkspace's complete type -- only needed here, not in style.h
 

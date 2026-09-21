@@ -116,13 +116,13 @@ def test_read_gbt_rejects_malformed_xml(tmp_path):
 
 
 def test_write_efg():
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     serialized_game = game.to_efg()
     assert serialized_game[:3] == "EFG"
 
 
 def test_write_nfg():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     serialized_game = game.to_nfg()
     assert serialized_game[:3] == "NFG"
 
@@ -158,7 +158,7 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 
 
 def test_write_html():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     alice, bob = game.players
     game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_html()
@@ -168,7 +168,7 @@ def test_write_html():
 
 
 def test_write_latex():
-    game = gbt.Game.new_table([2, 2], title="Game title")
+    game = gbt.StrategicGame([2, 2], title="Game title")
     alice, bob = game.players
     game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_latex()

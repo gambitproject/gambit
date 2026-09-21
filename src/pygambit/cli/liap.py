@@ -34,6 +34,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     resolve_behavior_starts,
     resolve_strategy_starts,
     version_option,
@@ -102,6 +103,7 @@ _DEFAULT_TRIES = 10
     default=None,
     help="file containing starting points (mutually exclusive with -n)",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -120,14 +122,18 @@ def main(
     maxiter: int,
     maxregret: float,
     start_file: str | None,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
-    use_agent = agent and game.is_tree
+    use_agent = agent and isinstance(game, gbt.ExtensiveGame)
 
     def render(profile, label: str = "NE") -> None:
-        click.echo(render_profile_csv(profile, label, decimals))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals))
 
     def render_event(event) -> None:
         if not verbose:

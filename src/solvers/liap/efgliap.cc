@@ -23,6 +23,7 @@
 #include <numeric>
 
 #include "games.h"
+#include "games/gametree.h"
 #include "core/function.h"
 #include "liap.h"
 

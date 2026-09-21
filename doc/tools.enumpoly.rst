@@ -50,6 +50,16 @@ and (in verbose mode) the support is identified with the label
    strategies for extensive games. (This has no effect for strategic
    games, since a strategic game is its own reduced strategic game.)
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
+
 .. cmdoption:: -m
 
    .. versionadded:: 16.3.0

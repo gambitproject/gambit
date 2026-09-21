@@ -31,6 +31,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     version_option,
 )
 
@@ -55,27 +56,33 @@ PROG_NAME = "gambit-enummixed"
     help="compute using floating-point arithmetic; display results with DECIMALS digits",
 )
 @click.option("-c", "--cliques", is_flag=True, help="output connectedness information")
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @version_option(DESCRIPTION)
 @handle_errors
-def main(file: str | None, decimals: int | None, cliques: bool, quiet: bool) -> None:
+def main(
+    file: str | None, decimals: int | None, cliques: bool, detail: bool, quiet: bool
+) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     rational = decimals is None
 
-    def render(profile) -> None:
-        click.echo(render_profile_csv(profile, "NE", decimals or 0))
+    def echo_profile(profile, label: str) -> None:
+        if detail:
+            click.echo(render_profile_detail(profile, decimals or 0))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals or 0))
 
     result = gbt.nash.enummixed_solve(
         game,
         rational=rational,
-        nash_callback=render,
+        nash_callback=lambda profile: echo_profile(profile, "NE"),
         cliques=cliques,
     )
     if cliques:
         for index, clique in enumerate(result.cliques, start=1):
             label = f"convex-{index}"
             for profile in clique:
-                click.echo(render_profile_csv(profile, label, decimals or 0))
+                echo_profile(profile, label)
 
 
 if __name__ == "__main__":

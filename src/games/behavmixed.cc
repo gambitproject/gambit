@@ -24,6 +24,7 @@
 #include <numeric>
 
 #include "games.h"
+#include "gametree.h"
 #include "behavmixed.h"
 
 namespace Gambit {

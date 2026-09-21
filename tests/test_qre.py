@@ -6,7 +6,7 @@ from . import games
 
 
 def _asymmetric_2x2() -> gbt.Game:
-    return gbt.Game.from_arrays([[1, 2], [3, 4]], [[4, 3], [2, 1]])
+    return gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[4, 3], [2, 1]])
 
 
 def _asymmetric_poker_behavior_data() -> gbt.MixedBehaviorProfile:

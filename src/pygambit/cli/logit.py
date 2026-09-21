@@ -33,6 +33,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     version_option,
 )
 
@@ -159,6 +160,16 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
         "bifurcations are already reported as part of the traced branch otherwise"
     ),
 )
+@click.option(
+    "-D",
+    "--detail",
+    is_flag=True,
+    help=(
+        "print detailed information about the terminal equilibrium, if tracing reaches "
+        "one accepted as a Nash equilibrium (has no effect on points printed along the "
+        "way, or on -L/-l output, which are not themselves accepted equilibria)"
+    ),
+)
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @version_option(DESCRIPTION)
 @handle_errors
@@ -173,11 +184,18 @@ def main(
     mle_file: str | None,
     terminal_only: bool,
     report_bifurcations: bool,
+    detail: bool,
     quiet: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
     if not game.is_perfect_recall:
         raise ValueError("Computing equilibria of games with imperfect recall is not supported.")
+
+    def render_equilibrium(profile) -> None:
+        if detail:
+            click.echo(render_profile_detail(profile, decimals, fixed=False))
+        else:
+            click.echo(render_profile_csv(profile, "NE", decimals, fixed=False))
 
     def stream(event) -> None:
         if isinstance(event, gbt.LogitPathEvent):
@@ -199,7 +217,7 @@ def main(
     # Maximum-likelihood estimation, like the C++ tool, is only defined over the
     # strategic representation, since the observed frequencies are read as a flat
     # list of strategy counts.
-    if mle_file is not None and (strategic or not game.is_tree):
+    if mle_file is not None and (strategic or not isinstance(game, gbt.ExtensiveGame)):
         frequencies = _read_frequencies(mle_file, game)
         result = gbt.qre.logit_estimate(
             frequencies,
@@ -231,7 +249,8 @@ def main(
             max_accel=max_accel,
             event_callback=event_callback,
         )
-        click.echo(render_profile_csv(result.equilibrium, "NE", decimals, fixed=False))
+        if result.equilibrium is not None:
+            render_equilibrium(result.equilibrium)
         return
 
     result = gbt.nash.logit_solve(
@@ -242,7 +261,8 @@ def main(
         max_accel=max_accel,
         event_callback=event_callback,
     )
-    click.echo(render_profile_csv(result.equilibrium, "NE", decimals, fixed=False))
+    if result.equilibrium is not None:
+        render_equilibrium(result.equilibrium)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,16 @@ equilibria being found.
    Express all output using decimal representations
    with the specified number of digits.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
