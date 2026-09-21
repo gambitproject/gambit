@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/solvers/enumpoly/polypartial.imp
+// FILE: src/solvers/enumpoly/polypartial.cc
 // Implementation of partial derivatives of polynomials
 //
 // This program is free software; you can redistribute it and/or modify
@@ -195,5 +195,8 @@ Vector<T> PolynomialSystemDerivatives<T>::ValuesOfRootPolys(const Vector<T> &poi
   }
   return answer;
 }
+
+template class PolynomialDerivatives<double>;
+template class PolynomialSystemDerivatives<double>;
 
 } // end namespace Gambit
