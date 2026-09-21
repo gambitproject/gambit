@@ -227,7 +227,7 @@ class ExtensiveGame(Game):
                 raise TypeError(f"_get_nodes(): unknown selector op {op!r}")
         if current is None:
             current = [self._root()]
-        return current
+        return list(dict.fromkeys(current))
 
     def _get_histories(self, selector: Selector) -> list[History]:
         """Evaluate `selector` (an `H`-built expression) against this game,

@@ -199,3 +199,12 @@ def test_by_last_action_distinguishes_infosets_sharing_a_label():
         frozenset({("R", "U")}),
         frozenset({("R", "D")}),
     }
+
+
+def test_selector_deduplicates_plays():
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["go", "stop"])
+    game.append_move(gbt.H.path("go"), "B", ["go", "stay"])
+    plays = game.get_histories(gbt.H.after("go").plays)
+    assert {h.actions for h in plays} == {("go", "go"), ("go", "stay")}
+    assert len(plays) == 2, f"expected 2 unique plays, got {len(plays)}: {plays}"
