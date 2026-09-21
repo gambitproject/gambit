@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/solvers/logit/logbehav.imp
+// FILE: src/solvers/logit/logbehav.cc
 // Behavior strategy profile where action probabilities are represented using
 // logarithms.
 //
@@ -21,8 +21,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "logbehav.h"
+#include "games.h"
 #include "games/gametree.h"
+#include "logbehav.h"
 
 //========================================================================
 //                  LogBehavProfile<T>: Lifecycle
@@ -260,3 +261,5 @@ template <class T> void LogBehavProfile<T>::ComputeSolutionData() const
   ComputeSolutionDataPass2(m_game->GetRoot());
   m_cacheValid = true;
 }
+
+template class LogBehavProfile<double>;
