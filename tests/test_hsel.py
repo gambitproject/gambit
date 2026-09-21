@@ -208,3 +208,31 @@ def test_selector_deduplicates_plays():
     plays = game.get_histories(gbt.H.after("go").plays)
     assert {h.actions for h in plays} == {("go", "go"), ("go", "stay")}
     assert len(plays) == 2, f"expected 2 unique plays, got {len(plays)}: {plays}"
+
+
+def test_grouped_mutation_raises_on_empty_group():
+    # A post-op (`.after`) can filter one group's members down to none while
+    # leaving others nonempty. That must raise, the same as an ungrouped
+    # selector matching no nodes, rather than being silently skipped.
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+    game.append_move(gbt.H.path("U"), "B", ["x", "y"])
+    game.append_move(gbt.H.path("D"), "B", ["z", "w"])
+
+    grouped = gbt.H.plays.by(lambda h: h[:].actions[0]).after("x", "z")
+    with pytest.raises(ValueError):
+        game.append_move(grouped, "A", ["p", "q"])
+
+
+def test_grouped_mutation_validates_all_groups_before_mutating_any():
+    # If a later group fails validation, an earlier group must not have been
+    # mutated -- grouped mutation calls validate every group before applying
+    # any of them.
+    game = gbt.ExtensiveGame(players=["A"])
+    game.append_move(gbt.H.path(), "A", ["U", "D"])
+    game.append_move(gbt.H.path("U"), "A", ["x", "y"])  # U-group node no longer terminal
+
+    grouped = gbt.H.path(...).by(lambda h: h[:].actions[0])
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.append_move(grouped, "A", ["m", "n"])
+    assert game.get_actions(gbt.H.path("D")) == []
