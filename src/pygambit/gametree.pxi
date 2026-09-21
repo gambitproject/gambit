@@ -441,9 +441,9 @@ class ExtensiveGame(Game):
         Applies `grouped`'s initial partition (`base`/`key`), then its
         `post_ops` in order, each one per-group -- expanding/filtering each
         group's own members independently, leaving the key untouched, except
-        that a `.plays` step refines the key by `recall_player`'s last action
-        at that point, if `with_recall` set one (see `GroupedSelector`'s
-        docstring for why).
+        that a `.plays` step refines the key by `last_action_player`'s last
+        action at that point, if `.by_last_action` set one (see
+        `GroupedSelector`'s docstring for why).
         """
         result: dict = {}
         for node in self._get_nodes(grouped.base):
@@ -457,11 +457,13 @@ class ExtensiveGame(Game):
                     expanded = [
                         play for node in nodes for play in cython.cast(Node, node)._plays()
                     ]
-                    if grouped.recall_player is None:
+                    if grouped.last_action_player is None:
                         next_result[key] = expanded
                     else:
                         for play in expanded:
-                            refined_key = (key, _last_action(play, grouped.recall_player))
+                            refined_key = (
+                                key, _last_action_key(play, grouped.last_action_player)
+                            )
                             next_result.setdefault(refined_key, []).append(play)
                     continue
                 if isinstance(op, _AfterStep):

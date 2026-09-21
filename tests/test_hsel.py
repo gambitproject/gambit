@@ -156,24 +156,46 @@ def test_last_action_raises_on_empty_player():
     game._get_groups(gbt.H.plays.by(key))
 
 
-def test_with_recall_raises_on_invalid_player():
+def test_by_last_action_raises_on_invalid_player():
     game = gbt.ExtensiveGame(players=["A", "B"])
     game.append_move(gbt.H.path(), "A", ["U", "D"])
     game.append_move(gbt.H.plays, "B", ["x", "y"])
 
-    grouped = gbt.H.path().by(lambda h: None).with_recall("NoSuchPlayer").plays
+    grouped = gbt.H.path().by(lambda h: None).by_last_action("NoSuchPlayer").plays
     with pytest.raises(KeyError):
         game._get_groups(grouped)
 
 
-def test_with_recall_refines_key_by_last_action():
+def test_by_last_action_refines_key_by_last_action():
     game = gbt.ExtensiveGame(players=["A", "B"])
     game.append_move(gbt.H.path(), "A", ["U", "D"])
     game.append_move(gbt.H.plays, "B", ["x", "y"])
 
-    grouped = gbt.H.path().by(lambda h: None).with_recall("A").plays
+    grouped = gbt.H.path().by(lambda h: None).by_last_action("A").plays
     groups = game._get_groups(grouped)
-    assert {k: [h.actions for h in v] for k, v in groups.items()} == {
-        (None, "U"): [("U", "x"), ("U", "y")],
-        (None, "D"): [("D", "x"), ("D", "y")],
+    keyed_by_action = {k[1]: [h.actions for h in v] for k, v in groups.items()}
+    assert {label: histories for (_, label), histories in keyed_by_action.items()} == {
+        "U": [("U", "x"), ("U", "y")],
+        "D": [("D", "x"), ("D", "y")],
+    }
+
+
+def test_by_last_action_distinguishes_infosets_sharing_a_label():
+    # A acts at two distinct infosets (one per branch of the chance move), both
+    # offering an action labelled "U". Grouping only by the label would wrongly
+    # merge these into one group, breaking perfect recall by construction --
+    # `.by_last_action` must key on the (infoset, label) pair instead.
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_event(gbt.H.path(), {"L": gbt.Rational(1, 2), "R": gbt.Rational(1, 2)})
+    game.append_move(gbt.H.path("L"), "A", ["U", "D"])
+    game.append_move(gbt.H.path("R"), "A", ["U", "D"])
+
+    grouped = gbt.H.path(...).by(lambda h: None).by_last_action("A").plays
+    groups = game._get_groups(grouped)
+    assert len(groups) == 4
+    assert {frozenset(h.actions for h in v) for v in groups.values()} == {
+        frozenset({("L", "U")}),
+        frozenset({("L", "D")}),
+        frozenset({("R", "U")}),
+        frozenset({("R", "D")}),
     }
