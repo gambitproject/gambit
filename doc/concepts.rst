@@ -62,10 +62,3 @@ or action is nonnegative.  By convention, these values are not enforced to sum t
 do not sum to one, they are interpreted as weights.  It is not valid to set all the probabilities/weights
 of a ``MixedStrategy`` or ``MixedAction`` to zero.  ``MixedStrategy`` and ``MixedAction`` objects can be
 normalized to sum to one via an explicit operation.
-
-
-
-.. _concepts-regret:
-
-Regret and the Liapunov value
---------------------------------
