@@ -114,8 +114,8 @@ bool NumberValidator::Validate(wxWindow *p_parent)
   const wxString value(control->GetValue());
 
   if (!IsNumeric(value)) {
-    wxMessageBox(_T("The value ") + value + _T(" in ") + m_validatorWindow->GetName() +
-                     _T(" is not a valid number."),
+    wxMessageBox(wxString::Format(_("The value %s in %s is not a valid number."), value,
+                                  m_validatorWindow->GetName()),
                  _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
@@ -124,10 +124,10 @@ bool NumberValidator::Validate(wxWindow *p_parent)
   if ((m_hasMin && lexical_cast<Rational>(std::string(value.mb_str())) < m_minValue) ||
       (m_hasMax && lexical_cast<Rational>(std::string(value.mb_str())) > m_maxValue)) {
     wxMessageBox(
-        _T("The value ") + value + _T(" in ") + m_validatorWindow->GetName() +
-            _T(" is out of the range [") +
-            wxString(lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent) + _T(", ") +
-            wxString(lexical_cast<std::string>(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
+        wxString::Format(_("The value %s in %s is out of the range [%s, %s]."), value,
+                         m_validatorWindow->GetName(),
+                         wxString(lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent),
+                         wxString(lexical_cast<std::string>(m_maxValue).c_str(), *wxConvCurrent)),
         _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;

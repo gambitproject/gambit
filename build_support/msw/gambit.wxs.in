@@ -68,7 +68,18 @@
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder">
-                <Directory Id="ApplicationRootDirectory" Name="Gambit"/>
+                <Directory Id="ApplicationRootDirectory" Name="Gambit">
+                    <Directory Id="Gambit.share" Name="share">
+                        <Directory Id="Gambit.locale" Name="locale">
+                            <Directory Id="Gambit.es" Name="es">
+                                <Directory Id="Gambit.es.messages" Name="LC_MESSAGES"/>
+                            </Directory>
+                            <Directory Id="Gambit.fr" Name="fr">
+                                <Directory Id="Gambit.fr.messages" Name="LC_MESSAGES"/>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
             </Directory>
             <Directory Id="ProgramMenuFolder">
                 <Directory Id="ApplicationProgramsFolder" Name="Gambit"/>
@@ -101,10 +112,22 @@
                 <RegistryValue Root="HKCU" Key="Software\Gambit\Gambit @GAMBIT_MSI_MAJOR@" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="Gambit.es.messages">
+            <Component Id="Gambit.es.mo" Guid="7E5C11A2-3B14-4E9A-8C2F-1D0B6A9A9E41" Win64="yes">
+                <File Id="gambit.es.mo" Source="installer\es.mo" Name="gambit.mo" KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="Gambit.fr.messages">
+            <Component Id="Gambit.fr.mo" Guid="8F6D22B3-4C25-4FAB-9D30-2E1C7B0B0F52" Win64="yes">
+                <File Id="gambit.fr.mo" Source="installer\fr.mo" Name="gambit.mo" KeyPath="yes"/>
+            </Component>
+        </DirectoryRef>
         <Feature Id="Complete" Level="1">
             <ComponentRef Id="Gambit.exe"/>
             <ComponentRef Id="Gambit.copying"/>
             <ComponentRef Id="ApplicationShortcut"/>
+            <ComponentRef Id="Gambit.es.mo"/>
+            <ComponentRef Id="Gambit.fr.mo"/>
         </Feature>
     </Product>
 </Wix>

@@ -68,17 +68,17 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Hide strategies which are ")), 0,
+  topSizer->Add(new wxStaticText(this, wxID_STATIC, _("Hide strategies which are ")), 0,
                 wxALL | wxALIGN_CENTER, 5);
 
-  wxString domChoices[] = {wxT("strictly"), wxT("strictly or weakly")};
+  wxString domChoices[] = {_("strictly"), _("strictly or weakly")};
   auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnStrength));
   topSizer->Add(choice, 0, wxALL | wxALIGN_CENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("dominated:")), 0, wxALL | wxALIGN_CENTER,
+  topSizer->Add(new wxStaticText(this, wxID_STATIC, _("dominated:")), 0, wxALL | wxALIGN_CENTER,
                 5);
 
   m_topButton =
@@ -95,7 +95,7 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
           wxCommandEventHandler(StrategyDominanceToolbar::OnPreviousLevel));
   topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_level = new wxStaticText(this, wxID_STATIC, wxT("All strategies shown"), wxDefaultPosition,
+  m_level = new wxStaticText(this, wxID_STATIC, _("All strategies shown"), wxDefaultPosition,
                              wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
   topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -144,15 +144,16 @@ void StrategyDominanceToolbar::OnUpdate()
   m_nextButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
   m_allButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
   if (m_doc->GetWorkspace().GetStrategyElimLevel() == 1) {
-    m_level->SetLabel(wxT("All strategies shown"));
+    m_level->SetLabel(_("All strategies shown"));
   }
   else if (m_doc->GetWorkspace().GetStrategyElimLevel() == 2) {
-    m_level->SetLabel(wxT("Eliminated 1 level"));
+    m_level->SetLabel(_("Eliminated 1 level"));
   }
   else {
-    wxString label;
-    label << "Eliminated " << (m_doc->GetWorkspace().GetStrategyElimLevel() - 1) << " levels";
-    m_level->SetLabel(label);
+    m_level->SetLabel(wxString::Format(
+        wxPLURAL("Eliminated %d level", "Eliminated %d levels",
+                 m_doc->GetWorkspace().GetStrategyElimLevel() - 1),
+        m_doc->GetWorkspace().GetStrategyElimLevel() - 1));
   }
   GetSizer()->Layout();
 }
