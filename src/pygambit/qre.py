@@ -45,7 +45,7 @@ def logit_solve_branch(
         raise ValueError("logit_solve_branch(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve_branch(): max_accel argument must be at least 1.0")
-    if not game.is_tree or use_strategic:
+    if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
         return libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
     else:
         return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
@@ -58,7 +58,8 @@ def logit_solve_lambda(
         first_step: float = .03,
         max_accel: float = 1.1,
         event_callback: Callable[
-            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+            [libgbt.LogitPathEvent | libgbt.LogitBifurcationEvent | libgbt.LogitPerturbationEvent],
+            None,
         ] | None = None,
 ):
     """Compute the QRE(s) at the specified value(s) of `lam` along the principal branch.
@@ -67,7 +68,10 @@ def logit_solve_lambda(
     ----------
     event_callback : Callable, optional
         If specified, called with each point traced along the principal branch on the
-        way to each requested value of `lam`.
+        way to each requested value of `lam` (``LogitPathEvent``), the moment a
+        bifurcation is detected (``LogitBifurcationEvent``), and each time the tracer
+        switches a symmetry-breaking perturbation on or off while crossing one
+        (``LogitPerturbationEvent``).
 
         .. versionadded:: 17.0.0
     """
@@ -75,7 +79,7 @@ def logit_solve_lambda(
         raise ValueError("logit_solve_lambda(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve_lambda(): max_accel argument must be at least 1.0")
-    if not game.is_tree or use_strategic:
+    if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
         return libgbt._logit_strategy_lambda(
             game, lam, first_step, max_accel, event_callback
         )
@@ -232,10 +236,10 @@ def _estimate_strategy_empirical(
         data: libgbt.MixedStrategyProfile
 ) -> LogitQREMixedStrategyFitResult:
     flattened_data = [
-        data[p.label][s] for p in data.game.players for s in p.strategies
+        data[p][s] for p in data.game.players for s in data.game.get_strategies(p)
     ]
     strategy_regrets = data.normalize().strategy_regrets
-    regrets = [[-strategy_regrets[player.label][s] for s in player.strategies]
+    regrets = [[-strategy_regrets[player][s] for s in data.game.get_strategies(player)]
                for player in data.game.players]
     res = scipy.optimize.minimize(
         lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
@@ -245,7 +249,9 @@ def _estimate_strategy_empirical(
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
     profile = data.game.mixed_strategy_profile()
     for player in data.game.players:
-        profile[player.label] = {s: math.exp(next(log_probs)) for s in player.strategies}
+        profile[player] = {
+            s: math.exp(next(log_probs)) for s in data.game.get_strategies(player)
+        }
     return LogitQREMixedStrategyFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )
@@ -255,13 +261,19 @@ def _estimate_behavior_empirical(
         data: libgbt.MixedBehaviorProfile,
 ) -> LogitQREMixedBehaviorFitResult:
     flattened_data = [
-        data[next(iter(s.members))][a.label]
-        for p in data.game.players for s in p.infosets for a in s.actions
+        data[libgbt.H.path(*history.actions)][a]
+        for p in data.game.players
+        for history in data.game.get_infosets(p)
+        for a in data.game.get_actions(libgbt.H.path(*history.actions))
     ]
     normalized = data.normalize()
     regrets = [
-        [-normalized.action_regrets[next(iter(infoset.members))][a.label] for a in infoset.actions]
-        for player in data.game.players for infoset in player.infosets
+        [
+            -normalized.action_regrets[libgbt.H.path(*history.actions)][a]
+            for a in data.game.get_actions(libgbt.H.path(*history.actions))
+        ]
+        for player in data.game.players
+        for history in data.game.get_infosets(player)
     ]
     res = scipy.optimize.minimize(
         lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
@@ -271,9 +283,11 @@ def _estimate_behavior_empirical(
     profile = data.game.mixed_behavior_profile()
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
     for player in data.game.players:
-        for infoset in player.infosets:
-            node = next(iter(infoset.members))
-            profile[node] = {a.label: math.exp(next(log_probs)) for a in infoset.actions}
+        for history in data.game.get_infosets(player):
+            selector = libgbt.H.path(*history.actions)
+            profile[selector] = {
+                a: math.exp(next(log_probs)) for a in data.game.get_actions(selector)
+            }
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )
@@ -286,7 +300,8 @@ def logit_estimate(
         first_step: float = .03,
         max_accel: float = 1.1,
         event_callback: Callable[
-            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+            [libgbt.LogitPathEvent | libgbt.LogitBifurcationEvent | libgbt.LogitPerturbationEvent],
+            None,
         ] | None = None,
 ) -> LogitQREMixedStrategyFitResult | LogitQREMixedBehaviorFitResult:
     """Use maximum likelihood estimation to find the logit quantal
@@ -345,10 +360,13 @@ def logit_estimate(
 
            This argument only has an effect when use_empirical is False.
 
-    event_callback : Callable[[LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile], \
-None], optional
+    event_callback : Callable[[LogitPathEvent | LogitBifurcationEvent | \
+LogitPerturbationEvent], None], optional
         If specified, called with each point traced along the principal branch on the
-        way to the best-fitting QRE.
+        way to the best-fitting QRE (``LogitPathEvent``), the moment a bifurcation is
+        detected (``LogitBifurcationEvent``), and each time the tracer switches a
+        symmetry-breaking perturbation on or off while crossing one
+        (``LogitPerturbationEvent``).
 
         .. note::
 

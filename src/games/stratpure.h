@@ -84,9 +84,6 @@ public:
   /// Get the outcome that results from the profile
   virtual GameOutcome GetOutcome() const = 0;
 
-  /// Set the outcome that results from the profile
-  virtual void SetOutcome(GameOutcome p_outcome) = 0;
-
   /// Get the payoff to the player resulting from the profile
   virtual Rational GetPayoff(const GamePlayer &p_player) const = 0;
 

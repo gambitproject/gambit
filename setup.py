@@ -84,7 +84,7 @@ class GambitBuildPy(setuptools.command.build_py.build_py):
     def run(self) -> None:
         super().run()
 
-        catalog_source = pathlib.Path("catalog")
+        catalog_source = pathlib.Path("catalog") / "games"
         catalog_target = pathlib.Path(self.build_lib) / "pygambit/catalog_data"
         if catalog_target.exists():
             shutil.rmtree(catalog_target)
@@ -95,7 +95,7 @@ class GambitBuildPy(setuptools.command.build_py.build_py):
 cppgambit_bimatrix = solver_library_config("cppgambit_bimatrix",
                                            ["linalg", "lp", "lcp", "enummixed"])
 cppgambit_liap = solver_library_config("cppgambit_liap", ["liap"])
-cppgambit_logit = solver_library_config("cppgambit_logit", ["logit"])
+cppgambit_homotopy = solver_library_config("cppgambit_homotopy", ["path", "logit", "hp"])
 cppgambit_gtracer = solver_library_config("cppgambit_gtracer", ["gtracer", "ipa", "gnm"])
 cppgambit_simpdiv = solver_library_config("cppgambit_simpdiv", ["simpdiv"])
 cppgambit_enumpoly = solver_library_config("cppgambit_enumpoly", ["nashsupport", "enumpoly"])
@@ -111,7 +111,7 @@ libgambit = setuptools.Extension(
 
 setuptools.setup(
     cmdclass={"build_py": GambitBuildPy},
-    libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
+    libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_homotopy, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core],
     ext_modules=Cython.Build.cythonize(libgambit,

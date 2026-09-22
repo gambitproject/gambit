@@ -35,6 +35,7 @@
 #include <wx/statline.h>
 
 #include "games.h"
+#include "games/gametree.h"
 
 #include "editlabel.h"
 #include "efgdisplay.h"
@@ -96,7 +97,7 @@ private:
   void OnOpenTimer(wxTimerEvent &p_event);
 
   // Checks the label field for being non-empty and not matching any of the game's other
-  // outcomes (GameOutcome::NewOutcome() rejects an empty or duplicate label outright, so an
+  // outcomes (GameRep::MakeOutcome() rejects an empty or duplicate label outright, so an
   // outcome not yet attached to a node would otherwise fail at commit with no earlier warning),
   // colouring it like EditMoveDialog's infoset-label field and returning a description of the
   // problem found, or an empty string if it's valid.
@@ -253,6 +254,15 @@ void OutcomeEditorPopup::BuildControls()
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
+  auto *hintText = new wxStaticText(m_contentPanel, wxID_STATIC,
+                                    _("Escape cancels and closes this window. Enter accepts."));
+  hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+  wxFont hintFont = hintText->GetFont();
+  hintFont.SetPointSize(hintFont.GetPointSize() - 1);
+  hintText->SetFont(hintFont);
+  hintText->Wrap(FromDIP(260));
+  outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
+
   m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
@@ -271,7 +281,7 @@ void OutcomeEditorPopup::LoadValues()
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
   if (!outcome || outcome->IsNull()) {
-    // GameOutcome::NewOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
+    // GameRep::MakeOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
     // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
     // opens already showing that as an error the user has to notice and fix before they can
     // accept anything else.
@@ -822,8 +832,10 @@ void AppendMovePopup::BuildControls()
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
-  m_hintText =
-      new wxStaticText(m_contentPanel, wxID_ANY, _("Tab past the last action to add another"));
+  m_hintText = new wxStaticText(
+      m_contentPanel, wxID_ANY,
+      _("Tab past the last action to add another.\nEscape cancels and closes this window. Enter "
+        "accepts."));
   m_hintText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   wxFont hintFont = m_hintText->GetFont();
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
@@ -1152,6 +1164,7 @@ wxString AppendMovePopup::ValidateLabels()
 
     if (invalid && message.empty()) {
       message = value.empty() ? _("Action labels cannot be empty.")
+                : m_isChance  ? _("Action labels must be unique within the event.")
                               : _("Action labels must be unique within the information set.");
     }
   }
@@ -1498,11 +1511,13 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
     m_moveHeading->SetLabel(wxString::FromUTF8(mover->GetLabel()) + _(" to move"));
     m_nodeProbText->SetLabel(_("Pr(Node reached): ") +
                              wxString::FromUTF8(profiles.GetRealizProb(p_node)));
-    m_infosetProbText->SetLabel(_("Pr(Infoset reached): ") +
-                                wxString::FromUTF8(profiles.GetInfosetProb(p_node)));
+    m_infosetProbText->SetLabel(
+        (mover->IsChance() ? _("Pr(Event reached): ") : _("Pr(Information set reached): ")) +
+        wxString::FromUTF8(profiles.GetInfosetProb(p_node)));
     m_beliefText->SetLabel(_("Belief: ") + wxString::FromUTF8(profiles.GetBeliefProb(p_node)));
-    m_infosetValueText->SetLabel(_("Payoff | Infoset: ") +
-                                 wxString::FromUTF8(profiles.GetInfosetValue(p_node)));
+    m_infosetValueText->SetLabel(
+        (mover->IsChance() ? _("Payoff | Event: ") : _("Payoff | Information set: ")) +
+        wxString::FromUTF8(profiles.GetInfosetValue(p_node)));
   }
   m_contentPanel->GetSizer()->Show(m_moveSizer, showMove, true);
 

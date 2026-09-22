@@ -206,7 +206,7 @@ public:
 };
 
 // Generates a label guaranteed not to collide with any of p_game's current outcome labels, of
-// the form "Outcome N" -- GameOutcome::NewOutcome() itself rejects an empty or duplicate label,
+// the form "Outcome N" -- GameRep::MakeOutcome() itself rejects an empty or duplicate label,
 // so callers that need to pre-fill a fresh outcome's label (rather than make the user type one
 // first) use this.
 std::string GenerateOutcomeLabel(const Game &p_game);

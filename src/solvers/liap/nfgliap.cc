@@ -133,18 +133,16 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 
 } // namespace
 
-std::list<MixedStrategyProfile<double>>
-LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  StrategyCallbackType<double> p_onEquilibrium,
-                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent,
-                  const CancelToken &p_cancel)
+LiapStrategyResult LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
+                                     double p_maxregret, int p_maxitsN,
+                                     StrategyCallbackType<double> p_onEquilibrium,
+                                     LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent,
+                                     const CancelToken &p_cancel)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-
-  std::list<MixedStrategyProfile<double>> solutions;
 
   MixedStrategyProfile<double> p(p_start);
   p_onEvent(LiapStartEvent<MixedStrategyProfile<double>>{p});
@@ -155,10 +153,17 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   double fval;
   minimizer.Set(F, p.GetProbVector(), fval, gradient, .001, .00001);
 
+  bool minimizerFailed = false;
   for (int iter = 1; iter <= p_maxitsN; iter++) {
     p_cancel.Check();
     Vector<double> point(p.GetProbVector());
-    if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
+    try {
+      if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
+        break;
+      }
+    }
+    catch (const FunctionMinimizerError &) {
+      minimizerFailed = true;
       break;
     }
     p = point;
@@ -171,13 +176,12 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   const double regret = p.GetMaxRegret() * F.GetScale();
   if (regret < p_maxregret) {
     p_onEquilibrium(p);
-    solutions.push_back(p);
+    return {p, true, LiapTerminationReason::Converged};
   }
-  else {
-    p_onEvent(LiapEndEvent<MixedStrategyProfile<double>>{p, regret});
-  }
-
-  return solutions;
+  p_onEvent(LiapEndEvent<MixedStrategyProfile<double>>{p, regret});
+  return {std::nullopt, false,
+          minimizerFailed ? LiapTerminationReason::MinimizerFailed
+                          : LiapTerminationReason::RegretTargetNotReached};
 }
 
 } // namespace Gambit::Nash

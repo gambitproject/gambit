@@ -30,6 +30,8 @@
 #include <cstring>
 #include <vector>
 
+#include "core/util.h"
+
 namespace Gambit::gametracer {
 
 class cvector {
@@ -709,7 +711,9 @@ public:
 
   void multiply(const cvector &source, cvector &dest) const
   {
-    // assert(n == source.m && m == dest.m);
+    if (n != source.m || m != dest.m) {
+      throw DimensionException();
+    }
     int i, j, c = 0;
     for (i = 0; i < m; i++) {
       dest[i] = 0;

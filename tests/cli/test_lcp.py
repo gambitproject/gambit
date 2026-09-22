@@ -19,7 +19,7 @@ def test_detail_flag_switches_to_multiline_report(cli_runner, nfg_coordination_t
     result = cli_runner.invoke(lcp.main, ["-q", "-D"], input=nfg_coordination_text)
     assert result.exit_code == 0
     assert "NE," not in result.stdout
-    assert "Strategy profile for player 1:" in result.stdout
+    assert "Strategy profile for 1:" in result.stdout
 
 
 def test_strategic_flag_switches_tree_game_to_strategy_representation(

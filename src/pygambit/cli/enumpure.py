@@ -29,9 +29,7 @@ import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_game,
+    load_game,
     render_profile_csv,
     render_profile_detail,
     version_option,
@@ -62,22 +60,20 @@ PROG_NAME = "gambit-enumpure"
 @version_option(DESCRIPTION)
 @handle_errors
 def main(file: str | None, strategic: bool, agent: bool, detail: bool, quiet: bool) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION)
-    game = read_game(open_game_file(file, PROG_NAME))
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
 
     def render(profile) -> None:
         is_behavior = hasattr(profile, "as_strategy")
         if strategic and is_behavior:
             profile = profile.as_strategy()
-        elif not strategic and game.is_tree and not is_behavior:
+        elif not strategic and isinstance(game, gbt.ExtensiveGame) and not is_behavior:
             profile = profile.as_behavior()
         if detail:
             click.echo(render_profile_detail(profile, 0))
         else:
             click.echo(render_profile_csv(profile, "NE", 0))
 
-    if agent and game.is_tree:
+    if agent and isinstance(game, gbt.ExtensiveGame):
         gbt.nash.enumpure_agent_solve(game, nash_callback=render)
     else:
         gbt.nash.enumpure_solve(game, nash_callback=render)

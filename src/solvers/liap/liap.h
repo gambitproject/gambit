@@ -23,6 +23,7 @@
 #ifndef GAMBIT_SOLVERS_LIAP_LIAP_H
 #define GAMBIT_SOLVERS_LIAP_LIAP_H
 
+#include <optional>
 #include <variant>
 #include "solvers/nash.h"
 
@@ -45,14 +46,37 @@ using LiapEventCallbackType = std::function<void(const LiapEvent<Profile> &)>;
 
 template <class Profile> void NullLiapEventCallback(const LiapEvent<Profile> &) {}
 
-std::list<MixedBehaviorProfile<double>>
+/// @brief Why a call to LiapStrategySolve()/LiapAgentSolve() did not return an accepted
+///        equilibrium
+enum class LiapTerminationReason {
+  Converged,              // the accepted point satisfies maxregret
+  MinimizerFailed,        // the underlying line search encountered a numerical breakdown
+  RegretTargetNotReached, // the iteration limit was reached without regret falling below
+                          // maxregret
+};
+
+/// @brief The result of minimizing the Lyapunov function on an extensive game
+struct LiapAgentResult {
+  std::optional<MixedBehaviorProfile<double>> equilibrium;
+  bool success{false};
+  LiapTerminationReason reason{LiapTerminationReason::RegretTargetNotReached};
+};
+
+LiapAgentResult
 LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
                LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent =
                    NullLiapEventCallback<MixedBehaviorProfile<double>>,
                const CancelToken &p_cancel = CancelToken());
 
-std::list<MixedStrategyProfile<double>>
+/// @brief The result of minimizing the Lyapunov function on a strategic game
+struct LiapStrategyResult {
+  std::optional<MixedStrategyProfile<double>> equilibrium;
+  bool success{false};
+  LiapTerminationReason reason{LiapTerminationReason::RegretTargetNotReached};
+};
+
+LiapStrategyResult
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                   StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                   LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent =

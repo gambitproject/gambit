@@ -27,18 +27,16 @@ function minimization.
 from __future__ import annotations
 
 import click
-import numpy as np
 
 import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_behavior_profiles_csv,
-    read_game,
-    read_strategy_profiles_csv,
+    load_game,
     render_profile_csv,
+    render_profile_detail,
+    resolve_behavior_starts,
+    resolve_strategy_starts,
     version_option,
 )
 
@@ -105,6 +103,7 @@ _DEFAULT_TRIES = 10
     default=None,
     help="file containing starting points (mutually exclusive with -n)",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -123,20 +122,18 @@ def main(
     maxiter: int,
     maxregret: float,
     start_file: str | None,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION)
-    if n_tries is not None and start_file is not None:
-        raise ValueError("The -n and -s options are mutually exclusive.")
-    if seed is not None and n_tries is None:
-        raise ValueError("The -R option requires -n.")
-    game = read_game(open_game_file(file, PROG_NAME))
-    use_agent = agent and game.is_tree
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
+    use_agent = agent and isinstance(game, gbt.ExtensiveGame)
 
     def render(profile, label: str = "NE") -> None:
-        click.echo(render_profile_csv(profile, label, decimals))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals))
 
     def render_event(event) -> None:
         if not verbose:
@@ -147,14 +144,7 @@ def main(
             render(event.profile, "end")
 
     if use_agent:
-        starts = (
-            read_behavior_profiles_csv(start_file, game)
-            if start_file is not None
-            else [
-                game.random_behavior_profile(gen=np.random.default_rng(seed))
-                for _ in range(n_tries if n_tries is not None else _DEFAULT_TRIES)
-            ]
-        )
+        starts = resolve_behavior_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
         for start in starts:
             gbt.nash.liap_agent_solve(
                 start,
@@ -164,14 +154,7 @@ def main(
                 event_callback=render_event,
             )
     else:
-        starts = (
-            read_strategy_profiles_csv(start_file, game)
-            if start_file is not None
-            else [
-                game.random_strategy_profile(gen=np.random.default_rng(seed))
-                for _ in range(n_tries if n_tries is not None else _DEFAULT_TRIES)
-            ]
-        )
+        starts = resolve_strategy_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
         for start in starts:
             gbt.nash.liap_solve(
                 start,

@@ -79,33 +79,6 @@ def _to_number(value: typing.Any) -> c_Number:
     return c_Number(_to_number_string(value).encode("ascii"))
 
 
-@cython.cfunc
-def _resolve_by_label(collection, label: str, scope: str, kind: str, kind_plural: str):
-    """Resolve a member of a game collection by its text label.
-
-    Game collections are accessed by label, not by position.  Lookup is by exact label match.
-
-    Failure modes:
-      * an empty label raises ``ValueError``;
-      * a label matching no member raises ``KeyError``;
-      * a label matching more than one member raises ``ValueError``.
-    """
-    if not label:
-        raise ValueError(f"{kind} label cannot be empty")
-    matches = [x for x in collection if x.label == label]
-    if not matches:
-        raise KeyError(f"{scope} has no {kind} with label '{label}'")
-    if len(matches) > 1:
-        raise ValueError(f"{scope} has multiple {kind_plural} with label '{label}'")
-    return matches[0]
-
-
-PlayerReference = Player | str
-InfosetReference = Infoset | str
-ActionReference = Action | str
-NodeReference = Node | str
-NodeReferenceSet = typing.Iterable[NodeReference]
-
 ProfileDType = float | Rational
 
 
@@ -177,29 +150,37 @@ class StrategyIndexedVector(_LabeledVector):
 
 
 @cython.cclass
-class NodeIndexedVector(_LabeledVector):
-    """A read-only mapping from a ``Node`` to a computed value, one entry per node.
+class HistoryIndexedVector(_LabeledVector):
+    """A read-only mapping from a node's History to a computed value, one entry
+    per node.
 
     Unlike ``PlayerIndexedVector``/``StrategyIndexedVector``, which are keyed by a stable
-    label, this is keyed by node identity: the value can genuinely differ between two
-    nodes, even nodes belonging to the same information set.
+    label, this is keyed by the node's own History -- unique to that node -- since the
+    value can genuinely differ between two nodes, even nodes belonging to the same
+    information set.
+
+    .. versionadded:: 17.0.0
     """
-    _label_kind = "node"
+    _label_kind = "history"
 
 
 ######################
 # Includes
 ######################
 
-include "action.pxi"
-include "infoset.pxi"
 include "strategy.pxi"
-include "player.pxi"
-include "outcome.pxi"
 include "node.pxi"
+include "hsel.pxi"
 include "stratspt.pxi"
 include "behavspt.pxi"
 include "stratmixed.pxi"
 include "behavmixed.pxi"
+include "gamecollections.pxi"
+include "gamehelpers.pxi"
 include "game.pxi"
+include "gametree.pxi"
+include "gametable.pxi"
+include "gameagg.pxi"
+include "layout.pxi"
+include "gameio.pxi"
 include "nash.pxi"

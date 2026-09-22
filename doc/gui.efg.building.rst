@@ -86,13 +86,13 @@ Editing moves
 -------------
 
 The properties of an existing move -- the label of its information
-set, the player to which it belongs, and the actions available at it
--- can be changed by right-clicking on any node belonging to the move
+set or event, the player to which it belongs, and the actions available
+at it -- can be changed by right-clicking on any node belonging to the move
 and choosing :guilabel:`Move properties`. This displays the
 :guilabel:`Move properties` dialog, which shows a dropdown for the player
 to which the move belongs (each player again shown with its colour), a text
-field for the information set's label, and a row for each action, showing
-its label and, for moves belonging to the chance player, its probability.
+field for the information set's or event's label, and a row for each action,
+showing its label and, for moves belonging to the chance player, its probability.
 
 Adding, removing, and reordering actions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -205,7 +205,9 @@ A node can be placed in the same information set as another using the
 drag-and-drop idiom described in :ref:`copying-trees`: dragging one
 node onto another and choosing :guilabel:`Put node in same information
 set` (or, when dropping on a terminal node, :guilabel:`Insert move
-using same information set`) from the popup menu. This is currently the
+using same information set`) from the popup menu. When the node being
+dragged belongs to the chance player, these read :guilabel:`Put node in
+same event` and :guilabel:`Insert move using same event`. This is currently the
 only way to have a newly created move share an information set with an
 existing one; the :ref:`per-player submenu <adding-moves>` for adding a
 move always creates a fresh information set.
@@ -225,7 +227,9 @@ a list of all other information sets in the game which are compatible
 with the node, that is, which have the same number of
 actions. Additionally, the node can be moved to a new, singleton
 information set by setting this dropdown to the :guilabel:`New
-information set` entry.
+information set` entry. For a node belonging to the chance player the
+dropdown is labeled :guilabel:`Event`, lists the game's events, and
+offers :guilabel:`New event` instead.
 
 
 

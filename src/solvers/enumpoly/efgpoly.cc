@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "games/gametree.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "polysystem.h"
@@ -207,7 +208,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   catch (const SingularMatrixException &) {
     p_isSingular = true;
   }
-  catch (const std::domain_error &) {
+  catch (const RootOutsideRectangleException &) {
     p_isSingular = true;
   }
 
@@ -227,7 +228,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
 namespace Gambit::Nash {
 
-std::list<MixedBehaviorProfile<double>>
+EnumPolyBehaviorResult
 EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles, BehaviorCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
@@ -271,7 +272,7 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return ret;
+  return {ret, true};
 }
 
 } // namespace Gambit::Nash

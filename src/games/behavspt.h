@@ -27,6 +27,7 @@
 #include <map>
 #include "core/lazy.h"
 #include "game.h"
+#include "gametree.h"
 #include "seqpure.h"
 
 namespace Gambit {
@@ -210,7 +211,7 @@ public:
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   template <class T>
   MixedBehaviorProfile<T> ToMixedBehaviorProfile(const std::map<GameSequence, T> &) const;
-  Infosets GetInfosets() const { return {this}; };
+  Infosets GetInfosets() const { return {this}; }
   SequenceContingencies GetSequenceContingencies() const;
 
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;

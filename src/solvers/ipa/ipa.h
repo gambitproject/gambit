@@ -23,6 +23,7 @@
 #ifndef GAMBIT_SOLVERS_IPA_IPA_H
 #define GAMBIT_SOLVERS_IPA_IPA_H
 
+#include <optional>
 #include <variant>
 
 #include "solvers/nash.h"
@@ -52,13 +53,22 @@ using IPAEventCallbackType = std::function<void(const IPAEvent &)>;
 
 inline void NullIPAEventCallback(const IPAEvent &) {}
 
-std::list<MixedStrategyProfile<double>>
+/// @brief The result of computing a Nash equilibrium via iterated polymatrix approximation
+struct IPAStrategyResult {
+  std::optional<MixedStrategyProfile<double>> equilibrium;
+  bool success{false};
+  /// Why the iteration terminated; this is the same reason reported to IPAEventCallbackType
+  /// via IPATerminationEvent.  success is true only when this is Converged.
+  gametracer::IPATerminationReason reason{gametracer::IPATerminationReason::MaxIterationsReached};
+};
+
+IPAStrategyResult
 IPAStrategySolve(const Game &p_game,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                  IPAEventCallbackType p_onEvent = NullIPAEventCallback,
                  const CancelToken &p_cancel = CancelToken());
 
-std::list<MixedStrategyProfile<double>>
+IPAStrategyResult
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
                  IPAEventCallbackType p_onEvent = NullIPAEventCallback,

@@ -47,13 +47,14 @@ construction and analysis of finite extensive and strategic games.
    .. grid-item-card:: 📚 Catalog of games
       :columns: 3
 
-      Browse a curated collection of game theory models.
+      Browse a curated collection of games.
 
-      .. button-ref:: catalog
-         :ref-type: ref
+      .. button-link:: https://gambit-catalog.readthedocs.io/
          :click-parent:
          :color: secondary
          :expand:
+
+         Open catalog
 
    .. grid-item-card:: 🖱️ Graphical interface
       :columns: 3
@@ -109,7 +110,7 @@ construction and analysis of finite extensive and strategic games.
    pygambit
    tools
    gui
-   catalog
+   catalog_generators
    developer
    formats
    biblio

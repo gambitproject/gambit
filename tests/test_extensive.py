@@ -10,16 +10,16 @@ from . import games
     "players,title", [([], "New game"), (["Alice", "Bob"], "A poker game")]
 )
 def test_new_tree(players: list, title: str | None):
-    game = gbt.Game.new_tree(players=players, title=title)
+    game = gbt.ExtensiveGame(players=players, title=title)
     assert len(game.players) == len(players)
     for player, label in zip(game.players, players, strict=True):
-        assert player.label == label
+        assert player == label
     assert game.title == title
 
 
 @pytest.mark.parametrize("title", ["My game's new title"])
 def test_game_title(title: str):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.title = title
     assert game.title == title
 
@@ -28,7 +28,7 @@ def test_game_title(title: str):
     "description", ["This describes the game in more detail than the title"]
 )
 def test_game_description(description: str):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.description = description
     assert game.description == description
 
@@ -44,7 +44,7 @@ def test_game_description(description: str):
 def test_game_title_accepts_text_invalid_for_a_label(text: str):
     """Title/description have no printable-character or spacing restriction (#862):
     only well-formedness of the UTF-8 text is required, unlike object labels."""
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.title = text
     game.description = text
     assert game.title == text
@@ -53,10 +53,10 @@ def test_game_title_accepts_text_invalid_for_a_label(text: str):
 
 @pytest.mark.parametrize("players", [["Alice"], ["Oscar", "Felix"]])
 def test_game_set_players_label(players: list):
-    game = gbt.Game.new_tree()
+    game = gbt.ExtensiveGame()
     game.set_players(players)
     for player, label in zip(game.players, players, strict=True):
-        assert player.label == label
+        assert player == label
 
 
 @pytest.mark.parametrize("game_input,expected_result", [
@@ -97,10 +97,35 @@ def test_is_perfect_recall(game_input, expected_result: bool):
     assert game.is_perfect_recall == expected_result
 
 
+@pytest.mark.parametrize("game_input,expected_result", [
+    (gbt.catalog.load("journals/geb/wichardt2008"), {"Player 1": False, "Player 2": True}),
+    ("noPR-information-no-deflate.efg", {"Player 1": True, "Player 2": False}),
+    ("noPR-action-AM.efg", {"Player 1": False, "Player 2": True}),
+    ("stripped_down_poker.efg", {"Alice": True, "Bob": True}),
+    ("gilboa_two_am_agents.efg", {"Player 1": False, "Player 2": True}),
+    ("2x2.agg", {"1": True, "2": True}),
+])
+def test_has_perfect_recall(game_input, expected_result: dict):
+    """
+    Verify the HasPerfectRecall implementation, for individual players, against games
+    with and without perfect recall, and in each representation.
+    """
+    game = (games.read_from_file(game_input) if isinstance(game_input, str) else game_input)
+    assert set(game.players) == set(expected_result)
+    for player, expected in expected_result.items():
+        assert game.has_perfect_recall(player) == expected
+
+
+def test_has_perfect_recall_trivial_game():
+    game = gbt.ExtensiveGame(players=["Alice", "Bob"])
+    assert game.has_perfect_recall("Alice")
+    assert game.has_perfect_recall("Bob")
+
+
 def test_getting_payoff_by_label_string():
     game = games.read_from_file("sample_extensive_game.efg")
-    s1 = list(game.players["Player 1"].strategies)
-    s2 = list(game.players["Player 2"].strategies)
+    s1 = game.get_strategies("Player 1")
+    s2 = game.get_strategies("Player 2")
     assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[0]})["Player 1"] == 2
     assert game.get_payoffs({"Player 1": s1[0], "Player 2": s2[1]})["Player 1"] == 2
     assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[0]})["Player 1"] == 4
@@ -111,19 +136,19 @@ def test_getting_payoff_by_label_string():
     assert game.get_payoffs({"Player 1": s1[1], "Player 2": s2[1]})["Player 2"] == 7
 
 
-def test_getting_payoff_player_object_key_raises():
+def test_getting_payoff_non_str_key_raises():
+    """`get_payoffs`'s contingency keys must be player labels (`str`)."""
     game = games.read_from_file("sample_extensive_game.efg")
-    player1 = game.players["Player 1"]
-    s1 = next(iter(player1.strategies))
-    s2 = next(iter(game.players["Player 2"].strategies))
+    s1 = next(iter(game.get_strategies("Player 1")))
+    s2 = next(iter(game.get_strategies("Player 2")))
     with pytest.raises(TypeError):
-        _ = game.get_payoffs({player1: s1, "Player 2": s2})
+        _ = game.get_payoffs({1: s1, "Player 2": s2})
 
 
 def test_outcome_index_exception_label():
     game = games.read_from_file("sample_extensive_game.efg")
-    s1 = next(iter(game.players["Player 1"].strategies))
-    s2 = next(iter(game.players["Player 2"].strategies))
+    s1 = next(iter(game.get_strategies("Player 1")))
+    s2 = next(iter(game.get_strategies("Player 2")))
     with pytest.raises(KeyError):
         _ = game.get_payoffs({"Player 1": s1, "Player 2": s2})["Not a player"]
 
@@ -391,7 +416,7 @@ def test_reduced_strategic_form(
     for player, labels, exp_raw, arr in zip(
         game.players, strategy_labels, np_arrays_of_rsf, arrays, strict=True
     ):
-        assert labels == list(player.strategies)
+        assert labels == game.get_strategies(player)
         assert (arr == games.vectorized_make_rational(exp_raw)).all()
 
 
@@ -504,11 +529,14 @@ def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
     prescribes no action, being unreachable given the strategy's own earlier actions.
     """
     for player, expected_maps in zip(game.players, strategy_maps, strict=True):
-        for strategy, expected in zip(player.strategies, expected_maps, strict=True):
-            behavior = game.get_behavior(player.label, strategy)
+        for strategy, expected in zip(game.get_strategies(player), expected_maps, strict=True):
+            behavior = game.get_behavior(player, strategy)
             assert tuple(
-                "*" if (action := behavior.get(infoset)) is None else str(action.number + 1)
-                for infoset in player.infosets
+                "*" if (
+                    action := behavior.get(gbt.H.path(*history.actions))
+                ) is None
+                else str(game.get_actions(gbt.H.path(*history.actions)).index(action) + 1)
+                for history in games.player_infosets(game, player)
             ) == expected
 
 

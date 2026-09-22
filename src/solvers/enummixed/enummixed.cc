@@ -124,8 +124,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   // Construct vectors b1, b2
   Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
   Vector<T> b2(1, p_game->GetPlayer(2)->GetStrategies().size());
-  b1 = (T)-1;
-  b2 = (T)-1;
+  b1 = static_cast<T>(-1);
+  b2 = static_cast<T>(-1);
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
   const auto poly1 = EnumerateVertices(A1, b1, p_cancel);

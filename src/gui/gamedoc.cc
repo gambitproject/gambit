@@ -25,6 +25,9 @@
 #include <set>
 
 #include "games.h"
+#include "games/gametree.h"
+#include "games/gameagg.h"
+#include "games/gamebagg.h"
 #include "games/workspace.h"
 
 #include "app.h" // for wxGetApp()
@@ -241,7 +244,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
   input.seekg(0);
   try {
     const Game game = ReadGame(input);
-    if (game->IsAgg()) {
+    if (As<GameAGGRep>(game) || As<GameBAGGRep>(game)) {
       return {LoadResult::UnsupportedRepresentation, nullptr};
     }
     auto doc = std::make_shared<GameDocument>(game);
@@ -257,8 +260,8 @@ void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
   LegacyWorkspaceFile workspace;
   m_style.Save(workspace);
-  workspace.game_format = m_game->IsTree() ? "efg" : "nfg";
-  if (!m_game->IsTree()) {
+  workspace.game_format = As<GameTreeRep>(m_game) ? "efg" : "nfg";
+  if (!As<GameTreeRep>(m_game)) {
     workspace.layout.reset();
     workspace.labels.reset();
   }
@@ -346,7 +349,7 @@ void GameDocument::PostPendingChanges()
 
 void GameDocument::BuildNfg()
 {
-  if (m_game->IsTree()) {
+  if (As<GameTreeRep>(m_game)) {
     m_workspace.BuildNfg();
   }
 }
@@ -698,19 +701,42 @@ std::string GenerateOutcomeLabel(const Game &p_game)
 
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->SetOutcome(p_node, m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
+  m_game->MakeOutcome({p_node}, std::vector<Number>(m_game->NumPlayers(), Number()),
+                      GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
-  p_profile->SetOutcome(m_game->NewOutcome(GenerateOutcomeLabel(m_game)));
+  std::vector<GameStrategy> strategies;
+  strategies.reserve(m_game->NumPlayers());
+  for (const auto &player : m_game->GetPlayers()) {
+    strategies.push_back(p_profile->GetStrategy(player));
+  }
+  m_game->MakeOutcome({strategies}, std::vector<Number>(m_game->NumPlayers(), Number()),
+                      GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
 void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  m_game->SetOutcome(p_node, p_outcome);
+  if (!p_outcome) {
+    m_game->MakeOutcomeNull({p_node});
+  }
+  else {
+    std::vector<GameNode> members{p_node};
+    for (const auto &node : m_game->GetNodes()) {
+      if (node != p_node && node->GetOutcome() == p_outcome) {
+        members.push_back(node);
+      }
+    }
+    std::vector<Number> payoffs;
+    payoffs.reserve(m_game->NumPlayers());
+    for (const auto &player : m_game->GetPlayers()) {
+      payoffs.emplace_back(p_outcome->GetPayoff<std::string>(player));
+    }
+    m_game->MakeOutcome(members, payoffs, p_outcome->GetLabel());
+  }
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
@@ -756,15 +782,19 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   }
 
   if (outcome->IsNull()) {
-    outcome = m_game->NewOutcome(p_label.ToStdString(wxConvUTF8));
-    m_game->SetOutcome(p_node, outcome);
+    std::vector<Number> payoffs;
+    payoffs.reserve(p_payoffs.size());
+    for (const auto &value : p_payoffs) {
+      payoffs.emplace_back(value.ToStdString());
+    }
+    m_game->MakeOutcome({p_node}, payoffs, label);
   }
   else {
     outcome->SetLabel(label);
-  }
-
-  for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
-    outcome->SetPayoff(GetGame()->GetPlayer(player), Number(p_payoffs[player - 1].ToStdString()));
+    for (size_t player = 1; player <= GetGame()->NumPlayers(); ++player) {
+      outcome->SetPayoff(GetGame()->GetPlayer(player),
+                         Number(p_payoffs[player - 1].ToStdString()));
+    }
   }
 
   NotifyChanged(GameModificationType::GamePayoffs);
@@ -775,7 +805,7 @@ void GameDocument::DoRemoveOutcome(GameNode p_node)
   if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
   }
-  m_game->SetOutcome(p_node, nullptr);
+  m_game->MakeOutcomeNull({p_node});
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
@@ -784,7 +814,12 @@ void GameDocument::DoRemoveOutcome(const PureStrategyProfile &p_profile)
   if (p_profile->GetOutcome()->IsNull()) {
     return;
   }
-  p_profile->SetOutcome(nullptr);
+  std::vector<GameStrategy> strategies;
+  strategies.reserve(m_game->NumPlayers());
+  for (const auto &player : m_game->GetPlayers()) {
+    strategies.push_back(p_profile->GetStrategy(player));
+  }
+  m_game->MakeOutcomeNull({strategies});
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 

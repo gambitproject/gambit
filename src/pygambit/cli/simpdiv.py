@@ -38,6 +38,7 @@ from .common import (
     read_game,
     read_strategy_profiles_csv,
     render_profile_csv,
+    render_profile_detail,
     version_option,
 )
 
@@ -49,8 +50,8 @@ def _default_start(game: gbt.Game) -> gbt.MixedStrategyProfileRational:
     """Each player's first strategy, matching the C++ library's `SimpdivDefaultStart`."""
     start = game.mixed_strategy_profile(rational=True)
     for player in game.players:
-        first_strategy = next(iter(player.strategies))
-        start[player.label] = {first_strategy: 1}
+        first_strategy = next(iter(game.get_strategies(player)))
+        start[player] = {first_strategy: 1}
     return start
 
 
@@ -117,6 +118,7 @@ def _default_start(game: gbt.Game) -> gbt.MixedStrategyProfileRational:
     help="maximum regret acceptable as a proportion of range of payoffs in the game "
     "(default is 1/10000000)",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -135,6 +137,7 @@ def main(
     start_file: str | None,
     decimals: int,
     maxregret: str | None,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
@@ -161,7 +164,10 @@ def main(
         starts = [_default_start(game)]
 
     def render(profile, label: str = "NE") -> None:
-        click.echo(render_profile_csv(profile, label, decimals, as_float=as_float))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals, as_float=as_float))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals, as_float=as_float))
 
     def render_event(event) -> None:
         if not verbose:

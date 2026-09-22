@@ -68,17 +68,6 @@ std::string FormatList(const C &p_container, T p_renderer, bool p_commas = false
 }
 
 ///
-/// Abstract base class for objects that write games to various formats
-///
-class GameWriter {
-public:
-  ///
-  /// Convert the game to a string-based representation
-  ///
-  virtual std::string Write(const Game &) const = 0;
-};
-
-///
 /// Convert the game to HTML, selecting the row and column player.
 ///
 std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,

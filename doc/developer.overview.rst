@@ -23,7 +23,7 @@ Running ``make check`` has no effect (there are no tests defined in that build s
 The test suite makes use of a variety of games, which are drawn from examples in
 the game theory literature and textbooks, as well as examples constructed specifically
 to test edge cases.  From Gambit 17, these are all curated as part of Gambit's
-:ref:`catalog of games <catalog>`.
+`catalog of games <https://gambit-catalog.readthedocs.io/>`_.
 
 From Gambit 17, ``pygambit`` is also responsible for providing command-line interfaces to
 equilibrium computation and other facilities; previously the command-line wrappers were

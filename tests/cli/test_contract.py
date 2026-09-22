@@ -12,6 +12,7 @@ from pygambit.cli import (
     enumpoly,
     enumpure,
     gnm,
+    hp,
     ipa,
     lcp,
     liap,
@@ -31,6 +32,7 @@ TOOLS = [
     gnm,
     ipa,
     enumpoly,
+    hp,
 ]
 
 

@@ -91,17 +91,18 @@ private:
   Vector<double> g0;
 
   void AlphaXPlusY(double alpha, const Vector<double> &x, Vector<double> &y);
-  void TakeStep(const Vector<double> &x, const Vector<double> &p, double step, double lambda,
-                Vector<double> &x1, Vector<double> &dx);
-  void IntermediatePoint(const Function &fdf, const Vector<double> &x, const Vector<double> &p,
-                         double lambda, double pg, double stepa, double stepc, double fa,
-                         double fc, Vector<double> &x1, Vector<double> &dx,
-                         Vector<double> &gradient, double &step, double &f);
-  void Minimize(const Function &fdf, const Vector<double> &x, const Vector<double> &p,
-                double lambda, double stepa, double stepb, double stepc, double fa, double fb,
-                double fc, double tol, Vector<double> &x1, Vector<double> &dx1, Vector<double> &x2,
-                Vector<double> &dx2, Vector<double> &gradient, double &step, double &f,
-                double &gnorm);
+  void TakeStep(const Vector<double> &p_x, const Vector<double> &p_p, double p_step,
+                double p_lambda, Vector<double> &p_x1, Vector<double> &p_dx);
+  void IntermediatePoint(const Function &p_fdf, const Vector<double> &p_x,
+                         const Vector<double> &p_p, double p_lambda, double p_pg, double p_stepa,
+                         double p_stepc, double p_fa, double p_fc, Vector<double> &p_x1,
+                         Vector<double> &p_dx, Vector<double> &p_gradient, double &p_step,
+                         double &p_f);
+  void Minimize(const Function &p_fdf, const Vector<double> &p_x, const Vector<double> &p_p,
+                double p_lambda, double p_stepa, double p_stepb, double p_stepc, double p_fa,
+                double p_fb, double p_fc, double p_tol, Vector<double> &p_x1,
+                Vector<double> &p_dx1, Vector<double> &p_x2, Vector<double> &p_dx2,
+                Vector<double> &p_gradient, double &p_step, double &p_f, double &p_gnorm);
 };
 
 } // end namespace Gambit

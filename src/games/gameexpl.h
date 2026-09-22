@@ -39,11 +39,6 @@ public:
   Rational GetMaxPayoff() const override;
   //@}
 
-  /// @name Outcomes
-  //@{
-  /// Creates a new outcome in the game
-  GameOutcome NewOutcome(const std::string &p_label) override;
-
   /// @name Writing data files
   //@{
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;

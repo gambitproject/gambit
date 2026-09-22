@@ -19,6 +19,16 @@ subsets of equilibria being found.
    Express all output using decimal representations
    with the specified number of digits.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
@@ -90,7 +100,7 @@ subsets of equilibria being found.
 Computing an equilibrium of
 the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-gnm catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-gnm catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria using a global Newton method
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project

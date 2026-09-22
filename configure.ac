@@ -23,7 +23,6 @@ dnl
 AC_INIT([gambit],[m4_esyscmd_s([cat build_support/GAMBIT_VERSION])])
 AC_CONFIG_SRCDIR([src/gambit.h])
 AM_INIT_AUTOMAKE([subdir-objects foreign])
-dnl AC_CONFIG_MACRO_DIR([m4])
 AM_OPTIONS_WXCONFIG
 
 dnl User-specified options
@@ -50,7 +49,6 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
-dnl LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
@@ -170,7 +168,7 @@ fi
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-GAMBIT_VERSION=`cat build_support/GAMBIT_VERSION`
+GAMBIT_VERSION=$VERSION
 AC_SUBST(GAMBIT_VERSION)
 
 dnl WiX requires the Product/@Version attribute to be a purely numeric

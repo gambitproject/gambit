@@ -48,7 +48,7 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
         vv[i] = dum;
       }
     }
-    if (vv[i] == (double)0.0) {
+    if (vv[i] == 0.0) {
       delete[] vv;
       return 0;
     }

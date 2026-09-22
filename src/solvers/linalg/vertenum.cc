@@ -125,10 +125,10 @@ VertexEnumerationResult<T> EnumerateVertices(const Matrix<T> &A, const Vector<T>
 template <class T> std::list<Vector<T>> VertexEnumerationResult<T>::GetVertices() const
 {
   std::list<Vector<T>> verts;
-  for (int i = 1; i <= vertices.size(); i++) {
+  for (int i = vertices.front_index(); i <= vertices.back_index(); i++) {
     Vector<T> vert(numColumns);
     vert = T{0};
-    for (int j = 1; j <= vert.size(); j++) {
+    for (int j = vert.front_index(); j <= vert.back_index(); j++) {
       if (vertices[i].count(j)) {
         vert[j] = -vertices[i][j];
       }

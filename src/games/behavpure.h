@@ -24,6 +24,7 @@
 #define GAMBIT_GAMES_BEHAVPURE_H
 
 #include "game.h"
+#include "gametree.h"
 #include "behavspt.h"
 
 namespace Gambit {

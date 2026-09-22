@@ -23,10 +23,16 @@
 #include <stack>
 
 #include "games.h"
+#include "gametree.h"
 
 namespace Gambit {
 
 PureSequenceProfile::PureSequenceProfile(const Game &p_efg) : m_efg(p_efg) {}
+
+void PureSequenceProfile::SetSequence(const GameSequence &p_sequence)
+{
+  m_profile[p_sequence->GetPlayer()] = p_sequence;
+}
 
 namespace {
 

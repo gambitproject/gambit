@@ -26,6 +26,7 @@
 #endif // WX_PRECOMP
 #include <wx/tokenzr.h>
 #include "games.h"
+#include "games/gametree.h"
 #include "games/workspace.h"
 
 #include "analysis.h"
@@ -40,7 +41,7 @@ template <class T>
 void AnalysisProfileList<T>::AddProfile(const MixedStrategyProfile<T> &p_profile)
 {
   m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile));
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
   }
   m_current = m_mixedProfiles.size();
@@ -64,7 +65,7 @@ template <class T> void AnalysisProfileList<T>::BuildNfg()
 
 template <class T> int AnalysisProfileList<T>::NumProfiles() const
 {
-  return (m_doc->GetGame()->IsTree()) ? m_behavProfiles.size() : m_mixedProfiles.size();
+  return As<GameTreeRep>(m_doc->GetGame()) ? m_behavProfiles.size() : m_mixedProfiles.size();
 }
 
 template <class T> void AnalysisProfileList<T>::Clear()
@@ -139,7 +140,7 @@ template <class T> std::string AnalysisProfileList<T>::GetPayoff(int pl, int p_i
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    if (m_doc->GetGame()->IsTree()) {
+    if (As<GameTreeRep>(m_doc->GetGame())) {
       return lexical_cast<std::string>(
           m_behavProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
           m_doc->GetStyle().NumDecimals());
@@ -346,11 +347,78 @@ std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index
   }
 }
 
+namespace {
+
+/// Order two entries, either of which may be undefined; undefined entries
+/// order after defined ones.  Only operator< is used, so entries are ordered
+/// exactly in whatever type the profiles are stored in.
+template <class T>
+int CompareEntries(const std::optional<T> &p_left, const std::optional<T> &p_right)
+{
+  if (!p_left.has_value()) {
+    return p_right.has_value() ? 1 : 0;
+  }
+  if (!p_right.has_value()) {
+    return -1;
+  }
+  if (p_left.value() < p_right.value()) {
+    return -1;
+  }
+  if (p_right.value() < p_left.value()) {
+    return 1;
+  }
+  return 0;
+}
+
+} // end anonymous namespace
+
+template <class T>
+std::optional<T> AnalysisProfileList<T>::GetActionProbEntry(int p_action, int p_index) const
+{
+  try {
+    const MixedBehaviorProfile<T> &profile = *m_behavProfiles[p_index];
+
+    if (!profile.IsDefinedAt(m_doc->GetAction(p_action)->GetInfoset())) {
+      return {};
+    }
+
+    return profile[p_action];
+  }
+  catch (std::out_of_range &) {
+    return {};
+  }
+}
+
+template <class T>
+std::optional<T> AnalysisProfileList<T>::GetStrategyProbEntry(int p_strategy, int p_index) const
+{
+  try {
+    return (*m_mixedProfiles[p_index])[p_strategy];
+  }
+  catch (std::out_of_range &) {
+    return {};
+  }
+}
+
+template <class T>
+int AnalysisProfileList<T>::CompareActionProb(int p_action, int p_left, int p_right) const
+{
+  return CompareEntries(GetActionProbEntry(p_action, p_left),
+                        GetActionProbEntry(p_action, p_right));
+}
+
+template <class T>
+int AnalysisProfileList<T>::CompareStrategyProb(int p_strategy, int p_left, int p_right) const
+{
+  return CompareEntries(GetStrategyProbEntry(p_strategy, p_left),
+                        GetStrategyProbEntry(p_strategy, p_right));
+}
+
 template <class T> LegacyWorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 {
   LegacyWorkspaceFile::Analysis result;
   result.description = m_description.ToStdString();
-  if (m_doc->GetGame()->IsTree()) {
+  if (As<GameTreeRep>(m_doc->GetGame())) {
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
       std::ostringstream probabilities;

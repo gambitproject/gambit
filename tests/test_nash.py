@@ -23,12 +23,20 @@ def d(*probs) -> tuple:
     return tuple(probs)
 
 
-def _action_prob(profile: gbt.MixedBehaviorProfile, action: gbt.Action):
-    """The probability profile assigns to action, addressed via a representative node
-    of its information set (MixedBehaviorProfile no longer indexes by Action directly).
+def _action_prob(profile: gbt.MixedBehaviorProfile, history: gbt.History, label: str):
+    """The probability profile assigns to the action labeled `label` at the
+    information set identified by `history`."""
+    return profile[gbt.H.path(*history.actions)][label]
+
+
+def _equilibria(result: gbt.nash.NashResultBase) -> list:
+    """Normalize a Nash result's found equilibria to a list, regardless of whether the
+    underlying method can produce many (`result.equilibria`) or at most one
+    (`result.equilibrium`).
     """
-    node = next(iter(action.infoset.members))
-    return profile[node][action.label]
+    if hasattr(result, "equilibria"):
+        return result.equilibria
+    return [result.equilibrium] if result.equilibrium is not None else []
 
 
 @dataclasses.dataclass
@@ -36,7 +44,7 @@ class EquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashResultBase]
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
     prob_tol: float | gbt.Rational = Q(0)
@@ -48,7 +56,7 @@ class EquilibriumTestCaseWithStart:
     that needs a starting profile."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashResultBase]
     start_data: None | list
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
@@ -1610,17 +1618,18 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
-                for strategy in player.strategies:
-                    eq_prob = eq[player.label][strategy]
-                    exp_prob = expected[player.label][strategy]
+                for strategy in game.get_strategies(player):
+                    eq_prob = eq[player][strategy]
+                    exp_prob = expected[player][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
 
 
@@ -1639,29 +1648,29 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
         zero = gbt.Rational(0) if rational else 0.0
         perturbation = game.mixed_strategy_profile(rational=rational)
         for player in game.players:
-            strategies = list(player.strategies)
-            perturbation[player.label] = {
+            strategies = list(game.get_strategies(player))
+            perturbation[player] = {
                 s: (one if s == strategies[0] else zero) for s in strategies
             }
         return perturbation
 
     rational_result = solver(_one_hot_perturbation(rational=True))
     double_result = solver(_one_hot_perturbation(rational=False))
+    rational_equilibria = _equilibria(rational_result)
+    double_equilibria = _equilibria(double_result)
     with subtests.test("perturbation converted to double precision"):
-        assert isinstance(
-            rational_result.parameters["perturbation"], gbt.MixedStrategyProfileDouble
-        )
+        assert isinstance(rational_result.perturbation, gbt.MixedStrategyProfileDouble)
     with subtests.test("number of equilibria found"):
-        assert len(rational_result.equilibria) == len(double_result.equilibria)
+        assert len(rational_equilibria) == len(double_equilibria)
     for i, (rational_eq, double_eq) in enumerate(
-        zip(rational_result.equilibria, double_result.equilibria, strict=True)
+        zip(rational_equilibria, double_equilibria, strict=True)
     ):
         with subtests.test(eq=i, check="strategy_profile"):
             for player in game.players:
-                for strategy in player.strategies:
+                for strategy in game.get_strategies(player):
                     assert (
-                        rational_eq[player.label][strategy]
-                        == pytest.approx(double_eq[player.label][strategy])
+                        rational_eq[player][strategy]
+                        == pytest.approx(double_eq[player][strategy])
                     )
 
 
@@ -1698,6 +1707,36 @@ LIAP_STRATEGY_CASES = [
 ]
 
 
+HP_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(data=[[0.5, 0.5], [2.0 / 3.0, 1.0 / 3.0]], rational=False),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_herings_peeters_example",
+    ),
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=games.create_hs1988_base_game,
+            solver=gbt.nash.hp_solve,
+            start_data=dict(
+                data=[[1.0 / 3.0, 2.0 / 3.0], [1.0 / 6.0, 5.0 / 6.0]], rational=False
+            ),
+            expected=[[d(0.0, 1.0), d(0.0, 1.0)]],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_hp_strategy,
+        id="test_hp_hs_example_1",
+    ),
+]
+
+
 SIMPDIV_CASES = [
     pytest.param(
         EquilibriumTestCaseWithStart(
@@ -1720,6 +1759,7 @@ SIMPDIV_CASES = [
 
 CASES = []
 CASES += LIAP_STRATEGY_CASES
+CASES += HP_STRATEGY_CASES
 CASES += SIMPDIV_CASES
 
 
@@ -1736,18 +1776,36 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
     game = test_case.factory()
     start = game.mixed_strategy_profile(**test_case.start_data)
     result = test_case.solver(start)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
-                for strategy in player.strategies:
-                    eq_prob = eq[player.label][strategy]
-                    exp_prob = expected[player.label][strategy]
+                for strategy in game.get_strategies(player):
+                    eq_prob = eq[player][strategy]
+                    exp_prob = expected[player][strategy]
                     assert abs(eq_prob - exp_prob) <= test_case.prob_tol
+
+
+@pytest.mark.nash
+@pytest.mark.nash_hp_strategy
+def test_hp_degenerate_t0_prior_raises_error() -> None:
+    """hp_solve() rejects a prior without a unique best response for some player at t=0,
+    rather than picking one of the tied best responses arbitrarily.
+    """
+    game = games.create_hs1988_base_game()
+    prior = game.mixed_strategy_profile(
+        data=[[2.0 / 3.0, 1.0 / 3.0], [1.0 / 3.0, 2.0 / 3.0]], rational=False
+    )
+    with pytest.raises(
+        RuntimeError,
+        match="Multiple best responses found for player 1. Only one best response is allowed.",
+    ):
+        gbt.nash.hp_solve(prior)
 
 
 ##################################################################################################
@@ -3199,9 +3257,10 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3209,10 +3268,12 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
+                        assert abs(
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -3259,16 +3320,20 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
 
     def are_the_same(game, found, candidate):
         for p in game.players:
-            for a in p.actions:
-                if not abs(_action_prob(found, a) - _action_prob(candidate, a)) <= TOL:
-                    return False
+            for history in game.get_infosets(p):
+                for a in game.get_actions(gbt.H.path(*history.actions)):
+                    if not abs(
+                        _action_prob(found, history, a) - _action_prob(candidate, history, a)
+                    ) <= TOL:
+                        return False
         return True
 
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, eq in enumerate(result.equilibria):
+        assert len(equilibria) == len(test_case.expected)
+    for i, eq in enumerate(equilibria):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3413,9 +3478,10 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.agent_max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3423,10 +3489,12 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
+                        assert abs(
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -3479,9 +3547,10 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
     game = test_case.factory()
     start = game.mixed_behavior_profile(**test_case.start_data)
     result = test_case.solver(start)
+    equilibria = _equilibria(result)
     with subtests.test("number of equilibria found"):
-        assert len(result.equilibria) == len(test_case.expected)
-    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        assert len(equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(equilibria, test_case.expected, strict=True)):
         with subtests.test(eq=i, check="agent_max_regret"):
             assert eq.agent_max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
@@ -3489,10 +3558,12 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
             for player in game.players:
-                for action in player.actions:
-                    assert abs(
-                        _action_prob(eq, action) - _action_prob(expected, action)
-                    ) <= test_case.prob_tol
+                for history in game.get_infosets(player):
+                    for action in game.get_actions(gbt.H.path(*history.actions)):
+                        assert abs(
+                            _action_prob(eq, history, action)
+                            - _action_prob(expected, history, action)
+                        ) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -3564,9 +3635,9 @@ def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="strategy_profile"):
             exp_profile = game.mixed_strategy_profile(rational=True, data=exp["profile"])
             for player in game.players:
-                for s in player.strategies:
-                    found_prob = found.profile[player.label][s]
-                    exp_prob = exp_profile[player.label][s]
+                for s in game.get_strategies(player):
+                    found_prob = found.profile[player][s]
+                    exp_prob = exp_profile[player][s]
                     assert abs(found_prob - exp_prob) <= test_case.prob_tol
 
 
@@ -3653,3 +3724,84 @@ def test_logit_solve_lambda_error_with_invalid_max_accel():
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0)
     with pytest.raises(ValueError, match="at least 1.0"):
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0.1)
+
+
+def test_logit_solve_branch_and_lambda_on_extensive_game():
+    """`logit_solve_branch`/`logit_solve_lambda`, on a tree game with `use_strategic`
+    left at its default `False`, dispatch to the behavior-form (`LogitQREMixedBehaviorProfile`)
+    code path rather than the strategy-form one exercised by the other tests in this module."""
+    game = games.create_stripped_down_poker_efg()
+    branch = gbt.qre.logit_solve_branch(game, maxregret=0.01, first_step=0.1, max_accel=1.1)
+    assert len(branch) > 0
+    assert all(isinstance(p, gbt.LogitQREMixedBehaviorProfile) for p in branch)
+
+    events = []
+    lam_results = gbt.qre.logit_solve_lambda(
+        game, lam=[0.5, 1.0], first_step=0.1, max_accel=1.1,
+        event_callback=lambda ev: events.append(ev),
+    )
+    assert [p.lam for p in lam_results] == pytest.approx([0.5, 1.0])
+    assert all(isinstance(p, gbt.LogitQREMixedBehaviorProfile) for p in lam_results)
+    assert len(events) > 0
+
+
+def test_logit_solve_lambda_reports_bifurcation_and_perturbation_events():
+    """The 2x2 symmetric coordination game's logit QRE correspondence has a
+    well-known bifurcation; tracing far enough past it should report it via
+    `event_callback` as a `LogitBifurcationEvent`, bracketed by matching
+    `LogitPerturbationEvent(active=True)`/`(active=False)` events around it,
+    interleaved with the ordinary `LogitPathEvent`s traced along the way."""
+    game = games.create_2x2_symmetric_coordination_nfg()
+    events = []
+    gbt.qre.logit_solve_lambda(game, lam=20.0, event_callback=events.append)
+
+    bifurcations = [e for e in events if isinstance(e, gbt.LogitBifurcationEvent)]
+    perturbations = [e for e in events if isinstance(e, gbt.LogitPerturbationEvent)]
+    assert any(isinstance(e, gbt.LogitPathEvent) for e in events)
+    assert len(bifurcations) == 1
+    assert [p.active for p in perturbations] == [True, False]
+    assert bifurcations[0].before.lam < bifurcations[0].after.lam
+    assert perturbations[0].qre.lam == pytest.approx(bifurcations[0].before.lam)
+    # Detected in the order it happened, not just collected unordered.
+    assert events.index(bifurcations[0]) < events.index(perturbations[1])
+
+
+def test_lp_solve_reports_use_strategic_for_native_strategic_game():
+    """A game that is natively strategic (not a `gbt.ExtensiveGame`) is always solved on
+    the strategic representation, regardless of the `use_strategic` argument -- the
+    reported `use_strategic` on the result must reflect that, not just echo the
+    argument as passed."""
+    game = games.read_from_file("const_sum_game.nfg")
+    assert not isinstance(game, gbt.ExtensiveGame)
+    res = gbt.nash.lp_solve(game, use_strategic=False)
+    assert res.use_strategic is True
+
+
+def test_enumpoly_solve_phcpack_reports_use_strategic_true(monkeypatch):
+    """`enumpoly_solve(..., phcpack_path=...)` always solves on the strategic
+    representation (enforced by the check just above the PHCpack call) -- the
+    reported `use_strategic` must say so, not hardcode a stale `False`."""
+    import pathlib
+
+    game = gbt.StrategicGame([2, 2])
+    game.make_outcome({"1": "1", "2": "1"}, {"1": 1, "2": -1}, "a")
+    game.make_outcome({"1": "1", "2": "2"}, {"1": -1, "2": 1}, "b")
+    game.make_outcome({"1": "2", "2": "1"}, {"1": -1, "2": 1}, "c")
+    game.make_outcome({"1": "2", "2": "2"}, {"1": 1, "2": -1}, "d")
+    phc_output = (
+        "THE SOLUTIONS :\n\n"
+        "solution 1 :\n"
+        " a0 :  5.0E-01 0.0E+00\n"
+        " a1 :  5.0E-01 0.0E+00\n"
+        " b0 :  5.0E-01 0.0E+00\n"
+        " b1 :  5.0E-01 0.0E+00\n"
+        "TIMING INFORMATION\n"
+    )
+
+    def _fake_run(cmd, **kwargs):
+        pathlib.Path(cmd[3]).write_text(phc_output)
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr("pygambit.nashphc.subprocess.run", _fake_run)
+    res = gbt.nash.enumpoly_solve(game, phcpack_path="./phc")
+    assert res.use_strategic is True

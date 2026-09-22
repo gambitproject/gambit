@@ -50,6 +50,16 @@ and (in verbose mode) the support is identified with the label
    strategies for extensive games. (This has no effect for strategic
    games, since a strategic game is its own reduced strategic game.)
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
+
 .. cmdoption:: -m
 
    .. versionadded:: 16.3.0
@@ -90,7 +100,7 @@ and (in verbose mode) the support is identified with the label
 Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
 "Selten's horse"::
 
-   $ gambit-enumpoly -S catalog/journals/ijgt/selten1975/fig1.efg
+   $ gambit-enumpoly -S catalog/games/journals/ijgt/selten1975/fig1.efg
    Compute Nash equilibria by solving polynomial systems
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

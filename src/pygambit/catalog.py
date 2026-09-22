@@ -11,13 +11,14 @@ import pandas as pd
 
 import pygambit as gbt
 
-# Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
-# This ensures that catalog files are included in editable installs too
-if not _CATALOG_RESOURCE.is_dir():
-    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
-    if _repo_catalog.is_dir():
-        _CATALOG_RESOURCE = _repo_catalog
+# Prefer a co-located repo checkout's catalog (editable/dev installs) over any packaged
+# catalog_data. A prior non-editable install in the same environment can leave a stale
+# catalog_data directory in site-packages that nothing else would clean up; checking the repo
+# path first means it's never even consulted when a checkout is present (gambit#920).
+_repo_catalog = Path(__file__).parent.parent.parent / "catalog" / "games"
+_CATALOG_RESOURCE = (
+    _repo_catalog if _repo_catalog.is_dir() else files("pygambit") / "catalog_data"
+)
 
 READERS = {
     ".nfg": gbt.read_nfg,
@@ -418,37 +419,42 @@ def games(
 
     def check_filters(game: gbt.Game) -> bool:
         if n_actions is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
-            if len(game.actions) != n_actions:
+            n_game_actions = sum(
+                len(game.get_actions(gbt.H.path(*history.actions)))
+                for player in game.players
+                for history in game.get_infosets(player)
+            )
+            if n_game_actions != n_actions:
                 return False
         if n_contingencies is not None and len(game.contingencies) != n_contingencies:
             return False
         if n_infosets is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
-            if len(game.infosets) != n_infosets:
+            if sum(len(game.get_infosets(p)) for p in game.players) != n_infosets:
                 return False
         if is_const_sum is not None and game.is_const_sum != is_const_sum:
             return False
         if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
             return False
-        if is_tree is not None and game.is_tree != is_tree:
+        if is_tree is not None and isinstance(game, gbt.ExtensiveGame) != is_tree:
             return False
         if min_payoff is not None and game.min_payoff < min_payoff:
             return False
         if max_payoff is not None and game.max_payoff > max_payoff:
             return False
         if n_nodes is not None:
-            if not game.is_tree:
+            if not isinstance(game, gbt.ExtensiveGame):
                 return False
-            if len(game.nodes) != n_nodes:
+            if len(game.get_histories(gbt.H.after())) != n_nodes:
                 return False
-        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
+        if n_outcomes is not None and len(game.get_outcomes()) != n_outcomes:
             return False
         if n_players is not None and len(game.players) != n_players:
             return False
-        total_strategies = sum(len(list(p.strategies)) for p in game.players)
+        total_strategies = sum(len(game.get_strategies(p)) for p in game.players)
         return not (n_strategies is not None and total_strategies != n_strategies)
 
     def append_record(
@@ -461,8 +467,8 @@ def games(
         }
         if include_descriptions:
             record["Description"] = game.description
-            ext = "efg" if game.is_tree else "nfg"
-            record["Download"] = f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`"
+            ext = "efg" if isinstance(game, gbt.ExtensiveGame) else "nfg"
+            record["Download"] = f":download:`{slug}.{ext} <../games/{slug}.{ext}>`"
             record["Format"] = ext
         records.append(record)
 

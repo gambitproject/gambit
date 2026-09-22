@@ -30,9 +30,12 @@ strategy.  For behavior strategy profiles, the probabilities are sorted
 by player, then information set, then action number, where the
 information sets for a player are sorted by the order in which they
 are encountered in a depth-first traversal of the game tree.
-Many programs take an option `-D`, which, if specified, instead prints
+Every program takes an option `-D`, which, if specified, instead prints
 a more verbose, human-friendly description of each strategy profile
-computed.
+computed.  (`gambit-logit` is a partial exception: since it traces a whole
+branch rather than reporting discrete equilibria, `-D` there affects only
+the terminal point, if tracing reaches one accepted as a Nash equilibrium --
+see its own documentation.)
 
 Many of the programs optionally output additional information
 about the operation of the algorithm.  These outputs have other,
@@ -53,3 +56,4 @@ documentation.
    tools.logit
    tools.gnm
    tools.ipa
+   tools.hp

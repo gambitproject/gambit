@@ -32,7 +32,12 @@ jobs:
       - run: make
       - run: sudo make install
       - run: make osx-dmg
+      - run: make dist
       - uses: actions/upload-artifact@v7
         with:
           name: artifact-osx-14
           path: "*.dmg"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: artifact-source-dist
+          path: "*.tar.gz"

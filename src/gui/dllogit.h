@@ -33,6 +33,7 @@
 #include <wx/thread.h>
 #include <wx/grid.h>
 
+#include "games/gametree.h"
 #include "gamedoc.h"
 #include "solvers/logit/logit.h"
 
@@ -87,8 +88,8 @@ struct BehavLogitTraits {
                     const CancelToken &p_cancel)
   {
     const QREType start(p_game);
-    LogitBehaviorSolve(start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullBehaviorCallback<double>,
-                       p_onEvent, p_cancel);
+    LogitBehaviorSolve(start, 1.0e-8, PathTracer::TraceDirection::Positive, 0.03, 1.1,
+                       Nash::NullBehaviorCallback<double>, p_onEvent, p_cancel);
   }
 };
 
@@ -123,8 +124,8 @@ struct MixedLogitTraits {
                     const CancelToken &p_cancel)
   {
     const QREType start(p_game);
-    LogitStrategySolve(start, 1.0e-8, 1.0, 0.03, 1.1, Nash::NullStrategyCallback<double>,
-                       p_onEvent, p_cancel);
+    LogitStrategySolve(start, 1.0e-8, PathTracer::TraceDirection::Positive, 0.03, 1.1,
+                       Nash::NullStrategyCallback<double>, p_onEvent, p_cancel);
   }
 };
 
@@ -296,7 +297,11 @@ template <class Traits> class LogitThreadRunner final : public wxThread {
       Traits::Solve(
           m_game,
           [this](const LogitEvent<typename Traits::QREType> &p_event) {
-            PostPoint(std::get<LogitPathEvent<typename Traits::QREType>>(p_event).qre);
+            if (const auto *pathEvent =
+                    std::get_if<LogitPathEvent<typename Traits::QREType>>(&p_event)) {
+              PostPoint(pathEvent->qre);
+            }
+            // Bifurcation/perturbation events are not yet visualized in the GUI's logit plot.
           },
           m_cancel);
     }

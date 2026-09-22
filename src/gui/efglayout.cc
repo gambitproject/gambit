@@ -29,6 +29,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
+#include "games/gametree.h"
 #include "efglayout.h"
 
 namespace Gambit::GUI {
@@ -339,7 +340,7 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
                              bool p_noHints) const
 {
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
-  if (!outcome) {
+  if (outcome->IsNull()) {
     if (p_noHints) {
       return;
     }
@@ -389,7 +390,7 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
   wxPoint point(p_entry->GetX() + nodeSize + 20, p_entry->GetY());
 
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
-  if (!outcome) {
+  if (outcome->IsNull()) {
     int width, height;
     p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
     p_dc.GetTextExtent(wxT("(u)"), &width, &height);

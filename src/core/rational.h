@@ -103,8 +103,8 @@ public:
   friend std::istream &operator>>(std::istream &s, Rational &y);
   friend std::ostream &operator<<(std::ostream &s, const Rational &y);
 
-  int fits_in_float() const;
-  int fits_in_double() const;
+  bool fits_in_float() const;
+  bool fits_in_double() const;
 
   // procedural versions of operators
 

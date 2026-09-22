@@ -50,7 +50,7 @@ template <class V> struct TrieNode {
 
   // constructor
   TrieNode(size_t branches, typename std::list<std::pair<std::vector<int>, V>>::iterator v)
-    : children(branches, (TrieNode *)nullptr), val(v)
+    : children(branches, nullptr), val(v)
   {
   }
 
@@ -60,7 +60,7 @@ template <class V> struct TrieNode {
       return children[i];
     }
     else {
-      children.resize(i + 1, (TrieNode *)nullptr);
+      children.resize(i + 1, nullptr);
       return children[i];
     }
   }
@@ -162,7 +162,7 @@ public:
   {
     size_t i = 0;
     TrieNode<V> *ptr = root;
-    for (; i < k.size() && k[i] < (int)ptr->children.size() && ptr->children[k[i]];
+    for (; i < k.size() && k[i] < static_cast<int>(ptr->children.size()) && ptr->children[k[i]];
          ptr = ptr->children[k[i++]]) {
     }
 
@@ -189,11 +189,11 @@ public:
              std::vector<projtype> &f);
 
   // inner product
-  V inner_prod(trie_map<V> &other, V init = (V)(0)) const;
+  V inner_prod(trie_map<V> &other, V init = static_cast<V>(0)) const;
 
   // first apply the action x, then inner prod
   V inner_prod(const std::vector<int> &x, size_t keylen, std::vector<projtype> &f,
-               trie_map<V> &other, V init = (V)(0)) const;
+               trie_map<V> &other, V init = static_cast<V>(0)) const;
 
   // polynomial division
   trie_map<V> &operator/=(const std::vector<V> &denom);

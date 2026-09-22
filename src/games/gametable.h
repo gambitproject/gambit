@@ -44,6 +44,14 @@ private:
   /// p_oldToNew maps old strategy indices to new index, or to -1 if the strategy was removed.
   void RebuildTable(const std::vector<long> &old_radices, long p_player,
                     const std::vector<long> &p_oldToNew);
+  /// Resolves p_contingencies to the flat m_results indices they refer to, validating that each
+  /// contingency gives exactly one strategy per player and is referenced only once.
+  std::set<long>
+  ResolveContingencies(const std::vector<std::vector<GameStrategy>> &p_contingencies) const;
+  /// Returns the subset of p_covered no longer referenced by any contingency outside p_selected.
+  std::set<const GameOutcomeRep *>
+  ComputeAbsorbedOutcomes(const std::set<long> &p_selected,
+                          const std::set<const GameOutcomeRep *> &p_covered) const;
   //@}
 
 public:
@@ -54,12 +62,12 @@ public:
   explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
   GameOutcome MakeOutcome(const std::vector<std::vector<GameStrategy>> &,
                           const std::vector<Number> &, const std::string &) override;
+  void MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &) override;
   Game Copy() const override;
   //@}
 
   /// @name General data access
   //@{
-  bool IsTree() const override { return false; }
   bool IsConstSum() const override;
 
   /// Returns the smallest payoff to the player in any play of the game
@@ -91,12 +99,6 @@ public:
   size_t NumNodes() const override { throw UndefinedException(); }
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { throw UndefinedException(); }
-  //@}
-
-  /// @name Outcomes
-  //@{
-  /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override;
   //@}
 
   /// @name Strategies

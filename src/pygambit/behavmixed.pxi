@@ -25,45 +25,79 @@ from cython.operator cimport dereference as deref
 
 @cython.cclass
 class InfosetIndexedVector(_LabeledVector):
-    """A read-only mapping from an information set to a computed value, one entry per
-    information set.
+    """A read-only mapping from an information set or event to a computed value, one
+    entry per information set or event.
 
     Since information sets don't reliably have unique persistent labels, this is indexed
-    by any ``Node`` belonging to the information set (resolved to the information set
-    itself before lookup) rather than by a label: any member node is an equally valid
-    key, unlike ``NodeIndexedVector``.
-    """
-    _label_kind = "information set"
+    by a `Selector` (an `H`-built expression) resolving to a single node belonging to the
+    information set -- resolved to the History of the information set's canonical member
+    before lookup, so any member node is an equally valid key -- rather than by a label,
+    unlike `HistoryIndexedVector`.
 
-    def __getitem__(self, node: Node) -> typing.Any:
-        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
-        if infoset is None:
-            raise ValueError("node is terminal, has no information set")
+    Each subclass holds entries of one kind only, and overrides ``_label_kind`` so that
+    a failed lookup reports the kind it actually contains.
+
+    .. versionadded:: 17.0.0
+    """
+    _label_kind = "information set or event"
+    _game = cython.declare(Game)
+
+    def __init__(self, game: Game, values: collections.abc.Mapping) -> None:
+        self._game = game
+        _LabeledVector.__init__(self, values)
+
+    def __getitem__(self, selector: Selector) -> typing.Any:
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"{type(self).__name__} index must be a Selector, not "
+                f"{selector.__class__.__name__}"
+            )
+        # Resolves via _resolve_infoset_or_event, not _resolve_infoset: infoset_probs's
+        # values span both personal information sets and chance events, so resolution
+        # must succeed for either kind here, leaving "wrong kind for this vector" (e.g.
+        # a chance node in infoset_values, which only holds personal ones) to surface
+        # as the KeyError below, from _values simply not having that entry -- not as a
+        # resolution-time error that would also wrongly block a valid chance lookup in
+        # infoset_probs.
+        resolved_node = cython.cast(ExtensiveGame, self._game)._resolve_infoset_or_event(
+            selector, f"{type(self).__name__}.__getitem__"
+        )
         try:
-            return self._values[infoset]
+            return self._values[_canonical_history(resolved_node)]
         except KeyError:
-            raise KeyError(f"no {self._label_kind} for this node") from None
+            raise KeyError(f"no {self._label_kind} for this selector") from None
 
 
 @cython.cclass
 class InfosetValueVector(InfosetIndexedVector):
     """The expected payoff to the player conditional on reaching each information set,
-    one entry per (non-chance) information set.
+    one entry per information set.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class InfosetRegretVector(InfosetIndexedVector):
     """The regret of playing the mixed action at each information set, one entry per
-    information set.
+    information set.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class InfosetProbVector(InfosetIndexedVector):
     """The probability with which each information set is reached, one entry per
-    information set.
+    information set.  Chance events are excluded; see `EventProbVector`.
     """
+    _label_kind = "information set"
+
+
+@cython.cclass
+class EventProbVector(InfosetIndexedVector):
+    """The probability with which each chance event is reached, one entry per event.
+    Personal players' information sets are excluded; see `InfosetProbVector`.
+    """
+    _label_kind = "event"
 
 
 @cython.cclass
@@ -82,40 +116,42 @@ class ActionRegretVector(StrategyIndexedVector):
 class ActionValuesVector(InfosetIndexedVector):
     """The expected payoff of playing each action, conditional on reaching it, grouped
     by information set; each value is an `ActionValueVector` for that information set's
-    actions.
+    actions.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
 class ActionRegretsVector(InfosetIndexedVector):
     """The regret of playing each action, grouped by information set; each value is an
-    `ActionValueVector` for that information set's actions.
+    `ActionValueVector` for that information set's actions.  Chance events are excluded.
     """
+    _label_kind = "information set"
 
 
 @cython.cclass
-class RealizProbVector(NodeIndexedVector):
+class RealizProbVector(HistoryIndexedVector):
     """The probability with which each node is reached, one entry per node."""
 
 
 @cython.cclass
-class BeliefVector(NodeIndexedVector):
+class BeliefVector(HistoryIndexedVector):
     """The conditional probability that each node is reached, given that its
     information set is reached, one entry per node.
     """
 
 
 @cython.cclass
-class NodeValueVector(NodeIndexedVector):
+class HistoryValueVector(HistoryIndexedVector):
     """The expected payoff to one player conditional on reaching each node, one entry
     per node.
     """
 
 
 @cython.cclass
-class NodeValuesVector(PlayerIndexedVector):
-    """The expected payoff to each (non-chance) player conditional on reaching each
-    node, grouped by player; each value is a `NodeValueVector` for that player.
+class HistoryValuesVector(PlayerIndexedVector):
+    """The expected payoff to each personal player conditional on reaching each node,
+    grouped by player; each value is a `HistoryValueVector` for that player.
     """
 
 
@@ -125,15 +161,18 @@ class MixedAction:
 
     An immutable snapshot taken from a ``MixedBehaviorProfile`` at retrieval time: it
     does not reflect later changes to the profile, and cannot itself be modified. The
-    information set is accessible via `infoset`.
+    information set is identified by the history that was resolved to reach it,
+    accessible via `history`.
 
     .. versionchanged:: 17.0.0
 
         No longer a live view onto the profile: holds its own copy of the probabilities,
         and can no longer be assigned into. Set a distribution via
-        ``MixedBehaviorProfile.__setitem__`` instead.
+        ``MixedBehaviorProfile.__setitem__`` instead. `infoset` (an ``Infoset``) replaced
+        by `history` (the ``History`` of the node that was resolved to identify the
+        information set).
     """
-    _infoset = cython.declare(Infoset)
+    _history = cython.declare(object)
     _values = cython.declare(dict)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -141,16 +180,16 @@ class MixedAction:
 
     @staticmethod
     @cython.cfunc
-    def wrap(infoset: Infoset, values: dict) -> MixedAction:
+    def wrap(history: History, values: dict) -> MixedAction:
         obj: MixedAction = MixedAction.__new__(MixedAction)
-        obj._infoset = infoset
+        obj._history = history
         obj._values = values
         return obj
 
     @property
-    def infoset(self) -> Infoset:
-        """The information set over which this mixed action is defined."""
-        return self._infoset
+    def history(self) -> History:
+        """The History of the node that was resolved to identify this information set."""
+        return self._history
 
     def __repr__(self) -> str:
         return str(self._values)
@@ -171,7 +210,7 @@ class MixedAction:
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, collections.abc.Mapping):
             return self._values == dict(other)
-        if not isinstance(other, MixedAction) or self.infoset != other.infoset:
+        if not isinstance(other, MixedAction) or self.history != other.history:
             return False
         return self._values == cython.cast(MixedAction, other)._values
 
@@ -232,23 +271,25 @@ class MixedBehavior:
         and can no longer be assigned into. Set a player's whole behavior via
         ``MixedBehaviorProfile.__setitem__`` instead.
     """
-    _player = cython.declare(Player)
+    _player = cython.declare(str)
     _values = cython.declare(dict)
+    _game = cython.declare(Game)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a MixedBehavior outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(player: Player, values: dict) -> MixedBehavior:
+    def wrap(game: Game, player: str, values: dict) -> MixedBehavior:
         obj: MixedBehavior = MixedBehavior.__new__(MixedBehavior)
+        obj._game = game
         obj._player = player
         obj._values = values
         return obj
 
     @property
-    def player(self) -> Player:
-        """The player for whom this mixed behavior strategy is defined."""
+    def player(self) -> str:
+        """The label of the player for whom this mixed behavior strategy is defined."""
         return self._player
 
     def __repr__(self) -> str:
@@ -275,7 +316,7 @@ class MixedBehavior:
     def __len__(self) -> int:
         return len(self._values)
 
-    def __iter__(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[History, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
 
         A ``MixedBehavior`` is a collection of ``MixedAction``\\ s, one per information
@@ -286,38 +327,49 @@ class MixedBehavior:
 
             Previously iterated over individual actions and their probabilities; use
             ``MixedAction``'s own iteration for that at a specific information set.
+            Yields the History of the information set's canonical member (its first,
+            in pre-order depth-first order) instead of an ``Infoset``.
 
         Yields
         ------
-        infoset : Infoset
-            An information set belonging to the player
+        history : History
+            The History identifying an information set belonging to the player
         action : MixedAction
             The player's mixed action specified at the information set
         """
         yield from self._values.items()
 
-    def __getitem__(self, index: Node) -> MixedAction:
-        """Returns the mixed action at the information set containing `index`.
+    def __getitem__(self, selector: Selector) -> MixedAction:
+        """Returns the mixed action at the information set `selector` resolves to.
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to return.
+        selector : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to return.
 
         Raises
         ------
-        MismatchError
-            If `index` is a ``Node`` from a different game, or belongs to an
-            information set that isn't this player's.
+        TypeError
+            If `selector` is not a ``Selector``.
         ValueError
-            If `index` is a terminal node, which belongs to no information set.
+            If `selector` resolves to a terminal node, which belongs to no
+            information set, or to a chance event.
+        MismatchError
+            If the resolved information set does not belong to this player.
         """
-        infoset = cython.cast(NodeInfoset, index.infoset)._resolve()
-        if infoset is None:
-            raise ValueError("node is terminal, has no information set")
-        if infoset.player != self.player:
-            raise MismatchError("node must belong to this player")
-        return self._values[infoset]
+        if not isinstance(selector, Selector):
+            raise TypeError(
+                f"MixedBehavior index must be Selector, not {selector.__class__.__name__}"
+            )
+        infoset = cython.cast(ExtensiveGame, self._game)._resolve_infoset(
+            selector, "MixedBehavior.__getitem__"
+        )
+        if infoset.player != self._player:
+            raise MismatchError(
+                "selector must resolve to an information set belonging to this player"
+            )
+        return self._values[_canonical_history(infoset)]
 
 
 @cython.cclass
@@ -347,14 +399,14 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player.label: self[player.label] for player in self.game.players})
+        return str({player: self[player] for player in self.game.players})
 
     def _repr_latex_(self) -> str:
         return (
             r"$\left\{" +
             ",".join(
-                r"\text{" + player.label + "}:" +
-                self[player.label]._repr_latex_().replace("$", "")
+                r"\text{" + player + "}:" +
+                self[player]._repr_latex_().replace("$", "")
                 for player in self.game.players
             ) +
             r"\right\}$"
@@ -380,80 +432,184 @@ class MixedBehaviorProfile:
             The player's mixed behavior specified in the profile
         """
         for player in self.game.players:
-            yield self[player.label]
+            yield self[player]
 
     def __getitem__(self, index: typing.Any) -> MixedBehavior | MixedAction:
         """Access a component of the mixed behavior profile specified by `index`.
 
         Parameters
         ----------
-        index : str or Node
+        index : str or Selector
             The part of the profile to return:
 
             * If `index` is a ``str``, returns a ``MixedBehavior`` over the player's
               information sets. The player is determined by finding the player with
               that label, if any.
-            * If `index` is a ``Node``, returns a ``MixedAction`` over the actions at
-              the node's information set.
+            * If `index` is a ``Selector`` (an `H`-built expression) resolving to a
+              single node, returns a ``MixedAction`` over the actions at that
+              node's information set.
 
         Raises
         ------
         TypeError
-            If `index` is not a ``str`` or a ``Node``.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
+            If `index` is not a ``str`` or a ``Selector``.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set.
+            If `index` is a ``Selector`` resolving to a terminal node, which
+            belongs to no information set, or to a chance event.
         KeyError
             If `index` is a ``str`` and no player in the game has that label.
         """
         self._check_validity()
-        if isinstance(index, Node):
-            return self._mixed_action_at(self._resolve_infoset_for_node(index))
         if isinstance(index, str):
-            resolved_player = self.game._resolve_player(index, "__getitem__")
             values = {
-                infoset: self._mixed_action_at(infoset) for infoset in resolved_player.infosets
+                _canonical_history(node): self._mixed_action_at(node)
+                for node in cython.cast(ExtensiveGame, self.game)._get_infosets(index)
             }
-            return MixedBehavior.wrap(resolved_player, values)
+            return MixedBehavior.wrap(self.game, index, values)
+        if isinstance(index, Selector):
+            resolved_infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
+                index, "MixedBehaviorProfile.__getitem__"
+            )
+            return self._mixed_action_at(resolved_infoset)
         raise TypeError(
-            f"profile index must be str or Node, not {index.__class__.__name__}"
+            f"profile index must be str or Selector, not {index.__class__.__name__}"
         )
 
-    def _resolve_infoset_for_node(self, node: Node) -> Infoset:
-        """Resolves the information set containing node.
-
-        Raises
-        ------
-        MismatchError
-            If `node` belongs to a different game.
-        ValueError
-            If `node` is terminal, and so belongs to no information set.
+    def _personal_infosets(self) -> typing.Iterator[Node]:
+        """Iterates over a representative node of every information set in the game
+        belonging to a personal player, excluding the chance player's.
         """
-        if node.game != self.game:
-            raise MismatchError("node must belong to this game")
-        infoset = cython.cast(NodeInfoset, node.infoset)._resolve()
-        if infoset is None:
-            raise ValueError("node is terminal, has no information set")
-        return infoset
+        for player in self.game.players:
+            yield from cython.cast(ExtensiveGame, self.game)._get_infosets(player)
 
-    def _all_infosets(self) -> typing.Iterator[Infoset]:
-        """Iterates over every information set in the game, including the chance
-        player's, which ``self.game.infosets`` excludes.
+    def _events(self) -> typing.Iterator[Node]:
+        """Iterates over a representative node of every event of the chance player in
+        the game.
         """
-        yield from self.game.infosets
-        yield from self.game.players.chance.infosets
+        yield from self.game._get_events()
 
-    def _mixed_action_at(self, infoset: Infoset) -> MixedAction:
-        """Returns a snapshot of the mixed action at infoset, as of now."""
-        return MixedAction.wrap(
-            infoset, {a.label: self._getprob_action(a) for a in infoset.actions}
-        )
+    # The public API above is implemented once here and dispatches to the hooks below,
+    # each of which is implemented by a concrete dtype-specific subclass
+    # (MixedBehaviorProfileDouble/MixedBehaviorProfileRational).
+
+    def _check_validity(self) -> None:
+        """Raises GameStructureChangedError if the game has structurally changed since
+        this profile was created.
+        """
+        raise NotImplementedError
+
+    @property
+    def _game(self) -> Game:
+        """The game on which this profile is defined."""
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        """Returns the probability with which action `index` is played."""
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value: typing.Any) -> cython.void:
+        """Sets the probability with which action `index` is played."""
+        raise NotImplementedError
+
+    def _to_prob(self, value: typing.Any) -> ProfileDType:
+        """Coerces value (int, float, str, Decimal, or Rational) into this profile's
+        native probability type.
+        """
+        raise NotImplementedError
+
+    def _payoff(self, player: str) -> ProfileDType:
+        """Returns the expected payoff to player."""
+        raise NotImplementedError
+
+    def _belief(self, node: Node) -> ProfileDType | None:
+        """Returns the belief probability of reaching node, conditional on play having
+        reached its information set; None if the information set is unreached.
+        """
+        raise NotImplementedError
+
+    def _realiz_prob(self, node: Node) -> ProfileDType:
+        """Returns the probability that play reaches node."""
+        raise NotImplementedError
+
+    def _infoset_prob(self, node: Node) -> ProfileDType:
+        """Returns the probability that play reaches node's information set or event."""
+        raise NotImplementedError
+
+    def _infoset_value(self, node: Node) -> ProfileDType | None:
+        """Returns the expected payoff to the player owning node's information set,
+        conditional on reaching it; None if it is unreached.
+        """
+        raise NotImplementedError
+
+    def _node_value(self, player: str, node: Node) -> ProfileDType:
+        """Returns the expected payoff to player, conditional on reaching node."""
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        """Returns the expected payoff to playing action, conditional on reaching its
+        information set; None if the information set is unreached.
+        """
+        raise NotImplementedError
+
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        """Returns the regret to playing action."""
+        raise NotImplementedError
+
+    def _infoset_regret(self, node: Node) -> ProfileDType:
+        """Returns the regret of the player owning node's information set for their
+        behavior at it."""
+        raise NotImplementedError
+
+    def _agent_max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player at any information set."""
+        raise NotImplementedError
+
+    def _max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player over their whole strategy."""
+        raise NotImplementedError
+
+    def _agent_liap_value(self) -> ProfileDType:
+        """Returns the agent-form Lyapunov value of the profile."""
+        raise NotImplementedError
+
+    def _liap_value(self) -> ProfileDType:
+        """Returns the Lyapunov value of the profile."""
+        raise NotImplementedError
+
+    def _copy(self) -> MixedBehaviorProfile:
+        """Creates a copy of the profile."""
+        raise NotImplementedError
+
+    def _as_strategy(self) -> MixedStrategyProfile:
+        """Creates the equivalent mixed strategy profile."""
+        raise NotImplementedError
+
+    def _as_float(self) -> MixedBehaviorProfileDouble:
+        """Creates a floating-point copy of the profile."""
+        raise NotImplementedError
+
+    def _normalize(self) -> MixedBehaviorProfile:
+        """Creates a copy of the profile, normalized so each information set's action
+        probabilities sum to one.
+        """
+        raise NotImplementedError
+
+    def _mixed_action_at(self, node: Node) -> MixedAction:
+        """Returns a snapshot of the mixed action at node's information set, as of
+        now."""
+        values: dict = {}
+        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions():
+            values[a.deref().GetLabel().decode("utf-8")] = self._getprob_action(a)
+        return MixedAction.wrap(_history_of(node), values)
 
     def _setprob_infoset(
-        self, infoset: Infoset, distribution: collections.abc.Mapping, sparse: bool
+        self, node: Node, distribution: collections.abc.Mapping, sparse: bool
     ) -> None:
-        """Validates and sets the whole mixed action for infoset.
+        """Validates and sets the whole mixed action for node's information set.
 
         Every key of `distribution` must be one of the information set's action
         labels. If `sparse` is True, actions `distribution` omits are treated as
@@ -465,7 +621,7 @@ class MixedBehaviorProfile:
                 f"a mixed action must be set from a Mapping from action label to "
                 f"weight, not {distribution.__class__.__name__}"
             )
-        labels = {a.label for a in infoset.actions}
+        labels = set(node.actions)
         given = set(distribution.keys())
         unknown = given - labels
         if unknown:
@@ -484,10 +640,10 @@ class MixedBehaviorProfile:
             raise ValueError("a mixed action's weights must be non-negative")
         if all(v == 0 for v in values.values()):
             raise ValueError("a mixed action's weights must not all be zero")
-        for a in infoset.actions:
-            self._setprob_action(a, values[a.label])
+        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions():
+            self._setprob_action(a, values[a.deref().GetLabel().decode("utf-8")])
 
-    def __setitem__(self, index: Node, distribution: collections.abc.Mapping) -> None:
+    def __setitem__(self, index: Selector, distribution: collections.abc.Mapping) -> None:
         """Sets the mixed action at the information set containing `index`.
 
         `distribution` need not specify a weight for every one of the information
@@ -496,8 +652,9 @@ class MixedBehaviorProfile:
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to set.
+        index : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to set.
         distribution : Mapping[str, Any]
             A non-negative weight for some or all of the information set's actions,
             keyed by action label; actions it omits are treated as having weight
@@ -508,14 +665,13 @@ class MixedBehaviorProfile:
         Raises
         ------
         TypeError
-            If `index` is not a ``Node``, or `distribution` is not a Mapping.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
+            If `index` is not a ``Selector``, or `distribution` is not a Mapping.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set;
-            if any key of `distribution` is not one of the information set's action
-            labels; if any weight cannot be interpreted as a number; if any weight
-            is negative; or if the weights are all zero.
+            If `index` resolves to a terminal node, which belongs to no
+            information set, or to a chance event; if any key of `distribution`
+            is not one of the information set's action labels; if any weight
+            cannot be interpreted as a number; if any weight is negative; or if
+            the weights are all zero.
 
         See Also
         --------
@@ -524,13 +680,15 @@ class MixedBehaviorProfile:
             silently defaulting omitted ones to zero.
         """
         self._check_validity()
-        if not isinstance(index, Node):
-            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
-        infoset = self._resolve_infoset_for_node(index)
+        if not isinstance(index, Selector):
+            raise TypeError(f"profile index must be Selector, not {index.__class__.__name__}")
+        infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
+            index, "MixedBehaviorProfile.__setitem__"
+        )
         self._setprob_infoset(infoset, distribution, sparse=True)
 
     def set_mixed_action(
-        self, index: Node, distribution: collections.abc.Mapping, sparse: bool = False
+        self, index: Selector, distribution: collections.abc.Mapping, sparse: bool = False
     ) -> None:
         """Sets the mixed action at the information set containing `index`.
 
@@ -544,8 +702,9 @@ class MixedBehaviorProfile:
 
         Parameters
         ----------
-        index : Node
-            A node belonging to the information set to set.
+        index : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to set.
         distribution : Mapping[str, Any]
             A non-negative weight for the information set's actions, keyed by
             action label. A weight may be any value Gambit can interpret as a
@@ -560,46 +719,26 @@ class MixedBehaviorProfile:
         Raises
         ------
         TypeError
-            If `index` is not a ``Node``, or `distribution` is not a Mapping.
-        MismatchError
-            If `index` is a ``Node`` from a different game.
+            If `index` is not a ``Selector``, or `distribution` is not a Mapping.
         ValueError
-            If `index` is a terminal ``Node``, which belongs to no information set;
-            if any key of `distribution` is not one of the information set's action
-            labels; if `sparse` is False and `distribution` omits an action; if any
-            weight cannot be interpreted as a number; if any weight is negative; or
-            if the weights are all zero.
+            If `index` resolves to a terminal node, which belongs to no
+            information set, or to a chance event; if any key of `distribution`
+            is not one of the information set's action labels; if `sparse` is
+            False and `distribution` omits an action; if any weight cannot be
+            interpreted as a number; if any weight is negative; or if the
+            weights are all zero.
 
         See Also
         --------
         __setitem__
         """
         self._check_validity()
-        if not isinstance(index, Node):
-            raise TypeError(f"profile index must be Node, not {index.__class__.__name__}")
-        infoset = self._resolve_infoset_for_node(index)
+        if not isinstance(index, Selector):
+            raise TypeError(f"profile index must be Selector, not {index.__class__.__name__}")
+        infoset = cython.cast(ExtensiveGame, self.game)._resolve_infoset(
+            index, "MixedBehaviorProfile.set_mixed_action"
+        )
         self._setprob_infoset(infoset, distribution, sparse=sparse)
-
-    def is_defined_at(self, infoset: InfosetReference) -> bool:
-        """Returns whether the profile has probabilities defined at the information set.
-        A profile can be well-defined if probabilities are not specified at some information sets,
-        as long as those information sets are reached with zero probability.
-
-        Parameters
-        ----------
-        infoset : Infoset or str
-            The information set to check.  If a string is passed, the
-            information set is determined by finding the information set with that label, if any.
-
-        Raises
-        ------
-        MismatchError
-            If `infoset` is an ``Infoset`` from a different game.
-        KeyError
-            If `infoset` is a string and no information set in the game has that label.
-        """
-        self._check_validity()
-        return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
 
     @property
     def payoffs(self) -> PayoffVector:
@@ -610,16 +749,21 @@ class MixedBehaviorProfile:
         well-defined payoff; ``self.game.players`` already excludes it.
         """
         self._check_validity()
-        return PayoffVector({p.label: self._payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._payoff(p) for p in self.game.players})
 
     @property
-    def node_values(self) -> NodeValuesVector:
+    def history_values(self) -> HistoryValuesVector:
         """Returns the expected payoff to each player conditional on play reaching each
         node, if all players play according to the profile, grouped by player.
+
+        .. versionadded:: 17.0.0
         """
         self._check_validity()
-        return NodeValuesVector({
-            p.label: NodeValueVector({n: self._node_value(p, n) for n in self.game.nodes})
+        histories: dict = cython.cast(ExtensiveGame, self.game)._all_histories()
+        return HistoryValuesVector({
+            p: HistoryValueVector({
+                history: self._node_value(p, n) for n, history in histories.items()
+            })
             for p in self.game.players
         })
 
@@ -636,8 +780,9 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return InfosetValueVector({
-            infoset: self._infoset_value(infoset) for infoset in self.game.infosets
+        return InfosetValueVector(self.game, {
+            _canonical_history(node): self._infoset_value(node)
+            for node in self._personal_infosets()
         })
 
     @property
@@ -654,18 +799,26 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.infoset_probs
         """
         self._check_validity()
-        return ActionValuesVector({
-            infoset: ActionValueVector({a.label: self._action_value(a) for a in infoset.actions})
-            for infoset in self.game.infosets
+        return ActionValuesVector(self.game, {
+            _canonical_history(node): ActionValueVector({
+                a.deref().GetLabel().decode("utf-8"): self._action_value(a)
+                for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
+            })
+            for node in self._personal_infosets()
         })
 
     @property
     def realiz_probs(self) -> RealizProbVector:
         """Returns the probability with which each node is reached, if all players
         play according to the profile.
+
+        .. versionadded:: 17.0.0
         """
         self._check_validity()
-        return RealizProbVector({n: self._realiz_prob(n) for n in self.game.nodes})
+        return RealizProbVector({
+            history: self._realiz_prob(n)
+            for n, history in cython.cast(ExtensiveGame, self.game)._all_histories().items()
+        })
 
     @property
     def infoset_probs(self) -> InfosetProbVector:
@@ -685,15 +838,39 @@ class MixedBehaviorProfile:
         MixedBehaviorProfile.beliefs
         """
         self._check_validity()
-        return InfosetProbVector({
-            infoset: self._infoset_prob(infoset) for infoset in self._all_infosets()
+        return InfosetProbVector(self.game, {
+            _canonical_history(node): self._infoset_prob(node)
+            for node in self._personal_infosets()
+        })
+
+    @property
+    def event_probs(self) -> EventProbVector:
+        """Returns the probability with which each chance event is reached, if all
+        players play according to the profile.
+
+        This is the counterpart of `infoset_probs` for the chance player: the
+        probability that the event is reached *at least once* under the profile, i.e.
+        the realization probability of its upper frontier.  For an event with a single
+        member node, which is the usual case, this is that node's realization
+        probability.
+
+        .. versionadded:: 17.0.0
+
+        See Also
+        --------
+        MixedBehaviorProfile.infoset_probs
+        MixedBehaviorProfile.beliefs
+        """
+        self._check_validity()
+        return EventProbVector(self.game, {
+            _canonical_history(node): self._infoset_prob(node) for node in self._events()
         })
 
     @property
     def beliefs(self) -> BeliefVector:
         """Returns, for each node, the conditional probability that the node is
-        reached, given that its information set is reached, if all players play
-        according to the profile.
+        reached, given that its information set (or, at a chance node, its event) is
+        reached, if all players play according to the profile.
 
         The conditioning event is that the information set is reached at least once,
         so beliefs are normalized by the upper-frontier probability returned by
@@ -704,15 +881,22 @@ class MixedBehaviorProfile:
 
         If a node's information set is reached with zero probability under the
         profile, the belief is not well-defined and the corresponding entry is `None`.
-        This is the same reach probability returned by `infoset_probs`, so a `None`
-        belief corresponds exactly to `infoset_probs` being zero there.
+        This is the same reach probability returned by `infoset_probs` (or by
+        `event_probs`, for a chance node), so a `None` belief corresponds exactly to
+        that reach probability being zero.
+
+        .. versionadded:: 17.0.0
 
         See Also
         --------
         MixedBehaviorProfile.infoset_probs
+        MixedBehaviorProfile.event_probs
         """
         self._check_validity()
-        return BeliefVector({n: self._belief(n) for n in self.game.nodes})
+        return BeliefVector({
+            history: self._belief(n)
+            for n, history in cython.cast(ExtensiveGame, self.game)._all_histories().items()
+        })
 
     @property
     def action_regrets(self) -> ActionRegretsVector:
@@ -725,7 +909,7 @@ class MixedBehaviorProfile:
         always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded (``self.game.infosets`` already excludes them).
+        events are excluded.
 
         See Also
         --------
@@ -733,9 +917,12 @@ class MixedBehaviorProfile:
         agent_max_regret
         """
         self._check_validity()
-        return ActionRegretsVector({
-            infoset: ActionRegretVector({a.label: self._action_regret(a) for a in infoset.actions})
-            for infoset in self.game.infosets
+        return ActionRegretsVector(self.game, {
+            _canonical_history(node): ActionRegretVector({
+                a.deref().GetLabel().decode("utf-8"): self._action_regret(a)
+                for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
+            })
+            for node in self._personal_infosets()
         })
 
     @property
@@ -749,7 +936,7 @@ class MixedBehaviorProfile:
         By convention, the regret is always non-negative.
 
         Regret is not defined for the chance player, which takes no decisions; its
-        information sets are excluded (``self.game.infosets`` already excludes them).
+        events are excluded.
 
         See Also
         --------
@@ -757,8 +944,9 @@ class MixedBehaviorProfile:
         agent_max_regret
         """
         self._check_validity()
-        return InfosetRegretVector({
-            infoset: self._infoset_regret(infoset) for infoset in self.game.infosets
+        return InfosetRegretVector(self.game, {
+            _canonical_history(node): self._infoset_regret(node)
+            for node in self._personal_infosets()
         })
 
     def agent_max_regret(self) -> ProfileDType:
@@ -901,11 +1089,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()
 
-    def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset.infoset)
-
-    def _getprob_action(self, index: Action) -> float:
-        return deref(self.profile).getaction(index.action)
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        return deref(self.profile).getaction(index)
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -915,9 +1101,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value) -> None:
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value) -> cython.void:
         self._ensure_unshared()
-        setitem_mbpd_action(deref(self.profile), index.action, value)
+        setitem_mbpd_action(deref(self.profile), index, value)
 
     def _to_prob(self, value: typing.Any) -> float:
         normalized = _to_number_string(value)
@@ -927,8 +1114,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
             return float(Rational(normalized))
 
-    def _payoff(self, player: Player) -> float:
-        return deref(self.profile).GetPayoff(player.player)
+    def _payoff(self, player: str) -> float:
+        game: Game = cython.cast(ExtensiveGame, self.game)
+        return deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff"))
 
     def _belief(self, node: Node) -> float:
         cdef optional[double] value = deref(self.profile).GetBeliefProb(node.node)
@@ -939,29 +1127,35 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> float:
         return deref(self.profile).GetRealizProb(node.node)
 
-    def _infoset_prob(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetInfosetProb(infoset.infoset)
+    def _infoset_prob(self, node: Node) -> float:
+        return deref(self.profile).GetInfosetProb(cython.cast(Node, node)._infoset_handle())
 
-    def _infoset_value(self, infoset: Infoset) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(infoset.infoset)
+    def _infoset_value(self, node: Node) -> float | None:
+        cdef optional[double] value = deref(self.profile).GetPayoff(
+            cython.cast(Node, node)._infoset_handle()
+        )
         if value.has_value():
             return value.value()
         return None
 
-    def _node_value(self, player: Player, node: Node) -> float:
-        return deref(self.profile).GetPayoff(player.player, node.node)
+    def _node_value(self, player: str, node: Node) -> float:
+        game: Game = cython.cast(ExtensiveGame, self.game)
+        resolved_player = game._resolve_player(player, "_node_value")
+        return deref(self.profile).GetPayoff(resolved_player, node.node)
 
-    def _action_value(self, action: Action) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(action.action)
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        cdef optional[double] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return value.value()
         return None
 
-    def _action_regret(self, action: Action) -> float:
-        return deref(self.profile).GetRegret(action.action)
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        return deref(self.profile).GetRegret(action)
 
-    def _infoset_regret(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetRegret(infoset.infoset)
+    def _infoset_regret(self, node: Node) -> float:
+        return deref(self.profile).GetRegret(cython.cast(Node, node)._infoset_handle())
 
     def _agent_max_regret(self) -> float:
         return deref(self.profile).GetAgentMaxRegret()
@@ -1001,7 +1195,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())
 
 
 @cython.cclass
@@ -1026,11 +1220,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def __len__(self) -> int:
         return deref(self.profile).BehaviorProfileLength()
 
-    def _is_defined_at(self, infoset: Infoset) -> bool:
-        return deref(self.profile).IsDefinedAt(infoset.infoset)
-
-    def _getprob_action(self, index: Action) -> Rational:
-        return rat_to_py(deref(self.profile).getaction(index.action))
+    @cython.cfunc
+    def _getprob_action(self, index: c_GameAction) -> object:
+        return rat_to_py(deref(self.profile).getaction(index))
 
     @cython.cfunc
     def _ensure_unshared(self) -> cython.void:
@@ -1040,21 +1232,23 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         if self.profile.use_count() != 1:
             self.profile = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
 
-    def _setprob_action(self, index: Action, value: typing.Any) -> None:
+    @cython.cfunc
+    def _setprob_action(self, index: c_GameAction, value: typing.Any) -> cython.void:
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError(
                 f"rational precision profile requires int or Fraction probability, "
                 f"not {value.__class__.__name__}"
             )
         self._ensure_unshared()
-        setitem_mbpr_action(deref(self.profile), index.action,
+        setitem_mbpr_action(deref(self.profile), index,
                             to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
         return Rational(_to_number_string(value))
 
-    def _payoff(self, player: Player) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player))
+    def _payoff(self, player: str) -> Rational:
+        game: Game = cython.cast(ExtensiveGame, self.game)
+        return rat_to_py(deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff")))
 
     def _belief(self, node: Node) -> Rational:
         cdef optional[c_Rational] value = deref(self.profile).GetBeliefProb(node.node)
@@ -1065,29 +1259,37 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _realiz_prob(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetRealizProb(node.node))
 
-    def _infoset_prob(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetInfosetProb(infoset.infoset))
+    def _infoset_prob(self, node: Node) -> Rational:
+        return rat_to_py(
+            deref(self.profile).GetInfosetProb(cython.cast(Node, node)._infoset_handle())
+        )
 
-    def _infoset_value(self, infoset: Infoset) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(infoset.infoset)
+    def _infoset_value(self, node: Node) -> Rational | None:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(
+            cython.cast(Node, node)._infoset_handle()
+        )
         if value.has_value():
             return rat_to_py(value.value())
         return None
 
-    def _node_value(self, player: Player, node: Node) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
+    def _node_value(self, player: str, node: Node) -> Rational:
+        game: Game = cython.cast(ExtensiveGame, self.game)
+        resolved_player = game._resolve_player(player, "_node_value")
+        return rat_to_py(deref(self.profile).GetPayoff(resolved_player, node.node))
 
-    def _action_value(self, action: Action) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action.action)
+    @cython.cfunc
+    def _action_value(self, action: c_GameAction) -> object:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action)
         if value.has_value():
             return rat_to_py(value.value())
         return None
 
-    def _action_regret(self, action: Action) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(action.action))
+    @cython.cfunc
+    def _action_regret(self, action: c_GameAction) -> object:
+        return rat_to_py(deref(self.profile).GetRegret(action))
 
-    def _infoset_regret(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetRegret(infoset.infoset))
+    def _infoset_regret(self, node: Node) -> Rational:
+        return rat_to_py(deref(self.profile).GetRegret(cython.cast(Node, node)._infoset_handle()))
 
     def _agent_max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentMaxRegret())
@@ -1114,10 +1316,13 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
         for player in self.game.players:
-            for infoset in player.infosets:
+            for node in cython.cast(ExtensiveGame, self.game)._get_infosets(player):
                 profile._setprob_infoset(
-                    infoset,
-                    {a.label: float(self._getprob_action(a)) for a in infoset.actions},
+                    node,
+                    {
+                        a.deref().GetLabel().decode("utf-8"): float(self._getprob_action(a))
+                        for a in cython.cast(Node, node)._infoset_handle().deref().GetActions()
+                    },
                     sparse=True,
                 )
         return profile
@@ -1135,4 +1340,4 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())

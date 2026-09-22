@@ -24,10 +24,11 @@
 class StrategyBehavior:
     """A read-only, map-like view of the actions prescribed by a reduced strategy.
 
-    The keys of the mapping are the information sets of the strategy's player at
-    which the strategy prescribes an action; an unreachable information set is not a key.
-    The corresponding values are the prescribed ``Action`` objects.
-    Iteration yields the keys in the player's information set order.
+    The keys of the mapping are Histories identifying the information sets of the
+    strategy's player at which the strategy prescribes an action; an unreachable
+    information set is not a key. The corresponding values are the labels of the
+    prescribed actions. Iteration yields the keys in the player's information set
+    order.
 
     .. versionadded:: 17.0.0
     """
@@ -63,145 +64,101 @@ class StrategyBehavior:
         """The label of the strategy of which this is the behavior."""
         return self._strategy_label
 
-    def _action_at(self, infoset: Infoset) -> Action | None:
-        """The action prescribed by the strategy at `infoset`, or None if unreachable."""
-        player = cython.cast(Player, self._game.players[self._player_label])
+    def _action_at(self, node: Node) -> str | None:
+        """The label of the action prescribed by the strategy at node's information
+        set, or None if unreachable."""
         handle = self._game._resolve_strategy(
-            player, self._strategy_label, "StrategyBehavior"
+            self._player_label, self._strategy_label, "StrategyBehavior"
         )
-        action: c_GameAction = handle.deref().GetAction(cython.cast(Infoset, infoset).infoset)
+        action: c_GameAction = handle.deref().GetAction(cython.cast(Node, node)._infoset_handle())
         if not action:
             return None
-        return Action.wrap(action)
+        return action.deref().GetLabel().decode("utf-8")
 
-    def _resolve_key(self, key: Infoset | str) -> Infoset:
-        """Resolve `key` to an information set at which the player has the move."""
-        infoset = self._game._resolve_infoset(key, "StrategyBehavior", "key")
-        if infoset.player.label != self._player_label:
-            raise ValueError(
-                f"Player '{self._player_label}' does not have the move at {infoset}."
+    def _resolve_key(self, key: Selector) -> Node:
+        """Resolve `key` to a node at the information set at which the player has
+        the move."""
+        if not isinstance(key, Selector):
+            raise TypeError(
+                f"StrategyBehavior key must be Selector, not {key.__class__.__name__}"
             )
-        return infoset
+        resolved_node = cython.cast(ExtensiveGame, self._game)._resolve_infoset(
+            key, "StrategyBehavior", "key"
+        )
+        if resolved_node.player != self._player_label:
+            raise ValueError(
+                f"Player '{self._player_label}' does not have the move at {resolved_node}."
+            )
+        return resolved_node
 
-    def __getitem__(self, key: Infoset | str) -> Action:
-        """Return the action prescribed at the information set referenced by `key`.
+    def __getitem__(self, key: Selector) -> str:
+        """Return the label of the action prescribed at the information set `key`
+        resolves to.
+
+        Parameters
+        ----------
+        key : Selector
+            An `H`-built expression resolving to a single node belonging to the
+            information set to look up.
 
         Raises
         ------
+        TypeError
+            If `key` is not a ``Selector``.
         KeyError
-            If the strategy prescribes no action at the information set,
-            or if `key` is a string and no information set has that label.
+            If the strategy prescribes no action at the information set.
         ValueError
-            If the information set belongs to a different player.
+            If the information set belongs to a different player, or `key`
+            resolves to a terminal node or a chance event.
         """
-        infoset = self._resolve_key(key)
-        action = self._action_at(infoset)
+        node = self._resolve_key(key)
+        action = self._action_at(node)
         if action is None:
             raise KeyError(
-                f"Strategy '{self._strategy_label}' prescribes no action at {infoset}."
+                f"Strategy '{self._strategy_label}' prescribes no action at {node}."
             )
         return action
 
-    def get(self, key: Infoset | str, default: typing.Any = None) -> Action | None:
-        """Return the action prescribed at `key`, or `default` if none is prescribed."""
-        infoset = self._resolve_key(key)
-        action = self._action_at(infoset)
+    def get(self, key: Selector, default: typing.Any = None) -> str | None:
+        """Return the label of the action prescribed at `key`, or `default` if none
+        is prescribed."""
+        node = self._resolve_key(key)
+        action = self._action_at(node)
         return default if action is None else action
 
     def __contains__(self, key: typing.Any) -> bool:
         try:
-            infoset = self._resolve_key(key)
+            node = self._resolve_key(key)
         except (KeyError, ValueError, TypeError):
             return False
-        return self._action_at(infoset) is not None
+        return self._action_at(node) is not None
 
-    def __iter__(self) -> typing.Iterator[Infoset]:
-        player = self._game.players[self._player_label]
-        for infoset in player.infosets:
-            if self._action_at(infoset) is not None:
-                yield infoset
+    def _reachable_nodes(self) -> typing.Iterator[Node]:
+        """The representative nodes of the player's information sets at which the
+        strategy prescribes an action, in the player's information set order."""
+        for node in cython.cast(ExtensiveGame, self._game)._get_infosets(self._player_label):
+            if self._action_at(node) is not None:
+                yield node
+
+    def __iter__(self) -> typing.Iterator[tuple]:
+        for node in self._reachable_nodes():
+            yield _canonical_history(node)
 
     def __len__(self) -> int:
         return sum(1 for _ in self)
 
-    def keys(self) -> list[Infoset]:
-        """The information sets at which the strategy prescribes an action."""
+    def keys(self) -> list[tuple]:
+        """The Histories identifying the information sets at which the strategy
+        prescribes an action."""
         return list(self)
 
-    def values(self) -> list[Action]:
-        """The prescribed actions, in the order of `keys`."""
-        return [self._action_at(infoset) for infoset in self]
+    def values(self) -> list[str]:
+        """The labels of the prescribed actions, in the order of `keys`."""
+        return [self._action_at(node) for node in self._reachable_nodes()]
 
-    def items(self) -> list[tuple[Infoset, Action]]:
-        """(information set, action) pairs, in the order of `keys`."""
-        return [(infoset, self._action_at(infoset)) for infoset in self]
-
-
-@cython.cclass
-class Sequence:
-    """A sequence ``Player`` in a ``Game``.
-
-    .. versionadded:: 16.7.0
-    """
-    sequence = cython.declare(c_GameSequence)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create a Sequence outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(sequence: c_GameSequence) -> Sequence:
-        obj: Sequence = Sequence.__new__(Sequence)
-        obj.sequence = sequence
-        return obj
-
-    def __repr__(self) -> str:
-        return f"Sequence(player={self.player}, actions={self.actions})"
-
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Sequence) and
-            self.sequence.deref() == cython.cast(Sequence, other).sequence.deref()
-        )
-
-    def __hash__(self) -> int:
-        return cython.cast(cython.long, self.sequence.deref())
-
-    @property
-    def game(self) -> Game:
-        """The game to which the sequence belongs."""
-        return Game.wrap(self.sequence.deref().GetPlayer().deref().GetGame())
-
-    @property
-    def player(self) -> Player:
-        """The player to which the sequence belongs."""
-        return Player.wrap(self.sequence.deref().GetPlayer())
-
-    @property
-    def parent(self) -> Sequence | None:
-        """The parent (predecessor) of the sequence."""
-        if self.sequence.deref().GetParent() == cython.cast(c_GameSequence, NULL):
-            return None
-        return Sequence.wrap(self.sequence.deref().GetParent())
-
-    @property
-    def children(self) -> list[Sequence]:
-        """The immediate children (successors) of the sequence."""
-        ret: list[Sequence] = []
-        for seq in self.player.sequences:
-            if seq.parent == self:
-                ret.append(seq)
-        return ret
-
-    @property
-    def actions(self) -> list[Action]:
-        """Get the collection of actions defining this sequence.
-
-        Returns the empty list for the root sequence of the player.
-        """
-        actions: list[Action] = []
-        seq = self.sequence
-        while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
-            actions.insert(0, Action.wrap(seq.deref().GetAction()))
-            seq = seq.deref().GetParent()
-        return actions
+    def items(self) -> list[tuple[tuple, str]]:
+        """(History, action label) pairs, in the order of `keys`."""
+        return [
+            (_canonical_history(node), self._action_at(node))
+            for node in self._reachable_nodes()
+        ]

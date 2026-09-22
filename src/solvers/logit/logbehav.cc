@@ -1,0 +1,265 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
+//
+// FILE: src/solvers/logit/logbehav.cc
+// Behavior strategy profile where action probabilities are represented using
+// logarithms.
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "games.h"
+#include "games/gametree.h"
+#include "logbehav.h"
+
+//========================================================================
+//                  LogBehavProfile<T>: Lifecycle
+//========================================================================
+
+template <class T>
+LogBehavProfile<T>::LogBehavProfile(const Game &p_game)
+  : m_game(p_game), m_probs(m_game->BehavProfileLength()), m_logProbs(m_game->BehavProfileLength())
+{
+  int index = 1;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        m_profileIndex[action] = index++;
+      }
+    }
+  }
+
+  for (const auto &infoset : m_game->GetInfosets()) {
+    T center = T(1) / T(infoset->GetActions().size());
+    for (const auto &act : infoset->GetActions()) {
+      SetProb(act, center);
+    }
+  }
+}
+
+//========================================================================
+//               LogBehavProfile<T>: Operator overloading
+//========================================================================
+
+template <class T> bool LogBehavProfile<T>::operator==(const LogBehavProfile<T> &p_profile) const
+{
+  return (m_game == p_profile.m_game && m_probs == p_profile.m_probs);
+}
+
+//========================================================================
+//              LogBehavProfile<T>: Interesting quantities
+//========================================================================
+
+template <class T> T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
+{
+  if (action->GetInfoset()->GetPlayer()->IsChance()) {
+    return static_cast<T>(action->GetInfoset()->GetActionProb(action));
+  }
+  return GetProb(action);
+}
+
+template <class T> T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
+{
+  if (action->GetInfoset()->GetPlayer()->IsChance()) {
+    return log(static_cast<T>(action->GetInfoset()->GetActionProb(action)));
+  }
+  return m_logProbs[m_profileIndex.at(action)];
+}
+
+template <class T> const T &LogBehavProfile<T>::GetPayoff(const GameAction &act) const
+{
+  ComputeSolutionData();
+  return m_actionValues[act];
+}
+
+//
+// The following routines compute the derivatives of quantities as
+// the probability of the action 'p_oppAction' is changed.
+// See Turocy (2001), "Computing the Quantal Response Equilibrium
+// Correspondence" for details.
+// These assume that the profile is interior (totally mixed),
+// and that the game is of perfect recall
+//
+GameAction GetPrecedingAction(const GameNode &p_node, const GameInfoset &p_infoset)
+{
+  GameNode node = p_node;
+  while (node->GetParent()) {
+    const GameAction prevAction = node->GetPriorAction();
+    if (prevAction->GetInfoset() == p_infoset) {
+      return prevAction;
+    }
+    node = node->GetParent();
+  }
+  return nullptr;
+}
+
+template <class T>
+T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
+                                      const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+
+  const GameInfoset infoset = p_action->GetInfoset();
+  const GamePlayer player = p_action->GetInfoset()->GetPlayer();
+
+  // derivs stores the ratio of the derivative of the realization probability
+  // for each node, divided by the realization probability of the infoset,
+  // times the probability with which p_oppAction is played
+  std::map<GameNode, T> derivs;
+  for (auto member : infoset->GetMembers()) {
+    const GameAction act = GetPrecedingAction(member, p_oppAction->GetInfoset());
+    derivs[member] = (act == p_oppAction) ? m_beliefs[member] : static_cast<T>(0);
+  }
+
+  T deriv = static_cast<T>(0);
+  for (auto member : infoset->GetMembers()) {
+    const GameNode child = member->GetChild(p_action);
+    deriv += derivs[member] * m_nodeValues[child][player];
+    deriv -= derivs[member] * GetPayoff(p_action);
+    deriv += GetProb(p_oppAction) * m_beliefs[member] * DiffNodeValue(child, player, p_oppAction);
+  }
+
+  return deriv;
+}
+
+template <class T>
+T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_player,
+                                    const GameAction &p_oppAction) const
+{
+  ComputeSolutionData();
+
+  if (p_node->IsTerminal()) {
+    // If we reach a terminal node and haven't encountered p_oppAction,
+    // derivative wrt this path is zero.
+    return static_cast<T>(0);
+  }
+
+  const GameInfoset infoset = p_node->GetInfoset();
+  if (infoset == p_oppAction->GetInfoset()) {
+    // We've encountered the action; since we assume perfect recall,
+    // we won't encounter it again, and the downtree value must
+    // be the same.
+    return m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+  }
+  else {
+    T deriv = T(0);
+    for (auto action : infoset->GetActions()) {
+      deriv +=
+          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+    }
+    return deriv;
+  }
+}
+
+//========================================================================
+//             LogBehavProfile<T>: Cached profile information
+//========================================================================
+
+template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
+{
+  const GameOutcome outcome = node->GetOutcome();
+  for (auto player : m_game->GetPlayers()) {
+    m_nodeValues[node][player] += outcome->GetPayoff<T>(player);
+  }
+
+  const GameInfoset infoset = node->GetInfoset();
+  if (!infoset) {
+    return;
+  }
+
+  // push down payoffs from outcomes attached to non-terminal nodes
+  for (auto child : node->GetChildren()) {
+    m_nodeValues[child] = m_nodeValues[node];
+  }
+
+  for (auto player : m_game->GetPlayers()) {
+    m_nodeValues[node][player] = T(0);
+  }
+
+  for (auto child : node->GetChildren()) {
+    ComputeSolutionDataPass2(child);
+    const GameAction action = child->GetPriorAction();
+    for (auto player : m_game->GetPlayers()) {
+      m_nodeValues[node][player] += GetActionProb(action) * m_nodeValues[child][player];
+    }
+    if (!infoset->IsChanceInfoset()) {
+      m_actionValues[action] += m_beliefs[node] * m_nodeValues[child][infoset->GetPlayer()];
+    }
+  }
+}
+
+template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
+{
+  m_logRealizProbs[node] = (node->GetParent()) ? m_logRealizProbs[node->GetParent()] +
+                                                     GetLogActionProb(node->GetPriorAction())
+                                               : T(0);
+  for (auto child : node->GetChildren()) {
+    ComputeSolutionDataPass1(child);
+  }
+}
+
+template <class T> void LogBehavProfile<T>::ComputeSolutionData() const
+{
+  if (m_cacheValid) {
+    return;
+  }
+  m_actionValues.clear();
+  m_beliefs.clear();
+  m_nodeValues.clear();
+  ComputeSolutionDataPass1(m_game->GetRoot());
+
+  for (auto player : m_game->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      // The log-profile assumes that the mixed behavior profile has full support.
+      // However, if a game has zero-probability chance actions, then it is possible
+      // for an information set not to be reached.  In this event, we set the beliefs
+      // at those information sets to be uniform across the nodes.
+      T infosetProb = T(0);
+      for (auto member : infoset->GetMembers()) {
+        infosetProb += exp(m_logRealizProbs[member]);
+      }
+      if (infosetProb == T(0)) {
+        for (auto member : infoset->GetMembers()) {
+          m_beliefs[member] = 1.0 / T(infoset->GetMembers().size());
+        }
+        continue;
+      }
+
+      T maxLogProb = m_logRealizProbs[infoset->GetMember(1)];
+      for (auto member : infoset->GetMembers()) {
+        if (m_logRealizProbs[member] > maxLogProb) {
+          maxLogProb = m_logRealizProbs[member];
+        }
+      }
+
+      T total = 0.0;
+      for (auto member : infoset->GetMembers()) {
+        total += exp(m_logRealizProbs[member] - maxLogProb);
+      }
+
+      // The belief for the most likely node
+      T mostLikelyBelief = 1.0 / total;
+      for (auto member : infoset->GetMembers()) {
+        m_beliefs[member] = mostLikelyBelief * exp(m_logRealizProbs[member] - maxLogProb);
+      }
+    }
+  }
+
+  ComputeSolutionDataPass2(m_game->GetRoot());
+  m_cacheValid = true;
+}
+
+template class LogBehavProfile<double>;

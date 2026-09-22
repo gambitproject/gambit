@@ -14,12 +14,13 @@ Representation of games
    :toctree: api/
 
    Game
-   Player
-   Outcome
-   Node
-   Infoset
-   Action
-   Subgame
+   ExtensiveGame
+   StrategicGame
+   ActionGraphGame
+   BayesianActionGraphGame
+   History
+   TreeLayout
+   TreeLayoutCoordinates
 
 
 Creating, reading, and writing games
@@ -34,15 +35,22 @@ Creating, reading, and writing games
    read_agg
    read_bagg
 
-   Game.new_tree
-   Game.new_table
-   Game.from_arrays
+   StrategicGame.from_arrays
    Game.to_arrays
-   Game.from_dict
+   StrategicGame.from_dict
    Game.to_efg
    Game.to_nfg
    Game.to_html
    Game.to_latex
+
+
+Computing a tree layout for graphical display
+..............................................
+
+.. autosummary::
+   :toctree: api/
+
+   layout_tree
 
 
 Transforming game trees
@@ -51,16 +59,16 @@ Transforming game trees
 .. autosummary::
    :toctree: api/
 
-   Game.append_move
-   Game.append_infoset
-   Game.append_event
-   Game.insert_move
-   Game.insert_infoset
-   Game.insert_event
-   Game.copy_tree
-   Game.move_tree
-   Game.delete_parent
-   Game.delete_tree
+   ExtensiveGame.append_move
+   ExtensiveGame.append_infoset
+   ExtensiveGame.append_event
+   ExtensiveGame.insert_move
+   ExtensiveGame.insert_infoset
+   ExtensiveGame.insert_event
+   ExtensiveGame.copy_tree
+   ExtensiveGame.move_tree
+   ExtensiveGame.delete_parent
+   ExtensiveGame.delete_tree
 
 
 Transforming game information structure
@@ -69,13 +77,11 @@ Transforming game information structure
 .. autosummary::
    :toctree: api/
 
-   Game.make_infoset
-   Game.make_outcome
-   Game.make_event
-   Game.relabel_actions
-   Game.set_move_actions
-   Game.set_event_actions
-   Game.reveal
+   ExtensiveGame.make_infoset
+   ExtensiveGame.make_event
+   ExtensiveGame.relabel_actions
+   ExtensiveGame.set_move_actions
+   ExtensiveGame.set_event_actions
 
 
 Transforming game components
@@ -85,12 +91,17 @@ Transforming game components
    :toctree: api/
 
    Game.relabel_players
-   Game.set_players
-   Game.add_outcome
-   Game.delete_outcome
-   Game.set_outcome
-   Game.relabel_strategies
-   Game.set_strategies
+   ExtensiveGame.set_players
+   StrategicGame.set_players
+   StrategicGame.relabel_strategies
+   StrategicGame.set_strategies
+   ExtensiveGame.make_outcome
+   StrategicGame.make_outcome
+   ExtensiveGame.make_outcome_null
+   StrategicGame.make_outcome_null
+   ExtensiveGame.relabel_outcomes
+   StrategicGame.relabel_outcomes
+   Game.set_outcome_payoffs
 
 
 Information about the game
@@ -102,103 +113,26 @@ Information about the game
    Game.title
    Game.description
    Game.is_const_sum
-   Game.is_tree
    Game.is_perfect_recall
+   Game.has_perfect_recall
    Game.players
-   Game.outcomes
    Game.min_payoff
    Game.max_payoff
-   Game.root
-   Game.actions
-   Game.infosets
-   Game.nodes
+   Game.get_min_payoff
+   Game.get_max_payoff
+   ExtensiveGame.get_infosets
+   ExtensiveGame.get_events
+   Game.get_strategies
    Game.contingencies
-   Game.get_outcome
+   ExtensiveGame.get_outcome
+   StrategicGame.get_outcome
+   Game.get_outcomes
+   Game.get_outcome_payoffs
    Game.get_payoffs
-   Game.subgames
-   Game.minimal_subgame
+   ExtensiveGame.get_subgame_roots
+   ExtensiveGame.get_minimal_subgame
+   ExtensiveGame.get_strategy_unreachable
 
-.. autosummary::
-   :toctree: api/
-
-   Player.label
-   Player.number
-   Player.game
-   Player.strategies
-   Player.infosets
-   Player.actions
-   Player.is_chance
-   Player.min_payoff
-   Player.max_payoff
-   Player.sequences
-
-.. autosummary::
-   :toctree: api/
-
-   Outcome.label
-   Outcome.number
-   Outcome.game
-
-.. autosummary::
-   :toctree: api/
-
-   Node.label
-   Node.game
-   Node.outcome
-   Node.children
-   Node.parent
-   Node.is_subgame_root
-   Node.is_terminal
-   Node.is_strategy_reachable
-   Node.prior_action
-   Node.prior_sibling
-   Node.next_sibling
-   Node.infoset
-   Node.player
-   Node.is_successor_of
-   Node.plays
-   Node.own_prior_action
-
-.. autosummary::
-   :toctree: api/
-
-   Subgame.game
-   Subgame.root
-   Subgame.parent
-   Subgame.children
-
-.. autosummary::
-
-   :toctree: api/
-
-   Infoset.label
-   Infoset.game
-   Infoset.is_chance
-   Infoset.is_absent_minded
-   Infoset.player
-   Infoset.actions
-   Infoset.members
-   Infoset.precedes
-   Infoset.plays
-   Infoset.own_prior_actions
-
-.. autosummary::
-
-   :toctree: api/
-
-   Action.label
-   Action.infoset
-   Action.precedes
-   Action.prob
-   Action.plays
-
-.. autosummary::
-
-   :toctree: api/
-
-   Sequence.player
-   Sequence.parent
-   Sequence.actions
 
 Player behavior
 ...............
@@ -208,10 +142,11 @@ Player behavior
 
    Game.mixed_strategy_profile
    Game.random_strategy_profile
-   Game.mixed_behavior_profile
-   Game.random_behavior_profile
+   ExtensiveGame.get_behavior
+   ExtensiveGame.mixed_behavior_profile
+   ExtensiveGame.random_behavior_profile
    Game.strategy_support_profile
-   Game.behavior_support_profile
+   ExtensiveGame.behavior_support_profile
 
 
 Representation of strategic behavior
@@ -234,9 +169,9 @@ Computed quantities
    StrategyIndexedVector.__iter__
    StrategyIndexedVector.__getitem__
 
-   NodeIndexedVector
-   NodeIndexedVector.__iter__
-   NodeIndexedVector.__getitem__
+   HistoryIndexedVector
+   HistoryIndexedVector.__iter__
+   HistoryIndexedVector.__getitem__
 
    InfosetIndexedVector
    InfosetIndexedVector.__iter__
@@ -295,11 +230,11 @@ Probability distributions over behavior
    MixedBehaviorProfile.action_regrets
    MixedBehaviorProfile.infoset_values
    MixedBehaviorProfile.infoset_regrets
-   MixedBehaviorProfile.node_values
+   MixedBehaviorProfile.history_values
    MixedBehaviorProfile.realiz_probs
    MixedBehaviorProfile.infoset_probs
+   MixedBehaviorProfile.event_probs
    MixedBehaviorProfile.beliefs
-   MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.agent_max_regret
    MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.max_regret
@@ -320,14 +255,15 @@ Probability distributions over behavior
    InfosetValueVector
    InfosetRegretVector
    InfosetProbVector
+   EventProbVector
    ActionValueVector
    ActionRegretVector
    ActionValuesVector
    ActionRegretsVector
    RealizProbVector
    BeliefVector
-   NodeValueVector
-   NodeValuesVector
+   HistoryValueVector
+   HistoryValuesVector
 
 
 Representation of supports
@@ -367,7 +303,7 @@ Subsets of actions
    BehaviorSupportProfile.__getitem__
    BehaviorSupportProfile.__setitem__
    BehaviorSupportProfile.copy
-   BehaviorSupportProfile.is_reachable
+   BehaviorSupportProfile.is_infoset_reachable
 
    BehaviorSupport
    BehaviorSupport.player
@@ -375,7 +311,7 @@ Subsets of actions
    BehaviorSupport.__getitem__
 
    ActionSupport
-   ActionSupport.infoset
+   ActionSupport.history
    ActionSupport.__iter__
    ActionSupport.__contains__
 
@@ -399,7 +335,6 @@ Computation of Nash equilibria
 .. autosummary::
    :toctree: api/
 
-   NashComputationResult
    enumpure_solve
    enumpure_agent_solve
    enummixed_solve
@@ -412,6 +347,26 @@ Computation of Nash equilibria
    simpdiv_solve
    ipa_solve
    gnm_solve
+   hp_solve
+
+Each of these returns its own result type, documented below:
+
+.. autosummary::
+   :toctree: api/
+
+   NashResultBase
+   EnumPureResult
+   EnumMixedResult
+   EnumPolyResult
+   LpResult
+   LcpStrategyResult
+   LcpBehaviorResult
+   LiapResult
+   LogitResult
+   SimpdivResult
+   IPAResult
+   GNMResult
+   HPResult
 
 
 Computation of quantal response equilibria

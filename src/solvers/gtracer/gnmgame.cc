@@ -95,7 +95,7 @@ void gnmgame::retract(cvector &dest, const cvector &z) const
       }
       sumz += y[i];
     }
-    v = (sumz - 1) / (double)(i - firstAction(n));
+    v = (sumz - 1) / (i - firstAction(n));
     for (i = firstAction(n); i < lastAction(n); i++) {
       dest[i] = z[i] - v;
       if (dest[i] < 0.0) {

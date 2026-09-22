@@ -175,10 +175,14 @@ static IntegerRep *Inew(int newlen)
     allocsiz <<= 1; // find a power of 2
   }
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  // assert((unsigned long) allocsiz < MAX_INTREP_SIZE * sizeof(short));
+
+  const unsigned int repSize = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
+  if (repSize > std::numeric_limits<unsigned short>::max()) {
+    throw std::overflow_error("Integer: requested precision too large");
+  }
 
   auto *rep = reinterpret_cast<IntegerRep *>(new char[allocsiz]);
-  rep->sz = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
+  rep->sz = static_cast<unsigned short>(repSize);
   return rep;
 }
 

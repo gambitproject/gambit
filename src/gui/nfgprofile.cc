@@ -38,6 +38,10 @@ MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
 {
   CreateGrid(0, 0);
 
+  // The table takes ownership of the provider
+  m_labels = new ProfileLabelProvider;
+  GetTable()->SetAttrProvider(m_labels);
+
   SetRowLabelSize(40);
   SetColLabelSize(25);
   SetCornerLabelValue(wxT("#"));
@@ -50,6 +54,25 @@ MixedStrategyProfileList::MixedStrategyProfileList(wxWindow *p_parent,
   SetCellHighlightPenWidth(0);
   SetCellHighlightROPenWidth(0);
 
+#if wxCHECK_VERSION(3, 3, 0)
+  // Suppress wxGrid's own label highlighting, which follows the grid cursor.
+  // The cursor is meaningless here, and cannot be moved out of the way, as
+  // wxGrid puts it back on the first cell whenever the grid is repainted;
+  // the labels worth highlighting are chosen in OnUpdate() instead.
+  // Versions before 3.3 do not highlight labels, so there is nothing to do.
+  DisableOverlaySelection();
+#endif
+
+  // The column and corner labels sort the list, so show them as clickable
+  GetGridColLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
+  GetGridCornerLabelWindow()->SetCursor(wxCursor(wxCURSOR_HAND));
+
+  GetGridColLabelWindow()->SetToolTip(
+      _("Click a strategy to sort the profiles by its probability; "
+        "click it again to reverse the order"));
+  GetGridCornerLabelWindow()->SetToolTip(
+      _("Click to list the profiles in the order in which they were computed"));
+
   Bind(wxEVT_GRID_LABEL_LEFT_CLICK, &MixedStrategyProfileList::OnLabelClick, this);
   Bind(wxEVT_GRID_CELL_LEFT_CLICK, &MixedStrategyProfileList::OnCellClick, this);
   Bind(wxEVT_GRID_SELECT_CELL, &MixedStrategyProfileList::OnSelectCell, this);
@@ -59,8 +82,20 @@ MixedStrategyProfileList::~MixedStrategyProfileList() = default;
 
 void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 {
-  if (p_event.GetCol() == -1) {
-    m_doc->DoSelectProfile(p_event.GetRow() + 1);
+  if (p_event.GetCol() == -1 && p_event.GetRow() == -1) {
+    // The corner label: restore the order in which the profiles were computed
+    p_event.Veto();
+    m_sortOrder.Reset();
+    OnUpdate();
+  }
+  else if (p_event.GetCol() == -1) {
+    m_doc->DoSelectProfile(m_sortOrder.GetProfile(p_event.GetRow()));
+  }
+  else if (p_event.GetRow() == -1) {
+    // A strategy: sort the profiles on the probability it is played with
+    p_event.Veto();
+    m_sortOrder.ToggleColumn(p_event.GetCol() + 1);
+    OnUpdate();
   }
 
   ClearSelection();
@@ -68,7 +103,7 @@ void MixedStrategyProfileList::OnLabelClick(wxGridEvent &p_event)
 
 void MixedStrategyProfileList::OnCellClick(wxGridEvent &p_event)
 {
-  m_doc->DoSelectProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(m_sortOrder.GetProfile(p_event.GetRow()));
   ClearSelection();
 }
 
@@ -126,9 +161,11 @@ void MixedStrategyProfileList::ResizeGrid(int p_rows, int p_cols)
 
 void MixedStrategyProfileList::UpdateLabels()
 {
+  // Row labels identify the profile itself, so that a profile keeps its
+  // number however the list happens to be sorted.
   for (int row = 0; row < GetNumberRows(); ++row) {
     wxString label;
-    label << (row + 1);
+    label << m_sortOrder.GetProfile(row);
     SetRowLabelValue(row, label);
   }
 
@@ -136,7 +173,8 @@ void MixedStrategyProfileList::UpdateLabels()
   for (const auto &player : m_doc->GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       wxString label;
-      label << player->GetNumber() << ": " << strategy->GetLabel();
+      label << player->GetNumber() << ": " << strategy->GetLabel()
+            << wxString::FromUTF8(m_sortOrder.GetColumnMarker(index + 1));
       SetColLabelValue(index++, label);
     }
   }
@@ -150,7 +188,7 @@ void MixedStrategyProfileList::UpdateCells()
   const wxFont boldFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
   for (int row = 0; row < GetNumberRows(); ++row) {
-    const int profile = row + 1;
+    const int profile = m_sortOrder.GetProfile(row);
 
     for (int col = 0; col < GetNumberCols(); ++col) {
       SetCellValue(
@@ -167,6 +205,13 @@ void MixedStrategyProfileList::UpdateCells()
       SetAttr(row, col, attr);
     }
   }
+}
+
+void MixedStrategyProfileList::UpdateHighlights()
+{
+  // GetColumn() numbers columns from one, and is zero when unsorted
+  m_labels->SetSortedColumn(m_sortOrder.GetColumn() - 1);
+  m_labels->SetSelectedRow(m_sortOrder.GetRow(m_doc->GetWorkspace().GetCurrentProfile()));
 }
 
 void MixedStrategyProfileList::OnUpdate()
@@ -189,6 +234,10 @@ void MixedStrategyProfileList::OnUpdate()
   const int newCols = m_doc->GetGame()->GetStrategies().size();
 
   ResizeGrid(newRows, newCols);
+  m_sortOrder.Rebuild(newRows, newCols, [&](int p_col, int p_left, int p_right) {
+    return profiles.CompareStrategyProb(p_col, p_left, p_right);
+  });
+  UpdateHighlights();
   UpdateLabels();
   UpdateCells();
 

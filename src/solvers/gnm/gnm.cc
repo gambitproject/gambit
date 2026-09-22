@@ -30,11 +30,11 @@ using namespace Gambit::gametracer;
 
 namespace {
 
-std::list<MixedStrategyProfile<double>>
-Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &p_pert,
-      double p_lambdaEnd, int p_steps, int p_localNewtonInterval, int p_localNewtonMaxits,
-      Nash::StrategyCallbackType<double> p_onEquilibrium, Nash::GNMEventCallbackType p_onEvent,
-      const CancelToken &p_cancel)
+Nash::GNMStrategyResult Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep,
+                              const cvector &p_pert, double p_lambdaEnd, int p_steps,
+                              int p_localNewtonInterval, int p_localNewtonMaxits,
+                              Nash::StrategyCallbackType<double> p_onEquilibrium,
+                              Nash::GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   const double FUZZ = 1e-12;
   const bool WOBBLE = false;
@@ -73,17 +73,20 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
   for (const auto &answer : result.equilibria) {
     eqa.push_back(ToProfile(p_game, answer));
   }
-  return eqa;
+  const bool success = result.reason == GNMTerminationReason::NoMoreBoundaries ||
+                       result.reason == GNMTerminationReason::NoNextBoundary ||
+                       result.reason == GNMTerminationReason::LambdaOutOfRange;
+  return {eqa, success, result.reason};
 }
 
 } // namespace
 
 namespace Gambit::Nash {
 
-std::list<MixedStrategyProfile<double>>
-GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
-                 int p_localNewtonMaxits, StrategyCallbackType<double> p_onEquilibrium,
-                 GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
+GNMStrategyResult GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps,
+                                   int p_localNewtonInterval, int p_localNewtonMaxits,
+                                   StrategyCallbackType<double> p_onEquilibrium,
+                                   GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -103,11 +106,10 @@ GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_loca
                p_localNewtonMaxits, p_onEquilibrium, p_onEvent, p_cancel);
 }
 
-std::list<MixedStrategyProfile<double>>
-GNMStrategySolve(const MixedStrategyProfile<double> &p_pert, double p_lambdaEnd, int p_steps,
-                 int p_localNewtonInterval, int p_localNewtonMaxits,
-                 StrategyCallbackType<double> p_onEquilibrium, GNMEventCallbackType p_onEvent,
-                 const CancelToken &p_cancel)
+GNMStrategyResult GNMStrategySolve(const MixedStrategyProfile<double> &p_pert, double p_lambdaEnd,
+                                   int p_steps, int p_localNewtonInterval, int p_localNewtonMaxits,
+                                   StrategyCallbackType<double> p_onEquilibrium,
+                                   GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

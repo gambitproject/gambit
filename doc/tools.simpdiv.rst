@@ -83,6 +83,16 @@ options to specify additional starting points for the algorithm.
    this option sacrifices some precision in reporting the output of the method, in exchange for
    probabilities which are more human-readable.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed, respecting :option:`-d` the same way.
+
 .. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, initial points, as well as
@@ -96,7 +106,7 @@ options to specify additional starting points for the algorithm.
 
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-simpdiv catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-simpdiv catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria using simplicial subdivision
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

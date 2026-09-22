@@ -20,9 +20,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-ACLOCAL_AMFLAGS = -I m4
-
-include build_support/catalog/catalog.am
+include catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/GAMBIT_VERSION \
@@ -231,6 +229,7 @@ game_SOURCES = \
 	src/games/stratspt.h \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
+	src/games/stratmixed.cc \
 	src/games/file.cc \
 	src/games/workspace.cc \
 	src/games/workspace.h \
@@ -249,7 +248,6 @@ game_SOURCES = \
 	src/games/agg/bagg.h \
 	src/games/agg/proj_func.h \
 	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp \
     src/games/agg/trie_map.cc
 
 linalg_SOURCES = \
@@ -282,6 +280,12 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
+hp_SOURCES = \
+	src/solvers/hp/hp.h \
+	src/solvers/hp/hp.cc \
+	src/solvers/hp/hpsystem.h \
+	src/solvers/hp/hpsystem.cc
+
 nashsupport_SOURCES = \
 	src/solvers/nashsupport/efgsupport.cc \
 	src/solvers/nashsupport/nfgsupport.cc \
@@ -311,14 +315,21 @@ liap_SOURCES = \
 	src/solvers/liap/nfgliap.cc \
 	src/solvers/liap/liap.h
 
+path_SOURCES = \
+	src/solvers/path/path.cc \
+	src/solvers/path/path.h
+
 logit_SOURCES = \
 	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.imp \
-	src/solvers/logit/path.cc \
-	src/solvers/logit/path.h \
+	src/solvers/logit/logbehav.cc \
     src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc
+
+homotopy_SOURCES = \
+	${path_SOURCES} \
+	${logit_SOURCES} \
+	${hp_SOURCES}
 
 simpdiv_SOURCES = \
 	src/solvers/simpdiv/simpdiv.cc \
@@ -334,7 +345,7 @@ enumpoly_SOURCES = \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/polysystem.h \
     src/solvers/enumpoly/polypartial.h \
-    src/solvers/enumpoly/polypartial.imp \
+    src/solvers/enumpoly/polypartial.cc \
 	src/solvers/enumpoly/polysolver.cc \
 	src/solvers/enumpoly/polysolver.h \
 	src/solvers/enumpoly/efgpoly.cc \
@@ -351,14 +362,11 @@ if WITH_GUI
 bin_PROGRAMS = gambit
 endif
 
-# Read version from GAMBIT_VERSION file for use in compilation
-GAMBIT_VERSION = $(shell cat $(top_srcdir)/build_support/GAMBIT_VERSION)
-
 # Define VERSION for all C++ compilations and set include paths
 AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\" \
 	-DLOCALEDIR=\"$(LOCALEDIR)\"
 
-AM_CXXFLAGS = ${LLVM_CXXFLAGS}
+AM_CXXFLAGS = ${LLVM_CXXFLAGS} -Wall -Wsign-compare -Wunreachable-code
 
 ## Convenience libraries
 ##
@@ -366,14 +374,14 @@ AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 ## recompiling the same core/games/solver sources from scratch.
 
 noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
-	libliap.a liblogit.a libsimpdiv.a libenumpoly.a
+	libliap.a libhomotopy.a libsimpdiv.a libenumpoly.a
 
 libcore_a_SOURCES = ${core_SOURCES}
 libgames_a_SOURCES = ${game_SOURCES}
 libbimatrix_a_SOURCES = ${bimatrix_SOURCES}
 libgtracer_a_SOURCES = ${gtracerlib_SOURCES}
 libliap_a_SOURCES = ${liap_SOURCES}
-liblogit_a_SOURCES = ${logit_SOURCES}
+libhomotopy_a_SOURCES = ${homotopy_SOURCES}
 libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
 libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
 
@@ -437,6 +445,10 @@ gambit_SOURCES = \
 	src/gui/nfgprofile.h \
 	src/gui/nfgtable.cc \
 	src/gui/nfgtable.h \
+	src/gui/profilelabels.cc \
+	src/gui/profilelabels.h \
+	src/gui/profilesort.cc \
+	src/gui/profilesort.h \
 	src/gui/renratio.cc \
 	src/gui/renratio.h \
 	src/gui/style.cc \
@@ -450,7 +462,7 @@ gambit_SOURCES = \
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
 gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
-gambit_LDADD_LIBS = libbimatrix.a libliap.a liblogit.a libgtracer.a \
+gambit_LDADD_LIBS = libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
 gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
@@ -543,6 +555,4 @@ endif
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion

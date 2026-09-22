@@ -23,6 +23,7 @@
 #ifndef GAMBIT_SOLVERS_SIMPDIV_SIMPDIV_H
 #define GAMBIT_SOLVERS_SIMPDIV_SIMPDIV_H
 
+#include <optional>
 #include <variant>
 #include "solvers/nash.h"
 
@@ -57,12 +58,18 @@ inline void NullSimpdivEventCallback(const SimpdivEvent &) {}
 ///
 MixedStrategyProfile<Rational> SimpdivDefaultStart(const Game &p_game);
 
+/// @brief The result of computing a Nash equilibrium via simplicial subdivision
+struct SimpdivStrategyResult {
+  std::optional<MixedStrategyProfile<Rational>> equilibrium;
+  bool success{true};
+};
+
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
 /// van Der Laan, Talman and van Der Heyden, Math of Oper Res, 1987.
 ///
-std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
+SimpdivStrategyResult SimpdivStrategySolve(
     const MixedStrategyProfile<Rational> &p_start,
     const Rational &p_maxregret = Rational(1, 10000000), int p_gridResize = 2,
     int p_leashLength = 0,

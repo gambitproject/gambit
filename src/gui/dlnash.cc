@@ -30,6 +30,9 @@
 #endif // WX_PRECOMP
 #include <wx/stdpaths.h>
 
+#include "games.h"
+#include "games/gametree.h"
+
 #include "dlnash.h"
 
 namespace Gambit::GUI {
@@ -38,6 +41,7 @@ static wxString EnumPureMethodName() { return _("by looking for pure strategy eq
 static wxString EnumMixedMethodName() { return _("by enumerating extreme points"); }
 static wxString EnumPolyMethodName() { return _("by solving systems of polynomial equations"); }
 static wxString GnmMethodName() { return _("by global Newton tracing"); }
+static wxString HpMethodName() { return _("by the Herings-Peeters homotopy"); }
 static wxString IpaMethodName() { return _("by iterated polymatrix approximation"); }
 static wxString LpMethodName() { return _("by solving a linear program"); }
 static wxString LcpMethodName() { return _("by solving a linear complementarity program"); }
@@ -91,6 +95,9 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
   if (p_method == GnmMethodName()) {
     return GNMNashSpec{};
   }
+  if (p_method == HpMethodName()) {
+    return HPNashSpec{};
+  }
   if (p_method == IpaMethodName()) {
     return IPANashSpec{};
   }
@@ -118,7 +125,7 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
 template <class M>
 concept StrategicMethod =
     std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
-    std::same_as<M, GNMNashSpec> || std::same_as<M, IPANashSpec> ||
+    std::same_as<M, GNMNashSpec> || std::same_as<M, HPNashSpec> || std::same_as<M, IPANashSpec> ||
     std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
 
 template <class M>
@@ -169,6 +176,10 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
                                            method.perturbations, method.lambdaEnd, method.steps,
                                            method.localNewtonInterval,
                                            method.localNewtonMaxIterations);
+        }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return prefix +
+                 wxString::Format("hp -d 10 -n %d -m %.17g", method.priors, method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return prefix + wxString::Format("ipa -d 10 -n %d", method.perturbations);
@@ -223,6 +234,9 @@ wxString MethodDescription(const NashMethodSpec &p_method)
         else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
           return _("by global Newton tracing");
         }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return _("by the Herings-Peeters homotopy");
+        }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return _("by iterated polymatrix approximation");
         }
@@ -262,6 +276,10 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
                 "every %d steps, at most %d iterations)"),
               method.perturbations, method.lambdaEnd, method.steps, method.localNewtonInterval,
               method.localNewtonMaxIterations);
+        }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return wxString::Format(_(" (%d random priors; maximum regret %.4g)"), method.priors,
+                                  method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, IPANashSpec>) {
           return wxString::Format(_(" (%d perturbation)"), method.perturbations);
@@ -338,7 +356,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, S);
 
-  if (m_doc->GetGame()->IsTree()) {
+if (As<GameTreeRep>(m_doc->GetGame())) {
     wxString repChoices[] = {_("using the extensive game"), _("using the strategic game")};
     m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
     m_repChoice->SetSelection(0);
@@ -383,10 +401,11 @@ void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
     if (m_doc->GetGame()->NumPlayers() == 2) {
       m_methodChoice->Append(LcpMethodName());
     }
-    m_methodChoice->Append(EnumPureMethodName());
+m_methodChoice->Append(EnumPureMethodName());
     m_methodChoice->Append(LiapMethodName());
     m_methodChoice->Append(GnmMethodName());
     m_methodChoice->Append(IpaMethodName());
+    m_methodChoice->Append(HpMethodName());
     m_methodChoice->Append(EnumPolyMethodName());
   }
   else {

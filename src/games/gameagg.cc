@@ -40,7 +40,6 @@ public:
   }
 
   GameOutcome GetOutcome() const override { throw UndefinedException(); }
-  void SetOutcome(GameOutcome p_outcome) override { throw UndefinedException(); }
   Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };

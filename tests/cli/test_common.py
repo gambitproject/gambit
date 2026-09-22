@@ -12,12 +12,12 @@ from pygambit.cli import common
 class TestReadGame:
     def test_reads_nfg(self, nfg_matching_pennies_text):
         game = common.read_game(io.BytesIO(nfg_matching_pennies_text.encode()))
-        assert not game.is_tree
+        assert not isinstance(game, gbt.ExtensiveGame)
         assert len(game.players) == 2
 
     def test_reads_efg(self, efg_small_tree_text):
         game = common.read_game(io.BytesIO(efg_small_tree_text.encode()))
-        assert game.is_tree
+        assert isinstance(game, gbt.ExtensiveGame)
         assert len(game.players) == 2
 
     def test_reads_text_stream(self, nfg_matching_pennies_text):
@@ -166,6 +166,6 @@ class TestRenderSupportCsv:
         game = gbt.read_nfg(io.BytesIO(nfg_matching_pennies_text.encode()))
         support = game.strategy_support_profile()
         p1 = next(iter(game.players))
-        first_strategy = next(iter(p1.strategies))
-        support[p1.label] = [first_strategy]
+        first_strategy = next(iter(game.get_strategies(p1)))
+        support[p1] = [first_strategy]
         assert common.render_support_csv(support, "candidate") == "candidate,10,11"

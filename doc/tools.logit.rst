@@ -74,11 +74,33 @@ See the :ref:`algorithm description <logit>` for full details.
    this switch is specified, only the approximation to the Nash
    equilibrium at the end of the branch is output.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   If tracing reaches a point accepted as a Nash equilibrium (per
+   :option:`-m`), print detailed, human-readable information about that
+   terminal profile instead of the usual comma-separated line -- whether
+   or not :option:`-e` was also given, since both end with the same
+   accepted-equilibrium line.  This has no effect on the points printed
+   along the way there, or on the output of :option:`-l` or of maximum-likelihood
+   estimation, neither of which is itself an accepted equilibrium.
+
+.. cmdoption:: -b
+
+   .. versionadded:: 17.0.0
+
+   Report any bifurcations detected while tracing, as comment lines giving the
+   bracketing values of lambda.  Bifurcations are reported inline, interleaved
+   with the trace, as soon as each is detected.  This switch has no additional
+   effect unless :option:`-e` is also given, since bifurcations are already
+   reported as part of the full trace otherwise.
+
 Computing the principal branch, in mixed strategies, of
 the reduced strategic form of the example
 in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-logit -S catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-logit -S catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute a branch of the logit equilibrium correspondence
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

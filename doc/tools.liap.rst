@@ -47,6 +47,16 @@ See the :ref:`algorithm description <liap>` for full details.
    Express all output using decimal representations with the
    specified number of digits.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
+
 .. cmdoption:: -n
 
    Specify the number of starting points to randomly generate.
@@ -88,16 +98,20 @@ See the :ref:`algorithm description <liap>` for full details.
    output of equilibria (excluding the initial NE tag).
    Mutually exclusive with :option:`-n`.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, initial points, as well as
    points at which the minimization fails at a constrained local minimum
    that is not a Nash equilibrium, are all output, in addition to any
    equilibria found.
 
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
+
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-liap catalog/journals/ijgt/selten1975/fig2.efg
+   $ gambit-liap catalog/games/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria by minimizing the Lyapunov function
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

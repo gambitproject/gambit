@@ -15,15 +15,15 @@ def cli_runner() -> CliRunner:
 
 
 def _table_game(payoffs: dict, title: str) -> gbt.Game:
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.title = title
     p1, p2 = game.players
-    s1a, s1b = p1.strategies
-    s2a, s2b = p2.strategies
+    s1a, s1b = game.get_strategies(p1)
+    s2a, s2b = game.get_strategies(p2)
     strategies = {"a": s1a, "b": s1b, "A": s2a, "B": s2b}
     for (row, col), (v1, v2) in payoffs.items():
         game.make_outcome(
-            {p1.label: strategies[row], p2.label: strategies[col]}, {p1: v1, p2: v2}, f"{row}{col}"
+            {p1: strategies[row], p2: strategies[col]}, {p1: v1, p2: v2}, f"{row}{col}"
         )
     return game
 
@@ -96,14 +96,13 @@ def efg_asymmetric_tree_text() -> str:
     player 2 plays "x" after it; player 2's action after the off-path "R" is
     payoff-irrelevant and so free to vary across equilibria).
     """
-    game = gbt.Game.new_tree(players=["1", "2"], title="Asymmetric multi-infoset game")
-    game.append_move(game.root, "1", ["L", "R"])
-    left, right = game.root.children
-    game.append_move(left, "2", ["x", "y", "z"])
-    game.append_move(right, "2", ["p", "q"])
-    for node in left.children:
-        payoff = [1, 1] if node.prior_action.label == "x" else [0, 0]
-        game.set_outcome(node, game.add_outcome(node.prior_action.label, payoff))
-    for node in right.children:
-        game.set_outcome(node, game.add_outcome(node.prior_action.label, [0, 0]))
+    game = gbt.ExtensiveGame(players=["1", "2"], title="Asymmetric multi-infoset game")
+    game.append_move(gbt.H.path(), "1", ["L", "R"])
+    game.append_move(gbt.H.path("L"), "2", ["x", "y", "z"])
+    game.append_move(gbt.H.path("R"), "2", ["p", "q"])
+    for label in ["x", "y", "z"]:
+        payoff = [1, 1] if label == "x" else [0, 0]
+        game.make_outcome(gbt.H.path("L", label), {"1": payoff[0], "2": payoff[1]}, label)
+    for label in ["p", "q"]:
+        game.make_outcome(gbt.H.path("R", label), {"1": 0, "2": 0}, label)
     return game.to_efg()

@@ -23,12 +23,14 @@
 
 from __future__ import annotations
 
+import csv
 import functools
 import io
 import pathlib
 import sys
 
 import click
+import numpy as np
 
 import pygambit as gbt
 
@@ -105,6 +107,22 @@ def print_banner(description: str, extra_lines: tuple[str, ...] = ()) -> None:
     )
     click.echo("This is free software, distributed under the GNU GPL", err=True)
     click.echo(err=True)
+
+
+def load_game(
+    quiet: bool,
+    description: str,
+    file: str | None,
+    prog_name: str,
+    extra_lines: tuple[str, ...] = (),
+) -> gbt.Game:
+    """Standard tool startup, shared by every `gambit-*` CLI tool's `main()`: print
+    the banner (see `print_banner`) unless `quiet`, then read the game from `file`
+    (or standard input).
+    """
+    if not quiet:
+        print_banner(description, extra_lines)
+    return read_game(open_game_file(file, prog_name))
 
 
 def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> callable:
@@ -204,12 +222,12 @@ def render_profile_csv(
         values = [
             prob
             for player in profile.game.players
-            for _infoset, action in profile[player.label]
+            for _infoset, action in profile[player]
             for _label, prob in action
         ]
     else:
         values = [
-            prob for player in profile.game.players for _label, prob in profile[player.label]
+            prob for player in profile.game.players for _label, prob in profile[player]
         ]
     return ",".join([label, *(format_value(v, decimals, fixed, as_float) for v in values)])
 
@@ -226,17 +244,19 @@ def render_support_csv(
     if isinstance(support, gbt.BehaviorSupportProfile):
         fields = [
             "".join(
-                "1" if action.label in action_support else "0"
-                for action in action_support.infoset.actions
+                "1" if action in action_support else "0"
+                for action in support.game.get_actions(gbt.H.path(*history.actions))
             )
             for player in support.game.players
-            for action_support in support[player.label]
+            for history, action_support in zip(
+                support.game.get_infosets(player), support[player], strict=True
+            )
         ]
     else:
         fields = [
             "".join(
-                "1" if strategy in support[player.label] else "0"
-                for strategy in player.strategies
+                "1" if strategy in support[player] else "0"
+                for strategy in support.game.get_strategies(player)
             )
             for player in support.game.players
         ]
@@ -246,71 +266,114 @@ def render_support_csv(
 def render_profile_detail(
     profile: gbt.MixedStrategyProfile | gbt.MixedBehaviorProfile,
     decimals: int,
+    fixed: bool = True,
+    as_float: bool = False,
 ) -> str:
     """Render a strategy or behavior profile as a human-readable description,
     matching `MixedStrategyProfileDetailRenderer` and
-    `MixedBehaviorProfileDetailRenderer` in the C++ tools.
+    `MixedBehaviorProfileDetailRenderer` in the C++ tools.  See `format_value` for
+    the meaning of `fixed` and `as_float`.
     """
     if _is_behavior_profile(profile):
-        return _render_behavior_detail(profile, decimals)
-    return _render_strategy_detail(profile, decimals)
+        return _render_behavior_detail(profile, decimals, fixed, as_float)
+    return _render_strategy_detail(profile, decimals, fixed, as_float)
 
 
-def _name_or_number(obj) -> str:
-    # Gambit's Python API numbers players/strategies/infosets/actions from 0;
-    # the C++ tools display the underlying (1-based) engine numbering.
-    return obj.label if obj.label else str(obj.number + 1)
+def _render_history(actions: tuple[str, ...]) -> str:
+    # Comma-joining alone is ambiguous: action labels may themselves contain commas
+    # (or quotes), so e.g. actions "A,B" then "C" and "A" then "B,C" would both render
+    # as "A,B,C". CSV quote-when-needed is a standard, already-correct fix for exactly
+    # this problem.
+    buf = io.StringIO()
+    csv.writer(buf, lineterminator="").writerow(actions)
+    return buf.getvalue() or "(root)"
 
 
-def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
+def _render_strategy_detail(
+    profile: gbt.MixedStrategyProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
     for player in profile.game.players:
-        lines.append(f"Strategy profile for player {player.number + 1}:")
+        lines.append(f"Strategy profile for {player}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
-        probs = profile[player.label]
-        values = profile.strategy_values[player.label]
-        for strategy in player.strategies:
-            prob = format_value(probs[strategy], decimals)
-            value = format_value(values[strategy], decimals)
+        probs = profile[player]
+        values = profile.strategy_values[player]
+        for strategy in profile.game.get_strategies(player):
+            prob = format_value(probs[strategy], decimals, fixed, as_float)
+            value = format_value(values[strategy], decimals, fixed, as_float)
             lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
 
 
-def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) -> str:
+def _render_behavior_detail(
+    profile: gbt.MixedBehaviorProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
     for player in profile.game.players:
-        lines.append(f"Behavior profile for player {player.number + 1}:")
+        lines.append(f"Behavior profile for {player}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        for infoset, mixed_action in profile[player.label]:
-            infoset_name = _name_or_number(infoset)
-            values = action_values[next(iter(infoset.members))]
-            for action in infoset.actions:
-                prob = mixed_action[action.label]
-                value = values[action.label]
-                value_text = format_value(value, decimals) if value is not None else ""
+        # Numbered by position among the player's information sets -- a compact key
+        # matched against the same numbering in the History table below, rather than
+        # a description; see that table's own comment.
+        for infoset_number, (history, (_, mixed_action)) in enumerate(
+            zip(profile.game.get_infosets(player), profile[player], strict=True), start=1
+        ):
+            selector = gbt.H.path(*history.actions)
+            values = action_values[selector]
+            for action in profile.game.get_actions(selector):
+                prob = mixed_action[action]
+                value = values[action]
+                value_text = (
+                    format_value(value, decimals, fixed, as_float) if value is not None else ""
+                )
                 lines.append(
-                    f"{infoset_name:>7}    {_name_or_number(action):>7}   "
-                    f"{format_value(prob, decimals):>11}   {value_text:>11}"
+                    f"{infoset_number:>7}    {action:>7}   "
+                    f"{format_value(prob, decimals, fixed, as_float):>11}   {value_text:>11}"
                 )
         lines.append("")
-        lines.append("Infoset    Node       Belief        Prob")
-        lines.append("-------    -------    -----------   -----------")
-        for infoset, _mixed_action in profile[player.label]:
-            infoset_name = _name_or_number(infoset)
-            for node in infoset.members:
-                node_name = _name_or_number(node)
-                belief = beliefs[node]
-                belief_text = format_value(belief, decimals) if belief is not None else ""
-                realiz_text = format_value(realiz_probs[node], decimals)
-                lines.append(
-                    f"{infoset_name:>7}    {node_name:>7}   {belief_text:>11}   {realiz_text:>11}"
-                )
+        # One row per member of each of the player's information sets, identified by
+        # its History (see `_render_history`) rather than an engine-assigned node
+        # number: the `Infoset` column is still the same encounter-order index as the
+        # table above (a compact key for matching rows across the two tables, not a
+        # description -- the first member listed under each infoset number is always
+        # its canonical one, so its own History is already visible there for anyone
+        # who wants it).
+        rows = [
+            (infoset_number, _render_history(member.actions), beliefs[member],
+             realiz_probs[member])
+            for infoset_number, history in enumerate(profile.game.get_infosets(player), start=1)
+            for member in profile.game.get_members(gbt.H.path(*history.actions))
+        ]
+        history_width = max([len("History")] + [len(row[1]) for row in rows])
+        lines.append(f"Infoset    {'History':<{history_width}}    Belief        Prob")
+        lines.append(f"-------    {'-' * history_width}    -----------   -----------")
+        for infoset_number, history_text, belief, realiz in rows:
+            belief_text = (
+                format_value(belief, decimals, fixed, as_float) if belief is not None else ""
+            )
+            lines.append(
+                f"{infoset_number:>7}    {history_text:<{history_width}}    "
+                f"{belief_text:>11}   {format_value(realiz, decimals, fixed, as_float):>11}"
+            )
         lines.append("")
+    # The probability distribution over plays: not player-specific (unlike the tables
+    # above), so printed once for the whole profile rather than once per player.
+    plays = [
+        (_render_history(play.actions), realiz_probs[play])
+        for play in profile.game.get_histories(gbt.H.plays)
+    ]
+    play_width = max([len("Play")] + [len(text) for text, _ in plays])
+    lines.append("Probability distribution over full histories:")
+    lines.append(f"{'Play':<{play_width}}    Prob")
+    lines.append(f"{'-' * play_width}    -----------")
+    for play_text, prob in plays:
+        prob_text = format_value(prob, decimals, fixed, as_float)
+        lines.append(f"{play_text:<{play_width}}    {prob_text:>11}")
     return "\n".join(lines)
 
 
@@ -324,7 +387,9 @@ def read_strategy_profiles_csv(
     Values are parsed as exact rationals; a method which requires floating-point
     starting points converts the result via `~MixedStrategyProfile.as_float`.
     """
-    strategies = [strategy for player in game.players for strategy in player.strategies]
+    strategies = [
+        strategy for player in game.players for strategy in game.get_strategies(player)
+    ]
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
         line = line.strip()
@@ -337,7 +402,7 @@ def read_strategy_profiles_csv(
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
         profile = game.mixed_strategy_profile(rational=True)
         for player in game.players:
-            profile[player.label] = {s: next(values) for s in player.strategies}
+            profile[player] = {s: next(values) for s in game.get_strategies(player)}
         profiles.append(profile)
     return profiles
 
@@ -352,7 +417,9 @@ def read_behavior_profiles_csv(
     the result via `~MixedBehaviorProfile.as_float`.
     """
     count = sum(
-        len(list(infoset.actions)) for player in game.players for infoset in player.infosets
+        len(game.get_actions(gbt.H.path(*history.actions)))
+        for player in game.players
+        for history in game.get_infosets(player)
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -366,8 +433,63 @@ def read_behavior_profiles_csv(
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
         for player in game.players:
-            for infoset in player.infosets:
-                node = next(iter(infoset.members))
-                profile[node] = {a.label: next(values) for a in infoset.actions}
+            for history in game.get_infosets(player):
+                selector = gbt.H.path(*history.actions)
+                profile[selector] = {a: next(values) for a in game.get_actions(selector)}
         profiles.append(profile)
     return profiles
+
+
+def _validate_random_start_options(
+    n: int | None, seed: int | None, start_file: str | None
+) -> None:
+    """Shared validation for the `-n`/`-R`/`-s` starting-point options common to
+    gambit-gnm, gambit-ipa, and gambit-liap: `-n` and `-s` are mutually exclusive,
+    and `-R` requires `-n`.
+    """
+    if n is not None and start_file is not None:
+        raise ValueError("The -n and -s options are mutually exclusive.")
+    if seed is not None and n is None:
+        raise ValueError("The -R option requires -n.")
+
+
+def resolve_strategy_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedStrategyProfile]:
+    """Resolve strategy starting points for a `-n`/`-R`/`-s`-style tool: read from
+    `start_file` if given, otherwise `n` uniform-random draws (`default_count` if `n`
+    is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, and
+    gambit-liap's non-agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_strategy_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_strategy_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]
+
+
+def resolve_behavior_starts(
+    game: gbt.Game,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.MixedBehaviorProfile]:
+    """Behavior-profile counterpart to `resolve_strategy_starts`; see there for the
+    shared `-n`/`-R`/`-s` semantics. Used by gambit-liap's agent form.
+    """
+    _validate_random_start_options(n, seed, start_file)
+    if start_file is not None:
+        return read_behavior_profiles_csv(start_file, game)
+    gen = np.random.default_rng(seed)
+    return [
+        game.random_behavior_profile(gen=gen)
+        for _ in range(n if n is not None else default_count)
+    ]

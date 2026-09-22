@@ -27,17 +27,15 @@ polymatrix approximation.
 from __future__ import annotations
 
 import click
-import numpy as np
 
 import pygambit as gbt
 
 from .common import (
     handle_errors,
-    open_game_file,
-    print_banner,
-    read_game,
-    read_strategy_profiles_csv,
+    load_game,
     render_profile_csv,
+    render_profile_detail,
+    resolve_strategy_starts,
     version_option,
 )
 
@@ -84,6 +82,7 @@ _EXTRA_BANNER = ("Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Chris
     default=None,
     help="file containing perturbation vectors (mutually exclusive with -n)",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -99,28 +98,18 @@ def main(
     n_vectors: int | None,
     seed: int | None,
     start_file: str | None,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
-    if not quiet:
-        print_banner(DESCRIPTION, _EXTRA_BANNER)
-    if n_vectors is not None and start_file is not None:
-        raise ValueError("The -n and -s options are mutually exclusive.")
-    if seed is not None and n_vectors is None:
-        raise ValueError("The -R option requires -n.")
-    game = read_game(open_game_file(file, PROG_NAME))
-
-    if start_file is not None:
-        perturbations = read_strategy_profiles_csv(start_file, game)
-    else:
-        gen = np.random.default_rng(seed)
-        perturbations = [
-            game.random_strategy_profile(gen=gen)
-            for _ in range(n_vectors if n_vectors is not None else 1)
-        ]
+    game = load_game(quiet, DESCRIPTION, file, PROG_NAME, _EXTRA_BANNER)
+    perturbations = resolve_strategy_starts(game, n_vectors, seed, start_file)
 
     def render(profile, label: str = "NE") -> None:
-        click.echo(render_profile_csv(profile, label, decimals))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals))
 
     def render_event(event) -> None:
         if not verbose:
