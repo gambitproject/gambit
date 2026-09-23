@@ -19,7 +19,7 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython==3.3.0 wheel lxml numpy scipy cibuildwheel==4.2.1
+          pip install cython wheel lxml numpy scipy cibuildwheel
       - name: Build and smoke-test cp314 Windows wheel
         run: |
           python -m cibuildwheel --output-dir wheelhouse/
