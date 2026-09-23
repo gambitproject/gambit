@@ -798,6 +798,19 @@ class ExtensiveGame(Game):
         return resolved_nodes
 
     @cython.cfunc
+    def _resolve_move_nodes(self, nodes: typing.Any, funcname: str) -> list[Node]:
+        """Internal: resolve `nodes` to a nonempty set of distinct terminal nodes,
+        without mutating the game -- shared by `append_move` and `append_event` to
+        validate every group of a `GroupedSelector` before any of them is mutated,
+        so a later group's failure can never leave an earlier group's mutation
+        applied.  An empty group therefore raises, the same as an empty selector.
+        """
+        resolved_nodes = self._resolve_nodes(nodes, funcname, "nodes")
+        if any(not cython.cast(Node, n)._is_terminal() for n in resolved_nodes):
+            raise UndefinedOperationError(f"{funcname}(): `nodes` must be terminal nodes")
+        return resolved_nodes
+
+    @cython.cfunc
     def _resolve_infoset(self,
                          infoset: Selector, funcname: str, argname: str = "infoset") -> Node:
         """Resolve an attempt to reference a personal player's information set of the
@@ -962,10 +975,12 @@ class ExtensiveGame(Game):
             an empty or a duplicated label.
         """
         if isinstance(nodes, GroupedSelector):
-            for group in self._group_nodes(nodes).values():
-                if not group:
-                    continue
-                self._append_move_at(group, player, actions)
+            resolved_groups = [
+                self._resolve_move_nodes(group, "append_move")
+                for group in self._group_nodes(nodes).values()
+            ]
+            for resolved_nodes in resolved_groups:
+                self._append_move_at(resolved_nodes, player, actions)
             return
         if not isinstance(nodes, Selector):
             raise TypeError(
@@ -1096,10 +1111,12 @@ class ExtensiveGame(Game):
             summing to exactly one.
         """
         if isinstance(nodes, GroupedSelector):
-            for group in self._group_nodes(nodes).values():
-                if not group:
-                    continue
-                self._append_event_at(group, actions)
+            resolved_groups = [
+                self._resolve_move_nodes(group, "append_event")
+                for group in self._group_nodes(nodes).values()
+            ]
+            for resolved_nodes in resolved_groups:
+                self._append_event_at(resolved_nodes, actions)
             return
         if not isinstance(nodes, Selector):
             raise TypeError(
