@@ -50,7 +50,6 @@ Advanced tutorials:
    tutorials/advanced_tutorials/starting_points
    tutorials/advanced_tutorials/quantal_response
    tutorials/advanced_tutorials/agent_versus_non_agent_regret
-   .. pygambit.external_programs
 
 Interoperability tutorials
 --------------------------
