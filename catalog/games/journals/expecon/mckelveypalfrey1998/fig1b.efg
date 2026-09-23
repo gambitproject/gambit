@@ -1,0 +1,16 @@
+EFG 2 R "Chainstore paradox (McKelvey and Palfrey 1998, Figure 1b), 'strategic' version" { "Entrant" "Incumbent" }
+"The 'strategic' version of the one-shot chainstore paradox stage game, as
+presented in :cite:p:`McKPal98`, Figure 1(b): the incumbent (player 2) must
+commit to Fight or Acquiesce without observing the entrant's move, represented
+here as a single information set spanning both of the entrant's actions. This
+game is strategically equivalent to the sequential version in Figure 1(a), and
+is used to illustrate the sensitivity of the logit agent quantal response
+equilibrium correspondence to a game's extensive-form representation."
+
+p "" 1 1 "" { "N" "E" } 0
+p "" 2 1 "" { "F" "A" } 0
+t "" 1 "" { 2, 2 }
+t "" 2 "" { 2, 2 }
+p "" 2 1 "" { "F" "A" } 0
+t "" 3 "" { 0, 0 }
+t "" 4 "" { 3, 1 }
