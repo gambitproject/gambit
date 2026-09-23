@@ -19,7 +19,9 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython wheel lxml numpy scipy cibuildwheel
+          # Pinned to reproduce the toolchain combo in effect when v16.7.0 was tagged (2026-07-11):
+          # cython 3.2.8 and cibuildwheel 4.1.0 were the latest available at that date.
+          pip install cython==3.2.8 wheel lxml numpy scipy cibuildwheel==4.1.0
       - name: Build and smoke-test cp314 Windows wheel
         run: |
           python -m cibuildwheel --output-dir wheelhouse/
