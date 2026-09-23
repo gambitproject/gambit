@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython"]
+requires = ["setuptools", "wheel", "Cython==3.3.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -136,6 +136,9 @@ markers = [
     "slow: all time-consuming tests",
     "catalog_update: tests of catalog/build.py",
 ]
+
+[tool.cibuildwheel]
+test-command = "python -c \"import pygambit\""
 
 [tool.setuptools]
 packages = ["pygambit", "pygambit.cli"]
