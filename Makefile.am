@@ -317,8 +317,6 @@ path_SOURCES = \
 	src/solvers/path/path.h
 
 logit_SOURCES = \
-	src/solvers/logit/logbehav.h \
-	src/solvers/logit/logbehav.cc \
     src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc
