@@ -384,7 +384,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_onEvent);
   EquationSystem system(game);
-  tracer.TracePath(
+  const auto result = tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
         system.GetValue(p_point, p_lhs);
       },
@@ -407,16 +407,16 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   if (profiles.back().GetProfile().GetAgentMaxRegret() < p_regret) {
     p_onEquilibrium(profiles.back().GetProfile());
   }
-  return {profiles, callback.GetBifurcations()};
+  return {profiles, callback.GetBifurcations(), {result.stats}};
 }
 
-std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
+LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
     const LogitQREMixedBehaviorProfile &p_start, const std::list<double> &p_targetLambda,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
-    return {p_start};
+    return {{p_start}, {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
@@ -426,9 +426,9 @@ std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_onEvent);
   EquationSystem system(game);
-  std::list<LogitQREMixedBehaviorProfile> ret;
+  LogitLambdaResult<LogitQREMixedBehaviorProfile> ret;
   for (auto lam : p_targetLambda) {
-    tracer.TracePath(
+    const auto result = tracer.TracePath(
         [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
           system.GetValue(p_point, p_lhs);
         },
@@ -447,7 +447,8 @@ std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
         [&callback](bool p_active, const Vector<double> &p_point) {
           callback.OnPerturbation(p_active, p_point);
         });
-    ret.push_back(callback.GetProfiles().back());
+    ret.profiles.push_back(callback.GetProfiles().back());
+    ret.stats.push_back(result.stats);
   }
   return ret;
 }

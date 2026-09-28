@@ -692,11 +692,31 @@ cdef extern from "solvers/hp/hp.h" namespace "Gambit::Nash":
         PolishFailed
         RegretTargetNotReached
 
+cdef extern from "solvers/path/path.h":
+    cdef cppclass c_TracePathStats "Gambit::TracePathStats":
+        size_t predictor_attempts
+        size_t accepted_steps
+        size_t rejected_distance
+        size_t rejected_contraction
+        size_t rejected_orientation
+        size_t corrector_iterations
+        size_t function_evals
+        size_t jacobian_evals
+        size_t factorizations
+        double function_seconds
+        double jacobian_seconds
+        double factorization_seconds
+        double newton_seconds
+        double terminate_seconds
+        double callback_seconds
+        double total_seconds
+
 cdef extern from "solvers/hp/hp.h":
     cdef cppclass c_HPStrategyResult "Gambit::Nash::HPStrategyResult":
         optional[c_MixedStrategyProfile[double]] equilibrium
         bool success
         c_HPTerminationReason reason
+        stdvector[c_TracePathStats] stats
     c_HPStrategyResult HPStrategySolve(
             c_MixedStrategyProfile[double], double, StrategyCallbackType[double],
             HPEventCallbackType
@@ -760,11 +780,13 @@ cdef extern from "solvers/logit/logit.h":
         bool success
         c_LogitTerminationReason reason
         stdvector[c_LogitBifurcationStrategy] bifurcations
+        stdvector[c_TracePathStats] stats
     cdef cppclass c_LogitBehaviorResult "Gambit::LogitBehaviorResult":
         optional[c_MixedBehaviorProfile[double]] equilibrium
         bool success
         c_LogitTerminationReason reason
         stdvector[c_LogitBifurcationBehavior] bifurcations
+        stdvector[c_TracePathStats] stats
 
     c_LogitStrategyResult LogitStrategySolveEquilibrium(
             c_LogitQREMixedStrategyProfile, double, double, double,
@@ -782,10 +804,14 @@ cdef extern from "nash.h":
     ] EnumMixedStrategySolveCliquesWrapper[T](
             c_Game, StrategyCallbackType[T]
     ) except +RuntimeError
-    stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
+    pair[
+        stdlist[c_LogitQREMixedBehaviorProfile], stdvector[c_TracePathStats]
+    ] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
-    stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
+    pair[
+        stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]], stdvector[c_TracePathStats]
+    ] LogitBehaviorAtLambdaWrapper(
             c_Game, stdlist[double], double, double,
             LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
@@ -793,10 +819,14 @@ cdef extern from "nash.h":
             shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double,
             LogitEventCallbackType[c_LogitQREMixedBehaviorProfile]
     ) except +
-    stdlist[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
+    pair[
+        stdlist[c_LogitQREMixedStrategyProfile], stdvector[c_TracePathStats]
+    ] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
-    stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(
+    pair[
+        stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]], stdvector[c_TracePathStats]
+    ] LogitStrategyAtLambdaWrapper(
             c_Game, stdlist[double], double, double,
             LogitEventCallbackType[c_LogitQREMixedStrategyProfile]
     ) except +

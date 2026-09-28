@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <algorithm> // for std::max
+#include <chrono>
 
 #include "games.h"
 #include "path.h"
@@ -33,6 +34,26 @@ namespace Gambit {
 //----------------------------------------------------------------------------
 
 namespace {
+
+using Clock = std::chrono::steady_clock;
+
+double SecondsSince(Clock::time_point p_start)
+{
+  return std::chrono::duration<double>(Clock::now() - p_start).count();
+}
+
+/// Adds the wall-clock duration of its own lifetime to an accumulator
+class ScopedTimer {
+public:
+  explicit ScopedTimer(double &p_seconds) : m_seconds(p_seconds), m_start(Clock::now()) {}
+  ~ScopedTimer() { m_seconds += SecondsSince(m_start); }
+  ScopedTimer(const ScopedTimer &) = delete;
+  ScopedTimer &operator=(const ScopedTimer &) = delete;
+
+private:
+  double &m_seconds;
+  Clock::time_point m_start;
+};
 
 inline double sqr(double x) { return x * x; }
 
@@ -155,6 +176,9 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   const double b_tol = 1.0e-10; // Tolerance for perturbing the b matrix in case of singularity
   const double b_pert = 1.0e-8; // Perturbation of the b matrix in case of singularity
 
+  const auto start = Clock::now();
+  TracePathStats stats;
+
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.size()), newT(x.size());
@@ -162,29 +186,61 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   Matrix<double> b(x.size(), x.size() - 1);
   Matrix<double> q(x.size(), x.size());
 
-  p_jacobian(x, b);
-  QRDecomp(b, q);
-  q.GetRow(q.NumRows(), t);
-  p_callback(x);
+  auto evaluateFunction = [&](const Vector<double> &p_point) {
+    const ScopedTimer timer(stats.function_seconds);
+    stats.function_evals++;
+    p_function(p_point, y);
+  };
+  auto evaluateJacobian = [&](const Vector<double> &p_point) {
+    const ScopedTimer timer(stats.jacobian_seconds);
+    stats.jacobian_evals++;
+    p_jacobian(p_point, b);
+  };
+  auto factorize = [&]() {
+    const ScopedTimer timer(stats.factorization_seconds);
+    stats.factorizations++;
+    QRDecomp(b, q);
+  };
+  auto newtonStep = [&](double &p_dist) {
+    const ScopedTimer timer(stats.newton_seconds);
+    NewtonStep(q, b, u, y, p_dist);
+  };
+  auto shouldTerminate = [&]() -> bool {
+    const ScopedTimer timer(stats.terminate_seconds);
+    return p_terminate(x);
+  };
+  auto callback = [&]() {
+    const ScopedTimer timer(stats.callback_seconds);
+    p_callback(x);
+  };
+
   int steps = 0;
+  auto finish = [&](bool p_status, const std::string &p_message) -> TracePathResult {
+    stats.total_seconds = SecondsSince(start);
+    return {x, p_status, p_message, steps, stats};
+  };
+
+  evaluateJacobian(x);
+  factorize();
+  q.GetRow(q.NumRows(), t);
+  callback();
 
   auto stepsizeBelowMinimum = [&]() -> TracePathResult {
     if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
-      return {x, true,
-              "Path following terminated successfully at point satisfying criterion function.",
-              steps};
+      return finish(
+          true, "Path following terminated successfully at point satisfying criterion function.");
     }
-    return {x, false, "Stepsize fell below minimum threshold.", steps};
+    return finish(false, "Stepsize fell below minimum threshold.");
   };
 
   bool first_step = true;
   double omega = (p_direction == TraceDirection::Positive) ? 1.0 : -1.0;
 
   if (p_trackingIndex > x.size() || p_trackingIndex < 1) {
-    return {x, false, "Tracking index exceeds dimension of point vector.", steps};
+    return finish(false, "Tracking index exceeds dimension of point vector.");
   }
 
-  while (!p_terminate(x)) {
+  while (!shouldTerminate()) {
     p_cancel.Check();
 
     bool accept = true;
@@ -195,8 +251,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
 
     if (first_step) {
       if (std::abs(t[p_trackingIndex]) <= c_orientTol) {
-        return {x, false, "Initial tangent vector is orthogonal to path-following direction.",
-                steps};
+        return finish(false, "Initial tangent vector is orthogonal to path-following direction.");
       }
       // Ensure that the tangent is oriented in the same direction as
       // the path-following direction.
@@ -207,13 +262,14 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     }
 
     // Predictor step
+    stats.predictor_attempts++;
     for (size_t k = 1; k <= x.size(); k++) {
       u[k] = x[k] + h * omega * t[k];
     }
 
     double decel = 1.0 / m_maxDecel; // initialize deceleration factor
-    p_jacobian(u, b);
-    QRDecomp(b, q);
+    evaluateJacobian(u);
+    factorize();
 
     // Perturb the b matrix if it is singular or nearly singular
     for (size_t i = 1; i < b.NumRows(); i++) {
@@ -232,17 +288,19 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     while (true) {
       double dist;
 
-      p_function(u, y);
+      stats.corrector_iterations++;
+      evaluateFunction(u);
       if (pert != 0.0) {
         for (size_t i = 1; i <= y.size(); i++) {
           // Symmetry breaking, perturbing all directions with an altenating sign
           y[i] += pert * (i % 2 == 0 ? 1.0 : -1.0);
         }
       }
-      NewtonStep(q, b, u, y, dist);
+      newtonStep(dist);
 
       if (dist >= c_maxDist) {
         accept = false;
+        stats.rejected_distance++;
         break;
       }
 
@@ -251,6 +309,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
         const double contr = dist / (disto + c_tol * c_eta);
         if (contr > c_maxContr) {
           accept = false;
+          stats.rejected_contraction++;
           break;
         }
         decel = std::max(decel, std::sqrt(contr / c_maxContr) * m_maxDecel);
@@ -263,7 +322,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        return {x, false, "Maximum iterations exceeded.", steps};
+        return finish(false, "Maximum iterations exceeded.");
       }
     }
 
@@ -280,6 +339,10 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
         pert = c_pert;
         pert_countdown = std::max(std::abs(10.0 * h), min_pert_countdown);
         p_onPerturbation(true, x);
+      }
+      if (accept) {
+        // Count each rejected attempt under one reason only
+        stats.rejected_orientation++;
       }
       accept = false;
     }
@@ -318,8 +381,9 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     // PC step was successful; update and iterate
     x = u;
     t = newT;
-    p_callback(x);
+    callback();
     steps++;
+    stats.accepted_steps++;
 
     if (pert_countdown > 0.0) {
       // If we are currently perturbing in the neighborhood of a bifurcation, check to see
@@ -332,7 +396,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
       }
     }
   }
-  return {x, true, "Path tracing terminated successfully.", steps};
+  return finish(true, "Path tracing terminated successfully.");
 }
 
 PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
@@ -350,16 +414,36 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
   Matrix<double> Q(N, N);            // Orthogonal matrix from QR decomposition
   Vector<double> x_reduced(N);       // Reduced x vector with fixed_index removed
 
+  const auto start = Clock::now();
+  TracePathStats stats;
   int steps = 0;
   double dist = 0.0;
 
-  while (!p_terminate(x)) {
+  auto finish = [&](bool p_status, const std::string &p_message) -> PolishResult {
+    stats.total_seconds = SecondsSince(start);
+    return {x, p_status, p_message, steps, stats};
+  };
+  auto shouldTerminate = [&]() -> bool {
+    const ScopedTimer timer(stats.terminate_seconds);
+    return p_terminate(x);
+  };
+
+  while (!shouldTerminate()) {
     if (steps >= max_iter) {
-      return {x, false, "Polishing exceeded maximum iterations.", steps};
+      return finish(false, "Polishing exceeded maximum iterations.");
     }
 
-    p_function(x, y);
-    p_jacobian(x, jac_full);
+    stats.corrector_iterations++;
+    {
+      const ScopedTimer timer(stats.function_seconds);
+      stats.function_evals++;
+      p_function(x, y);
+    }
+    {
+      const ScopedTimer timer(stats.jacobian_seconds);
+      stats.jacobian_evals++;
+      p_jacobian(x, jac_full);
+    }
 
     size_t row_index = 1;
     for (size_t i = 1; i <= N + 1; ++i) { // Newton step expects the transposed Jacobian
@@ -379,10 +463,17 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
       }
     }
 
-    QRDecomp(jac_square, Q);
+    {
+      const ScopedTimer timer(stats.factorization_seconds);
+      stats.factorizations++;
+      QRDecomp(jac_square, Q);
+    }
 
     // Solve jac_square * x_reduced = -y
-    NewtonStep(Q, jac_square, x_reduced, y, dist);
+    {
+      const ScopedTimer timer(stats.newton_seconds);
+      NewtonStep(Q, jac_square, x_reduced, y, dist);
+    }
 
     // Update x, keeping fixed_index constant
     temp_idx = 1;
@@ -395,13 +486,14 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
     steps++;
 
     if (p_callback) {
+      const ScopedTimer timer(stats.callback_seconds);
       p_callback(x);
     }
   }
 
   // The loop only exits here once p_terminate(x) holds for the actual, current x;
   // there is nothing further to validate against a separate tolerance.
-  return {x, true, "Polishing terminated successfully.", steps};
+  return finish(true, "Polishing terminated successfully.");
 }
 
 } // end namespace Gambit

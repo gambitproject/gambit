@@ -42,13 +42,13 @@ EnumMixedStrategySolveCliquesWrapper(
           cliques};
 }
 
-inline std::list<LogitQREMixedBehaviorProfile>
+inline std::pair<std::list<LogitQREMixedBehaviorProfile>, std::vector<TracePathStats>>
 LogitBehaviorPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
-      .profiles;
+  auto trace = LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
+                                  PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  return {std::move(trace.profiles), std::move(trace.stats)};
 }
 
 std::shared_ptr<LogitQREMixedBehaviorProfile>
@@ -62,45 +62,47 @@ LogitBehaviorEstimateWrapper(std::shared_ptr<MixedBehaviorProfile<double>> p_fre
                             p_stopAtLocal, p_firstStep, p_maxAccel, p_onEvent));
 }
 
-std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>
+std::pair<std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>, std::vector<TracePathStats>>
 LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
                              double p_firstStep, double p_maxAccel,
                              LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
                                  NullLogitEventCallback<LogitQREMixedBehaviorProfile>)
 {
   LogitQREMixedBehaviorProfile start(p_game);
-  std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> ret;
-  for (auto &qre :
-       LogitBehaviorSolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
-                                p_firstStep, p_maxAccel, p_onEvent)) {
-    ret.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
+  auto result =
+      LogitBehaviorSolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
+                               p_firstStep, p_maxAccel, p_onEvent);
+  std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> profiles;
+  for (auto &qre : result.profiles) {
+    profiles.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
   }
-  return ret;
+  return {std::move(profiles), std::move(result.stats)};
 }
 
-inline std::list<LogitQREMixedStrategyProfile>
+inline std::pair<std::list<LogitQREMixedStrategyProfile>, std::vector<TracePathStats>>
 LogitStrategyPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel)
-      .profiles;
+  auto trace = LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
+                                  PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  return {std::move(trace.profiles), std::move(trace.stats)};
 }
 
-std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>
+std::pair<std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>, std::vector<TracePathStats>>
 LogitStrategyAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
                              double p_firstStep, double p_maxAccel,
                              LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
                                  NullLogitEventCallback<LogitQREMixedStrategyProfile>)
 {
   LogitQREMixedStrategyProfile start(p_game);
-  std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> ret;
-  for (auto &qre :
-       LogitStrategySolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
-                                p_firstStep, p_maxAccel, p_onEvent)) {
-    ret.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
+  auto result =
+      LogitStrategySolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
+                               p_firstStep, p_maxAccel, p_onEvent);
+  std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> profiles;
+  for (auto &qre : result.profiles) {
+    profiles.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
   }
-  return ret;
+  return {std::move(profiles), std::move(result.stats)};
 }
 
 std::shared_ptr<LogitQREMixedStrategyProfile>
