@@ -23,6 +23,7 @@
 #include <cmath>
 #include <algorithm> // for std::max
 #include <chrono>
+#include <vector>
 
 #include "games.h"
 #include "path.h"
@@ -57,60 +58,97 @@ private:
 
 inline double sqr(double x) { return x * x; }
 
-void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1, int l2, int l3)
+//
+// QR decomposition of a (transposed) Jacobian by Givens rotations.  The rotations are recorded
+// rather than accumulated into an explicit orthogonal matrix Q, which is only ever needed to
+// extract the tangent to the path and to multiply vectors by its transpose; both are done by
+// applying the recorded rotations.  Rotating row by row makes the sign of the tangent stable
+// from one step to the next, which bifurcation detection relies on.
+//
+class GivensQR {
+public:
+  /// Reduce b to upper triangular form R in place, recording the rotations used, so that
+  /// R = Q b where Q is the product of the rotations
+  void Decompose(Matrix<double> &b);
+
+  /// Replace p_v by Q^T p_v
+  void ApplyTranspose(Vector<double> &p_v) const;
+
+  /// Set p_row to the last row of Q, the tangent to the path when b is a transposed Jacobian
+  void LastRow(Vector<double> &p_row) const
+  {
+    std::ranges::fill(p_row, 0.0);
+    p_row[m_rows] = 1.0;
+    ApplyTranspose(p_row);
+  }
+
+private:
+  size_t m_rows{0}, m_cols{0};
+  // Cosine and sine of each rotation, in the order they were applied; rotation (m, k)
+  // combines rows m and k, for m = 1..m_cols and k = m+1..m_rows
+  std::vector<double> m_cos, m_sin;
+};
+
+void GivensQR::Decompose(Matrix<double> &b)
 {
-  if (std::abs(c1) + std::abs(c2) == 0.0) {
-    return;
-  }
-
-  double sn;
-  if (std::abs(c2) >= std::abs(c1)) {
-    sn = std::sqrt(1.0 + sqr(c1 / c2)) * std::abs(c2);
-  }
-  else {
-    sn = std::sqrt(1.0 + sqr(c2 / c1)) * std::abs(c1);
-  }
-  const double s1 = c1 / sn;
-  const double s2 = c2 / sn;
-
-  for (size_t k = 1; k <= q.NumColumns(); k++) {
-    const double sv1 = q(l1, k);
-    const double sv2 = q(l2, k);
-    q(l1, k) = s1 * sv1 + s2 * sv2;
-    q(l2, k) = -s2 * sv1 + s1 * sv2;
-  }
-
-  for (size_t k = l3; k <= b.NumColumns(); k++) {
-    const double sv1 = b(l1, k);
-    const double sv2 = b(l2, k);
-    b(l1, k) = s1 * sv1 + s2 * sv2;
-    b(l2, k) = -s2 * sv1 + s1 * sv2;
-  }
-
-  c1 = sn;
-  c2 = 0.0;
-}
-
-void SetAsIdentity(Matrix<double> &M)
-{
-  M = 0.0;
-  for (int i = M.MinRow(); i <= M.MaxRow(); ++i) {
-    M(i, i) = 1.0;
-  }
-}
-
-void QRDecomp(Matrix<double> &b, Matrix<double> &q)
-{
-  SetAsIdentity(q);
-  for (size_t m = 1; m <= b.NumColumns(); m++) {
-    for (size_t k = m + 1; k <= b.NumRows(); k++) {
-      Givens(b, q, b(m, m), b(k, m), m, k, m + 1);
+  m_rows = b.NumRows();
+  m_cols = b.NumColumns();
+  m_cos.clear();
+  m_sin.clear();
+  for (size_t m = 1; m <= m_cols; m++) {
+    for (size_t k = m + 1; k <= m_rows; k++) {
+      double &c1 = b(m, m);
+      double &c2 = b(k, m);
+      if (std::abs(c1) + std::abs(c2) == 0.0) {
+        m_cos.push_back(1.0);
+        m_sin.push_back(0.0);
+        continue;
+      }
+      double sn;
+      if (std::abs(c2) >= std::abs(c1)) {
+        sn = std::sqrt(1.0 + sqr(c1 / c2)) * std::abs(c2);
+      }
+      else {
+        sn = std::sqrt(1.0 + sqr(c2 / c1)) * std::abs(c1);
+      }
+      const double s1 = c1 / sn;
+      const double s2 = c2 / sn;
+      m_cos.push_back(s1);
+      m_sin.push_back(s2);
+      for (size_t j = m + 1; j <= m_cols; j++) {
+        const double sv1 = b(m, j);
+        const double sv2 = b(k, j);
+        b(m, j) = s1 * sv1 + s2 * sv2;
+        b(k, j) = -s2 * sv1 + s1 * sv2;
+      }
+      c1 = sn;
+      c2 = 0.0;
     }
   }
 }
 
-void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<double> &y,
-                double &d)
+void GivensQR::ApplyTranspose(Vector<double> &p_v) const
+{
+  // Q^T is the product of the transposed rotations in reverse order of application
+  size_t index = m_cos.size();
+  for (size_t m = m_cols; m >= 1; m--) {
+    for (size_t k = m_rows; k > m; k--) {
+      index--;
+      const double s1 = m_cos[index];
+      const double s2 = m_sin[index];
+      const double sv1 = p_v[m];
+      const double sv2 = p_v[k];
+      p_v[m] = s1 * sv1 - s2 * sv2;
+      p_v[k] = s2 * sv1 + s1 * sv2;
+    }
+  }
+}
+
+// Newton step on the system whose (transposed) Jacobian has been decomposed as R = Q b:
+// solve for the correction in the row space of the Jacobian, and apply it to u.  On return
+// y holds the correction and d its length.
+void NewtonStep(const GivensQR &p_qr, const Matrix<double> &b, Vector<double> &u,
+                Vector<double> &y, Vector<double> &p_work, double &d)
 {
   for (size_t k = 1; k <= b.NumColumns(); k++) {
     for (size_t l = 1; l <= k - 1; l++) {
@@ -119,14 +157,14 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
     y[k] /= b(k, k);
   }
 
+  for (size_t k = 1; k <= p_work.size(); k++) {
+    p_work[k] = (k <= y.size()) ? y[k] : 0.0;
+  }
+  p_qr.ApplyTranspose(p_work);
   d = 0.0;
-  for (size_t k = 1; k <= b.NumRows(); k++) {
-    double s = 0.0;
-    for (size_t l = 1; l <= b.NumColumns(); l++) {
-      s += q(l, k) * y[l];
-    }
-    u[k] -= s;
-    d += s * s;
+  for (size_t k = 1; k <= p_work.size(); k++) {
+    u[k] -= p_work[k];
+    d += p_work[k] * p_work[k];
   }
   d = std::sqrt(d);
 }
@@ -184,7 +222,8 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   Vector<double> t(x.size()), newT(x.size());
   Vector<double> y(x.size() - 1);
   Matrix<double> b(x.size(), x.size() - 1);
-  Matrix<double> q(x.size(), x.size());
+  GivensQR qr;
+  Vector<double> work(x.size());
 
   auto evaluateFunction = [&](const Vector<double> &p_point) {
     const ScopedTimer timer(stats.function_seconds);
@@ -199,11 +238,15 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   auto factorize = [&]() {
     const ScopedTimer timer(stats.factorization_seconds);
     stats.factorizations++;
-    QRDecomp(b, q);
+    qr.Decompose(b);
+  };
+  auto tangent = [&](Vector<double> &p_tangent) {
+    const ScopedTimer timer(stats.factorization_seconds);
+    qr.LastRow(p_tangent);
   };
   auto newtonStep = [&](double &p_dist) {
     const ScopedTimer timer(stats.newton_seconds);
-    NewtonStep(q, b, u, y, p_dist);
+    NewtonStep(qr, b, u, y, work, p_dist);
   };
   auto shouldTerminate = [&]() -> bool {
     const ScopedTimer timer(stats.terminate_seconds);
@@ -222,7 +265,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
 
   evaluateJacobian(x);
   factorize();
-  q.GetRow(q.NumRows(), t);
+  tangent(t);
   callback();
 
   auto stepsizeBelowMinimum = [&]() -> TracePathResult {
@@ -327,7 +370,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
     }
 
     // Obtain the tangent at the next step
-    q.GetRow(q.NumRows(), newT);
+    tangent(newT);
     const double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
 
     if (omega_flip == -1.0) {
@@ -411,7 +454,8 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
   Vector<double> y(N);               // Equations results
   Matrix<double> jac_full(N + 1, N); // Full Jacobian matrix (N+1 unknowns, N equations)
   Matrix<double> jac_square(N, N);   // Jacobian matrix with fixed_index row removed
-  Matrix<double> Q(N, N);            // Orthogonal matrix from QR decomposition
+  GivensQR qr;                       // QR decomposition of jac_square
+  Vector<double> work(N);            // Scratch for the Newton step
   Vector<double> x_reduced(N);       // Reduced x vector with fixed_index removed
 
   const auto start = Clock::now();
@@ -466,13 +510,13 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
     {
       const ScopedTimer timer(stats.factorization_seconds);
       stats.factorizations++;
-      QRDecomp(jac_square, Q);
+      qr.Decompose(jac_square);
     }
 
     // Solve jac_square * x_reduced = -y
     {
       const ScopedTimer timer(stats.newton_seconds);
-      NewtonStep(Q, jac_square, x_reduced, y, dist);
+      NewtonStep(qr, jac_square, x_reduced, y, work, dist);
     }
 
     // Update x, keeping fixed_index constant
