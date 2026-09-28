@@ -86,81 +86,79 @@ template <class T> const T &LogBehavProfile<T>::GetPayoff(const GameAction &act)
 }
 
 //
-// The following routines compute the derivatives of quantities as
-// the probability of the action 'p_oppAction' is changed.
+// Derivatives of action values with respect to log action probabilities.
 // See Turocy (2001), "Computing the Quantal Response Equilibrium
-// Correspondence" for details.
-// These assume that the profile is interior (totally mixed),
-// and that the game is of perfect recall
+// Correspondence" for details.  These assume that the profile is interior
+// (totally mixed), and that the game is of perfect recall.
 //
-GameAction GetPrecedingAction(const GameNode &p_node, const GameInfoset &p_infoset)
-{
-  GameNode node = p_node;
-  while (node->GetParent()) {
-    const GameAction prevAction = node->GetPriorAction();
-    if (prevAction->GetInfoset() == p_infoset) {
-      return prevAction;
-    }
-    node = node->GetParent();
-  }
-  return nullptr;
-}
-
+// With x the log probabilities, the value of action a at information set I of
+// player i is V(a) = sum_{h in I} mu(h) v_i(h a), where mu are beliefs and v_i are
+// node values.  Its derivative with respect to x_b has two parts:
+//  - for b taken below h a, the change in v_i(h a): each terminal node z below h a
+//    whose path contains b contributes mu(h) Pr(z | h a) u_i(z);
+//  - for b taken above h, the change in beliefs: mu(h) v_i(h a) for each member h
+//    whose path contains b, less V(a) times the total belief on those members.
+// Both are accumulated in a single pass over the tree.
+//
 template <class T>
-T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
-                                      const GameAction &p_oppAction) const
+void LogBehavProfile<T>::DiffActionValuesPass(
+    const GameNode &p_node, std::vector<PathAction> &p_path, Matrix<T> &p_derivs,
+    std::map<GameInfoset, std::map<int, T>> &p_shares) const
 {
-  ComputeSolutionData();
-
-  const GameInfoset infoset = p_action->GetInfoset();
-  const GamePlayer player = p_action->GetInfoset()->GetPlayer();
-
-  // derivs stores the ratio of the derivative of the realization probability
-  // for each node, divided by the realization probability of the infoset,
-  // times the probability with which p_oppAction is played
-  std::map<GameNode, T> derivs;
-  for (auto member : infoset->GetMembers()) {
-    const GameAction act = GetPrecedingAction(member, p_oppAction->GetInfoset());
-    derivs[member] = (act == p_oppAction) ? m_beliefs[member] : static_cast<T>(0);
-  }
-
-  T deriv = static_cast<T>(0);
-  for (auto member : infoset->GetMembers()) {
-    const GameNode child = member->GetChild(p_action);
-    deriv += derivs[member] * m_nodeValues[child][player];
-    deriv -= derivs[member] * GetPayoff(p_action);
-    deriv += GetProb(p_oppAction) * m_beliefs[member] * DiffNodeValue(child, player, p_oppAction);
-  }
-
-  return deriv;
-}
-
-template <class T>
-T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_player,
-                                    const GameAction &p_oppAction) const
-{
-  ComputeSolutionData();
-
   if (p_node->IsTerminal()) {
-    // If we reach a terminal node and haven't encountered p_oppAction,
-    // derivative wrt this path is zero.
-    return static_cast<T>(0);
+    const T logRealizProb = m_logRealizProbs[p_node];
+    for (size_t k = 0; k < p_path.size(); k++) {
+      const T weight = p_path[k].belief * exp(logRealizProb - p_path[k].logRealizProb) *
+                       m_nodeValues[p_node][p_path[k].player];
+      for (size_t m = k + 1; m < p_path.size(); m++) {
+        p_derivs(p_path[k].index, p_path[m].index) += weight;
+      }
+    }
+    return;
   }
 
   const GameInfoset infoset = p_node->GetInfoset();
-  if (infoset == p_oppAction->GetInfoset()) {
-    // We've encountered the action; since we assume perfect recall,
-    // we won't encounter it again, and the downtree value must
-    // be the same.
-    return m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
-  }
-  else {
-    T deriv = T(0);
-    for (auto action : infoset->GetActions()) {
-      deriv +=
-          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+  if (infoset->IsChanceInfoset()) {
+    for (const auto &action : infoset->GetActions()) {
+      DiffActionValuesPass(p_node->GetChild(action), p_path, p_derivs, p_shares);
     }
-    return deriv;
+    return;
+  }
+
+  const GamePlayer player = infoset->GetPlayer();
+  const T belief = m_beliefs[p_node];
+  auto &shares = p_shares[infoset];
+  for (const auto &taken : p_path) {
+    shares[taken.index] += belief;
+  }
+  for (const auto &action : infoset->GetActions()) {
+    const GameNode child = p_node->GetChild(action);
+    const int index = m_profileIndex.at(action);
+    const T childValue = m_nodeValues[child][player];
+    for (const auto &taken : p_path) {
+      p_derivs(index, taken.index) += belief * childValue;
+    }
+    p_path.push_back({index, player, belief, m_logRealizProbs[child]});
+    DiffActionValuesPass(child, p_path, p_derivs, p_shares);
+    p_path.pop_back();
+  }
+}
+
+template <class T> void LogBehavProfile<T>::DiffActionValues(Matrix<T> &p_derivs) const
+{
+  ComputeSolutionData();
+  p_derivs = T(0);
+  std::vector<PathAction> path;
+  std::map<GameInfoset, std::map<int, T>> shares;
+  DiffActionValuesPass(m_game->GetRoot(), path, p_derivs, shares);
+  for (const auto &[infoset, infosetShares] : shares) {
+    for (const auto &action : infoset->GetActions()) {
+      const int index = m_profileIndex.at(action);
+      const T value = m_actionValues[action];
+      for (const auto &[taken, share] : infosetShares) {
+        p_derivs(index, taken) -= share * value;
+      }
+    }
   }
 }
 
