@@ -62,11 +62,22 @@ protected:
   mutable std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
   mutable std::map<GameAction, T> m_actionValues;
 
+  /// A player action taken on the path from the root to the node currently being visited
+  struct PathAction {
+    int index{0};       // position of the action in the profile
+    GamePlayer player;  // the player taking the action
+    T belief{0};        // belief at the node where the action is taken
+    T logRealizProb{0}; // log realization probability of the node the action leads to
+  };
+
   /// @name Auxiliary functions for computation of interesting values
   //@{
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData() const;
+  void DiffActionValuesPass(const GameNode &p_node, std::vector<PathAction> &p_path,
+                            Matrix<T> &p_derivs,
+                            std::map<GameInfoset, std::map<int, T>> &p_shares) const;
   //@}
 
 public:
@@ -124,9 +135,12 @@ public:
   T GetLogActionProb(const GameAction &) const;
   const T &GetPayoff(const GameAction &act) const;
 
-  T DiffActionValue(const GameAction &action, const GameAction &oppAction) const;
-  T DiffNodeValue(const GameNode &node, const GamePlayer &player,
-                  const GameAction &oppAction) const;
+  /// @brief Compute the derivatives of all action values with respect to the log
+  ///        probabilities of all actions
+  /// @param[out] p_derivs Square matrix indexed by profile position; entry (a, b) is the
+  ///             derivative of the value of action a with respect to the log probability
+  ///             of action b.  Entries where a and b are at the same information set are zero.
+  void DiffActionValues(Matrix<T> &p_derivs) const;
 
   //@}
 };

@@ -96,9 +96,6 @@ private:
     virtual ~Equation() = default;
 
     virtual double Value(const LogBehavProfile<double> &p_point, double p_lambda) const = 0;
-
-    virtual void Gradient(const LogBehavProfile<double> &p_point, double p_lambda,
-                          Vector<double> &p_gradient) const = 0;
   };
 
   //
@@ -117,9 +114,6 @@ private:
     }
 
     double Value(const LogBehavProfile<double> &p_profile, double p_lambda) const override;
-
-    void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-                  Vector<double> &p_gradient) const override;
   };
 
   //
@@ -140,9 +134,6 @@ private:
     }
 
     double Value(const LogBehavProfile<double> &p_profile, double p_lambda) const override;
-
-    void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
-                  Vector<double> &p_gradient) const override;
   };
 
   Array<std::shared_ptr<Equation>> m_equations;
@@ -172,54 +163,11 @@ double EquationSystem::SumToOneEquation::Value(const LogBehavProfile<double> &p_
   return value;
 }
 
-void EquationSystem::SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
-                                                double p_lambda, Vector<double> &p_gradient) const
-{
-  int i = 1;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        p_gradient[i++] = (infoset == m_infoset) ? p_profile.GetProb(action) : 0.0;
-      }
-    }
-  }
-  // Derivative wrt lambda is zero
-  p_gradient[i] = 0.0;
-}
-
 double EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
                                             double p_lambda) const
 {
   return (p_profile.GetLogProb(m_action) - p_profile.GetLogProb(m_refAction) -
           p_lambda * (p_profile.GetPayoff(m_action) - p_profile.GetPayoff(m_refAction)));
-}
-
-void EquationSystem::RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
-                                             double p_lambda, Vector<double> &p_gradient) const
-{
-  int i = 1;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        if (action == m_refAction) {
-          p_gradient[i] = -1.0;
-        }
-        else if (action == m_action) {
-          p_gradient[i] = 1.0;
-        }
-        else if (infoset == m_infoset) {
-          p_gradient[i] = 0.0;
-        }
-        else {
-          p_gradient[i] = -p_lambda * (p_profile.DiffActionValue(m_action, action) -
-                                       p_profile.DiffActionValue(m_refAction, action));
-        }
-        i++;
-      }
-    }
-  }
-
-  p_gradient[i] = (p_profile.GetPayoff(m_refAction) - p_profile.GetPayoff(m_action));
 }
 
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
@@ -233,13 +181,44 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
 {
+  // Rows of p_matrix are variables (log probabilities, then lambda); columns are equations,
+  // in the order in which the constructor creates them.
   const LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
   const double lambda = p_point.back();
+  const size_t numActions = p_point.size() - 1;
+  Matrix<double> derivs(numActions, numActions);
+  profile.DiffActionValues(derivs);
 
-  Vector<double> column(p_point.size());
-  for (size_t i = 1; i <= m_equations.size(); i++) {
-    m_equations[i]->Gradient(profile, lambda, column);
-    p_matrix.SetColumn(i, column);
+  p_matrix = 0.0;
+  size_t column = 1;
+  size_t first = 1; // position of the first action of the current information set
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      const auto &actions = infoset->GetActions();
+      const size_t last = first + actions.size() - 1;
+
+      size_t row = first;
+      for (const auto &action : actions) {
+        p_matrix(row++, column) = profile.GetProb(action);
+      }
+      column++;
+
+      const double refValue = profile.GetPayoff(actions.front());
+      size_t index = first + 1;
+      for (auto action = std::next(actions.begin()); action != actions.end();
+           ++action, ++index, ++column) {
+        for (size_t var = 1; var < first; var++) {
+          p_matrix(var, column) = -lambda * (derivs(index, var) - derivs(first, var));
+        }
+        for (size_t var = last + 1; var <= numActions; var++) {
+          p_matrix(var, column) = -lambda * (derivs(index, var) - derivs(first, var));
+        }
+        p_matrix(index, column) = 1.0;
+        p_matrix(first, column) = -1.0;
+        p_matrix(numActions + 1, column) = refValue - profile.GetPayoff(*action);
+      }
+      first = last + 1;
+    }
   }
 }
 
