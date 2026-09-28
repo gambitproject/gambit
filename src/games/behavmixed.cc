@@ -198,7 +198,11 @@ MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
     throw MismatchException();
   }
   m_probs = p_profile.m_probs;
+  m_profileIndex = p_profile.m_profileIndex;
   m_gameversion = p_profile.m_gameversion;
+  // The cache is aligned with the layout of the version of the game it was computed for
+  m_layout = p_profile.m_layout;
+  m_layoutProfileIndex = p_profile.m_layoutProfileIndex;
   m_cache = p_profile.m_cache;
   return *this;
 }
