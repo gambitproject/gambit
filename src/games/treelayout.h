@@ -24,9 +24,11 @@
 #define GAMBIT_GAMES_TREELAYOUT_H
 
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "core/lazy.h"
+#include "core/matrix.h"
 #include "game.h"
 
 namespace Gambit {
@@ -88,6 +90,71 @@ private:
 
   template <class T> Numbers<T> BuildNumbers() const;
 };
+
+/// @brief Compute the derivatives of action values with respect to the log probabilities
+///        of actions at personal information sets
+///
+/// The quantities are those of a behavior profile, indexed as in the layout: beliefs by node,
+/// node values by node and player, and action values by action.  Node values may be any
+/// satisfying v(n) = c(n) + sum over children of Pr(child) v(child), for payoffs c(n) which do
+/// not depend on the profile: for example, the payoff of the outcome at the node (as in
+/// MixedBehaviorProfile), or the total of the outcomes from the root to a terminal node and
+/// zero elsewhere.  Action values must be the belief-weighted node values of the children of
+/// the members of each information set.  `p_pathProb(p_from, p_to)` must return the probability
+/// of reaching node `p_to` from node `p_from`, an ancestor of it.
+///
+/// Assumes the game has perfect recall.  See Turocy (2001), "Computing the Quantal Response
+/// Equilibrium Correspondence".
+///
+/// @param[out] p_derivs Square matrix indexed by action; entry (a, b) is the derivative of the
+///             value of action a with respect to the log probability of action b.  Entries
+///             where a and b are at the same information set are zero.
+template <class T, class PathProb>
+void DiffActionValues(const TreeLayout &p_layout, const std::vector<T> &p_beliefs,
+                      const std::vector<T> &p_nodeValues, const std::vector<T> &p_actionValues,
+                      PathProb p_pathProb, Matrix<T> &p_derivs)
+{
+  // The value of action a at information set I of player i is
+  // V(a) = sum_{h in I} mu(h) v_i(h a).  Its derivative with respect to the log probability
+  // of action b has two parts:
+  //  - for b taken above h, the change in beliefs: mu(h) (v_i(h a) - V(a)) for each member h
+  //    whose path contains b;
+  //  - for b taken at a node n below h a, the change in v_i(h a):
+  //    mu(h) Pr(n b | h a) v_i(n b).
+  // Both are accumulated by visiting each node together with the actions taken above it.
+  const size_t numPlayers = p_layout.numPlayers;
+  p_derivs = static_cast<T>(0);
+  std::vector<size_t> above; // nodes reached by the personal actions taken above a node
+  for (size_t n = 0; n < p_layout.parent.size(); n++) {
+    const int info = p_layout.infoset[n];
+    if (info < 0 || std::cmp_greater_equal(info, p_layout.numPersonalInfosets)) {
+      continue;
+    }
+    above.clear();
+    for (size_t c = n; p_layout.parent[c] >= 0; c = p_layout.parent[c]) {
+      if (p_layout.action[c] != 0) {
+        above.push_back(c);
+      }
+    }
+    if (above.empty()) {
+      continue;
+    }
+    const size_t player = p_layout.infosets[info].player;
+    for (size_t j = 0; j < p_layout.numChildren[n]; j++) {
+      const size_t child = p_layout.childList[p_layout.firstChild[n] + j];
+      const size_t a = p_layout.action[child];
+      const T beliefWeight =
+          p_beliefs[n] * (p_nodeValues[child * numPlayers + player] - p_actionValues[a]);
+      for (const size_t up : above) {
+        p_derivs(a, p_layout.action[up]) += beliefWeight;
+        const size_t h = p_layout.parent[up];
+        const size_t owner = p_layout.infosets[p_layout.infoset[h]].player;
+        p_derivs(p_layout.action[up], a) +=
+            p_beliefs[h] * p_pathProb(up, child) * p_nodeValues[child * numPlayers + owner];
+      }
+    }
+  }
+}
 
 template <> inline const TreeLayout::Numbers<double> &TreeLayout::GetNumbers<double>() const
 {

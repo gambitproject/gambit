@@ -296,6 +296,14 @@ public:
   ///
   T GetMaxRegret() const;
 
+  /// @brief Computes the derivatives of all action values with respect to the log
+  ///        probabilities of all actions
+  /// @details Assumes the game has perfect recall and the profile is totally mixed.
+  /// @param[out] p_derivs Resized to a square matrix indexed by position in the profile;
+  ///             entry (a, b) is the derivative of the value of action a with respect to the
+  ///             log probability of action b.
+  void DiffActionValues(Matrix<T> &p_derivs) const;
+
   MixedStrategyProfile<T> ToMixedProfile() const;
 
   /// @brief Converts the profile to one on the full support of the game

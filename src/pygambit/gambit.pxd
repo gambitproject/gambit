@@ -498,6 +498,9 @@ cdef extern from "util.h":
     string WriteHTMLFile(c_Game)
 
     stdlist[shared_ptr[T]] make_list_of_pointer[T](stdlist[T]) except +
+    stdvector[stdvector[double]] ProfileDiffActionValues(
+            c_MixedBehaviorProfile[double]
+    ) except +
 
     void setitem_array_int "setitem"(Array[int] *, int, int) except +
     void setitem_array_number "setitem"(Array[c_Number], int, c_Number) except +
