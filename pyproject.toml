@@ -137,6 +137,10 @@ markers = [
     "catalog_update: tests of catalog/build.py",
 ]
 
+[tool.cibuildwheel]
+skip = "pp* *t"
+test-command = "python -c \"import pygambit; g = pygambit.Game.new_table([2, 2]); assert g\""
+
 [tool.setuptools]
 packages = ["pygambit", "pygambit.cli"]
 package-dir = { "pygambit" = "src/pygambit" }
