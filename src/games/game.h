@@ -83,6 +83,7 @@ template <class T> class MixedStrategyProfile;
 class StrategySupportProfile;
 
 template <class T> class MixedBehaviorProfile;
+struct TreeLayout;
 
 class SequenceContingencies;
 
@@ -746,6 +747,9 @@ public:
   {
     return {};
   }
+  /// Returns the flattened structure of the game tree for the current version of the game.
+  /// The layout is shared by all callers until the game is next modified.
+  virtual std::shared_ptr<const TreeLayout> GetTreeLayout() const { throw UndefinedException(); }
   /// Returns a list of all subgame roots in the game
   virtual std::vector<GameSubgame> GetSubgames() const { throw UndefinedException(); }
   /// Returns the smallest subgame containing the information set

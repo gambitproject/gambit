@@ -219,6 +219,8 @@ game_SOURCES = \
 	src/games/behavpure.h \
 	src/games/behavmixed.cc \
 	src/games/behavmixed.h \
+	src/games/treelayout.cc \
+	src/games/treelayout.h \
 	src/games/seqpure.cc \
 	src/games/seqpure.h \
 	src/games/seqmixed.h \

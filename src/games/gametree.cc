@@ -1074,6 +1074,17 @@ GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
   return it->second;
 }
 
+std::shared_ptr<const TreeLayout> GameTreeRep::GetTreeLayout() const
+{
+  const std::scoped_lock lock(m_layoutMutex);
+  if (!m_layout || m_layoutVersion != GetVersion()) {
+    EnsureInfosetOrdering();
+    m_layout = std::make_shared<const TreeLayout>(*this);
+    m_layoutVersion = GetVersion();
+  }
+  return m_layout;
+}
+
 std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentries() const
 {
   EnsureOwnPriorActions();

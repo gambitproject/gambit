@@ -29,6 +29,7 @@
 #include "games/writer.h"
 
 #include "games/behavspt.h"
+#include "games/treelayout.h"
 #include "games/behavmixed.h"
 #include "games/behavpure.h"
 #include "games/seqpure.h"

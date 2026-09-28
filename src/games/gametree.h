@@ -27,6 +27,7 @@
 #include "gameexpl.h"
 #include "seqpure.h"
 #include "stratmixed.h"
+#include <mutex>
 #include <unordered_map>
 
 namespace Gambit {
@@ -722,6 +723,10 @@ protected:
     std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> m_subgameByRoot;
   };
   mutable Lazy<SubgameData> m_subgameData;
+  // The flattened layout of the tree, and the version of the game it describes
+  mutable std::mutex m_layoutMutex;
+  mutable std::shared_ptr<const TreeLayout> m_layout;
+  mutable unsigned int m_layoutVersion{0};
 
   /// @name Private auxiliary functions
   //@{
@@ -780,6 +785,7 @@ public:
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
   std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const override;
+  std::shared_ptr<const TreeLayout> GetTreeLayout() const override;
   std::vector<GameSubgame> GetSubgames() const override;
   GameSubgame GetMinimalSubgame(const GameInfoset &) const override;
   //@}
