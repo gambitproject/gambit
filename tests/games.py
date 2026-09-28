@@ -564,6 +564,66 @@ def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
     return create_efg_corresponding_to_bimatrix_game_arrays(A, B, title)
 
 
+def create_allpay_correlated_types_efg(p: gbt.Rational, common_value: bool,
+                                       bids: int) -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        All-pay contest with correlated types, following the experimental design of
+        Rentschler and Turocy.
+
+        Nature draws a state of 15 or 30 with equal probability; each contestant then
+        receives a type equal to the state with probability `p`, independently given the
+        state.  The prize is worth the contestant's own type (private values) or the
+        state (common values).  Both contestants bid simultaneously from `bids` levels
+        spaced 0.30 apart, the experiment's bid increment; both pay their bid, the
+        higher bid wins, and ties split the prize.
+    """
+    states = [15, 30]
+    step = gbt.Rational(3, 10)
+    g = gbt.ExtensiveGame(
+        players=["1", "2"],
+        title=f"All-pay contest, p={p}, {'common' if common_value else 'private'} values",
+    )
+    g.append_event(gbt.H.path(), {f"w={w}": gbt.Rational(1, 2) for w in states})
+
+    def type_probs(state: int, who: str) -> dict:
+        return {f"{who}={t}": (p if t == state else 1 - p) for t in states}
+
+    for w in states:
+        g.append_event(gbt.H.path(f"w={w}"), type_probs(w, "t1"))
+    for w in states:
+        for t1 in states:
+            g.append_event(gbt.H.path(f"w={w}", f"t1={t1}"), type_probs(w, "t2"))
+
+    labels = [str(step * k) for k in range(bids)]
+    for t in states:
+        g.append_move(gbt.H.path(..., f"t1={t}", ...), player="1",
+                      actions=[f"b1={b}" for b in labels])
+    for t in states:
+        g.append_move(gbt.H.path(..., ..., f"t2={t}", ...), player="2",
+                      actions=[f"b2={b}" for b in labels])
+
+    for w in states:
+        for t1 in states:
+            for t2 in states:
+                v1, v2 = (w, w) if common_value else (t1, t2)
+                for k1 in range(bids):
+                    for k2 in range(bids):
+                        b1, b2 = step * k1, step * k2
+                        if k1 > k2:
+                            u1, u2 = v1 - b1, -b2
+                        elif k1 == k2:
+                            u1, u2 = gbt.Rational(v1, 2) - b1, gbt.Rational(v2, 2) - b2
+                        else:
+                            u1, u2 = -b1, v2 - b2
+                        path = (f"w={w}", f"t1={t1}", f"t2={t2}",
+                                f"b1={labels[k1]}", f"b2={labels[k2]}")
+                        g.make_outcome(gbt.H.path(*path), {"1": u1, "2": u2}, ",".join(path))
+    return g
+
+
 class EfgFamilyForReducedStrategicFormTests(ABC):
     """ """
 
