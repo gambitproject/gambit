@@ -72,11 +72,33 @@ using PerturbationEventFunctionType = std::function<void(bool, const Vector<doub
 
 inline void NullPerturbationEventFunction(bool, const Vector<double> &) {}
 
+/// @brief Counts and wall-clock timings recorded by one call to TracePath() or PolishPoint()
+struct TracePathStats {
+  size_t predictor_attempts{0};   ///< predictor steps tried, whether accepted or rejected
+  size_t accepted_steps{0};       ///< predictor-corrector steps accepted
+  size_t rejected_distance{0};    ///< steps rejected because a corrector step was too long
+  size_t rejected_contraction{0}; ///< steps rejected because the corrector contracted too slowly
+  size_t rejected_orientation{0}; ///< steps rejected because the tangent orientation flipped
+  size_t corrector_iterations{0}; ///< Newton corrector iterations, over all attempts
+  size_t function_evals{0};       ///< evaluations of the system of equations
+  size_t jacobian_evals{0};       ///< evaluations of the Jacobian
+  size_t factorizations{0};       ///< QR decompositions of the Jacobian
+
+  double function_seconds{0.0};      ///< time evaluating the system of equations
+  double jacobian_seconds{0.0};      ///< time evaluating the Jacobian
+  double factorization_seconds{0.0}; ///< time in QR decompositions
+  double newton_seconds{0.0};        ///< time in Newton corrector steps
+  double terminate_seconds{0.0};     ///< time in the termination function
+  double callback_seconds{0.0};      ///< time in the per-point callback
+  double total_seconds{0.0};         ///< total time in the call
+};
+
 struct TracePathResult {
   Vector<double> final_point;
   bool status; // true if path tracing terminated successfully, false if it terminated due to error
   std::string message; // error message if status is false
   int steps;           // Step at which the tracing terminated
+  TracePathStats stats;
 };
 
 struct PolishResult {
@@ -84,6 +106,7 @@ struct PolishResult {
   bool status; // true if polishing terminated successfully, false if it terminated due to error
   std::string message; // error message if status is false
   int steps;           // Step at which the polishing terminated
+  TracePathStats stats;
 };
 //
 // This class implements a generic path-following algorithm for smooth curves.

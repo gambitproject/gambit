@@ -123,6 +123,14 @@ template <class QRE> void NullLogitEventCallback(const LogitEvent<QRE> &) {}
 template <class QRE> struct LogitTrace {
   std::list<QRE> profiles;
   std::vector<LogitBifurcation<QRE>> bifurcations;
+  std::vector<TracePathStats> stats;
+};
+
+/// @brief The QREs found at each requested value of lambda, together with the tracing
+///        statistics for each segment of the path, one per requested value, in order
+template <class QRE> struct LogitLambdaResult {
+  std::list<QRE> profiles;
+  std::vector<TracePathStats> stats;
 };
 
 /// @brief Why a call to LogitStrategySolveEquilibrium()/LogitBehaviorSolveEquilibrium() did
@@ -149,6 +157,7 @@ struct LogitStrategyResult {
   bool success{false};
   LogitTerminationReason reason{LogitTerminationReason::RegretTargetNotReached};
   std::vector<LogitBifurcation<LogitQREMixedStrategyProfile>> bifurcations;
+  std::vector<TracePathStats> stats;
 };
 
 /// @brief Trace the principal branch of the logit QRE correspondence for a strategic game,
@@ -168,12 +177,12 @@ inline LogitStrategyResult LogitStrategySolveEquilibrium(
   const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
   if (candidate.GetMaxRegret() > regret) {
     return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached,
-            trace.bifurcations};
+            trace.bifurcations, trace.stats};
   }
-  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations};
+  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations, trace.stats};
 }
 
-std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
+LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
     const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
@@ -203,6 +212,7 @@ struct LogitBehaviorResult {
   bool success{false};
   LogitTerminationReason reason{LogitTerminationReason::RegretTargetNotReached};
   std::vector<LogitBifurcation<LogitQREMixedBehaviorProfile>> bifurcations;
+  std::vector<TracePathStats> stats;
 };
 
 /// @brief Trace the principal branch of the logit QRE correspondence for an extensive game,
@@ -222,12 +232,12 @@ inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
   const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
   if (candidate.GetAgentMaxRegret() > regret) {
     return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached,
-            trace.bifurcations};
+            trace.bifurcations, trace.stats};
   }
-  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations};
+  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations, trace.stats};
 }
 
-std::list<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
+LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
     const LogitQREMixedBehaviorProfile &p_start, const std::list<double> &p_targetLambda,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =

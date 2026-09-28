@@ -197,6 +197,32 @@ class LogitBifurcation:
 
 
 @dataclasses.dataclass(frozen=True)
+class _TracePathStats:
+    """Counts and wall-clock timings from one run of the path tracer.
+
+    Private and undocumented, pending a consistent design for reporting the performance
+    of solution methods.
+    """
+    kind: str
+    predictor_attempts: int
+    accepted_steps: int
+    rejected_distance: int
+    rejected_contraction: int
+    rejected_orientation: int
+    corrector_iterations: int
+    function_evals: int
+    jacobian_evals: int
+    factorizations: int
+    function_seconds: float
+    jacobian_seconds: float
+    factorization_seconds: float
+    newton_seconds: float
+    terminate_seconds: float
+    callback_seconds: float
+    total_seconds: float
+
+
+@dataclasses.dataclass(frozen=True)
 class EnumPolyCandidateSupportEvent:
     """Reports a support profile examined by :ref:`enumpoly <enumpoly>` as a candidate
     to contain a totally-mixed equilibrium.
@@ -515,6 +541,9 @@ class LogitResult(NashResultBase):
     success: bool
     reason: LogitTerminationReason
     bifurcations: list[LogitBifurcation]
+    _trace_stats: list[_TracePathStats] = dataclasses.field(
+        default_factory=list, repr=False, compare=False
+    )
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -540,6 +569,9 @@ class HPResult(NashResultBase):
     equilibrium: MixedStrategyProfileDouble | None
     success: bool
     reason: HPTerminationReason
+    _trace_stats: list[_TracePathStats] = dataclasses.field(
+        default_factory=list, repr=False, compare=False
+    )
 
 
 cdef public string InvokeStrategyCallbackDouble(
@@ -973,6 +1005,33 @@ def _convert_logit_bifurcations_behavior(
     ]
 
 
+@cython.cfunc
+def _convert_trace_stats(stats: stdvector[c_TracePathStats], kinds: tuple = ("trace",)) -> list:
+    # Entries beyond the length of `kinds` take its last element.
+    return [
+        _TracePathStats(
+            kind=kinds[min(i, len(kinds) - 1)],
+            predictor_attempts=stats[i].predictor_attempts,
+            accepted_steps=stats[i].accepted_steps,
+            rejected_distance=stats[i].rejected_distance,
+            rejected_contraction=stats[i].rejected_contraction,
+            rejected_orientation=stats[i].rejected_orientation,
+            corrector_iterations=stats[i].corrector_iterations,
+            function_evals=stats[i].function_evals,
+            jacobian_evals=stats[i].jacobian_evals,
+            factorizations=stats[i].factorizations,
+            function_seconds=stats[i].function_seconds,
+            jacobian_seconds=stats[i].jacobian_seconds,
+            factorization_seconds=stats[i].factorization_seconds,
+            newton_seconds=stats[i].newton_seconds,
+            terminate_seconds=stats[i].terminate_seconds,
+            callback_seconds=stats[i].callback_seconds,
+            total_seconds=stats[i].total_seconds,
+        )
+        for i in range(stats.size())
+    ]
+
+
 def _enumpure_strategy_solve(game: Game, nash_callback: object = None) -> EnumPureResult:
     result: c_EnumPureStrategyResult = EnumPureStrategySolve(
         game.game, MakeStrategyCallback[c_Rational](nash_callback)
@@ -1315,6 +1374,7 @@ def _logit_strategy_solve(
         equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
         reason=LogitTerminationReason(<int>result.reason),
         bifurcations=_convert_logit_bifurcations_strategy(result.bifurcations),
+        _trace_stats=_convert_trace_stats(result.stats),
     )
 
 
@@ -1333,6 +1393,7 @@ def _logit_behavior_solve(
         equilibrium=_convert_mbp_opt_d(result.equilibrium), success=result.success,
         reason=LogitTerminationReason(<int>result.reason),
         bifurcations=_convert_logit_bifurcations_behavior(result.bifurcations),
+        _trace_stats=_convert_trace_stats(result.stats),
     )
 
 
@@ -1404,27 +1465,43 @@ def _logit_strategy_lambda(game: Game,
                            lam: float | list[float],
                            first_step: float = .03,
                            max_accel: float = 1.1,
-                           event_callback: object = None) -> list[LogitQREMixedStrategyProfile]:
+                           event_callback: object = None,
+                           _with_stats: bool = False):
     """Compute the first QRE encountered along the principal branch of the strategic
     game corresponding to lambda value `lam`.
+
+    If `_with_stats` is True, return a pair of the list of QREs and the list of path-tracing
+    statistics, one per value of `lam`.
     """
     try:
         iter(lam)
     except TypeError:
         lam = [lam]
-    return [LogitQREMixedStrategyProfile.wrap(profile)
-            for profile in LogitStrategyAtLambdaWrapper(
-                game.game, lam, first_step, max_accel,
-                MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
-            )]
+    result: pair[
+        stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]], stdvector[c_TracePathStats]
+    ] = LogitStrategyAtLambdaWrapper(
+        game.game, lam, first_step, max_accel,
+        MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
+    )
+    profiles = [LogitQREMixedStrategyProfile.wrap(profile) for profile in result.first]
+    if _with_stats:
+        return profiles, _convert_trace_stats(result.second)
+    return profiles
 
 
 def _logit_strategy_branch(game: Game,
                            maxregret: float,
                            first_step: float,
-                           max_accel: float):
-    solns = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    return [LogitQREMixedStrategyProfile.wrap(profile) for profile in make_list_of_pointer(solns)]
+                           max_accel: float,
+                           _with_stats: bool = False):
+    result: pair[
+        stdlist[c_LogitQREMixedStrategyProfile], stdvector[c_TracePathStats]
+    ] = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
+    profiles = [LogitQREMixedStrategyProfile.wrap(profile)
+                for profile in make_list_of_pointer(result.first)]
+    if _with_stats:
+        return profiles, _convert_trace_stats(result.second)
+    return profiles
 
 
 @cython.cclass
@@ -1495,27 +1572,43 @@ def _logit_behavior_lambda(game: Game,
                            lam: float | list[float],
                            first_step: float = .03,
                            max_accel: float = 1.1,
-                           event_callback: object = None) -> list[LogitQREMixedBehaviorProfile]:
+                           event_callback: object = None,
+                           _with_stats: bool = False):
     """Compute the first QRE encountered along the principal branch of the extensive
     game corresponding to lambda value `lam`.
+
+    If `_with_stats` is True, return a pair of the list of QREs and the list of path-tracing
+    statistics, one per value of `lam`.
     """
     try:
         iter(lam)
     except TypeError:
         lam = [lam]
-    return [LogitQREMixedBehaviorProfile.wrap(profile)
-            for profile in LogitBehaviorAtLambdaWrapper(
-                game.game, lam, first_step, max_accel,
-                MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
-            )]
+    result: pair[
+        stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]], stdvector[c_TracePathStats]
+    ] = LogitBehaviorAtLambdaWrapper(
+        game.game, lam, first_step, max_accel,
+        MakeLogitEventCallback[c_LogitQREMixedBehaviorProfile](event_callback)
+    )
+    profiles = [LogitQREMixedBehaviorProfile.wrap(profile) for profile in result.first]
+    if _with_stats:
+        return profiles, _convert_trace_stats(result.second)
+    return profiles
 
 
 def _logit_behavior_branch(game: Game,
                            maxregret: float,
                            first_step: float,
-                           max_accel: float):
-    solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    return [LogitQREMixedBehaviorProfile.wrap(profile) for profile in make_list_of_pointer(solns)]
+                           max_accel: float,
+                           _with_stats: bool = False):
+    result: pair[
+        stdlist[c_LogitQREMixedBehaviorProfile], stdvector[c_TracePathStats]
+    ] = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
+    profiles = [LogitQREMixedBehaviorProfile.wrap(profile)
+                for profile in make_list_of_pointer(result.first)]
+    if _with_stats:
+        return profiles, _convert_trace_stats(result.second)
+    return profiles
 
 
 def _hp_strategy_solve(
@@ -1532,4 +1625,5 @@ def _hp_strategy_solve(
         prior=prior, maxregret=maxregret,
         equilibrium=_convert_msp_opt_d(result.equilibrium), success=result.success,
         reason=HPTerminationReason(<int>result.reason),
+        _trace_stats=_convert_trace_stats(result.stats, ("trace", "polish")),
     )

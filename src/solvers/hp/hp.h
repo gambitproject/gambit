@@ -27,8 +27,10 @@
 #include <list>
 #include <optional>
 #include <variant>
+#include <vector>
 
 #include "solvers/nash.h"
+#include "solvers/path/path.h"
 
 namespace Gambit::Nash {
 
@@ -57,6 +59,7 @@ struct HPStrategyResult {
   std::optional<MixedStrategyProfile<double>> equilibrium;
   bool success{false};
   HPTerminationReason reason{HPTerminationReason::TraceFailed};
+  std::vector<TracePathStats> stats; ///< one entry for the trace, then one for polishing if run
 };
 
 /// @brief Compute a Nash equilibrium of a game using the homotopy method of

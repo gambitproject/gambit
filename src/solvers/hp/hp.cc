@@ -91,7 +91,7 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
       criterion_function, NullCriterionBracketFunction, p_cancel);
 
   if (!tracing_result.status) {
-    return {std::nullopt, false, HPTerminationReason::TraceFailed};
+    return {std::nullopt, false, HPTerminationReason::TraceFailed, {tracing_result.stats}};
   }
 
   const PolishResult polishing_result = PolishPoint(
@@ -105,14 +105,15 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
         p_onEvent(HPStepEvent{.profile = profile, .t = point[1]});
       });
 
+  const std::vector<TracePathStats> stats{tracing_result.stats, polishing_result.stats};
   if (!polishing_result.status) {
-    return {std::nullopt, false, HPTerminationReason::PolishFailed};
+    return {std::nullopt, false, HPTerminationReason::PolishFailed, stats};
   }
   const MixedStrategyProfile<double> equilibrium = system.ExtractEquilibrium(x);
   if (equilibrium.GetMaxRegret() > p_maxRegret) {
-    return {std::nullopt, false, HPTerminationReason::RegretTargetNotReached};
+    return {std::nullopt, false, HPTerminationReason::RegretTargetNotReached, stats};
   }
   p_onEquilibrium(equilibrium);
-  return {equilibrium, true, HPTerminationReason::Converged};
+  return {equilibrium, true, HPTerminationReason::Converged, stats};
 }
 } // namespace Gambit::Nash
