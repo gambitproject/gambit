@@ -619,6 +619,39 @@ template <class T> void MixedBehaviorProfile<T>::ComputeActionRegrets() const
   }
 }
 
+template <class T> void MixedBehaviorProfile<T>::DiffActionValues(Matrix<T> &p_derivs) const
+{
+  CheckVersion();
+  EnsureActionValues();
+  const auto &layout = *m_layout;
+  Matrix<T> derivs(layout.numActions, layout.numActions);
+  Gambit::DiffActionValues(
+      layout, m_cache.m_beliefs, m_cache.m_nodeValues, m_cache.m_actionValues,
+      [this](size_t p_from, size_t p_to) {
+        T prob = static_cast<T>(1);
+        for (size_t k = p_to; k != p_from; k = m_layout->parent[k]) {
+          prob *= LayoutActionProb(k);
+        }
+        return prob;
+      },
+      derivs);
+
+  const size_t length = m_probs.size();
+  p_derivs = Matrix<T>(length, length);
+  p_derivs = static_cast<T>(0);
+  for (size_t a = 1; a <= layout.numActions; a++) {
+    const int row = m_layoutProfileIndex[a];
+    if (row < 0) {
+      continue;
+    }
+    for (size_t b = 1; b <= layout.numActions; b++) {
+      if (const int col = m_layoutProfileIndex[b]; col >= 0) {
+        p_derivs(row, col) = derivs(a, b);
+      }
+    }
+  }
+}
+
 template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 {
   CheckVersion();

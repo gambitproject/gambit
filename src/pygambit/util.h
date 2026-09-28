@@ -116,6 +116,23 @@ void setitem(C &p_container, const X &p_index, const T &p_value)
   p_container[p_index] = p_value;
 }
 
+/// Derivatives of action values with respect to log action probabilities, as nested vectors
+/// indexed from 0 by position in the profile
+inline std::vector<std::vector<double>>
+ProfileDiffActionValues(const MixedBehaviorProfile<double> &p_profile)
+{
+  Matrix<double> derivs;
+  p_profile.DiffActionValues(derivs);
+  std::vector<std::vector<double>> result(derivs.NumRows(),
+                                          std::vector<double>(derivs.NumColumns()));
+  for (size_t i = 0; i < derivs.NumRows(); i++) {
+    for (size_t j = 0; j < derivs.NumColumns(); j++) {
+      result[i][j] = derivs(derivs.MinRow() + i, derivs.MinCol() + j);
+    }
+  }
+  return result;
+}
+
 template <class T> std::list<std::shared_ptr<T>> make_list_of_pointer(const std::list<T> &p_list)
 {
   std::list<std::shared_ptr<T>> result;

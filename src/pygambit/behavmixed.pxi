@@ -1157,6 +1157,11 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _infoset_regret(self, node: Node) -> float:
         return deref(self.profile).GetRegret(cython.cast(Node, node)._infoset_handle())
 
+    def _diff_action_values(self) -> list[list[float]]:
+        # Private, for testing: derivatives of action values with respect to the log
+        # probabilities of actions, indexed by position in the profile.
+        return ProfileDiffActionValues(deref(self.profile))
+
     def _agent_max_regret(self) -> float:
         return deref(self.profile).GetAgentMaxRegret()
 

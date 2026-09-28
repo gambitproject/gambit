@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <map>
 #include <vector>
 
 #include "games.h"
@@ -72,275 +71,123 @@ bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point
 }
 
 //
-// The tree of an extensive game, flattened for repeated evaluation of the agent logit
-// equations along the path.  Nodes are numbered in depth-first preorder, so a node's
-// parent always precedes it.  Player actions are numbered by their position in the
-// behavior profile, starting at 1; 0 means that no player action leads to a node.
+// Quantities derived from a point on the path, stored in arrays aligned with the tree layout
+// of the game.  These are the quantities a MixedBehaviorProfile computes, but derived from the
+// log probabilities that are the coordinates of the path.
 //
-struct TreeLayout {
-  struct Infoset {
-    size_t player{0};      // position of the owning player, from 0
-    size_t firstAction{0}; // profile position of the first action
-    size_t numActions{0};
-    std::vector<size_t> members; // in the information set's own order
-  };
-
-  size_t numPlayers{0};
-  size_t numActions{0};
-  std::vector<int> parent;           // -1 at the root
-  std::vector<size_t> action;        // player action leading to the node, or 0
-  std::vector<double> chanceProb;    // probability of the chance action leading to the node
-  std::vector<double> logChanceProb; // its logarithm
-  std::vector<int> infoset;          // player information set at the node, or -1
-  std::vector<size_t> firstChild;    // children are childList[firstChild, firstChild+numChildren)
-  std::vector<size_t> numChildren;
-  std::vector<size_t> childList;
-  std::vector<double> pathPayoffs; // numPlayers per node: sum of outcomes from the root
-  std::vector<size_t> terminals;
-  std::vector<Infoset> infosets;
+// Realization probabilities are kept as logarithms, and beliefs are computed relative to the
+// most likely member of each information set.  This keeps beliefs accurate at information
+// sets whose realization probability is going to zero, which is needed to approximate the
+// limiting sequential equilibrium well, and where the probabilities themselves may underflow.
+//
+// Node values here include the payoffs of the outcomes above each node, accumulated along the
+// path from the root.  Off the path these differ from the values a MixedBehaviorProfile would
+// compute by more than a per-node constant, because the probabilities at an information set
+// need not sum to one there; this convention defines the equations the tracer has always used.
+//
+struct LogPathValues {
+  std::vector<double> prob, logProb; // by action; entry 0 unused
+  std::vector<double> logRealizProb; // by node
+  std::vector<double> belief;        // by node; meaningful at personal information sets
+  std::vector<double> nodeValues;    // by node, one entry per player
+  std::vector<double> actionValues;  // by action; entry 0 unused
 };
 
-void AddNode(TreeLayout &p_layout, const GameNode &p_node, int p_parent, size_t p_action,
-             double p_chanceProb, const std::map<GameInfoset, int> &p_infosets,
-             const std::vector<GamePlayer> &p_players, std::map<GameNode, size_t> &p_index)
+/// Total payoffs of the outcomes on the path from the root to each node, one entry per player
+std::vector<double> ComputePathPayoffs(const TreeLayout &p_layout)
 {
-  const size_t index = p_layout.parent.size();
-  p_index[p_node] = index;
-  p_layout.parent.push_back(p_parent);
-  p_layout.action.push_back(p_action);
-  p_layout.chanceProb.push_back(p_chanceProb);
-  p_layout.logChanceProb.push_back(std::log(p_chanceProb));
-  const GameOutcome outcome = p_node->GetOutcome();
-  for (size_t pl = 0; pl < p_layout.numPlayers; pl++) {
-    const double inherited =
-        (p_parent < 0)
-            ? 0.0
-            : p_layout.pathPayoffs[static_cast<size_t>(p_parent) * p_layout.numPlayers + pl];
-    p_layout.pathPayoffs.push_back(inherited + outcome->GetPayoff<double>(p_players[pl]));
-  }
-  p_layout.firstChild.push_back(p_layout.childList.size());
-
-  const GameInfoset infoset = p_node->GetInfoset();
-  if (!infoset) {
-    p_layout.infoset.push_back(-1);
-    p_layout.numChildren.push_back(0);
-    p_layout.terminals.push_back(index);
-    return;
-  }
-  const auto actions = infoset->GetActions();
-  const int info = (infoset->IsChanceInfoset()) ? -1 : p_infosets.at(infoset);
-  p_layout.infoset.push_back(info);
-  p_layout.numChildren.push_back(actions.size());
-  p_layout.childList.resize(p_layout.childList.size() + actions.size());
-
-  size_t slot = p_layout.firstChild[index];
-  size_t playerAction = (info >= 0) ? p_layout.infosets[info].firstAction : 0;
-  for (const auto &action : actions) {
-    p_layout.childList[slot++] = p_layout.parent.size();
-    if (info >= 0) {
-      AddNode(p_layout, p_node->GetChild(action), static_cast<int>(index), playerAction++, 1.0,
-              p_infosets, p_players, p_index);
-    }
-    else {
-      AddNode(p_layout, p_node->GetChild(action), static_cast<int>(index), 0,
-              static_cast<double>(infoset->GetActionProb(action)), p_infosets, p_players, p_index);
+  const size_t numPlayers = p_layout.numPlayers;
+  const auto &payoffs = p_layout.GetNumbers<double>().payoffs;
+  std::vector<double> pathPayoffs(payoffs.size());
+  for (size_t k = 0; k < p_layout.parent.size(); k++) {
+    for (size_t pl = 0; pl < numPlayers; pl++) {
+      const double inherited =
+          (k == 0) ? 0.0 : pathPayoffs[static_cast<size_t>(p_layout.parent[k]) * numPlayers + pl];
+      pathPayoffs[k * numPlayers + pl] = inherited + payoffs[k * numPlayers + pl];
     }
   }
+  return pathPayoffs;
 }
 
-TreeLayout BuildTreeLayout(const Game &p_game)
-{
-  TreeLayout layout;
-  std::vector<GamePlayer> players;
-  std::map<GameInfoset, int> infosetIndex;
-  size_t first = 1;
-  for (const auto &player : p_game->GetPlayers()) {
-    players.push_back(player);
-    for (const auto &infoset : player->GetInfosets()) {
-      infosetIndex[infoset] = static_cast<int>(layout.infosets.size());
-      layout.infosets.push_back({players.size() - 1, first, infoset->GetActions().size(), {}});
-      first += infoset->GetActions().size();
-    }
-  }
-  layout.numPlayers = players.size();
-  layout.numActions = first - 1;
-
-  std::map<GameNode, size_t> nodeIndex;
-  AddNode(layout, p_game->GetRoot(), -1, 0, 1.0, infosetIndex, players, nodeIndex);
-  for (const auto &[infoset, index] : infosetIndex) {
-    for (const auto &member : infoset->GetMembers()) {
-      layout.infosets[index].members.push_back(nodeIndex.at(member));
-    }
-  }
-  return layout;
-}
-
-//
-// Quantities derived from a point on the path, stored in arrays aligned with a TreeLayout.
-//
-// Realization probabilities are kept as logarithms, and beliefs are computed relative to
-// the most likely member of each information set.  This keeps beliefs accurate at
-// information sets whose realization probability is going to zero, which is needed to
-// approximate the limiting sequential equilibrium well.
-//
-struct PathQuantities {
-  std::vector<double> prob, logProb;           // by profile position; entry 0 unused
-  std::vector<double> logRealizProb;           // by node
-  std::vector<double> belief;                  // by node; meaningful at player nodes
-  std::vector<double> nodeValues;              // numPlayers per node, including outcomes above
-  std::vector<double> actionValues;            // by profile position; entry 0 unused
-  std::vector<std::pair<size_t, size_t>> path; // scratch: (child node, action) pairs
-};
-
-void ComputePathQuantities(const TreeLayout &p_layout, const Vector<double> &p_point,
-                           PathQuantities &p_quantities)
+void ComputeLogPathValues(const TreeLayout &p_layout, const std::vector<double> &p_logChanceProb,
+                          const std::vector<double> &p_pathPayoffs, const Vector<double> &p_point,
+                          LogPathValues &p_values)
 {
   const size_t numNodes = p_layout.parent.size();
   const size_t numPlayers = p_layout.numPlayers;
-  auto &q = p_quantities;
-  q.prob.resize(p_layout.numActions + 1);
-  q.logProb.resize(p_layout.numActions + 1);
+  const auto &numbers = p_layout.GetNumbers<double>();
+  auto &v = p_values;
+  v.prob.resize(p_layout.numActions + 1);
+  v.logProb.resize(p_layout.numActions + 1);
   for (size_t a = 1; a <= p_layout.numActions; a++) {
-    q.logProb[a] = p_point[a];
-    q.prob[a] = std::exp(p_point[a]);
+    v.logProb[a] = p_point[a];
+    v.prob[a] = std::exp(p_point[a]);
   }
 
-  q.logRealizProb.resize(numNodes);
-  q.logRealizProb[0] = 0.0;
+  v.logRealizProb.resize(numNodes);
+  v.logRealizProb[0] = 0.0;
   for (size_t k = 1; k < numNodes; k++) {
     const size_t a = p_layout.action[k];
-    q.logRealizProb[k] = q.logRealizProb[p_layout.parent[k]] +
-                         ((a != 0) ? q.logProb[a] : p_layout.logChanceProb[k]);
+    v.logRealizProb[k] =
+        v.logRealizProb[p_layout.parent[k]] + ((a != 0) ? v.logProb[a] : p_logChanceProb[k]);
   }
 
-  q.belief.assign(numNodes, 0.0);
-  for (const auto &infoset : p_layout.infosets) {
+  v.belief.assign(numNodes, 0.0);
+  for (size_t i = 0; i < p_layout.numPersonalInfosets; i++) {
+    const auto &members = p_layout.infosets[i].members;
     double infosetProb = 0.0;
-    for (const size_t m : infoset.members) {
-      infosetProb += std::exp(q.logRealizProb[m]);
+    for (const size_t m : members) {
+      infosetProb += std::exp(v.logRealizProb[m]);
     }
     if (infosetProb == 0.0) {
       // Possible when a zero-probability chance action makes the information set
       // unreachable; beliefs are then taken to be uniform
-      for (const size_t m : infoset.members) {
-        q.belief[m] = 1.0 / static_cast<double>(infoset.members.size());
+      for (const size_t m : members) {
+        v.belief[m] = 1.0 / static_cast<double>(members.size());
       }
       continue;
     }
-    double maxLogProb = q.logRealizProb[infoset.members.front()];
-    for (const size_t m : infoset.members) {
-      maxLogProb = std::max(maxLogProb, q.logRealizProb[m]);
+    double maxLogProb = v.logRealizProb[members.front()];
+    for (const size_t m : members) {
+      maxLogProb = std::max(maxLogProb, v.logRealizProb[m]);
     }
     double total = 0.0;
-    for (const size_t m : infoset.members) {
-      total += std::exp(q.logRealizProb[m] - maxLogProb);
+    for (const size_t m : members) {
+      total += std::exp(v.logRealizProb[m] - maxLogProb);
     }
     const double mostLikelyBelief = 1.0 / total;
-    for (const size_t m : infoset.members) {
-      q.belief[m] = mostLikelyBelief * std::exp(q.logRealizProb[m] - maxLogProb);
+    for (const size_t m : members) {
+      v.belief[m] = mostLikelyBelief * std::exp(v.logRealizProb[m] - maxLogProb);
     }
   }
 
-  q.nodeValues.resize(numNodes * numPlayers);
-  q.actionValues.assign(p_layout.numActions + 1, 0.0);
+  // Children follow their parents in the layout, so a reverse sweep is a postorder traversal
+  v.nodeValues.resize(numNodes * numPlayers);
   for (size_t k = numNodes; k-- > 0;) {
-    double *value = &q.nodeValues[k * numPlayers];
+    double *value = &v.nodeValues[k * numPlayers];
     if (p_layout.numChildren[k] == 0) {
-      std::copy_n(&p_layout.pathPayoffs[k * numPlayers], numPlayers, value);
+      std::copy_n(&p_pathPayoffs[k * numPlayers], numPlayers, value);
       continue;
     }
     std::fill_n(value, numPlayers, 0.0);
     for (size_t j = 0; j < p_layout.numChildren[k]; j++) {
       const size_t child = p_layout.childList[p_layout.firstChild[k] + j];
       const size_t a = p_layout.action[child];
-      const double childProb = (a != 0) ? q.prob[a] : p_layout.chanceProb[child];
+      const double childProb = (a != 0) ? v.prob[a] : numbers.chanceProb[child];
       for (size_t pl = 0; pl < numPlayers; pl++) {
-        value[pl] += childProb * q.nodeValues[child * numPlayers + pl];
-      }
-    }
-  }
-  // Accumulate action values in preorder, visiting members of each information set in the
-  // same sequence as a depth-first traversal
-  for (size_t k = 0; k < numNodes; k++) {
-    const int info = p_layout.infoset[k];
-    if (info < 0) {
-      continue;
-    }
-    const size_t player = p_layout.infosets[info].player;
-    for (size_t j = 0; j < p_layout.numChildren[k]; j++) {
-      const size_t child = p_layout.childList[p_layout.firstChild[k] + j];
-      q.actionValues[p_layout.action[child]] +=
-          q.belief[k] * q.nodeValues[child * numPlayers + player];
-    }
-  }
-}
-
-//
-// Derivatives of action values with respect to log action probabilities, written into
-// p_derivs, a square matrix indexed by profile position.  See Turocy (2001), "Computing the
-// Quantal Response Equilibrium Correspondence".  These assume that the profile is interior
-// (totally mixed), and that the game is of perfect recall.
-//
-// The value of action a at information set I of player i is
-// V(a) = sum_{h in I} mu(h) v_i(h a), where mu are beliefs and v_i are node values.  Its
-// derivative with respect to the log probability of action b has two parts:
-//  - for b taken above h, the change in beliefs: mu(h) (v_i(h a) - V(a)) for each member h
-//    whose path contains b;
-//  - for b taken below h a, the change in v_i(h a): each terminal node z below h a whose
-//    path contains b contributes mu(h) Pr(z | h a) u_i(z).
-// Entries where a and b are at the same information set are zero.
-//
-void DiffActionValues(const TreeLayout &p_layout, PathQuantities &p_quantities,
-                      Matrix<double> &p_derivs)
-{
-  const size_t numPlayers = p_layout.numPlayers;
-  auto &q = p_quantities;
-  auto &path = q.path;
-  p_derivs = 0.0;
-
-  for (size_t h = 0; h < p_layout.parent.size(); h++) {
-    const int info = p_layout.infoset[h];
-    if (info < 0) {
-      continue;
-    }
-    path.clear();
-    for (int c = static_cast<int>(h); p_layout.parent[c] >= 0; c = p_layout.parent[c]) {
-      if (p_layout.action[c] != 0) {
-        path.emplace_back(c, p_layout.action[c]);
-      }
-    }
-    if (path.empty()) {
-      continue;
-    }
-    const size_t player = p_layout.infosets[info].player;
-    for (size_t j = 0; j < p_layout.numChildren[h]; j++) {
-      const size_t child = p_layout.childList[p_layout.firstChild[h] + j];
-      const size_t a = p_layout.action[child];
-      const double weight =
-          q.belief[h] * (q.nodeValues[child * numPlayers + player] - q.actionValues[a]);
-      for (const auto &[node, b] : path) {
-        p_derivs(a, b) += weight;
+        value[pl] += childProb * v.nodeValues[child * numPlayers + pl];
       }
     }
   }
 
-  for (const size_t z : p_layout.terminals) {
-    path.clear();
-    for (int c = static_cast<int>(z); p_layout.parent[c] >= 0; c = p_layout.parent[c]) {
-      if (p_layout.action[c] != 0) {
-        path.emplace_back(c, p_layout.action[c]);
-      }
-    }
-    // path runs from the terminal node towards the root; each action is paired with
-    // every action taken after it, i.e. earlier in the list
-    for (size_t k = 1; k < path.size(); k++) {
-      const auto &[child, a] = path[k];
-      const size_t h = p_layout.parent[child];
-      const size_t player = p_layout.infosets[p_layout.infoset[h]].player;
-      const double weight = q.belief[h] * std::exp(q.logRealizProb[z] - q.logRealizProb[child]) *
-                            p_layout.pathPayoffs[z * numPlayers + player];
-      for (size_t m = 0; m < k; m++) {
-        p_derivs(a, path[m].second) += weight;
+  v.actionValues.assign(p_layout.numActions + 1, 0.0);
+  for (size_t i = 0; i < p_layout.numPersonalInfosets; i++) {
+    const auto &infoset = p_layout.infosets[i];
+    for (const size_t member : infoset.members) {
+      for (size_t j = 0; j < p_layout.numChildren[member]; j++) {
+        const size_t child = p_layout.childList[p_layout.firstChild[member] + j];
+        v.actionValues[p_layout.action[child]] +=
+            v.belief[member] * v.nodeValues[child * numPlayers + infoset.player];
       }
     }
   }
@@ -348,10 +195,7 @@ void DiffActionValues(const TreeLayout &p_layout, PathQuantities &p_quantities,
 
 class EquationSystem {
 public:
-  explicit EquationSystem(const Game &p_game)
-    : m_layout(BuildTreeLayout(p_game)), m_derivs(m_layout.numActions, m_layout.numActions)
-  {
-  }
+  explicit EquationSystem(const Game &p_game);
   ~EquationSystem() = default;
 
   // Compute the value of the system of equations at the specified point.
@@ -361,30 +205,43 @@ public:
   void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const;
 
 private:
-  TreeLayout m_layout;
-  mutable PathQuantities m_quantities;
+  std::shared_ptr<const TreeLayout> m_layout;
+  std::vector<double> m_logChanceProb; // by node
+  std::vector<double> m_pathPayoffs;   // by node, one entry per player
+  mutable LogPathValues m_values;
   mutable Matrix<double> m_derivs;
 };
+
+EquationSystem::EquationSystem(const Game &p_game)
+  : m_layout(p_game->GetTreeLayout()), m_pathPayoffs(ComputePathPayoffs(*m_layout)),
+    m_derivs(m_layout->numActions, m_layout->numActions)
+{
+  const auto &chanceProb = m_layout->GetNumbers<double>().chanceProb;
+  m_logChanceProb.resize(chanceProb.size());
+  std::ranges::transform(chanceProb, m_logChanceProb.begin(),
+                         [](double p) { return std::log(p); });
+}
 
 // Equations are, for each information set in turn, that its action probabilities sum to
 // one, followed by one equation for each action but the first relating its log probability
 // to that of the first.
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
-  ComputePathQuantities(m_layout, p_point, m_quantities);
-  const auto &q = m_quantities;
+  ComputeLogPathValues(*m_layout, m_logChanceProb, m_pathPayoffs, p_point, m_values);
+  const auto &v = m_values;
   const double lambda = p_point.back();
   size_t row = 1;
-  for (const auto &infoset : m_layout.infosets) {
+  for (size_t i = 0; i < m_layout->numPersonalInfosets; i++) {
+    const auto &infoset = m_layout->infosets[i];
     const size_t ref = infoset.firstAction;
     double sum = -1.0;
     for (size_t a = ref; a < ref + infoset.numActions; a++) {
-      sum += q.prob[a];
+      sum += v.prob[a];
     }
     p_lhs[row++] = sum;
     for (size_t a = ref + 1; a < ref + infoset.numActions; a++) {
       p_lhs[row++] =
-          q.logProb[a] - q.logProb[ref] - lambda * (q.actionValues[a] - q.actionValues[ref]);
+          v.logProb[a] - v.logProb[ref] - lambda * (v.actionValues[a] - v.actionValues[ref]);
     }
   }
 }
@@ -393,19 +250,25 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
 {
   // Rows of p_matrix are variables (log probabilities, then lambda); columns are equations,
   // in the same order as in GetValue().
-  ComputePathQuantities(m_layout, p_point, m_quantities);
-  const size_t numActions = m_layout.numActions;
-  DiffActionValues(m_layout, m_quantities, m_derivs);
-  const auto &q = m_quantities;
+  ComputeLogPathValues(*m_layout, m_logChanceProb, m_pathPayoffs, p_point, m_values);
+  const auto &v = m_values;
+  DiffActionValues(
+      *m_layout, v.belief, v.nodeValues, v.actionValues,
+      [&v](size_t p_from, size_t p_to) {
+        return std::exp(v.logRealizProb[p_to] - v.logRealizProb[p_from]);
+      },
+      m_derivs);
+  const size_t numActions = m_layout->numActions;
   const double lambda = p_point.back();
 
   p_matrix = 0.0;
   size_t column = 1;
-  for (const auto &infoset : m_layout.infosets) {
+  for (size_t i = 0; i < m_layout->numPersonalInfosets; i++) {
+    const auto &infoset = m_layout->infosets[i];
     const size_t first = infoset.firstAction;
     const size_t last = first + infoset.numActions - 1;
     for (size_t a = first; a <= last; a++) {
-      p_matrix(a, column) = q.prob[a];
+      p_matrix(a, column) = v.prob[a];
     }
     column++;
     for (size_t a = first + 1; a <= last; a++, column++) {
@@ -417,7 +280,7 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
       }
       p_matrix(a, column) = 1.0;
       p_matrix(first, column) = -1.0;
-      p_matrix(numActions + 1, column) = q.actionValues[first] - q.actionValues[a];
+      p_matrix(numActions + 1, column) = v.actionValues[first] - v.actionValues[a];
     }
   }
 }
