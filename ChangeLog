@@ -18,6 +18,9 @@
   `History` (the actions from the root, comma-joined).
 - The command-line tools' `-D` report now identifies each player by their own label, rather than by
   their position among the game's players.
+- Substantially faster computation of the agent logit QRE correspondence for extensive games,
+  and of payoffs, beliefs and regrets of mixed behavior profiles on large game trees.  Path
+  following (logit and hp) also spends about half as long factorizing Jacobians.  (#1162)
 
 ## [17.0.0-beta.1] - 2026-09-08
 
