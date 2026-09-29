@@ -23,6 +23,7 @@
 #include <iostream>
 
 #include "games.h"
+#include "core/lazy.h"
 #include "gametable.h"
 #include "writer.h"
 
@@ -84,176 +85,97 @@ PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
       std::const_pointer_cast<GameRep>(shared_from_this())));
 }
 
+template <class T> GameTableRep::PayoffTable<T> GameTableRep::BuildPayoffTable() const
+{
+  PayoffTable<T> table(m_players.size(), std::vector<T>(m_results.size()));
+  for (size_t pl = 0; pl < m_players.size(); pl++) {
+    const GamePlayer player = m_players[pl];
+    auto &payoffs = table[pl];
+    for (size_t index = 0; index < m_results.size(); index++) {
+      payoffs[index] = m_results[index]->GetPayoff<T>(player);
+    }
+  }
+  return table;
+}
+
+template <>
+std::shared_ptr<const GameTableRep::PayoffTable<double>>
+GameTableRep::GetPayoffTable<double>() const
+{
+  const std::scoped_lock lock(m_payoffTableMutex);
+  if (!m_doublePayoffs || m_doublePayoffsVersion != GetVersion()) {
+    m_doublePayoffs = std::make_shared<const PayoffTable<double>>(BuildPayoffTable<double>());
+    m_doublePayoffsVersion = GetVersion();
+  }
+  return m_doublePayoffs;
+}
+
+template <>
+std::shared_ptr<const GameTableRep::PayoffTable<Rational>>
+GameTableRep::GetPayoffTable<Rational>() const
+{
+  const std::scoped_lock lock(m_payoffTableMutex);
+  if (!m_rationalPayoffs || m_rationalPayoffsVersion != GetVersion()) {
+    m_rationalPayoffs =
+        std::make_shared<const PayoffTable<Rational>>(BuildPayoffTable<Rational>());
+    m_rationalPayoffsVersion = GetVersion();
+  }
+  return m_rationalPayoffs;
+}
+
 //========================================================================
 //                   TableMixedStrategyProfileRep<T>
 //========================================================================
 
-template <class T> class ProductDistribution {
-public:
-  using index_type = long;
-  using prob_type = T;
-  using value_type = std::pair<index_type, prob_type>;
-
-  class iterator {
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using difference_type = std::ptrdiff_t;
-    using value_type = std::pair<index_type, prob_type>;
-    using reference = value_type;
-    using pointer = void;
-
-    iterator() = default;
-
-    iterator(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets, size_t skip1,
-             size_t skip2, bool end)
-      : m_probs(&probs), m_offsets(&offsets), m_done(end)
-    {
-      if (m_done) {
-        return;
-      }
-
-      const size_t P = m_probs->GetShape().size();
-
-      // Build active dimension list
-      for (size_t p = 1; p <= P; ++p) {
-        if (p != skip1 && p != skip2) {
-          m_dims.push_back(p);
-        }
-      }
-
-      m_K = m_dims.size();
-
-      m_digit.assign(m_K, 0);
-      m_radix.assign(m_K, 0);
-      m_cum_prob.assign(m_K + 1, T{});
-
-      // initialise radices
-      for (size_t j = 0; j < m_K; ++j) {
-        const size_t p = m_dims[j];
-        m_radix[j] = m_probs->segment(p).size();
-        if (m_radix[j] == 0) {
-          m_done = true;
-          return;
-        }
-      }
-
-      // initial recompute
-      recompute_from(0);
-      advance_to_next_nonzero();
+/// Visit each contingency of the strategies of all players other than p_skip1 and p_skip2 (player
+/// numbers, or 0) which has positive probability under p_probs, calling p_visit(index, prob) with
+/// its position in the table and its probability.  Contingencies are visited with the strategy
+/// of the lowest-numbered player varying fastest; each probability is the product of the
+/// players' probabilities in order of player number.
+template <class T, class Visit>
+void ForEachContingency(const SegmentedVector<T> &p_probs, const SegmentedArray<long> &p_offsets,
+                        size_t p_skip1, size_t p_skip2, Visit p_visit)
+{
+  std::vector<const T *> probs;
+  std::vector<const long *> offsets;
+  std::vector<size_t> radix;
+  for (size_t pl = 1; pl <= p_probs.GetShape().size(); pl++) {
+    if (pl == p_skip1 || pl == p_skip2) {
+      continue;
     }
-
-    reference operator*() const { return {m_index, m_cum_prob[m_K]}; }
-
-    iterator &operator++()
-    {
-      if (m_done) {
-        return *this;
-      }
-
-      // increment odometer
-      size_t j = 0;
-      for (; j < m_K; ++j) {
-        if (++m_digit[j] < m_radix[j]) {
-          break;
-        }
-        m_digit[j] = 0;
-      }
-
-      if (j == m_K) {
-        m_done = true;
-        return *this;
-      }
-
-      recompute_from(j);
-      advance_to_next_nonzero();
-      return *this;
+    const auto segment = p_probs.segment(pl);
+    if (segment.empty()) {
+      return;
     }
-
-    iterator operator++(int)
-    {
-      iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    bool operator==(const iterator &other) const { return m_done == other.m_done; }
-
-  private:
-    void recompute_from(size_t j0)
-    {
-      m_index = 0;
-      m_cum_prob[0] = T{1};
-
-      for (size_t j = 0; j < m_K; ++j) {
-        const size_t p = m_dims[j];
-        const size_t d = m_digit[j] + 1;
-
-        const T pi = m_probs->segment(p)[d];
-        m_cum_prob[j + 1] = m_cum_prob[j] * pi;
-        m_index += m_offsets->segment(p)[d];
-      }
-    }
-
-    void advance_to_next_nonzero()
-    {
-      while (!m_done && m_cum_prob[m_K] == T{0}) {
-        size_t j = 0;
-        for (; j < m_K; ++j) {
-          if (++m_digit[j] < m_radix[j]) {
-            break;
-          }
-          m_digit[j] = 0;
-        }
-
-        if (j == m_K) {
-          m_done = true;
-          return;
-        }
-
-        recompute_from(j);
-      }
-    }
-
-    const SegmentedVector<T> *m_probs{nullptr};
-    const SegmentedArray<long> *m_offsets{nullptr};
-
-    std::vector<size_t> m_dims; // active player numbers
-    size_t m_K{0};
-    bool m_done{true};
-
-    std::vector<size_t> m_digit;
-    std::vector<size_t> m_radix;
-    std::vector<T> m_cum_prob;
-    index_type m_index{0};
-  };
-
-  ProductDistribution(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets)
-    : m_probs(probs), m_offsets(offsets), m_skip1(0), m_skip2(0)
-  {
+    probs.push_back(segment.data());
+    offsets.push_back(p_offsets.segment(pl).data());
+    radix.push_back(segment.size());
   }
 
-  ProductDistribution(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets,
-                      size_t skip1)
-    : m_probs(probs), m_offsets(offsets), m_skip1(skip1), m_skip2(0)
-  {
+  const size_t numActive = probs.size();
+  std::vector<size_t> digit(numActive, 0);
+  while (true) {
+    T prob{1};
+    long index = 0;
+    for (size_t k = 0; k < numActive; k++) {
+      prob *= probs[k][digit[k]];
+      index += offsets[k][digit[k]];
+    }
+    if (prob != T{0}) {
+      p_visit(index, prob);
+    }
+    size_t k = 0;
+    for (; k < numActive; k++) {
+      if (++digit[k] < radix[k]) {
+        break;
+      }
+      digit[k] = 0;
+    }
+    if (k == numActive) {
+      return;
+    }
   }
-
-  ProductDistribution(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets,
-                      size_t skip1, size_t skip2)
-    : m_probs(probs), m_offsets(offsets), m_skip1(skip1), m_skip2(skip2)
-  {
-  }
-
-  iterator begin() const { return iterator(m_probs, m_offsets, m_skip1, m_skip2, false); }
-
-  iterator end() const { return iterator(m_probs, m_offsets, m_skip1, m_skip2, true); }
-
-private:
-  const SegmentedVector<T> &m_probs;
-  const SegmentedArray<long> &m_offsets;
-  size_t m_skip1;
-  size_t m_skip2;
-};
+}
 
 template <class T> class TableMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 public:
@@ -268,6 +190,19 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+
+private:
+  Lazy<std::shared_ptr<const GameTableRep::PayoffTable<T>>> m_payoffTable;
+
+  /// The payoffs to player p_player (a player number) in every contingency
+  const std::vector<T> &GetPayoffs(int p_player) const
+  {
+    const auto &table = m_payoffTable.Get([this] {
+      return dynamic_cast<const GameTableRep &>(*this->GetSupport().GetGame())
+          .template GetPayoffTable<T>();
+    });
+    return (*table)[p_player - 1];
+  }
 };
 
 template <class T>
@@ -278,46 +213,37 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TableMixedStrategyProfileRep<T>::Cop
 
 template <class T> T TableMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  const auto game = this->GetSupport().GetGame();
-  auto &g = dynamic_cast<GameTableRep &>(*game);
-  const auto player = game->GetPlayer(pl);
+  const auto &payoffs = GetPayoffs(pl);
   T value{0};
-  for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets)) {
-    value += prob * g.m_results[index]->template GetPayoff<T>(player);
-  }
+  ForEachContingency(this->m_probs, this->m_offsets, 0, 0,
+                     [&](long index, const T &prob) { value += prob * payoffs[index]; });
   return value;
 }
 
 template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
 {
-  const auto game = this->GetSupport().GetGame();
-  auto &g = dynamic_cast<GameTableRep &>(*game);
-  auto base_index = this->StrategyOffset(strategy);
-  const auto player = game->GetPlayer(pl);
+  const auto &payoffs = GetPayoffs(pl);
+  const long base = this->StrategyOffset(strategy);
   T value{0};
-  for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets,
-                                                   strategy->GetPlayer()->GetNumber())) {
-    value += prob * g.m_results[base_index + index]->template GetPayoff<T>(player);
-  }
+  ForEachContingency(this->m_probs, this->m_offsets, strategy->GetPlayer()->GetNumber(), 0,
+                     [&](long index, const T &prob) { value += prob * payoffs[base + index]; });
   return value;
 }
 
 template <class T>
 bool TableMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_derivs) const
 {
-  const auto game = this->GetSupport().GetGame();
-  auto &g = dynamic_cast<GameTableRep &>(*game);
-  const auto player = game->GetPlayer(pl);
+  const auto &payoffs = GetPayoffs(pl);
   p_derivs = T{0};
-  auto segment = this->m_offsets.segment(pl);
-  for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets, pl)) {
-    auto deriv_it = p_derivs.begin();
-    for (const auto base_index : segment) {
-      *deriv_it += prob * g.m_results[base_index + index]->template GetPayoff<T>(player);
-      ++deriv_it;
+  const auto segment = this->m_offsets.segment(pl);
+  ForEachContingency(this->m_probs, this->m_offsets, pl, 0, [&](long index, const T &prob) {
+    auto deriv = p_derivs.begin();
+    for (const long base : segment) {
+      *deriv += prob * payoffs[base + index];
+      ++deriv;
     }
-  }
+  });
   return true;
 }
 
@@ -328,16 +254,12 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
   if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
     return T{0};
   }
-  const auto game = this->GetSupport().GetGame();
-  auto &g = dynamic_cast<GameTableRep &>(*game);
-  auto base_index = this->StrategyOffset(strategy1) + this->StrategyOffset(strategy2);
-  const auto player = game->GetPlayer(pl);
+  const auto &payoffs = GetPayoffs(pl);
+  const long base = this->StrategyOffset(strategy1) + this->StrategyOffset(strategy2);
   T value{0};
-  for (auto [index, prob] :
-       ProductDistribution<T>(this->m_probs, this->m_offsets, strategy1->GetPlayer()->GetNumber(),
-                              strategy2->GetPlayer()->GetNumber())) {
-    value += prob * g.m_results[base_index + index]->template GetPayoff<T>(player);
-  }
+  ForEachContingency(this->m_probs, this->m_offsets, strategy1->GetPlayer()->GetNumber(),
+                     strategy2->GetPlayer()->GetNumber(),
+                     [&](long index, const T &prob) { value += prob * payoffs[base + index]; });
   return value;
 }
 

@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GAMES_GAMETABLE_H
 #define GAMBIT_GAMES_GAMETABLE_H
 
+#include <mutex>
+
 #include "gameexpl.h"
 
 namespace Gambit {
@@ -35,8 +37,21 @@ class GameTableRep : public GameExplicitRep {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
 
+public:
+  /// Payoffs of every contingency, by player (indexed from 0), stored contiguously in the order
+  /// of the contingencies of the table
+  template <class T> using PayoffTable = std::vector<std::vector<T>>;
+
 private:
   std::vector<GameOutcomeRep *> m_results;
+
+  // The payoff tables derived from the outcomes, and the versions of the game they describe
+  mutable std::mutex m_payoffTableMutex;
+  mutable std::shared_ptr<const PayoffTable<double>> m_doublePayoffs;
+  mutable std::shared_ptr<const PayoffTable<Rational>> m_rationalPayoffs;
+  mutable unsigned int m_doublePayoffsVersion{0}, m_rationalPayoffsVersion{0};
+
+  template <class T> PayoffTable<T> BuildPayoffTable() const;
 
   /// @name Private auxiliary functions
   //@{
@@ -69,6 +84,10 @@ public:
   /// @name General data access
   //@{
   bool IsConstSum() const override;
+
+  /// Returns the payoffs of every contingency for the current version of the game, as type T
+  /// (double or Rational).  The table is shared by all callers until the game is next modified.
+  template <class T> std::shared_ptr<const PayoffTable<T>> GetPayoffTable() const;
 
   /// Returns the smallest payoff to the player in any play of the game
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
