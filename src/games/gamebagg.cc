@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <iostream>
 #include <type_traits>
 
@@ -95,6 +96,9 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
   void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
+
+private:
+  T GetPartialDeriv(int pl, const std::vector<GameStrategy> &p_strategies) const;
 };
 
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
@@ -121,93 +125,98 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
   return g.baggPtr->getMixedPayoff(bplayer, btype, s);
 }
 
+// The payoff to agent pl is linear in its own mixed strategy and in the mixed strategy each
+// other BAGG player induces on its AGG actions, to which each of that player's types t
+// contributes with weight P(t); it does not depend on the strategies of the other types of pl's
+// own BAGG player.  The partial derivative with respect to the probabilities of p_strategies is
+// therefore the payoff when each is played for sure (for another BAGG player, by all of its
+// types), times the probabilities of the types of the other BAGG players involved.  It is zero
+// if two of the strategies belong to one BAGG player, or one belongs to another type of pl's.
+template <class T>
+T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(
+    int pl, const std::vector<GameStrategy> &p_strategies) const
+{
+  const auto game = this->m_support.GetGame();
+  auto &g = dynamic_cast<GameBAGGRep &>(*game);
+  const auto &bagg = *g.baggPtr;
+  auto &agg = *bagg.aggPtr;
+  const int bplayer = g.agent2baggPlayer[pl] - 1;
+  const int btype = pl - 1 - bagg.typeOffset[bplayer];
+
+  int ownAction = -1;
+  // Each other BAGG player involved, with the AGG action it plays for sure
+  std::vector<std::pair<int, int>> fixed;
+  T weight(1);
+  for (const auto &strategy : p_strategies) {
+    const int agent = strategy->GetPlayer()->GetNumber();
+    const int player = g.agent2baggPlayer[agent] - 1;
+    const int type = agent - 1 - bagg.typeOffset[player];
+    if (agent == pl) {
+      if (ownAction != -1) {
+        return T(0);
+      }
+      ownAction = strategy->GetNumber() - 1;
+      continue;
+    }
+    if (player == bplayer || std::any_of(fixed.begin(), fixed.end(),
+                                         [&](const auto &f) { return f.first == player; })) {
+      return T(0);
+    }
+    fixed.emplace_back(player,
+                       agg.firstAction(player) +
+                           bagg.typeAction2ActionIndex[player][type][strategy->GetNumber() - 1]);
+    if constexpr (std::is_same_v<T, Rational>) {
+      weight *= static_cast<Rational>(bagg.exactIndepTypeDist[player][type]);
+    }
+    else {
+      weight *= bagg.indepTypeDist[player][type];
+    }
+  }
+
+  std::vector<T> s(bagg.strategyOffset[bagg.getNumTypes()]);
+  for (int k = 1, offset = 0; k <= bagg.getNumTypes(); k++) {
+    for (const auto &strategy : game->GetPlayer(k)->GetStrategies()) {
+      const int ind = this->m_profileIndex.at(strategy);
+      s[offset++] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
+    }
+  }
+
+  std::vector<T> as(agg.getNumActions());
+  T value(0);
+  for (int action = 0; action < bagg.getNumActions(bplayer, btype); action++) {
+    const T prob = (ownAction == -1) ? s[bagg.firstAction(bplayer, btype) + action]
+                                     : T((action == ownAction) ? 1 : 0);
+    if (prob <= T(0)) {
+      continue;
+    }
+    bagg.getAGGStrat(as, s, bplayer, btype, action);
+    for (const auto &[player, index] : fixed) {
+      std::fill(as.begin() + agg.firstAction(player),
+                as.begin() + agg.firstAction(player) + agg.getNumActions(player), T(0));
+      as[index] = T(1);
+    }
+    value += prob * agg.getV(bplayer, bagg.typeAction2ActionIndex[bplayer][btype][action], as);
+  }
+  return (fixed.empty()) ? value : weight * value;
+}
+
 template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<T> s(g.GetStrategies().size());
-  int bplayer = -1, btype = -1;
-  for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
-    for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
-      if (pl == g.baggPtr->typeOffset[i] + tp + 1) {
-        bplayer = i;
-        btype = tp;
-      }
-      if (g.baggPtr->typeOffset[i] + tp + 1 == ps->GetPlayer()->GetNumber()) {
-        for (unsigned int j = 0; j < g.baggPtr->typeActionSets.at(i).at(tp).size(); ++j) {
-          s.at(g.baggPtr->firstAction(i, tp) + j) = T(0);
-        }
-        s.at(g.baggPtr->firstAction(i, tp) + ps->GetNumber() - 1) = T(1);
-      }
-      else {
-        for (int j = 0; j < g.baggPtr->getNumActions(i, tp); ++j) {
-          const GameStrategy strategy = this->m_support.GetGame()
-                                            ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
-                                            ->GetStrategy(j + 1);
-          const int ind = this->m_profileIndex.at(strategy);
-          s.at(g.baggPtr->firstAction(i, tp) + j) =
-              (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-        }
-      }
-    }
-  }
-  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
+  return GetPartialDeriv(pl, {ps});
 }
 
 template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
                                                  const GameStrategy &ps2) const
 {
-  const auto player1 = ps1->GetPlayer().get();
-  const auto player2 = ps2->GetPlayer().get();
-  if (player1 == player2) {
-    return T(0);
-  }
-
-  auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<T> s(g.GetStrategies().size());
-  int bplayer = -1, btype = -1;
-  for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
-    for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
-      if (pl == g.baggPtr->typeOffset[i] + tp + 1) {
-        bplayer = i;
-        btype = tp;
-      }
-
-      if (g.baggPtr->typeOffset[i] + tp + 1 == player1->GetNumber()) {
-        for (unsigned int j = 0; j < g.baggPtr->typeActionSets.at(i).at(tp).size(); ++j) {
-          s.at(g.baggPtr->firstAction(i, tp) + j) = T(0);
-        }
-        s.at(g.baggPtr->firstAction(i, tp) + ps1->GetNumber() - 1) = T(1);
-      }
-      else if (g.baggPtr->typeOffset[i] + tp + 1 == player2->GetNumber()) {
-        for (int j = 0; j < g.baggPtr->getNumActions(i, tp); ++j) {
-          s.at(g.baggPtr->firstAction(i, tp) + j) = T(0);
-        }
-        s.at(g.baggPtr->firstAction(i, tp) + ps2->GetNumber() - 1) = T(1);
-      }
-      else {
-        for (unsigned int j = 0; j < g.baggPtr->typeActionSets.at(i).at(tp).size(); ++j) {
-          const GameStrategy strategy = this->m_support.GetGame()
-                                            ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
-                                            ->GetStrategy(j + 1);
-          const int ind = this->m_profileIndex.at(strategy);
-          s.at(g.baggPtr->firstAction(i, tp) + j) =
-              (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-        }
-      }
-    }
-  }
-  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
+  return GetPartialDeriv(pl, {ps1, ps2});
 }
 
-// The payoff to an action of agent pl is linear in the mixed strategy each other BAGG player
-// induces on its AGG actions, in which that player's type tq enters with weight P(tq).  Fixing
-// an action b of agent (j, tq) therefore moves the payoff by P(tq) times the difference between
-// the payoff when j plays b's AGG action and its average under (j, tq)'s mixed strategy; both
-// come from one row of the AGG payoff Jacobian.  As with GetPayoffDeriv, derivatives with respect
-// to agents of pl's own BAGG player equal the payoff, which does not depend on them.  The
-// Jacobian row is available in floating point only; exact computation uses the default.
+// See GetPartialDeriv.  The derivative with respect to an action b of type tq of another BAGG
+// player j is P(tq) times the payoff when j plays b's AGG action for sure, which is one entry of
+// a row of the AGG payoff Jacobian.  The Jacobian row is available in floating point only; exact
+// computation uses the default.
 template <class T>
 void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
                                                          Matrix<T> &p_derivs) const
@@ -260,31 +269,17 @@ void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_va
       as[ownFirst + action] = 0.0;
 
       for (int j = 0; j < bagg.getNumPlayers(); j++) {
+        if (j == bplayer) {
+          continue;
+        }
+        const double *payoffs = row.data() + agg.firstAction(j);
         for (int tq = 0; tq < bagg.getNumTypes(j); tq++) {
-          const int agent = bagg.typeOffset[j] + tq + 1;
-          if (agent == pl) {
-            continue;
-          }
-          const int first = bagg.strategyOffset[agent - 1];
-          const int count = bagg.getNumActions(j, tq);
-          if (j == bplayer) {
-            for (int b = 0; b < count; b++) {
-              if (column[first + b] != -1) {
-                p_derivs(r, column[first + b]) = value;
-              }
-            }
-            continue;
-          }
+          const int first = bagg.strategyOffset[bagg.typeOffset[j] + tq];
           const auto &actions = bagg.typeAction2ActionIndex[j][tq];
-          const double *payoffs = row.data() + agg.firstAction(j);
-          double mean = 0.0;
-          for (int b = 0; b < count; b++) {
-            mean += s[first + b] * payoffs[actions[b]];
-          }
           const double weight = bagg.indepTypeDist[j][tq];
-          for (int b = 0; b < count; b++) {
+          for (int b = 0; b < bagg.getNumActions(j, tq); b++) {
             if (column[first + b] != -1) {
-              p_derivs(r, column[first + b]) = value + weight * (payoffs[actions[b]] - mean);
+              p_derivs(r, column[first + b]) = weight * payoffs[actions[b]];
             }
           }
         }

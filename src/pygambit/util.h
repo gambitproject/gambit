@@ -178,6 +178,45 @@ inline double PayoffDerivBlockDiscrepancy(const MixedStrategyProfile<double> &p_
   return worst;
 }
 
+/// Returns the largest discrepancy between the partial derivatives of payoffs computed by
+/// GetPayoffDeriv and central differences of the payoffs, perturbing one probability at a time
+/// by p_step without renormalising.  Private, for testing.
+inline double PayoffDerivFiniteDifferenceDiscrepancy(const MixedStrategyProfile<double> &p_profile,
+                                                     double p_step)
+{
+  const Game game = p_profile.GetGame();
+  auto profile = p_profile;
+  auto difference = [&](const GameStrategy &p_wrt, auto p_payoff) {
+    const double prob = profile[p_wrt];
+    profile[p_wrt] = prob + p_step;
+    const double above = p_payoff();
+    profile[p_wrt] = prob - p_step;
+    const double below = p_payoff();
+    profile[p_wrt] = prob;
+    return (above - below) / (2.0 * p_step);
+  };
+  double worst = 0.0;
+  for (const auto &player : game->GetPlayers()) {
+    for (const auto &wrt : game->GetStrategies()) {
+      const double expected = difference(wrt, [&]() { return profile.GetPayoff(player); });
+      worst =
+          std::max(worst, std::abs(profile.GetPayoffDeriv(player->GetNumber(), wrt) - expected));
+    }
+    for (const auto &strategy : player->GetStrategies()) {
+      for (const auto &wrt : game->GetStrategies()) {
+        if (wrt->GetPlayer() == player) {
+          continue;
+        }
+        const double expected = difference(wrt, [&]() { return profile.GetPayoff(strategy); });
+        worst =
+            std::max(worst, std::abs(profile.GetPayoffDeriv(player->GetNumber(), strategy, wrt) -
+                                     expected));
+      }
+    }
+  }
+  return worst;
+}
+
 template <class T> std::list<std::shared_ptr<T>> make_list_of_pointer(const std::list<T> &p_list)
 {
   std::list<std::shared_ptr<T>> result;
