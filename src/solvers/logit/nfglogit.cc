@@ -84,10 +84,6 @@ public:
   virtual double Value(const MixedStrategyProfile<double> &p_profile,
                        const MixedStrategyProfile<double> &p_logProfile,
                        const Vector<double> &p_strategyValues, double p_lambda) const = 0;
-  virtual void Gradient(const MixedStrategyProfile<double> &p_profile,
-                        const Vector<double> &p_strategyValues,
-                        const Matrix<double> &p_strategyDerivs, double p_lambda,
-                        Vector<double> &p_gradient) const = 0;
 };
 
 class SumToOneEquation final : public Equation {
@@ -115,9 +111,6 @@ public:
   double Value(const MixedStrategyProfile<double> &p_profile,
                const MixedStrategyProfile<double> &p_logProfile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
-  void Gradient(const MixedStrategyProfile<double> &p_profile,
-                const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
-                double p_lambda, Vector<double> &p_gradient) const override;
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
@@ -129,17 +122,6 @@ double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
     value += p_profile[col];
   }
   return value;
-}
-
-void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
-                                const Vector<double> &p_strategyValues,
-                                const Matrix<double> &p_strategyDerivs, double p_lambda,
-                                Vector<double> &p_gradient) const
-{
-  p_gradient = 0.0;
-  for (int col = m_firstIndex; col < m_lastIndex; col++) {
-    p_gradient[col] = p_profile[col];
-  }
 }
 
 class RatioEquation final : public Equation {
@@ -169,9 +151,6 @@ public:
   double Value(const MixedStrategyProfile<double> &p_profile,
                const MixedStrategyProfile<double> &p_logProfile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
-  void Gradient(const MixedStrategyProfile<double> &p_profile,
-                const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
-                double p_lambda, Vector<double> &p_gradient) const override;
 };
 
 double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
@@ -180,34 +159,6 @@ double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
 {
   return p_logProfile[m_strategyIndex] - p_logProfile[m_refStrategyIndex] -
          p_lambda * (p_strategyValues[m_strategyIndex] - p_strategyValues[m_refStrategyIndex]);
-}
-
-void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
-                             const Vector<double> &p_strategyValues,
-                             const Matrix<double> &p_strategyDerivs, double p_lambda,
-                             Vector<double> &p_gradient) const
-{
-  int col = 1;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &strategy : player->GetStrategies()) {
-      if (strategy == m_refStrategy) {
-        p_gradient[col] = -1.0;
-      }
-      else if (strategy == m_strategy) {
-        p_gradient[col] = 1.0;
-      }
-      else if (player == m_player) {
-        p_gradient[col] = 0.0;
-      }
-      else {
-        p_gradient[col] =
-            -p_lambda * p_profile[col] *
-            (p_strategyDerivs(m_strategyIndex, col) - p_strategyDerivs(m_refStrategyIndex, col));
-      }
-      col++;
-    }
-  }
-  p_gradient[col] = p_strategyValues[m_refStrategyIndex] - p_strategyValues[m_strategyIndex];
 }
 
 class EquationSystem {
@@ -223,14 +174,15 @@ private:
   Game m_game;
   mutable MixedStrategyProfile<double> m_profile, m_logProfile;
   mutable Vector<double> m_strategyValues;
-  mutable Matrix<double> m_strategyDerivs;
+  // Payoffs of one player's strategies and their derivatives, reused across players
+  mutable Vector<double> m_blockValues;
+  mutable Matrix<double> m_blockDerivs;
 };
 
 EquationSystem::EquationSystem(const Game &p_game)
   : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0)),
     m_logProfile(p_game->NewMixedStrategyProfile(0.0)),
-    m_strategyValues(m_profile.MixedProfileLength()),
-    m_strategyDerivs(m_profile.MixedProfileLength(), m_profile.MixedProfileLength())
+    m_strategyValues(m_profile.MixedProfileLength())
 {
   m_equations.reserve(m_profile.MixedProfileLength());
   for (const auto &player : m_game->GetPlayers()) {
@@ -258,26 +210,34 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const
 {
+  // Rows of p_jac are variables (log probabilities, then lambda); columns are equations: for
+  // each player, that their probabilities sum to one, then one for each strategy but the first
+  // relating its log probability to that of the first.
   PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
-  Vector<double> column(p_point.size());
-  m_strategyDerivs = 0.0;
-  int row = 1;
-  for (const auto &strategy1 : m_game->GetStrategies()) {
-    m_strategyValues[row] = m_profile.GetPayoff(strategy1);
-    int col = 1;
-    for (const auto &strategy2 : m_game->GetStrategies()) {
-      if (strategy1->GetPlayer() != strategy2->GetPlayer()) {
-        m_strategyDerivs(row, col) =
-            m_profile.GetPayoffDeriv(strategy1->GetPlayer()->GetNumber(), strategy1, strategy2);
-      }
-      col++;
+  const size_t length = p_point.size() - 1;
+  p_jac = 0.0;
+  size_t column = 1;
+  size_t first = 1; // position in the profile of the current player's first strategy
+  for (const auto &player : m_game->GetPlayers()) {
+    m_profile.GetPayoffDerivBlock(player, m_blockValues, m_blockDerivs);
+    const size_t last = first + m_blockValues.size() - 1;
+    for (size_t var = first; var <= last; var++) {
+      p_jac(var, column) = m_profile[var];
     }
-    row++;
-  }
-  for (size_t i = 1; i <= m_equations.size(); i++) {
-    m_equations[i - 1]->Gradient(m_profile, m_strategyValues, m_strategyDerivs, lambda, column);
-    p_jac.SetColumn(i, column);
+    column++;
+    for (size_t r = 2; r <= m_blockValues.size(); r++, column++) {
+      for (size_t var = 1; var <= length; var++) {
+        if (var < first || var > last) {
+          p_jac(var, column) =
+              -lambda * m_profile[var] * (m_blockDerivs(r, var) - m_blockDerivs(1, var));
+        }
+      }
+      p_jac(first + r - 1, column) = 1.0;
+      p_jac(first, column) = -1.0;
+      p_jac(length + 1, column) = m_blockValues[1] - m_blockValues[r];
+    }
+    first = last + 1;
   }
 }
 

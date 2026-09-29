@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <type_traits>
 #include <iostream>
 
 #include "games.h"
@@ -90,6 +91,7 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 };
 
 template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
@@ -166,6 +168,51 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
     }
   }
   return g.aggPtr->getMixedPayoff(pl - 1, s);
+}
+
+// Each row of derivatives comes from a single leave-one-out convolution in the AGG, which is
+// available in floating point only; exact computation uses the default.
+template <class T>
+void AGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                        Matrix<T> &p_derivs) const
+{
+  if constexpr (!std::is_same_v<T, double>) {
+    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
+  }
+  else {
+    const auto game = this->m_support.GetGame();
+    auto &g = dynamic_cast<GameAGGRep &>(*game);
+    const auto &agg = *g.aggPtr;
+    std::vector<double> s(agg.getNumActions());
+    for (int i = 0; i < agg.getNumPlayers(); ++i) {
+      for (int j = 0; j < agg.getNumActions(i); ++j) {
+        const int ind = this->m_profileIndex.at(game->GetPlayer(i + 1)->GetStrategy(j + 1));
+        s[agg.firstAction(i) + j] = (ind == -1) ? 0.0 : this->m_probs.GetFlattened()[ind];
+      }
+    }
+
+    const auto player = game->GetPlayer(pl);
+    const auto &strategies = this->m_support.GetStrategies(player);
+    p_values = Vector<double>(strategies.size());
+    p_derivs = Matrix<double>(strategies.size(), this->m_probs.GetFlattened().size());
+    p_derivs = 0.0;
+    std::vector<double> row(agg.getNumActions());
+    size_t r = 1;
+    for (const auto &strategy : strategies) {
+      p_values[r] = GetPayoffDeriv(pl, strategy);
+      g.aggPtr->getPayoffJacobianRow(pl - 1, strategy->GetNumber() - 1, s, row);
+      for (const auto &other : game->GetPlayers()) {
+        if (other == player) {
+          continue;
+        }
+        for (const auto &otherStrategy : this->m_support.GetStrategies(other)) {
+          p_derivs(r, this->m_profileIndex.at(otherStrategy)) =
+              row[agg.firstAction(other->GetNumber() - 1) + otherStrategy->GetNumber() - 1];
+        }
+      }
+      r++;
+    }
+  }
 }
 
 template class AGGMixedStrategyProfileRep<double>;

@@ -602,6 +602,16 @@ class MixedStrategyProfile:
 class MixedStrategyProfileDouble(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfile[double]])
 
+    def _payoff_deriv_block_discrepancy(self, removed: list[tuple[str, str]]) -> float:
+        # Private, for testing: the largest discrepancy between the payoff derivative blocks of
+        # the players and the same quantities computed one at a time, on the support without
+        # the strategies `removed`, given as (player label, strategy label) pairs.
+        game: Game = self.game
+        cdef stdvector[c_GameStrategy] handles
+        for player, label in removed:
+            handles.push_back(game._resolve_strategy(player, label, "_payoff_deriv_block"))
+        return PayoffDerivBlockDiscrepancy(deref(self.profile), handles)
+
     @staticmethod
     @cython.cfunc
     def wrap(profile: shared_ptr[c_MixedStrategyProfile[float]]) -> MixedStrategyProfileDouble:
