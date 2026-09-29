@@ -21,6 +21,7 @@
 //
 
 #include <iostream>
+#include <type_traits>
 
 #include "games.h"
 #include "gamebagg.h"
@@ -93,6 +94,7 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 };
 
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
@@ -197,6 +199,99 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
     }
   }
   return g.baggPtr->getMixedPayoff(bplayer, btype, s);
+}
+
+// The payoff to an action of agent pl is linear in the mixed strategy each other BAGG player
+// induces on its AGG actions, in which that player's type tq enters with weight P(tq).  Fixing
+// an action b of agent (j, tq) therefore moves the payoff by P(tq) times the difference between
+// the payoff when j plays b's AGG action and its average under (j, tq)'s mixed strategy; both
+// come from one row of the AGG payoff Jacobian.  As with GetPayoffDeriv, derivatives with respect
+// to agents of pl's own BAGG player equal the payoff, which does not depend on them.  The
+// Jacobian row is available in floating point only; exact computation uses the default.
+template <class T>
+void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                         Matrix<T> &p_derivs) const
+{
+  if constexpr (!std::is_same_v<T, double>) {
+    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
+  }
+  else {
+    const auto game = this->m_support.GetGame();
+    const auto &bagg = *dynamic_cast<GameBAGGRep &>(*game).baggPtr;
+    auto &agg = *bagg.aggPtr;
+    const int numAgents = bagg.getNumTypes();
+
+    // The BAGG strategy vector, and the profile position of each of its entries (-1 if the
+    // strategy is not in the support); agent k's strategies start at strategyOffset[k - 1]
+    std::vector<double> s(bagg.strategyOffset[numAgents]);
+    std::vector<int> column(s.size());
+    for (int k = 1; k <= numAgents; k++) {
+      int offset = bagg.strategyOffset[k - 1];
+      for (const auto &strategy : game->GetPlayer(k)->GetStrategies()) {
+        const int ind = this->m_profileIndex.at(strategy);
+        s[offset] = (ind == -1) ? 0.0 : this->m_probs.GetFlattened()[ind];
+        column[offset++] = ind;
+      }
+    }
+
+    int bplayer = 0;
+    while (bagg.typeOffset[bplayer + 1] < pl) {
+      bplayer++;
+    }
+    const int btype = pl - 1 - bagg.typeOffset[bplayer];
+    std::vector<double> as(agg.getNumActions());
+    bagg.getAGGStrat(as, s, bplayer, btype, 0);
+    const int ownFirst = agg.firstAction(bplayer);
+    const auto &ownActions = bagg.typeAction2ActionIndex[bplayer][btype];
+    as[ownFirst + ownActions[0]] = 0.0;
+
+    const auto &strategies = this->m_support.GetStrategies(game->GetPlayer(pl));
+    p_values = Vector<double>(strategies.size());
+    p_derivs = Matrix<double>(strategies.size(), this->m_probs.GetFlattened().size());
+    p_derivs = 0.0;
+    std::vector<double> row(agg.getNumActions());
+    size_t r = 1;
+    for (const auto &strategy : strategies) {
+      const int action = ownActions[strategy->GetNumber() - 1];
+      as[ownFirst + action] = 1.0;
+      const double value = agg.getV(bplayer, action, as);
+      p_values[r] = value;
+      agg.getPayoffJacobianRow(bplayer, action, as, row);
+      as[ownFirst + action] = 0.0;
+
+      for (int j = 0; j < bagg.getNumPlayers(); j++) {
+        for (int tq = 0; tq < bagg.getNumTypes(j); tq++) {
+          const int agent = bagg.typeOffset[j] + tq + 1;
+          if (agent == pl) {
+            continue;
+          }
+          const int first = bagg.strategyOffset[agent - 1];
+          const int count = bagg.getNumActions(j, tq);
+          if (j == bplayer) {
+            for (int b = 0; b < count; b++) {
+              if (column[first + b] != -1) {
+                p_derivs(r, column[first + b]) = value;
+              }
+            }
+            continue;
+          }
+          const auto &actions = bagg.typeAction2ActionIndex[j][tq];
+          const double *payoffs = row.data() + agg.firstAction(j);
+          double mean = 0.0;
+          for (int b = 0; b < count; b++) {
+            mean += s[first + b] * payoffs[actions[b]];
+          }
+          const double weight = bagg.indepTypeDist[j][tq];
+          for (int b = 0; b < count; b++) {
+            if (column[first + b] != -1) {
+              p_derivs(r, column[first + b]) = value + weight * (payoffs[actions[b]] - mean);
+            }
+          }
+        }
+      }
+      r++;
+    }
+  }
 }
 
 template class BAGGMixedStrategyProfileRep<double>;
