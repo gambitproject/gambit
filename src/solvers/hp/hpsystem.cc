@@ -33,11 +33,6 @@ public:
   virtual double Value(const Vector<double> &point,
                        const MixedStrategyProfile<double> &current_sigma,
                        const std::vector<double> &payoffs_against_prior) const = 0;
-
-  virtual void Gradient(const Vector<double> &point,
-                        const MixedStrategyProfile<double> &current_sigma,
-                        const std::vector<double> &payoffs_against_prior,
-                        Vector<double> &gradient) const = 0;
 };
 
 namespace {
@@ -83,46 +78,6 @@ public:
 
     return v_i + lambda - mu;
   }
-
-  void Gradient(const Vector<double> &point, const MixedStrategyProfile<double> &current_sigma,
-                const std::vector<double> &payoffs_against_prior,
-                Vector<double> &gradient) const override
-  {
-    gradient = 0.0;
-    const double t = point[1];
-    const GamePlayer my_player = m_strategy->GetPlayer();
-    const Game game = m_strategy->GetGame();
-
-    // Derivative wrt t:
-    const double payoff_vs_sigma = current_sigma.GetPayoff(m_strategy);
-    const double payoff_vs_prior = payoffs_against_prior[m_flat_s_idx];
-    gradient[1] = payoff_vs_sigma - payoff_vs_prior;
-
-    // Derivative wrt mu_i:
-    gradient[m_mu_idx] = -1.0;
-
-    // Derivatives wrt all alphas:
-    int alpha_col = 2;
-    for (const auto &player2 : game->GetPlayers()) {
-      for (const auto &strat2 : player2->GetStrategies()) {
-        const double alpha2 = point[alpha_col];
-
-        if (my_player == player2) {
-          if (m_strategy == strat2) {
-            gradient[alpha_col] = AlphaToLambdaDeriv(alpha2);
-          }
-        }
-        else {
-          // Chain rule for opposing players' strategies
-          const double deriv_u =
-              current_sigma.GetPayoffDeriv(my_player->GetNumber(), m_strategy, strat2);
-          const double deriv_sigma = AlphaToSigmaDeriv(alpha2);
-          gradient[alpha_col] = t * deriv_u * deriv_sigma;
-        }
-        alpha_col++;
-      }
-    }
-  }
 };
 
 // Eq (b): Probability Sum Equation
@@ -146,17 +101,6 @@ public:
       sum_sigma += AlphaToSigma(point[i]);
     }
     return sum_sigma - 1.0;
-  }
-
-  void Gradient(const Vector<double> &point, const MixedStrategyProfile<double> &current_sigma,
-                const std::vector<double> &payoffs_against_prior,
-                Vector<double> &gradient) const override
-  {
-    gradient = 0.0;
-    // Only non-zero derivatives are those with respect to the player's own alphas
-    for (int i = m_first_alpha_idx; i < m_last_alpha_idx; ++i) {
-      gradient[i] = AlphaToSigmaDeriv(point[i]);
-    }
   }
 };
 
@@ -214,13 +158,34 @@ void HPEquationSystem::GetJacobian(const Vector<double> &point, Matrix<double> &
   // Update internal mutable state
   UpdateSigma(point);
 
+  // Rows of p_jac are variables (t, then alpha for each strategy, then mu for each player);
+  // columns are equations: for each player, a best response equation for each strategy, then
+  // that the player's probabilities sum to one.  Variable 1 + k is the alpha of the strategy at
+  // position k of the profile.
+  const double t = point[1];
   p_jac = 0.0;
-  Vector<double> column(point.size()); // Temp vector matching Jacobian column size
-
-  // Compute the Jacobian
-  for (size_t i = 1; i <= m_equations.size(); ++i) {
-    m_equations[i - 1]->Gradient(point, m_current_sigma, m_payoffs_against_prior, column);
-    p_jac.SetColumn(i, column);
+  size_t column = 1;
+  size_t first = 1; // position in the profile of the current player's first strategy
+  int mu_row = 2 + m_star;
+  for (const auto &player : m_game->GetPlayers()) {
+    m_current_sigma.GetPayoffDerivBlock(player, m_blockValues, m_blockDerivs);
+    const size_t last = first + m_blockValues.size() - 1;
+    for (size_t r = 1; r <= m_blockValues.size(); r++, column++) {
+      p_jac(1, column) = m_blockValues[r] - m_payoffs_against_prior[first + r - 2];
+      for (size_t k = 1; k <= m_blockDerivs.NumColumns(); k++) {
+        if (k < first || k > last) {
+          p_jac(1 + k, column) = t * m_blockDerivs(r, k) * AlphaToSigmaDeriv(point[1 + k]);
+        }
+      }
+      p_jac(first + r, column) = AlphaToLambdaDeriv(point[first + r]);
+      p_jac(mu_row, column) = -1.0;
+    }
+    for (size_t k = first; k <= last; k++) {
+      p_jac(1 + k, column) = AlphaToSigmaDeriv(point[1 + k]);
+    }
+    column++;
+    mu_row++;
+    first = last + 1;
   }
 }
 
