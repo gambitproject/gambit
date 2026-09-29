@@ -889,6 +889,8 @@ private:
                     const std::vector<Number> &);
 };
 
+struct TreeSequenceLayout;
+
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 public:
   explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
@@ -902,9 +904,11 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 
 private:
   mutable std::shared_ptr<MixedBehaviorProfile<T>> m_mixedBehavior;
+  mutable std::shared_ptr<const TreeSequenceLayout> m_sequences;
 
   void MakeBehavior() const;
   void OnProfileChanged() const override;

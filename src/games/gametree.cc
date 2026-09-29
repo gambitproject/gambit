@@ -108,6 +108,184 @@ T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &str
   return tmp.GetPayoff(pl);
 }
 
+/// The sequence of each player at each node of a tree with perfect recall, and the sequences each
+/// reduced strategy is consistent with.  A player's sequence at a node is the player's last action
+/// on the path to it, numbered from 1 among that player's actions in the order of the
+/// TreeLayout; 0 is the empty sequence.  A strategy is consistent with the empty sequence and with
+/// each action it chooses.
+struct TreeSequenceLayout {
+  std::shared_ptr<const TreeLayout> tree;
+  bool perfectRecall;
+  std::vector<size_t> numSequences;  ///< by player
+  std::vector<size_t> nodeSequences; ///< numPlayers per node
+  /// by player, then strategy in the order of GamePlayerRep::GetStrategies()
+  std::vector<std::vector<std::vector<size_t>>> strategySequences;
+
+  explicit TreeSequenceLayout(const GameRep &p_game)
+    : tree(p_game.GetTreeLayout()), perfectRecall(p_game.IsPerfectRecall()),
+      numSequences(tree->numPlayers, 1)
+  {
+    if (!perfectRecall) {
+      return;
+    }
+    const size_t numPlayers = tree->numPlayers;
+    std::vector<size_t> sequenceOfAction(tree->numActions + 1, 0);
+    std::vector<int> playerOfAction(tree->numActions + 1, -1);
+    for (size_t i = 0; i < tree->numPersonalInfosets; i++) {
+      const auto &infoset = tree->infosets[i];
+      for (size_t a = 0; a < infoset.numActions; a++) {
+        playerOfAction[infoset.firstAction + a] = infoset.player;
+        sequenceOfAction[infoset.firstAction + a] = numSequences[infoset.player]++;
+      }
+    }
+    nodeSequences.resize(tree->parent.size() * numPlayers, 0);
+    for (size_t node = 1; node < tree->parent.size(); node++) {
+      std::copy_n(nodeSequences.begin() + tree->parent[node] * numPlayers, numPlayers,
+                  nodeSequences.begin() + node * numPlayers);
+      if (const size_t action = tree->action[node]; action != 0) {
+        nodeSequences[node * numPlayers + playerOfAction[action]] = sequenceOfAction[action];
+      }
+    }
+    for (const auto &player : p_game.GetPlayers()) {
+      auto &sequences = strategySequences.emplace_back();
+      for (const auto &strategy : player->GetStrategies()) {
+        auto &consistent = sequences.emplace_back(1, 0);
+        for (const auto &[infoset, action] : strategy->m_behav) {
+          if (action > 0) {
+            consistent.push_back(
+                sequenceOfAction[tree->infosets[tree->infosetIndex.at(infoset)].firstAction +
+                                 action - 1]);
+          }
+        }
+      }
+    }
+  }
+};
+
+// The payoff is the sum over nodes of the probability chance leads to the node, times the payoff
+// of the outcome there, times the probability of each player's sequence at the node, which is the
+// total probability of the strategies consistent with it.  The payoff to a strategy s of player
+// i, and its derivative with respect to the probability of a strategy t of player j, therefore
+// sum, over the sequences of i consistent with s (and of j consistent with t), quantities
+// accumulated over the nodes where those are the players' sequences.
+template <class T>
+void TreeMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                         Matrix<T> &p_derivs) const
+{
+  const auto game = this->m_support.GetGame();
+  if (!m_sequences || m_sequences->tree != game->GetTreeLayout()) {
+    m_sequences = std::make_shared<const TreeSequenceLayout>(*game);
+  }
+  const auto &layout = *m_sequences;
+  if (!layout.perfectRecall) {
+    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
+    return;
+  }
+  const auto &tree = *layout.tree;
+  const auto &numbers = tree.template GetNumbers<T>();
+  const size_t numPlayers = tree.numPlayers;
+  const size_t numNodes = tree.parent.size();
+  const size_t self = pl - 1;
+
+  // Probability of each sequence of each player
+  std::vector<std::vector<T>> seqProbs(numPlayers);
+  for (size_t k = 0; k < numPlayers; k++) {
+    seqProbs[k].assign(layout.numSequences[k], static_cast<T>(0));
+    const auto player = game->GetPlayer(k + 1);
+    for (const auto &strategy : this->m_support.GetStrategies(player)) {
+      const T &prob = this->m_probs.GetFlattened()[this->m_profileIndex.at(strategy)];
+      for (const size_t sequence : layout.strategySequences[k][strategy->GetNumber() - 1]) {
+        seqProbs[k][sequence] += prob;
+      }
+    }
+  }
+
+  // Accumulate over nodes, by the sequence of the player (values) and by the sequences of the
+  // player and of each other player (derivatives)
+  const size_t numOwn = layout.numSequences[self];
+  std::vector<T> ownValues(numOwn, static_cast<T>(0));
+  std::vector<std::vector<T>> pairValues(numPlayers);
+  for (size_t j = 0; j < numPlayers; j++) {
+    if (j != self) {
+      pairValues[j].assign(numOwn * layout.numSequences[j], static_cast<T>(0));
+    }
+  }
+  std::vector<T> chance(numNodes);
+  for (size_t node = 0; node < numNodes; node++) {
+    chance[node] =
+        (node == 0) ? numbers.chanceProb[0] : chance[tree.parent[node]] * numbers.chanceProb[node];
+    const T &payoff = numbers.payoffs[node * numPlayers + self];
+    if (payoff == static_cast<T>(0) || chance[node] == static_cast<T>(0)) {
+      continue;
+    }
+    const size_t *sequences = layout.nodeSequences.data() + node * numPlayers;
+    const T base = chance[node] * payoff;
+    T all = base;
+    for (size_t k = 0; k < numPlayers; k++) {
+      if (k != self) {
+        all *= seqProbs[k][sequences[k]];
+      }
+    }
+    ownValues[sequences[self]] += all;
+    for (size_t j = 0; j < numPlayers; j++) {
+      if (j == self) {
+        continue;
+      }
+      T others = base;
+      for (size_t k = 0; k < numPlayers; k++) {
+        if (k != self && k != j) {
+          others *= seqProbs[k][sequences[k]];
+        }
+      }
+      pairValues[j][sequences[self] * layout.numSequences[j] + sequences[j]] += others;
+    }
+  }
+
+  const auto player = game->GetPlayer(pl);
+  const auto &strategies = this->m_support.GetStrategies(player);
+  const auto &ownSequences = layout.strategySequences[self];
+  p_values = Vector<T>(strategies.size());
+  p_derivs = Matrix<T>(strategies.size(), this->m_probs.GetFlattened().size());
+  p_derivs = static_cast<T>(0);
+  size_t row = 1;
+  for (const auto &strategy : strategies) {
+    T value = static_cast<T>(0);
+    for (const size_t sequence : ownSequences[strategy->GetNumber() - 1]) {
+      value += ownValues[sequence];
+    }
+    p_values[row++] = value;
+  }
+
+  // For each strategy t of another player j, sum over t's sequences for each sequence of the
+  // player, then over each of the player's strategies' sequences
+  std::vector<T> byOwnSequence(numOwn);
+  for (size_t j = 0; j < numPlayers; j++) {
+    if (j == self) {
+      continue;
+    }
+    const size_t numOther = layout.numSequences[j];
+    for (const auto &other : this->m_support.GetStrategies(game->GetPlayer(j + 1))) {
+      const auto &otherSequences = layout.strategySequences[j][other->GetNumber() - 1];
+      for (size_t q = 0; q < numOwn; q++) {
+        T sum = static_cast<T>(0);
+        for (const size_t sequence : otherSequences) {
+          sum += pairValues[j][q * numOther + sequence];
+        }
+        byOwnSequence[q] = sum;
+      }
+      const int column = this->m_profileIndex.at(other);
+      row = 1;
+      for (const auto &strategy : strategies) {
+        T deriv = static_cast<T>(0);
+        for (const size_t sequence : ownSequences[strategy->GetNumber() - 1]) {
+          deriv += byOwnSequence[sequence];
+        }
+        p_derivs(row++, column) = deriv;
+      }
+    }
+  }
+}
+
 template class TreeMixedStrategyProfileRep<double>;
 template class TreeMixedStrategyProfileRep<Rational>;
 

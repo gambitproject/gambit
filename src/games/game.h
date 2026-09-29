@@ -402,6 +402,7 @@ class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
+  friend struct TreeSequenceLayout;
 
   bool m_valid{true};
   GamePlayerRep *m_player;
