@@ -504,6 +504,9 @@ cdef extern from "util.h":
     double PayoffDerivBlockDiscrepancy(
             c_MixedStrategyProfile[double], stdvector[c_GameStrategy]
     ) except +
+    double PayoffDerivFiniteDifferenceDiscrepancy(
+            c_MixedStrategyProfile[double], double
+    ) except +
 
     void setitem_array_int "setitem"(Array[int] *, int, int) except +
     void setitem_array_number "setitem"(Array[c_Number], int, c_Number) except +

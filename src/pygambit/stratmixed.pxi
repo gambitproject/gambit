@@ -612,6 +612,11 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             handles.push_back(game._resolve_strategy(player, label, "_payoff_deriv_block"))
         return PayoffDerivBlockDiscrepancy(deref(self.profile), handles)
 
+    def _payoff_deriv_finite_difference_discrepancy(self, step: float) -> float:
+        # Private, for testing: the largest discrepancy between the partial derivatives of
+        # payoffs and central differences of the payoffs with the given step.
+        return PayoffDerivFiniteDifferenceDiscrepancy(deref(self.profile), step)
+
     @staticmethod
     @cython.cfunc
     def wrap(profile: shared_ptr[c_MixedStrategyProfile[float]]) -> MixedStrategyProfileDouble:
