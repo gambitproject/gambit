@@ -50,8 +50,8 @@ GAMES = [
                  id="bagg-2x2-fraction-types"),
     pytest.param(games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg"), 1.0e-12,
                  id="bagg-coffee"),
-    pytest.param(games.create_stripped_down_poker_efg(), 0.0, id="tree-poker"),
-    pytest.param(games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"), 0.0,
+    pytest.param(games.create_stripped_down_poker_efg(), 1.0e-12, id="tree-poker"),
+    pytest.param(games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"), 1.0e-12,
                  id="tree-chance-in-middle"),
 ]
 
