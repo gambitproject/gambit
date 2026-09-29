@@ -40,6 +40,7 @@ namespace Gambit {
 class GameActionRep : public std::enable_shared_from_this<GameActionRep> {
   friend class GameTreeRep;
   friend class GameInfosetRep;
+  friend class GameNodeRep;
   template <class T> friend class MixedBehaviorProfile;
 
   bool m_valid{true};
@@ -192,6 +193,8 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
 
   bool m_valid{true};
   int m_number{0};
+  /// Position of the node among its parent's children, set with the node ordering
+  std::size_t m_childIndex{0};
   GameRep *m_game;
   std::string m_label;
   GameInfosetRep *m_infoset{nullptr};
@@ -233,10 +236,10 @@ public:
   int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
   {
-    if (p_action->GetInfoset().get() != m_infoset) {
+    if (p_action->m_infoset != m_infoset) {
       throw MismatchException("Action is from a different information set than node");
     }
-    return m_children.at(p_action->GetNumber() - 1);
+    return m_children.at(p_action->m_number - 1);
   }
   Children GetChildren() const
   {

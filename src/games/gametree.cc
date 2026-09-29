@@ -376,8 +376,8 @@ GameNode GameNodeRep::GetNextSibling() const
   if (!m_parent || m_parent->m_children.back().get() == this) {
     return nullptr;
   }
-  return *std::next(
-      std::find(m_parent->m_children.begin(), m_parent->m_children.end(), shared_from_this()));
+  m_game->EnsureNodeOrdering();
+  return m_parent->m_children[m_childIndex + 1];
 }
 
 GameNode GameNodeRep::GetPriorSibling() const
@@ -385,8 +385,8 @@ GameNode GameNodeRep::GetPriorSibling() const
   if (!m_parent || m_parent->m_children.front().get() == this) {
     return nullptr;
   }
-  return *std::prev(
-      std::find(m_parent->m_children.begin(), m_parent->m_children.end(), shared_from_this()));
+  m_game->EnsureNodeOrdering();
+  return m_parent->m_children[m_childIndex - 1];
 }
 
 GameAction GameNodeRep::GetPriorAction() const
@@ -394,12 +394,9 @@ GameAction GameNodeRep::GetPriorAction() const
   if (!m_parent) {
     return nullptr;
   }
-  for (const auto &action : m_parent->m_infoset->m_actions) {
-    if (m_parent->GetChild(action).get() == this) {
-      return action;
-    }
-  }
-  return nullptr;
+  // Children are in the order of the actions at their parent's information set
+  m_game->EnsureNodeOrdering();
+  return m_parent->m_infoset->m_actions[m_childIndex];
 }
 
 GameAction GameNodeRep::GetOwnPriorAction() const
@@ -1135,6 +1132,9 @@ void GameTreeRep::EnsureNodeOrdering() const
     int nodeindex = 1;
     for (const auto &node : GetNodes()) {
       node->m_number = nodeindex++;
+      for (std::size_t i = 0; i < node->m_children.size(); i++) {
+        node->m_children[i]->m_childIndex = i;
+      }
     }
   });
 }
