@@ -21,6 +21,7 @@
 //
 
 #include <iostream>
+#include <utility>
 
 #include "games.h"
 #include "core/lazy.h"
@@ -190,6 +191,7 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 
 private:
   Lazy<std::shared_ptr<const GameTableRep::PayoffTable<T>>> m_payoffTable;
@@ -261,6 +263,93 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
                      strategy2->GetPlayer()->GetNumber(),
                      [&](long index, const T &prob) { value += prob * payoffs[base + index]; });
   return value;
+}
+
+// Visits every contingency of the other players once.  Each contribution is formed and
+// accumulated in the same order as when the payoffs and derivatives are computed separately:
+// for a derivative with respect to a strategy of player j, the probability is the product,
+// in order of player number, of the probabilities of the players other than pl and j.
+template <class T>
+void TableMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                          Matrix<T> &p_derivs) const
+{
+  const auto &payoffs = GetPayoffs(pl);
+  const auto &shape = this->m_probs.GetShape();
+  const size_t length = this->m_probs.GetFlattened().size();
+  const auto own = this->m_offsets.segment(pl);
+  const size_t numOwn = own.size();
+
+  std::vector<const T *> probs;
+  std::vector<const long *> offsets;
+  std::vector<size_t> radix, firstColumn;
+  bool empty = false;
+  for (size_t player = 1, column = 1; player <= shape.size(); column += shape[player++]) {
+    if (std::cmp_equal(player, pl)) {
+      continue;
+    }
+    const auto segment = this->m_probs.segment(player);
+    empty = empty || segment.empty();
+    probs.push_back(segment.data());
+    offsets.push_back(this->m_offsets.segment(player).data());
+    radix.push_back(segment.size());
+    firstColumn.push_back(column);
+  }
+
+  std::vector<T> values(numOwn, T{0});
+  std::vector<T> derivs(numOwn * length, T{0}); // row-major, columns from 0
+  const size_t numActive = probs.size();
+  std::vector<size_t> digit(numActive, 0);
+  std::vector<T> factor(numActive);
+  while (!empty) {
+    long index = 0;
+    for (size_t k = 0; k < numActive; k++) {
+      factor[k] = probs[k][digit[k]];
+      index += offsets[k][digit[k]];
+    }
+    T prob{1};
+    for (size_t k = 0; k < numActive; k++) {
+      prob *= factor[k];
+    }
+    if (prob != T{0}) {
+      for (size_t r = 0; r < numOwn; r++) {
+        values[r] += prob * payoffs[own.data()[r] + index];
+      }
+    }
+    for (size_t j = 0; j < numActive; j++) {
+      T others{1};
+      for (size_t k = 0; k < numActive; k++) {
+        if (k != j) {
+          others *= factor[k];
+        }
+      }
+      if (others == T{0}) {
+        continue;
+      }
+      const size_t column = firstColumn[j] + digit[j] - 1;
+      for (size_t r = 0; r < numOwn; r++) {
+        derivs[r * length + column] += others * payoffs[own.data()[r] + index];
+      }
+    }
+    size_t k = 0;
+    for (; k < numActive; k++) {
+      if (++digit[k] < radix[k]) {
+        break;
+      }
+      digit[k] = 0;
+    }
+    if (k == numActive) {
+      break;
+    }
+  }
+
+  p_values = Vector<T>(numOwn);
+  p_derivs = Matrix<T>(numOwn, length);
+  for (size_t r = 0; r < numOwn; r++) {
+    p_values[r + 1] = values[r];
+    for (size_t c = 0; c < length; c++) {
+      p_derivs(r + 1, c + 1) = derivs[r * length + c];
+    }
+  }
 }
 
 template class TableMixedStrategyProfileRep<double>;

@@ -26,6 +26,7 @@
 #include <random>
 #include <vector>
 
+#include "core/matrix.h"
 #include "core/vector.h"
 #include "core/segment.h"
 #include "games/game.h"
@@ -105,6 +106,10 @@ public:
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
   virtual bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const { return false; }
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
+  /// Computes the payoffs of the strategies of player pl, and their derivatives with respect to
+  /// the probabilities of the strategies of the other players; see
+  /// MixedStrategyProfile::GetPayoffDerivBlock.  The default computes each derivative separately.
+  virtual void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const;
 
   T GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }
   T GetPayoff(const GameStrategy &p_strategy) const
@@ -309,6 +314,22 @@ public:
   {
     CheckVersion();
     return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy);
+  }
+
+  /// @brief Computes the payoffs of a player's strategies and their derivatives
+  /// @details For each strategy of \p p_player in the support, computes the payoff to playing
+  ///          it against the profile, and the derivatives of that payoff with respect to the
+  ///          probabilities of the strategies of the other players.
+  /// @param[in] p_player  The player whose strategies are evaluated
+  /// @param[out] p_values  Resized to one entry per strategy of the player in the support
+  /// @param[out] p_derivs  Resized to one row per strategy of the player in the support and one
+  ///                       column per position in the profile; columns of the player's own
+  ///                       strategies are zero
+  void GetPayoffDerivBlock(const GamePlayer &p_player, Vector<T> &p_values,
+                           Matrix<T> &p_derivs) const
+  {
+    CheckVersion();
+    m_rep->GetPayoffDerivBlock(p_player->GetNumber(), p_values, p_derivs);
   }
 
   /// @brief Computes the regret to playing \p p_strategy

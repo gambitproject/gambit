@@ -501,6 +501,9 @@ cdef extern from "util.h":
     stdvector[stdvector[double]] ProfileDiffActionValues(
             c_MixedBehaviorProfile[double]
     ) except +
+    double PayoffDerivBlockDiscrepancy(
+            c_MixedStrategyProfile[double], stdvector[c_GameStrategy]
+    ) except +
 
     void setitem_array_int "setitem"(Array[int] *, int, int) except +
     void setitem_array_number "setitem"(Array[c_Number], int, c_Number) except +

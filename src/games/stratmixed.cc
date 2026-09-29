@@ -241,6 +241,33 @@ MixedStrategyProfile<Rational> PureStrategyProfileRep::ToMixedStrategyProfile() 
   return temp;
 }
 
+template <class T>
+void MixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                     Matrix<T> &p_derivs) const
+{
+  const auto game = m_support.GetGame();
+  const auto player = game->GetPlayer(pl);
+  const auto &strategies = m_support.GetStrategies(player);
+  const size_t length = m_probs.GetFlattened().size();
+  p_values = Vector<T>(strategies.size());
+  p_derivs = Matrix<T>(strategies.size(), length);
+  p_derivs = T{0};
+  size_t row = 1;
+  for (const auto &strategy : strategies) {
+    p_values[row] = GetPayoffDeriv(pl, strategy);
+    size_t column = 1;
+    for (const auto &other : game->GetPlayers()) {
+      for (const auto &otherStrategy : m_support.GetStrategies(other)) {
+        if (other != player) {
+          p_derivs(row, column) = GetPayoffDeriv(pl, strategy, otherStrategy);
+        }
+        column++;
+      }
+    }
+    row++;
+  }
+}
+
 template class MixedStrategyProfileRep<double>;
 template class MixedStrategyProfileRep<Rational>;
 

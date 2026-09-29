@@ -26,6 +26,8 @@
 // classes easier.
 //
 
+#include <algorithm>
+#include <cmath>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -131,6 +133,49 @@ ProfileDiffActionValues(const MixedBehaviorProfile<double> &p_profile)
     }
   }
   return result;
+}
+
+/// Largest absolute difference, over every player, between the payoffs and derivatives given by
+/// MixedStrategyProfile::GetPayoffDerivBlock and the same quantities computed one at a time.
+/// The profile checked is on the support of p_profile's game with p_removed taken out, with the
+/// probabilities of the remaining strategies taken from p_profile.  Private, for testing.
+inline double PayoffDerivBlockDiscrepancy(const MixedStrategyProfile<double> &p_profile,
+                                          const std::vector<GameStrategy> &p_removed)
+{
+  const Game game = p_profile.GetGame();
+  StrategySupportProfile support(game);
+  for (const auto &strategy : p_removed) {
+    support.RemoveStrategy(strategy);
+  }
+  auto profile = support.NewMixedStrategyProfile<double>();
+  for (const auto &player : game->GetPlayers()) {
+    for (const auto &strategy : support.GetStrategies(player)) {
+      profile[strategy] = p_profile[strategy];
+    }
+  }
+  double worst = 0.0;
+  Vector<double> values;
+  Matrix<double> derivs;
+  for (const auto &player : game->GetPlayers()) {
+    profile.GetPayoffDerivBlock(player, values, derivs);
+    size_t row = 1;
+    for (const auto &strategy : support.GetStrategies(player)) {
+      worst = std::max(worst, std::abs(values[row] - profile.GetPayoff(strategy)));
+      size_t column = 1;
+      for (const auto &other : game->GetPlayers()) {
+        for (const auto &otherStrategy : support.GetStrategies(other)) {
+          const double expected =
+              (other == player)
+                  ? 0.0
+                  : profile.GetPayoffDeriv(player->GetNumber(), strategy, otherStrategy);
+          worst = std::max(worst, std::abs(derivs(row, column) - expected));
+          column++;
+        }
+      }
+      row++;
+    }
+  }
+  return worst;
 }
 
 template <class T> std::list<std::shared_ptr<T>> make_list_of_pointer(const std::list<T> &p_list)
