@@ -1880,7 +1880,7 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
 
   IncrementVersion();
   auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label);
-  m_outcomes.push_back(outcome);
+  AddOutcome(outcome);
   for (const auto &[pl, player] : enumerate(m_players)) {
     outcome->SetPayoff(player, p_payoffs[pl]);
   }

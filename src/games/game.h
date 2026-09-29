@@ -31,6 +31,7 @@
 #include <random>
 #include <set>
 #include <stack>
+#include <unordered_map>
 
 #include "core/array.h"
 #include "number.h"
@@ -590,6 +591,8 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
 protected:
   std::vector<std::shared_ptr<GamePlayerRep>> m_players;
   std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
+  /// The outcomes of the game indexed by label; outcome labels are unique within a game
+  std::unordered_map<std::string, GameOutcomeRep *> m_outcomeLabels;
   /// The game's null outcome, shared by every node or contingency with no outcome attached.
   std::shared_ptr<GameOutcomeRep> m_nullOutcome;
   mutable CartesianProductSpace m_pureStrategies;
@@ -612,6 +615,12 @@ protected:
                          const std::set<const GameOutcomeRep *> &p_ignore = {}) const;
   /// Invalidate and remove the given outcomes from the game, renumbering the survivors.
   void EraseOutcomes(const std::set<const GameOutcomeRep *> &p_outcomes);
+  /// Append a newly created outcome to the outcomes of the game.
+  void AddOutcome(const std::shared_ptr<GameOutcomeRep> &p_outcome);
+  /// Rebuild the index of outcome labels from the outcomes of the game.
+  void IndexOutcomeLabels();
+  /// Remove the entry for p_outcome's label from the index, if it refers to p_outcome.
+  void UnindexOutcomeLabel(const GameOutcomeRep *p_outcome);
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1018,8 +1027,10 @@ inline void GameOutcomeRep::SetLabel(const std::string &p_label)
   if (p_label == m_label) {
     return;
   }
-  GetGame()->CheckOutcomeLabel(p_label);
+  m_game->CheckOutcomeLabel(p_label);
+  m_game->UnindexOutcomeLabel(this);
   m_label = p_label;
+  m_game->m_outcomeLabels[m_label] = this;
 }
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
@@ -1087,20 +1098,41 @@ inline void GameRep::CheckOutcomeLabel(const std::string &p_label,
     throw ValueException("Outcome label must not be empty");
   }
   CheckLabel(p_label);
+  if (const auto entry = m_outcomeLabels.find(p_label);
+      entry != m_outcomeLabels.end() && !p_ignore.contains(entry->second)) {
+    throw ValueException("Outcome label must be unique within the game");
+  }
+}
+inline void GameRep::AddOutcome(const std::shared_ptr<GameOutcomeRep> &p_outcome)
+{
+  m_outcomes.push_back(p_outcome);
+  // An outcome being absorbed may still hold this label; the new outcome takes it over
+  m_outcomeLabels[p_outcome->m_label] = p_outcome.get();
+}
+inline void GameRep::IndexOutcomeLabels()
+{
+  m_outcomeLabels.clear();
   for (const auto &outcome : m_outcomes) {
-    if (outcome->GetLabel() == p_label && !p_ignore.contains(outcome.get())) {
-      throw ValueException("Outcome label must be unique within the game");
-    }
+    m_outcomeLabels[outcome->m_label] = outcome.get();
+  }
+}
+inline void GameRep::UnindexOutcomeLabel(const GameOutcomeRep *p_outcome)
+{
+  if (const auto entry = m_outcomeLabels.find(p_outcome->m_label);
+      entry != m_outcomeLabels.end() && entry->second == p_outcome) {
+    m_outcomeLabels.erase(entry);
   }
 }
 inline void GameRep::EraseOutcomes(const std::set<const GameOutcomeRep *> &p_outcomes)
 {
-  for (const auto *outcome : p_outcomes) {
-    auto member = std::find_if(m_outcomes.begin(), m_outcomes.end(),
-                               [outcome](const auto &c) { return c.get() == outcome; });
-    (*member)->Invalidate();
-    m_outcomes.erase(member);
-  }
+  std::erase_if(m_outcomes, [&](const std::shared_ptr<GameOutcomeRep> &c) {
+    if (!p_outcomes.contains(c.get())) {
+      return false;
+    }
+    UnindexOutcomeLabel(c.get());
+    c->Invalidate();
+    return true;
+  });
   std::for_each(
       m_outcomes.begin(), m_outcomes.end(),
       [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
