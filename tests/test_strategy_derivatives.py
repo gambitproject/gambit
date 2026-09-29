@@ -51,24 +51,13 @@ GAMES = [
     pytest.param(games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg"), 1.0e-12,
                  id="bagg-coffee"),
     pytest.param(games.create_stripped_down_poker_efg(), 0.0, id="tree-poker"),
+    pytest.param(games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"), 0.0,
+                 id="tree-chance-in-middle"),
 ]
 
 
-@pytest.mark.parametrize(
-    "game",
-    [
-        param if param.id != "tree-poker" else pytest.param(
-            param.values[0], id=param.id,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="a tree's strategic payoff normalises the mixed strategy, so it is not "
-                       "linear in each probability off the simplex",
-            ),
-        )
-        for param in [pytest.param(p.values[0], id=p.id) for p in GAMES]
-    ],
-)
-def test_payoff_derivs_are_partial_derivatives(game: gbt.Game):
+@pytest.mark.parametrize("game,block_tolerance", GAMES)
+def test_payoff_derivs_are_partial_derivatives(game: gbt.Game, block_tolerance: float):
     profile = _interior_profile(game, seed=4)
     assert profile._payoff_deriv_finite_difference_discrepancy(1.0e-3) <= 1.0e-8
 

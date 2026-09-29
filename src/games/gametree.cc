@@ -29,6 +29,7 @@
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <variant>
 
 #include "games.h"
@@ -61,7 +62,8 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy
 template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
   if (m_mixedBehavior == nullptr) {
-    m_mixedBehavior = std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
+    m_mixedBehavior =
+        std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(this->Normalize()));
   }
 }
 
@@ -70,10 +72,19 @@ template <class T> void TreeMixedStrategyProfileRep<T>::OnProfileChanged() const
   m_mixedBehavior = nullptr;
 }
 
+// The behavior profile is realization-equivalent to the normalized profile, so its payoff is
+// scaled by each player's total probability.  This gives the payoff as the multilinear function
+// of the probabilities that the other representations compute, of which GetPayoffDeriv then
+// gives the partial derivatives.
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MakeBehavior();
-  return m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
+  T payoff = m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
+  for (size_t player = 1; player <= this->m_probs.GetShape().size(); player++) {
+    const auto probs = std::as_const(this->m_probs).segment(player);
+    payoff *= std::accumulate(probs.begin(), probs.end(), static_cast<T>(0));
+  }
+  return payoff;
 }
 
 template <class T>
