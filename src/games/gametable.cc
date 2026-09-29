@@ -373,6 +373,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
     });
     std::transform(m_outcomes.begin(), m_outcomes.end(), m_results.begin(),
                    [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
+    IndexOutcomeLabels();
   }
 }
 
@@ -539,7 +540,7 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
 
   IncrementVersion();
   auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label);
-  m_outcomes.push_back(outcome);
+  AddOutcome(outcome);
   for (const auto &[pl, player] : enumerate(m_players)) {
     outcome->SetPayoff(player, p_payoffs[pl]);
   }

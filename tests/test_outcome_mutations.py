@@ -198,3 +198,56 @@ def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
     with pytest.raises(ValueError):
         game.relabel_outcomes({"lose": "win"})
     assert set(game.get_outcomes()) == {"win", "lose"}
+
+
+def test_outcome_relabel_swap_keeps_labels_consistent():
+    """Swapping two outcomes' labels in one relabelling leaves each label naming the
+    other outcome, with both labels still in use."""
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["x", "y"])
+    game.make_outcome(gbt.H.path("x"), {"A": 1, "B": 0}, "first")
+    game.make_outcome(gbt.H.path("y"), {"A": 2, "B": 0}, "second")
+    game.relabel_outcomes({"first": "second", "second": "first"})
+    assert game.get_outcome(gbt.H.path("x")) == "second"
+    assert game.get_outcome(gbt.H.path("y")) == "first"
+    assert game.get_outcome_payoffs("second")["A"] == 1
+    assert game.get_outcome_payoffs("first")["A"] == 2
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({"first": "second"})
+
+
+def test_outcome_label_freed_by_relabel_can_be_reused():
+    game = gbt.ExtensiveGame(players=["A"])
+    game.append_move(gbt.H.path(), "A", ["x", "y"])
+    game.make_outcome(gbt.H.path("x"), {"A": 1}, "old")
+    game.relabel_outcomes({"old": "new"})
+    game.make_outcome(gbt.H.path("y"), {"A": 2}, "old")
+    assert set(game.get_outcomes()) == {"old", "new"}
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({"old": "new"})
+
+
+def test_outcome_label_reused_on_absorption_refers_to_new_outcome():
+    """A label taken over from an absorbed outcome names the new outcome, and can then be
+    relabelled and freed like any other."""
+    game = gbt.ExtensiveGame(["Alice"])
+    game.append_move(gbt.H.path(), "Alice", ["U", "D"])
+    game.make_outcome(gbt.H.path("U"), {"Alice": 1}, "w")
+    game.make_outcome(gbt.H.path(...), {"Alice": 2}, "w")
+    game.relabel_outcomes({"w": "v"})
+    assert game.get_outcomes() == ["v"]
+    assert game.get_outcome_payoffs("v")["Alice"] == 2
+    game.make_outcome(gbt.H.path(...), {"Alice": 3}, "w")
+    assert game.get_outcomes() == ["w"]
+
+
+def test_outcome_labels_of_dense_strategic_game_are_indexed():
+    """Outcomes created in bulk with a strategic game have unique labels which can be
+    relabelled, and a duplicate is refused."""
+    game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[4, 3], [2, 1]])
+    labels = game.get_outcomes()
+    assert len(set(labels)) == len(labels) == 4
+    game.relabel_outcomes({labels[0]: "renamed"})
+    assert "renamed" in game.get_outcomes()
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({labels[1]: "renamed"})

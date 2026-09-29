@@ -304,20 +304,12 @@ void GameRep::RelabelOutcomes(const std::map<std::string, std::string> &p_labels
   std::map<GameOutcomeRep *, std::string> assignment;
   std::set<const GameOutcomeRep *> relabeled;
   for (const auto &[old_label, new_label] : p_labels) {
-    GameOutcomeRep *match = nullptr;
-    for (const auto &outcome : m_outcomes) {
-      if (outcome->GetLabel() == old_label) {
-        if (match) {
-          throw ValueException("Outcome label '" + old_label + "' is ambiguous in this game");
-        }
-        match = outcome.get();
-      }
-    }
-    if (!match) {
+    const auto entry = m_outcomeLabels.find(old_label);
+    if (entry == m_outcomeLabels.end()) {
       throw ValueException("No outcome with label '" + old_label + "' in this game");
     }
-    assignment[match] = new_label;
-    relabeled.insert(match);
+    assignment[entry->second] = new_label;
+    relabeled.insert(entry->second);
   }
   // Replacement labels must be legal, unique against untouched outcomes, and pairwise distinct
   std::set<std::string> targets;
@@ -329,7 +321,11 @@ void GameRep::RelabelOutcomes(const std::map<std::string, std::string> &p_labels
     }
   }
   for (const auto &[outcome, new_label] : assignment) {
+    UnindexOutcomeLabel(outcome);
+  }
+  for (const auto &[outcome, new_label] : assignment) {
     outcome->m_label = new_label;
+    m_outcomeLabels[new_label] = outcome;
   }
 }
 
