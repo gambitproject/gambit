@@ -1,3 +1,6 @@
+import io
+
+import numpy as np
 import pytest
 
 import pygambit as gbt
@@ -80,3 +83,40 @@ def test_logit_estimate_behavior_completes(use_empirical: bool, local_max: bool)
             probs = dict(result.profile[selector])
             assert probs.keys() == set(data.game.get_actions(selector))
             assert sum(probs.values()) == pytest.approx(1.0)
+
+
+def _logit_strategy_path(game: gbt.Game, lam: float) -> tuple[np.ndarray, list[tuple[int, int]]]:
+    events = []
+    _, stats = gbt.gambit._logit_strategy_lambda(game, [lam], 0.03, 1.1, events.append,
+                                                 _with_stats=True)
+    points = np.array([
+        [event.qre.lam] + [event.qre[i] for i in range(len(event.qre))]
+        for event in events if isinstance(event, gbt.LogitPathEvent)
+    ])
+    return points, [(s.accepted_steps, s.corrector_iterations) for s in stats]
+
+
+@pytest.mark.parametrize(
+    "game",
+    [
+        pytest.param(games.create_stripped_down_poker_efg(), id="stripped_down_poker"),
+        pytest.param(games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+                     id="stripped_down_poker_nonterm_outcomes"),
+        pytest.param(games.read_from_file("3_player_with_nonterm_outcomes.efg"),
+                     id="3_player_with_nonterm_outcomes"),
+        pytest.param(games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+                     id="chance_in_middle_with_nonterm_outcomes"),
+        pytest.param(games.read_from_file("nature_leaves_generic.efg"),
+                     id="nature_leaves_generic"),
+    ],
+)
+def test_logit_strategy_tree_matches_table_form(game: gbt.Game):
+    """Strategic-form logit on a tree traces the same path as on the table game written from
+    its reduced strategic form.  A fixed lambda is used so the comparison does not depend on
+    the payoff range, which is defined differently for the two representations."""
+    table = gbt.read_nfg(io.BytesIO(game.to_nfg().encode()))
+    tree_points, tree_counts = _logit_strategy_path(game, 5.0)
+    table_points, table_counts = _logit_strategy_path(table, 5.0)
+    assert tree_counts == table_counts
+    assert tree_points.shape == table_points.shape
+    assert np.max(np.abs(tree_points - table_points)) <= 1.0e-12
