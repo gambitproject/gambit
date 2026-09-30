@@ -99,7 +99,9 @@ void GivensQR::Decompose(Matrix<double> &b)
     for (size_t k = m + 1; k <= m_rows; k++) {
       double &c1 = b(m, m);
       double &c2 = b(k, m);
-      if (std::abs(c1) + std::abs(c2) == 0.0) {
+      // With nothing to eliminate and a non-negative diagonal the rotation is the identity.
+      // This is common where the Jacobian has structural zeros which survive fill-in.
+      if (c2 == 0.0 && c1 >= 0.0) {
         m_cos.push_back(1.0);
         m_sin.push_back(0.0);
         continue;
@@ -115,11 +117,17 @@ void GivensQR::Decompose(Matrix<double> &b)
       const double s2 = c2 / sn;
       m_cos.push_back(s1);
       m_sin.push_back(s2);
-      for (size_t j = m + 1; j <= m_cols; j++) {
-        const double sv1 = b(m, j);
-        const double sv2 = b(k, j);
-        b(m, j) = s1 * sv1 + s2 * sv2;
-        b(k, j) = -s2 * sv1 + s1 * sv2;
+      if (m < m_cols) {
+        // Rows are stored contiguously; rotating through raw pointers rather than checked
+        // element access lets the compiler vectorise the loop
+        double *row1 = &b(m, m + 1);
+        double *row2 = &b(k, m + 1);
+        for (size_t j = 0; j < m_cols - m; j++) {
+          const double sv1 = row1[j];
+          const double sv2 = row2[j];
+          row1[j] = s1 * sv1 + s2 * sv2;
+          row2[j] = -s2 * sv1 + s1 * sv2;
+        }
       }
       c1 = sn;
       c2 = 0.0;
@@ -136,6 +144,9 @@ void GivensQR::ApplyTranspose(Vector<double> &p_v) const
       index--;
       const double s1 = m_cos[index];
       const double s2 = m_sin[index];
+      if (s2 == 0.0 && s1 == 1.0) {
+        continue;
+      }
       const double sv1 = p_v[m];
       const double sv2 = p_v[k];
       p_v[m] = s1 * sv1 - s2 * sv2;
