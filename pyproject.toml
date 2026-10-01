@@ -138,8 +138,7 @@ markers = [
 ]
 
 [tool.cibuildwheel]
-skip = "pp* *t"
-test-command = "python -c \"import pygambit; g = pygambit.Game.new_table([2, 2]); assert g\""
+test-command = "python -c \"import pygambit; g = pygambit.StrategicGame.from_arrays([[1, 0], [0, 1]], [[1, 0], [0, 1]]); assert g\""
 
 [tool.setuptools]
 packages = ["pygambit", "pygambit.cli"]
