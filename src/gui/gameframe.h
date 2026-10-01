@@ -70,6 +70,7 @@ class GameFrame final : public wxFrame, public GameView {
   void OnEditRedo(wxCommandEvent &);
 
   void OnEditGame(wxCommandEvent &);
+  void OnPrefs(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewZoom(wxCommandEvent &);
@@ -95,6 +96,9 @@ class GameFrame final : public wxFrame, public GameView {
 
   // Overriding GameView members
   void OnUpdate() override;
+
+  //! Rebuilds the menus, toolbar and window chrome after a language change.
+  void Retranslate();
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR

@@ -17,7 +17,7 @@ constexpr int ID_FIRST_STRATEGY_COUNT = wxID_HIGHEST + 500;
 } // namespace
 
 NewTableDialog::NewTableDialog(wxWindow *parent)
-  : wxDialog(parent, wxID_ANY, wxT("New strategic-form game"), wxDefaultPosition, wxDefaultSize,
+  : wxDialog(parent, wxID_ANY, _("New strategic-form game"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   CreateControls();
@@ -41,7 +41,7 @@ std::vector<int> NewTableDialog::GetDimensions() const
 
 void NewTableDialog::CreateControls()
 {
-  auto *playerCountLabel = new wxStaticText(this, wxID_ANY, wxT("Number of players:"));
+  auto *playerCountLabel = new wxStaticText(this, wxID_ANY, _("Number of players:"));
   m_playerCountCtrl = new wxSpinCtrl(this, ID_PLAYER_COUNT);
   m_playerCountCtrl->SetRange(2, 16);
   m_playerCountCtrl->SetValue(2);
@@ -65,7 +65,7 @@ void NewTableDialog::LayoutControls()
   formSizer->Add(playerCountLabel, 0, wxALIGN_CENTER_VERTICAL);
   formSizer->Add(m_playerCountCtrl, 0);
 
-  auto *strategyBox = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Strategies per player"));
+  auto *strategyBox = new wxStaticBoxSizer(wxVERTICAL, this, _("Strategies per player"));
   strategyBox->Add(m_strategyRowsSizer, 0, wxEXPAND | wxALL, FromDIP(8));
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
@@ -97,7 +97,7 @@ void NewTableDialog::RebuildStrategyControls()
   grid->AddGrowableCol(1, 1);
 
   for (int i = 0; i < playerCount; ++i) {
-    auto *label = new wxStaticText(this, wxID_ANY, wxString::Format(wxT("Player %d:"), i + 1));
+    auto *label = new wxStaticText(this, wxID_ANY, wxString::Format(_("Player %d:"), i + 1));
     auto *ctrl = new wxSpinCtrl(this, ID_FIRST_STRATEGY_COUNT + i);
 
     ctrl->SetRange(1, 99);
