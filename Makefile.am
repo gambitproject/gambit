@@ -59,19 +59,10 @@ EXTRA_DIST = \
 	contrib/games/badgame2.efg \
 	contrib/games/bayes1a.efg \
 	contrib/games/bayes2a.efg \
-	contrib/games/bcp2.efg \
-	contrib/games/bcp3.efg \
-	contrib/games/bcp4.efg \
 	contrib/games/bhg1.efg \
 	contrib/games/bhg2.efg \
-	contrib/games/bhg3.efg \
-	contrib/games/bhg4.efg \
 	contrib/games/bhg5.efg \
 	contrib/games/caro2.efg \
-	contrib/games/cent2.efg \
-	contrib/games/cent3.efg \
-	contrib/games/cent4.efg \
-	contrib/games/cent6.efg \
 	contrib/games/centcs10.efg \
 	contrib/games/centcs6.efg \
 	contrib/games/condjury.efg \
@@ -123,9 +114,6 @@ EXTRA_DIST = \
 	contrib/games/pvw2.efg \
 	contrib/games/pvw.efg \
 	contrib/games/sh3.efg \
-	contrib/games/sww1.efg \
-	contrib/games/sww2.efg \
-	contrib/games/sww3.efg \
 	contrib/games/tim.efg \
 	contrib/games/ttt.efg \
 	contrib/games/vd.efg \
@@ -146,7 +134,6 @@ EXTRA_DIST = \
 	contrib/games/5x4x3.nfg \
 	contrib/games/8x2x2.nfg \
 	contrib/games/8x8.nfg \
-	contrib/games/cent2.nfg \
 	contrib/games/coord2.nfg \
 	contrib/games/coord333.nfg \
 	contrib/games/coord3.nfg \
@@ -171,7 +158,6 @@ EXTRA_DIST = \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
 	contrib/games/sh3.nfg \
-	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
 	contrib/games/todd3.nfg \
