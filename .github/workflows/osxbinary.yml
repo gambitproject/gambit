@@ -10,15 +10,23 @@ on:
 
 jobs:
   macos:
+    name: macOS DMG (wxWidgets 3.2)
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
+      - name: Find latest wxWidgets 3.2.x release
+        run: |
+            version=$(git ls-remote --tags --refs https://github.com/wxWidgets/wxWidgets 'v3.2.*' \
+              | sed 's|.*refs/tags/v||' | grep -E '^3\.2\.[0-9]+$' | sort -V | tail -1)
+            test -n "${version}"
+            echo "Using wxWidgets ${version}"
+            echo "WX_VERSION=${version}" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: |
             brew install automake autoconf
-            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2
-            tar xjf wxWidgets-3.2.8.tar.bz2
-            cd wxWidgets-3.2.8
+            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v${WX_VERSION}/wxWidgets-${WX_VERSION}.tar.bz2
+            tar xjf wxWidgets-${WX_VERSION}.tar.bz2
+            cd wxWidgets-${WX_VERSION}
             mkdir build-release
             cd build-release
             ../configure --disable-shared --disable-sys-libs

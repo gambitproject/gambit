@@ -100,6 +100,16 @@ Install build tools and dependencies
       When building for a different target (32-bit) substitute the corresponding MinGW packages (``mingw-w64-i686-*``).
 
 
+.. _wxwidgets-versions:
+
+Supported wxWidgets versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The GUI requires wxWidgets 3.2 or later.  Official macOS binaries are built against
+the latest stable 3.2.x release.  Continuous integration also checks that Gambit builds
+successfully against the latest 3.3.x release (the ``wxwidgets@3.3`` Homebrew formula),
+but 3.3.x is not yet used for released binaries.
+
 .. _cli-gui-from-source:
 
 Install CLI and GUI from source
