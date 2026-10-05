@@ -10,10 +10,6 @@ repos:
   rev: v0.14.5
   hooks:
     - id: ruff
-- repo: https://github.com/pycqa/flake8
-  rev: 7.3.0
-  hooks:
-    - id: flake8
 - repo: https://github.com/MarcoGorelli/cython-lint
   rev: v0.18.1
   hooks:
