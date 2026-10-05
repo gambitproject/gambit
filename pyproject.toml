@@ -7,7 +7,7 @@ name = "pygambit"
 dynamic = ["version"]
 description = "The package for computation in game theory"
 readme = "src/README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "GPL-2.0-or-later"
 authors = [
     {name = "Theodore Turocy", email = "ted.turocy@gmail.com"},
@@ -17,11 +17,11 @@ keywords = ["game theory", "Nash equilibrium"]
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering :: Mathematics"
 ]
@@ -77,8 +77,8 @@ Changelog = "https://github.com/gambitproject/gambit/blob/master/ChangeLog"
 [tool.ruff]
 line-length = 99
 indent-width = 4
-target-version = "py310"
-include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py, doc/tutorials/*.ipynb"]
+target-version = "py311"
+include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py", "doc/tutorials/*.ipynb"]
 
 [tool.ruff.lint]
 select = [
@@ -90,8 +90,21 @@ select = [
     "I", # isort
     "Q", # prefer double quotes
     "W291", # trailing-whitespace
+    "W293", # blank-line-with-whitespace
+    "W391", # too-many-newlines-at-end-of-file
+    "W605", # invalid-escape-sequence
+    # pycodestyle whitespace and blank-line rules, still preview-only in ruff
+    "E111", "E112", "E113", "E114", "E115", "E116", "E117",
+    "E201", "E202", "E211",
+    "E221", "E222", "E223", "E224", "E225", "E227", "E228",
+    "E231", "E251", "E252",
+    "E261", "E262", "E265", "E266",
+    "E271", "E272", "E273", "E274", "E275",
+    "E301", "E302", "E303", "E304", "E305", "E306",
 ]
 ignore = ["E203"]
+preview = true
+explicit-preview-rules = true
 
 fixable = ["ALL"]
 unfixable = []

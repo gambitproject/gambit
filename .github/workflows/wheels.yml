@@ -6,16 +6,19 @@ on:
     tags:
       - 'v*'
   schedule:
-    - cron: '0 6 * * 4'
+    - cron: '0 6 1 * *'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   wheels:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-14]
-        python-tag: [cp310, cp311, cp312, cp313, cp314]
+        os: [windows-latest, ubuntu-latest, macos-15]
+        python-tag: [cp311, cp312, cp313, cp314, cp315]
 
     runs-on: ${{ matrix.os }}
 

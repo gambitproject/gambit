@@ -10,6 +10,8 @@
   distribution over full histories (discussion #1094)
 
 ### Changed
+- Python 3.10 is no longer supported; pygambit now requires Python 3.11 or later, and
+  Python 3.15 is supported.
 - Refined the perturbation approach in `path.cc` (logit and hp solvers) to better handle paths on games
   with bifurcations. (#492)
 - Nash solver algorithms now return a method-specific `Result` class, rather than a generic class,
