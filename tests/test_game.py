@@ -107,3 +107,21 @@ def test_collection_rejects_integer_indexing(getter):
     collection = getter(games.create_stripped_down_poker_efg())
     with pytest.raises(TypeError):
         _ = collection[0]
+
+
+@pytest.mark.parametrize(
+    "game",
+    [
+        pytest.param(gbt.StrategicGame([2, 2], title=""), id="strategic"),
+        pytest.param(gbt.ExtensiveGame(["1", "2"], title=""), id="extensive"),
+    ],
+)
+def test_repr_untitled_game(game):
+    # A game without a title is represented by its identity; the representation
+    # must be well-formed (closing parenthesis included), just as for titled games.
+    assert repr(game) == f"Game(id={hash(game)})"
+
+
+def test_repr_titled_game():
+    game = gbt.StrategicGame([2, 2], title="Coordination")
+    assert repr(game) == "Game(title='Coordination')"

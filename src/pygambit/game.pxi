@@ -102,7 +102,7 @@ class Game:
         if self.title:
             return f"Game(title='{self.title}')"
         else:
-            return f"Game(id={hash(self)}"
+            return f"Game(id={hash(self)})"
 
     def _repr_html_(self):
         if isinstance(self, ExtensiveGame):
