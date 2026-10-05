@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   clang-format:
     name: clang-format
@@ -73,6 +77,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Install pygambit (editable, picks up catalog/games directly)
         run: |
           python -m pip install -v -e ".[doc]"

@@ -22,16 +22,26 @@ jobs:
             echo "Using wxWidgets ${version}"
             echo "WX_VERSION=${version}" >> "$GITHUB_ENV"
       - name: Install dependencies
+        run: brew install automake autoconf
+      - name: Cache static wxWidgets build
+        id: wx-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/wx-static
+          key: wx-static-${{ runner.os }}-${{ runner.arch }}-${{ env.WX_VERSION }}
+      - name: Build static wxWidgets
+        if: steps.wx-cache.outputs.cache-hit != 'true'
         run: |
-            brew install automake autoconf
-            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v${WX_VERSION}/wxWidgets-${WX_VERSION}.tar.bz2
-            tar xjf wxWidgets-${WX_VERSION}.tar.bz2
-            cd wxWidgets-${WX_VERSION}
+            curl -L -O "https://github.com/wxWidgets/wxWidgets/releases/download/v${WX_VERSION}/wxWidgets-${WX_VERSION}.tar.bz2"
+            tar xjf "wxWidgets-${WX_VERSION}.tar.bz2"
+            cd "wxWidgets-${WX_VERSION}"
             mkdir build-release
             cd build-release
-            ../configure --disable-shared --disable-sys-libs
-            make -j4
-            sudo make install
+            ../configure --prefix="$HOME/wx-static" --disable-shared --disable-sys-libs
+            make -j"$(sysctl -n hw.ncpu)"
+            make install
+      - name: Put wxWidgets on PATH
+        run: echo "$HOME/wx-static/bin" >> "$GITHUB_PATH"
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
