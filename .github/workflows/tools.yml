@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   linux:
     name: Linux (wxWidgets 3.2)
@@ -59,7 +62,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
       - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2

@@ -8,6 +8,9 @@ on:
     - cron: '0 6 * * 4'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   macos:
     name: macOS DMG (wxWidgets 3.2)

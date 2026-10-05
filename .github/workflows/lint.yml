@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   clang-format:
     name: clang-format
@@ -15,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Run clang-format style check for C/C++
-        uses: jidicula/clang-format-action@v4.18.0
+        uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
         with:
           clang-format-version: '17'
           check-path: 'src'
@@ -41,7 +44,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/ruff-action@v3
+      - uses: astral-sh/ruff-action@4919ec5cf1f49eff0871dbcea0da843445b837e6 # v3
 
   flake8:
     runs-on: ubuntu-latest
@@ -51,7 +54,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
-      - uses: py-actions/flake8@v2
+      - uses: py-actions/flake8@84ec6726560b6d5bd68f2a5bed83d62b52bb50ba # v2
 
   cython-lint:
     runs-on: ubuntu-latest
