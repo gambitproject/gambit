@@ -58,7 +58,7 @@ doc = [
     "pickleshare",
     "jupyter",
     "jupyter-sphinx",
-    "open_spiel; sys_platform != 'win32'",
+    "open_spiel; sys_platform != 'win32' and python_version < '3.15'",
     "sphinxcontrib-tikz",
     "jupyter_sphinx",
     "pyyaml",
