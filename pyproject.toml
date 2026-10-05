@@ -78,7 +78,7 @@ Changelog = "https://github.com/gambitproject/gambit/blob/master/ChangeLog"
 line-length = 99
 indent-width = 4
 target-version = "py310"
-include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py, doc/tutorials/*.ipynb"]
+include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py", "doc/tutorials/*.ipynb"]
 
 [tool.ruff.lint]
 select = [

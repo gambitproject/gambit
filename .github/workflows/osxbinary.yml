@@ -9,9 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  macos-13:
-    runs-on: macos-14
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+  macos:
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
@@ -35,7 +34,7 @@ jobs:
       - run: make dist
       - uses: actions/upload-artifact@v7
         with:
-          name: artifact-osx-14
+          name: artifact-osx
           path: "*.dmg"
       - uses: actions/upload-artifact@v7
         with:
