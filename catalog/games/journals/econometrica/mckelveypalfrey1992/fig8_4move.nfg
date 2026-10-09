@@ -1,0 +1,23 @@
+NFG 1 R "Centipede game. Two inning, with probability of altruists" { "Player 1" "Player 2" }
+
+{ { "1*11" "2111" "2211" }
+{ "1*11" "2111" "2211" }
+}
+"Reduced normal form of the 4-move centipede game with the incomplete-
+information altruism model of :cite:p:`McKPal92`, Section 4.1 (Appendix A,
+Figure 8), with each player independently altruistic with probability 1/20.
+This fixed parameterization is kept as an illustrative example, since Gambit's
+file formats do not yet support symbolic payoffs or probabilities."
+
+{
+{ "" 0.405500 0.137000 }
+{ "" 0.434000 0.251000 }
+{ "" 0.700000 0.175000 }
+{ "" 0.282000 0.783000 }
+{ "" 1.574000 0.536000 }
+{ "" 1.840000 0.460000 }
+{ "" 0.510000 0.840000 }
+{ "" 1.080000 3.120000 }
+{ "" 6.400000 1.600000 }
+}
+1 4 7 2 5 8 3 6 9

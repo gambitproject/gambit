@@ -1,0 +1,20 @@
+NFG 1 R "Schotter-Weigelt-Wilson (GEB 94), Problem 3M" { "Player 1" "Player 2" }
+
+{ { "T" "M" "B" }
+{ "T" "M" "B" }
+}
+"Problem 3 (matrix version) from :cite:p:`SchWeiWil94`, designed to test the
+explanatory power of iterated dominance in the absence of backward induction."
+
+{
+{ "TT" 4, 4 }
+{ "MT" 0, 1 }
+{ "BT" 0, 1 }
+{ "TM" 4, 4 }
+{ "MM" 6, 3 }
+{ "BM" 0, 0 }
+{ "TB" 4, 4 }
+{ "MB" 0, 0 }
+{ "BB" 3, 6 }
+}
+1 2 3 4 5 6 7 8 9
