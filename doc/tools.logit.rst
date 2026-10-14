@@ -11,7 +11,7 @@ See the :ref:`algorithm description <logit>` for full details.
    The criterion for accepting whether a point is sufficiently close to a
    Nash equilibrium to terminate the path-following is specified
    in terms of the maximum regret.  This regret is interpreted as a fraction
-   of the difference between the maximum and minimum payoffs in the game.
+   of the difference between the maximum and minimum expected payoffs in the game.
 
 .. program:: gambit-logit
 

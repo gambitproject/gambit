@@ -30,6 +30,8 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
                                  StrategyCallbackType<double> p_onEquilibrium,
                                  HPEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
+  RequirePerfectRecall(p_prior.GetGame());
+  const double maxRegret = ScaleRegret(p_prior.GetGame(), p_maxRegret);
   HPEquationSystem system(p_prior);
   Vector<double> x = system.ComputeInitialPoint();
 
@@ -40,12 +42,12 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
   double last_t = 0.0;
   bool has_crossed = false;
 
-  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret,
+  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret, maxRegret,
                                 &system](const Vector<double> &point) {
     const double t = point[1];
 
     // Path tracer reaches maximum acceptable regret
-    if (system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret &&
+    if (system.ExtractEquilibrium(point).GetMaxRegret() <= maxRegret &&
         t >= t_target - p_maxRegret) {
       return true;
     }
@@ -73,9 +75,9 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
     return point[1] - t_target;
   };
 
-  auto polishing_termination_condition = [p_maxRegret,
+  auto polishing_termination_condition = [maxRegret,
                                           &system](const Vector<double> &point) -> bool {
-    return system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret;
+    return system.ExtractEquilibrium(point).GetMaxRegret() <= maxRegret;
   };
 
   const auto tracing_result = tracer.TracePath(
@@ -110,7 +112,7 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
     return {std::nullopt, false, HPTerminationReason::PolishFailed, stats};
   }
   const MixedStrategyProfile<double> equilibrium = system.ExtractEquilibrium(x);
-  if (equilibrium.GetMaxRegret() > p_maxRegret) {
+  if (equilibrium.GetMaxRegret() > maxRegret) {
     return {std::nullopt, false, HPTerminationReason::RegretTargetNotReached, stats};
   }
   p_onEquilibrium(equilibrium);

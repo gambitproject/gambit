@@ -367,6 +367,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
                    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent,
                    const CancelToken &p_cancel)
 {
+  Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
     return {{p_start}, {}};
   }
@@ -374,10 +375,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  if (const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
-      scale != 0.0) {
-    p_regret *= scale;
-  }
+  p_regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
@@ -414,6 +412,7 @@ LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
 {
+  Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
     return {{p_start}, {}};
   }

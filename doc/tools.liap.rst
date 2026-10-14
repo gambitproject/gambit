@@ -16,7 +16,7 @@ See the :ref:`algorithm description <liap>` for full details.
    The criterion for accepting whether a local constrained minimizer
    of the Lyanunov function is an approximate Nash equilibrium is specified
    in terms of the maximum regret.  This regret is interpreted as a fraction
-   of the difference between the maximum and minimum payoffs in the game.
+   of the difference between the maximum and minimum expected payoffs in the game.
 
 .. versionchanged:: 16.5.0
 
