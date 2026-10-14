@@ -24,6 +24,10 @@
   and of payoffs, beliefs and regrets of mixed behavior profiles on large game trees.  Path
   following (logit and hp) also spends about half as long factorizing Jacobians.  (#1162)
 
+### Fixed
+- `maxregret` is now scaled by the range of feasible expected payoffs, so the tolerance no longer
+  depends on whether a game is represented as a tree or as a table.  (#1168)
+
 ## [17.0.0-beta.1] - 2026-09-08
 
 ### Added

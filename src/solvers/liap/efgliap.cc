@@ -38,7 +38,7 @@ public:
   explicit AgentLyapunovFunction(const MixedBehaviorProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
-    m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
+    m_scale = static_cast<double>(AgentExpectedPayoffScale(m_game));
     m_scale = (m_scale == 0.0) ? 1.0 : 1.0 / m_scale;
     std::transform(
         m_game->GetInfosets().begin(), m_game->GetInfosets().end(), std::back_inserter(m_shape),
@@ -133,10 +133,7 @@ LiapAgentResult LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, doub
                                LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent,
                                const CancelToken &p_cancel)
 {
-  if (!p_start.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_start.GetGame());
 
   MixedBehaviorProfile<double> p(p_start);
   p_onEvent(LiapStartEvent<MixedBehaviorProfile<double>>{p});

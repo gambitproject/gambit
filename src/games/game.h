@@ -733,6 +733,22 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
+  /// Returns the (minimum, maximum) expected payoff to the player over all pure strategy profiles
+  /// (that is, over the cells of the reduced strategic form).
+  /// @throws UndefinedException if the game has absent-mindedness
+  virtual std::pair<Rational, Rational>
+  GetPlayerExpectedPayoffRange(const GamePlayer &p_player) const;
+  /// Returns the (minimum, maximum) expected payoff to any player over all pure strategy profiles
+  /// @throws UndefinedException if the game has absent-mindedness
+  virtual std::pair<Rational, Rational> GetExpectedPayoffRange() const;
+  /// Returns the (minimum, maximum) expected payoff to any player over all pure behavior profiles,
+  /// that is, over the pure strategy profiles of the agent form.  Games with no distinct agent
+  /// form report the same range as GetExpectedPayoffRange().
+  virtual std::pair<Rational, Rational> GetAgentExpectedPayoffRange() const
+  {
+    return GetExpectedPayoffRange();
+  }
+
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
   /// Returns the set of terminal nodes which are descendants of members of an infoset

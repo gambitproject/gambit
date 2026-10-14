@@ -37,7 +37,7 @@ public:
   explicit StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
-    m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
+    m_scale = static_cast<double>(ExpectedPayoffScale(m_game));
     m_scale = (m_scale == 0.0) ? 1.0 : 1.0 / m_scale;
   }
   ~StrategicLyapunovFunction() override = default;
@@ -139,10 +139,7 @@ LiapStrategyResult LiapStrategySolve(const MixedStrategyProfile<double> &p_start
                                      LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent,
                                      const CancelToken &p_cancel)
 {
-  if (!p_start.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_start.GetGame());
 
   MixedStrategyProfile<double> p(p_start);
   p_onEvent(LiapStartEvent<MixedStrategyProfile<double>>{p});

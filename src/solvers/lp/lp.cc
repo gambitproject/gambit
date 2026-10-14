@@ -221,10 +221,7 @@ LpBehaviorResult<T> LpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> 
   if (!p_game->IsConstSum()) {
     throw UndefinedException("Method only valid for constant-sum games.");
   }
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
   const TableauIndexMap indexMap(p_game);
   const Matrix<T> A = ConstructMatrix<T>(indexMap);
@@ -256,10 +253,7 @@ LpStrategyResult<T> LpStrategySolve(const Game &p_game, StrategyCallbackType<T> 
   if (!p_game->IsConstSum()) {
     throw UndefinedException("Method only valid for constant-sum games.");
   }
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
   const int m = p_game->GetPlayer(1)->GetStrategies().size();
   const int k = p_game->GetPlayer(2)->GetStrategies().size();

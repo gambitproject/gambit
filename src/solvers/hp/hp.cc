@@ -30,6 +30,7 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
                                  StrategyCallbackType<double> p_onEquilibrium,
                                  HPEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
+  RequirePerfectRecall(p_prior.GetGame());
   HPEquationSystem system(p_prior);
   Vector<double> x = system.ComputeInitialPoint();
 
