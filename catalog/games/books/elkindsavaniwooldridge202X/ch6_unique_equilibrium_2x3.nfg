@@ -1,0 +1,16 @@
+NFG 1 R "2x3 game with a unique equilibrium" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "c" "r" }
+}
+"The running example of Chapter 6 (Algorithms for Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X`, used for the upper envelope method, best response diagrams, the Lemke-Howson algorithm and best response polytopes. Its unique equilibrium is x = (2/3, 1/3), y = (1/2, 1/2, 0)."
+
+{
+{ "" 0, 3 }
+{ "" 1, 0 }
+{ "" 3, 2 }
+{ "" 2, 2 }
+{ "" 2, 0 }
+{ "" 0, 3 }
+}
+1 2 3 4 5 6

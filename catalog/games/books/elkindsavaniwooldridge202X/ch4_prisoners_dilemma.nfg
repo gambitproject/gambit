@@ -1,0 +1,14 @@
+NFG 1 R "Prisoner's Dilemma" { "1" "2" }
+
+{ { "D" "C" }
+{ "d" "c" }
+}
+"The Prisoner's Dilemma as in Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, with payoffs equal to minus the years in jail. D is strictly dominant for both players."
+
+{
+{ "" -2, -2 }
+{ "" -3, 0 }
+{ "" 0, -3 }
+{ "" -1, -1 }
+}
+1 2 3 4
