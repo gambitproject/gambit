@@ -8,6 +8,12 @@ def pytest_addoption(parser):
         default=False,
         help="Run tutorial notebook tests",
     )
+    parser.addoption(
+        "--run-textbook",
+        action="store_true",
+        default=False,
+        help="Also run the textbook companion notebooks in doc/tutorials/textbook",
+    )
 
 
 def pytest_configure(config):
