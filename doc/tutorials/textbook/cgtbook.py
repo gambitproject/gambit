@@ -4,7 +4,8 @@
 Everything game-theoretic (building games, solving them) is done with
 pygambit; this module only
 
-* builds games with the book's strategy names (``bimatrix``, ``table_game``),
+* loads the book's games from Gambit's catalog (``load``), and builds further games
+  with given strategy names (``bimatrix``, ``table_game``),
 * prints mixed strategy profiles in the book's notation (``show``,
   ``eq_table``), and
 * draws the two kinds of picture the chapters use again and again
@@ -47,6 +48,22 @@ def table_game(payoffs, strategies, players=None, title="Untitled"):
     if players is not None:
         g.relabel_players(dict(zip(list(g.players), players, strict=True)))
     return g
+
+
+CATALOG_PREFIX = "books/elkindsavaniwooldridge202X"
+
+
+def load(name):
+    """Load one of the book's games from Gambit's catalog, e.g. load("ch4_running_example")."""
+    return gbt.catalog.load(f"{CATALOG_PREFIX}/{name}")
+
+
+def bimatrix_data(g):
+    """(A, B, rows, cols) for a two-player game: payoff matrices as lists of Fractions
+    (rows = player 1's strategies) and the two players' strategy names."""
+    A, B = payoff_arrays(g)
+    p1, p2 = g.players
+    return A.tolist(), B.tolist(), list(g.get_strategies(p1)), list(g.get_strategies(p2))
 
 
 def bimatrix(A, B, rows, cols, title="Untitled"):
