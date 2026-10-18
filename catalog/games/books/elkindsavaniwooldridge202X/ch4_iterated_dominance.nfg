@@ -1,10 +1,9 @@
-NFG 1 R "Example 4.21" { "1" "2" }
+NFG 1 R "Iterated elimination of strictly dominated strategies" { "1" "2" }
 
 { { "T" "M" "B" }
-{ "L" "C" "R" }
+{ "l" "c" "r" }
 }
-"Example 4.21 from :cite:p:`ESW2X`, which is used as an example of Iterated Elimination of
-Dominated Strategies."
+"An example from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X` of iterated elimination of strictly dominated strategies: c is dominated by r, then M and B by T, then r by l, leaving (T, l)."
 
 {
 { "" 4, 3 }

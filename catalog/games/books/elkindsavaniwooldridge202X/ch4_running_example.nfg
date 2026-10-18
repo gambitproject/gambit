@@ -1,10 +1,9 @@
-NFG 1 R "Example 4.4" { "1" "2" }
+NFG 1 R "Running example for strategic form games" { "1" "2" }
 
-{ { "1" "2" }
-{ "1" "2" }
+{ { "T" "B" }
+{ "l" "r" }
 }
-"This is Example 4.4 from :cite:p:`ESW2X`, which is used as a running example to introduce
-normal-form games."
+"The running example of Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, used to introduce best responses, dominant strategies and Nash equilibrium. T is a dominant strategy for player 1, and (T, l) is the unique Nash equilibrium."
 
 {
 { "" 1, 1 }

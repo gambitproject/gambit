@@ -1,6 +1,6 @@
-EFG 2 R "Figure 9.5: A Simple Extensive Game" { "Player 1" "Player 2" }
-"Figure 9.5 from :cite:p:`ESW2X`, used as a running example of an extensive-form game
-with perfect information."
+EFG 2 R "A simple extensive form game" { "Player 1" "Player 2" }
+"A simple extensive form game from Chapter 8 (Extensive Form Games) of :cite:p:`ESW2X`,
+used as a running example of an extensive form game with perfect information."
 
 p "" 1 1 "" { "L" "R" } 0
 p "" 2 1 "" { "l" "r" } 0
