@@ -139,6 +139,12 @@ bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
                     p_method);
 }
 
+bool RequiresStrategicRepresentation(const NashMethodSpec &p_method, bool p_recommended)
+{
+  return RequiresStrategicRepresentation(p_method) ||
+         (p_recommended && std::holds_alternative<LCPNashSpec>(p_method));
+}
+
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
   return std::visit([]<typename Method>(const Method &) { return RationalOutputMethod<Method>; },
@@ -426,7 +432,8 @@ void NashChoiceDialog::UpdateRepresentationChoice()
   }
   const auto method = ResolveMethod(m_methodChoice->GetStringSelection(),
                                     GetTarget(m_countChoice->GetSelection()), m_doc->GetGame());
-  if (RequiresStrategicRepresentation(method)) {
+  if (RequiresStrategicRepresentation(method,
+                                      m_methodChoice->GetStringSelection() == s_recommended)) {
     m_repChoice->SetSelection(1);
     m_repChoice->Enable(false);
   }
@@ -444,12 +451,12 @@ NashComputationSpec NashChoiceDialog::GetComputation() const
 {
   const auto target = GetTarget(m_countChoice->GetSelection());
   auto method = ResolveMethod(m_methodChoice->GetStringSelection(), target, m_doc->GetGame());
-  const auto representation =
-      !m_repChoice || m_repChoice->GetSelection() == 1 || RequiresStrategicRepresentation(method)
-          ? NashRepresentation::Strategic
-          : NashRepresentation::Behavior;
-  return {representation, target, std::move(method),
-          m_methodChoice->GetStringSelection() == s_recommended};
+  const bool recommended = m_methodChoice->GetStringSelection() == s_recommended;
+  const auto representation = !m_repChoice || m_repChoice->GetSelection() == 1 ||
+                                      RequiresStrategicRepresentation(method, recommended)
+                                  ? NashRepresentation::Strategic
+                                  : NashRepresentation::Behavior;
+  return {representation, target, std::move(method), recommended};
 }
 
 std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
