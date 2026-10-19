@@ -48,6 +48,21 @@ Advanced tutorials:
    tutorials/advanced_tutorials/agent_versus_non_agent_regret
    .. pygambit.external_programs
 
+Textbook companion notebooks
+----------------------------
+
+These notebooks accompany Chapters 4–6 of the textbook *An Introduction to Computational Game Theory*.
+They recompute the book's examples with PyGambit and, alongside Gambit's solvers, give short
+Python implementations of the algorithms the chapters describe, so that their intermediate steps
+can be compared with the book's tables.
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/textbook/ch04_strategic_games
+   tutorials/textbook/ch05_mixed_strategies
+   tutorials/textbook/ch06_algorithms_mixed_equilibria
+
 Interoperability tutorials
 --------------------------
 

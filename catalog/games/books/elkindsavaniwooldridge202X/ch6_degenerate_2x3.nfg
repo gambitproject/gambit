@@ -1,0 +1,16 @@
+NFG 1 R "Degenerate 2x3 game" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "c" "r" }
+}
+"A degenerate variant of the running example of Chapter 6 (Algorithms for Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X`, in which all three of player 2's payoff lines meet at prob(B) = 1/2. The equilibria form a segment."
+
+{
+{ "" 0, 3 }
+{ "" 1, 0 }
+{ "" 3, 3/2 }
+{ "" 2, 3/2 }
+{ "" 2, 0 }
+{ "" 0, 3 }
+}
+1 2 3 4 5 6
