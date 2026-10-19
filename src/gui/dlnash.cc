@@ -24,6 +24,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
+#include <vector>
 
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -37,84 +38,121 @@
 
 namespace Gambit::GUI {
 static wxString s_recommended(wxT("with Gambit's recommended method"));
-static wxString s_enumpure(wxT("by looking for pure strategy equilibria"));
-static wxString s_enummixed(wxT("by enumerating extreme points"));
-static wxString s_enumpoly(wxT("by solving systems of polynomial equations"));
-static wxString s_gnm(wxT("by global Newton tracing"));
-static wxString s_hp(wxT("by the Herings-Peeters homotopy"));
-static wxString s_ipa(wxT("by iterated polymatrix approximation"));
-static wxString s_lp(wxT("by solving a linear program"));
-static wxString s_lcp(wxT("by solving a linear complementarity program"));
-static wxString s_liap(wxT("by minimizing the Lyapunov function"));
-static wxString s_logit(wxT("by tracing logit equilibria"));
-static wxString s_simpdiv(wxT("by simplicial subdivision"));
 
 namespace {
 
-NashEquilibriumTarget GetTarget(int p_selection)
+NashGoal GoalFromSelection(int p_selection)
 {
   if (p_selection == 0) {
-    return NashEquilibriumTarget::One;
+    return NashGoal::One;
   }
   if (p_selection == 1) {
-    return NashEquilibriumTarget::Some;
+    return NashGoal::Several;
   }
-  return NashEquilibriumTarget::All;
+  return NashGoal::All;
 }
 
-NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_target,
-                             const Game &p_game)
+NashEquilibriumTarget GetTarget(NashGoal p_goal)
 {
-  if (p_method == s_recommended) {
-    if (p_target == NashEquilibriumTarget::One) {
-      if (p_game->NumPlayers() == 2 && p_game->IsConstSum()) {
-        return LPNashSpec{};
-      }
-      return LogitNashSpec{};
+  switch (p_goal) {
+  case NashGoal::One:
+    return NashEquilibriumTarget::One;
+  case NashGoal::Several:
+    return NashEquilibriumTarget::Some;
+  default:
+    return NashEquilibriumTarget::All;
+  }
+}
+
+wxString MethodLabel(NashMethodId p_method)
+{
+  switch (p_method) {
+  case NashMethodId::EnumMixed:
+    return wxT("by enumerating extreme points");
+  case NashMethodId::EnumPoly:
+    return wxT("by solving systems of polynomial equations");
+  case NashMethodId::EnumPure:
+    return wxT("by looking for pure strategy equilibria");
+  case NashMethodId::GNM:
+    return wxT("by global Newton tracing");
+  case NashMethodId::HP:
+    return wxT("by the Herings-Peeters homotopy");
+  case NashMethodId::IPA:
+    return wxT("by iterated polymatrix approximation");
+  case NashMethodId::LCP:
+    return wxT("by solving a linear complementarity program");
+  case NashMethodId::Liap:
+    return wxT("by minimizing the Lyapunov function");
+  case NashMethodId::Logit:
+    return wxT("by tracing logit equilibria");
+  case NashMethodId::LP:
+    return wxT("by solving a linear program");
+  case NashMethodId::Simpdiv:
+    return wxT("by simplicial subdivision");
+  }
+  throw std::logic_error("Unknown Nash equilibrium method");
+}
+
+// The methods the dialog lists under each goal.
+std::vector<NashMethodId> ListedMethods(NashGoal p_goal)
+{
+  using enum NashMethodId;
+  switch (p_goal) {
+  case NashGoal::One:
+    return {LP, Simpdiv, Logit, EnumPoly};
+  case NashGoal::Several:
+    return {LCP, EnumPure, Liap, GNM, IPA, HP, EnumPoly};
+  default:
+    return {EnumMixed};
+  }
+}
+
+// Agent-form liap and enumpure are not yet offered.
+bool IsOffered(const NashVariant &p_variant)
+{
+  return p_variant.representation == VariantRepresentation::Strategic ||
+         (p_variant.method != NashMethodId::Liap && p_variant.method != NashMethodId::EnumPure);
+}
+
+std::vector<const NashVariant *> RunnableVariants(NashMethodId p_method, const Game &p_game)
+{
+  std::vector<const NashVariant *> result;
+  for (const auto *variant : NashVariantsOf(p_method)) {
+    if (IsOffered(*variant) && !UnavailableReason(*variant, p_game)) {
+      result.push_back(variant);
     }
-    if (p_target == NashEquilibriumTarget::Some) {
-      if (p_game->NumPlayers() == 2) {
-        return LCPNashSpec{};
-      }
-      return SimpdivNashSpec{};
-    }
+  }
+  return result;
+}
+
+NashMethodSpec ResolveMethod(NashMethodId p_method, NashGoal p_goal)
+{
+  switch (p_method) {
+  case NashMethodId::EnumMixed:
     return EnumMixedNashSpec{};
-  }
-  if (p_method == s_enumpure) {
-    return EnumPureNashSpec{};
-  }
-  if (p_method == s_enummixed) {
-    return EnumMixedNashSpec{};
-  }
-  if (p_method == s_enumpoly) {
-    if (p_target == NashEquilibriumTarget::One) {
+  case NashMethodId::EnumPoly:
+    if (p_goal == NashGoal::One) {
       return EnumPolyNashSpec{.stopAfter = 1};
     }
     return EnumPolyNashSpec{};
-  }
-  if (p_method == s_gnm) {
+  case NashMethodId::EnumPure:
+    return EnumPureNashSpec{};
+  case NashMethodId::GNM:
     return GNMNashSpec{};
-  }
-  if (p_method == s_hp) {
+  case NashMethodId::HP:
     return HPNashSpec{};
-  }
-  if (p_method == s_ipa) {
+  case NashMethodId::IPA:
     return IPANashSpec{};
-  }
-  if (p_method == s_lp) {
-    return LPNashSpec{};
-  }
-  if (p_method == s_lcp) {
+  case NashMethodId::LCP:
     return LCPNashSpec{};
-  }
-  if (p_method == s_liap) {
+  case NashMethodId::Liap:
     return LiapNashSpec{};
-  }
-  if (p_method == s_logit) {
+  case NashMethodId::Logit:
     return LogitNashSpec{};
-  }
-  if (p_method == s_simpdiv) {
-    if (p_target == NashEquilibriumTarget::One) {
+  case NashMethodId::LP:
+    return LPNashSpec{};
+  case NashMethodId::Simpdiv:
+    if (p_goal == NashGoal::One) {
       return SimpdivNashSpec{.startingPoints = 1};
     }
     return SimpdivNashSpec{};
@@ -123,27 +161,9 @@ NashMethodSpec ResolveMethod(const wxString &p_method, NashEquilibriumTarget p_t
 }
 
 template <class M>
-concept StrategicMethod =
-    std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
-    std::same_as<M, GNMNashSpec> || std::same_as<M, HPNashSpec> || std::same_as<M, IPANashSpec> ||
-    std::same_as<M, LiapNashSpec> || std::same_as<M, SimpdivNashSpec>;
-
-template <class M>
 concept RationalOutputMethod =
     std::same_as<M, EnumPureNashSpec> || std::same_as<M, EnumMixedNashSpec> ||
     std::same_as<M, LPNashSpec> || std::same_as<M, LCPNashSpec>;
-
-bool RequiresStrategicRepresentation(const NashMethodSpec &p_method)
-{
-  return std::visit([]<typename Method>(const Method &) { return StrategicMethod<Method>; },
-                    p_method);
-}
-
-bool RequiresStrategicRepresentation(const NashMethodSpec &p_method, bool p_recommended)
-{
-  return RequiresStrategicRepresentation(p_method) ||
-         (p_recommended && std::holds_alternative<LCPNashSpec>(p_method));
-}
 
 bool UsesRationalOutput(const NashMethodSpec &p_method)
 {
@@ -349,17 +369,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
           wxCommandEventHandler(NashChoiceDialog::OnCount));
   topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, S);
 
-  if (p_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
-    wxString methodChoices[] = {s_recommended, s_lp, s_simpdiv, s_logit, s_enumpoly};
-    m_methodChoice =
-        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, methodChoices);
-  }
-  else {
-    wxString methodChoices[] = {s_recommended, s_simpdiv, s_logit, s_enumpoly};
-    m_methodChoice =
-        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, methodChoices);
-  }
-  m_methodChoice->SetSelection(0);
+  m_methodChoice = new wxChoice(this, wxID_ANY);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, S);
 
   if (As<GameTreeRep>(m_doc->GetGame())) {
@@ -377,7 +387,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
     m_repChoice = nullptr;
   }
 
-  UpdateRepresentationChoice();
+  UpdateMethodChoice();
 
   if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
@@ -390,51 +400,59 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   CenterOnParent();
 }
 
-void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
+NashGoal NashChoiceDialog::GetGoal() const
 {
-  m_methodChoice->Clear();
-  m_methodChoice->Append(s_recommended);
+  return GoalFromSelection(m_countChoice->GetSelection());
+}
 
-  if (p_event.GetSelection() == 0) {
-    if (m_doc->GetGame()->NumPlayers() == 2 && m_doc->GetGame()->IsConstSum()) {
-      m_methodChoice->Append(s_lp);
-    }
-    m_methodChoice->Append(s_simpdiv);
-    m_methodChoice->Append(s_logit);
-    m_methodChoice->Append(s_enumpoly);
-  }
-  else if (p_event.GetSelection() == 1) {
-    if (m_doc->GetGame()->NumPlayers() == 2) {
-      m_methodChoice->Append(s_lcp);
-    }
-    m_methodChoice->Append(s_enumpure);
-    m_methodChoice->Append(s_liap);
-    m_methodChoice->Append(s_gnm);
-    m_methodChoice->Append(s_ipa);
-    m_methodChoice->Append(s_hp);
-    m_methodChoice->Append(s_enumpoly);
-  }
-  else {
-    if (m_doc->GetGame()->NumPlayers() == 2) {
-      m_methodChoice->Append(s_enummixed);
+void NashChoiceDialog::OnCount(wxCommandEvent &) { UpdateMethodChoice(); }
+
+void NashChoiceDialog::OnMethod(wxCommandEvent &) { UpdateRepresentationChoice(); }
+
+void NashChoiceDialog::UpdateMethodChoice()
+{
+  const auto game = m_doc->GetGame();
+  m_methodChoice->Clear();
+  m_methods.clear();
+
+  m_methodChoice->Append(s_recommended);
+  m_methods.emplace_back(std::nullopt);
+  for (const auto method : ListedMethods(GetGoal())) {
+    if (!RunnableVariants(method, game).empty()) {
+      m_methodChoice->Append(MethodLabel(method));
+      m_methods.emplace_back(method);
     }
   }
   m_methodChoice->SetSelection(0);
   UpdateRepresentationChoice();
 }
 
-void NashChoiceDialog::OnMethod(wxCommandEvent &) { UpdateRepresentationChoice(); }
+std::vector<const NashVariant *> NashChoiceDialog::Candidates() const
+{
+  const auto game = m_doc->GetGame();
+  const auto goal = GetGoal();
+  const auto &method = m_methods.at(m_methodChoice->GetSelection());
+  if (!method) {
+    std::vector<const NashVariant *> result;
+    for (const auto *variant : RunnableVariants(RecommendedMethod(goal, game), game)) {
+      if (MeetsGoal(*variant, goal)) {
+        result.push_back(variant);
+      }
+    }
+    return result;
+  }
+  return RunnableVariants(*method, game);
+}
 
 void NashChoiceDialog::UpdateRepresentationChoice()
 {
   if (!m_repChoice) {
     return;
   }
-  const auto method = ResolveMethod(m_methodChoice->GetStringSelection(),
-                                    GetTarget(m_countChoice->GetSelection()), m_doc->GetGame());
-  if (RequiresStrategicRepresentation(method,
-                                      m_methodChoice->GetStringSelection() == s_recommended)) {
-    m_repChoice->SetSelection(1);
+  const auto candidates = Candidates();
+  if (candidates.size() == 1) {
+    m_repChoice->SetSelection(
+        candidates.front()->representation == VariantRepresentation::Strategic ? 1 : 0);
     m_repChoice->Enable(false);
   }
   else {
@@ -449,14 +467,23 @@ bool NashChoiceDialog::UseStrategic() const
 
 NashComputationSpec NashChoiceDialog::GetComputation() const
 {
-  const auto target = GetTarget(m_countChoice->GetSelection());
-  auto method = ResolveMethod(m_methodChoice->GetStringSelection(), target, m_doc->GetGame());
-  const bool recommended = m_methodChoice->GetStringSelection() == s_recommended;
-  const auto representation = !m_repChoice || m_repChoice->GetSelection() == 1 ||
-                                      RequiresStrategicRepresentation(method, recommended)
-                                  ? NashRepresentation::Strategic
-                                  : NashRepresentation::Behavior;
-  return {representation, target, std::move(method), recommended};
+  const auto goal = GetGoal();
+  const auto &chosen = m_methods.at(m_methodChoice->GetSelection());
+  const bool recommended = !chosen.has_value();
+  const auto candidates = Candidates();
+  const auto methodId = recommended ? RecommendedMethod(goal, m_doc->GetGame()) : *chosen;
+
+  VariantRepresentation representation;
+  if (candidates.size() == 1) {
+    representation = candidates.front()->representation;
+  }
+  else {
+    representation = m_repChoice->GetSelection() == 0 ? VariantRepresentation::Behavior
+                                                      : VariantRepresentation::Strategic;
+  }
+  return {representation == VariantRepresentation::Strategic ? NashRepresentation::Strategic
+                                                             : NashRepresentation::Behavior,
+          GetTarget(goal), ResolveMethod(methodId, goal), recommended};
 }
 
 std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const

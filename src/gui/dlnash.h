@@ -23,17 +23,26 @@
 #ifndef GAMBIT_GUI_DLNASH_H
 #define GAMBIT_GUI_DLNASH_H
 
+#include <optional>
+#include <vector>
+
 #include "gamedoc.h"
+#include "nashvariants.h"
 
 namespace Gambit::GUI {
 class NashChoiceDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
   wxChoice *m_countChoice, *m_methodChoice, *m_repChoice;
+  std::vector<std::optional<NashMethodId>> m_methods;
 
   // Event handlers
   void OnCount(wxCommandEvent &);
   void OnMethod(wxCommandEvent &);
+  void UpdateMethodChoice();
   void UpdateRepresentationChoice();
+
+  NashGoal GetGoal() const;
+  std::vector<const NashVariant *> Candidates() const;
 
   NashComputationSpec GetComputation() const;
 
