@@ -20,15 +20,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <concepts>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <type_traits>
 #include <vector>
 
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/display.h>
+#include <wx/listctrl.h>
+#include <wx/radiobut.h>
 #include <wx/stdpaths.h>
 
 #include "games.h"
@@ -37,20 +44,8 @@
 #include "dlnash.h"
 
 namespace Gambit::GUI {
-static wxString s_recommended(wxT("with Gambit's recommended method"));
 
 namespace {
-
-NashGoal GoalFromSelection(int p_selection)
-{
-  if (p_selection == 0) {
-    return NashGoal::One;
-  }
-  if (p_selection == 1) {
-    return NashGoal::Several;
-  }
-  return NashGoal::All;
-}
 
 NashEquilibriumTarget GetTarget(NashGoal p_goal)
 {
@@ -64,49 +59,6 @@ NashEquilibriumTarget GetTarget(NashGoal p_goal)
   }
 }
 
-wxString MethodLabel(NashMethodId p_method)
-{
-  switch (p_method) {
-  case NashMethodId::EnumMixed:
-    return wxT("by enumerating extreme points");
-  case NashMethodId::EnumPoly:
-    return wxT("by solving systems of polynomial equations");
-  case NashMethodId::EnumPure:
-    return wxT("by looking for pure strategy equilibria");
-  case NashMethodId::GNM:
-    return wxT("by global Newton tracing");
-  case NashMethodId::HP:
-    return wxT("by the Herings-Peeters homotopy");
-  case NashMethodId::IPA:
-    return wxT("by iterated polymatrix approximation");
-  case NashMethodId::LCP:
-    return wxT("by solving a linear complementarity program");
-  case NashMethodId::Liap:
-    return wxT("by minimizing the Lyapunov function");
-  case NashMethodId::Logit:
-    return wxT("by tracing logit equilibria");
-  case NashMethodId::LP:
-    return wxT("by solving a linear program");
-  case NashMethodId::Simpdiv:
-    return wxT("by simplicial subdivision");
-  }
-  throw std::logic_error("Unknown Nash equilibrium method");
-}
-
-// The methods the dialog lists under each goal.
-std::vector<NashMethodId> ListedMethods(NashGoal p_goal)
-{
-  using enum NashMethodId;
-  switch (p_goal) {
-  case NashGoal::One:
-    return {LP, Simpdiv, Logit, EnumPoly};
-  case NashGoal::Several:
-    return {LCP, EnumPure, Liap, GNM, IPA, HP, EnumPoly};
-  default:
-    return {EnumMixed};
-  }
-}
-
 // Agent-form liap and enumpure are not yet offered.
 bool IsOffered(const NashVariant &p_variant)
 {
@@ -114,16 +66,121 @@ bool IsOffered(const NashVariant &p_variant)
          (p_variant.method != NashMethodId::Liap && p_variant.method != NashMethodId::EnumPure);
 }
 
-std::vector<const NashVariant *> RunnableVariants(NashMethodId p_method, const Game &p_game)
+std::vector<const NashVariant *> OfferedVariants(const Game &p_game)
 {
   std::vector<const NashVariant *> result;
-  for (const auto *variant : NashVariantsOf(p_method)) {
-    if (IsOffered(*variant) && !UnavailableReason(*variant, p_game)) {
-      result.push_back(variant);
+  for (const auto &variant : NashVariants()) {
+    if (IsOffered(variant) &&
+        (variant.representation == VariantRepresentation::Strategic || As<GameTreeRep>(p_game))) {
+      result.push_back(&variant);
     }
   }
   return result;
 }
+
+wxString VariantLabel(const NashVariant &p_variant)
+{
+  const bool strategic = p_variant.representation == VariantRepresentation::Strategic;
+  const wxString form = strategic ? wxT(" on the strategic form") : wxT(" on the sequence form");
+  switch (p_variant.method) {
+  case NashMethodId::EnumMixed:
+    return wxT("Enumerate extreme points") + form;
+  case NashMethodId::EnumPoly:
+    return wxT("Solve systems of polynomial equations") + form;
+  case NashMethodId::EnumPure:
+    return wxT("Look for pure strategy equilibria") +
+           (strategic ? form : wxString(wxT(" on the agent form")));
+  case NashMethodId::GNM:
+    return wxT("Global Newton tracing") + form;
+  case NashMethodId::HP:
+    return wxT("Herings-Peeters homotopy") + form;
+  case NashMethodId::IPA:
+    return wxT("Iterated polymatrix approximation") + form;
+  case NashMethodId::LCP:
+    return strategic ? wxString(wxT("Lemke-Howson linear complementarity") + form)
+                     : wxString(wxT("Lemke linear complementarity") + form);
+  case NashMethodId::Liap:
+    return wxT("Minimize the Lyapunov function") +
+           (strategic ? form : wxString(wxT(" on the agent form")));
+  case NashMethodId::Logit:
+    return strategic ? wxString(wxT("Trace logit quantal response equilibria"))
+                     : wxString(wxT("Trace agent logit quantal response equilibria"));
+  case NashMethodId::LP:
+    return wxT("Solve a linear program") + form;
+  case NashMethodId::Simpdiv:
+    return wxT("Simplicial subdivision") + form;
+  }
+  throw std::logic_error("Unknown Nash equilibrium method");
+}
+
+wxString FromStd(std::string_view p_text)
+{
+  return wxString::FromUTF8(p_text.data(), p_text.size());
+}
+
+wxString GoalName(NashGoal p_goal)
+{
+  switch (p_goal) {
+  case NashGoal::One:
+    return wxT("One");
+  case NashGoal::Several:
+    return wxT("Several");
+  default:
+    return wxT("All");
+  }
+}
+
+wxString CoverageLabel(VariantCoverage p_coverage)
+{
+  switch (p_coverage) {
+  case VariantCoverage::One:
+    return wxT("One");
+  case VariantCoverage::Some:
+    return wxT("Some");
+  case VariantCoverage::AllPure:
+    return wxT("All pure");
+  default:
+    return wxT("All");
+  }
+}
+
+wxString ReliabilityLabel(VariantReliability p_reliability)
+{
+  switch (p_reliability) {
+  case VariantReliability::Always:
+    return wxT("Always");
+  case VariantReliability::NumericalFailurePossible:
+    return wxT("Numerical failure possible");
+  default:
+    return wxT("No guarantee");
+  }
+}
+
+wxString ConceptLabel(VariantConcept p_concept)
+{
+  return p_concept == VariantConcept::Nash ? wxT("Nash") : wxT("Agent Nash");
+}
+
+wxString GoalMissWarning(const NashVariant &p_variant, NashGoal p_goal)
+{
+  wxString what;
+  switch (p_goal) {
+  case NashGoal::One:
+    what = wxT("may find no equilibrium");
+    break;
+  case NashGoal::Several:
+    what = wxT("returns only one equilibrium");
+    break;
+  default:
+    what = wxT("does not guarantee to return all equilibria");
+    break;
+  }
+  return wxString::Format(wxT("Warning: this variant %s; your Goal is %s."), what,
+                          GoalName(p_goal));
+}
+
+const wxString s_allUnavailable(wxT("Gambit has no method that guarantees all equilibria for "
+                                    "games with more than two players."));
 
 NashMethodSpec ResolveMethod(NashMethodId p_method, NashGoal p_goal)
 {
@@ -341,56 +398,77 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
 
 } // namespace
 
+namespace {
+enum ListColumn { COL_STAR, COL_METHOD, COL_COVERAGE, COL_RELIABILITY, COL_SOLVES };
+} // namespace
+
 NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-    m_doc(p_doc)
+    m_doc(p_doc), m_variants(OfferedVariants(p_doc->GetGame()))
 {
   const int S = FromDIP(5);
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  if (m_doc->GetGame()->NumPlayers() == 2) {
-    wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
-                               wxT("Compute some Nash equilibria"),
-                               wxT("Compute all Nash equilibria")};
-    m_countChoice =
-        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, countChoices);
+  auto *goalSizer = new wxBoxSizer(wxHORIZONTAL);
+  goalSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Goal:")), 0,
+                 wxALIGN_CENTER_VERTICAL | wxRIGHT, S * 2);
+  const wxString goalLabels[] = {wxT("One equilibrium"), wxT("Several equilibria"),
+                                 wxT("All equilibria")};
+  for (int i = 0; i < 3; i++) {
+    m_goalButtons[i] = new wxRadioButton(this, wxID_ANY, goalLabels[i], wxDefaultPosition,
+                                         wxDefaultSize, i == 0 ? wxRB_GROUP : 0);
+    goalSizer->Add(m_goalButtons[i], 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, S * 2);
+    m_goalButtons[i]->Bind(wxEVT_RADIOBUTTON, &NashChoiceDialog::OnGoal, this);
   }
-  else {
-    wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
-                               wxT("Compute some Nash equilibria")};
-    m_countChoice =
-        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, countChoices);
-  }
-  m_countChoice->SetSelection(0);
+  m_goalButtons[0]->SetValue(true);
+  topSizer->Add(goalSizer, 0, wxALL | wxEXPAND, S);
 
-  Connect(m_countChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(NashChoiceDialog::OnCount));
-  topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, S);
+  const auto game = m_doc->GetGame();
+  const bool allAvailable = std::ranges::any_of(m_variants, [&](const NashVariant *v) {
+    return !UnavailableReason(*v, game) && MeetsGoal(*v, NashGoal::All);
+  });
+  m_goalButtons[2]->Enable(allAvailable);
+  m_goalNote = new wxStaticText(this, wxID_ANY, allAvailable ? wxString{} : s_allUnavailable);
+  m_goalNote->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+  topSizer->Add(m_goalNote, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
 
-  m_methodChoice = new wxChoice(this, wxID_ANY);
-  topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, S);
-
-  if (As<GameTreeRep>(m_doc->GetGame())) {
-    wxString repChoices[] = {wxT("using the extensive game"), wxT("using the strategic game")};
-    m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
-    m_repChoice->SetSelection(0);
-    topSizer->Add(m_repChoice, 0, wxALL | wxEXPAND, S);
-
-    // We only need to respond to changes in method when we have an
-    // extensive game
-    Connect(m_methodChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-            wxCommandEventHandler(NashChoiceDialog::OnMethod));
-  }
-  else {
-    m_repChoice = nullptr;
+  m_list = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                          wxLC_REPORT | wxLC_SINGLE_SEL);
+  m_list->AppendColumn(wxT(""), wxLIST_FORMAT_CENTER, FromDIP(24));
+  m_list->AppendColumn(wxT("Method"));
+  m_list->AppendColumn(wxT("Coverage"));
+  m_list->AppendColumn(wxT("Reliability"));
+  m_list->AppendColumn(wxT("Solves for"));
+  m_list->Bind(wxEVT_LIST_ITEM_SELECTED, &NashChoiceDialog::OnItemSelected, this);
+  m_list->Bind(wxEVT_LIST_COL_CLICK, &NashChoiceDialog::OnColumnClick, this);
+  for (wxWindow *child : m_list->GetChildren()) {
+    child->Bind(wxEVT_MOTION,
+                [this, child](wxMouseEvent &p_event) { OnListMotion(child, p_event); });
   }
 
-  UpdateMethodChoice();
+  int displayIndex = wxDisplay::GetFromWindow(p_parent ? p_parent : this);
+  const wxRect area = wxDisplay(displayIndex == wxNOT_FOUND ? 0 : displayIndex).GetClientArea();
+  m_list->SetMinSize(wxSize(std::min(FromDIP(660), area.width * 8 / 10),
+                            std::min(FromDIP(300), area.height * 4 / 10)));
+  topSizer->Add(m_list, 1, wxLEFT | wxRIGHT | wxEXPAND, S);
+
+  auto *legend = new wxStaticText(this, wxID_ANY,
+                                  wxString::FromUTF8("\xE2\x98\x85") +
+                                      wxT(" marks the variant Gambit recommends for the Goal."));
+  topSizer->Add(legend, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, S);
+
+  m_warning = new wxStaticText(this, wxID_ANY, wxT(" "));
+  topSizer->Add(m_warning, 0, wxALL | wxEXPAND, S);
 
   if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  }
+
+  RefreshList();
+  for (const int column : {COL_METHOD, COL_COVERAGE, COL_RELIABILITY, COL_SOLVES}) {
+    m_list->SetColumnWidth(column, wxLIST_AUTOSIZE_USEHEADER);
   }
 
   SetSizer(topSizer);
@@ -402,62 +480,148 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
 
 NashGoal NashChoiceDialog::GetGoal() const
 {
-  return GoalFromSelection(m_countChoice->GetSelection());
+  if (m_goalButtons[2]->GetValue()) {
+    return NashGoal::All;
+  }
+  return m_goalButtons[1]->GetValue() ? NashGoal::Several : NashGoal::One;
 }
 
-void NashChoiceDialog::OnCount(wxCommandEvent &) { UpdateMethodChoice(); }
-
-void NashChoiceDialog::OnMethod(wxCommandEvent &) { UpdateRepresentationChoice(); }
-
-void NashChoiceDialog::UpdateMethodChoice()
+const NashVariant &NashChoiceDialog::GetSelectedVariant() const
 {
-  const auto game = m_doc->GetGame();
-  m_methodChoice->Clear();
-  m_methods.clear();
+  return m_userChoice ? *m_userChoice : RecommendedVariant(GetGoal(), m_doc->GetGame());
+}
 
-  m_methodChoice->Append(s_recommended);
-  m_methods.emplace_back(std::nullopt);
-  for (const auto method : ListedMethods(GetGoal())) {
-    if (!RunnableVariants(method, game).empty()) {
-      m_methodChoice->Append(MethodLabel(method));
-      m_methods.emplace_back(method);
+void NashChoiceDialog::OnGoal(wxCommandEvent &) { UpdateRecommendation(); }
+
+void NashChoiceDialog::OnItemSelected(wxListEvent &p_event)
+{
+  if (m_refreshing) {
+    return;
+  }
+  const auto *variant = m_rows.at(p_event.GetIndex());
+  if (UnavailableReason(*variant, m_doc->GetGame())) {
+    SelectRow(GetSelectedVariant());
+    m_warning->SetLabel(VariantLabel(*variant) + wxT(" is unavailable: ") +
+                        FromStd(*UnavailableReason(*variant, m_doc->GetGame())) + wxT("."));
+    return;
+  }
+  m_userChoice = variant;
+  UpdateWarning();
+}
+
+void NashChoiceDialog::OnListMotion(wxWindow *p_window, wxMouseEvent &p_event)
+{
+  p_event.Skip();
+  int flags = 0;
+  const wxPoint position = m_list->ScreenToClient(p_window->ClientToScreen(p_event.GetPosition()));
+  const long row = m_list->HitTest(position, flags);
+  wxString tip;
+  if (row != wxNOT_FOUND && row < static_cast<long>(m_rows.size())) {
+    if (const auto reason = UnavailableReason(*m_rows[row], m_doc->GetGame())) {
+      tip = FromStd(*reason);
     }
   }
-  m_methodChoice->SetSelection(0);
-  UpdateRepresentationChoice();
+  if (tip != m_tip) {
+    m_tip = tip;
+    p_window->UnsetToolTip();
+    if (!tip.empty()) {
+      p_window->SetToolTip(tip);
+    }
+  }
 }
 
-std::vector<const NashVariant *> NashChoiceDialog::Candidates() const
+void NashChoiceDialog::OnColumnClick(wxListEvent &p_event)
+{
+  const int column = p_event.GetColumn();
+  if (column == COL_STAR) {
+    return;
+  }
+  m_sortAscending = (column != m_sortColumn) || !m_sortAscending;
+  m_sortColumn = column;
+  RefreshList();
+}
+
+void NashChoiceDialog::SelectRow(const NashVariant &p_variant)
+{
+  const bool wasRefreshing = m_refreshing;
+  m_refreshing = true;
+  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+    if (m_rows[row] == &p_variant) {
+      m_list->SetItemState(row, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
+                           wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
+      m_list->EnsureVisible(row);
+    }
+    else {
+      m_list->SetItemState(row, 0, wxLIST_STATE_SELECTED);
+    }
+  }
+  m_refreshing = wasRefreshing;
+}
+
+void NashChoiceDialog::RefreshList()
 {
   const auto game = m_doc->GetGame();
   const auto goal = GetGoal();
-  const auto &method = m_methods.at(m_methodChoice->GetSelection());
-  if (!method) {
-    std::vector<const NashVariant *> result;
-    for (const auto *variant : RunnableVariants(RecommendedMethod(goal, game), game)) {
-      if (MeetsGoal(*variant, goal)) {
-        result.push_back(variant);
+  const auto *recommended = &RecommendedVariant(goal, game);
+
+  m_rows = m_variants;
+  if (m_sortColumn != -1) {
+    const auto key = [&](const NashVariant *v) -> std::pair<int, std::string> {
+      switch (m_sortColumn) {
+      case COL_METHOD:
+        return {0, std::string(v->methodName)};
+      case COL_COVERAGE:
+        return {static_cast<int>(v->coverage), {}};
+      case COL_RELIABILITY:
+        return {static_cast<int>(v->reliability), {}};
+      default:
+        return {static_cast<int>(v->solves), {}};
       }
-    }
-    return result;
+    };
+    std::ranges::stable_sort(m_rows, [&](const NashVariant *a, const NashVariant *b) {
+      return m_sortAscending ? key(a) < key(b) : key(b) < key(a);
+    });
   }
-  return RunnableVariants(*method, game);
+
+  m_refreshing = true;
+  m_list->DeleteAllItems();
+  const wxColour grey = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
+  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+    const auto &variant = *m_rows[row];
+    const auto reason = UnavailableReason(variant, game);
+    const wxString label = VariantLabel(variant);
+    m_list->InsertItem(row,
+                       &variant == recommended ? wxString::FromUTF8("\xE2\x98\x85") : wxString{});
+    m_list->SetItem(row, COL_METHOD, label);
+    m_list->SetItem(row, COL_COVERAGE, CoverageLabel(variant.coverage));
+    m_list->SetItem(row, COL_RELIABILITY, ReliabilityLabel(variant.reliability));
+    m_list->SetItem(row, COL_SOLVES, ConceptLabel(variant.solves));
+    if (reason) {
+      m_list->SetItemTextColour(row, grey);
+    }
+  }
+  m_refreshing = false;
+  SelectRow(m_userChoice ? *m_userChoice : *recommended);
+  UpdateWarning();
 }
 
-void NashChoiceDialog::UpdateRepresentationChoice()
+void NashChoiceDialog::UpdateRecommendation()
 {
-  if (!m_repChoice) {
-    return;
+  const auto *recommended = &RecommendedVariant(GetGoal(), m_doc->GetGame());
+  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+    m_list->SetItem(row, COL_STAR,
+                    m_rows[row] == recommended ? wxString::FromUTF8("\xE2\x98\x85") : wxString{});
   }
-  const auto candidates = Candidates();
-  if (candidates.size() == 1) {
-    m_repChoice->SetSelection(
-        candidates.front()->representation == VariantRepresentation::Strategic ? 1 : 0);
-    m_repChoice->Enable(false);
-  }
-  else {
-    m_repChoice->Enable(true);
-  }
+  SelectRow(m_userChoice ? *m_userChoice : *recommended);
+  UpdateWarning();
+}
+
+void NashChoiceDialog::UpdateWarning()
+{
+  const auto goal = GetGoal();
+  const auto &variant = GetSelectedVariant();
+  m_warning->SetLabel(MeetsGoal(variant, goal) ? wxString(wxT(" "))
+                                               : GoalMissWarning(variant, goal));
 }
 
 bool NashChoiceDialog::UseStrategic() const
@@ -468,22 +632,11 @@ bool NashChoiceDialog::UseStrategic() const
 NashComputationSpec NashChoiceDialog::GetComputation() const
 {
   const auto goal = GetGoal();
-  const auto &chosen = m_methods.at(m_methodChoice->GetSelection());
-  const bool recommended = !chosen.has_value();
-  const auto candidates = Candidates();
-  const auto methodId = recommended ? RecommendedMethod(goal, m_doc->GetGame()) : *chosen;
-
-  VariantRepresentation representation;
-  if (candidates.size() == 1) {
-    representation = candidates.front()->representation;
-  }
-  else {
-    representation = m_repChoice->GetSelection() == 0 ? VariantRepresentation::Behavior
-                                                      : VariantRepresentation::Strategic;
-  }
-  return {representation == VariantRepresentation::Strategic ? NashRepresentation::Strategic
-                                                             : NashRepresentation::Behavior,
-          GetTarget(goal), ResolveMethod(methodId, goal), recommended};
+  const auto &variant = GetSelectedVariant();
+  return {variant.representation == VariantRepresentation::Strategic
+              ? NashRepresentation::Strategic
+              : NashRepresentation::Behavior,
+          GetTarget(goal), ResolveMethod(variant.method, goal), m_userChoice == nullptr};
 }
 
 std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
