@@ -57,10 +57,7 @@ inline EnumPureStrategyResult EnumPureStrategySolve(
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
     const CancelToken &p_cancel = CancelToken())
 {
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
   EnumPureStrategyResult result;
   for (const auto &profile : StrategyContingencies(p_game)) {
     p_cancel.Check();

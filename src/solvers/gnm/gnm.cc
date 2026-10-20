@@ -88,10 +88,7 @@ GNMStrategyResult GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p
                                    StrategyCallbackType<double> p_onEquilibrium,
                                    GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
   const std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (const auto &player : p_game->GetPlayers()) {
@@ -111,10 +108,7 @@ GNMStrategyResult GNMStrategySolve(const MixedStrategyProfile<double> &p_pert, d
                                    StrategyCallbackType<double> p_onEquilibrium,
                                    GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
-  if (!p_pert.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_pert.GetGame());
   const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), true);
   return Solve(p_pert.GetGame(), A, ToPerturbation(p_pert), p_lambdaEnd, p_steps,
                p_localNewtonInterval, p_localNewtonMaxits, p_onEquilibrium, p_onEvent, p_cancel);
