@@ -459,8 +459,10 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
                                       wxT(" marks the variant Gambit recommends for the Goal."));
   topSizer->Add(legend, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, S);
 
-  m_warning = new wxStaticText(this, wxID_ANY, wxT(" "));
-  topSizer->Add(m_warning, 0, wxALL | wxEXPAND, S);
+  m_detail =
+      new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, FromDIP(130)),
+                     wxTE_MULTILINE | wxTE_READONLY | wxTE_BESTWRAP);
+  topSizer->Add(m_detail, 0, wxALL | wxEXPAND, S);
 
   if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
@@ -501,12 +503,10 @@ void NashChoiceDialog::OnItemSelected(wxListEvent &p_event)
   const auto *variant = m_rows.at(p_event.GetIndex());
   if (UnavailableReason(*variant, m_doc->GetGame())) {
     SelectRow(GetSelectedVariant());
-    m_warning->SetLabel(VariantLabel(*variant) + wxT(" is unavailable: ") +
-                        FromStd(*UnavailableReason(*variant, m_doc->GetGame())) + wxT("."));
     return;
   }
   m_userChoice = variant;
-  UpdateWarning();
+  UpdateDetail();
 }
 
 void NashChoiceDialog::OnListMotion(wxWindow *p_window, wxMouseEvent &p_event)
@@ -602,7 +602,7 @@ void NashChoiceDialog::RefreshList()
   }
   m_refreshing = false;
   SelectRow(m_userChoice ? *m_userChoice : *recommended);
-  UpdateWarning();
+  UpdateDetail();
 }
 
 void NashChoiceDialog::UpdateRecommendation()
@@ -613,15 +613,34 @@ void NashChoiceDialog::UpdateRecommendation()
                     m_rows[row] == recommended ? wxString::FromUTF8("\xE2\x98\x85") : wxString{});
   }
   SelectRow(m_userChoice ? *m_userChoice : *recommended);
-  UpdateWarning();
+  UpdateDetail();
 }
 
-void NashChoiceDialog::UpdateWarning()
+wxString NashChoiceDialog::DescribeVariant(const NashVariant &p_variant)
 {
-  const auto goal = GetGoal();
-  const auto &variant = GetSelectedVariant();
-  m_warning->SetLabel(MeetsGoal(variant, goal) ? wxString(wxT(" "))
-                                               : GoalMissWarning(variant, goal));
+  const auto game = m_doc->GetGame();
+  wxString text = VariantLabel(p_variant) + wxT("\n");
+  text +=
+      wxT("Method: ") + FromStd(p_variant.methodName) + wxT(".  Arithmetic: ") +
+      (p_variant.arithmetic == VariantArithmetic::Exact ? wxT("exact.") : wxT("floating point.")) +
+      wxT("  Solves for: ") + ConceptLabel(p_variant.solves) + wxT(" equilibria.\n");
+  if (const auto goal = GetGoal(); !MeetsGoal(p_variant, goal)) {
+    text += GoalMissWarning(p_variant, goal) + wxT("\n");
+  }
+  text += FromStd(p_variant.caveat) + wxT("\n");
+  if (p_variant.representation == VariantRepresentation::Strategic && As<GameTreeRep>(game)) {
+    if (!m_contingencies) {
+      m_contingencies = game->GetStrategies().extent_product();
+    }
+    text += wxString::Format(wxT("The reduced strategic form has %llu contingencies.\n"),
+                             static_cast<unsigned long long>(*m_contingencies));
+  }
+  return text;
+}
+
+void NashChoiceDialog::UpdateDetail()
+{
+  m_detail->ChangeValue(DescribeVariant(GetSelectedVariant()));
 }
 
 bool NashChoiceDialog::UseStrategic() const

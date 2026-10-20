@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GUI_DLNASH_H
 #define GAMBIT_GUI_DLNASH_H
 
+#include <optional>
 #include <vector>
 
 #include <wx/listctrl.h>
@@ -35,11 +36,13 @@ namespace Gambit::GUI {
 class NashChoiceDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
   wxRadioButton *m_goalButtons[3];
-  wxStaticText *m_goalNote, *m_warning;
+  wxStaticText *m_goalNote;
+  wxTextCtrl *m_detail;
   wxListCtrl *m_list;
   std::vector<const NashVariant *> m_variants;
   std::vector<const NashVariant *> m_rows;
   const NashVariant *m_userChoice{nullptr};
+  std::optional<std::size_t> m_contingencies;
   int m_sortColumn{-1};
   bool m_sortAscending{true};
   bool m_refreshing{false};
@@ -52,7 +55,8 @@ class NashChoiceDialog final : public wxDialog {
   void RefreshList();
   void UpdateRecommendation();
   void SelectRow(const NashVariant &);
-  void UpdateWarning();
+  void UpdateDetail();
+  wxString DescribeVariant(const NashVariant &);
 
   NashGoal GetGoal() const;
   const NashVariant &GetSelectedVariant() const;
