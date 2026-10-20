@@ -33,6 +33,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/collpane.h>
 #include <wx/display.h>
 #include <wx/listctrl.h>
 #include <wx/radiobut.h>
@@ -464,6 +465,18 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
                      wxTE_MULTILINE | wxTE_READONLY | wxTE_BESTWRAP);
   topSizer->Add(m_detail, 0, wxALL | wxEXPAND, S);
 
+  m_parameters = new wxCollapsiblePane(this, wxID_ANY, wxT("Parameters"));
+  m_parameters->Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, &NashChoiceDialog::OnParametersToggled, this);
+  m_parametersText = new wxStaticText(m_parameters->GetPane(), wxID_ANY, wxEmptyString);
+  auto *paneSizer = new wxBoxSizer(wxVERTICAL);
+  paneSizer->Add(m_parametersText, 0, wxALL | wxEXPAND, S);
+  m_parameters->GetPane()->SetSizer(paneSizer);
+  m_parameters->GetPane()->Bind(wxEVT_SIZE, [this](wxSizeEvent &p_event) {
+    p_event.Skip();
+    WrapParameters();
+  });
+  topSizer->Add(m_parameters, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
+
   if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
   }
@@ -477,6 +490,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
   wxTopLevelWindowBase::Layout();
+  m_bestHeight = ClientToWindowSize(topSizer->GetMinSize()).y;
   CenterOnParent();
 }
 
@@ -641,6 +655,31 @@ wxString NashChoiceDialog::DescribeVariant(const NashVariant &p_variant)
 void NashChoiceDialog::UpdateDetail()
 {
   m_detail->ChangeValue(DescribeVariant(GetSelectedVariant()));
+  wxString parameters = ParameterDescription(GetComputation().method);
+  parameters.Trim(false);
+  m_parametersLabel =
+      parameters.empty() ? wxString(wxT("This variant has no parameters.")) : parameters;
+  WrapParameters();
+}
+
+void NashChoiceDialog::WrapParameters()
+{
+  const int width = m_parameters->GetPane()->GetClientSize().GetWidth() - 2 * FromDIP(5);
+  m_parametersText->SetLabel(m_parametersLabel);
+  if (width > 0) {
+    m_parametersText->Wrap(width);
+  }
+  m_parameters->GetPane()->Layout();
+}
+
+void NashChoiceDialog::OnParametersToggled(wxCollapsiblePaneEvent &)
+{
+  Layout();
+  const wxSize best = ClientToWindowSize(GetSizer()->GetMinSize());
+  const wxSize size = GetSize();
+  SetMinSize(best);
+  SetSize(size.x, std::max(best.y, size.y + best.y - m_bestHeight));
+  m_bestHeight = best.y;
 }
 
 bool NashChoiceDialog::UseStrategic() const

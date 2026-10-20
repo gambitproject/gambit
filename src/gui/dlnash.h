@@ -26,6 +26,7 @@
 #include <optional>
 #include <vector>
 
+#include <wx/collpane.h>
 #include <wx/listctrl.h>
 #include <wx/radiobut.h>
 
@@ -38,6 +39,10 @@ class NashChoiceDialog final : public wxDialog {
   wxRadioButton *m_goalButtons[3];
   wxStaticText *m_goalNote;
   wxTextCtrl *m_detail;
+  wxCollapsiblePane *m_parameters;
+  wxStaticText *m_parametersText;
+  wxString m_parametersLabel;
+  int m_bestHeight{0};
   wxListCtrl *m_list;
   std::vector<const NashVariant *> m_variants;
   std::vector<const NashVariant *> m_rows;
@@ -56,6 +61,8 @@ class NashChoiceDialog final : public wxDialog {
   void UpdateRecommendation();
   void SelectRow(const NashVariant &);
   void UpdateDetail();
+  void WrapParameters();
+  void OnParametersToggled(wxCollapsiblePaneEvent &);
   wxString DescribeVariant(const NashVariant &);
 
   NashGoal GetGoal() const;
