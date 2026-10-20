@@ -998,12 +998,25 @@ class MixedBehaviorProfile:
            New implementation of `max_regret` to clarify the distinction between
            per-player and per-agent concepts.
 
+        .. versionchanged:: 17.0.0
+
+           Raises `UndefinedOperationError` for games with absent-minded information sets.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game has absent-minded information sets.
+
         See Also
         --------
         liap_value
         agent_max_regret
         """
         self._check_validity()
+        if self.game._has_absent_minded_infoset():
+            raise UndefinedOperationError(
+                "max_regret() is not defined for games with absent-minded information sets."
+            )
         return self._max_regret()
 
     def liap_value(self) -> ProfileDType:
