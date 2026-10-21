@@ -1082,6 +1082,7 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
+    m_doc->SetNashChoice(dialog.GetChoice());
     ShowNashMonitorDialog(this, m_doc, dialog.GetCommand());
 
     if (!m_splitter->IsSplit()) {

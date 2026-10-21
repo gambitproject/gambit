@@ -69,6 +69,13 @@ struct NashVariant {
   std::string_view caveat;
 };
 
+/// The user's last choices in the equilibrium dialog.
+struct NashChoice {
+  NashGoal goal{NashGoal::One};
+  /// The variant explicitly picked; null if the selection followed the recommendation.
+  const NashVariant *variant{nullptr};
+};
+
 /// Every variant, in alphabetical order by method.
 std::span<const NashVariant> NashVariants();
 

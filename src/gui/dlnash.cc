@@ -435,6 +435,15 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
   m_goalNote->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   topSizer->Add(m_goalNote, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
 
+  const NashChoice &remembered = m_doc->GetNashChoice();
+  if (remembered.goal != NashGoal::All || allAvailable) {
+    SetGoal(remembered.goal);
+    if (std::ranges::find(m_variants, remembered.variant) != m_variants.end() &&
+        !UnavailableReason(*remembered.variant, game)) {
+      m_userChoice = remembered.variant;
+    }
+  }
+
   m_list = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                           wxLC_REPORT | wxLC_SINGLE_SEL);
   m_list->AppendColumn(wxT(""), wxLIST_FORMAT_CENTER, FromDIP(24));
@@ -500,6 +509,11 @@ NashGoal NashChoiceDialog::GetGoal() const
     return NashGoal::All;
   }
   return m_goalButtons[1]->GetValue() ? NashGoal::Several : NashGoal::One;
+}
+
+void NashChoiceDialog::SetGoal(NashGoal p_goal)
+{
+  m_goalButtons[static_cast<int>(p_goal)]->SetValue(true);
 }
 
 const NashVariant &NashChoiceDialog::GetSelectedVariant() const

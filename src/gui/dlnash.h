@@ -66,6 +66,7 @@ class NashChoiceDialog final : public wxDialog {
   wxString DescribeVariant(const NashVariant &);
 
   NashGoal GetGoal() const;
+  void SetGoal(NashGoal);
   const NashVariant &GetSelectedVariant() const;
 
   NashComputationSpec GetComputation() const;
@@ -76,6 +77,9 @@ public:
   std::shared_ptr<AnalysisOutput> GetCommand() const;
 
   bool UseStrategic() const;
+
+  /// The goal and explicitly picked variant, for the document to remember.
+  NashChoice GetChoice() const { return {GetGoal(), m_userChoice}; }
 };
 } // namespace Gambit::GUI
 
