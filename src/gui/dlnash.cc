@@ -60,19 +60,11 @@ NashEquilibriumTarget GetTarget(NashGoal p_goal)
   }
 }
 
-// Agent-form liap is not yet offered.
-bool IsOffered(const NashVariant &p_variant)
-{
-  return p_variant.representation == VariantRepresentation::Strategic ||
-         p_variant.method != NashMethodId::Liap;
-}
-
 std::vector<const NashVariant *> OfferedVariants(const Game &p_game)
 {
   std::vector<const NashVariant *> result;
   for (const auto &variant : NashVariants()) {
-    if (IsOffered(variant) &&
-        (variant.representation == VariantRepresentation::Strategic || As<GameTreeRep>(p_game))) {
+    if (variant.representation == VariantRepresentation::Strategic || As<GameTreeRep>(p_game)) {
       result.push_back(&variant);
     }
   }
@@ -280,9 +272,9 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
           return prefix + command + strategic;
         }
         else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
-          return prefix + wxString::Format("liap -d 10 -n %d -i %d -m %.17g",
-                                           method.startingPoints, method.maxIterations,
-                                           method.maxRegret);
+          return prefix + wxT("liap") + (p_spec.agentNash ? wxT(" -A") : wxString{}) +
+                 wxString::Format(" -d 10 -n %d -i %d -m %.17g", method.startingPoints,
+                                  method.maxIterations, method.maxRegret);
         }
         else if constexpr (std::is_same_v<Method, LogitNashSpec>) {
           return prefix +
