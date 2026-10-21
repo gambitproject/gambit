@@ -1,0 +1,15 @@
+NFG 1 R "McKelvey and Palfrey (1995) zero-sum game from Ochs (1995), variant 2" { "Player 1" "Player 2" }
+
+{ { "A1" "A2" }
+{ "B1" "B2" }
+}
+"This is the fourth example game in :cite:p:`McKPal95`, with data from :cite:p:`Och95`.
+This variant sets the row player's payoff from (A1, B1) to 9."
+
+{
+{ "A1B1" 9, 0 }
+{ "A1B2" 0, 1 }
+{ "A2B1" 0, 1 }
+{ "A2B2" 1, 0 }
+}
+1 2 3 4

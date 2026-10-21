@@ -1,0 +1,16 @@
+NFG 1 R "Schotter-Weigelt-Wilson (GEB 94), Problem 1M" { "Player 1" "Player 2" }
+
+{ { "L" "R" }
+{ "L" "R" }
+}
+"Problem 1 (matrix version) from the framing experiment in :cite:p:`SchWeiWil94`.
+A generic 2x2 game of perfect information based on this structure (with payoffs
+relabeled A, B, C, D) is discussed as an example in :cite:p:`McKPal98`, Figure 4."
+
+{
+{ "LL" 4, 4 }
+{ "RL" 0, 1 }
+{ "LR" 4, 4 }
+{ "RR" 6, 3 }
+}
+1 2 3 4

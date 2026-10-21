@@ -1,0 +1,20 @@
+NFG 1 R "Schotter-Weigelt-Wilson (GEB 94), Problem 2M" { "Player 1" "Player 2" }
+
+{ { "T" "M" "B" }
+{ "T" "M" "B" }
+}
+"Problem 2 (matrix version) from :cite:p:`SchWeiWil94`, designed to test the
+explanatory power of subgame perfection in the absence of iterated dominance."
+
+{
+{ "TT" 4, 4 }
+{ "MT" 0, 1 }
+{ "BT" 0, 1 }
+{ "TM" 4, 4 }
+{ "MM" 7, 0 }
+{ "BM" 5, 6 }
+{ "TB" 4, 4 }
+{ "MB" 5, 6 }
+{ "BB" 7, 0 }
+}
+1 2 3 4 5 6 7 8 9
