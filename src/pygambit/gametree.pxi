@@ -66,6 +66,14 @@ class ExtensiveGame(Game):
             for infoset in resolved_player.deref().GetInfosets()
         ]
 
+    def _has_absent_minded_infoset(self) -> bool:
+        """Returns whether any information set of a personal player is absent-minded."""
+        for player in self.game.deref().GetPlayers():
+            for infoset in player.deref().GetInfosets():
+                if self.game.deref().IsAbsentMinded(infoset):
+                    return True
+        return False
+
     def get_infosets(self, player: str) -> list[History]:
         """Returns a snapshot of the information sets belonging to the personal
         player `player`: the decisions at which that player chooses an action.

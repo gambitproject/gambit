@@ -292,6 +292,7 @@ public:
   T GetAgentMaxRegret() const;
 
   /// @brief Computes the maximum regret for any player in the profile
+  /// @throws UndefinedException if the game has any absent-minded information sets
   /// @sa GetAgentMaxRegret() const
   ///
   T GetMaxRegret() const;

@@ -29,6 +29,225 @@
 
 namespace Gambit {
 
+namespace {
+
+/// The data needed to evaluate one player's deviations against a fixed behavior profile
+template <class T> struct DeviationProblem {
+  const TreeLayout &layout;
+  const std::vector<T> &actionProb; ///< by node: probability of the action leading to it
+  size_t player;                    ///< position of the deviating player
+};
+
+template <class T> const T &Payoff(const DeviationProblem<T> &p_problem, size_t p_node)
+{
+  const auto &layout = p_problem.layout;
+  return layout.template GetNumbers<T>().payoffs[p_node * layout.numPlayers + p_problem.player];
+}
+
+template <class T> bool IsOwnNode(const DeviationProblem<T> &p_problem, size_t p_node)
+{
+  const auto &layout = p_problem.layout;
+  const int info = layout.infoset[p_node];
+  return info >= 0 && std::cmp_less(info, layout.numPersonalInfosets) &&
+         std::cmp_equal(layout.infosets[info].player, p_problem.player);
+}
+
+/// The child of a node reached by the action in position p_slot at the node's information set
+size_t ChildAt(const TreeLayout &p_layout, size_t p_node, size_t p_slot)
+{
+  return p_layout.childList[p_layout.firstChild[p_node] + p_slot];
+}
+
+/// Probability of reaching each node when the deviating player chooses actions to reach it
+template <class T> std::vector<T> OthersReachProbs(const DeviationProblem<T> &p_problem)
+{
+  const auto &layout = p_problem.layout;
+  std::vector<T> reach(layout.parent.size(), static_cast<T>(1));
+  for (size_t k = 1; k < reach.size(); k++) {
+    const size_t parent = layout.parent[k];
+    reach[k] =
+        IsOwnNode(p_problem, parent) ? reach[parent] : reach[parent] * p_problem.actionProb[k];
+  }
+  return reach;
+}
+
+/// Memoized state of the backward induction on a player's information sets
+template <class T> struct BackwardInduction {
+  std::vector<T> reach;                    ///< by node, probability of reaching it absent own play
+  std::vector<std::optional<T>> value;     ///< by node, once evaluated
+  std::vector<std::optional<size_t>> best; ///< by information set, the best action's position
+};
+
+/// The position of the action maximizing the player's value at an information set, given
+/// that the values below its members' children have been evaluated
+template <class T>
+size_t BestActionPosition(const DeviationProblem<T> &p_problem,
+                          const BackwardInduction<T> &p_state, size_t p_infoset)
+{
+  const auto &layout = p_problem.layout;
+  size_t best = 0;
+  T bestValue = static_cast<T>(0);
+  for (size_t position = 0; position < layout.infosets[p_infoset].numActions; position++) {
+    T actionValue = static_cast<T>(0);
+    for (const size_t member : layout.infosets[p_infoset].members) {
+      actionValue += p_state.reach[member] * *p_state.value[ChildAt(layout, member, position)];
+    }
+    if (position == 0 || actionValue > bestValue) {
+      best = position;
+      bestValue = actionValue;
+    }
+  }
+  return best;
+}
+
+/// Evaluate the value of the root, with the player best-responding at each information set.
+/// A node is evaluated once the nodes it depends on are; the dependencies of a node of the
+/// player are, by perfect recall, never its own ancestors, so the walk terminates.
+template <class T>
+void EvaluateBackwardInduction(const DeviationProblem<T> &p_problem, BackwardInduction<T> &p_state)
+{
+  const auto &layout = p_problem.layout;
+  std::vector<size_t> stack{0};
+  const auto pushMissing = [&](size_t p_child) {
+    if (!p_state.value[p_child]) {
+      stack.push_back(p_child);
+    }
+  };
+  while (!stack.empty()) {
+    const size_t node = stack.back();
+    if (p_state.value[node]) {
+      stack.pop_back();
+      continue;
+    }
+    const size_t size = stack.size();
+    T value = Payoff(p_problem, node);
+    if (!IsOwnNode(p_problem, node)) {
+      for (size_t j = 0; j < layout.numChildren[node]; j++) {
+        pushMissing(ChildAt(layout, node, j));
+      }
+      if (stack.size() > size) {
+        continue;
+      }
+      for (size_t j = 0; j < layout.numChildren[node]; j++) {
+        const size_t child = ChildAt(layout, node, j);
+        value += p_problem.actionProb[child] * *p_state.value[child];
+      }
+    }
+    else {
+      const auto info = static_cast<size_t>(layout.infoset[node]);
+      if (!p_state.best[info]) {
+        for (const size_t member : layout.infosets[info].members) {
+          for (size_t j = 0; j < layout.numChildren[member]; j++) {
+            pushMissing(ChildAt(layout, member, j));
+          }
+        }
+        if (stack.size() > size) {
+          continue;
+        }
+        p_state.best[info] = BestActionPosition(p_problem, p_state, info);
+      }
+      const size_t child = ChildAt(layout, node, *p_state.best[info]);
+      pushMissing(child);
+      if (stack.size() > size) {
+        continue;
+      }
+      value += *p_state.value[child];
+    }
+    p_state.value[node] = value;
+    stack.pop_back();
+  }
+}
+
+/// Best-response value of a player with perfect recall, by backward induction on the
+/// player's information sets
+template <class T> T PerfectRecallBestResponse(const DeviationProblem<T> &p_problem)
+{
+  BackwardInduction<T> state{OthersReachProbs(p_problem),
+                             std::vector<std::optional<T>>(p_problem.layout.parent.size()),
+                             std::vector<std::optional<size_t>>(p_problem.layout.infosets.size())};
+  EvaluateBackwardInduction(p_problem, state);
+  return *state.value[0];
+}
+
+/// A node awaiting evaluation in the search over pure behavior profiles
+template <class T> struct PendingNode {
+  size_t node;
+  T weight; ///< probability of reaching the node, given the player's choices so far
+};
+
+/// A partially completed walk of the tree under the player's choices so far
+template <class T> struct SearchFrame {
+  std::vector<PendingNode<T>> pending;
+  T value; ///< weighted payoff of the nodes visited so far
+  /// Set while the frame is branching on the information set of an unvisited node of the player
+  std::optional<size_t> branchInfoset;
+  size_t branchNode{0};
+  T branchWeight{};
+  size_t nextPosition{0}; ///< the next action position to try at the branching information set
+};
+
+/// Best-response value of a player without absent-mindedness, by depth-first enumeration of
+/// the player's pure behavior profiles, in which an information set is branched on only when
+/// the walk of the tree reaches it
+template <class T> T PureEnumerationBestResponse(const DeviationProblem<T> &p_problem)
+{
+  const auto &layout = p_problem.layout;
+  std::vector<std::optional<size_t>> choice(layout.infosets.size());
+  std::optional<T> best;
+  std::vector<SearchFrame<T>> frames;
+  frames.push_back({{{0, static_cast<T>(1)}}, static_cast<T>(0), std::nullopt, 0, T{}, 0});
+  while (!frames.empty()) {
+    auto &frame = frames.back();
+    if (!frame.branchInfoset) {
+      while (!frame.pending.empty()) {
+        const auto [node, weight] = frame.pending.back();
+        frame.pending.pop_back();
+        if (weight == static_cast<T>(0)) {
+          continue;
+        }
+        frame.value += weight * Payoff(p_problem, node);
+        if (!IsOwnNode(p_problem, node)) {
+          for (size_t j = 0; j < layout.numChildren[node]; j++) {
+            const size_t child = ChildAt(layout, node, j);
+            frame.pending.push_back({child, weight * p_problem.actionProb[child]});
+          }
+          continue;
+        }
+        const auto info = static_cast<size_t>(layout.infoset[node]);
+        if (choice[info]) {
+          frame.pending.push_back({ChildAt(layout, node, *choice[info]), weight});
+          continue;
+        }
+        frame.branchInfoset = info;
+        frame.branchNode = node;
+        frame.branchWeight = weight;
+        break;
+      }
+      if (!frame.branchInfoset) {
+        if (!best || frame.value > *best) {
+          best = frame.value;
+        }
+        frames.pop_back();
+        continue;
+      }
+    }
+    const size_t info = *frame.branchInfoset;
+    if (frame.nextPosition == layout.infosets[info].numActions) {
+      choice[info] = std::nullopt;
+      frames.pop_back();
+      continue;
+    }
+    const size_t position = frame.nextPosition++;
+    choice[info] = position;
+    SearchFrame<T> branch{frame.pending, frame.value, std::nullopt, 0, T{}, 0};
+    branch.pending.push_back({ChildAt(layout, frame.branchNode, position), frame.branchWeight});
+    frames.push_back(std::move(branch));
+  }
+  return *best;
+}
+
+} // end anonymous namespace
+
 //========================================================================
 //                  MixedBehaviorProfile<T>: Lifecycle
 //========================================================================
@@ -487,8 +706,25 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 {
-  m_support.GetGame()->EnsureStrategies();
-  return MixedStrategyProfile<T>(*this).GetMaxRegret();
+  CheckVersion();
+  const auto game = m_support.GetGame();
+  if (!m_layout->reentries.empty()) {
+    throw UndefinedException(
+        "Player regret is not defined for a behavior profile of a game with absent-mindedness");
+  }
+  const bool perfectRecall = game->IsPerfectRecall();
+  std::vector<T> actionProb(m_layout->parent.size(), static_cast<T>(1));
+  for (size_t k = 1; k < actionProb.size(); k++) {
+    actionProb[k] = LayoutActionProb(k);
+  }
+  T maxRegret = static_cast<T>(0);
+  for (const auto &player : game->GetPlayers()) {
+    const DeviationProblem<T> problem{*m_layout, actionProb, *PlayerIndex(player)};
+    const T bestResponse =
+        perfectRecall ? PerfectRecallBestResponse(problem) : PureEnumerationBestResponse(problem);
+    maxRegret = std::max(maxRegret, bestResponse - GetPayoff(player));
+  }
+  return maxRegret;
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
