@@ -40,10 +40,14 @@ std::optional<SolverFunction>
 EnumPureNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   if (p_representation == NashRepresentation::Behavior) {
-    return [](const Game &p_game, const ProfileFoundCallback &p_callback, const CancelToken &) {
-      Nash::EnumPureAgentSolve(p_game, [&p_callback](const MixedBehaviorProfile<Rational> &p) {
-        p_callback(ComputedProfile(p));
-      });
+    return [](const Game &p_game, const ProfileFoundCallback &p_callback,
+              const CancelToken &p_cancel) {
+      Nash::EnumPureAgentSolve(
+          p_game,
+          [&p_callback](const MixedBehaviorProfile<Rational> &p) {
+            p_callback(ComputedProfile(p));
+          },
+          p_cancel);
     };
   }
   return [](const Game &p_game, const ProfileFoundCallback &p_callback,
