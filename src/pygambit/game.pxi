@@ -23,9 +23,10 @@ import io
 import itertools
 import pathlib
 
+import cdd
+import cdd.gmp
 import cython
 import numpy as np
-from scipy.optimize import linprog
 
 import pygambit.gameiter
 
@@ -992,10 +993,15 @@ class Game:
         """Check whether this two-player game is degenerate.
 
         A two-player game is *nondegenerate* if no mixed strategy of support
-        size ``k`` has more than ``k`` pure best responses. A degenerate game
-        violates this -- for example, a pure strategy with two pure best
-        responses. The check searches over supports (a discrete search); the
-        problem is NP-hard in general.
+        size ``k`` has more than ``k`` pure best responses. A game that
+        violates this is *degenerate*; for example, a pure strategy with two
+        pure best responses.
+
+        The check is exact: payoffs are treated as rational numbers and each
+        candidate is tested with exact linear programming (pycddlib), so ties
+        are detected exactly rather than up to a numerical tolerance. The
+        search is exhaustive over supports, so its running time grows
+        exponentially with the number of strategies.
 
         Parameters
         ----------
@@ -1006,16 +1012,27 @@ class Game:
         -------
         bool or tuple
             Whether the game is degenerate. If ``certificate=True``, returns
-            ``(is_degenerate, witness)``. When degenerate, ``witness`` is
-            ``(player, strategy)``: ``player`` is 0 (row) or 1 (column), and
-            ``strategy`` is the  mixed strategy (of support size k) whose
-            opponent has more than k best responses has more best responses
-            than its support size. When nondegenerate, ``witness`` is None.
+            ``(is_degenerate, witness)``. When the game is degenerate,
+            ``witness`` is ``(player, strategy)``, where ``player`` is 0 (row)
+            or 1 (column) and ``strategy`` is a numpy array of `Rational`
+            probabilities: a mixed strategy of that player, with support size
+            k, against which the opponent has more than k pure best responses.
+            When the game is nondegenerate, ``witness`` is None.
 
         Raises
         ------
-        ValueError
+        NotImplementedError
             If the game does not have exactly two players.
+
+        Notes
+        -----
+        For each support size ``k``, each candidate support ``S`` (size ``k``)
+        of one player and each candidate set ``T`` (size ``k + 1``) of the
+        opponent's strategies, a linear feasibility problem asks whether some
+        mixed strategy on ``S`` makes every strategy in ``T`` a best response:
+        the opponent's payoffs are equal across ``T`` and no greater outside
+        ``T``. The game is degenerate if and only if one of these problems is
+        feasible.
 
         Examples
         --------
@@ -1031,81 +1048,93 @@ class Game:
 
         >>> g = gbt.Game.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]])
         >>> g.is_degenerate(certificate=True)
-        (True, (0, (1.0, 0.0)))
+        (True, (0, array([Rational(1, 1), Rational(0, 1)], dtype=object)))
+
+        A degenerate game in which no pure strategy has tied best responses;
+        only a mixed strategy reveals it:
+
+        >>> g = gbt.Game.from_arrays([[1, 2, 3], [6, 5, 4]],
+        ...                          [[2, 0, 1], [0, 2, 1]])
+        >>> g.is_degenerate(certificate=True)
+        (True, (0, array([Rational(1, 2), Rational(1, 2)], dtype=object)))
         """
-
         if len(self.players) != 2:
-            raise ValueError("is_degenerate() is only defined for two-player games")
+            raise NotImplementedError(
+                "is_degenerate() is only implemented for two-player games"
+            )
 
-        M1, M2 = (np.asarray(a, dtype=float) for a in self.to_arrays())
+        M1, M2 = self.to_arrays()
         m, n = M1.shape
+        zero, one = Rational(0), Rational(1)
 
-        def feasible(M, S, T):
-            """Search for a small-support strategy with too many best responses.
+        for player, payoff_matrix in ((0, M2), (1, M1.T)):
+            for i, payoffs in enumerate(payoff_matrix):
+                if np.count_nonzero(payoffs == max(payoffs)) > 1:
+                    if not certificate:
+                        return True
+                    strategy = np.full(payoff_matrix.shape[0], zero, dtype=object)
+                    strategy[i] = one
+                    return True, (player, strategy)
 
-            Given a candidate support ``S`` for the strategizing player and a
-            candidate best-response set ``T`` for the opponent (with
-            ``len(T) == len(S) + 1``), determine whether there exists a mixed
-            strategy supported on ``S`` such that every pure strategy in ``T``
-            is an equal, maximal best response for the opponent. If such a
-            strategy exists, it witnesses degeneracy, because the opponent then
-            has more best responses (``len(T)``) than the support size
-            (``len(S)``).
-
-            Parameters
-            ----------
-            M : numpy.ndarray
-                The opponent's payoff matrix, oriented so the strategizing
-                player indexes axis 0 and the opponent indexes axis 1.
-            S : sequence of int
-                Indices (axis 0) forming the candidate support.
-            T : sequence of int
-                Indices (axis 1) of the candidate best responses;
-                ``len(T) == len(S) + 1``.
-
-            Returns
-            -------
-            numpy.ndarray or None
-                A full-length probability vector supported on ``S`` that makes
-                every strategy in ``T`` an equal, maximal best response, or
-                None if no such strategy exists.
-
-
-            This is solved as a linear feasibility problem: find x >= 0 on S
-            with sum 1 making the opponent's payoff equal across all of T (tie
-            constraints) and no greater for any strategy outside T (maximality).
-
-            """
-
-            S, T = list(S), list(T)
+        def tied_best_response_strategy(M, S, T):
+            """Return a mixed strategy on rows ``S`` of ``M`` against which every
+            column in ``T`` is a best response, or None if there is none."""
             k = len(S)
             sub = M[S, :]
-            A_eq = [sub[:, T[t]] - sub[:, T[0]] for t in range(1, len(T))]
-            A_eq.append(np.ones(k))
-            b_eq = [0.0] * (len(T) - 1) + [1.0]
+            ref = T[0]
             others = [j for j in range(M.shape[1]) if j not in T]
-            A_ub = [sub[:, j] - sub[:, T[0]] for j in others]
-            b_ub = [0.0] * len(others)
-            res = linprog(np.zeros(k), A_ub or None, b_ub or None,
-                          A_eq, b_eq, bounds=[(0, None)] * k, method="highs")
-            if not res.success:
-                return None
-            x = np.zeros(M.shape[0])
-            x[S] = res.x
-            return x
 
-        for k in range(1, min(m, n) + 1):
-            # P1 mixes over k rows -> can P2 get k+1 tied best responses? (use M2)
+            # In cdd's format, a row [b, a_1, ..., a_k] means b + a.x >= 0,
+            # or b + a.x == 0 if its index is in the linearity set.
+            rows, equalities = [], []
+            for t in T[1:]:
+                equalities.append(len(rows))
+                rows.append([zero] + list(sub[:, ref] - sub[:, t]))
+            equalities.append(len(rows))
+            rows.append([one] + [-one] * k)
+            for j in others:
+                rows.append([zero] + list(sub[:, ref] - sub[:, j]))
+            for r in range(k):
+                rows.append([zero] + [one if c == r else zero for c in range(k)])
+
+            mat = cdd.gmp.matrix_from_array(
+                rows,
+                lin_set=frozenset(equalities),
+                rep_type=cdd.RepType.INEQUALITY,
+                obj_type=cdd.LPObjType.MAX,
+                obj_func=[zero] * (k + 1),
+            )
+            lp = cdd.gmp.linprog_from_matrix(mat)
+            cdd.gmp.linprog_solve(lp)
+
+            if lp.status == cdd.LPStatusType.OPTIMAL:
+                x = np.full(M.shape[0], zero, dtype=object)
+                x[list(S)] = [Rational(v) for v in lp.primal_solution]
+                return x
+            if lp.status in (cdd.LPStatusType.INCONSISTENT,
+                             cdd.LPStatusType.STRUC_INCONSISTENT):
+                return None
+            # The feasible region is bounded and the objective is zero,
+            # so no other status should occur.
+            raise RuntimeError(f"unexpected LP status {lp.status!r}")
+
+        for k in range(2, min(m, n) + 1):
+            # Player 0 mixes over k rows; can player 1 have k + 1 best responses?
             for S in itertools.combinations(range(m), k):
                 for T in itertools.combinations(range(n), k + 1):
-                    x = feasible(M2, S, T)
-                    if x is not None:
-                        return (True, (0, tuple(x.tolist()))) if certificate else True
-            # P2 mixes over k cols -> can P1 get k+1 tied best responses? (use M1.T)
+                    strategy = tied_best_response_strategy(M2, S, T)
+                    if strategy is not None:
+                        if not certificate:
+                            return True
+                        return True, (0, strategy)
+
+            # Player 1 mixes over k columns; can player 0 have k + 1 best responses?
             for S in itertools.combinations(range(n), k):
                 for T in itertools.combinations(range(m), k + 1):
-                    y = feasible(M1.T, S, T)
-                    if y is not None:
-                        return (True, (1, tuple(y.tolist()))) if certificate else True
+                    strategy = tied_best_response_strategy(M1.T, S, T)
+                    if strategy is not None:
+                        if not certificate:
+                            return True
+                        return True, (1, strategy)
 
         return (False, None) if certificate else False
