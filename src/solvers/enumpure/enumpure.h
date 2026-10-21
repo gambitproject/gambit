@@ -104,11 +104,13 @@ struct EnumPureAgentResult {
 ///
 inline EnumPureAgentResult
 EnumPureAgentSolve(const Game &p_game,
-                   BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
+                   BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>,
+                   const CancelToken &p_cancel = CancelToken())
 {
   EnumPureAgentResult result;
   const BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
+    p_cancel.Check();
     if (IsAgentNash(citer)) {
       result.equilibria.push_back(citer.ToMixedBehaviorProfile());
       p_onEquilibrium(result.equilibria.back());
