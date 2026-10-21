@@ -60,11 +60,11 @@ NashEquilibriumTarget GetTarget(NashGoal p_goal)
   }
 }
 
-// Agent-form liap and enumpure are not yet offered.
+// Agent-form liap is not yet offered.
 bool IsOffered(const NashVariant &p_variant)
 {
   return p_variant.representation == VariantRepresentation::Strategic ||
-         (p_variant.method != NashMethodId::Liap && p_variant.method != NashMethodId::EnumPure);
+         p_variant.method != NashMethodId::Liap;
 }
 
 std::vector<const NashVariant *> OfferedVariants(const Game &p_game)
@@ -242,7 +242,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
   return std::visit(
       [&]<typename Method>(const Method &method) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
-          return prefix + wxT("enumpure") + strategic;
+          return prefix + wxT("enumpure") + (p_spec.agentNash ? wxT(" -A") : strategic);
         }
         else if constexpr (std::is_same_v<Method, EnumMixedNashSpec>) {
           return prefix + wxT("enummixed");
@@ -404,7 +404,7 @@ enum ListColumn { COL_STAR, COL_METHOD, COL_COVERAGE, COL_RELIABILITY, COL_SOLVE
 } // namespace
 
 NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
-  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition, wxDefaultSize,
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute equilibria"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc), m_variants(OfferedVariants(p_doc->GetGame()))
 {
@@ -708,7 +708,8 @@ NashComputationSpec NashChoiceDialog::GetComputation() const
   return {variant.representation == VariantRepresentation::Strategic
               ? NashRepresentation::Strategic
               : NashRepresentation::Behavior,
-          GetTarget(goal), ResolveMethod(variant.method, goal), m_userChoice == nullptr};
+          GetTarget(goal), ResolveMethod(variant.method, goal), m_userChoice == nullptr,
+          variant.solves == VariantConcept::AgentNash};
 }
 
 std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
@@ -723,16 +724,17 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
     output = std::make_shared<AnalysisProfileList<double>>(m_doc.get(), useBehavior);
   }
 
+  const wxString kind = computation.agentNash ? wxT("agent Nash ") : wxString{};
   wxString count;
   switch (computation.target) {
   case NashEquilibriumTarget::One:
-    count = wxT("One equilibrium ");
+    count = wxT("One ") + kind + wxT("equilibrium ");
     break;
   case NashEquilibriumTarget::Some:
-    count = wxT("Some equilibria ");
+    count = wxT("Some ") + kind + wxT("equilibria ");
     break;
   case NashEquilibriumTarget::All:
-    count = wxT("All equilibria ");
+    count = wxT("All ") + kind + wxT("equilibria ");
     break;
   }
   const wxString representation =

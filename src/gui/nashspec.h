@@ -154,6 +154,8 @@ struct NashComputationSpec {
   NashEquilibriumTarget target;
   NashMethodSpec method;
   bool selectedByRecommendation{false};
+  /// Whether the computation solves for agent Nash rather than Nash equilibria.
+  bool agentNash{false};
 
   /// Build a function that runs this computation in-process on a worker
   /// thread, or std::nullopt if this method/representation combination
