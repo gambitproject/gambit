@@ -361,8 +361,8 @@ public:
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent,
                                      const std::shared_ptr<GameDocument> &p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
-  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition,
-             wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+  : wxDialog(p_parent, wxID_ANY, wxT("Computing equilibria"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc), m_output(p_command)
 {
   const int S = FromDIP(5);
