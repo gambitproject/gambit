@@ -23,8 +23,6 @@ import io
 import itertools
 import pathlib
 
-import cdd
-import cdd.gmp
 import cython
 import numpy as np
 
@@ -1015,8 +1013,9 @@ class Game:
             ``(is_degenerate, witness)``. When the game is degenerate,
             ``witness`` is ``(player, strategy)``, where ``player`` is 0 (row)
             or 1 (column) and ``strategy`` is a numpy array of `Rational`
-            probabilities: a mixed strategy of that player, with support size
-            k, against which the opponent has more than k pure best responses.
+            probabilities: a mixed strategy of that player against which the
+            opponent has more pure best responses than the size of the
+            strategy's support.
             When the game is nondegenerate, ``witness`` is None.
 
         Raises
@@ -1037,24 +1036,24 @@ class Game:
         Examples
         --------
         >>> import pygambit as gbt
-        >>> g = gbt.Game.from_arrays([[3, 3], [2, 5], [0, 6]],
-        ...                          [[3, 3], [2, 6], [3, 1]])
+        >>> g = gbt.StrategicGame.from_arrays([[3, 3], [2, 5], [0, 6]],
+        ...                                   [[3, 3], [2, 6], [3, 1]])
         >>> g.is_degenerate()
         True
 
-        >>> g = gbt.Game.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]])
+        >>> g = gbt.StrategicGame.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]])
         >>> g.is_degenerate()
         False
 
-        >>> g = gbt.Game.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]])
+        >>> g = gbt.StrategicGame.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]])
         >>> g.is_degenerate(certificate=True)
         (True, (0, array([Rational(1, 1), Rational(0, 1)], dtype=object)))
 
         A degenerate game in which no pure strategy has tied best responses;
         only a mixed strategy reveals it:
 
-        >>> g = gbt.Game.from_arrays([[1, 2, 3], [6, 5, 4]],
-        ...                          [[2, 0, 1], [0, 2, 1]])
+        >>> g = gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
+        ...                                   [[2, 0, 1], [0, 2, 1]])
         >>> g.is_degenerate(certificate=True)
         (True, (0, array([Rational(1, 2), Rational(1, 2)], dtype=object)))
         """
@@ -1062,6 +1061,9 @@ class Game:
             raise NotImplementedError(
                 "is_degenerate() is only implemented for two-player games"
             )
+
+        import cdd
+        import cdd.gmp
 
         M1, M2 = self.to_arrays()
         m, n = M1.shape
