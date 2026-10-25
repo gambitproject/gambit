@@ -66,6 +66,10 @@ jobs:
           brew install cddlib gmp
       - name: Build extension
         run: |
+          # pycddlib builds from source against Homebrew's (arm64-only) cddlib and GMP
+          export CFLAGS="-I$(brew --prefix)/include"
+          export LDFLAGS="-L$(brew --prefix)/lib"
+          export ARCHFLAGS="-arch arm64"
           python -m pip install -v ".[test,doc]"
           pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
       - name: Run tests
@@ -92,6 +96,10 @@ jobs:
           brew install cddlib gmp
       - name: Build extension
         run: |
+          # pycddlib builds from source against Homebrew's (arm64-only) cddlib and GMP
+          export CFLAGS="-I$(brew --prefix)/include"
+          export LDFLAGS="-L$(brew --prefix)/lib"
+          export ARCHFLAGS="-arch arm64"
           python -m pip install -v ".[test,doc]"
           pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
       - name: Run tests
