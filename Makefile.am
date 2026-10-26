@@ -464,6 +464,7 @@ gambit_LDADD_LIBS = libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
 
 if IS_WIN32
+gambit_LDFLAGS = $(AM_LDFLAGS) -mwindows
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 else
 gambit_LDADD = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS) $(WX_LIBS)
