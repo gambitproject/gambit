@@ -67,7 +67,7 @@ Vector<double> ProfileToPoint(const LogitQREMixedBehaviorProfile &p_profile)
 
 bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
 {
-  return (p_point.back() < 0.0 || PointToProfile(p_game, p_point).GetAgentMaxRegret() < p_regret);
+  return (p_point.back() < 0.0 || PointToProfile(p_game, p_point).GetMaxRegret() < p_regret);
 }
 
 //
@@ -409,6 +409,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
                    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent,
                    const CancelToken &p_cancel)
 {
+  Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
     return {{p_start}, {}};
   }
@@ -416,10 +417,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
-  if (scale != 0.0) {
-    p_regret *= scale;
-  }
+  p_regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_onEvent);
@@ -444,7 +442,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         callback.OnPerturbation(p_active, p_point);
       });
   const auto &profiles = callback.GetProfiles();
-  if (profiles.back().GetProfile().GetAgentMaxRegret() < p_regret) {
+  if (profiles.back().GetProfile().GetMaxRegret() < p_regret) {
     p_onEquilibrium(profiles.back().GetProfile());
   }
   return {profiles, callback.GetBifurcations(), {result.stats}};

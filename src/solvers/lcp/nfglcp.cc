@@ -273,10 +273,7 @@ std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
   Solution solution;
 
   const Matrix<T> A1 = Make_A1<T>(p_game);

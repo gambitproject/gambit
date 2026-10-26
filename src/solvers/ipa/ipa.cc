@@ -53,6 +53,7 @@ IPAStrategyResult IPAStrategySolve(const Game &p_game,
                                    StrategyCallbackType<double> p_onEquilibrium,
                                    IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
+  RequirePerfectRecall(p_game);
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (const auto &player : p_game->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
@@ -69,10 +70,7 @@ IPAStrategyResult IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
                                    StrategyCallbackType<double> p_onEquilibrium,
                                    IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
-  if (!p_pert.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_pert.GetGame());
 
   const Game game = p_pert.GetGame();
   const std::shared_ptr<gnmgame> A = BuildGame(game, false);
