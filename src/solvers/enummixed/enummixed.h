@@ -48,6 +48,7 @@ public:
 
   Game m_game;
   std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
+  bool success{true};
 
   /// Representation of the graph connecting the extreme equilibria
   ///@{
@@ -67,13 +68,21 @@ EnumMixedStrategySolveDetailed(const Game &p_game,
                                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                                const CancelToken &p_cancel = CancelToken());
 
+/// @brief The result of enumerating all extreme mixed-strategy Nash equilibria of a
+///        two-player game
+template <class T> struct EnumMixedStrategyResult {
+  std::list<MixedStrategyProfile<T>> equilibria;
+  bool success{true};
+};
+
 template <class T>
-std::list<MixedStrategyProfile<T>>
+EnumMixedStrategyResult<T>
 EnumMixedStrategySolve(const Game &p_game,
                        StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                        const CancelToken &p_cancel = CancelToken())
 {
-  return EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium, p_cancel)->m_extremeEquilibria;
+  const auto solution = EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium, p_cancel);
+  return {solution->m_extremeEquilibria, solution->success};
 }
 
 } // end namespace Gambit::Nash

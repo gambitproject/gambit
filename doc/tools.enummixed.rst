@@ -29,6 +29,17 @@ See the :ref:`algorithm description <enummixed>` for full details.
    each convex set, prefixed by convex-N , where N indexes the set. The
    set of all equilibria, then, is the union of these convex sets.
 
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed (and, with :option:`-c`, on each member of every
+   convex set reported).
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.

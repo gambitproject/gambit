@@ -44,7 +44,7 @@ class GamePlayers:
         return obj
 
     def __repr__(self) -> str:
-        return f"GamePlayers(game={Game.wrap(self.game)})"
+        return f"GamePlayers(game={Game._wrap(self.game)})"
 
     def __len__(self) -> int:
         """Returns the number of players in the game."""

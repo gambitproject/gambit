@@ -53,6 +53,10 @@ def test_execute_notebook(nb_path):
     if sys.platform == "win32" and "openspiel" in nb_path.name.lower():
         pytest.skip("OpenSpiel notebook requires OpenSpiel, which is not available on Windows")
 
+    # OpenSpiel has no Python 3.15 wheels yet, and building it from source is very slow
+    if sys.version_info >= (3, 15) and "openspiel" in nb_path.name.lower():
+        pytest.skip("OpenSpiel is not installed on Python 3.15 (no wheels available)")
+
     # GAMUT notebook requires Java and gamut.jar; outputs are pre-saved for docs builds
     if "gamut" in nb_path.name.lower():
         pytest.skip("GAMUT notebook requires Java and gamut.jar (see catalog documentation)")

@@ -33,6 +33,7 @@
 #include <wx/thread.h>
 #include <wx/grid.h>
 
+#include "games/gametree.h"
 #include "gamedoc.h"
 #include "solvers/logit/logit.h"
 
@@ -296,7 +297,11 @@ template <class Traits> class LogitThreadRunner final : public wxThread {
       Traits::Solve(
           m_game,
           [this](const LogitEvent<typename Traits::QREType> &p_event) {
-            PostPoint(std::get<LogitPathEvent<typename Traits::QREType>>(p_event).qre);
+            if (const auto *pathEvent =
+                    std::get_if<LogitPathEvent<typename Traits::QREType>>(&p_event)) {
+              PostPoint(pathEvent->qre);
+            }
+            // Bifurcation/perturbation events are not yet visualized in the GUI's logit plot.
           },
           m_cancel);
     }

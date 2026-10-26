@@ -4,7 +4,7 @@ import pygambit as gbt
 
 
 def test_make_outcome_attaches_to_all_given_nodes():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")),
@@ -19,7 +19,7 @@ def test_make_outcome_attaches_to_all_given_nodes():
 
 
 def test_make_outcome_accepts_selector():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(gbt.H.path("U"), {"Alice": 1, "Bob": -1}, "shared")
     assert game.get_outcome(gbt.H.path("U")) == "shared"
@@ -28,7 +28,7 @@ def test_make_outcome_accepts_selector():
 
 
 def test_make_outcome_accepts_selector_matching_several_nodes():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(gbt.H.plays, {"Alice": 1, "Bob": -1}, "shared")
     assert game.get_outcome(gbt.H.path("U")) == "shared"
@@ -39,7 +39,7 @@ def test_make_outcome_accepts_selector_matching_several_nodes():
 def test_make_outcome_accepts_grouped_selector_pooled():
     """A `GroupedSelector`'s groups are pooled together: every matched node
     receives the same outcome, regardless of grouping."""
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
         gbt.H.path(...).by(lambda h: h[0].action), {"Alice": 1, "Bob": -1}, "shared"
@@ -51,14 +51,14 @@ def test_make_outcome_accepts_grouped_selector_pooled():
 
 def test_make_outcome_error_location_not_a_selector():
     """A bare `History` tuple is no longer accepted for an extensive game."""
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     with pytest.raises(TypeError):
         game.make_outcome(("U",), {"Alice": 1}, "w")
 
 
 def test_make_outcome_attaches_at_contingencies():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome(
         [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
     )
@@ -69,7 +69,7 @@ def test_make_outcome_attaches_at_contingencies():
 
 
 def test_make_outcome_absorbs_fully_covered_outcome_and_reuses_label():
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     game.make_outcome(gbt.H.path("U"), {"Alice": 1}, "w")
     game.make_outcome(gbt.H.path(...), {"Alice": 2}, "w")
@@ -78,7 +78,7 @@ def test_make_outcome_absorbs_fully_covered_outcome_and_reuses_label():
 
 
 def test_make_outcome_label_of_partially_covered_outcome_refused():
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")), {"Alice": 1}, "w"
@@ -90,7 +90,7 @@ def test_make_outcome_label_of_partially_covered_outcome_refused():
 
 @pytest.mark.parametrize("bad_label", ["", "win"])
 def test_make_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str):
-    game = gbt.Game.new_tree(players=["A", "B"])
+    game = gbt.ExtensiveGame(players=["A", "B"])
     game.append_move(gbt.H.path(), "A", ["win", "lose"])
     game.make_outcome(gbt.H.path("win"), {"A": 1, "B": 2}, "win")
     with pytest.raises(ValueError):
@@ -99,7 +99,7 @@ def test_make_outcome_bad_label_raises_and_leaves_game_unchanged(bad_label: str)
 
 
 def test_make_outcome_incomplete_payoffs_raises():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     with pytest.raises(ValueError):
         game.make_outcome(gbt.H.path("U"), {"Alice": 1}, "w")
@@ -121,7 +121,7 @@ class _RepeatedEntryPayoffs:
 
 
 def test_make_outcome_payoffs_naming_player_twice_raises():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     payoffs = _RepeatedEntryPayoffs([("Alice", 1), ("Alice", 2), ("Bob", 0)])
     with pytest.raises(ValueError):
@@ -129,7 +129,7 @@ def test_make_outcome_payoffs_naming_player_twice_raises():
 
 
 def test_make_outcome_null_accepts_selector():
-    game = gbt.Game.new_tree(["Alice", "Bob"])
+    game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")),
@@ -143,14 +143,14 @@ def test_make_outcome_null_accepts_selector():
 
 def test_make_outcome_null_error_location_not_a_selector():
     """A bare `History` tuple is no longer accepted for an extensive game."""
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     with pytest.raises(TypeError):
         game.make_outcome_null(("U",))
 
 
 def test_make_outcome_null_resets_given_contingencies_to_null():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.StrategicGame([2, 2])
     game.make_outcome(
         [{"1": "1", "2": "1"}, {"1": "2", "2": "2"}], {"1": 2, "2": -2}, "diagonal"
     )
@@ -160,7 +160,7 @@ def test_make_outcome_null_resets_given_contingencies_to_null():
 
 
 def test_make_outcome_null_removes_fully_orphaned_outcome():
-    game = gbt.Game.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
+    game = gbt.StrategicGame.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
     outcome_count = len(game.get_outcomes())
     p1, p2 = game.players
     s1 = next(iter(game.get_strategies(p1)))
@@ -170,7 +170,7 @@ def test_make_outcome_null_removes_fully_orphaned_outcome():
 
 
 def test_make_outcome_null_keeps_partially_referenced_outcome():
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
     game.make_outcome(
         gbt.H.path(...).filter(lambda h: h[0].action in ("U", "M")), {"Alice": 1}, "shared"
@@ -182,7 +182,7 @@ def test_make_outcome_null_keeps_partially_referenced_outcome():
 
 
 def test_make_outcome_null_on_already_null_node_is_a_no_op():
-    game = gbt.Game.new_tree(["Alice"])
+    game = gbt.ExtensiveGame(["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["U", "D"])
     outcome_count = len(game.get_outcomes())
     game.make_outcome_null(gbt.H.path("U"))
@@ -191,10 +191,63 @@ def test_make_outcome_null_on_already_null_node_is_a_no_op():
 
 
 def test_outcome_relabel_duplicate_rejected_and_label_unchanged():
-    game = gbt.Game.new_tree(players=["A", "B"])
+    game = gbt.ExtensiveGame(players=["A", "B"])
     game.append_move(gbt.H.path(), "A", ["win", "lose"])
     game.make_outcome(gbt.H.path("win"), {"A": 1, "B": 2}, "win")
     game.make_outcome(gbt.H.path("lose"), {"A": 0, "B": 0}, "lose")
     with pytest.raises(ValueError):
         game.relabel_outcomes({"lose": "win"})
     assert set(game.get_outcomes()) == {"win", "lose"}
+
+
+def test_outcome_relabel_swap_keeps_labels_consistent():
+    """Swapping two outcomes' labels in one relabelling leaves each label naming the
+    other outcome, with both labels still in use."""
+    game = gbt.ExtensiveGame(players=["A", "B"])
+    game.append_move(gbt.H.path(), "A", ["x", "y"])
+    game.make_outcome(gbt.H.path("x"), {"A": 1, "B": 0}, "first")
+    game.make_outcome(gbt.H.path("y"), {"A": 2, "B": 0}, "second")
+    game.relabel_outcomes({"first": "second", "second": "first"})
+    assert game.get_outcome(gbt.H.path("x")) == "second"
+    assert game.get_outcome(gbt.H.path("y")) == "first"
+    assert game.get_outcome_payoffs("second")["A"] == 1
+    assert game.get_outcome_payoffs("first")["A"] == 2
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({"first": "second"})
+
+
+def test_outcome_label_freed_by_relabel_can_be_reused():
+    game = gbt.ExtensiveGame(players=["A"])
+    game.append_move(gbt.H.path(), "A", ["x", "y"])
+    game.make_outcome(gbt.H.path("x"), {"A": 1}, "old")
+    game.relabel_outcomes({"old": "new"})
+    game.make_outcome(gbt.H.path("y"), {"A": 2}, "old")
+    assert set(game.get_outcomes()) == {"old", "new"}
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({"old": "new"})
+
+
+def test_outcome_label_reused_on_absorption_refers_to_new_outcome():
+    """A label taken over from an absorbed outcome names the new outcome, and can then be
+    relabelled and freed like any other."""
+    game = gbt.ExtensiveGame(["Alice"])
+    game.append_move(gbt.H.path(), "Alice", ["U", "D"])
+    game.make_outcome(gbt.H.path("U"), {"Alice": 1}, "w")
+    game.make_outcome(gbt.H.path(...), {"Alice": 2}, "w")
+    game.relabel_outcomes({"w": "v"})
+    assert game.get_outcomes() == ["v"]
+    assert game.get_outcome_payoffs("v")["Alice"] == 2
+    game.make_outcome(gbt.H.path(...), {"Alice": 3}, "w")
+    assert game.get_outcomes() == ["w"]
+
+
+def test_outcome_labels_of_dense_strategic_game_are_indexed():
+    """Outcomes created in bulk with a strategic game have unique labels which can be
+    relabelled, and a duplicate is refused."""
+    game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[4, 3], [2, 1]])
+    labels = game.get_outcomes()
+    assert len(set(labels)) == len(labels) == 4
+    game.relabel_outcomes({labels[0]: "renamed"})
+    assert "renamed" in game.get_outcomes()
+    with pytest.raises(ValueError):
+        game.relabel_outcomes({labels[1]: "renamed"})

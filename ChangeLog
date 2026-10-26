@@ -1,8 +1,32 @@
 ## [17.0.0-beta.2] - unreleased
 
+### Added
+- The "Open existing game" button on the GUI's welcome screen now has a dropdown listing the most
+  recently opened games.  (#1108)
+- Details on bifurcations found and actions taken to resolve them (by perturbation) are now reported
+  by `nash.logit_solve` (and related functions)  (#186)
+- `-D`/`--detail` is now available on every `gambit-*` command-line tool that reports equilibria.
+- The command-line tools' `-D` report for behavior profiles now includes the probability
+  distribution over full histories (discussion #1094)
+
 ### Changed
+- Python 3.10 is no longer supported; pygambit now requires Python 3.11 or later, and
+  Python 3.15 is supported.
 - Refined the perturbation approach in `path.cc` (logit and hp solvers) to better handle paths on games
   with bifurcations. (#492)
+- Nash solver algorithms now return a method-specific `Result` class, rather than a generic class,
+  with potentially richer information about the performance of the algorithm.
+- The command-line tools' `-D` (detail) report for behavior profiles now identifies each node by its
+  `History` (the actions from the root, comma-joined).
+- The command-line tools' `-D` report now identifies each player by their own label, rather than by
+  their position among the game's players.
+- Substantially faster computation of the agent logit QRE correspondence for extensive games,
+  and of payoffs, beliefs and regrets of mixed behavior profiles on large game trees.  Path
+  following (logit and hp) also spends about half as long factorizing Jacobians.  (#1162)
+
+### Fixed
+- `maxregret` is now scaled by the range of feasible expected payoffs, so the tolerance no longer
+  depends on whether a game is represented as a tree or as a table.  (#1168)
 
 ## [17.0.0-beta.1] - 2026-09-08
 

@@ -21,7 +21,6 @@
 //
 
 #include "poly.h"
-#include "polypartial.imp"
 
 namespace Gambit {
 
@@ -331,7 +330,5 @@ template <class T> Polynomial<T> Polynomial<T>::Normalize() const
 }
 
 template class Polynomial<double>;
-template class PolynomialDerivatives<double>;
-template class PolynomialSystemDerivatives<double>;
 
 } // end namespace Gambit

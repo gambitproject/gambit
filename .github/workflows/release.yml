@@ -15,14 +15,18 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Extract changelog for this version
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="${REF_NAME}"
           python3 build_support/releases/extract_changelog.py "${VERSION#v}"
 
       - name: Determine prerelease status
         id: version
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="${REF_NAME}"
           if [[ "${VERSION#v}" =~ -(alpha|beta|rc) ]]; then
             echo "prerelease_flag=--prerelease" >> "$GITHUB_OUTPUT"
           else
@@ -32,8 +36,11 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
+          PRERELEASE_FLAG: ${{ steps.version.outputs.prerelease_flag }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "Gambit ${{ github.ref_name }}" \
+          # shellcheck disable=SC2086  # the flag must vanish when empty
+          gh release create "${REF_NAME}" \
+            --title "Gambit ${REF_NAME}" \
             --notes-file release_notes.md \
-            ${{ steps.version.outputs.prerelease_flag }}
+            ${PRERELEASE_FLAG}

@@ -109,7 +109,7 @@ class StrategySupportProfile:
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())
 
     def __repr__(self) -> str:
         return f"StrategySupportProfile(game={self.game})"

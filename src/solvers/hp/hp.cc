@@ -26,13 +26,12 @@
 #include "solvers/path/path.h"
 
 namespace Gambit::Nash {
-std::list<MixedStrategyProfile<double>>
-HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
-                StrategyCallbackType<double> p_onEquilibrium, HPEventCallbackType p_onEvent,
-                const CancelToken &p_cancel)
+HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
+                                 StrategyCallbackType<double> p_onEquilibrium,
+                                 HPEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
-  std::list<MixedStrategyProfile<double>> equilibria;
-
+  RequirePerfectRecall(p_prior.GetGame());
+  const double maxRegret = ScaleRegret(p_prior.GetGame(), p_maxRegret);
   HPEquationSystem system(p_prior);
   Vector<double> x = system.ComputeInitialPoint();
 
@@ -43,12 +42,12 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
   double last_t = 0.0;
   bool has_crossed = false;
 
-  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret,
+  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret, maxRegret,
                                 &system](const Vector<double> &point) {
     const double t = point[1];
 
     // Path tracer reaches maximum acceptable regret
-    if (system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret &&
+    if (system.ExtractEquilibrium(point).GetMaxRegret() <= maxRegret &&
         t >= t_target - p_maxRegret) {
       return true;
     }
@@ -76,9 +75,9 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
     return point[1] - t_target;
   };
 
-  auto polishing_termination_condition = [p_maxRegret,
+  auto polishing_termination_condition = [maxRegret,
                                           &system](const Vector<double> &point) -> bool {
-    return system.ExtractEquilibrium(point).GetMaxRegret() <= p_maxRegret;
+    return system.ExtractEquilibrium(point).GetMaxRegret() <= maxRegret;
   };
 
   const auto tracing_result = tracer.TracePath(
@@ -93,6 +92,10 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
       },
       criterion_function, NullCriterionBracketFunction, p_cancel);
 
+  if (!tracing_result.status) {
+    return {std::nullopt, false, HPTerminationReason::TraceFailed, {tracing_result.stats}};
+  }
+
   const PolishResult polishing_result = PolishPoint(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {
@@ -104,15 +107,15 @@ HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
         p_onEvent(HPStepEvent{.profile = profile, .t = point[1]});
       });
 
+  const std::vector<TracePathStats> stats{tracing_result.stats, polishing_result.stats};
   if (!polishing_result.status) {
-    return {};
+    return {std::nullopt, false, HPTerminationReason::PolishFailed, stats};
   }
   const MixedStrategyProfile<double> equilibrium = system.ExtractEquilibrium(x);
-  if (equilibrium.GetMaxRegret() > p_maxRegret) {
-    return {};
+  if (equilibrium.GetMaxRegret() > maxRegret) {
+    return {std::nullopt, false, HPTerminationReason::RegretTargetNotReached, stats};
   }
   p_onEquilibrium(equilibrium);
-  equilibria.push_back(equilibrium);
-  return equilibria;
+  return {equilibrium, true, HPTerminationReason::Converged, stats};
 }
 } // namespace Gambit::Nash

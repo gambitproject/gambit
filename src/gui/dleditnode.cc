@@ -26,6 +26,7 @@
 #endif // WX_PRECOMP
 #include <wx/richmsgdlg.h>
 #include "games.h"
+#include "games/gametree.h"
 #include "dleditnode.h"
 
 namespace Gambit::GUI {

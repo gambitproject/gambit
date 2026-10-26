@@ -21,6 +21,7 @@
 //
 
 #include "games.h"
+#include "gametree.h"
 
 namespace Gambit {
 

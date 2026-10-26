@@ -34,6 +34,7 @@ from .common import (
     handle_errors,
     load_game,
     render_profile_csv,
+    render_profile_detail,
     resolve_strategy_starts,
     version_option,
 )
@@ -81,6 +82,7 @@ _EXTRA_BANNER = ("Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Chris
     default=None,
     help="file containing perturbation vectors (mutually exclusive with -n)",
 )
+@click.option("-D", "--detail", is_flag=True, help="print detailed information about equilibria")
 @click.option("-q", "--quiet", is_flag=True, help="quiet mode (suppresses banner)")
 @click.option(
     "-V",
@@ -96,6 +98,7 @@ def main(
     n_vectors: int | None,
     seed: int | None,
     start_file: str | None,
+    detail: bool,
     quiet: bool,
     verbose: bool,
 ) -> None:
@@ -103,7 +106,10 @@ def main(
     perturbations = resolve_strategy_starts(game, n_vectors, seed, start_file)
 
     def render(profile, label: str = "NE") -> None:
-        click.echo(render_profile_csv(profile, label, decimals))
+        if detail:
+            click.echo(render_profile_detail(profile, decimals))
+        else:
+            click.echo(render_profile_csv(profile, label, decimals))
 
     def render_event(event) -> None:
         if not verbose:

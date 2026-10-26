@@ -8,23 +8,43 @@ on:
     - cron: '0 6 * * 4'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  macos-13:
-    runs-on: macos-14
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+  macos:
+    name: macOS DMG (wxWidgets 3.2)
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
-      - name: Install dependencies
+      - name: Find latest wxWidgets 3.2.x release
         run: |
-            brew install automake autoconf
-            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2
-            tar xjf wxWidgets-3.2.8.tar.bz2
-            cd wxWidgets-3.2.8
+            version=$(git ls-remote --tags --refs https://github.com/wxWidgets/wxWidgets 'v3.2.*' \
+              | sed 's|.*refs/tags/v||' | grep -E '^3\.2\.[0-9]+$' | sort -V | tail -1)
+            test -n "${version}"
+            echo "Using wxWidgets ${version}"
+            echo "WX_VERSION=${version}" >> "$GITHUB_ENV"
+      - name: Install dependencies
+        run: brew install automake autoconf
+      - name: Cache static wxWidgets build
+        id: wx-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/wx-static
+          key: wx-static-${{ runner.os }}-${{ runner.arch }}-${{ env.WX_VERSION }}
+      - name: Build static wxWidgets
+        if: steps.wx-cache.outputs.cache-hit != 'true'
+        run: |
+            curl -L -O "https://github.com/wxWidgets/wxWidgets/releases/download/v${WX_VERSION}/wxWidgets-${WX_VERSION}.tar.bz2"
+            tar xjf "wxWidgets-${WX_VERSION}.tar.bz2"
+            cd "wxWidgets-${WX_VERSION}"
             mkdir build-release
             cd build-release
-            ../configure --disable-shared --disable-sys-libs
-            make -j4
-            sudo make install
+            ../configure --prefix="$HOME/wx-static" --disable-shared --disable-sys-libs
+            make -j"$(sysctl -n hw.ncpu)"
+            make install
+      - name: Put wxWidgets on PATH
+        run: echo "$HOME/wx-static/bin" >> "$GITHUB_PATH"
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
@@ -35,7 +55,7 @@ jobs:
       - run: make dist
       - uses: actions/upload-artifact@v7
         with:
-          name: artifact-osx-14
+          name: artifact-osx
           path: "*.dmg"
       - uses: actions/upload-artifact@v7
         with:

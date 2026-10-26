@@ -1,0 +1,45 @@
+name: pygambit wheel smoke test
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows cp314
+            os: windows-latest
+            build: cp314-win_amd64
+          - name: Linux cp314
+            os: ubuntu-latest
+            build: cp314-manylinux_x86_64
+          - name: macOS cp314
+            os: macos-15
+            build: cp314-macosx_arm64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - name: Set up dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cibuildwheel
+      - name: Build and smoke-test wheel
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse/
+        env:
+          CIBW_BUILD: ${{ matrix.build }}

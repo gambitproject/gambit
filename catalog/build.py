@@ -462,7 +462,7 @@ def _game_stats(game: gbt.Game) -> dict:
     """Return a subset of *game*'s structural attributes, for catalog-browser filtering."""
     return {
         "n_players": len(game.players),
-        "is_tree": game.is_tree,
+        "is_tree": isinstance(game, gbt.ExtensiveGame),
         "is_const_sum": game.is_const_sum,
         "n_strategies": sum(len(game.get_strategies(p)) for p in game.players),
     }
@@ -534,7 +534,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
             "Update Gambit catalog documentation and build files. "
-            "Always regenerates catalog/doc/_table.rst from the current catalog. "
+            "Regenerates catalog/doc/_table.rst from the current catalog by default; "
+            "pass --skip-table to skip this (it requires a LaTeX toolchain via gtdraw). "
             "Run from the repo root or catalog/."
         )
     )

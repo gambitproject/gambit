@@ -472,7 +472,7 @@ class MixedStrategyProfile:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        if not self.game.is_tree:
+        if not isinstance(self.game, ExtensiveGame):
             raise UndefinedOperationError(
                 "Mixed behavior profiles are not defined for strategic games"
             )
@@ -602,6 +602,21 @@ class MixedStrategyProfile:
 class MixedStrategyProfileDouble(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfile[double]])
 
+    def _payoff_deriv_block_discrepancy(self, removed: list[tuple[str, str]]) -> float:
+        # Private, for testing: the largest discrepancy between the payoff derivative blocks of
+        # the players and the same quantities computed one at a time, on the support without
+        # the strategies `removed`, given as (player label, strategy label) pairs.
+        game: Game = self.game
+        cdef stdvector[c_GameStrategy] handles
+        for player, label in removed:
+            handles.push_back(game._resolve_strategy(player, label, "_payoff_deriv_block"))
+        return PayoffDerivBlockDiscrepancy(deref(self.profile), handles)
+
+    def _payoff_deriv_finite_difference_discrepancy(self, step: float) -> float:
+        # Private, for testing: the largest discrepancy between the partial derivatives of
+        # payoffs and central differences of the payoffs with the given step.
+        return PayoffDerivFiniteDifferenceDiscrepancy(deref(self.profile), step)
+
     @staticmethod
     @cython.cfunc
     def wrap(profile: shared_ptr[c_MixedStrategyProfile[float]]) -> MixedStrategyProfileDouble:
@@ -695,7 +710,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())
 
 
 @cython.cclass
@@ -803,4 +818,4 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     @property
     def _game(self) -> Game:
-        return Game.wrap(deref(self.profile).GetGame())
+        return Game._wrap(deref(self.profile).GetGame())

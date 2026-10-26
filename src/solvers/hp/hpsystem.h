@@ -51,6 +51,9 @@ private:
   std::vector<double> m_payoffs_against_prior;
   int m_star;
   mutable MixedStrategyProfile<double> m_current_sigma;
+  // Payoffs of one player's strategies and their derivatives, reused across players
+  mutable Vector<double> m_blockValues;
+  mutable Matrix<double> m_blockDerivs;
   std::vector<std::shared_ptr<HPEquation>> m_equations;
 
   void UpdateSigma(const Vector<double> &point) const;

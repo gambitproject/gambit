@@ -62,7 +62,13 @@ template <class Support> void NullEnumPolyEventCallback(const EnumPolyEvent<Supp
 /// for difficult-but-tractable ones while bounding the worst case.
 constexpr size_t kDefaultEnumPolyMaxRectangles = 20'000;
 
-std::list<MixedStrategyProfile<double>>
+/// @brief The result of enumerating Nash equilibria of a strategic game via enumpoly
+struct EnumPolyStrategyResult {
+  std::list<MixedStrategyProfile<double>> equilibria;
+  bool success{true};
+};
+
+EnumPolyStrategyResult
 EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
@@ -70,7 +76,13 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
                           NullEnumPolyEventCallback<StrategySupportProfile>,
                       const CancelToken &p_cancel = CancelToken());
 
-std::list<MixedBehaviorProfile<double>>
+/// @brief The result of enumerating Nash equilibria of an extensive game via enumpoly
+struct EnumPolyBehaviorResult {
+  std::list<MixedBehaviorProfile<double>> equilibria;
+  bool success{true};
+};
+
+EnumPolyBehaviorResult
 EnumPolyBehaviorSolve(const Game &, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
                       BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,

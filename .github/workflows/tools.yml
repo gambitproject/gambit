@@ -4,15 +4,22 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   linux:
+    name: Linux (wxWidgets 3.2)
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
-          sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
           sudo apt-get update
           sudo apt-get install -y automake autoconf libwxgtk3.2-dev
       - name: Configure build with autotools
@@ -33,12 +40,13 @@ jobs:
           sudo make install
 
   macos:
+    name: macOS (wxWidgets 3.3)
     runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
+        run: brew install automake autoconf wxwidgets@3.3
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
@@ -46,6 +54,7 @@ jobs:
       - run: make
 
   windows:
+    name: Windows (wxWidgets 3.2)
     runs-on: windows-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     defaults:
@@ -53,7 +62,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v7
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
       - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2

@@ -23,18 +23,32 @@
 #ifndef GAMBIT_SOLVERS_LP_LP_H
 #define GAMBIT_SOLVERS_LP_LP_H
 
+#include <optional>
+
 #include "solvers/nash.h"
 
 namespace Gambit::Nash {
 
+/// @brief The result of computing a Nash equilibrium of a strategic game via linear programming
+template <class T> struct LpStrategyResult {
+  std::optional<MixedStrategyProfile<T>> equilibrium;
+  bool success{true};
+};
+
 template <class T>
-std::list<MixedStrategyProfile<T>>
+LpStrategyResult<T>
 LpStrategySolve(const Game &p_game,
                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                 const CancelToken &p_cancel = CancelToken());
 
+/// @brief The result of computing a Nash equilibrium of an extensive game via linear programming
+template <class T> struct LpBehaviorResult {
+  std::optional<MixedBehaviorProfile<T>> equilibrium;
+  bool success{true};
+};
+
 template <class T>
-std::list<MixedBehaviorProfile<T>>
+LpBehaviorResult<T>
 LpBehaviorSolve(const Game &p_game,
                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
                 const CancelToken &p_cancel = CancelToken());

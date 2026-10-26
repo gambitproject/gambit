@@ -23,6 +23,7 @@
 
 from __future__ import annotations
 
+import csv
 import functools
 import io
 import pathlib
@@ -32,7 +33,6 @@ import click
 import numpy as np
 
 import pygambit as gbt
-from pygambit.gambit import _history_of
 
 _GAME_FORMATS = (
     ("NFG", gbt.read_nfg),
@@ -266,52 +266,60 @@ def render_support_csv(
 def render_profile_detail(
     profile: gbt.MixedStrategyProfile | gbt.MixedBehaviorProfile,
     decimals: int,
+    fixed: bool = True,
+    as_float: bool = False,
 ) -> str:
     """Render a strategy or behavior profile as a human-readable description,
     matching `MixedStrategyProfileDetailRenderer` and
-    `MixedBehaviorProfileDetailRenderer` in the C++ tools.
+    `MixedBehaviorProfileDetailRenderer` in the C++ tools.  See `format_value` for
+    the meaning of `fixed` and `as_float`.
     """
     if _is_behavior_profile(profile):
-        return _render_behavior_detail(profile, decimals)
-    return _render_strategy_detail(profile, decimals)
+        return _render_behavior_detail(profile, decimals, fixed, as_float)
+    return _render_strategy_detail(profile, decimals, fixed, as_float)
 
 
-def _name_or_number(node: gbt.Node) -> str:
-    # Gambit's Python API numbers nodes from 0; the C++ tools display the
-    # underlying (1-based) engine numbering. `Node._label`/`._number` are private
-    # (not part of the public API) but still Python-accessible, same as
-    # `Game._get_infosets` just below -- rendering needs the node's own label/engine
-    # number, which a History alone cannot provide.
-    return node._label if node._label else str(node._number() + 1)
+def _render_history(actions: tuple[str, ...]) -> str:
+    # Comma-joining alone is ambiguous: action labels may themselves contain commas
+    # (or quotes), so e.g. actions "A,B" then "C" and "A" then "B,C" would both render
+    # as "A,B,C". CSV quote-when-needed is a standard, already-correct fix for exactly
+    # this problem.
+    buf = io.StringIO()
+    csv.writer(buf, lineterminator="").writerow(actions)
+    return buf.getvalue() or "(root)"
 
 
-def _render_strategy_detail(profile: gbt.MixedStrategyProfile, decimals: int) -> str:
+def _render_strategy_detail(
+    profile: gbt.MixedStrategyProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
-    for number, player in enumerate(profile.game.players, start=1):
-        lines.append(f"Strategy profile for player {number}:")
+    for player in profile.game.players:
+        lines.append(f"Strategy profile for {player}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
         probs = profile[player]
         values = profile.strategy_values[player]
         for strategy in profile.game.get_strategies(player):
-            prob = format_value(probs[strategy], decimals)
-            value = format_value(values[strategy], decimals)
+            prob = format_value(probs[strategy], decimals, fixed, as_float)
+            value = format_value(values[strategy], decimals, fixed, as_float)
             lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
 
 
-def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) -> str:
+def _render_behavior_detail(
+    profile: gbt.MixedBehaviorProfile, decimals: int, fixed: bool = True, as_float: bool = False
+) -> str:
     lines = []
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
-    for number, player in enumerate(profile.game.players, start=1):
-        lines.append(f"Behavior profile for player {number}:")
+    for player in profile.game.players:
+        lines.append(f"Behavior profile for {player}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
-        # Numbered by position among the player's information sets: Infoset no
-        # longer exists as an object, so there is currently no infoset-level label
-        # to prefer over this, unlike _name_or_number's use for players/nodes/actions.
+        # Numbered by position among the player's information sets -- a compact key
+        # matched against the same numbering in the History table below, rather than
+        # a description; see that table's own comment.
         for infoset_number, (history, (_, mixed_action)) in enumerate(
             zip(profile.game.get_infosets(player), profile[player], strict=True), start=1
         ):
@@ -320,32 +328,52 @@ def _render_behavior_detail(profile: gbt.MixedBehaviorProfile, decimals: int) ->
             for action in profile.game.get_actions(selector):
                 prob = mixed_action[action]
                 value = values[action]
-                value_text = format_value(value, decimals) if value is not None else ""
+                value_text = (
+                    format_value(value, decimals, fixed, as_float) if value is not None else ""
+                )
                 lines.append(
                     f"{infoset_number:>7}    {action:>7}   "
-                    f"{format_value(prob, decimals):>11}   {value_text:>11}"
+                    f"{format_value(prob, decimals, fixed, as_float):>11}   {value_text:>11}"
                 )
         lines.append("")
-        lines.append("Infoset    Node       Belief        Prob")
-        lines.append("-------    -------    -----------   -----------")
-        # Uses the private, Node-returning `_get_infosets` (rather than the public
-        # History-returning `get_infosets`) because rendering needs each member's own
-        # `.label`/`.number` for display, which a History alone cannot provide;
-        # `Node.members` (still public) then gives the other members directly, and
-        # `_history_of` recovers the History each one needs to index
-        # `beliefs`/`realiz_probs` with.
-        for infoset_number, node in enumerate(profile.game._get_infosets(player), start=1):
-            for member in node.members:
-                node_name = _name_or_number(member)
-                member_history = _history_of(member)
-                belief = beliefs[member_history]
-                belief_text = format_value(belief, decimals) if belief is not None else ""
-                realiz_text = format_value(realiz_probs[member_history], decimals)
-                lines.append(
-                    f"{infoset_number:>7}    {node_name:>7}   "
-                    f"{belief_text:>11}   {realiz_text:>11}"
-                )
+        # One row per member of each of the player's information sets, identified by
+        # its History (see `_render_history`) rather than an engine-assigned node
+        # number: the `Infoset` column is still the same encounter-order index as the
+        # table above (a compact key for matching rows across the two tables, not a
+        # description -- the first member listed under each infoset number is always
+        # its canonical one, so its own History is already visible there for anyone
+        # who wants it).
+        rows = [
+            (infoset_number, _render_history(member.actions), beliefs[member],
+             realiz_probs[member])
+            for infoset_number, history in enumerate(profile.game.get_infosets(player), start=1)
+            for member in profile.game.get_members(gbt.H.path(*history.actions))
+        ]
+        history_width = max([len("History")] + [len(row[1]) for row in rows])
+        lines.append(f"Infoset    {'History':<{history_width}}    Belief        Prob")
+        lines.append(f"-------    {'-' * history_width}    -----------   -----------")
+        for infoset_number, history_text, belief, realiz in rows:
+            belief_text = (
+                format_value(belief, decimals, fixed, as_float) if belief is not None else ""
+            )
+            lines.append(
+                f"{infoset_number:>7}    {history_text:<{history_width}}    "
+                f"{belief_text:>11}   {format_value(realiz, decimals, fixed, as_float):>11}"
+            )
         lines.append("")
+    # The probability distribution over plays: not player-specific (unlike the tables
+    # above), so printed once for the whole profile rather than once per player.
+    plays = [
+        (_render_history(play.actions), realiz_probs[play])
+        for play in profile.game.get_histories(gbt.H.plays)
+    ]
+    play_width = max([len("Play")] + [len(text) for text, _ in plays])
+    lines.append("Probability distribution over full histories:")
+    lines.append(f"{'Play':<{play_width}}    Prob")
+    lines.append(f"{'-' * play_width}    -----------")
+    for play_text, prob in plays:
+        prob_text = format_value(prob, decimals, fixed, as_float)
+        lines.append(f"{play_text:<{play_width}}    {prob_text:>11}")
     return "\n".join(lines)
 
 

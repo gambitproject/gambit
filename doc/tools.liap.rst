@@ -16,7 +16,7 @@ See the :ref:`algorithm description <liap>` for full details.
    The criterion for accepting whether a local constrained minimizer
    of the Lyanunov function is an approximate Nash equilibrium is specified
    in terms of the maximum regret.  This regret is interpreted as a fraction
-   of the difference between the maximum and minimum payoffs in the game.
+   of the difference between the maximum and minimum expected payoffs in the game.
 
 .. versionchanged:: 16.5.0
 
@@ -46,6 +46,16 @@ See the :ref:`algorithm description <liap>` for full details.
 
    Express all output using decimal representations with the
    specified number of digits.
+
+.. cmdoption:: -D
+
+   .. versionadded:: 17.0.0
+
+   The default output format for computed equilibria is a
+   comma-separated list of strategy or action probabilities, suitable
+   for postprocessing by automated tools.  Specifying `-D` instead
+   causes the program to output greater detail on each equilibrium
+   profile computed.
 
 .. cmdoption:: -n
 
@@ -88,12 +98,16 @@ See the :ref:`algorithm description <liap>` for full details.
    output of equilibria (excluding the initial NE tag).
    Mutually exclusive with :option:`-n`.
 
-.. cmdoption:: -v
+.. cmdoption:: -V, --verbose
 
    Sets verbose mode. In verbose mode, initial points, as well as
    points at which the minimization fails at a constrained local minimum
    that is not a Nash equilibrium, are all output, in addition to any
    equilibria found.
+
+.. cmdoption:: -v, --version
+
+   Prints version information and exits.
 
 Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 

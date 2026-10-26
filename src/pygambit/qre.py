@@ -45,7 +45,7 @@ def logit_solve_branch(
         raise ValueError("logit_solve_branch(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve_branch(): max_accel argument must be at least 1.0")
-    if not game.is_tree or use_strategic:
+    if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
         return libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
     else:
         return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
@@ -58,7 +58,8 @@ def logit_solve_lambda(
         first_step: float = .03,
         max_accel: float = 1.1,
         event_callback: Callable[
-            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+            [libgbt.LogitPathEvent | libgbt.LogitBifurcationEvent | libgbt.LogitPerturbationEvent],
+            None,
         ] | None = None,
 ):
     """Compute the QRE(s) at the specified value(s) of `lam` along the principal branch.
@@ -67,7 +68,10 @@ def logit_solve_lambda(
     ----------
     event_callback : Callable, optional
         If specified, called with each point traced along the principal branch on the
-        way to each requested value of `lam`.
+        way to each requested value of `lam` (``LogitPathEvent``), the moment a
+        bifurcation is detected (``LogitBifurcationEvent``), and each time the tracer
+        switches a symmetry-breaking perturbation on or off while crossing one
+        (``LogitPerturbationEvent``).
 
         .. versionadded:: 17.0.0
     """
@@ -75,7 +79,7 @@ def logit_solve_lambda(
         raise ValueError("logit_solve_lambda(): first_step argument must be positive")
     if max_accel < 1.0:
         raise ValueError("logit_solve_lambda(): max_accel argument must be at least 1.0")
-    if not game.is_tree or use_strategic:
+    if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
         return libgbt._logit_strategy_lambda(
             game, lam, first_step, max_accel, event_callback
         )
@@ -296,7 +300,8 @@ def logit_estimate(
         first_step: float = .03,
         max_accel: float = 1.1,
         event_callback: Callable[
-            [libgbt.LogitQREMixedStrategyProfile | libgbt.LogitQREMixedBehaviorProfile], None
+            [libgbt.LogitPathEvent | libgbt.LogitBifurcationEvent | libgbt.LogitPerturbationEvent],
+            None,
         ] | None = None,
 ) -> LogitQREMixedStrategyFitResult | LogitQREMixedBehaviorFitResult:
     """Use maximum likelihood estimation to find the logit quantal
@@ -355,10 +360,13 @@ def logit_estimate(
 
            This argument only has an effect when use_empirical is False.
 
-    event_callback : Callable[[LogitQREMixedStrategyProfile | LogitQREMixedBehaviorProfile], \
-None], optional
+    event_callback : Callable[[LogitPathEvent | LogitBifurcationEvent | \
+LogitPerturbationEvent], None], optional
         If specified, called with each point traced along the principal branch on the
-        way to the best-fitting QRE.
+        way to the best-fitting QRE (``LogitPathEvent``), the moment a bifurcation is
+        detected (``LogitBifurcationEvent``), and each time the tracer switches a
+        symmetry-breaking perturbation on or off while crossing one
+        (``LogitPerturbationEvent``).
 
         .. note::
 

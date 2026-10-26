@@ -25,6 +25,7 @@
 
 #include "games.h"
 #include "gameexpl.h"
+#include "gametree.h"
 
 namespace Gambit {
 
@@ -61,10 +62,11 @@ Rational GameExplicitRep::GetMaxPayoff() const
 void GameExplicitRep::Write(std::ostream &p_stream,
                             const std::string &p_format /*="native"*/) const
 {
-  if (p_format == "efg" || (p_format == "native" && IsTree())) {
+  if (p_format == "efg" || (p_format == "native" && dynamic_cast<const GameTreeRep *>(this))) {
     WriteEfgFile(p_stream);
   }
-  else if (p_format == "nfg" || (p_format == "native" && !IsTree())) {
+  else if (p_format == "nfg" ||
+           (p_format == "native" && !dynamic_cast<const GameTreeRep *>(this))) {
     WriteNfgFile(p_stream);
   }
   else {

@@ -27,8 +27,10 @@
 #include <vector>
 
 #include "game.h"
+#include "gametree.h"
 #include "behavspt.h"
 #include "seqmixed.h"
+#include "treelayout.h"
 
 namespace Gambit {
 
@@ -43,37 +45,43 @@ protected:
   /// The index into the action profile for a action (-1 if not in support)
   std::map<GameAction, int> m_profileIndex;
   unsigned int m_gameversion;
+  /// The flattened structure of the game tree on which cached quantities are computed
+  std::shared_ptr<const TreeLayout> m_layout;
+  /// The index into the action profile for each action of the layout (-1 if not in support)
+  std::vector<int> m_layoutProfileIndex;
 
+  /// Cached quantities, stored in arrays aligned with the tree layout
   struct Cache {
     enum class Level { None, Realizations, Beliefs, NodeValues, ActionValues, Regrets };
 
     Level m_level{Level::None};
-    std::map<GameNode, T> m_realizProbs, m_beliefs;
-    std::map<GameInfoset, T> m_infosetProbs;
-    std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
-    std::map<GameInfoset, T> m_infosetValues;
-    std::map<GameAction, T> m_actionValues;
-    std::map<GameAction, T> m_regret;
+    std::vector<T> m_realizProbs, m_beliefs; ///< by node
+    std::vector<T> m_infosetProbs;           ///< by information set
+    std::vector<T> m_nodeValues;             ///< by node, one entry per player
+    std::vector<T> m_infosetValues;          ///< by information set
+    std::vector<T> m_actionValues, m_regret; ///< by action
 
-    Cache() = default;
-    Cache(const Cache &) = default;
-    Cache &operator=(const Cache &) = default;
-    ~Cache() = default;
-
-    void Clear()
-    {
-      m_level = Level::None;
-      m_realizProbs.clear();
-      m_infosetProbs.clear();
-      m_beliefs.clear();
-      m_nodeValues.clear();
-      m_infosetValues.clear();
-      m_actionValues.clear();
-      m_regret.clear();
-    }
+    void Clear() { m_level = Level::None; }
   };
 
   mutable Cache m_cache;
+
+  /// @name Locating game elements in the tree layout
+  //@{
+  /// Record the layout of the game and how its actions map into the profile
+  void InitializeLayout();
+  std::optional<size_t> NodeIndex(const GameNode &p_node) const;
+  std::optional<size_t> InfosetIndex(const GameInfoset &p_infoset) const;
+  std::optional<size_t> PlayerIndex(const GamePlayer &p_player) const;
+  /// The probability of the action leading to the node with index p_node
+  T LayoutActionProb(size_t p_node) const;
+  /// The probability of the action with layout index p_action
+  T LayoutProfileProb(size_t p_action) const
+  {
+    const int index = m_layoutProfileIndex[p_action];
+    return (index < 0) ? T(0) : m_probs[index];
+  }
+  //@}
 
   /// @name Auxiliary functions for cached computation of interesting values
   //@{
@@ -237,7 +245,8 @@ public:
   {
     CheckVersion();
     EnsureNodeValues();
-    return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][p_player];
+    const auto player = PlayerIndex(p_player);
+    return (player) ? m_cache.m_nodeValues[*player] : T(0);
   }
   T GetLiapValue() const;
   T GetAgentLiapValue() const;
@@ -283,14 +292,18 @@ public:
   T GetAgentMaxRegret() const;
 
   /// @brief Computes the maximum regret for any player in the profile
+  /// @throws UndefinedException if the game has any absent-minded information sets
   /// @sa GetAgentMaxRegret() const
   ///
   T GetMaxRegret() const;
 
-  T DiffActionValue(const GameAction &action, const GameAction &oppAction) const;
-  T DiffRealizProb(const GameNode &node, const GameAction &oppAction) const;
-  T DiffNodeValue(const GameNode &node, const GamePlayer &player,
-                  const GameAction &oppAction) const;
+  /// @brief Computes the derivatives of all action values with respect to the log
+  ///        probabilities of all actions
+  /// @details Assumes the game has perfect recall and the profile is totally mixed.
+  /// @param[out] p_derivs Resized to a square matrix indexed by position in the profile;
+  ///             entry (a, b) is the derivative of the value of action a with respect to the
+  ///             log probability of action b.
+  void DiffActionValues(Matrix<T> &p_derivs) const;
 
   MixedStrategyProfile<T> ToMixedProfile() const;
 

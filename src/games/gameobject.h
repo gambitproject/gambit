@@ -80,15 +80,17 @@ public:
   ///
   /// @exception NullException if the object holds a reference to a null element
   /// @exception InvalidObjectException if the element referred to has been deleted from its game
-  std::shared_ptr<T> operator->() const
+  T *operator->() const
   {
+    // The handle itself keeps the element alive, so there is no need to return a
+    // shared pointer (and pay for its reference counting) on every member access.
     if (!m_rep) {
       throw NullException();
     }
     if (!m_rep->IsValid()) {
       throw InvalidObjectException();
     }
-    return m_rep;
+    return m_rep.get();
   }
 
   /// Access the shared pointer to the object representing the game element

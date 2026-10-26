@@ -39,7 +39,7 @@ pygments_style = "sphinx"
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "external_links": [
-        {"name": "Gambit documentation", "url": "https://gambit.readthedocs.io/"},
+        {"name": "Gambit documentation", "url": "https://gambitproject.readthedocs.io/"},
         {"name": "GitHub", "url": "https://github.com/gambitproject/gambit"},
     ],
 }

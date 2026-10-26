@@ -26,6 +26,7 @@
 #endif // WX_PRECOMP
 
 #include "games.h"
+#include "games/gametree.h"
 
 #include "efgdisplay.h"
 #include "menuconst.h"

@@ -27,6 +27,7 @@
 #include <wx/dnd.h>
 
 #include "games.h"
+#include "games/gametree.h"
 
 #include "efgdisplay.h"
 #include "dlexcept.h"

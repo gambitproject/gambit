@@ -504,12 +504,9 @@ inline Integer find_lcd(const Vector<Rational> &vec)
 std::list<MixedStrategyProfile<Rational>>
 NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) const
 {
-  if (!p_start.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_start.GetGame());
   Rational d(Integer(1), find_lcd(p_start.GetProbVector()));
-  const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const Rational maxRegret = ScaleRegret(p_start.GetGame(), m_maxregret);
 
   MixedStrategyProfile<Rational> y(p_start);
   m_onEvent(SimpdivStartEvent{y});
@@ -518,7 +515,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
     d /= Rational(m_gridResize);
     const Rational regret = Simplex(y, d);
     m_onEvent(SimpdivRefinementEvent{y, d, regret});
-    if (regret <= m_maxregret * scale) {
+    if (regret <= maxRegret) {
       break;
     }
   }
@@ -532,6 +529,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
 std::list<MixedStrategyProfile<Rational>>
 NashSimpdivStrategySolver::Solve(const Game &p_game) const
 {
+  RequirePerfectRecall(p_game);
   return Solve(SimpdivDefaultStart(p_game));
 }
 
@@ -545,15 +543,17 @@ MixedStrategyProfile<Rational> SimpdivDefaultStart(const Game &p_game)
   return start;
 }
 
-std::list<MixedStrategyProfile<Rational>>
-SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
-                     int p_gridResize, int p_leashLength,
-                     StrategyCallbackType<Rational> p_onEquilibrium,
-                     SimpdivEventCallbackType p_onEvent, const CancelToken &p_cancel)
+SimpdivStrategyResult SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start,
+                                           const Rational &p_maxregret, int p_gridResize,
+                                           int p_leashLength,
+                                           StrategyCallbackType<Rational> p_onEquilibrium,
+                                           SimpdivEventCallbackType p_onEvent,
+                                           const CancelToken &p_cancel)
 {
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium,
-                                   p_onEvent, p_cancel)
-      .Solve(p_start);
+  const auto solutions = NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
+                                                   p_onEquilibrium, p_onEvent, p_cancel)
+                             .Solve(p_start);
+  return {solutions.back(), true};
 }
 
 } // end namespace Gambit::Nash

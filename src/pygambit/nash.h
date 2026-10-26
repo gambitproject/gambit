@@ -21,7 +21,6 @@
 //
 
 #include "solvers/enummixed/enummixed.h"
-#include "solvers/hp/hp.h"
 #include "solvers/logit/logit.h"
 #include "solvers/path/path.h"
 
@@ -29,7 +28,7 @@ using namespace std;
 using namespace Gambit;
 
 template <class T>
-std::pair<std::list<MixedStrategyProfile<T>>, std::list<std::list<MixedStrategyProfile<T>>>>
+std::pair<Nash::EnumMixedStrategyResult<T>, std::list<std::list<MixedStrategyProfile<T>>>>
 EnumMixedStrategySolveCliquesWrapper(
     const Game &p_game,
     Nash::StrategyCallbackType<T> p_onEquilibrium = Nash::NullStrategyCallback<T>)
@@ -39,30 +38,17 @@ EnumMixedStrategySolveCliquesWrapper(
   for (auto &clique : solution->GetCliques()) {
     cliques.emplace_back(clique.begin(), clique.end());
   }
-  return {solution->GetExtremeEquilibria(), cliques};
+  return {Nash::EnumMixedStrategyResult<T>{solution->GetExtremeEquilibria(), solution->success},
+          cliques};
 }
 
-std::list<MixedBehaviorProfile<double>>
-LogitBehaviorSolveWrapper(const Game &p_game, double p_regret, double p_firstStep,
-                          double p_maxAccel,
-                          LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
-                              NullLogitEventCallback<LogitQREMixedBehaviorProfile>)
-{
-  std::list<MixedBehaviorProfile<double>> ret;
-  ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
-                                   PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel,
-                                   Nash::NullBehaviorCallback<double>, p_onEvent)
-                    .back()
-                    .GetProfile());
-  return ret;
-}
-
-inline std::list<LogitQREMixedBehaviorProfile>
+inline std::pair<std::list<LogitQREMixedBehaviorProfile>, std::vector<TracePathStats>>
 LogitBehaviorPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  auto trace = LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret,
+                                  PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  return {std::move(trace.profiles), std::move(trace.stats)};
 }
 
 std::shared_ptr<LogitQREMixedBehaviorProfile>
@@ -76,59 +62,47 @@ LogitBehaviorEstimateWrapper(std::shared_ptr<MixedBehaviorProfile<double>> p_fre
                             p_stopAtLocal, p_firstStep, p_maxAccel, p_onEvent));
 }
 
-std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>
+std::pair<std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>, std::vector<TracePathStats>>
 LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
                              double p_firstStep, double p_maxAccel,
                              LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
                                  NullLogitEventCallback<LogitQREMixedBehaviorProfile>)
 {
   LogitQREMixedBehaviorProfile start(p_game);
-  std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> ret;
-  for (auto &qre :
-       LogitBehaviorSolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
-                                p_firstStep, p_maxAccel, p_onEvent)) {
-    ret.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
+  auto result =
+      LogitBehaviorSolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
+                               p_firstStep, p_maxAccel, p_onEvent);
+  std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> profiles;
+  for (auto &qre : result.profiles) {
+    profiles.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
   }
-  return ret;
+  return {std::move(profiles), std::move(result.stats)};
 }
 
-std::list<MixedStrategyProfile<double>>
-LogitStrategySolveWrapper(const Game &p_game, double p_regret, double p_firstStep,
-                          double p_maxAccel,
-                          LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
-                              NullLogitEventCallback<LogitQREMixedStrategyProfile>)
-{
-  std::list<MixedStrategyProfile<double>> ret;
-  ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
-                                   PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel,
-                                   Nash::NullStrategyCallback<double>, p_onEvent)
-                    .back()
-                    .GetProfile());
-  return ret;
-}
-
-inline std::list<LogitQREMixedStrategyProfile>
+inline std::pair<std::list<LogitQREMixedStrategyProfile>, std::vector<TracePathStats>>
 LogitStrategyPrincipalBranchWrapper(const Game &p_game, double p_regret, double p_firstStep,
                                     double p_maxAccel)
 {
-  return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
-                            PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  auto trace = LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret,
+                                  PathTracer::TraceDirection::Positive, p_firstStep, p_maxAccel);
+  return {std::move(trace.profiles), std::move(trace.stats)};
 }
 
-std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>
+std::pair<std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>, std::vector<TracePathStats>>
 LogitStrategyAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
                              double p_firstStep, double p_maxAccel,
                              LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
                                  NullLogitEventCallback<LogitQREMixedStrategyProfile>)
 {
   LogitQREMixedStrategyProfile start(p_game);
-  std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> ret;
-  for (auto &qre :
-       LogitStrategySolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
-                                p_firstStep, p_maxAccel, p_onEvent)) {
-    ret.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
+  auto result =
+      LogitStrategySolveLambda(start, p_targetLambda, PathTracer::TraceDirection::Positive,
+                               p_firstStep, p_maxAccel, p_onEvent);
+  std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> profiles;
+  for (auto &qre : result.profiles) {
+    profiles.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
   }
-  return ret;
+  return {std::move(profiles), std::move(result.stats)};
 }
 
 std::shared_ptr<LogitQREMixedStrategyProfile>
@@ -140,12 +114,4 @@ LogitStrategyEstimateWrapper(std::shared_ptr<MixedStrategyProfile<double>> p_fre
   return make_shared<LogitQREMixedStrategyProfile>(
       LogitStrategyEstimate(*p_frequencies, 1000000.0, PathTracer::TraceDirection::Positive,
                             p_stopAtLocal, p_firstStep, p_maxAccel, p_onEvent));
-}
-
-std::list<MixedStrategyProfile<double>>
-HPStrategySolveWrapper(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
-                       Nash::HPEventCallbackType p_onEvent = Nash::NullHPEventCallback)
-{
-  return Nash::HPStrategySolve(p_prior, p_maxRegret, Nash::NullStrategyCallback<double>,
-                               p_onEvent);
 }

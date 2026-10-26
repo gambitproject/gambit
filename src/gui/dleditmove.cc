@@ -35,6 +35,7 @@
 #include <set>
 
 #include "games.h"
+#include "games/gametree.h"
 #include "gamedoc.h"
 #include "dleditmove.h"
 #include "valnumber.h"

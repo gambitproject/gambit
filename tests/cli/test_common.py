@@ -12,12 +12,12 @@ from pygambit.cli import common
 class TestReadGame:
     def test_reads_nfg(self, nfg_matching_pennies_text):
         game = common.read_game(io.BytesIO(nfg_matching_pennies_text.encode()))
-        assert not game.is_tree
+        assert not isinstance(game, gbt.ExtensiveGame)
         assert len(game.players) == 2
 
     def test_reads_efg(self, efg_small_tree_text):
         game = common.read_game(io.BytesIO(efg_small_tree_text.encode()))
-        assert game.is_tree
+        assert isinstance(game, gbt.ExtensiveGame)
         assert len(game.players) == 2
 
     def test_reads_text_stream(self, nfg_matching_pennies_text):

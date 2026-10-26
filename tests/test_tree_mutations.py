@@ -497,7 +497,7 @@ def test_make_infoset_converts_chance_node():
 def test_make_infoset_requires_matching_action_labels(node_actions):
     """Nodes must have the same actions, with the same labels in the same order;
     a matching count is not sufficient."""
-    game = gbt.Game.new_tree(players=["1"])
+    game = gbt.ExtensiveGame(players=["1"])
     game.append_move(gbt.H.path(), "1", ["a", "b"])
     game.append_move(gbt.H.path("a"), "1", node_actions)
     with pytest.raises(ValueError):
@@ -514,9 +514,9 @@ def test_make_infoset_empty_nodes_raises():
 
 
 def test_make_infoset_strategic_game_raises():
-    """`make_infoset` is only defined for games with a tree representation."""
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    """`make_infoset` does not exist on a game with a strategic representation."""
+    game = gbt.StrategicGame([2, 2])
+    with pytest.raises(AttributeError):
         game.make_infoset(gbt.H.path(), "1")
 
 
@@ -598,8 +598,9 @@ def test_make_event_terminal_node_raises():
 
 
 def test_make_event_strategic_game_raises():
-    game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    """`make_event` does not exist on a game with a strategic representation."""
+    game = gbt.StrategicGame([2, 2])
+    with pytest.raises(AttributeError):
         game.make_event(gbt.H.path(), {"a": 1})
 
 
@@ -714,7 +715,7 @@ def test_make_infoset_split_creates_new_infoset():
 
 def test_make_infoset_across_different_source_players():
     """Nodes drawn from different players all land under the target player."""
-    game = gbt.Game.new_tree(players=["1", "2", "3"])
+    game = gbt.ExtensiveGame(players=["1", "2", "3"])
     game.append_move(gbt.H.path(), "1", ["a", "b"])
     game.append_move(gbt.H.path("a"), "2", ["a", "b"])   # player 2
     game.append_move(gbt.H.path("b"), "3", ["a", "b"])   # player 3
@@ -857,7 +858,7 @@ def test_set_move_actions_cannot_remove_the_only_action():
 def test_set_move_actions_reorder_carries_subtrees():
     """Reordering three actions as a cycle moves every action to a new position.
     Each action carries its whole subtree with it, at every member of the information set."""
-    game = gbt.Game.new_tree(players=["Alice", "Bob"])
+    game = gbt.ExtensiveGame(players=["Alice", "Bob"])
     game.append_move(gbt.H.path(), "Bob", ["x", "y"])
     game.append_move(gbt.H.path(...), "Alice", ["a", "b", "c"])
     game.append_move(
@@ -925,7 +926,7 @@ def test_set_move_actions_bad_labels_raise_and_leave_game_unchanged(bad_labels):
 def test_set_move_actions_absent_minded_drop_and_add():
     """Dropping an action whose subtree contains another member of the same information
     set deletes that member with the subtree."""
-    game = gbt.Game.new_tree(players=["Alice"])
+    game = gbt.ExtensiveGame(players=["Alice"])
     game.append_move(gbt.H.path(), "Alice", ["a", "b"])
     game.append_infoset(gbt.H.path("a"), gbt.H.path())
     game.set_move_actions(gbt.H.path(), ["b", "c"], drop=True)

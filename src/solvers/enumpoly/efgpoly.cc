@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "games/gametree.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "polysystem.h"
@@ -207,7 +208,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   catch (const SingularMatrixException &) {
     p_isSingular = true;
   }
-  catch (const std::domain_error &) {
+  catch (const RootOutsideRectangleException &) {
     p_isSingular = true;
   }
 
@@ -227,21 +228,15 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
 namespace Gambit::Nash {
 
-std::list<MixedBehaviorProfile<double>>
+EnumPolyBehaviorResult
 EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles, BehaviorCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
                       const CancelToken &p_cancel)
 {
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
-  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
-  if (scale != 0.0) {
-    p_maxregret *= scale;
-  }
+  p_maxregret = ScaleRegret(p_game, p_maxregret);
 
   std::list<MixedBehaviorProfile<double>> ret;
   PossibleNashBehaviorSupports possible_supports(p_game);
@@ -271,7 +266,7 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return ret;
+  return {ret, true};
 }
 
 } // namespace Gambit::Nash

@@ -126,8 +126,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   catch (const SingularMatrixException &) {
     is_singular = true;
   }
-  catch (const std::domain_error &) {
-    // std::cerr << "Assertion warning: " << e.what() << std::endl;
+  catch (const RootOutsideRectangleException &) {
     is_singular = true;
   }
 
@@ -141,21 +140,15 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   return solutions;
 }
 
-std::list<MixedStrategyProfile<double>>
+EnumPolyStrategyResult
 EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
                       size_t p_maxRectangles, StrategyCallbackType<double> p_onEquilibrium,
                       EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent,
                       const CancelToken &p_cancel)
 {
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
-  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
-  if (scale != 0.0) {
-    p_maxregret *= scale;
-  }
+  p_maxregret = ScaleRegret(p_game, p_maxregret);
 
   std::list<MixedStrategyProfile<double>> ret;
   PossibleNashStrategySupports possible_supports(p_game);
@@ -189,7 +182,7 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return ret;
+  return {ret, true};
 }
 
 } // namespace Gambit::Nash

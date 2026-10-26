@@ -35,6 +35,7 @@
 #include <wx/statline.h>
 
 #include "games.h"
+#include "games/gametree.h"
 
 #include "editlabel.h"
 #include "efgdisplay.h"

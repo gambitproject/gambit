@@ -61,10 +61,7 @@ public:
     return m_profile.at(p_player);
   }
   /// Assign the sequence to (its) player
-  void SetSequence(const GameSequence &p_sequence)
-  {
-    m_profile[p_sequence->GetPlayer()] = p_sequence;
-  }
+  void SetSequence(const GameSequence &p_sequence);
   //@}
 
   /// Returns the payoff to a player that arises when each player realises

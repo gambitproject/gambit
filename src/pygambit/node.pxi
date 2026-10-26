@@ -22,11 +22,9 @@
 
 Branch = collections.namedtuple("Branch", ["node", "label"])
 Branch.__doc__ = """The action labeled `label`, taken at `node`. Not part of the
-public API; internal return type of the private `Node._prior_action`/
-`._own_prior_action`, pending a `Game`/`History`-based design. `node` is the node
-at which the action was taken (not the node it leads to), so ``branch.node.actions``
-and, for a chance event, ``branch.node.action_probs[branch.label]`` are always
-well-defined.
+public API; internal return type of the private `Node._prior_action`, pending a
+`Game`/`History`-based design. `node` is the node at which the action was taken
+(not the node it leads to), so ``branch.node.actions`` is always well-defined.
 """
 
 
@@ -161,12 +159,6 @@ class Node:
     def _label(self, value: str) -> None:
         self.node.deref().SetLabel(value.encode("utf-8"))
 
-    def _number(self) -> int:
-        """The number of the node in its game, numbered starting with 0. Not part
-        of the public API; a node's position is otherwise only exposed via History.
-        """
-        return self.node.deref().GetNumber() - 1
-
     def _children(self) -> NodeChildren:
         """The set of children of this node. Not part of the public API; the public
         equivalent is a `Selector`'s `.path(..., ...)` wildcard step, e.g.
@@ -178,14 +170,14 @@ class Node:
         """The `Game` to which the node belongs. Not part of the public API; a
         `Node` is otherwise only obtained already scoped to a particular `Game`.
         """
-        return Game.wrap(self.node.deref().GetGame())
+        return Game._wrap(self.node.deref().GetGame())
 
     @cython.cfunc
     def _infoset_handle(self) -> c_GameInfoset:
         """The node's current information set or event, as a raw handle -- null if
         the node is currently terminal. Not part of the public API; the information
         set/event a node belongs to is otherwise only exposed piecemeal, via
-        `members`/`actions`/`action_probs` and the `Game`/`Selector`-based resolvers.
+        `members`/`actions` and the `Game`/`Selector`-based resolvers.
         """
         return self.node.deref().GetInfoset()
 
@@ -226,30 +218,6 @@ class Node:
         return [a.deref().GetLabel().decode("utf-8") for a in resolved.deref().GetActions()]
 
     @property
-    def action_probs(self) -> dict[str, decimal.Decimal | Rational]:
-        """The probability of each action at the node's current chance event, keyed
-        by label.
-
-        .. versionadded:: 17.0.0
-
-        Raises
-        ------
-        UndefinedOperationError
-            If the node does not currently belong to a chance event.
-        """
-        resolved: c_GameInfoset = self._infoset_handle()
-        if resolved == cython.cast(c_GameInfoset, NULL) or not resolved.deref().IsChanceInfoset():
-            raise UndefinedOperationError(
-                "action probabilities are only defined at events"
-            )
-        result: dict = {}
-        for a in resolved.deref().GetActions():
-            result[a.deref().GetLabel().decode("utf-8")] = _decode_number(
-                cython.cast(string, resolved.deref().GetActionProb(a))
-            )
-        return result
-
-    @property
     def player(self) -> str | None:
         """The label of the player associated with this node: the one who makes the
         decision, if this is a personal node, or the chance player, if this is an
@@ -283,21 +251,6 @@ class Node:
         if prior != cython.cast(c_GameAction, NULL):
             return Branch(self._parent(), prior.deref().GetLabel().decode("utf-8"))
         return None
-
-    def _own_prior_action(self) -> Branch | None:
-        """The last branch -- the node and the label of the action taken there -- at
-        which the node's owner acted before reaching this node, or None if the player
-        has not moved previously on the path to this node. Not part of the public
-        API, pending a `Game`/`History`-based design.
-        """
-        prior: c_GameAction = self.node.deref().GetOwnPriorAction()
-        if not (prior != cython.cast(c_GameAction, NULL)):
-            return None
-        label = prior.deref().GetLabel().decode("utf-8")
-        cur: c_GameNode = self.node
-        while cur.deref().GetPriorAction() != prior:
-            cur = cur.deref().GetParent()
-        return Branch(Node.wrap(cur.deref().GetParent()), label)
 
     @cython.cfunc
     def _is_terminal(self) -> cython.bint:
