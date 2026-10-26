@@ -135,8 +135,6 @@ public:
     : m_table(p_table), m_renderer(new PayoffCellRenderer(p_table)),
       m_editor(new RationalCellEditor())
   {
-    m_renderer->IncRef();
-    m_editor->IncRef();
   }
 
   ~PayoffTable() override
