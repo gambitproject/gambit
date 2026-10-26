@@ -76,7 +76,7 @@ Install build tools and dependencies
       the update instructions there (you will typically run ``pacman -Syu``
       and restart the MSYS2 terminal as instructed).
 
-   2. Open the "MSYS2 MinGW 64-bit" terminal (important: use the MinGW
+   2. Open the "MSYS2 UCRT64" terminal (important: use the UCRT64
       shell, not the plain MSYS shell).
 
    3. Install general build dependencies
@@ -87,17 +87,16 @@ Install build tools and dependencies
          pacman -Syu
 
          # install compiler toolchain, autotools and libtool
-         pacman -S --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-automake \
-         mingw-w64-x86_64-autoconf mingw-w64-x86_64-libtool mingw-w64-x86_64-make
+         pacman -S --needed mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-automake \
+         mingw-w64-ucrt-x86_64-autoconf mingw-w64-ucrt-x86_64-libtool mingw-w64-ucrt-x86_64-make
 
    4. Install GUI dependencies
 
       .. code-block:: bash
 
-         pacman -S --needed mingw-w64-x86_64-wxwidgets3.2
+         pacman -S --needed mingw-w64-ucrt-x86_64-wxwidgets3.2
 
-   .. note::
-      When building for a different target (32-bit) substitute the corresponding MinGW packages (``mingw-w64-i686-*``).
+
 
 
 .. _wxwidgets-versions:
@@ -115,7 +114,7 @@ but 3.3.x is not yet used for released binaries.
 Install CLI and GUI from source
 --------------------------------
 
-Navigate to the Gambit source directory (use the "MSYS2 MinGW 64-bit" terminal on Windows) and run:
+Navigate to the Gambit source directory (use the "MSYS2 UCRT64" terminal on Windows) and run:
 
 .. code-block:: bash
 

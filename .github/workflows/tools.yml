@@ -64,8 +64,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
-          install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2
+          msystem: UCRT64
+          install: mingw-w64-ucrt-x86_64-toolchain make automake autoconf
+      - run: pacman -S --noconfirm mingw-w64-ucrt-x86_64-wxwidgets3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
