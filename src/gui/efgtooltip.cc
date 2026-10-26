@@ -315,6 +315,10 @@ void OutcomeEditorPopup::LoadValues()
 
 void OutcomeEditorPopup::PositionPopup()
 {
+  if (!m_node) {
+    return;
+  }
+
   auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
@@ -488,6 +492,12 @@ wxString OutcomeEditorPopup::ValidatePayoffs()
 
 void OutcomeEditorPopup::UpdateValidation()
 {
+  // A focus-loss event delivered while the window is hiding on cancel arrives after OnDismiss()
+  // has cleared m_node, with nothing left to validate or position against.
+  if (!m_node) {
+    return;
+  }
+
   wxString message = ValidateLabel();
   const wxString payoffMessage = ValidatePayoffs(); // always run, to keep every field's
                                                     // highlighting current, not just the first
@@ -1025,6 +1035,10 @@ void AppendMovePopup::OnFieldKeyDown(wxKeyEvent &p_event, wxTextCtrl *p_ctrl)
 
 void AppendMovePopup::PositionPopup()
 {
+  if (!m_node) {
+    return;
+  }
+
   auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
@@ -1218,6 +1232,11 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
 
 void AppendMovePopup::UpdateValidation()
 {
+  // See OutcomeEditorPopup::UpdateValidation().
+  if (!m_node) {
+    return;
+  }
+
   wxString message = ValidateLabels();
   if (m_isChance) {
     std::vector<Number> probs;

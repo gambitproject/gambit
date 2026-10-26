@@ -50,6 +50,7 @@ class Application final : public wxApp {
   wxTimer m_splashDismissTimer;
 
   bool OnInit() override;
+  bool OnExceptionInMainLoop() override;
   void DismissSplash();
   void OnSplashDismissTimer(wxTimerEvent &) { DismissSplash(); }
   //! Drop `p_filename` from the recently-used list; returns whether it was there.
