@@ -695,6 +695,8 @@ inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
 }
 inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this(); }
 
+struct TreeSequenceLayout;
+
 class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
@@ -730,6 +732,9 @@ protected:
   mutable std::mutex m_layoutMutex;
   mutable std::shared_ptr<const TreeLayout> m_layout;
   mutable unsigned int m_layoutVersion{0};
+  mutable std::mutex m_sequenceLayoutMutex;
+  mutable std::shared_ptr<const TreeSequenceLayout> m_sequenceLayout;
+  mutable unsigned int m_sequenceLayoutVersion{0};
 
   /// @name Private auxiliary functions
   //@{
@@ -789,6 +794,7 @@ public:
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
   std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const override;
   std::shared_ptr<const TreeLayout> GetTreeLayout() const override;
+  std::shared_ptr<const TreeSequenceLayout> GetSequenceLayout() const;
   std::vector<GameSubgame> GetSubgames() const override;
   GameSubgame GetMinimalSubgame(const GameInfoset &) const override;
   //@}
@@ -889,8 +895,6 @@ private:
                     const std::vector<Number> &);
 };
 
-struct TreeSequenceLayout;
-
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 public:
   explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
@@ -904,12 +908,13 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const override;
   void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 
 private:
   mutable std::shared_ptr<MixedBehaviorProfile<T>> m_mixedBehavior;
-  mutable std::shared_ptr<const TreeSequenceLayout> m_sequences;
 
+  std::vector<std::vector<T>> GetSequenceProbs(const TreeSequenceLayout &) const;
   void MakeBehavior() const;
   void OnProfileChanged() const override;
 };
