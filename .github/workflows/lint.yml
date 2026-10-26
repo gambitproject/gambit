@@ -74,6 +74,7 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install pygambit (editable, picks up catalog/games directly)
         run: |
+          sudo apt-get update && sudo apt-get install -y libcdd-dev libgmp-dev
           python -m pip install -v -e ".[doc]"
           pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
       - name: Regenerate catalog/catalog.am
