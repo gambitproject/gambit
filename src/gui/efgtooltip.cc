@@ -263,7 +263,12 @@ void OutcomeEditorPopup::BuildControls()
   hintText->Wrap(FromDIP(260));
   outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
 
-  m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
+  // wxST_NO_AUTORESIZE: SetLabel() on MSW would otherwise measure the text immediately through a
+  // wxClientDC, which on a hidden control inside a not-yet-shown dialog hits a wx assertion
+  // (textmeasure.cpp, "Must not be used with non-native wxDCs"). Sizing is left to the layout
+  // pass instead (see InvalidateBestSize() at the SetLabel call sites).
+  m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString, wxDefaultPosition,
+                                 wxDefaultSize, wxST_NO_AUTORESIZE);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
@@ -278,6 +283,9 @@ void OutcomeEditorPopup::BuildControls()
 
 void OutcomeEditorPopup::LoadValues()
 {
+  // ChangeValue() rather than SetValue(): loading must not fire wxEVT_TEXT, or UpdateValidation()
+  // runs against a half-loaded form (label set, payoffs still empty) and reports a spurious
+  // error. BeginEdit() validates once, after everything is loaded.
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
   if (!outcome || outcome->IsNull()) {
@@ -285,15 +293,15 @@ void OutcomeEditorPopup::LoadValues()
     // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
     // opens already showing that as an error the user has to notice and fix before they can
     // accept anything else.
-    m_labelCtrl->SetValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
+    m_labelCtrl->ChangeValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
     for (auto &row : m_payoffRows) {
       *row.payoffValue = wxT("0");
-      row.payoffCtrl->SetValue(*row.payoffValue);
+      row.payoffCtrl->ChangeValue(*row.payoffValue);
     }
     return;
   }
 
-  m_labelCtrl->SetValue(wxString::FromUTF8(outcome->GetLabel()));
+  m_labelCtrl->ChangeValue(wxString::FromUTF8(outcome->GetLabel()));
 
   const Game game = m_doc->GetGame();
 
@@ -306,7 +314,7 @@ void OutcomeEditorPopup::LoadValues()
     // this dialog actually intends to display rather than a stale one from construction or the
     // previous node edited.
     *row.payoffValue = wxString(payoff.c_str(), *wxConvCurrent);
-    row.payoffCtrl->SetValue(*row.payoffValue);
+    row.payoffCtrl->ChangeValue(*row.payoffValue);
   }
 }
 
@@ -497,6 +505,7 @@ void OutcomeEditorPopup::UpdateValidation()
   else {
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
+    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout below must re-measure
     m_errorText->Show();
     m_contentPanel->Layout();
   }
@@ -560,6 +569,7 @@ void OutcomeEditorPopup::ShowValidationFailure(const wxString &p_message, wxText
   if (m_errorText) {
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
+    m_errorText->InvalidateBestSize();
     m_errorText->Show();
   }
 
@@ -842,7 +852,9 @@ void AppendMovePopup::BuildControls()
   m_hintText->SetFont(hintFont);
   outerSizer->Add(m_hintText, 0, wxALL, FromDIP(10));
 
-  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
+  // wxST_NO_AUTORESIZE for the same reason as OutcomeEditorPopup's error text.
+  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                                 wxDefaultSize, wxST_NO_AUTORESIZE);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
@@ -1229,6 +1241,7 @@ void AppendMovePopup::UpdateValidation()
   else {
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
+    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
     m_errorText->Show();
     m_contentPanel->Layout();
   }
@@ -1306,6 +1319,7 @@ void AppendMovePopup::ShowValidationFailure(const wxString &p_message, wxTextCtr
   if (m_errorText) {
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
+    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
     m_errorText->Show();
   }
 
