@@ -32,6 +32,7 @@
 #include "games.h"
 
 #include "app.h"
+#include "dlexcept.h"
 #include "gameframe.h"
 #include "welcome.h"
 
@@ -226,6 +227,27 @@ std::vector<wxString> Application::GetRecentFiles() const
     files.push_back(m_fileHistory.GetHistoryFile(i));
   }
   return files;
+}
+
+// Reached when an exception escapes an event handler. The wx default is a bare Abort/Retry/Ignore
+// box that says nothing about what was thrown; report the message instead and carry on, as
+// "Ignore" would.
+bool Application::OnExceptionInMainLoop()
+{
+  std::string message;
+  try {
+    throw;
+  }
+  catch (const std::exception &ex) {
+    message = ex.what();
+  }
+  catch (...) {
+    message = "An unknown exception was thrown.";
+  }
+  ExceptionDialog dialog(GetTopWindow(), message);
+  dialog.SetExtendedMessage(_("The operation was abandoned. Gambit will continue running."));
+  dialog.ShowModal();
+  return true;
 }
 
 bool Application::ForgetRecentFile(const wxString &p_filename)

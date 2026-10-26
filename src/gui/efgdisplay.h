@@ -76,11 +76,12 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   GameNode m_dragOverNode;
   bool m_dragOverValid{false};
 
-  // Constructs m_outcomeEditor/m_appendMoveEditor/m_nodeInfoPopup (efgtooltip.cc) and installs
-  // the tree drop target (efgdragdrop.cc), respectively. Called from the constructor body --
-  // rather than its initializer list -- since OutcomeEditorPopup/AppendMovePopup/NodeInfoPopup/
-  // TreeDropTarget are only forward-declared here; InitPopups() must run before OnUpdate(),
-  // which dereferences m_nodeInfoPopup via DismissNodeInfo().
+  // Constructs m_nodeInfoPopup (efgtooltip.cc) and installs the tree drop target
+  // (efgdragdrop.cc), respectively. Called from the constructor body -- rather than its
+  // initializer list -- since NodeInfoPopup/TreeDropTarget are only forward-declared here;
+  // InitPopups() must run before OnUpdate(), which dereferences m_nodeInfoPopup via
+  // DismissNodeInfo(). m_outcomeEditor and m_appendMoveEditor are created lazily, on first use
+  // (see InitPopups()).
   void InitPopups();
   void InitDropTarget();
 
