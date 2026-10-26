@@ -36,8 +36,20 @@
 
 namespace Gambit::GUI {
 
-std::optional<SolverFunction> EnumPureNashSpec::MakeSolver(NashRepresentation) const
+std::optional<SolverFunction>
+EnumPureNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
+  if (p_representation == NashRepresentation::Behavior) {
+    return [](const Game &p_game, const ProfileFoundCallback &p_callback,
+              const CancelToken &p_cancel) {
+      Nash::EnumPureAgentSolve(
+          p_game,
+          [&p_callback](const MixedBehaviorProfile<Rational> &p) {
+            p_callback(ComputedProfile(p));
+          },
+          p_cancel);
+    };
+  }
   return [](const Game &p_game, const ProfileFoundCallback &p_callback,
             const CancelToken &p_cancel) {
     Nash::EnumPureStrategySolve(
@@ -171,9 +183,23 @@ std::optional<SolverFunction> LCPNashSpec::MakeSolver(NashRepresentation p_repre
   };
 }
 
-std::optional<SolverFunction> LiapNashSpec::MakeSolver(NashRepresentation) const
+std::optional<SolverFunction> LiapNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   const LiapNashSpec spec = *this;
+  if (p_representation == NashRepresentation::Behavior) {
+    return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
+                  const CancelToken &p_cancel) {
+      for (const auto &start : NewRandomBehaviorProfiles(p_game, spec.startingPoints)) {
+        p_cancel.Check();
+        Nash::LiapAgentSolve(
+            start, spec.maxRegret, spec.maxIterations,
+            [&p_callback](const MixedBehaviorProfile<double> &p) {
+              p_callback(ComputedProfile(p));
+            },
+            Nash::NullLiapEventCallback<MixedBehaviorProfile<double>>, p_cancel);
+      }
+    };
+  }
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
                 const CancelToken &p_cancel) {
     for (const auto &start : NewRandomStrategyProfiles(p_game, spec.startingPoints)) {

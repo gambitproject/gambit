@@ -29,6 +29,7 @@
 #include "games/stratspt.h"
 #include "style.h"
 #include "analysis.h"
+#include "nashvariants.h"
 
 namespace Gambit::GUI {
 
@@ -229,6 +230,7 @@ class GameDocument {
   bool m_gameModified, m_workspaceModified;
 
   AnalysisWorkspace m_workspace;
+  NashChoice m_nashChoice;
 
   std::list<std::string> m_undoList, m_redoList;
 
@@ -276,6 +278,10 @@ public:
   void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
 
   const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
+
+  /// The last choices made in the equilibrium dialog; held for the session only.
+  const NashChoice &GetNashChoice() const { return m_nashChoice; }
+  void SetNashChoice(const NashChoice &p_choice) { m_nashChoice = p_choice; }
 
   //!
   //! @name Undo/redo
