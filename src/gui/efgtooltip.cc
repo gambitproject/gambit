@@ -263,12 +263,7 @@ void OutcomeEditorPopup::BuildControls()
   hintText->Wrap(FromDIP(260));
   outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
 
-  // wxST_NO_AUTORESIZE: SetLabel() on MSW would otherwise measure the text immediately through a
-  // wxClientDC, which on a hidden control inside a not-yet-shown dialog hits a wx assertion
-  // (textmeasure.cpp, "Must not be used with non-native wxDCs"). Sizing is left to the layout
-  // pass instead (see InvalidateBestSize() at the SetLabel call sites).
-  m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString, wxDefaultPosition,
-                                 wxDefaultSize, wxST_NO_AUTORESIZE);
+  m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
@@ -503,10 +498,9 @@ void OutcomeEditorPopup::UpdateValidation()
     ClearValidationFailure();
   }
   else {
-    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
-    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout below must re-measure
+    m_errorText->Show();
     m_contentPanel->Layout();
   }
   Fit();
@@ -567,10 +561,9 @@ void OutcomeEditorPopup::ShowValidationFailure(const wxString &p_message, wxText
   wxBell();
 
   if (m_errorText) {
-    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
-    m_errorText->InvalidateBestSize();
+    m_errorText->Show();
   }
 
   if (m_contentPanel) {
@@ -852,9 +845,7 @@ void AppendMovePopup::BuildControls()
   m_hintText->SetFont(hintFont);
   outerSizer->Add(m_hintText, 0, wxALL, FromDIP(10));
 
-  // wxST_NO_AUTORESIZE for the same reason as OutcomeEditorPopup's error text.
-  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                                 wxDefaultSize, wxST_NO_AUTORESIZE);
+  m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
   m_errorText->SetForegroundColour(*wxRED);
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
@@ -1239,10 +1230,9 @@ void AppendMovePopup::UpdateValidation()
     ClearValidationFailure();
   }
   else {
-    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
-    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
+    m_errorText->Show();
     m_contentPanel->Layout();
   }
   Fit();
@@ -1317,10 +1307,9 @@ void AppendMovePopup::ShowValidationFailure(const wxString &p_message, wxTextCtr
   wxBell();
 
   if (m_errorText) {
-    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
-    m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
+    m_errorText->Show();
   }
 
   if (m_contentPanel) {
@@ -1547,33 +1536,45 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
 
 void EfgDisplay::InitPopups()
 {
-  m_outcomeEditor = new OutcomeEditorPopup(this, m_doc);
-  m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  // m_outcomeEditor and m_appendMoveEditor are wxDialogs, created on first use rather than here:
+  // on MSW a dialog's native owner is chosen at creation, and when this EfgDisplay's frame is not
+  // yet shown (as it isn't during GameFrame's constructor) wx falls back to whichever window is
+  // active -- typically the welcome frame, which is destroyed straight after, taking the dialogs'
+  // native windows with it.
   m_nodeInfoPopup = new NodeInfoPopup(this, m_doc);
 }
 
 void EfgDisplay::PostPendingChanges()
 {
-  if (m_outcomeEditor->IsShown()) {
+  if (m_outcomeEditor && m_outcomeEditor->IsShown()) {
     m_outcomeEditor->Commit();
   }
-  if (m_appendMoveEditor->IsShown()) {
+  if (m_appendMoveEditor && m_appendMoveEditor->IsShown()) {
     m_appendMoveEditor->Commit();
   }
 }
 
 void EfgDisplay::BeginEditOutcome(const GameNode &p_node, int p_initialPlayer)
 {
+  if (!m_outcomeEditor) {
+    m_outcomeEditor = new OutcomeEditorPopup(this, m_doc);
+  }
   m_outcomeEditor->BeginEdit(p_node, p_initialPlayer);
 }
 
 void EfgDisplay::BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player)
 {
+  if (!m_appendMoveEditor) {
+    m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  }
   m_appendMoveEditor->BeginAppend(p_node, p_player);
 }
 
 void EfgDisplay::BeginInsertMove(const GameNode &p_node, const GamePlayer &p_player)
 {
+  if (!m_appendMoveEditor) {
+    m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  }
   m_appendMoveEditor->BeginInsert(p_node, p_player);
 }
 
