@@ -23,17 +23,45 @@
 #ifndef GAMBIT_GUI_DLNASH_H
 #define GAMBIT_GUI_DLNASH_H
 
+#include <optional>
+#include <vector>
+
+#include <wx/collpane.h>
+#include <wx/listctrl.h>
+#include <wx/radiobut.h>
+
 #include "gamedoc.h"
+#include "nashvariants.h"
 
 namespace Gambit::GUI {
 class NashChoiceDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
-  wxChoice *m_countChoice, *m_methodChoice, *m_repChoice;
+  wxRadioButton *m_goalButtons[3];
+  wxStaticText *m_goalNote;
+  wxStaticText *m_warning;
+  wxCollapsiblePane *m_details;
+  wxFlexGridSizer *m_detailsGrid;
+  wxListCtrl *m_list;
+  std::vector<const NashVariant *> m_variants;
+  std::vector<const NashVariant *> m_rows;
+  const NashVariant *m_userChoice{nullptr};
+  int m_sortColumn{-1};
+  bool m_sortAscending{true};
+  bool m_refreshing{false};
+  wxString m_tip;
 
-  // Event handlers
-  void OnCount(wxCommandEvent &);
-  void OnMethod(wxCommandEvent &);
-  void UpdateRepresentationChoice();
+  void OnGoal(wxCommandEvent &);
+  void OnItemSelected(wxListEvent &);
+  void OnColumnClick(wxListEvent &);
+  void OnListMotion(wxWindow *, wxMouseEvent &);
+  void RefreshList();
+  void UpdateRecommendation();
+  void SelectRow(const NashVariant &);
+  void UpdateDetail();
+
+  NashGoal GetGoal() const;
+  void SetGoal(NashGoal);
+  const NashVariant &GetSelectedVariant() const;
 
   NashComputationSpec GetComputation() const;
 
@@ -43,6 +71,9 @@ public:
   std::shared_ptr<AnalysisOutput> GetCommand() const;
 
   bool UseStrategic() const;
+
+  /// The goal and explicitly picked variant, for the document to remember.
+  NashChoice GetChoice() const { return {GetGoal(), m_userChoice}; }
 };
 } // namespace Gambit::GUI
 
