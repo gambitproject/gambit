@@ -92,15 +92,6 @@ public:
   explicit RowPlayerTable(TableWidget *p_table)
     : m_table(p_table), m_renderer(new RowHeaderCellRenderer(p_table))
   {
-    // Freshly-constructed wxGridCellWorker-derived objects start unreferenced;
-    // this is our own table's stake, matched by DecRef() in the destructor.
-    // Each SetRenderer() call below additionally consumes one reference per
-    // call (that's the ownership contract of that setter), so GetAttr() takes
-    // a fresh IncRef() immediately before each one -- the instance itself is
-    // reused across all cells and all calls, which is required: wxGrid
-    // expects the *same* renderer object identity back on repeated queries
-    // for a given cell.
-    m_renderer->IncRef();
   }
 
   ~RowPlayerTable() override { m_renderer->DecRef(); }
@@ -638,7 +629,6 @@ public:
   explicit ColPlayerTable(TableWidget *p_table)
     : m_table(p_table), m_renderer(new ColHeaderCellRenderer(p_table))
   {
-    m_renderer->IncRef();
   }
 
   ~ColPlayerTable() override { m_renderer->DecRef(); }
