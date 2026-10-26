@@ -1,3 +1,4 @@
+import time
 import typing
 from itertools import product
 
@@ -878,7 +879,85 @@ def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
 )
 def test_max_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    assert profile.max_regret() == profile.as_strategy().max_regret()
+    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+
+
+def _assert_regret_equal(actual, expected, rational_flag: bool) -> None:
+    if rational_flag:
+        assert actual == expected
+    else:
+        assert actual == pytest.approx(expected, abs=1e-12)
+
+
+def _skewed_behavior_profile(game: gbt.Game, rational_flag: bool) -> gbt.MixedBehaviorProfile:
+    """A fully mixed profile with distinct, unequal probabilities at every information set."""
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    for k, history in enumerate(games.all_infosets(game)):
+        selector = gbt.H.path(*history.actions)
+        labels = list(game.get_actions(selector))
+        weights = [(j + k) % 3 + 1 for j in range(len(labels))]
+        total = sum(weights)
+        profile[selector] = {
+            label: gbt.Rational(weight, total) if rational_flag else weight / total
+            for label, weight in zip(labels, weights, strict=True)
+        }
+    return profile
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "game",
+    [
+        games.read_from_file("mixed_behavior_game.efg"),
+        games.create_stripped_down_poker_efg(),
+        games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+        games.create_kuhn_poker_efg(),
+        games.create_kuhn_poker_efg(nonterm_outcomes=True),
+        games.read_from_file("3_player.efg"),
+        games.read_from_file("3_player_with_nonterm_outcomes.efg"),
+        games.read_from_file("2_player_chance.efg"),
+        games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
+        games.read_from_file("chance_in_middle.efg"),
+        games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+        games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
+        games.read_from_file("perfect_info_with_chance.efg"),
+        games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
+    ],
+)
+def test_max_regret_consistency_nonuniform(game: gbt.Game, rational_flag: bool):
+    profile = _skewed_behavior_profile(game, rational_flag)
+    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "noPR-action-selten-horse.efg",
+        "noPR-information-no-deflate.efg",
+    ],
+)
+def test_max_regret_imperfect_recall_without_absent_mindedness(filename: str, rational_flag: bool):
+    game = games.read_from_file(filename)
+    profile = _skewed_behavior_profile(game, rational_flag)
+    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "AM-driver-one-infoset.efg",
+        "noPR-AM-driver-one-player.efg",
+        "noPR-action-AM.efg",
+        "not_perfect_recall.efg",
+    ],
+)
+def test_max_regret_absent_minded_undefined(filename: str, rational_flag: bool):
+    game = games.read_from_file(filename)
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    with pytest.raises(gbt.UndefinedOperationError, match="absent-minded"):
+        profile.max_regret()
 
 
 @pytest.mark.parametrize(
@@ -2051,3 +2130,53 @@ def test_undefined_infoset_value():
     for rat in [False, True]:
         profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
         assert profile.infoset_values[selector] is None
+
+
+def _chance_types_game(n: int) -> gbt.Game:
+    """Chance draws one of `n` types; player 1 then makes a binary choice for each type."""
+    game = gbt.ExtensiveGame(players=["P1"])
+    game.append_event(gbt.H.path(), {f"t{i}": gbt.Rational(1, n) for i in range(n)})
+    for i in range(n):
+        game.append_move(gbt.H.path(f"t{i}"), "P1", ["a", "b"])
+        game.make_outcome(gbt.H.path(f"t{i}", "a"), {"P1": i + 1}, f"a{i}")
+        game.make_outcome(gbt.H.path(f"t{i}", "b"), {"P1": 2 * (i % 3)}, f"b{i}")
+    return game
+
+
+def test_max_regret_does_not_enumerate_strategies():
+    game = _chance_types_game(16)
+    profile = game.mixed_behavior_profile()
+    start = time.perf_counter()
+    regret = profile.max_regret()
+    assert time.perf_counter() - start < 1.0
+    assert regret == pytest.approx(
+        sum(max(i + 1, 2 * (i % 3)) - ((i + 1) + 2 * (i % 3)) / 2 for i in range(16)) / 16
+    )
+
+
+def test_logit_solve_on_many_types_game_is_fast():
+    game = _chance_types_game(12)
+    start = time.perf_counter()
+    gbt.nash.logit_solve(game)
+    assert time.perf_counter() - start < 5.0
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "game",
+    [
+        games.create_stripped_down_poker_efg(),
+        games.create_kuhn_poker_efg(nonterm_outcomes=True),
+        games.read_from_file("3_player.efg"),
+        games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+        games.read_from_file("noPR-action-selten-horse.efg"),
+    ],
+)
+def test_max_regret_consistency_pure_profile(game: gbt.Game, rational_flag: bool):
+    """Pure profiles leave many information sets unreached."""
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    for history in games.all_infosets(game):
+        selector = gbt.H.path(*history.actions)
+        labels = list(game.get_actions(selector))
+        profile[selector] = {labels[-1]: 1}
+    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
