@@ -503,10 +503,10 @@ void OutcomeEditorPopup::UpdateValidation()
     ClearValidationFailure();
   }
   else {
+    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
     m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout below must re-measure
-    m_errorText->Show();
     m_contentPanel->Layout();
   }
   Fit();
@@ -567,10 +567,10 @@ void OutcomeEditorPopup::ShowValidationFailure(const wxString &p_message, wxText
   wxBell();
 
   if (m_errorText) {
+    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
     m_errorText->InvalidateBestSize();
-    m_errorText->Show();
   }
 
   if (m_contentPanel) {
@@ -1239,10 +1239,10 @@ void AppendMovePopup::UpdateValidation()
     ClearValidationFailure();
   }
   else {
+    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(message);
     m_errorText->Wrap(FromDIP(260));
     m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
-    m_errorText->Show();
     m_contentPanel->Layout();
   }
   Fit();
@@ -1317,10 +1317,10 @@ void AppendMovePopup::ShowValidationFailure(const wxString &p_message, wxTextCtr
   wxBell();
 
   if (m_errorText) {
+    m_errorText->Show(); // wx's MSW text measurement fails on a hidden control: show it first
     m_errorText->SetLabel(p_message);
     m_errorText->Wrap(FromDIP(260));
     m_errorText->InvalidateBestSize(); // wxST_NO_AUTORESIZE: the layout must re-measure
-    m_errorText->Show();
   }
 
   if (m_contentPanel) {
