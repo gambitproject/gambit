@@ -50,7 +50,7 @@ enum class NashMethodId {
 
 enum class VariantRepresentation { Strategic, Behavior };
 enum class VariantCoverage { One, Some, AllPure, All };
-enum class VariantReliability { Always, NumericalFailurePossible, NoGuarantee };
+enum class VariantReliability { Always, Usually, NoGuarantee };
 enum class VariantConcept { Nash, AgentNash };
 enum class VariantArithmetic { Exact, FloatingPoint };
 enum class VariantScope { AnyGame, TwoPlayer, TwoPlayerConstSum };
@@ -66,7 +66,6 @@ struct NashVariant {
   VariantConcept solves;
   VariantArithmetic arithmetic;
   VariantScope scope;
-  std::string_view caveat;
 };
 
 /// The user's last choices in the equilibrium dialog.

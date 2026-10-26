@@ -142,8 +142,8 @@ wxString ReliabilityLabel(VariantReliability p_reliability)
   switch (p_reliability) {
   case VariantReliability::Always:
     return wxT("Always");
-  case VariantReliability::NumericalFailurePossible:
-    return wxT("Numerical failure possible");
+  case VariantReliability::Usually:
+    return wxT("Usually");
   default:
     return wxT("No guarantee");
   }
@@ -389,6 +389,67 @@ wxString ParameterDescription(const NashMethodSpec &p_method)
       p_method);
 }
 
+using ParameterRow = std::pair<wxString, wxString>;
+
+std::vector<ParameterRow> ParameterRows(const NashMethodSpec &p_method)
+{
+  return std::visit(
+      []<typename Method>(const Method &method) -> std::vector<ParameterRow> {
+        const auto regret = [](double p_value) { return wxString::Format("%.4g", p_value); };
+        if constexpr (std::is_same_v<Method, EnumPolyNashSpec>) {
+          return {{wxT("Equilibria sought"),
+                   method.stopAfter.has_value() && method.stopAfter.value() == 1
+                       ? wxT("One")
+                       : wxT("All supports")},
+                  {wxT("Maximum regret"), regret(method.maxRegret)}};
+        }
+        else if constexpr (std::is_same_v<Method, GNMNashSpec>) {
+          return {
+              {wxT("Perturbations"), wxString::Format("%d", method.perturbations)},
+              {wxT("Ending lambda"), regret(method.lambdaEnd)},
+              {wxT("Steps per support cell"), wxString::Format("%d", method.steps)},
+              {wxT("Local Newton interval"), wxString::Format("%d", method.localNewtonInterval)},
+              {wxT("Local Newton maximum iterations"),
+               wxString::Format("%d", method.localNewtonMaxIterations)}};
+        }
+        else if constexpr (std::is_same_v<Method, HPNashSpec>) {
+          return {{wxT("Random priors"), wxString::Format("%d", method.priors)},
+                  {wxT("Maximum regret"), regret(method.maxRegret)}};
+        }
+        else if constexpr (std::is_same_v<Method, IPANashSpec>) {
+          return {{wxT("Perturbations"), wxString::Format("%d", method.perturbations)}};
+        }
+        else if constexpr (std::is_same_v<Method, LCPNashSpec>) {
+          return {{wxT("Equilibria sought"), wxT("All accessible")},
+                  {wxT("Recursion depth"), method.maxDepth == 0
+                                               ? wxString(wxT("Unlimited"))
+                                               : wxString::Format("%d", method.maxDepth)}};
+        }
+        else if constexpr (std::is_same_v<Method, LiapNashSpec>) {
+          return {{wxT("Random starting points"), wxString::Format("%d", method.startingPoints)},
+                  {wxT("Maximum iterations"), wxString::Format("%d", method.maxIterations)},
+                  {wxT("Maximum regret"), regret(method.maxRegret)}};
+        }
+        else if constexpr (std::is_same_v<Method, LogitNashSpec>) {
+          return {{wxT("Maximum regret"), regret(method.maxRegret)},
+                  {wxT("Initial step"), regret(method.firstStep)},
+                  {wxT("Maximum acceleration"), regret(method.maxAcceleration)}};
+        }
+        else if constexpr (std::is_same_v<Method, SimpdivNashSpec>) {
+          std::ostringstream maxRegret;
+          maxRegret << method.maxRegret;
+          return {{wxT("Random starting points"), wxString::Format("%d", method.startingPoints)},
+                  {wxT("Starting denominator"), wxString::Format("%d", method.randomDenominator)},
+                  {wxT("Grid resize factor"), wxString::Format("%d", method.gridResize)},
+                  {wxT("Maximum regret"), wxString(maxRegret.str())}};
+        }
+        else {
+          return {};
+        }
+      },
+      p_method);
+}
+
 } // namespace
 
 namespace {
@@ -461,22 +522,16 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
                                       wxT(" marks the variant Gambit recommends for the Goal."));
   topSizer->Add(legend, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, S);
 
-  m_detail =
-      new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, FromDIP(130)),
-                     wxTE_MULTILINE | wxTE_READONLY | wxTE_BESTWRAP);
-  topSizer->Add(m_detail, 0, wxALL | wxEXPAND, S);
+  m_warning = new wxStaticText(this, wxID_ANY, wxEmptyString);
+  m_warning->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+  topSizer->Add(m_warning, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, S);
 
-  m_parameters = new wxCollapsiblePane(this, wxID_ANY, wxT("Parameters"));
-  m_parameters->Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, &NashChoiceDialog::OnParametersToggled, this);
-  m_parametersText = new wxStaticText(m_parameters->GetPane(), wxID_ANY, wxEmptyString);
+  m_details = new wxCollapsiblePane(this, wxID_ANY, wxT("Details"));
+  m_detailsGrid = new wxFlexGridSizer(2, FromDIP(4), FromDIP(16));
   auto *paneSizer = new wxBoxSizer(wxVERTICAL);
-  paneSizer->Add(m_parametersText, 0, wxALL | wxEXPAND, S);
-  m_parameters->GetPane()->SetSizer(paneSizer);
-  m_parameters->GetPane()->Bind(wxEVT_SIZE, [this](wxSizeEvent &p_event) {
-    p_event.Skip();
-    WrapParameters();
-  });
-  topSizer->Add(m_parameters, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
+  paneSizer->Add(m_detailsGrid, 0, wxALL, S);
+  m_details->GetPane()->SetSizer(paneSizer);
+  topSizer->Add(m_details, 0, wxALL | wxEXPAND, S);
 
   if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
     topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
@@ -489,9 +544,8 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
 
   SetSizer(topSizer);
   topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
+  SetMinSize(wxSize(GetSize().x, GetSize().y - FromDIP(140)));
   wxTopLevelWindowBase::Layout();
-  m_bestHeight = ClientToWindowSize(topSizer->GetMinSize()).y;
   CenterOnParent();
 }
 
@@ -636,56 +690,26 @@ void NashChoiceDialog::UpdateRecommendation()
   UpdateDetail();
 }
 
-wxString NashChoiceDialog::DescribeVariant(const NashVariant &p_variant)
-{
-  const auto game = m_doc->GetGame();
-  wxString text = VariantLabel(p_variant) + wxT("\n");
-  text +=
-      wxT("Method: ") + FromStd(p_variant.methodName) + wxT(".  Arithmetic: ") +
-      (p_variant.arithmetic == VariantArithmetic::Exact ? wxT("exact.") : wxT("floating point.")) +
-      wxT("  Solves for: ") + ConceptLabel(p_variant.solves) + wxT(" equilibria.\n");
-  if (const auto goal = GetGoal(); !MeetsGoal(p_variant, goal)) {
-    text += GoalMissWarning(p_variant, goal) + wxT("\n");
-  }
-  text += FromStd(p_variant.caveat) + wxT("\n");
-  if (p_variant.representation == VariantRepresentation::Strategic && As<GameTreeRep>(game)) {
-    if (!m_contingencies) {
-      m_contingencies = game->GetStrategies().extent_product();
-    }
-    text += wxString::Format(wxT("The reduced strategic form has %llu contingencies.\n"),
-                             static_cast<unsigned long long>(*m_contingencies));
-  }
-  return text;
-}
-
 void NashChoiceDialog::UpdateDetail()
 {
-  m_detail->ChangeValue(DescribeVariant(GetSelectedVariant()));
-  wxString parameters = ParameterDescription(GetComputation().method);
-  parameters.Trim(false);
-  m_parametersLabel =
-      parameters.empty() ? wxString(wxT("This variant has no parameters.")) : parameters;
-  WrapParameters();
-}
+  const auto &variant = GetSelectedVariant();
+  const auto goal = GetGoal();
+  m_warning->SetLabel(MeetsGoal(variant, goal) ? wxString{} : GoalMissWarning(variant, goal));
 
-void NashChoiceDialog::WrapParameters()
-{
-  const int width = m_parameters->GetPane()->GetClientSize().GetWidth() - 2 * FromDIP(5);
-  m_parametersText->SetLabel(m_parametersLabel);
-  if (width > 0) {
-    m_parametersText->Wrap(width);
+  const auto rows = ParameterRows(GetComputation().method);
+
+  wxWindow *pane = m_details->GetPane();
+  m_detailsGrid->Clear(true);
+  if (rows.empty()) {
+    m_detailsGrid->Add(new wxStaticText(pane, wxID_ANY, wxT("No parameters")));
+    m_detailsGrid->Add(new wxStaticText(pane, wxID_ANY, wxEmptyString));
   }
-  m_parameters->GetPane()->Layout();
-}
-
-void NashChoiceDialog::OnParametersToggled(wxCollapsiblePaneEvent &)
-{
+  for (const auto &[name, value] : rows) {
+    m_detailsGrid->Add(new wxStaticText(pane, wxID_ANY, name));
+    m_detailsGrid->Add(new wxStaticText(pane, wxID_ANY, value));
+  }
+  pane->Layout();
   Layout();
-  const wxSize best = ClientToWindowSize(GetSizer()->GetMinSize());
-  const wxSize size = GetSize();
-  SetMinSize(best);
-  SetSize(size.x, std::max(best.y, size.y + best.y - m_bestHeight));
-  m_bestHeight = best.y;
 }
 
 bool NashChoiceDialog::UseStrategic() const

@@ -87,21 +87,19 @@ be sorted by clicking a column heading.  The columns are:
 
 :guilabel:`Reliability`
    Whether the variant is guaranteed to return a result on a given game.
-   :guilabel:`Always` means it is.  :guilabel:`Numerical failure
-   possible` means it converges in theory but can fail in floating-point
-   arithmetic.  :guilabel:`No guarantee` means it is a local or
-   heuristic search that is not known to converge on every game.
+   :guilabel:`Always` means it is.  :guilabel:`Usually` means it
+   converges in theory but may have problems with games that have some types
+   of degeneracy, which are common in practice.  :guilabel:`No guarantee`
+   means it is a local or heuristic search that is not known to converge
+   on every game.
 
 :guilabel:`Solves for`
    The solution concept: :guilabel:`Nash`, or :guilabel:`Agent Nash`
    (see :ref:`agent-nash-equilibria`).
 
-Selecting a row shows a description in the detail pane: the method name,
-whether the arithmetic is exact or floating point, the solution concept,
-any warning about your Goal, and notes on the variant.  For variants
-that work on the reduced strategic form of an extensive game, the pane
-also shows the number of contingencies in that form, which gives an idea
-of how large the computation will be.
+If the selected variant does not meet your Goal, a warning appears
+below the list.  A collapsible :guilabel:`Details` section shows the
+parameters the variant will run with.
 
 The recommendation
 ~~~~~~~~~~~~~~~~~~
@@ -147,8 +145,8 @@ works on the extensive game.  Hence for :guilabel:`Several equilibria`
 on a two-player extensive game the recommendation is Lemke-Howson on the
 strategic form, because the sequence-form variant of ``lcp`` returns
 only one equilibrium.  ``simpdiv`` is recommended over ``gnm`` for three
-or more players because it is reliable, whereas ``gnm`` is less
-thoroughly tested and can fail numerically.  For strategic games every
+or more players because it always returns a result, whereas ``gnm``
+may have problems with some types of degenerate games.  For strategic games every
 recommendation uses the strategic form.
 
 The dialog remembers your Goal and variant for each game while it is
@@ -225,8 +223,7 @@ check the profiles returned.
 Parameters
 ~~~~~~~~~~
 
-Below the detail pane, a collapsible :guilabel:`Parameters` section shows
-the parameters the selected variant will use.  They are shown for
+The :guilabel:`Details` section shows the parameters the selected variant will use.  They are shown for
 information and cannot be edited in the dialog.  They depend on the Goal
 only for ``enumpoly`` and ``simpdiv``.
 

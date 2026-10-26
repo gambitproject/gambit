@@ -38,16 +38,13 @@ class NashChoiceDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
   wxRadioButton *m_goalButtons[3];
   wxStaticText *m_goalNote;
-  wxTextCtrl *m_detail;
-  wxCollapsiblePane *m_parameters;
-  wxStaticText *m_parametersText;
-  wxString m_parametersLabel;
-  int m_bestHeight{0};
+  wxStaticText *m_warning;
+  wxCollapsiblePane *m_details;
+  wxFlexGridSizer *m_detailsGrid;
   wxListCtrl *m_list;
   std::vector<const NashVariant *> m_variants;
   std::vector<const NashVariant *> m_rows;
   const NashVariant *m_userChoice{nullptr};
-  std::optional<std::size_t> m_contingencies;
   int m_sortColumn{-1};
   bool m_sortAscending{true};
   bool m_refreshing{false};
@@ -61,9 +58,6 @@ class NashChoiceDialog final : public wxDialog {
   void UpdateRecommendation();
   void SelectRow(const NashVariant &);
   void UpdateDetail();
-  void WrapParameters();
-  void OnParametersToggled(wxCollapsiblePaneEvent &);
-  wxString DescribeVariant(const NashVariant &);
 
   NashGoal GetGoal() const;
   void SetGoal(NashGoal);
