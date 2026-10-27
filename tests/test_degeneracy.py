@@ -1,7 +1,5 @@
 import dataclasses
 import types
-import typing
-from fractions import Fraction
 
 import cdd
 import cdd.gmp
@@ -14,7 +12,7 @@ from . import games
 
 # Payoff difference far below double precision: float(1 + EPS) == 1.0, so an
 # implementation using floating point would see a tie where there is none.
-EPS = Fraction(1, 10**20)
+EPS = gbt.Rational(1, 10**20)
 
 
 def _assert_valid_witness(game: gbt.Game, player: int, strategy):
@@ -35,60 +33,68 @@ def _assert_valid_witness(game: gbt.Game, player: int, strategy):
 
 @pytest.mark.parametrize("game,expected_result", [
     # Nondegenerate games
-    # - 2x2: no support of size 2 can have 3 best responses, so no LP is solved
-    (gbt.StrategicGame.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]]),
-     False),  # matching pennies; SageMath
-    (gbt.StrategicGame.from_arrays([[2, 5], [0, 4]], [[2, 0], [5, 4]]),
-     False),  # prisoner's dilemma; SageMath
-    # - larger games, where every candidate LP is infeasible
-    (gbt.StrategicGame.from_arrays([[0, -1, 1], [1, 0, -1], [-1, 1, 0]],
-                                   [[0, 1, -1], [-1, 0, 1], [1, -1, 0]]),
-     False),  # rock-paper-scissors; SageMath
-    (gbt.catalog.load("journals/other/shapley1974/fig2"), False),
-    (gbt.catalog.load("journals/other/shapley1974/fig3"), False),
-    (gbt.catalog.load("journals/dcg/vonstengel1999/6x6_game_with_75_eq"),
-     False),  # constructed to be nondegenerate with many equilibria
-    (games.read_from_file("coordination_4x4_payoff.nfg"), False),
-    # - one player has a single strategy, so only pure strategies are checked
-    (gbt.StrategicGame.from_arrays([[1, 2, 3]], [[1, 2, 3]]), False),
-    # - near-ties which are not ties in exact arithmetic
-    (gbt.StrategicGame.from_arrays([[1, 0], [0, 1]], [[1, 1 + EPS], [1 + EPS, 1]]),
-     False),  # pure strategies
-    (gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]], [[2, 0, 1 - EPS], [0, 2, 1 - EPS]]),
-     False),  # mixing (1/2, 1/2) leaves column 3 just short of a best response
+    pytest.param(gbt.StrategicGame.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]]),
+                 False, id="matching_pennies"),
+    pytest.param(gbt.StrategicGame.from_arrays([[2, 5], [0, 4]], [[2, 0], [5, 4]]),
+                 False, id="prisoners_dilemma"),
+    pytest.param(gbt.StrategicGame.from_arrays([[0, -1, 1], [1, 0, -1], [-1, 1, 0]],
+                                               [[0, 1, -1], [-1, 0, 1], [1, -1, 0]]),
+                 False, id="rock_paper_scissors"),
+    pytest.param(gbt.catalog.load("journals/other/shapley1974/fig2"),
+                 False, id="shapley1974_fig2"),
+    pytest.param(gbt.catalog.load("journals/other/shapley1974/fig3"),
+                 False, id="shapley1974_fig3"),
+    pytest.param(gbt.catalog.load("journals/dcg/vonstengel1999/6x6_game_with_75_eq"),
+                 False, id="vonstengel1999_6x6"),
+    pytest.param(games.read_from_file("coordination_4x4_payoff.nfg"),
+                 False, id="coordination_4x4"),
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 2, 3]], [[1, 2, 3]]),
+                 False, id="single_row_no_ties"),
+    # Payoffs differ by EPS, so these are not ties in exact arithmetic
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 0], [0, 1]], [[1, 1 + EPS], [1 + EPS, 1]]),
+                 False, id="near_tie_pure"),
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
+                                               [[2, 0, 1 - EPS], [0, 2, 1 - EPS]]),
+                 False, id="near_tie_mixed"),
 
-    # Degenerate games
-    # - a pure strategy has more than one pure best response
-    (gbt.StrategicGame.from_arrays([[3, 3], [2, 5], [0, 6]], [[3, 3], [2, 6], [3, 1]]),
-     True),  # Avis, Rosenberg, Savani and von Stengel (2010), via SageMath
-    (gbt.StrategicGame.from_arrays([[0, 6], [2, 5], [3, 3]], [[1, 0], [0, 2], [4, 4]]),
-     True),  # Nisan, Roughgarden, Tardos and Vazirani (2007), via SageMath
-    (gbt.StrategicGame.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]]), True),  # SageMath
-    (gbt.StrategicGame.from_arrays([[0, -1, 1, 1, -1], [1, 0, -1, -1, 1],
-                                    [-1, 1, 0, 1, -1], [-1, 1, -1, 0, 1],
-                                    [1, -1, 1, -1, 0]],
-                                   [[0, 1, -1, -1, 1], [-1, 0, 1, 1, -1],
-                                    [1, -1, 0, -1, 1], [1, -1, 1, 0, -1],
-                                    [-1, 1, -1, 1, 0]]),
-     True),  # rock-paper-scissors-lizard-Spock; SageMath
-    (gbt.StrategicGame.from_arrays([[0, 0, 0]] * 3, [[0, 0, 0]] * 3), True),  # SageMath
-    (gbt.StrategicGame.from_arrays([[-75, 18, 45, 33], [42, -8, -77, -18],
-                                    [83, 18, 11, 40], [-10, -38, 76, -9]],
-                                   [[62, 64, 87, 51], [-41, -27, -69, 52],
-                                    [-17, 25, -97, -82], [30, 31, -1, 50]]),
-     True),  # SageMath; only the column player's pure strategies have ties
-    (gbt.StrategicGame.from_arrays([[1, 2, 3]], [[3, 3, 1]]), True),
-    (gbt.catalog.load("journals/ijgt/selten1975/fig2"),
-     True),  # extensive game, via its reduced strategic form
-    # - only a mixed strategy has more best responses than its support size
-    (gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]], [[2, 0, 1], [0, 2, 1]]),
-     True),  # row player mixes
-    (gbt.StrategicGame.from_arrays([[3, 0], [0, 3], [Fraction(3, 2), Fraction(3, 2)]],
-                                   [[4, 3], [2, 6], [3, 1]]),
-     True),  # column player mixes; SageMath
-    (gbt.StrategicGame.from_arrays([[1, 2, 3], [4, 6, 5], [9, 8, 7]],
-                                   [[5, 0, 1], [2, 0, 1], [0, 2, 1]]),
-     True),  # found only after the LPs for rows {1, 2} and {1, 3} are infeasible
+    # Degenerate games: a pure strategy has more than one pure best response
+    pytest.param(gbt.StrategicGame.from_arrays([[3, 3], [2, 5], [0, 6]],
+                                               [[3, 3], [2, 6], [3, 1]]),
+                 True, id="avis_rosenberg_savani_vonstengel2010"),
+    pytest.param(gbt.StrategicGame.from_arrays([[0, 6], [2, 5], [3, 3]],
+                                               [[1, 0], [0, 2], [4, 4]]),
+                 True, id="nisan_roughgarden_tardos_vazirani2007"),
+    pytest.param(gbt.StrategicGame.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]]),
+                 True, id="sage_2x2"),
+    pytest.param(gbt.StrategicGame.from_arrays([[0, -1, 1, 1, -1], [1, 0, -1, -1, 1],
+                                                [-1, 1, 0, 1, -1], [-1, 1, -1, 0, 1],
+                                                [1, -1, 1, -1, 0]],
+                                               [[0, 1, -1, -1, 1], [-1, 0, 1, 1, -1],
+                                                [1, -1, 0, -1, 1], [1, -1, 1, 0, -1],
+                                                [-1, 1, -1, 1, 0]]),
+                 True, id="rock_paper_scissors_lizard_spock"),
+    pytest.param(gbt.StrategicGame.from_arrays([[0, 0, 0]] * 3, [[0, 0, 0]] * 3),
+                 True, id="all_zero_3x3"),
+    pytest.param(gbt.StrategicGame.from_arrays([[-75, 18, 45, 33], [42, -8, -77, -18],
+                                                [83, 18, 11, 40], [-10, -38, 76, -9]],
+                                               [[62, 64, 87, 51], [-41, -27, -69, 52],
+                                                [-17, 25, -97, -82], [30, 31, -1, 50]]),
+                 True, id="sage_4x4_column_ties_only"),
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 2, 3]], [[3, 3, 1]]),
+                 True, id="single_row_tie"),
+    pytest.param(gbt.catalog.load("journals/ijgt/selten1975/fig2"),
+                 True, id="selten1975_fig2_extensive"),
+    # Degenerate games: only a mixed strategy has too many best responses
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
+                                               [[2, 0, 1], [0, 2, 1]]),
+                 True, id="mixed_row_player"),
+    pytest.param(gbt.StrategicGame.from_arrays([[3, 0], [0, 3],
+                                                [gbt.Rational(3, 2), gbt.Rational(3, 2)]],
+                                               [[4, 3], [2, 6], [3, 1]]),
+                 True, id="mixed_column_player"),
+    pytest.param(gbt.StrategicGame.from_arrays([[1, 2, 3], [4, 6, 5], [9, 8, 7]],
+                                               [[5, 0, 1], [2, 0, 1], [0, 2, 1]]),
+                 True, id="mixed_after_infeasible_supports"),
 ])
 def test_is_degenerate(game: gbt.Game, expected_result: bool):
     """
@@ -107,7 +113,7 @@ def test_is_degenerate(game: gbt.Game, expected_result: bool):
 @dataclasses.dataclass
 class CertificateTestCase:
     """TestCase for a game whose degeneracy has exactly one witness."""
-    factory: typing.Callable[[], gbt.Game]
+    game: gbt.Game
     expected_player: int
     expected_strategy: list
 
@@ -116,7 +122,7 @@ CERTIFICATE_CASES = [
     pytest.param(
         CertificateTestCase(
             # Only the row player's single strategy has tied best responses, (3, 3).
-            factory=lambda: gbt.StrategicGame.from_arrays([[1, 2, 3]], [[3, 3, 1]]),
+            game=gbt.StrategicGame.from_arrays([[1, 2, 3]], [[3, 3, 1]]),
             expected_player=0,
             expected_strategy=[1],
         ),
@@ -125,7 +131,7 @@ CERTIFICATE_CASES = [
     pytest.param(
         CertificateTestCase(
             # Only the first column gives the row player tied payoffs, (5, 5).
-            factory=lambda: gbt.StrategicGame.from_arrays([[5, 0], [5, 2]], [[1, 2], [3, 4]]),
+            game=gbt.StrategicGame.from_arrays([[5, 0], [5, 2]], [[1, 2], [3, 4]]),
             expected_player=1,
             expected_strategy=[1, 0],
         ),
@@ -135,10 +141,10 @@ CERTIFICATE_CASES = [
         CertificateTestCase(
             # Mixing (x, 1 - x) gives the column player (2x, 2 - 2x, 1): all equal only
             # at x = 1/2.  With two rows, the column player cannot have a witness.
-            factory=lambda: gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
-                                                          [[2, 0, 1], [0, 2, 1]]),
+            game=gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
+                                               [[2, 0, 1], [0, 2, 1]]),
             expected_player=0,
-            expected_strategy=[Fraction(1, 2), Fraction(1, 2)],
+            expected_strategy=[gbt.Rational(1, 2), gbt.Rational(1, 2)],
         ),
         id="mixed_row_player"
     ),
@@ -146,11 +152,12 @@ CERTIFICATE_CASES = [
         CertificateTestCase(
             # Mixing (y, 1 - y) gives the row player (3y, 3 - 3y, 3/2): all equal only
             # at y = 1/2.  With two columns, the row player cannot have a witness.
-            factory=lambda: gbt.StrategicGame.from_arrays(
-                [[3, 0], [0, 3], [Fraction(3, 2), Fraction(3, 2)]], [[4, 3], [2, 6], [3, 1]]
+            game=gbt.StrategicGame.from_arrays(
+                [[3, 0], [0, 3], [gbt.Rational(3, 2), gbt.Rational(3, 2)]],
+                [[4, 3], [2, 6], [3, 1]],
             ),
             expected_player=1,
-            expected_strategy=[Fraction(1, 2), Fraction(1, 2)],
+            expected_strategy=[gbt.Rational(1, 2), gbt.Rational(1, 2)],
         ),
         id="mixed_column_player"
     ),
@@ -159,11 +166,11 @@ CERTIFICATE_CASES = [
             # Rows {1, 2}: columns 2 and 3 always pay 0 and 1, never tied.
             # Rows {1, 3}: (5x, 2 - 2x, 1) are never all equal.
             # Rows {2, 3}: (2x, 2 - 2x, 1) are all equal at x = 1/2.
-            factory=lambda: gbt.StrategicGame.from_arrays(
+            game=gbt.StrategicGame.from_arrays(
                 [[1, 2, 3], [4, 6, 5], [9, 8, 7]], [[5, 0, 1], [2, 0, 1], [0, 2, 1]]
             ),
             expected_player=0,
-            expected_strategy=[0, Fraction(1, 2), Fraction(1, 2)],
+            expected_strategy=[0, gbt.Rational(1, 2), gbt.Rational(1, 2)],
         ),
         id="mixed_after_infeasible_supports"
     ),
@@ -176,7 +183,7 @@ def test_is_degenerate_certificate(test_case: CertificateTestCase):
     Verify the witness returned by is_degenerate(certificate=True) for games
     in which it is unique.
     """
-    game = test_case.factory()
+    game = test_case.game
     result, (player, strategy) = game.is_degenerate(certificate=True)
     assert result is True
     assert player == test_case.expected_player
