@@ -38,9 +38,9 @@ deviating.  Every Nash equilibrium is an :math:`\varepsilon`-equilibrium with
 To provide a uniform interface across methods, where relevant Gambit provides a parameter
 `maxregret`, which specifies the acceptance criterion for labeling the output of the
 algorithm as an equilibrium.  This parameter is interpreted *proportionally* to the range of
-payoffs in the game: any profile returned as an equilibrium is guaranteed to be an
+expected payoffs in the game: any profile returned as an equilibrium is guaranteed to be an
 :math:`\varepsilon`-equilibrium, for :math:`\varepsilon` no more than `maxregret` times the
-difference of the game's maximum and minimum payoffs.  For example, with the default
+difference of the game's maximum and minimum expected payoffs.  For example, with the default
 `maxregret` of :math:`10^{-8}` in a game whose payoffs range over 4 units, any equilibrium
 returned is guaranteed to have a regret, measured directly in the game's own payoffs, of no
 more than :math:`4 \times 10^{-8}`.

@@ -23,8 +23,11 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <numeric>
+#include <map>
+#include <optional>
 #include <set>
 #include <stack>
 #include <unordered_map>
@@ -162,84 +165,142 @@ struct TreeSequenceLayout {
   }
 };
 
+std::shared_ptr<const TreeSequenceLayout> GameTreeRep::GetSequenceLayout() const
+{
+  const std::scoped_lock lock(m_sequenceLayoutMutex);
+  if (!m_sequenceLayout || m_sequenceLayoutVersion != GetVersion()) {
+    m_sequenceLayout = std::make_shared<const TreeSequenceLayout>(*this);
+    m_sequenceLayoutVersion = GetVersion();
+  }
+  return m_sequenceLayout;
+}
+
 // The payoff is the sum over nodes of the probability chance leads to the node, times the payoff
 // of the outcome there, times the probability of each player's sequence at the node, which is the
 // total probability of the strategies consistent with it.  The payoff to a strategy s of player
 // i, and its derivative with respect to the probability of a strategy t of player j, therefore
 // sum, over the sequences of i consistent with s (and of j consistent with t), quantities
 // accumulated over the nodes where those are the players' sequences.
+
 template <class T>
-void TreeMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
-                                                         Matrix<T> &p_derivs) const
+std::vector<std::vector<T>>
+TreeMixedStrategyProfileRep<T>::GetSequenceProbs(const TreeSequenceLayout &p_layout) const
 {
   const auto game = this->m_support.GetGame();
-  if (!m_sequences || m_sequences->tree != game->GetTreeLayout()) {
-    m_sequences = std::make_shared<const TreeSequenceLayout>(*game);
-  }
-  const auto &layout = *m_sequences;
-  if (!layout.perfectRecall) {
-    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
-    return;
-  }
-  const auto &tree = *layout.tree;
-  const auto &numbers = tree.template GetNumbers<T>();
-  const size_t numPlayers = tree.numPlayers;
-  const size_t numNodes = tree.parent.size();
-  const size_t self = pl - 1;
-
-  // Probability of each sequence of each player
-  std::vector<std::vector<T>> seqProbs(numPlayers);
-  for (size_t k = 0; k < numPlayers; k++) {
-    seqProbs[k].assign(layout.numSequences[k], static_cast<T>(0));
-    const auto player = game->GetPlayer(k + 1);
-    for (const auto &strategy : this->m_support.GetStrategies(player)) {
+  std::vector<std::vector<T>> seqProbs(p_layout.tree->numPlayers);
+  for (size_t k = 0; k < seqProbs.size(); k++) {
+    seqProbs[k].assign(p_layout.numSequences[k], static_cast<T>(0));
+    for (const auto &strategy : this->m_support.GetStrategies(game->GetPlayer(k + 1))) {
       const T &prob = this->m_probs.GetFlattened()[this->m_profileIndex.at(strategy)];
-      for (const size_t sequence : layout.strategySequences[k][strategy->GetNumber() - 1]) {
+      for (const size_t sequence : p_layout.strategySequences[k][strategy->GetNumber() - 1]) {
         seqProbs[k][sequence] += prob;
       }
     }
   }
+  return seqProbs;
+}
 
-  // Accumulate over nodes, by the sequence of the player (values) and by the sequences of the
-  // player and of each other player (derivatives)
-  const size_t numOwn = layout.numSequences[self];
-  std::vector<T> ownValues(numOwn, static_cast<T>(0));
-  std::vector<std::vector<T>> pairValues(numPlayers);
-  for (size_t j = 0; j < numPlayers; j++) {
-    if (j != self) {
-      pairValues[j].assign(numOwn * layout.numSequences[j], static_cast<T>(0));
+// Accumulates, by the sequence of the player, the payoff-weighted probability of reaching each
+// node.  If p_pairValues is given, also accumulates, for each other player j, by the sequences of
+// the player and of j, the same quantity omitting j's probability.
+template <class T>
+static std::vector<T> AccumulateSequenceValues(const TreeSequenceLayout &p_layout,
+                                               const std::vector<std::vector<T>> &p_seqProbs,
+                                               size_t p_self,
+                                               std::vector<std::vector<T>> *p_pairValues)
+{
+  const auto &tree = *p_layout.tree;
+  const auto &numbers = tree.template GetNumbers<T>();
+  const size_t numPlayers = tree.numPlayers;
+  const size_t numNodes = tree.parent.size();
+
+  std::vector<T> ownValues(p_layout.numSequences[p_self], static_cast<T>(0));
+  if (p_pairValues != nullptr) {
+    p_pairValues->resize(numPlayers);
+    for (size_t j = 0; j < numPlayers; j++) {
+      if (j != p_self) {
+        (*p_pairValues)[j].assign(ownValues.size() * p_layout.numSequences[j], static_cast<T>(0));
+      }
     }
   }
   std::vector<T> chance(numNodes);
   for (size_t node = 0; node < numNodes; node++) {
     chance[node] =
         (node == 0) ? numbers.chanceProb[0] : chance[tree.parent[node]] * numbers.chanceProb[node];
-    const T &payoff = numbers.payoffs[node * numPlayers + self];
+    const T &payoff = numbers.payoffs[node * numPlayers + p_self];
     if (payoff == static_cast<T>(0) || chance[node] == static_cast<T>(0)) {
       continue;
     }
-    const size_t *sequences = layout.nodeSequences.data() + node * numPlayers;
+    const size_t *sequences = p_layout.nodeSequences.data() + node * numPlayers;
     const T base = chance[node] * payoff;
     T all = base;
     for (size_t k = 0; k < numPlayers; k++) {
-      if (k != self) {
-        all *= seqProbs[k][sequences[k]];
+      if (k != p_self) {
+        all *= p_seqProbs[k][sequences[k]];
       }
     }
-    ownValues[sequences[self]] += all;
+    ownValues[sequences[p_self]] += all;
+    if (p_pairValues == nullptr) {
+      continue;
+    }
     for (size_t j = 0; j < numPlayers; j++) {
-      if (j == self) {
+      if (j == p_self) {
         continue;
       }
       T others = base;
       for (size_t k = 0; k < numPlayers; k++) {
-        if (k != self && k != j) {
-          others *= seqProbs[k][sequences[k]];
+        if (k != p_self && k != j) {
+          others *= p_seqProbs[k][sequences[k]];
         }
       }
-      pairValues[j][sequences[self] * layout.numSequences[j] + sequences[j]] += others;
+      (*p_pairValues)[j][sequences[p_self] * p_layout.numSequences[j] + sequences[j]] += others;
     }
   }
+  return ownValues;
+}
+
+template <class T>
+bool TreeMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_values) const
+{
+  const auto layout =
+      static_cast<const GameTreeRep &>(*this->m_support.GetGame()).GetSequenceLayout();
+  if (!layout->perfectRecall) {
+    return false;
+  }
+  const size_t self = pl - 1;
+  const auto ownValues =
+      AccumulateSequenceValues<T>(*layout, GetSequenceProbs(*layout), self, nullptr);
+  const auto &ownSequences = layout->strategySequences[self];
+  size_t row = 1;
+  for (const auto &strategy :
+       this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
+    T value = static_cast<T>(0);
+    for (const size_t sequence : ownSequences[strategy->GetNumber() - 1]) {
+      value += ownValues[sequence];
+    }
+    p_values[row++] = value;
+  }
+  return true;
+}
+
+template <class T>
+void TreeMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
+                                                         Matrix<T> &p_derivs) const
+{
+  const auto game = this->m_support.GetGame();
+  const auto layoutPtr = static_cast<const GameTreeRep &>(*game).GetSequenceLayout();
+  const auto &layout = *layoutPtr;
+  if (!layout.perfectRecall) {
+    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
+    return;
+  }
+  const size_t numPlayers = layout.tree->numPlayers;
+  const size_t self = pl - 1;
+  const size_t numOwn = layout.numSequences[self];
+
+  const auto seqProbs = GetSequenceProbs(layout);
+  std::vector<std::vector<T>> pairValues;
+  const auto ownValues = AccumulateSequenceValues<T>(layout, seqProbs, self, &pairValues);
 
   const auto player = game->GetPlayer(pl);
   const auto &strategies = this->m_support.GetStrategies(player);
@@ -1206,6 +1267,108 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
   return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
     return maximize_function(range, value_fn);
   });
+}
+
+namespace {
+
+// Enumerates pure behavior profiles lazily, branching on an information set only when the walk
+// first reaches it.  Profiles that agree on every information set they reach have the same
+// payoffs, so each such class is visited once.
+class PureBehaviorRangeScanner {
+  using Pending = std::vector<std::pair<GameNode, Rational>>;
+
+  std::vector<GamePlayer> m_players;
+  std::map<GameInfoset, GameAction> m_assigned;
+  std::vector<std::optional<std::pair<Rational, Rational>>> m_ranges;
+
+  void Explore(Pending p_pending, std::vector<Rational> p_totals)
+  {
+    while (!p_pending.empty()) {
+      const auto [node, weight] = p_pending.back();
+      p_pending.pop_back();
+      for (size_t pl = 0; pl < m_players.size(); pl++) {
+        p_totals[pl] += weight * node->GetOutcome()->GetPayoff<Rational>(m_players[pl]);
+      }
+      if (node->IsTerminal()) {
+        continue;
+      }
+      const GameInfoset infoset = node->GetInfoset();
+      if (infoset->IsChanceInfoset()) {
+        for (const auto &action : infoset->GetActions()) {
+          p_pending.emplace_back(
+              node->GetChild(action),
+              weight * static_cast<const Rational &>(infoset->GetActionProb(action)));
+        }
+      }
+      else if (const auto assigned = m_assigned.find(infoset); assigned != m_assigned.end()) {
+        p_pending.emplace_back(node->GetChild(assigned->second), weight);
+      }
+      else {
+        for (const auto &action : infoset->GetActions()) {
+          m_assigned[infoset] = action;
+          Pending branch = p_pending;
+          branch.emplace_back(node->GetChild(action), weight);
+          Explore(std::move(branch), p_totals);
+        }
+        m_assigned.erase(infoset);
+        return;
+      }
+    }
+    for (size_t pl = 0; pl < m_players.size(); pl++) {
+      auto &range = m_ranges[pl];
+      range = range ? std::pair{std::min(range->first, p_totals[pl]),
+                                std::max(range->second, p_totals[pl])}
+                    : std::pair{p_totals[pl], p_totals[pl]};
+    }
+  }
+
+public:
+  explicit PureBehaviorRangeScanner(const Game &p_game)
+    : m_players(p_game->GetPlayers().begin(), p_game->GetPlayers().end()),
+      m_ranges(m_players.size())
+  {
+  }
+
+  std::vector<std::pair<Rational, Rational>> Scan(const GameNode &p_root)
+  {
+    Explore({{p_root, Rational(1)}}, std::vector<Rational>(m_players.size(), Rational(0)));
+    std::vector<std::pair<Rational, Rational>> result;
+    std::transform(m_ranges.begin(), m_ranges.end(), std::back_inserter(result),
+                   [](const auto &range) { return *range; });
+    return result;
+  }
+};
+
+} // end anonymous namespace
+
+std::vector<std::pair<Rational, Rational>> GameTreeRep::ScanExpectedPayoffRanges() const
+{
+  if (!GetAbsentMindedReentries().empty()) {
+    throw UndefinedException(
+        "Expected payoff ranges are not defined for games with absent-mindedness.");
+  }
+  const Game game(const_cast<GameTreeRep *>(this)->shared_from_this());
+  return PureBehaviorRangeScanner(game).Scan(m_root);
+}
+
+std::pair<Rational, Rational>
+GameTreeRep::GetPlayerExpectedPayoffRange(const GamePlayer &p_player) const
+{
+  if (p_player->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  return ScanExpectedPayoffRanges().at(p_player->GetNumber() - 1);
+}
+
+std::pair<Rational, Rational> GameTreeRep::GetExpectedPayoffRange() const
+{
+  const auto ranges = ScanExpectedPayoffRanges();
+  return {std::min_element(ranges.begin(), ranges.end(),
+                           [](const auto &a, const auto &b) { return a.first < b.first; })
+              ->first,
+          std::max_element(ranges.begin(), ranges.end(), [](const auto &a, const auto &b) {
+            return a.second < b.second;
+          })->second};
 }
 
 bool GameTreeRep::IsPerfectRecall() const

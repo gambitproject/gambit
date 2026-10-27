@@ -185,10 +185,7 @@ LcpBehaviorResult<T> LcpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
   const ColumnIndexMap columns(p_game);
   linalg::LemkeTableau<T> tab(ConstructMatrix<T>(columns), ConstructVector<T>(columns));

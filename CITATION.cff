@@ -16,5 +16,5 @@ license: GPL-2.0-or-later
 keywords:
   - game theory
   - Nash equilibrium
-version: 17.0.0-alpha.1
-date-released: "2026-08-13"
+version: 17.0.0-beta.2
+date-released: "2026-10-26"

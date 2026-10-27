@@ -278,6 +278,9 @@ void OutcomeEditorPopup::BuildControls()
 
 void OutcomeEditorPopup::LoadValues()
 {
+  // ChangeValue() rather than SetValue(): loading must not fire wxEVT_TEXT, or UpdateValidation()
+  // runs against a half-loaded form (label set, payoffs still empty) and reports a spurious
+  // error. BeginEdit() validates once, after everything is loaded.
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
   if (!outcome || outcome->IsNull()) {
@@ -285,15 +288,15 @@ void OutcomeEditorPopup::LoadValues()
     // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
     // opens already showing that as an error the user has to notice and fix before they can
     // accept anything else.
-    m_labelCtrl->SetValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
+    m_labelCtrl->ChangeValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
     for (auto &row : m_payoffRows) {
       *row.payoffValue = wxT("0");
-      row.payoffCtrl->SetValue(*row.payoffValue);
+      row.payoffCtrl->ChangeValue(*row.payoffValue);
     }
     return;
   }
 
-  m_labelCtrl->SetValue(wxString::FromUTF8(outcome->GetLabel()));
+  m_labelCtrl->ChangeValue(wxString::FromUTF8(outcome->GetLabel()));
 
   const Game game = m_doc->GetGame();
 
@@ -306,12 +309,16 @@ void OutcomeEditorPopup::LoadValues()
     // this dialog actually intends to display rather than a stale one from construction or the
     // previous node edited.
     *row.payoffValue = wxString(payoff.c_str(), *wxConvCurrent);
-    row.payoffCtrl->SetValue(*row.payoffValue);
+    row.payoffCtrl->ChangeValue(*row.payoffValue);
   }
 }
 
 void OutcomeEditorPopup::PositionPopup()
 {
+  if (!m_node) {
+    return;
+  }
+
   auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
@@ -485,6 +492,12 @@ wxString OutcomeEditorPopup::ValidatePayoffs()
 
 void OutcomeEditorPopup::UpdateValidation()
 {
+  // A focus-loss event delivered while the window is hiding on cancel arrives after OnDismiss()
+  // has cleared m_node, with nothing left to validate or position against.
+  if (!m_node) {
+    return;
+  }
+
   wxString message = ValidateLabel();
   const wxString payoffMessage = ValidatePayoffs(); // always run, to keep every field's
                                                     // highlighting current, not just the first
@@ -1022,6 +1035,10 @@ void AppendMovePopup::OnFieldKeyDown(wxKeyEvent &p_event, wxTextCtrl *p_ctrl)
 
 void AppendMovePopup::PositionPopup()
 {
+  if (!m_node) {
+    return;
+  }
+
   auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
@@ -1215,6 +1232,11 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
 
 void AppendMovePopup::UpdateValidation()
 {
+  // See OutcomeEditorPopup::UpdateValidation().
+  if (!m_node) {
+    return;
+  }
+
   wxString message = ValidateLabels();
   if (m_isChance) {
     std::vector<Number> probs;
@@ -1533,33 +1555,45 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
 
 void EfgDisplay::InitPopups()
 {
-  m_outcomeEditor = new OutcomeEditorPopup(this, m_doc);
-  m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  // m_outcomeEditor and m_appendMoveEditor are wxDialogs, created on first use rather than here:
+  // on MSW a dialog's native owner is chosen at creation, and when this EfgDisplay's frame is not
+  // yet shown (as it isn't during GameFrame's constructor) wx falls back to whichever window is
+  // active -- typically the welcome frame, which is destroyed straight after, taking the dialogs'
+  // native windows with it.
   m_nodeInfoPopup = new NodeInfoPopup(this, m_doc);
 }
 
 void EfgDisplay::PostPendingChanges()
 {
-  if (m_outcomeEditor->IsShown()) {
+  if (m_outcomeEditor && m_outcomeEditor->IsShown()) {
     m_outcomeEditor->Commit();
   }
-  if (m_appendMoveEditor->IsShown()) {
+  if (m_appendMoveEditor && m_appendMoveEditor->IsShown()) {
     m_appendMoveEditor->Commit();
   }
 }
 
 void EfgDisplay::BeginEditOutcome(const GameNode &p_node, int p_initialPlayer)
 {
+  if (!m_outcomeEditor) {
+    m_outcomeEditor = new OutcomeEditorPopup(this, m_doc);
+  }
   m_outcomeEditor->BeginEdit(p_node, p_initialPlayer);
 }
 
 void EfgDisplay::BeginAppendMove(const GameNode &p_node, const GamePlayer &p_player)
 {
+  if (!m_appendMoveEditor) {
+    m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  }
   m_appendMoveEditor->BeginAppend(p_node, p_player);
 }
 
 void EfgDisplay::BeginInsertMove(const GameNode &p_node, const GamePlayer &p_player)
 {
+  if (!m_appendMoveEditor) {
+    m_appendMoveEditor = new AppendMovePopup(this, m_doc);
+  }
   m_appendMoveEditor->BeginInsert(p_node, p_player);
 }
 

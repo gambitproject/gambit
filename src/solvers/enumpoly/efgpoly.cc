@@ -234,15 +234,9 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
                       EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
                       const CancelToken &p_cancel)
 {
-  if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException(
-        "Computing equilibria of games with imperfect recall is not supported.");
-  }
+  RequirePerfectRecall(p_game);
 
-  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
-  if (scale != 0.0) {
-    p_maxregret *= scale;
-  }
+  p_maxregret = ScaleRegret(p_game, p_maxregret);
 
   std::list<MixedBehaviorProfile<double>> ret;
   PossibleNashBehaviorSupports possible_supports(p_game);

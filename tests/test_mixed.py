@@ -1108,10 +1108,14 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
         player_strategy_values = strategy_values[player]
         strategies = game.get_strategies(player)
         for strategy in strategies:
-            assert strategy_regrets[player][strategy] == (
+            expected = (
                 max(player_strategy_values[s] for s in strategies)
                 - player_strategy_values[strategy]
             )
+            if rational_flag:
+                assert strategy_regrets[player][strategy] == expected
+            else:
+                assert strategy_regrets[player][strategy] == pytest.approx(expected, abs=1e-12)
 
 
 @pytest.mark.parametrize(

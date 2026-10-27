@@ -424,7 +424,7 @@ def liap_solve(
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
         .. versionadded:: 16.2.0
 
@@ -491,7 +491,7 @@ def liap_agent_solve(
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
     maxiter : int, default 1000
         Maximum number of iterations in function minimization.
@@ -548,7 +548,7 @@ def simpdiv_solve(
     maxregret : Rational, default 1e-7
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
         .. versionadded:: 16.2.0
 
@@ -824,7 +824,7 @@ def enumpoly_solve(
     maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
     max_rectangles : int, default 20000
         The maximum number of rectangles to examine when searching for equilibria on a
@@ -947,7 +947,7 @@ def logit_solve(
     maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
         .. versionadded:: 16.2.0
 
@@ -1007,7 +1007,7 @@ def hp_solve(
     maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
-        difference of the maximum and minimum payoffs of the game
+        difference of the maximum and minimum expected payoffs of the game
 
     event_callback : Callable[[HPStepEvent], None], optional
         If specified, called with each point traced along the homotopy path,

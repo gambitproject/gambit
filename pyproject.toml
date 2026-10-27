@@ -152,6 +152,7 @@ markers = [
 ]
 
 [tool.cibuildwheel]
+skip = "*-win32"
 test-command = "python -c \"import pygambit; g = pygambit.StrategicGame.from_arrays([[1, 0], [0, 1]], [[1, 0], [0, 1]]); assert g\""
 
 [tool.setuptools]

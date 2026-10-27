@@ -174,6 +174,36 @@ GameRep::~GameRep()
   m_nullOutcome->Invalidate();
 }
 
+std::pair<Rational, Rational>
+GameRep::GetPlayerExpectedPayoffRange(const GamePlayer &p_player) const
+{
+  const Rational first = NewPureStrategyProfile()->GetPayoff(p_player);
+  std::pair<Rational, Rational> range{first, first};
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    const Rational payoff = profile->GetPayoff(p_player);
+    range.first = std::min(range.first, payoff);
+    range.second = std::max(range.second, payoff);
+  }
+  return range;
+}
+
+std::pair<Rational, Rational> GameRep::GetExpectedPayoffRange() const
+{
+  const Rational first =
+      NewPureStrategyProfile()->GetPayoff(m_players.front()->shared_from_this());
+  std::pair<Rational, Rational> range{first, first};
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    for (const auto &player : m_players) {
+      const Rational payoff = profile->GetPayoff(player->shared_from_this());
+      range.first = std::min(range.first, payoff);
+      range.second = std::max(range.second, payoff);
+    }
+  }
+  return range;
+}
+
 void GameRep::IndexStrategies() const
 {
   const size_t n = m_players.size();
