@@ -37,17 +37,23 @@ deviating.  Every Nash equilibrium is an :math:`\varepsilon`-equilibrium with
 
 To provide a uniform interface across methods, where relevant Gambit provides a parameter
 `maxregret`, which specifies the acceptance criterion for labeling the output of the
-algorithm as an equilibrium.  This parameter is interpreted *proportionally* to the range of
-expected payoffs in the game: any profile returned as an equilibrium is guaranteed to be an
-:math:`\varepsilon`-equilibrium, for :math:`\varepsilon` no more than `maxregret` times the
-difference of the game's maximum and minimum expected payoffs.  For example, with the default
-`maxregret` of :math:`10^{-8}` in a game whose payoffs range over 4 units, any equilibrium
-returned is guaranteed to have a regret, measured directly in the game's own payoffs, of no
-more than :math:`4 \times 10^{-8}`.
+algorithm as an equilibrium.  This parameter is interpreted *proportionally* to the range of payoffs in the game: any
+profile returned as an equilibrium is guaranteed to be an :math:`\varepsilon`-equilibrium, for
+:math:`\varepsilon` no more than `maxregret` times the difference between the largest and
+smallest payoffs at any play of the game.  For example, with the default `maxregret` of
+:math:`10^{-8}` in a game whose payoffs range over 4 units, any equilibrium returned is
+guaranteed to have a regret, measured directly in the game's own payoffs, of no more than
+:math:`4 \times 10^{-8}`.
 
 Expressing `maxregret` scaled by the game's payoffs in this way standardises the behavior of
 methods across games: for instance, doubling all the payoffs in a game does not change the
 `maxregret` value needed to obtain equilibria of comparable quality.
+
+The range of payoffs is based on the representation of the game used in the calculation.
+When calculating on an extensive game, this is the maximum and minimum payoffs attainable in some
+play of the game, including chance events.  Because the reduced strategic game arising from an
+extensive game takes expected values with respect to chance events, the range of payoffs in the
+corresponding reduced strategic game will be smaller, and therefore the regret scaling will differ.
 
 Methods differ in the guarantees they offer once a `maxregret` criterion is specified.
 Globally-convergent methods, such as :ref:`logit` and :ref:`gnm`, are guaranteed to eventually

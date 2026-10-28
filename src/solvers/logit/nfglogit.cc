@@ -376,7 +376,10 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  p_regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
+  if (const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+      scale != 0.0) {
+    p_regret *= scale;
+  }
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
