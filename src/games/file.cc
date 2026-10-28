@@ -318,8 +318,9 @@ public:
   std::vector<int> NumStrategies() const
   {
     std::vector<int> ret(m_players.size());
-    std::transform(m_players.begin(), m_players.end(), ret.begin(),
-                   [](const TableFilePlayer &player) { return player.m_strategies.size(); });
+    std::ranges::transform(m_players, ret.begin(), [](const TableFilePlayer &player) {
+      return player.m_strategies.size();
+    });
     return ret;
   }
 
@@ -673,7 +674,8 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     p_state.GetNextToken();
 
     if (!p_treeData.m_outcomeRecords.contains(outcomeId)) {
-      p_treeData.m_outcomeRecords.emplace(outcomeId, OutcomeRecord{label, payoffs});
+      p_treeData.m_outcomeRecords.emplace(outcomeId,
+                                          OutcomeRecord{.m_label = label, .m_payoffs = payoffs});
       p_treeData.m_outcomeOrder.push_back(outcomeId);
     }
     else {

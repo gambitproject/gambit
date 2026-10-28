@@ -329,14 +329,14 @@ void TracingCallbackFunction::OnBifurcation(const Vector<double> &p_before,
 {
   m_bifurcations.push_back({PointToQRE(p_before), PointToQRE(p_after)});
   const auto &bifurcation = m_bifurcations.back();
-  m_onEvent(
-      LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{bifurcation.before, bifurcation.after});
+  m_onEvent(LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{.before = bifurcation.before,
+                                                                .after = bifurcation.after});
 }
 
 void TracingCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
 {
   const auto qre = PointToQRE(p_point);
-  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{p_active, qre});
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{.active = p_active, .qre = qre});
 }
 
 class EstimatorCallbackFunction {
@@ -391,13 +391,13 @@ void EstimatorCallbackFunction::OnBifurcation(const Vector<double> &p_before,
 {
   const auto before = PointToQRE(p_before);
   const auto after = PointToQRE(p_after);
-  m_onEvent(LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{before, after});
+  m_onEvent(LogitBifurcationEvent<LogitQREMixedBehaviorProfile>{.before = before, .after = after});
 }
 
 void EstimatorCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
 {
   const auto qre = PointToQRE(p_point);
-  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{p_active, qre});
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedBehaviorProfile>{.active = p_active, .qre = qre});
 }
 
 } // namespace
@@ -411,7 +411,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
 {
   Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
-    return {{p_start}, {}};
+    return {.profiles = {p_start}, .bifurcations = {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
@@ -445,7 +445,8 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   if (profiles.back().GetProfile().GetMaxRegret() < p_regret) {
     p_onEquilibrium(profiles.back().GetProfile());
   }
-  return {profiles, callback.GetBifurcations(), {result.stats}};
+  return {
+      .profiles = profiles, .bifurcations = callback.GetBifurcations(), .stats = {result.stats}};
 }
 
 LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
@@ -454,7 +455,7 @@ LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
   if (p_start.size() == 0) {
-    return {{p_start}, {}};
+    return {.profiles = {p_start}, .stats = {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);

@@ -333,23 +333,23 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
     ym2 -= sh;
     p_onStep(static_cast<int>(iter), s, ym1.norm(), ym2.norm());
     if (!std::isfinite(ym1.norm()) || !std::isfinite(ym2.norm())) {
-      return {s,
-              IPATerminationReason::NonfiniteStrategy,
-              static_cast<int>(iter),
-              numLemkeHowsonCalls,
-              numSupportChanges,
-              std::max(ym1.norm(), ym2.norm())};
+      return {.strategy = s,
+              .reason = IPATerminationReason::NonfiniteStrategy,
+              .numIterations = static_cast<int>(iter),
+              .numLemkeHowsonCalls = numLemkeHowsonCalls,
+              .numSupportChanges = numSupportChanges,
+              .finalError = std::max(ym1.norm(), ym2.norm())};
     }
     // if z and zh or s and sh are close enough,
     // we've got an approximate equilibrium, so we can quit
     if (N <= 2 || (ym1.norm() < fuzz || ym2.norm() < fuzz)) {
       A.payoffMatrix(DG, s, 0.0);
-      return {s,
-              IPATerminationReason::Converged,
-              static_cast<int>(iter),
-              numLemkeHowsonCalls,
-              numSupportChanges,
-              std::max(ym1.norm(), ym2.norm())};
+      return {.strategy = s,
+              .reason = IPATerminationReason::Converged,
+              .numIterations = static_cast<int>(iter),
+              .numLemkeHowsonCalls = numLemkeHowsonCalls,
+              .numSupportChanges = numSupportChanges,
+              .finalError = std::max(ym1.norm(), ym2.norm())};
     }
     ym1 = z;
     // do a first-order approximation on the first iteration,
@@ -390,12 +390,12 @@ IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, dou
     A.normalizeStrategy(sh);
   }
   // Max iterations reached
-  return {s,
-          IPATerminationReason::MaxIterationsReached,
-          static_cast<int>(maxiter),
-          numLemkeHowsonCalls,
-          numSupportChanges,
-          std::max(ym1.norm(), ym2.norm())};
+  return {.strategy = s,
+          .reason = IPATerminationReason::MaxIterationsReached,
+          .numIterations = static_cast<int>(maxiter),
+          .numLemkeHowsonCalls = numLemkeHowsonCalls,
+          .numSupportChanges = numSupportChanges,
+          .finalError = std::max(ym1.norm(), ym2.norm())};
 }
 
 } // end namespace Gambit::gametracer

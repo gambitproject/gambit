@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <utility>
 
 #include "games.h"
 #include "gametree.h"
@@ -317,7 +318,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
         if (actions.contains(node->m_infoset) &&
-            actions.at(node->GetInfoset().get()) == static_cast<int>(i)) {
+            std::cmp_equal(actions.at(node->GetInfoset().get()), i)) {
           prob = static_cast<T>(1);
         }
         else {

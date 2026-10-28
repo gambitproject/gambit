@@ -21,6 +21,7 @@
 //
 
 #include <numeric>
+#include <utility>
 #include "games.h"
 #include "solvers/simpdiv/simpdiv.h"
 
@@ -156,7 +157,7 @@ step1:
   /* case1b */
   else if (TT.segment(j)[h]) {
     i = 1;
-    while (labels(i, 1) != static_cast<int>(j) || labels(i, 2) != static_cast<int>(h) ||
+    while (std::cmp_not_equal(labels(i, 1), j) || std::cmp_not_equal(labels(i, 2), h) ||
            i == state.ibar) {
       i++;
     }
@@ -176,7 +177,7 @@ step1:
     }
     else {
       i = 1;
-      while ((pi(i, 1) != static_cast<int>(j) || pi(i, 2) != static_cast<int>(k)) &&
+      while ((std::cmp_not_equal(pi(i, 1), j) || std::cmp_not_equal(pi(i, 2), k)) &&
              i <= state.t) {
         i++;
       }
@@ -302,7 +303,7 @@ step4:
   pi.RotateUp(i - 1, state.t);
   state.t--;
   ii = 1;
-  while (labels(ii, 1) != static_cast<int>(j) || labels(ii, 2) != static_cast<int>(h)) {
+  while (std::cmp_not_equal(labels(ii, 1), j) || std::cmp_not_equal(labels(ii, 2), h)) {
     ii++;
   }
   i = ii;
@@ -336,7 +337,7 @@ step5:
 
 end:
   maxz = state.bestz;
-  for (i = 1; i <= static_cast<int>(game->NumPlayers()); i++) {
+  for (i = 1; std::cmp_less_equal(i, game->NumPlayers()); i++) {
     for (j = 1; j <= nstrats[i]; j++) {
       y[GetStrategy(game, i, j)] = besty.segment(i)[j];
     }
@@ -404,7 +405,7 @@ void NashSimpdivStrategySolver::getY(const State &state, MixedStrategyProfile<Ra
                                      int k)
 {
   x = v.GetFlattened();
-  for (int j = 1; j <= static_cast<int>(x.GetGame()->NumPlayers()); j++) {
+  for (int j = 1; std::cmp_less_equal(j, x.GetGame()->NumPlayers()); j++) {
     const GamePlayer player = x.GetGame()->GetPlayer(j);
     for (size_t h = 1; h <= player->GetStrategies().size(); h++) {
       if (TT.segment(j)[h] == 1 || U.segment(j)[h] == 1) {
@@ -457,7 +458,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
   ylabel[1] = 1;
   ylabel[2] = 1;
 
-  for (int i = 1; i <= static_cast<int>(yy.GetGame()->NumPlayers()); i++) {
+  for (int i = 1; std::cmp_less_equal(i, yy.GetGame()->NumPlayers()); i++) {
     const GamePlayer player = yy.GetGame()->GetPlayer(i);
     Rational payoff(0);
     Rational maxval(-1000000);
@@ -478,7 +479,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
   }
   if (maxz < bestz) {
     bestz = maxz;
-    for (int i = 1; i <= static_cast<int>(yy.GetGame()->NumPlayers()); i++) {
+    for (int i = 1; std::cmp_less_equal(i, yy.GetGame()->NumPlayers()); i++) {
       const GamePlayer player = yy.GetGame()->GetPlayer(i);
       for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
         besty.segment(i)[j] = yy[player->GetStrategy(j)];
@@ -514,7 +515,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   while (true) {
     d /= Rational(m_gridResize);
     const Rational regret = Simplex(y, d);
-    m_onEvent(SimpdivRefinementEvent{y, d, regret});
+    m_onEvent(SimpdivRefinementEvent{.profile = y, .gridSize = d, .regret = regret});
     if (regret <= maxRegret) {
       break;
     }
@@ -553,7 +554,7 @@ SimpdivStrategyResult SimpdivStrategySolve(const MixedStrategyProfile<Rational> 
   const auto solutions = NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
                                                    p_onEquilibrium, p_onEvent, p_cancel)
                              .Solve(p_start);
-  return {solutions.back(), true};
+  return {.equilibrium = solutions.back(), .success = true};
 }
 
 } // end namespace Gambit::Nash

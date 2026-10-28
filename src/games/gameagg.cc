@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <type_traits>
 #include <iostream>
 
@@ -292,8 +293,12 @@ bool GameAGGRep::IsConstSum() const
   const Rational sum = payoff_sum(NewPureStrategyProfile());
 
   auto contingencies = StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()));
-  return std::all_of(contingencies.begin(), contingencies.end(),
-                     [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
+  for (const auto &profile : contingencies) {
+    if (payoff_sum(profile) != sum) {
+      return false;
+    }
+  }
+  return true;
 }
 
 Rational GameAGGRep::GetPlayerMinPayoff(const GamePlayer &p_player) const

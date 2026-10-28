@@ -23,6 +23,7 @@
 #ifndef GAMBIT_SOLVERS_LINALG_TABLEAU_H
 #define GAMBIT_SOLVERS_LINALG_TABLEAU_H
 
+#include <algorithm>
 #include <set>
 
 #include "core/core.h"
@@ -81,10 +82,10 @@ public:
     : m_basisLabels(first, last), m_columnPositions(firstlabel, lastlabel),
       m_slackPositions(first, last)
   {
-    std::fill(m_columnPositions.begin(), m_columnPositions.end(), 0);
+    std::ranges::fill(m_columnPositions, 0);
     std::iota(m_slackPositions.begin(), m_slackPositions.end(), m_slackPositions.front_index());
-    std::generate(m_basisLabels.begin(), m_basisLabels.end(),
-                  [n = -m_basisLabels.front_index()]() mutable { return n--; });
+    std::ranges::generate(m_basisLabels,
+                          [n = -m_basisLabels.front_index()]() mutable { return n--; });
   }
   Basis(const Basis &) = default;
   ~Basis() = default;
@@ -170,8 +171,7 @@ private:
   void RefreshIsIdentity()
   {
     int i = m_basisLabels.front_index();
-    m_isIdentity = std::all_of(m_basisLabels.begin(), m_basisLabels.end(),
-                               [&i](int label) { return label == -(i++); });
+    m_isIdentity = std::ranges::all_of(m_basisLabels, [&i](int label) { return label == -(i++); });
   }
 };
 

@@ -21,6 +21,8 @@
 //
 
 #include "polysolver.h"
+
+#include <algorithm>
 #include "indexproduct.h"
 #include "lufactor.h"
 
@@ -44,7 +46,7 @@ bool fuzzy_equals(double x, double y)
 
 inline bool fuzzy_zero(const Vector<double> &x)
 {
-  return std::all_of(x.begin(), x.end(), [](double v) { return std::abs(v) < 0.000000001; });
+  return std::ranges::all_of(x, [](double v) { return std::abs(v) < 0.000000001; });
 }
 
 } // end anonymous namespace
@@ -132,8 +134,8 @@ double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
     throw RootOutsideRectangleException();
   }
   Array<int> bottom(GetDimension()), top(GetDimension());
-  std::fill(bottom.begin(), bottom.end(), 1);
-  std::fill(top.begin(), top.end(), 2);
+  std::ranges::fill(bottom, 1);
+  std::ranges::fill(top, 2);
   double max_length = 0.0;
   for (const auto &topbottoms : CartesianIndexProduct(bottom, top)) {
     Vector<double> diffs(GetDimension());
@@ -220,7 +222,7 @@ void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
                     [&point](const PolynomialDerivatives<double> &d) {
                       return d.ValueOfRootPoly(point) >= 0.0;
                     }) &&
-        !std::any_of(rootlist.begin(), rootlist.end(), [&point](const Vector<double> &root) {
+        !std::ranges::any_of(rootlist, [&point](const Vector<double> &root) {
           return std::equal(point.begin(), point.end(), root.begin(), fuzzy_equals);
         })) {
       rootlist.push_back(point);

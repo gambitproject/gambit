@@ -334,8 +334,12 @@ bool GameBAGGRep::IsConstSum() const
   const Rational sum = payoff_sum(NewPureStrategyProfile());
 
   auto contingencies = StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()));
-  return std::all_of(contingencies.begin(), contingencies.end(),
-                     [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
+  for (const auto &profile : contingencies) {
+    if (payoff_sum(profile) != sum) {
+      return false;
+    }
+  }
+  return true;
 }
 
 Rational GameBAGGRep::GetPlayerMinPayoff(const GamePlayer &p_player) const

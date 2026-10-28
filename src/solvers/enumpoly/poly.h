@@ -42,7 +42,7 @@ public:
   explicit VariableSpace(size_t nvars)
   {
     for (size_t i = 1; i <= nvars; i++) {
-      m_variables.push_back({"n" + std::to_string(i), static_cast<int>(i)});
+      m_variables.push_back({.name = "n" + std::to_string(i), .number = static_cast<int>(i)});
     }
   }
   VariableSpace(const VariableSpace &) = delete;
@@ -127,7 +127,7 @@ public:
   int GetDimension() const { return m_space->GetDimension(); }
   bool IsMultiaffine() const
   {
-    return std::all_of(m_components.begin(), m_components.end(), [](int x) { return x <= 1; });
+    return std::ranges::all_of(m_components, [](int x) { return x <= 1; });
   }
   int TotalDegree() const { return std::accumulate(m_components.begin(), m_components.end(), 0); }
 

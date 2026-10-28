@@ -175,10 +175,17 @@ inline LogitStrategyResult LogitStrategySolveEquilibrium(
   const MixedStrategyProfile<double> &candidate = trace.profiles.back().GetProfile();
   const double regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
   if (candidate.GetMaxRegret() > regret) {
-    return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached,
-            trace.bifurcations, trace.stats};
+    return {.equilibrium = std::nullopt,
+            .success = false,
+            .reason = LogitTerminationReason::RegretTargetNotReached,
+            .bifurcations = trace.bifurcations,
+            .stats = trace.stats};
   }
-  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations, trace.stats};
+  return {.equilibrium = candidate,
+          .success = true,
+          .reason = LogitTerminationReason::Converged,
+          .bifurcations = trace.bifurcations,
+          .stats = trace.stats};
 }
 
 LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
@@ -229,10 +236,17 @@ inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
   const MixedBehaviorProfile<double> &candidate = trace.profiles.back().GetProfile();
   const double regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
   if (candidate.GetMaxRegret() > regret) {
-    return {std::nullopt, false, LogitTerminationReason::RegretTargetNotReached,
-            trace.bifurcations, trace.stats};
+    return {.equilibrium = std::nullopt,
+            .success = false,
+            .reason = LogitTerminationReason::RegretTargetNotReached,
+            .bifurcations = trace.bifurcations,
+            .stats = trace.stats};
   }
-  return {candidate, true, LogitTerminationReason::Converged, trace.bifurcations, trace.stats};
+  return {.equilibrium = candidate,
+          .success = true,
+          .reason = LogitTerminationReason::Converged,
+          .bifurcations = trace.bifurcations,
+          .stats = trace.stats};
 }
 
 LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(

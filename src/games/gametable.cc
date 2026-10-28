@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <iostream>
 #include <utility>
 
@@ -374,16 +375,16 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   IndexStrategies();
 
   if (p_sparseOutcomes) {
-    std::fill(m_results.begin(), m_results.end(), m_nullOutcome.get());
+    std::ranges::fill(m_results, m_nullOutcome.get());
   }
   else {
     m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
-    std::generate(m_outcomes.begin(), m_outcomes.end(), [this, outc = 1]() mutable {
+    std::ranges::generate(m_outcomes, [this, outc = 1]() mutable {
       const auto number = outc++;
       return std::make_shared<GameOutcomeRep>(this, number, std::to_string(number));
     });
-    std::transform(m_outcomes.begin(), m_outcomes.end(), m_results.begin(),
-                   [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
+    std::ranges::transform(m_outcomes, m_results.begin(),
+                           [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
     IndexOutcomeLabels();
   }
 }
@@ -408,8 +409,12 @@ bool GameTableRep::IsConstSum() const
   const Rational sum = payoff_sum(NewPureStrategyProfile());
 
   auto contingencies = StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()));
-  return std::all_of(contingencies.begin(), contingencies.end(),
-                     [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
+  for (const auto &profile : contingencies) {
+    if (payoff_sum(profile) != sum) {
+      return false;
+    }
+  }
+  return true;
 }
 
 Rational GameTableRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
@@ -600,6 +605,7 @@ void GameTableRep::RelabelStrategies(const GamePlayer &p_player,
   std::map<GameStrategyRep *, std::string> assignment;
   std::set<const GameStrategyRep *> relabeled;
   for (const auto &[old_label, new_label] : p_labels) {
+    // NOLINTNEXTLINE(misc-const-correctness): used as a key of a map with non-const keys
     GameStrategyRep *match = nullptr;
     for (const auto &strategy : p_player->m_strategies) {
       if (strategy->GetLabel() == old_label) {
@@ -849,7 +855,7 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_pla
     bool dropped = false;
     for (size_t i = 0; i < m_players.size(); ++i) {
       long digit = (old_index / old_strides[i]) % old_radices[i];
-      if (static_cast<long>(i) == p_player) {
+      if (std::cmp_equal(i, p_player)) {
         digit = p_oldToNew[digit];
         if (digit < 0) {
           // This contingency used a strategy that was removed.

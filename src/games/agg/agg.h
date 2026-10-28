@@ -24,6 +24,7 @@
 #ifndef GAMBIT_GAMES_AGG_AGG_H
 #define GAMBIT_GAMES_AGG_AGG_H
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -217,7 +218,7 @@ public:
     s << exactPayoffs.at(node).size() << std::endl;
     for (const auto &entry : exactPayoffs.at(node)) {
       s << "[ ";
-      std::copy(entry.first.begin(), entry.first.end(), std::ostream_iterator<int>(s, " "));
+      std::ranges::copy(entry.first, std::ostream_iterator<int>(s, " "));
       s << "] " << entry.second << std::endl;
     }
   }
@@ -226,7 +227,7 @@ public:
   {
     for (const auto &neighbor : neighbors) {
       s << neighbor.size() << "\t";
-      copy(neighbor.begin(), neighbor.end(), std::ostream_iterator<int>(s, " "));
+      std::ranges::copy(neighbor, std::ostream_iterator<int>(s, " "));
       s << std::endl;
     }
   }

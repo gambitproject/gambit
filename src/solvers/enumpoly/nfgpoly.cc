@@ -182,7 +182,7 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return {ret, true};
+  return {.equilibria = ret, .success = true};
 }
 
 } // namespace Gambit::Nash

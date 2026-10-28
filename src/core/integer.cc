@@ -36,6 +36,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <limits>
 #include <stdexcept>
+#include <utility>
 
 #include "integer.h"
 #include "util.h"
@@ -71,7 +72,7 @@ constexpr unsigned int SHORT_PER_LONG = (sizeof(long) + sizeof(short) - 1) / siz
 constexpr int MIN_INTREP_SIZE = 16;
 constexpr unsigned int MALLOC_MIN_OVERHEAD = 4;
 
-static IntegerRep ZeroRep = {0, 0, I_POSITIVE, {0}};
+static IntegerRep ZeroRep = {.len = 0, .sz = 0, .sgn = I_POSITIVE, .s = {0}};
 
 // utilities to extract and transfer bits
 
@@ -198,7 +199,7 @@ static void Ifree(IntegerRep *rep) noexcept
 IntegerRep *Ialloc(IntegerRep *old, const unsigned short *src, int srclen, int newsgn, int newlen)
 {
   IntegerRep *rep;
-  if (old == nullptr || newlen > old->sz) {
+  if (old == nullptr || std::cmp_greater(newlen, old->sz)) {
     rep = Inew(newlen);
   }
   else {
@@ -222,7 +223,7 @@ IntegerRep *Ialloc(IntegerRep *old, const unsigned short *src, int srclen, int n
 IntegerRep *Icalloc(IntegerRep *old, int newlen)
 {
   IntegerRep *rep;
-  if (old == nullptr || newlen > old->sz) {
+  if (old == nullptr || std::cmp_greater(newlen, old->sz)) {
     Ifree(old);
     rep = Inew(newlen);
   }
@@ -250,7 +251,7 @@ IntegerRep *Iresize(IntegerRep *old, int newlen)
   }
   else {
     oldlen = old->len;
-    if (newlen > old->sz) {
+    if (std::cmp_greater(newlen, old->sz)) {
       rep = Inew(newlen);
       scpy(old->s, rep->s, oldlen);
       rep->sgn = old->sgn;
@@ -288,7 +289,7 @@ IntegerRep *Icopy(IntegerRep *old, const IntegerRep *src)
   }
   else {
     const int newlen = src->len;
-    if (old == nullptr || newlen > old->sz) {
+    if (old == nullptr || std::cmp_greater(newlen, old->sz)) {
       Ifree(old);
       rep = Inew(newlen);
     }
@@ -521,7 +522,7 @@ double ratio(const Integer &num, const Integer &den)
           d2 += 1.0;
         }
 
-        if (i < r.rep->len) {
+        if (std::cmp_less(i, r.rep->len)) {
           d3 *= 2.0;
           if (r.rep->s[i] & a) {
             d3 += 1.0;
@@ -900,7 +901,7 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
     }
 
     unsigned short *rs = r->s;
-    unsigned short *topr = &(rs[rl]);
+    const unsigned short *topr = &(rs[rl]);
 
     const unsigned short *outer;
     int outer_len;
@@ -1781,7 +1782,7 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
   }
 
   unsigned short *s = r->s;
-  unsigned short *top = &(s[r->len - 1]);
+  const unsigned short *top = &(s[r->len - 1]);
 
   while (s < top) {
     const unsigned short cmp = ~(*s);
@@ -1826,7 +1827,7 @@ void clearbit(Integer &x, long b)
     else {
       const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
       const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
-      if (x.rep->len > bw) {
+      if (std::cmp_greater(x.rep->len, bw)) {
         x.rep->s[bw] &= ~(1 << sw);
       }
     }
@@ -1839,7 +1840,7 @@ int testbit(const Integer &x, long b)
   if (x.rep != nullptr && b >= 0) {
     const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
     const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
-    return (bw < x.rep->len && (x.rep->s[bw] & (1 << sw)) != 0);
+    return (std::cmp_less(bw, x.rep->len) && (x.rep->s[bw] & (1 << sw)) != 0);
   }
   else {
     return 0;
@@ -2305,10 +2306,10 @@ bool Integer::OK() const
   if (rep != nullptr) {
     const int l = rep->len;
     const int s = rep->sgn;
-    int v = l <= rep->sz || IsStaticIntegerRep(rep); // length within bounds
-    v &= s == 0 || s == 1;                           // legal sign
-    Icheck(rep);                                     // and correctly adjusted
-    v &= rep->len == l;
+    int v = std::cmp_less_equal(l, rep->sz) || IsStaticIntegerRep(rep); // length within bounds
+    v &= s == 0 || s == 1;                                              // legal sign
+    Icheck(rep);                                                        // and correctly adjusted
+    v &= std::cmp_equal(rep->len, l);
     v &= rep->sgn == s;
     if (v) {
       return v;

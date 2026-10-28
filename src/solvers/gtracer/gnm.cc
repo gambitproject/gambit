@@ -22,6 +22,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include "games.h"
 #include "gtracer.h"
 
@@ -141,7 +143,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
 
   std::vector<int> s(M); // current best responses
   std::vector<int> B(M); // current support
-  std::fill(B.begin(), B.end(), 0);
+  std::ranges::fill(B, 0);
 
   cmatrix DG(M, M),     // jacobian of the payoff function
       R(M, M),          // jacobian of the retraction operator
@@ -168,7 +170,7 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
-  std::copy(B.cbegin(), B.cend(), sigma.begin());
+  std::ranges::copy(B, sigma.begin());
 
   p_onStep("start", sigma);
 
@@ -283,13 +285,13 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
       // there are no more equilibria on the path.  This could be
       // handled differently.
       if (minBound == BIGFLOAT && Index * (lambda + dlambda * delta) > 0) {
-        return {std::move(equilibria),
-                GNMTerminationReason::NoMoreBoundaries,
-                "path crosses no more support boundaries and no next equilibrium",
-                numSteps,
-                numBoundaryCrossings,
-                numLNMCalls,
-                lambda};
+        return {.equilibria = std::move(equilibria),
+                .reason = GNMTerminationReason::NoMoreBoundaries,
+                .message = "path crosses no more support boundaries and no next equilibrium",
+                .numSteps = numSteps,
+                .numBoundaryCrossings = numBoundaryCrossings,
+                .numLNMCalls = numLNMCalls,
+                .finalLambda = lambda};
       }
 
       // each step covers 1.0/steps of the distance to the boundary
@@ -328,13 +330,13 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
           }
           for (int idx = 0; idx < M; idx++) {
             if (!std::isfinite(sigma[idx])) {
-              return {std::move(equilibria),
-                      GNMTerminationReason::NonfiniteStrategy,
-                      "sigma is not finite",
-                      numSteps,
-                      numBoundaryCrossings,
-                      numLNMCalls,
-                      lambda};
+              return {.equilibria = std::move(equilibria),
+                      .reason = GNMTerminationReason::NonfiniteStrategy,
+                      .message = "sigma is not finite",
+                      .numSteps = numSteps,
+                      .numBoundaryCrossings = numBoundaryCrossings,
+                      .numLNMCalls = numLNMCalls,
+                      .finalLambda = lambda};
             }
           }
           if (ee < fuzz) { // only save high quality equilibria;
@@ -349,13 +351,13 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
         }
       }
       if (del == BIGFLOAT) {
-        return {std::move(equilibria),
-                GNMTerminationReason::NoNextBoundary,
-                "no next support boundary after this equilibrium",
-                numSteps,
-                numBoundaryCrossings,
-                numLNMCalls,
-                lambda};
+        return {.equilibria = std::move(equilibria),
+                .reason = GNMTerminationReason::NoNextBoundary,
+                .message = "no next support boundary after this equilibrium",
+                .numSteps = numSteps,
+                .numBoundaryCrossings = numBoundaryCrossings,
+                .numLNMCalls = numLNMCalls,
+                .finalLambda = lambda};
       }
 
       backup = z;
@@ -370,13 +372,13 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
       // if we're sufficiently far out on the ray in the reverse
       // direction, we're probably not going back
       if (lambda < LambdaMin && Index == -1) {
-        return {std::move(equilibria),
-                GNMTerminationReason::LambdaOutOfRange,
-                "too far out in the reverse direction",
-                numSteps,
-                numBoundaryCrossings,
-                numLNMCalls,
-                lambda};
+        return {.equilibria = std::move(equilibria),
+                .reason = GNMTerminationReason::LambdaOutOfRange,
+                .message = "too far out in the reverse direction",
+                .numSteps = numSteps,
+                .numBoundaryCrossings = numBoundaryCrossings,
+                .numLNMCalls = numLNMCalls,
+                .finalLambda = lambda};
       }
       A.retract(sigma, z);
       A.payoffMatrix(DG, sigma, fuzz);
@@ -409,13 +411,13 @@ GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int L
           // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
         }
         else {
-          return {std::move(equilibria),
-                  GNMTerminationReason::ExcessiveError,
-                  "too much error; error is " + std::to_string(ee),
-                  numSteps,
-                  numBoundaryCrossings,
-                  numLNMCalls,
-                  lambda};
+          return {.equilibria = std::move(equilibria),
+                  .reason = GNMTerminationReason::ExcessiveError,
+                  .message = "too much error; error is " + std::to_string(ee),
+                  .numSteps = numSteps,
+                  .numBoundaryCrossings = numBoundaryCrossings,
+                  .numLNMCalls = numLNMCalls,
+                  .finalLambda = lambda};
         }
       }
 

@@ -76,7 +76,7 @@ Nash::GNMStrategyResult Solve(const Game &p_game, const std::shared_ptr<gnmgame>
   const bool success = result.reason == GNMTerminationReason::NoMoreBoundaries ||
                        result.reason == GNMTerminationReason::NoNextBoundary ||
                        result.reason == GNMTerminationReason::LambdaOutOfRange;
-  return {eqa, success, result.reason};
+  return {.equilibria = eqa, .success = success, .reason = result.reason};
 }
 
 } // namespace

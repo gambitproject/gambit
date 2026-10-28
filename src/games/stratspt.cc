@@ -119,7 +119,7 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   }
 
   auto &support = m_support[p_strategy->GetPlayer()];
-  auto pos = std::find_if(support.begin(), support.end(), [p_strategy](const GameStrategy &s) {
+  auto pos = std::ranges::find_if(support, [p_strategy](const GameStrategy &s) {
     return s->GetNumber() >= p_strategy->GetNumber();
   });
   if (pos == support.end() || *pos != p_strategy) {
@@ -130,7 +130,7 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  auto ipos = std::ranges::lower_bound(digits, digit);
   if (ipos == digits.end() || *ipos != digit) {
     digits.insert(ipos, digit);
   }
@@ -145,7 +145,7 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   if (support.size() == 1) {
     return false;
   }
-  auto pos = std::find(support.begin(), support.end(), p_strategy);
+  auto pos = std::ranges::find(support, p_strategy);
   if (pos != support.end()) {
     support.erase(pos);
   }
@@ -153,7 +153,7 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  auto ipos = std::ranges::lower_bound(digits, digit);
   if (ipos != digits.end() && *ipos == digit) {
     digits.erase(ipos);
     return true;
@@ -267,11 +267,11 @@ bool UndominatedForPlayer(const StrategySupportProfile &p_support,
                                              : p_support.GetStrategies(p_player).size());
   if (p_external) {
     auto strategies = p_player->GetStrategies();
-    std::copy(strategies.begin(), strategies.end(), set.begin());
+    std::ranges::copy(strategies, set.begin());
   }
   else {
     auto strategies = p_support.GetStrategies(p_player);
-    std::copy(strategies.begin(), strategies.end(), set.begin());
+    std::ranges::copy(strategies, set.begin());
   }
   auto min =
       find_minimal_elements(set.begin(), set.end(),

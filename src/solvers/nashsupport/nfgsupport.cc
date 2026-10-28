@@ -50,7 +50,7 @@ public:
     iterator(const std::vector<size_t> &p_sizes, bool p_end = false)
       : m_sizes(p_sizes), m_indices(m_sizes.size()), m_end(p_end)
     {
-      std::fill(m_indices.begin(), m_indices.end(), 1);
+      std::ranges::fill(m_indices, 1);
     }
 
     const std::vector<size_t> &operator*() const { return m_indices; }
@@ -149,6 +149,8 @@ public:
 
     iterator &operator++()
     {
+      // std::ranges::next_permutation does not support std::vector<bool>'s proxy iterators
+      // NOLINTNEXTLINE(modernize-use-ranges)
       m_end = !std::next_permutation(m_include.begin(), m_include.end(),
                                      [](bool x, bool y) { return y < x; });
       UpdateCurrent();
@@ -175,7 +177,7 @@ std::vector<size_t> ComputeOuterDim(const std::vector<size_t> &numActions, bool 
                                     int numPlayers)
 {
   const int maxsize = std::accumulate(numActions.begin(), numActions.end(), 0) - numPlayers + 1;
-  const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
+  const int maxdiff = *std::ranges::max_element(numActions);
   std::vector<size_t> dim(2);
   dim[0] = preferBalance ? maxsize : maxdiff;
   dim[1] = preferBalance ? maxdiff : maxsize;
@@ -261,7 +263,8 @@ private:
         return true;
       }
       StrategySubsets &nextDomain = m_domains[m_stack.size()];
-      m_stack.push_back(Frame{nextDomain.GetPlayer(), nextDomain.begin(), nextDomain.end()});
+      m_stack.push_back(Frame{
+          .player = nextDomain.GetPlayer(), .cur = nextDomain.begin(), .end = nextDomain.end()});
     }
     return false;
   }
@@ -290,8 +293,7 @@ private:
     while (m_spIt != m_spEnd) {
       const std::vector<size_t> &sizeProfile = *m_spIt;
       ++m_spIt;
-      if (*std::max_element(sizeProfile.cbegin(), sizeProfile.cend()) -
-                  *std::min_element(sizeProfile.cbegin(), sizeProfile.cend()) !=
+      if (*std::ranges::max_element(sizeProfile) - *std::ranges::min_element(sizeProfile) !=
               m_diff ||
           std::accumulate(sizeProfile.cbegin(), sizeProfile.cend(), 0) != m_size) {
         continue;
@@ -306,15 +308,15 @@ private:
   {
     auto players = m_game->GetPlayers();
     m_domains.clear();
-    std::transform(players.begin(), players.end(), p_sizeProfile.begin(),
-                   std::back_inserter(m_domains),
-                   [](const GamePlayer &player, size_t sz) -> StrategySubsets {
-                     return {player, sz};
-                   });
+    size_t index = 0;
+    for (const auto &player : players) {
+      m_domains.emplace_back(player, p_sizeProfile[index++]);
+    }
     m_currentSupports.clear();
     m_stack.clear();
-    m_stack.push_back(
-        Frame{m_domains.front().GetPlayer(), m_domains.front().begin(), m_domains.front().end()});
+    m_stack.push_back(Frame{.player = m_domains.front().GetPlayer(),
+                            .cur = m_domains.front().begin(),
+                            .end = m_domains.front().end()});
   }
 
   Game m_game;

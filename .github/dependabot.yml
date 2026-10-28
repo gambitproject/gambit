@@ -20,3 +20,9 @@ updates:
       python-dependencies:
         patterns:
           - "*"
+
+  # Maintain the pinned clang-tidy version
+  - package-ecosystem: "pip"
+    directory: "/.github"
+    schedule:
+      interval: "weekly"

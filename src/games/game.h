@@ -1150,9 +1150,9 @@ inline void GameRep::EraseOutcomes(const std::set<const GameOutcomeRep *> &p_out
     c->Invalidate();
     return true;
   });
-  std::for_each(
-      m_outcomes.begin(), m_outcomes.end(),
-      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  std::ranges::for_each(m_outcomes, [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable {
+    c->m_number = outc++;
+  });
 }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }

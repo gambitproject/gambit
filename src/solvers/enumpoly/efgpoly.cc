@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include "games/gametree.h"
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
@@ -165,10 +167,10 @@ FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_ma
     }
   }
   Array<int> firstIndex(extensionInfosets.size());
-  std::fill(firstIndex.begin(), firstIndex.end(), 1);
+  std::ranges::fill(firstIndex, 1);
   Array<int> lastIndex(extensionInfosets.size());
-  std::transform(extensionInfosets.begin(), extensionInfosets.end(), lastIndex.begin(),
-                 [](const auto &infoset) { return infoset->GetActions().size(); });
+  std::ranges::transform(extensionInfosets, lastIndex.begin(),
+                         [](const auto &infoset) { return infoset->GetActions().size(); });
   CartesianIndexProduct indices(firstIndex, lastIndex);
   for (const auto &index : indices) {
     auto extension = p_baseProfile.ToFullSupport();
@@ -266,7 +268,7 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
       break;
     }
   }
-  return {ret, true};
+  return {.equilibria = ret, .success = true};
 }
 
 } // namespace Gambit::Nash

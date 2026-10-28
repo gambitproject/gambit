@@ -27,6 +27,7 @@
 #include "gameexpl.h"
 #include "seqpure.h"
 #include "stratmixed.h"
+#include <algorithm>
 #include <mutex>
 #include <unordered_map>
 
@@ -85,9 +86,9 @@ class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
 
   void RenumberActions()
   {
-    std::for_each(
-        m_actions.begin(), m_actions.end(),
-        [act = 1](const std::shared_ptr<GameActionRep> &a) mutable { a->m_number = act++; });
+    std::ranges::for_each(m_actions, [act = 1](const std::shared_ptr<GameActionRep> &a) mutable {
+      a->m_number = act++;
+    });
   }
 
 public:
@@ -417,7 +418,8 @@ public:
         m_owner = nullptr;
         return;
       }
-      m_stack.push(Frame{p_game->GetRoot(), {}, {}, false});
+      m_stack.push(
+          Frame{.m_node = p_game->GetRoot(), .m_current = {}, .m_end = {}, .m_entered = false});
       advance();
     }
 
@@ -442,7 +444,7 @@ public:
         if (!f.m_node->IsTerminal() && f.m_current != f.m_end) {
           GameNode const child = *f.m_current;
           ++f.m_current;
-          m_stack.push(Frame{child, {}, {}, false});
+          m_stack.push(Frame{.m_node = child, .m_current = {}, .m_end = {}, .m_entered = false});
           continue;
         }
 

@@ -24,6 +24,7 @@
 #ifndef GAMBIT_GAMES_AGG_PROJ_FUNC_H
 #define GAMBIT_GAMES_AGG_PROJ_FUNC_H
 
+#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <set>
@@ -96,7 +97,7 @@ struct proj_func {
   {
     out << Type;
     out << " " << Default << " ";
-    copy(weights.begin(), weights.end(), std::ostream_iterator<int>(out, " "));
+    std::ranges::copy(weights, std::ostream_iterator<int>(out, " "));
     out << std::endl;
   }
 };

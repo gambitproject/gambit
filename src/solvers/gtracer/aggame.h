@@ -24,6 +24,8 @@
 #ifndef GAMBIT_SOLVERS_GTRACER_AGGAME_H
 #define GAMBIT_SOLVERS_GTRACER_AGGAME_H
 
+#include <algorithm>
+
 #include "cmatrix.h"
 #include "gnmgame.h"
 #include "games/agg/agg.h"
@@ -68,7 +70,7 @@ public:
     const std::vector<double> sp(ss.values(), ss.values() + ss.getm());
     std::vector<double> d(aggPtr->getNumActions(player));
     aggPtr->getPayoffVector(d, player, sp);
-    std::copy(d.begin(), d.end(), dest.values());
+    std::ranges::copy(d, dest.values());
   }
   double getPurePayoff(int player, const std::vector<int> &s) const override
   {

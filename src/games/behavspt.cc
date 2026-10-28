@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+
 #include "games.h"
 #include "gametree.h"
 
@@ -68,7 +70,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
-  auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
+  auto pos = std::ranges::find_if(support, [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
   });
   if (pos == support.end() || *pos != p_action) {
@@ -87,7 +89,7 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
-  auto pos = std::find(support.begin(), support.end(), p_action);
+  auto pos = std::ranges::find(support, p_action);
   if (pos != support.end()) {
     support.erase(pos);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
@@ -103,8 +105,8 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 bool BehaviorSupportProfile::HasReachableMembers(const GameInfoset &p_infoset) const
 {
   const auto &members = p_infoset->GetMembers();
-  return std::any_of(members.begin(), members.end(),
-                     [&](const GameNode &n) { return m_nonterminalReachable.at(n); });
+  return std::ranges::any_of(members,
+                             [&](const GameNode &n) { return m_nonterminalReachable.at(n); });
 }
 
 void BehaviorSupportProfile::ActivateSubtree(const GameNode &n)

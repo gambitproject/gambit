@@ -292,6 +292,7 @@ void GameRep::RelabelPlayers(const std::map<std::string, std::string> &p_labels)
   std::map<GamePlayerRep *, std::string> assignment;
   std::set<const GamePlayerRep *> relabeled;
   for (const auto &[old_label, new_label] : p_labels) {
+    // NOLINTNEXTLINE(misc-const-correctness): used as a key of a map with non-const keys
     GamePlayerRep *match = nullptr;
     for (const auto &player : m_players) {
       if (player->GetLabel() == old_label) {

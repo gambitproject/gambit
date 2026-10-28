@@ -384,8 +384,8 @@ bool Rational::fits_in_double() const
 // These were moved from the header file to eliminate warnings
 //
 
-static IntegerRep ZeroRep = {1, 0, 1, {0}};
-static IntegerRep OneRep = {1, 0, 1, {1}};
+static IntegerRep ZeroRep = {.len = 1, .sz = 0, .sgn = 1, .s = {0}};
+static IntegerRep OneRep = {.len = 1, .sz = 0, .sgn = 1, .s = {1}};
 
 Rational::Rational() : num(&ZeroRep), den(&OneRep) {}
 Rational::~Rational() = default;
