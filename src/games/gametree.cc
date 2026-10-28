@@ -377,19 +377,19 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_pl
                                int p_actions)
   : m_game(p_efg), m_number(p_number), m_player(p_player), m_actions(p_actions)
 {
-  std::generate(m_actions.begin(), m_actions.end(), [this, i = 1]() mutable {
+  std::ranges::generate(m_actions, [this, i = 1]() mutable {
     return std::make_shared<GameActionRep>(i++, "", this);
   });
   if (p_player->IsChance()) {
     m_probs = std::vector<Number>(m_actions.size());
-    std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
+    std::ranges::fill(m_probs, Rational(1, m_actions.size()));
   }
 }
 
 GameInfosetRep::~GameInfosetRep()
 {
-  std::for_each(m_actions.begin(), m_actions.end(),
-                [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
+  std::ranges::for_each(m_actions,
+                        [](const std::shared_ptr<GameActionRep> &a) { a->Invalidate(); });
 }
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
@@ -421,6 +421,7 @@ void GameTreeRep::RelabelActions(const GameInfoset &p_infoset,
   std::map<GameActionRep *, std::string> assignment;
   std::set<const GameActionRep *> relabeled;
   for (const auto &[old_label, new_label] : p_labels) {
+    // NOLINTNEXTLINE(misc-const-correctness): used as a key of a map with non-const keys
     GameActionRep *match = nullptr;
     for (const auto &action : p_infoset->m_actions) {
       if (action->GetLabel() == old_label) {
@@ -573,13 +574,12 @@ void GameTreeRep::DoSetActions(const GameInfoset &p_infoset,
 void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 {
   IncrementVersion();
-  p_infoset->m_members.erase(std::find(p_infoset->m_members.begin(), p_infoset->m_members.end(),
-                                       p_node->shared_from_this()));
+  p_infoset->m_members.erase(std::ranges::find(p_infoset->m_members, p_node->shared_from_this()));
   if (p_infoset->m_members.empty()) {
     auto player = p_infoset->m_player;
     p_infoset->Invalidate();
-    p_infoset->m_player->m_infosets.erase(std::find(
-        player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
+    p_infoset->m_player->m_infosets.erase(
+        std::ranges::find(player->m_infosets, p_infoset->shared_from_this()));
   }
   InvalidateTreeOrdering();
 }
@@ -617,8 +617,8 @@ GameNodeRep::GameNodeRep(GameRep *e, GameNodeRep *p)
 
 GameNodeRep::~GameNodeRep()
 {
-  std::for_each(m_children.begin(), m_children.end(),
-                [](const std::shared_ptr<GameNodeRep> &n) { n->Invalidate(); });
+  std::ranges::for_each(m_children,
+                        [](const std::shared_ptr<GameNodeRep> &n) { n->Invalidate(); });
 }
 
 GameNode GameNodeRep::GetNextSibling() const
@@ -698,14 +698,13 @@ void GameTreeRep::DeleteParent(GameNode p_node)
   IncrementVersion();
   auto *oldParent = node->m_parent;
 
-  oldParent->m_children.erase(std::find(oldParent->m_children.begin(), oldParent->m_children.end(),
-                                        node->shared_from_this()));
+  oldParent->m_children.erase(std::ranges::find(oldParent->m_children, node->shared_from_this()));
   DeleteTree(oldParent->shared_from_this());
   node->m_parent = oldParent->m_parent;
   m_numNodes--;
   if (node->m_parent) {
-    std::replace(node->m_parent->m_children.begin(), node->m_parent->m_children.end(),
-                 oldParent->shared_from_this(), node->shared_from_this());
+    std::ranges::replace(node->m_parent->m_children, oldParent->shared_from_this(),
+                         node->shared_from_this());
   }
   else {
     m_root = p_node;
@@ -797,10 +796,8 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
     return;
   }
   IncrementVersion();
-  std::iter_swap(std::find(src->m_parent->m_children.begin(), src->m_parent->m_children.end(),
-                           src->shared_from_this()),
-                 std::find(dest->m_parent->m_children.begin(), dest->m_parent->m_children.end(),
-                           dest->shared_from_this()));
+  std::iter_swap(std::ranges::find(src->m_parent->m_children, src->shared_from_this()),
+                 std::ranges::find(dest->m_parent->m_children, dest->shared_from_this()));
   std::swap(src->m_parent, dest->m_parent);
   dest->m_label = "";
   dest->m_outcome = m_nullOutcome.get();
@@ -848,8 +845,8 @@ GameInfoset GameTreeRep::MakeInfoset(const std::vector<GameNode> &p_nodes,
   const auto &reference = p_nodes.front()->m_infoset->m_actions;
   for (const auto &node : p_nodes) {
     const auto &actions = node->m_infoset->m_actions;
-    if (!std::equal(
-            actions.begin(), actions.end(), reference.begin(), reference.end(),
+    if (!std::ranges::equal(
+            actions, reference,
             [](const std::shared_ptr<GameActionRep> &a, const std::shared_ptr<GameActionRep> &b) {
               return a->GetLabel() == b->GetLabel();
             })) {
@@ -965,11 +962,11 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   IncrementVersion();
   node->m_infoset = p_infoset.get();
   node->m_infoset->m_members.push_back(p_node);
-  std::for_each(node->m_infoset->m_actions.begin(), node->m_infoset->m_actions.end(),
-                [this, node](const std::shared_ptr<GameActionRep> &) {
-                  node->m_children.push_back(std::make_shared<GameNodeRep>(this, node));
-                  m_numNodes++;
-                });
+  std::ranges::for_each(node->m_infoset->m_actions,
+                        [this, node](const std::shared_ptr<GameActionRep> &) {
+                          node->m_children.push_back(std::make_shared<GameNodeRep>(this, node));
+                          m_numNodes++;
+                        });
   m_numNonterminalNodes++;
   ClearComputedValues();
   InvalidateTreeOrdering();
@@ -1053,7 +1050,7 @@ GameInfoset GameTreeRep::AppendEvent(GameNode p_node, const std::vector<std::str
     action->m_label = *label_it;
     ++label_it;
   }
-  std::copy(p_probs.begin(), p_probs.end(), newInfoset->m_probs.begin());
+  std::ranges::copy(p_probs, newInfoset->m_probs.begin());
   return AppendMove(p_node, newInfoset);
 }
 
@@ -1084,7 +1081,7 @@ GameInfoset GameTreeRep::InsertEvent(GameNode p_node, const std::vector<std::str
     action->m_label = *label_it;
     ++label_it;
   }
-  std::copy(p_probs.begin(), p_probs.end(), newInfoset->m_probs.begin());
+  std::ranges::copy(p_probs, newInfoset->m_probs.begin());
   return InsertMove(p_node, newInfoset);
 }
 
@@ -1101,8 +1098,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   p_infoset->m_members.push_back(newNode);
 
   if (node->m_parent) {
-    std::replace(node->m_parent->m_children.begin(), node->m_parent->m_children.end(),
-                 node->shared_from_this(), newNode);
+    std::ranges::replace(node->m_parent->m_children, node->shared_from_this(), newNode);
   }
   else {
     m_root = newNode;
@@ -1183,10 +1179,9 @@ bool GameTreeRep::IsConstSum() const
       if (!p_node->IsTerminal()) {
         const auto children = p_node->GetChildren();
 
-        if (std::adjacent_find(children.begin(), children.end(),
-                               [&](const GameNode &a, const GameNode &b) {
-                                 return m_subtreeSums[a] != m_subtreeSums[b];
-                               }) != children.end()) {
+        if (std::ranges::adjacent_find(children, [&](const GameNode &a, const GameNode &b) {
+              return m_subtreeSums[a] != m_subtreeSums[b];
+            }) != children.end()) {
           m_isConstSum = false;
           return DFSCallbackResult::Stop;
         }
@@ -1206,7 +1201,7 @@ bool GameTreeRep::IsConstSum() const
     static void OnVisit(GameNode, int) {}
   };
 
-  ConstSumCallback callback{this, {}};
+  ConstSumCallback callback{.m_game = this, .m_subtreeSums = {}};
   WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
           TraversalOrder::Postorder, callback);
   return callback.m_isConstSum;
@@ -1333,8 +1328,8 @@ public:
   {
     Explore({{p_root, Rational(1)}}, std::vector<Rational>(m_players.size(), Rational(0)));
     std::vector<std::pair<Rational, Rational>> result;
-    std::transform(m_ranges.begin(), m_ranges.end(), std::back_inserter(result),
-                   [](const auto &range) { return *range; });
+    std::ranges::transform(m_ranges, std::back_inserter(result),
+                           [](const auto &range) { return *range; });
     return result;
   }
 };
@@ -1363,10 +1358,10 @@ GameTreeRep::GetPlayerExpectedPayoffRange(const GamePlayer &p_player) const
 std::pair<Rational, Rational> GameTreeRep::GetExpectedPayoffRange() const
 {
   const auto ranges = ScanExpectedPayoffRanges();
-  return {std::min_element(ranges.begin(), ranges.end(),
-                           [](const auto &a, const auto &b) { return a.first < b.first; })
+  return {std::ranges::min_element(ranges,
+                                   [](const auto &a, const auto &b) { return a.first < b.first; })
               ->first,
-          std::max_element(ranges.begin(), ranges.end(), [](const auto &a, const auto &b) {
+          std::ranges::max_element(ranges, [](const auto &a, const auto &b) {
             return a.second < b.second;
           })->second};
 }
@@ -1463,18 +1458,17 @@ void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
               });
   }
   // Sort information sets by the smallest ID among their members
-  std::sort(
-      p_player->m_infosets.begin(), p_player->m_infosets.end(),
-      [](const std::shared_ptr<GameInfosetRep> &a, const std::shared_ptr<GameInfosetRep> &b) {
-        return a->m_members.front()->m_number < b->m_members.front()->m_number;
-      });
+  std::ranges::sort(p_player->m_infosets, [](const std::shared_ptr<GameInfosetRep> &a,
+                                             const std::shared_ptr<GameInfosetRep> &b) {
+    return a->m_members.front()->m_number < b->m_members.front()->m_number;
+  });
   RenumberInfosets(p_player);
 }
 
 void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 {
-  std::for_each(
-      p_player->m_infosets.begin(), p_player->m_infosets.end(),
+  std::ranges::for_each(
+      p_player->m_infosets,
       [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
 }
 
@@ -1555,9 +1549,9 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
     auto *player = n->m_infoset->m_player;
     const auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
     for (const auto &action : n->m_infoset->m_actions) {
-      auto seq_it =
-          std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
-                       [&action](const auto seq) { return seq->m_action == action.get(); });
+      auto seq_it = std::ranges::find_if(player->m_sequences, [&action](const auto seq) {
+        return seq->m_action == action.get();
+      });
       std::shared_ptr<GameSequenceRep> sequence;
       if (seq_it == player->m_sequences.end()) {
         player->m_sequences.emplace_back(std::make_shared<GameSequenceRep>(
@@ -1834,10 +1828,11 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
 
       DFSCallbackResult OnExit(const GameNode &p_node, int)
       {
+        // NOLINTNEXTLINE(misc-const-correctness): used as a key of a map with non-const keys
         GameNodeRep *node = p_node.get();
         if (p_node->IsTerminal()) {
           m_counter++;
-          m_disc[node] = {m_counter, m_counter};
+          m_disc[node] = {.m_min = m_counter, .m_max = m_counter};
         }
         else {
           Range &node_disc = m_disc[node];
@@ -1866,6 +1861,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
 
       DFSCallbackResult OnExit(const GameNode &p_node, int)
       {
+        // NOLINTNEXTLINE(misc-const-correctness): used as a key of a map with non-const keys
         GameNodeRep *node = p_node.get();
         if (p_node->IsTerminal()) {
           m_low[node] = m_disc.at(node);
@@ -1890,10 +1886,10 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
           for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1 && !spurious;
                anc = anc->m_parent) {
             const auto &members = anc->m_infoset->m_members;
-            spurious = members.size() >= 2 &&
-                       std::any_of(members.begin(), members.end(), [&](const auto &member) {
-                         return member.get() != anc && member->IsSuccessorOf(p_node);
-                       });
+            spurious =
+                members.size() >= 2 && std::ranges::any_of(members, [&](const auto &member) {
+                  return member.get() != anc && member->IsSuccessorOf(p_node);
+                });
           }
           if (!spurious) {
             m_subgames.push_back(node);
@@ -1906,10 +1902,11 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
 
     auto game = std::const_pointer_cast<GameRep>(shared_from_this());
 
-    SpanVisitor span_visitor{disc, hull};
+    SpanVisitor span_visitor{.m_disc = disc, .m_hull = hull};
     WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-    BridgeVisitor bridge_visitor{disc, hull, sd.m_subgamePostorder, {}};
+    BridgeVisitor bridge_visitor{
+        .m_disc = disc, .m_hull = hull, .m_subgames = sd.m_subgamePostorder, .m_low = {}};
     WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 
     // Phase 3: Build subgame tree with subgame differences
@@ -1962,8 +1959,11 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
     const std::unordered_set<GameNodeRep *> subgame_root_set(sd.m_subgamePostorder.begin(),
                                                              sd.m_subgamePostorder.end());
 
-    SubgameVisitor subgame_visitor{
-        subgame_root_set, sd.m_subgameByRoot, const_cast<GameTreeRep *>(this), {}, {}};
+    SubgameVisitor subgame_visitor{.m_roots = subgame_root_set,
+                                   .m_cache = sd.m_subgameByRoot,
+                                   .m_game = const_cast<GameTreeRep *>(this),
+                                   .m_stack = {},
+                                   .m_infosetVisited = {}};
     WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
     return sd;
   });
@@ -2156,9 +2156,9 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
   std::vector<GameNode> consistent_plays_copy;
   consistent_plays_copy.reserve(consistent_plays.size());
 
-  std::transform(consistent_plays.cbegin(), consistent_plays.cend(),
-                 std::back_inserter(consistent_plays_copy),
-                 [](GameNodeRep *rep_ptr) -> GameNode { return {rep_ptr->shared_from_this()}; });
+  std::ranges::transform(
+      consistent_plays, std::back_inserter(consistent_plays_copy),
+      [](GameNodeRep *rep_ptr) -> GameNode { return {rep_ptr->shared_from_this()}; });
 
   return consistent_plays_copy;
 }
@@ -2300,8 +2300,8 @@ GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
   const auto &reference = p_nodes.front()->m_infoset->m_actions;
   for (const auto &node : p_nodes) {
     const auto &actions = node->m_infoset->m_actions;
-    if (!std::equal(
-            actions.begin(), actions.end(), reference.begin(), reference.end(),
+    if (!std::ranges::equal(
+            actions, reference,
             [](const std::shared_ptr<GameActionRep> &a, const std::shared_ptr<GameActionRep> &b) {
               return a->GetLabel() == b->GetLabel();
             })) {
@@ -2337,7 +2337,7 @@ GameInfoset GameTreeRep::MakeEvent(const std::vector<GameNode> &p_nodes,
     (*dest)->m_label = action->m_label;
     ++dest;
   }
-  std::copy(p_probs.begin(), p_probs.end(), newEvent->m_probs.begin());
+  std::ranges::copy(p_probs, newEvent->m_probs.begin());
   chance->m_infosets.push_back(newEvent);
   for (const auto &node : p_nodes) {
     RemoveMember(node->m_infoset, node.get());

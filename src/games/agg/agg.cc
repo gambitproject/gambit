@@ -24,6 +24,7 @@
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
+#include <utility>
 #include "games/agg/gray.h"
 #include "games/agg/agg.h"
 
@@ -72,7 +73,7 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
     }
     t.emplace_back(sortedActionSets[i], i);
   }
-  sort(t.begin(), t.end());
+  std::ranges::sort(t);
   // vector<pair<vector<int>,int> >::iterator new_end = unique(t.begin(),t.end());
   auto p = t.begin();
   uniqueActionSets.push_back(p->first);
@@ -247,7 +248,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
       initPorder(Po[i][j], i, n, projS[ASets[i][j]]);
     }
     vector<int> as = ASets[i];
-    sort(as.begin(), as.end());
+    std::ranges::sort(as);
     if (!doneASets.contains(as)) {
       for (j = 0; j < size[i]; j++) {
         // apply i's strategy j
@@ -385,11 +386,11 @@ void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<do
     }
   }
 
-  sort(order.begin(), order.end());
+  std::ranges::sort(order);
   auto p = Po.begin();
   (*p) = i;
   ++p;
-  transform(order.begin(), order.end(), p, select2nd);
+  std::ranges::transform(order, p, select2nd);
 }
 
 // compute the induced distribution. The action graph structure (projection, Porder,
@@ -462,7 +463,7 @@ template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) c
     std::stringstream str;
     str << "AGG::getPurePayoff ERROR: unable to find the following configuration ";
     str << "[";
-    copy(pureprofile.begin(), pureprofile.end(), ostream_iterator<int>(str, " "));
+    std::ranges::copy(pureprofile, ostream_iterator<int>(str, " "));
     str << "] in payoffs of action node #" << Node;
     throw std::runtime_error(str.str());
   };
@@ -904,7 +905,7 @@ double AGG::getKSymMixedPayoff(int playerClass, vector<StrategyProfile<double>> 
 {
   double result = 0.0;
 
-  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+  for (int act = 0; std::cmp_less(act, uniqueActionSets[playerClass].size()); act++) {
     if (s[playerClass][act] > 0.0) {
 
       result += s[playerClass][act] * getKSymMixedPayoff(playerClass, act, s);
@@ -917,7 +918,7 @@ double AGG::getKSymMixedPayoff(int playerClass, StrategyProfile<double> &s)
 {
   double result = 0.0;
 
-  for (int act = 0; act < static_cast<int>(uniqueActionSets[playerClass].size()); act++) {
+  for (int act = 0; std::cmp_less(act, uniqueActionSets[playerClass].size()); act++) {
     if (s[firstKSymAction(playerClass) + act] > 0.0) {
 
       result += s[firstKSymAction(playerClass) + act] * getKSymMixedPayoff(s, playerClass, act);
@@ -1041,7 +1042,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
     if (!in.good()) {
       std::stringstream str;
       str << "Error trying to read the utility value for configuration ";
-      copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
+      std::ranges::copy(key, ostream_iterator<int>(str, " "));
       throw std::runtime_error(str.str());
     }
     const Number num(word);
@@ -1052,14 +1053,14 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
     if (!r.second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";
-      copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
+      std::ranges::copy(key, ostream_iterator<int>(str, " "));
       str << "]";
       throw std::runtime_error(str.str());
     }
     if (!exactPay.insert(make_pair(key, num)).second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";
-      copy(key.begin(), key.end(), ostream_iterator<int>(str, " "));
+      std::ranges::copy(key, ostream_iterator<int>(str, " "));
       str << "]";
       throw std::runtime_error(str.str());
     }
@@ -1069,7 +1070,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
     if (pay.count(it.first) == 0) {
       std::stringstream str;
       str << "ERROR: utility at [";
-      copy(it.first.begin(), it.first.end(), ostream_iterator<int>(str, " "));
+      std::ranges::copy(it.first, ostream_iterator<int>(str, " "));
       str << "] not specified.";
       throw std::runtime_error(str.str());
     }

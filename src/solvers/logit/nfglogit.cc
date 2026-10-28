@@ -21,6 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <cmath>
 
 #include "games.h"
@@ -203,7 +204,7 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
   for (const auto &strategy : m_game->GetStrategies()) {
     m_strategyValues[col++] = m_profile.GetPayoff(strategy);
   }
-  std::transform(m_equations.begin(), m_equations.end(), p_lhs.begin(), [this, lambda](auto e) {
+  std::ranges::transform(m_equations, p_lhs.begin(), [this, lambda](auto e) {
     return e->Value(m_profile, m_logProfile, m_strategyValues, lambda);
   });
 }
@@ -287,14 +288,14 @@ void TracingCallbackFunction::OnBifurcation(const Vector<double> &p_before,
 {
   m_bifurcations.push_back({PointToQRE(p_before), PointToQRE(p_after)});
   const auto &bifurcation = m_bifurcations.back();
-  m_onEvent(
-      LogitBifurcationEvent<LogitQREMixedStrategyProfile>{bifurcation.before, bifurcation.after});
+  m_onEvent(LogitBifurcationEvent<LogitQREMixedStrategyProfile>{.before = bifurcation.before,
+                                                                .after = bifurcation.after});
 }
 
 void TracingCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
 {
   const auto qre = PointToQRE(p_point);
-  m_onEvent(LogitPerturbationEvent<LogitQREMixedStrategyProfile>{p_active, qre});
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedStrategyProfile>{.active = p_active, .qre = qre});
 }
 
 class EstimatorCallbackFunction {
@@ -349,13 +350,13 @@ void EstimatorCallbackFunction::OnBifurcation(const Vector<double> &p_before,
 {
   const auto before = PointToQRE(p_before);
   const auto after = PointToQRE(p_after);
-  m_onEvent(LogitBifurcationEvent<LogitQREMixedStrategyProfile>{before, after});
+  m_onEvent(LogitBifurcationEvent<LogitQREMixedStrategyProfile>{.before = before, .after = after});
 }
 
 void EstimatorCallbackFunction::OnPerturbation(bool p_active, const Vector<double> &p_point)
 {
   const auto qre = PointToQRE(p_point);
-  m_onEvent(LogitPerturbationEvent<LogitQREMixedStrategyProfile>{p_active, qre});
+  m_onEvent(LogitPerturbationEvent<LogitQREMixedStrategyProfile>{.active = p_active, .qre = qre});
 }
 
 } // namespace
@@ -369,7 +370,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
 {
   Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
-    return {{p_start}, {}};
+    return {.profiles = {p_start}, .bifurcations = {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
@@ -404,7 +405,8 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
   if (profiles.back().GetProfile().GetMaxRegret() < p_regret) {
     p_onEquilibrium(profiles.back().GetProfile());
   }
-  return {profiles, callback.GetBifurcations(), {result.stats}};
+  return {
+      .profiles = profiles, .bifurcations = callback.GetBifurcations(), .stats = {result.stats}};
 }
 
 LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
@@ -414,7 +416,7 @@ LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
 {
   Nash::RequirePerfectRecall(p_start.GetGame());
   if (p_start.size() == 0) {
-    return {{p_start}, {}};
+    return {.profiles = {p_start}, .stats = {}};
   }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);

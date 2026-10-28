@@ -21,6 +21,8 @@
 //
 
 #include "polypartial.h"
+
+#include <algorithm>
 #include "indexproduct.h"
 
 namespace Gambit {
@@ -75,7 +77,7 @@ T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Vector<T> &p,
                                                            const Vector<T> &halvesoflengths) const
 {
   Vector<int> WithRespectTos(p.size());
-  std::fill(WithRespectTos.begin(), WithRespectTos.end(), 0);
+  std::ranges::fill(WithRespectTos, 0);
   return MaximalNonconstantContribution(m_treeroot, p, halvesoflengths, WithRespectTos);
 }
 
@@ -97,7 +99,7 @@ bool PolynomialDerivatives<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r
                                                                       : static_cast<T>(-1);
 
   Array<int> zeros(GetDimension());
-  std::fill(zeros.begin(), zeros.end(), 0);
+  std::ranges::fill(zeros, 0);
   Array<int> ones(GetDimension());
   for (int j = 1; j <= GetDimension(); j++) {
     ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;
@@ -124,7 +126,7 @@ bool PolynomialDerivatives<T>::MultiaffinePolyEverywhereNegativeIn(const Rectang
   }
 
   Array<int> zeros(GetDimension());
-  std::fill(zeros.begin(), zeros.end(), 0);
+  std::ranges::fill(zeros, 0);
   Array<int> ones(GetDimension());
   for (int j = 1; j <= GetDimension(); j++) {
     ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;

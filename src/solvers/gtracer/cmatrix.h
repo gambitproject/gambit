@@ -58,6 +58,12 @@ public:
       m_index++;
       return *this;
     }
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
     bool operator==(const iterator &it) const
     {
       return (m_vector == it.m_vector) && (m_index == it.m_index);
@@ -83,6 +89,12 @@ public:
     {
       m_index++;
       return *this;
+    }
+    const_iterator operator++(int)
+    {
+      const_iterator tmp = *this;
+      ++(*this);
+      return tmp;
     }
     bool operator==(const const_iterator &it) const
     {

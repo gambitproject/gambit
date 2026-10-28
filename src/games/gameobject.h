@@ -181,10 +181,22 @@ public:
       m_index++;
       return *this;
     }
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++m_index;
+      return tmp;
+    }
     iterator &operator--()
     {
       m_index--;
       return *this;
+    }
+    iterator operator--(int)
+    {
+      iterator tmp = *this;
+      --m_index;
+      return tmp;
     }
     value_type operator*() const { return m_container->at(m_index); }
 

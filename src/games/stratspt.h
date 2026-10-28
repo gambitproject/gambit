@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GAMES_STRATSPT_H
 #define GAMBIT_GAMES_STRATSPT_H
 
+#include <algorithm>
 #include <map>
 
 #include "game.h"
@@ -97,9 +98,8 @@ public:
   Array<size_t> GetShape() const
   {
     Array<size_t> shape(NumPlayers());
-    std::transform(m_strategyDigits.m_allowedDigits.begin(),
-                   m_strategyDigits.m_allowedDigits.end(), shape.begin(),
-                   [](const auto &c) { return c.size(); });
+    std::ranges::transform(m_strategyDigits.m_allowedDigits, shape.begin(),
+                           [](const auto &c) { return c.size(); });
     return shape;
   }
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
@@ -116,7 +116,7 @@ public:
   {
     const auto &digits = m_strategyDigits.m_allowedDigits[s->GetPlayer()->GetNumber() - 1];
     const int digit = s->GetNumber() - 1;
-    return std::binary_search(digits.begin(), digits.end(), digit);
+    return std::ranges::binary_search(digits, digit);
   }
 
   /// Returns true iff this support is a (weak) subset of the specified support

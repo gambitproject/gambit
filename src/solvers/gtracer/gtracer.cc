@@ -39,14 +39,15 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 
   auto players = p_game->GetPlayers();
   std::vector<int> actions(players.size());
-  std::transform(players.cbegin(), players.cend(), actions.begin(),
-                 [](const GamePlayer &p) { return p->GetStrategies().size(); });
+  std::ranges::transform(players, actions.begin(),
+                         [](const GamePlayer &p) { return p->GetStrategies().size(); });
   std::shared_ptr<gnmgame> A(new nfgame(actions));
 
   std::vector<int> profile(players.size());
   for (const auto &iter : StrategyContingencies(p_game)) {
-    std::transform(players.cbegin(), players.cend(), profile.begin(),
-                   [iter](const GamePlayer &p) { return iter->GetStrategy(p)->GetNumber() - 1; });
+    std::ranges::transform(players, profile.begin(), [iter](const GamePlayer &p) {
+      return iter->GetStrategy(p)->GetNumber() - 1;
+    });
     for (auto player : players) {
       A->setPurePayoff(player->GetNumber() - 1, profile,
                        scale * (iter->GetPayoff(player) - minPay));
@@ -64,8 +65,8 @@ cvector ToPerturbation(const MixedStrategyProfile<double> &p_pert)
     }
   }
   cvector g(all_strategies.size());
-  std::transform(all_strategies.cbegin(), all_strategies.cend(), g.begin(),
-                 [p_pert](const GameStrategy &s) { return p_pert[s]; });
+  std::ranges::transform(all_strategies, g.begin(),
+                         [p_pert](const GameStrategy &s) { return p_pert[s]; });
   for (auto player : p_pert.GetGame()->GetPlayers()) {
     bool is_tie = false;
     auto strategies = player->GetStrategies();

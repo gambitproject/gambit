@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <stack>
 
 #include "games.h"
@@ -65,7 +66,7 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
     for (GameSequence seq = p_profile.GetSequence(player); seq; seq = seq->GetParent()) {
       chain.push_back(seq);
     }
-    std::reverse(chain.begin(), chain.end()); // chain.front() is the empty sequence
+    std::ranges::reverse(chain); // chain.front() is the empty sequence
     chains[player] = chain;
     initialProgress[player] = 0;
   }
@@ -141,7 +142,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
     for (GameSequence seq = GetSequence(player); seq; seq = seq->GetParent()) {
       chain.push_back(seq);
     }
-    std::reverse(chain.begin(), chain.end()); // chain.front() is the empty sequence
+    std::ranges::reverse(chain); // chain.front() is the empty sequence
     chains[player] = chain;
     initialProgress[player] = 0;
   }
@@ -162,7 +163,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       // player's progress has caught up to the sequence designated for
       // them -- i.e. this path is one on which the profile is exactly
       // realised, not merely a prefix of it.
-      const bool matches = std::all_of(chains.begin(), chains.end(), [&](const auto &entry) {
+      const bool matches = std::ranges::all_of(chains, [&](const auto &entry) {
         return frame.progress.at(entry.first) + 1 == entry.second.size();
       });
       if (matches) {

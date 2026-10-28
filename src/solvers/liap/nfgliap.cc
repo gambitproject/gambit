@@ -173,12 +173,13 @@ LiapStrategyResult LiapStrategySolve(const MixedStrategyProfile<double> &p_start
   const double regret = p.GetMaxRegret() * F.GetScale();
   if (regret < p_maxregret) {
     p_onEquilibrium(p);
-    return {p, true, LiapTerminationReason::Converged};
+    return {.equilibrium = p, .success = true, .reason = LiapTerminationReason::Converged};
   }
-  p_onEvent(LiapEndEvent<MixedStrategyProfile<double>>{p, regret});
-  return {std::nullopt, false,
-          minimizerFailed ? LiapTerminationReason::MinimizerFailed
-                          : LiapTerminationReason::RegretTargetNotReached};
+  p_onEvent(LiapEndEvent<MixedStrategyProfile<double>>{.profile = p, .regret = regret});
+  return {.equilibrium = std::nullopt,
+          .success = false,
+          .reason = minimizerFailed ? LiapTerminationReason::MinimizerFailed
+                                    : LiapTerminationReason::RegretTargetNotReached};
 }
 
 } // namespace Gambit::Nash

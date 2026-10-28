@@ -495,5 +495,8 @@ msw-msi:
 	candle build_support/msw/gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
 
+CLANG_TIDY = clang-tidy
+
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion
+	$(CLANG_TIDY) --version
+	$(CLANG_TIDY) ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion

@@ -168,12 +168,13 @@ LiapAgentResult LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, doub
   const double regret = p2.GetAgentMaxRegret() * F.GetScale();
   if (regret < p_maxregret) {
     p_onEquilibrium(p2);
-    return {p2, true, LiapTerminationReason::Converged};
+    return {.equilibrium = p2, .success = true, .reason = LiapTerminationReason::Converged};
   }
-  p_onEvent(LiapEndEvent<MixedBehaviorProfile<double>>{p2, regret});
-  return {std::nullopt, false,
-          minimizerFailed ? LiapTerminationReason::MinimizerFailed
-                          : LiapTerminationReason::RegretTargetNotReached};
+  p_onEvent(LiapEndEvent<MixedBehaviorProfile<double>>{.profile = p2, .regret = regret});
+  return {.equilibrium = std::nullopt,
+          .success = false,
+          .reason = minimizerFailed ? LiapTerminationReason::MinimizerFailed
+                                    : LiapTerminationReason::RegretTargetNotReached};
 }
 
 } // namespace Gambit::Nash

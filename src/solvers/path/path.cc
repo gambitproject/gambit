@@ -271,7 +271,11 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   int steps = 0;
   auto finish = [&](bool p_status, const std::string &p_message) -> TracePathResult {
     stats.total_seconds = SecondsSince(start);
-    return {x, p_status, p_message, steps, stats};
+    return {.final_point = x,
+            .status = p_status,
+            .message = p_message,
+            .steps = steps,
+            .stats = stats};
   };
 
   evaluateJacobian(x);
@@ -476,7 +480,11 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
 
   auto finish = [&](bool p_status, const std::string &p_message) -> PolishResult {
     stats.total_seconds = SecondsSince(start);
-    return {x, p_status, p_message, steps, stats};
+    return {.final_point = x,
+            .status = p_status,
+            .message = p_message,
+            .steps = steps,
+            .stats = stats};
   };
   auto shouldTerminate = [&]() -> bool {
     const ScopedTimer timer(stats.terminate_seconds);

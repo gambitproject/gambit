@@ -23,6 +23,8 @@
 #include "games.h"
 #include "solvers/linalg/vertenum.h"
 #include "solvers/enummixed/enummixed.h"
+
+#include <algorithm>
 #include "clique.h"
 
 namespace Gambit::Nash {
@@ -135,8 +137,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
 
   Array<int> vert1id(solution->m_v1);
   Array<int> vert2id(solution->m_v2);
-  std::fill(vert1id.begin(), vert1id.end(), 0);
-  std::fill(vert2id.begin(), vert2id.end(), 0);
+  std::ranges::fill(vert1id, 0);
+  std::ranges::fill(vert2id, 0);
 
   int id1 = 0, id2 = 0;
 
