@@ -40,8 +40,8 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;
-  for (auto player : p_support.GetGame()->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
+  for (const auto &player : p_support.GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (p_support.Contains(strategy)) {
         m_offsets.GetFlattened()[index] = StrategyOffset(strategy);
         m_profileIndex[strategy] = index;
@@ -57,9 +57,9 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
 
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
-  for (auto player : m_support.GetGame()->GetPlayers()) {
+  for (const auto &player : m_support.GetGame()->GetPlayers()) {
     T center = static_cast<T>(1) / static_cast<T>(m_support.GetStrategies(player).size());
-    for (auto strategy : m_support.GetStrategies(player)) {
+    for (const auto &strategy : m_support.GetStrategies(player)) {
       (*this)[strategy] = center;
     }
   }
@@ -69,15 +69,15 @@ template <class T>
 std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normalize() const
 {
   auto norm = Copy();
-  for (auto player : m_support.GetGame()->GetPlayers()) {
+  for (const auto &player : m_support.GetGame()->GetPlayers()) {
     T sum = static_cast<T>(0);
-    for (auto strategy : m_support.GetStrategies(player)) {
+    for (const auto &strategy : m_support.GetStrategies(player)) {
       sum += (*this)[strategy];
     }
     if (sum == static_cast<T>(0)) {
       continue;
     }
-    for (auto strategy : m_support.GetStrategies(player)) {
+    for (const auto &strategy : m_support.GetStrategies(player)) {
       (*norm)[strategy] /= sum;
     }
   }
@@ -92,7 +92,7 @@ template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_profile)
   : m_rep(std::make_unique<TreeMixedStrategyProfileRep<T>>(p_profile))
 {
-  auto *efg = dynamic_cast<GameTreeRep *>(p_profile.GetGame().operator->());
+  const auto *efg = dynamic_cast<GameTreeRep *>(p_profile.GetGame().operator->());
   for (const auto &player : efg->m_players) {
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
@@ -123,7 +123,7 @@ MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyP
 template <class T> Vector<T> MixedStrategyProfile<T>::GetStrategy(const GamePlayer &p_player) const
 {
   CheckVersion();
-  auto strategies = m_rep->GetSupport().GetStrategies(p_player);
+  const auto strategies = m_rep->GetSupport().GetStrategies(p_player);
   Vector<T> probs(strategies.size());
   std::transform(strategies.begin(), strategies.end(), probs.begin(),
                  [this](const GameStrategy &s) { return (*m_rep)[s]; });
@@ -211,13 +211,14 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_play
 {
   CheckVersion();
   ComputePayoffs();
-  auto strategies = p_player->GetStrategies();
+  const auto strategies = p_player->GetStrategies();
   if (strategies.size() == 0) {
     return T{0};
   }
-  auto br_payoff = maximize_function(strategies, [this, p_player](const auto &strategy) -> T {
-    return m_cache.m_strategyValues.at(p_player).at(strategy);
-  });
+  const auto br_payoff =
+      maximize_function(strategies, [this, p_player](const auto &strategy) -> T {
+        return m_cache.m_strategyValues.at(p_player).at(strategy);
+      });
   return br_payoff - m_cache.m_payoffs.at(p_player);
 }
 

@@ -60,7 +60,7 @@ IPAStrategyResult IPAStrategySolve(const Game &p_game,
       pert[strategy] = 0.0;
     }
   }
-  for (auto player : p_game->GetPlayers()) {
+  for (const auto &player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
   }
   return IPAStrategySolve(pert, p_onEquilibrium, p_onEvent, p_cancel);
@@ -81,8 +81,8 @@ IPAStrategyResult IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
   const double EQERR = 1e-6;
   const int MAX_RESTARTS = 100;
 
-  auto onStep = [game, p_onEvent](int p_iteration, const cvector &p_strategy, double p_zDiff,
-                                  double p_sDiff) {
+  const auto onStep = [game, p_onEvent](int p_iteration, const cvector &p_strategy, double p_zDiff,
+                                        double p_sDiff) {
     const auto profile = ToProfile(game, p_strategy);
     p_onEvent(IPAStepEvent{
         .profile = profile, .iteration = p_iteration, .zDiff = p_zDiff, .sDiff = p_sDiff});

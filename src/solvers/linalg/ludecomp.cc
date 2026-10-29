@@ -43,7 +43,7 @@ LUDecomposition<T>::LUDecomposition(Tableau<T> &t, int rfac /* = 0 */)
   : m_tableau(t), m_basis(t.GetBasis()), m_base(std::make_shared<const BaseFactorization>()),
     m_refactorInterval(rfac), m_iterationsSinceRefactor(0)
 {
-  auto m = m_basis.GetLast() - m_basis.GetFirst() + 1;
+  const auto m = m_basis.GetLast() - m_basis.GetFirst() + 1;
   m_totalOperations = (m - 1) * m * (2 * m - 1) / 6;
 }
 

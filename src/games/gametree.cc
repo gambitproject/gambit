@@ -658,7 +658,7 @@ std::set<GameAction> GameInfosetRep::GetOwnPriorActions() const
 
 bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 {
-  auto *n = const_cast<GameNodeRep *>(this);
+  const auto *n = const_cast<GameNodeRep *>(this);
   while (n && n != p_node.get()) {
     n = n->m_parent;
   }
@@ -671,7 +671,7 @@ bool GameNodeRep::IsSubgameRoot() const
     return !GetParent();
   }
 
-  auto *tree_game = static_cast<GameTreeRep *>(m_game);
+  const auto *tree_game = static_cast<GameTreeRep *>(m_game);
   return tree_game->GetSubgameData().m_subgameByRoot.contains(const_cast<GameNodeRep *>(this));
 }
 
@@ -899,9 +899,9 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
         "Revealing the move at an absent-minded information set is not well-defined");
   }
   for (const auto &action : p_atInfoset->m_actions) {
-    auto infosets = p_player->m_infosets;
+    const auto infosets = p_player->m_infosets;
     for (const auto &infoset : infosets) {
-      auto members = infoset->m_members;
+      const auto members = infoset->m_members;
       // Members of this information set which follow 'action' are grouped
       // into a single new information set.
       std::vector<GameNode> group;
@@ -935,7 +935,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player,
   }
 
   IncrementVersion();
-  auto newInfoset = std::make_shared<GameInfosetRep>(
+  const auto newInfoset = std::make_shared<GameInfosetRep>(
       this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
   p_player->m_infosets.push_back(newInfoset);
   auto label_it = p_actions.begin();
@@ -983,8 +983,8 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   }
 
   IncrementVersion();
-  auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
-                                                     p_player.get(), p_actions);
+  const auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
+                                                           p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
   std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
                 [act = 1](const GameAction &a) mutable { a->m_label = std::to_string(act++); });
@@ -1008,7 +1008,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player,
   }
 
   IncrementVersion();
-  auto newInfoset = std::make_shared<GameInfosetRep>(
+  const auto newInfoset = std::make_shared<GameInfosetRep>(
       this, p_player->m_infosets.size() + 1, p_player.get(), static_cast<int>(p_actions.size()));
   p_player->m_infosets.push_back(newInfoset);
   auto label_it = p_actions.begin();
@@ -1039,7 +1039,7 @@ GameInfoset GameTreeRep::AppendEvent(GameNode p_node, const std::vector<std::str
 
   IncrementVersion();
   const GamePlayer chance = GetChance();
-  auto newInfoset = std::make_shared<GameInfosetRep>(
+  const auto newInfoset = std::make_shared<GameInfosetRep>(
       this, chance->m_infosets.size() + 1, chance.get(), static_cast<int>(p_actions.size()));
   chance->m_infosets.push_back(newInfoset);
   auto label_it = p_actions.begin();
@@ -1070,7 +1070,7 @@ GameInfoset GameTreeRep::InsertEvent(GameNode p_node, const std::vector<std::str
 
   IncrementVersion();
   const GamePlayer chance = GetChance();
-  auto newInfoset = std::make_shared<GameInfosetRep>(
+  const auto newInfoset = std::make_shared<GameInfosetRep>(
       this, chance->m_infosets.size() + 1, chance.get(), static_cast<int>(p_actions.size()));
   chance->m_infosets.push_back(newInfoset);
   auto label_it = p_actions.begin();
@@ -1090,7 +1090,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
 
   IncrementVersion();
   GameNodeRep *node = p_node.get();
-  auto newNode = std::make_shared<GameNodeRep>(this, node->m_parent);
+  const auto newNode = std::make_shared<GameNodeRep>(this, node->m_parent);
   newNode->m_infoset = p_infoset.get();
   p_infoset->m_members.push_back(newNode);
 
@@ -1346,7 +1346,7 @@ std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentr
 void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
 {
   // Sort nodes within information sets according to ID.
-  for (auto &infoset : p_player->m_infosets) {
+  for (const auto &infoset : p_player->m_infosets) {
     std::sort(infoset->m_members.begin(), infoset->m_members.end(),
               [](const std::shared_ptr<GameNodeRep> &a, const std::shared_ptr<GameNodeRep> &b) {
                 return a->m_number < b->m_number;
@@ -1384,7 +1384,7 @@ void GameTreeRep::EnsureInfosetOrdering() const
 {
   m_infosetOrdering.Ensure([&] {
     EnsureNodeOrdering();
-    for (auto player : GetPlayersWithChance()) {
+    for (const auto &player : GetPlayersWithChance()) {
       SortInfosets(player.get());
     }
   });
@@ -1392,8 +1392,8 @@ void GameTreeRep::EnsureInfosetOrdering() const
 
 void GameTreeRep::ClearComputedValues() const
 {
-  for (auto player : m_players) {
-    for (auto strategy : player->m_strategies) {
+  for (const auto &player : m_players) {
+    for (const auto &strategy : player->m_strategies) {
       strategy->Invalidate();
     }
     player->m_strategies.clear();
@@ -1436,7 +1436,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
     return;
   }
   if (n->GetPlayer()->IsChance()) {
-    for (auto child : n->GetChildren()) {
+    for (const auto &child : n->GetChildren()) {
       BuildSequences(child, p_currentSequences);
     }
   }
@@ -1444,7 +1444,7 @@ void GameTreeRep::BuildSequences(const GameNode &n, PureSequenceProfile &p_curre
     auto *player = n->m_infoset->m_player;
     const auto tmp_sequence = p_currentSequences.GetSequence(n->GetPlayer());
     for (const auto &action : n->m_infoset->m_actions) {
-      auto seq_it = std::ranges::find_if(player->m_sequences, [&action](const auto seq) {
+      const auto seq_it = std::ranges::find_if(player->m_sequences, [&action](const auto seq) {
         return seq->m_action == action.get();
       });
       std::shared_ptr<GameSequenceRep> sequence;
@@ -1490,7 +1490,7 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
     consistent_plays = std::vector<GameNodeRep *>{node};
   }
   else {
-    for (auto child : node->GetChildren()) {
+    for (const auto &child : node->GetChildren()) {
       auto child_consistent_plays = BuildConsistentPlaysRecursiveImpl(child.get());
       consistent_plays.insert(consistent_plays.end(), child_consistent_plays.begin(),
                               child_consistent_plays.end());
@@ -1582,7 +1582,7 @@ GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 {
   EnsureOwnPriorActions();
 
-  auto it = m_ownPriorActionInfo->node_map.find(p_node.get());
+  const auto it = m_ownPriorActionInfo->node_map.find(p_node.get());
   if (it != m_ownPriorActionInfo->node_map.end() && it->second) {
     return it->second->shared_from_this();
   }
@@ -1594,7 +1594,7 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   EnsureOwnPriorActions();
 
   std::set<GameAction> result;
-  auto it = m_ownPriorActionInfo->infoset_map.find(p_infoset.get());
+  const auto it = m_ownPriorActionInfo->infoset_map.find(p_infoset.get());
 
   if (it != m_ownPriorActionInfo->infoset_map.end()) {
     for (auto *ptr : it->second) {
@@ -1795,7 +1795,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
       }
     };
 
-    auto game = std::const_pointer_cast<GameRep>(shared_from_this());
+    const auto game = std::const_pointer_cast<GameRep>(shared_from_this());
 
     SpanVisitor span_visitor{.m_disc = disc, .m_hull = hull};
     WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
@@ -1822,7 +1822,7 @@ const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
         if (m_roots.contains(node)) {
           auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
           if (!m_stack.empty()) {
-            auto &parent_subgame = m_cache.at(m_stack.back());
+            const auto &parent_subgame = m_cache.at(m_stack.back());
             subgame->m_parent = parent_subgame;
             parent_subgame->m_children.push_back(subgame);
           }
@@ -1919,7 +1919,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
   else {
     f << "0" << std::endl;
   }
-  for (auto child : n->GetChildren()) {
+  for (const auto &child : n->GetChildren()) {
     WriteEfgFile(f, child);
   }
 }
@@ -1949,8 +1949,8 @@ void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
 int GameTreeRep::BehavProfileLength() const
 {
   int sum = 0;
-  for (auto player : m_players) {
-    for (auto infoset : player->m_infosets) {
+  for (const auto &player : m_players) {
+    for (const auto &infoset : player->m_infosets) {
       sum += infoset->m_actions.size();
     }
   }
@@ -2001,7 +2001,8 @@ void GameTreeRep::SetPlayers(const std::vector<std::string> &p_labels)
       newPlayers.push_back(m_players[source[j]]);
       continue;
     }
-    auto player = std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j]);
+    const auto player =
+        std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j]);
     for (const auto &outcome : m_outcomes) {
       outcome->m_payoffs[player.get()] = Number();
     }
@@ -2029,7 +2030,7 @@ void GameTreeRep::SetPlayers(const std::vector<std::string> &p_labels)
 GameInfoset GameTreeRep::GetInfoset(int p_index) const
 {
   int index = 1;
-  for (auto player : m_players) {
+  for (const auto &player : m_players) {
     for (auto infoset : player->m_infosets) {
       if (index++ == p_index) {
         return infoset;

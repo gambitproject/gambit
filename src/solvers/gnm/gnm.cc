@@ -53,8 +53,8 @@ Nash::GNMStrategyResult Solve(const Game &p_game, const std::shared_ptr<gnmgame>
   const auto perturbation = ToProfile(p_game, p_pert);
   p_onEvent(Nash::GNMPerturbationEvent{.profile = perturbation});
   cvector norm_pert = p_pert / p_pert.norm();
-  auto callback = [p_game, p_onEquilibrium, p_onEvent](const std::string &label,
-                                                       const cvector &sigma) {
+  const auto callback = [p_game, p_onEquilibrium, p_onEvent](const std::string &label,
+                                                             const cvector &sigma) {
     const auto profile = ToProfile(p_game, sigma);
     if (label == "NE") {
       p_onEquilibrium(profile);
@@ -96,7 +96,7 @@ GNMStrategyResult GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p
       pert[strategy] = 0.0;
     }
   }
-  for (auto player : p_game->GetPlayers()) {
+  for (const auto &player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
   }
   return Solve(p_game, A, ToPerturbation(pert), p_lambdaEnd, p_steps, p_localNewtonInterval,

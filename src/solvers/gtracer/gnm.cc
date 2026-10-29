@@ -35,9 +35,9 @@ const double BIGFLOAT = 3.0e+28;
 // the image of the graph of the equilibrium correspondence above the ray,
 // under the homeomorphism.  In order to prevent costly memory allocation,
 // a number of scratch vectors are passed in.
-double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG,
-           cvector &s, int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup,
-           bool ksym = false)
+double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, const cmatrix &J,
+           cmatrix &DG, cvector &s, int MaxLNM, double fuzz, cvector &del, cvector &scratch,
+           cvector &backup, bool ksym = false)
 {
   double b, e = BIGFLOAT, ee;
   int k, faulted = 0;
@@ -112,7 +112,7 @@ void FindUniquePerturbedEquilibrium(const gnmgame &A, const cvector &g, std::vec
   }
 }
 
-GNMResult GNM(gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
+GNMResult GNM(const gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
               double LambdaMin, bool wobble, double threshold,
               std::function<void(const std::string &, const cvector &)> p_onStep,
               const CancelToken &p_cancel)

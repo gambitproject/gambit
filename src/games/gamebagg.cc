@@ -103,7 +103,7 @@ private:
 
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
+  const auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
   std::vector<T> s(g.GetStrategies().size());
   const auto ns = g.GetStrategies().shape();
   int bplayer = -1, btype = -1;
@@ -328,7 +328,7 @@ Game GameBAGGRep::Copy() const
 
 bool GameBAGGRep::IsConstSum() const
 {
-  auto payoff_sum = [&](const PureStrategyProfile &p) {
+  const auto payoff_sum = [&](const PureStrategyProfile &p) {
     return sum_function(m_players, [&](const auto &player) { return p->GetPayoff(player); });
   };
   const Rational sum = payoff_sum(NewPureStrategyProfile());

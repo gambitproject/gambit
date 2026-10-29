@@ -30,14 +30,14 @@ namespace Gambit::gametracer {
 
 std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 {
-  if (auto aggGame = As<GameAGGRep>(p_game)) {
+  if (const auto aggGame = As<GameAGGRep>(p_game)) {
     return std::shared_ptr<gnmgame>(new aggame(*aggGame));
   }
   const Rational maxPay = p_game->GetMaxPayoff();
   const Rational minPay = p_game->GetMinPayoff();
   const double scale = (p_scaled && maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
 
-  auto players = p_game->GetPlayers();
+  const auto players = p_game->GetPlayers();
   std::vector<int> actions(players.size());
   std::ranges::transform(players, actions.begin(),
                          [](const GamePlayer &p) { return p->GetStrategies().size(); });
@@ -48,7 +48,7 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
     std::ranges::transform(players, profile.begin(), [iter](const GamePlayer &p) {
       return iter->GetStrategy(p)->GetNumber() - 1;
     });
-    for (auto player : players) {
+    for (const auto &player : players) {
       A->setPurePayoff(player->GetNumber() - 1, profile,
                        scale * (iter->GetPayoff(player) - minPay));
     }
@@ -67,9 +67,9 @@ cvector ToPerturbation(const MixedStrategyProfile<double> &p_pert)
   cvector g(all_strategies.size());
   std::ranges::transform(all_strategies, g.begin(),
                          [p_pert](const GameStrategy &s) { return p_pert[s]; });
-  for (auto player : p_pert.GetGame()->GetPlayers()) {
+  for (const auto &player : p_pert.GetGame()->GetPlayers()) {
     bool is_tie = false;
-    auto strategies = player->GetStrategies();
+    const auto strategies = player->GetStrategies();
     auto strategy = strategies.cbegin();
     double maxval = p_pert[*strategy];
     for (++strategy; strategy != strategies.cend(); ++strategy) {

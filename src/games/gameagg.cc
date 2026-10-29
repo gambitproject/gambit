@@ -97,7 +97,7 @@ public:
 
 template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
+  const auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
   std::vector<T> s(g.aggPtr->getNumActions());
   for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
     for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
@@ -113,7 +113,7 @@ template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 template <class T>
 T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
+  const auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
   std::vector<T> s(g.aggPtr->getNumActions());
   for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
     if (i + 1 == ps->GetPlayer()->GetNumber()) {
@@ -144,7 +144,7 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
     return T(0);
   }
 
-  auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
+  const auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
   std::vector<T> s(g.aggPtr->getNumActions());
   for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
     if (i + 1 == player1->GetNumber()) {
@@ -182,7 +182,7 @@ void AGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_val
   }
   else {
     const auto game = this->m_support.GetGame();
-    auto &g = dynamic_cast<GameAGGRep &>(*game);
+    const auto &g = dynamic_cast<GameAGGRep &>(*game);
     const auto &agg = *g.aggPtr;
     std::vector<double> s(agg.getNumActions());
     for (int i = 0; i < agg.getNumPlayers(); ++i) {
@@ -287,7 +287,7 @@ GameAGGRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfi
 
 bool GameAGGRep::IsConstSum() const
 {
-  auto payoff_sum = [&](const PureStrategyProfile &p) {
+  const auto payoff_sum = [&](const PureStrategyProfile &p) {
     return sum_function(m_players, [&](const auto &player) { return p->GetPayoff(player); });
   };
   const Rational sum = payoff_sum(NewPureStrategyProfile());

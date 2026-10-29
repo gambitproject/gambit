@@ -100,7 +100,7 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // shifted by payoffShift and weighted by chance's probability of that
   // pair actually being realised (which need not be 1 -- see
   // PureSequenceProfile::GetRealizationProbability).
-  for (auto profile : game->GetSequenceContingencies()) {
+  for (const auto &profile : game->GetSequenceContingencies()) {
     const GameSequence &seq1 = profile.GetSequence(player1);
     const GameSequence &seq2 = profile.GetSequence(player2);
     const Rational prob = profile.GetRealizationProbability();
@@ -113,7 +113,7 @@ template <class T> Matrix<T> ConstructMatrix(const ColumnIndexMap &p_indexMap)
   // Constraint block: for each information set, the sum-to-one relation
   // between the probability of the sequence leading to it and the sum of
   // the probabilities of its own actions' sequences.
-  for (auto player : game->GetPlayers()) {
+  for (const auto &player : game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       const int infosetIdx = p_indexMap.infosetIndex.at(infoset);
       const auto children = infoset->GetSequences();

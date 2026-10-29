@@ -390,7 +390,7 @@ void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 void ReadStrategies(GameFileLexer &p_state, TableFileGame &p_data)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
-  auto token = p_state.GetNextToken();
+  const auto token = p_state.GetNextToken();
 
   if (token == TOKEN_LBRACE) {
     // Nested list of strategy labels
@@ -451,7 +451,7 @@ struct NfgOutcomeRecords {
 
 NfgOutcomeRecords ReadOutcomeList(GameFileLexer &p_parser, const Game &p_nfg)
 {
-  auto players = p_nfg->GetPlayers();
+  const auto players = p_nfg->GetPlayers();
   p_parser.GetNextToken();
 
   // Buffer raw labels + payoffs; which records become outcomes depends on the index table
@@ -478,7 +478,7 @@ NfgOutcomeRecords ReadOutcomeList(GameFileLexer &p_parser, const Game &p_nfg)
   return records;
 }
 
-void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
+void ParseOutcomeBody(GameFileLexer &p_parser, const Game &p_nfg)
 {
   const auto records = ReadOutcomeList(p_parser, p_nfg);
   // First pass: the outcome id at each contingency, in iteration order.
@@ -523,7 +523,7 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
   }
 }
 
-void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
+void ParsePayoffBody(GameFileLexer &p_parser, const Game &p_nfg)
 {
   for (const auto &profile : StrategyContingencies(p_nfg)) {
     for (const auto &player : p_nfg->GetPlayers()) {
@@ -534,7 +534,7 @@ void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
   }
 }
 
-Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
+Game BuildNfg(GameFileLexer &p_parser, const TableFileGame &p_data)
 {
   if (p_parser.GetCurrentToken() != TOKEN_LBRACE && p_parser.GetCurrentToken() != TOKEN_NUMBER) {
     p_parser.OnParseError("Expecting outcome or payoff");
@@ -546,26 +546,26 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   nfg->SetDescription(p_data.m_comment);
 
   std::vector<std::string> playerLabels;
-  for (auto player : nfg->GetPlayers()) {
+  for (const auto &player : nfg->GetPlayers()) {
     playerLabels.push_back(p_data.GetPlayer(player->GetNumber()));
   }
   NormalizeLabelStrings(playerLabels);
   std::map<std::string, std::string> playerRelabels;
   size_t playerIndex = 0;
-  for (auto player : nfg->GetPlayers()) {
+  for (const auto &player : nfg->GetPlayers()) {
     playerRelabels[player->GetLabel()] = playerLabels[playerIndex++];
   }
   nfg->RelabelPlayers(playerRelabels);
 
-  for (auto player : nfg->GetPlayers()) {
+  for (const auto &player : nfg->GetPlayers()) {
     std::vector<std::string> strategyLabels;
-    for (auto strategy : player->GetStrategies()) {
+    for (const auto &strategy : player->GetStrategies()) {
       strategyLabels.push_back(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
     NormalizeLabelStrings(strategyLabels);
     std::map<std::string, std::string> labels;
     size_t index = 0;
-    for (auto strategy : player->GetStrategies()) {
+    for (const auto &strategy : player->GetStrategies()) {
       labels[strategy->GetLabel()] = strategyLabels[index++];
     }
     nfg->RelabelStrategies(player, labels);
@@ -606,7 +606,7 @@ public:
   std::map<int, std::map<int, GameInfoset>> m_infosetMap;
 };
 
-void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
+void ReadPlayers(GameFileLexer &p_state, const Game &p_game, const TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   // Buffer the raw player labels so they can be normalized (made unique and nonempty)
@@ -649,7 +649,8 @@ void CheckOutcomeDefinition(const GameFileLexer &p_state, int p_outcomeId,
   }
 }
 
-void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
+void ParseOutcome(GameFileLexer &p_state, const Game &p_game, TreeData &p_treeData,
+                  const GameNode &p_node)
 {
   p_state.ExpectCurrentToken(TOKEN_NUMBER, "index of outcome");
   const int outcomeId = std::stoi(p_state.GetLastText());
@@ -665,7 +666,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
 
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
-    for (auto player : p_game->GetPlayers()) {
+    for (const auto &player : p_game->GetPlayers()) {
       p_state.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
       payoffs.emplace_back(p_state.GetLastText());
       p_state.AcceptNextToken(TOKEN_COMMA);
@@ -751,7 +752,7 @@ void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, con
                          ")");
   }
   auto label_it = normalized_labels.begin();
-  for (auto action : actions) {
+  for (const auto &action : actions) {
     if (action->GetLabel() != *label_it) {
       p_state.OnParseError("Infoset action labels do not match previous definition "
                            "(player " +
@@ -784,7 +785,8 @@ void CheckChanceProbs(const GameFileLexer &p_state, const int p_infosetId,
 
 void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData);
 
-void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, TreeData &p_treeData)
+void ParseChanceNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
+                     TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
@@ -833,7 +835,7 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
   }
 
   ParseOutcome(p_state, p_game, p_treeData, p_node);
-  for (auto child : p_node->GetChildren()) {
+  for (const auto &child : p_node->GetChildren()) {
     ParseNode(p_state, p_game, child, p_treeData);
   }
 }
@@ -887,7 +889,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
   }
 
   ParseOutcome(p_state, p_game, p_treeData, p_node);
-  for (auto child : p_node->GetChildren()) {
+  for (const auto &child : p_node->GetChildren()) {
     ParseNode(p_state, p_game, child, p_treeData);
   }
 }
@@ -1043,6 +1045,7 @@ Game ReadBaggFile(std::istream &p_stream)
   }
 }
 
+// NOLINTNEXTLINE(misc-const-correctness): reads from the stream
 Game ReadGame(std::istream &p_file)
 {
   std::stringstream buffer;

@@ -92,7 +92,7 @@ double StrategicLyapunovFunction::LiapDerivValue(const MixedStrategyProfile<doub
   double deriv = 0.0;
   for (const auto &player : m_game->GetPlayers()) {
     const double payoff = p_profile.GetPayoff(player);
-    for (auto strategy : player->GetStrategies()) {
+    for (const auto &strategy : player->GetStrategies()) {
       const double loss = sqr(m_scale) * (p_profile.GetPayoff(strategy) - payoff);
       if (loss <= 0.0) {
         continue;

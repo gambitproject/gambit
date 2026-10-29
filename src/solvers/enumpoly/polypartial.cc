@@ -150,7 +150,7 @@ bool PolynomialDerivatives<T>::PolyEverywhereNegativeIn(const Rectangle<T> &r) c
   if (m_treeroot.data.IsMultiaffine()) {
     return MultiaffinePolyEverywhereNegativeIn(r);
   }
-  auto center = r.Center();
+  const auto center = r.Center();
   T constant = m_treeroot.data.Evaluate(center);
   if (constant >= static_cast<T>(0)) {
     return false;

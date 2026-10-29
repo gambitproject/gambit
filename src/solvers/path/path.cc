@@ -236,34 +236,34 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   GivensQR qr;
   Vector<double> work(x.size());
 
-  auto evaluateFunction = [&](const Vector<double> &p_point) {
+  const auto evaluateFunction = [&](const Vector<double> &p_point) {
     const ScopedTimer timer(stats.function_seconds);
     stats.function_evals++;
     p_function(p_point, y);
   };
-  auto evaluateJacobian = [&](const Vector<double> &p_point) {
+  const auto evaluateJacobian = [&](const Vector<double> &p_point) {
     const ScopedTimer timer(stats.jacobian_seconds);
     stats.jacobian_evals++;
     p_jacobian(p_point, b);
   };
-  auto factorize = [&]() {
+  const auto factorize = [&]() {
     const ScopedTimer timer(stats.factorization_seconds);
     stats.factorizations++;
     qr.Decompose(b);
   };
-  auto tangent = [&](Vector<double> &p_tangent) {
+  const auto tangent = [&](Vector<double> &p_tangent) {
     const ScopedTimer timer(stats.factorization_seconds);
     qr.LastRow(p_tangent);
   };
-  auto newtonStep = [&](double &p_dist) {
+  const auto newtonStep = [&](double &p_dist) {
     const ScopedTimer timer(stats.newton_seconds);
     NewtonStep(qr, b, u, y, work, p_dist);
   };
-  auto shouldTerminate = [&]() -> bool {
+  const auto shouldTerminate = [&]() -> bool {
     const ScopedTimer timer(stats.terminate_seconds);
     return p_terminate(x);
   };
-  auto callback = [&]() {
+  const auto callback = [&]() {
     const ScopedTimer timer(stats.callback_seconds);
     p_callback(x);
   };
@@ -283,7 +283,7 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   tangent(t);
   callback();
 
-  auto stepsizeBelowMinimum = [&]() -> TracePathResult {
+  const auto stepsizeBelowMinimum = [&]() -> TracePathResult {
     if (newton && std::abs(p_criterion(x, t)) < c_newtonTol) {
       return finish(
           true, "Path following terminated successfully at point satisfying criterion function.");
@@ -478,7 +478,7 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
   int steps = 0;
   double dist = 0.0;
 
-  auto finish = [&](bool p_status, const std::string &p_message) -> PolishResult {
+  const auto finish = [&](bool p_status, const std::string &p_message) -> PolishResult {
     stats.total_seconds = SecondsSince(start);
     return {.final_point = x,
             .status = p_status,
@@ -486,7 +486,7 @@ PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<doubl
             .steps = steps,
             .stats = stats};
   };
-  auto shouldTerminate = [&]() -> bool {
+  const auto shouldTerminate = [&]() -> bool {
     const ScopedTimer timer(stats.terminate_seconds);
     return p_terminate(x);
   };

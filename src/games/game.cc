@@ -96,7 +96,7 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
   // Reduced strategies are labelled by their sequence number in their generation order.
   // This order is deterministic for a given game (see MakeReducedStrats)
   const std::string number = std::to_string(m_strategies.size() + 1);
-  auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, number);
+  const auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, number);
   strategy->m_behav = behav;
   m_strategies.push_back(strategy);
 }
@@ -165,10 +165,10 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
 
 GameRep::~GameRep()
 {
-  for (auto player : m_players) {
+  for (const auto &player : m_players) {
     player->Invalidate();
   }
-  for (auto outcome : m_outcomes) {
+  for (const auto &outcome : m_outcomes) {
     outcome->Invalidate();
   }
   m_nullOutcome->Invalidate();
@@ -226,13 +226,13 @@ void GameRep::CheckPlayerLabel(const std::string &p_label,
 ///
 void GameRep::WriteNfgFile(std::ostream &p_file) const
 {
-  auto players = GetPlayers();
+  const auto players = GetPlayers();
   p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl
          << std::endl;
   p_file << "{ ";
-  for (auto player : players) {
+  for (const auto &player : players) {
     p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
     }) << std::endl;

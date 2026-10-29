@@ -273,8 +273,7 @@ class SolverThreadRunner final : public wxThread {
   {
     int exitCode = 0;
     try {
-      m_solver(
-          m_game, [this](const ComputedProfile &p) { PostProfile(p); }, m_cancel);
+      m_solver(m_game, [this](const ComputedProfile &p) { PostProfile(p); }, m_cancel);
     }
     catch (const ComputationCanceledException &) {
       // Not an error -- NashMonitorDialog's m_stopRequested flag (already

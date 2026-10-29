@@ -141,7 +141,7 @@ public:
 
     size_t size() const
     {
-      auto reachable_infosets = m_support->GetReachableInfosets();
+      const auto reachable_infosets = m_support->GetReachableInfosets();
       size_t count = 0;
       for (auto [infoset, is_reachable] : *reachable_infosets) {
         if (is_reachable && !infoset->GetPlayer()->IsChance()) {

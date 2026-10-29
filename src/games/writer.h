@@ -52,7 +52,7 @@ std::string FormatList(const C &p_container, T p_renderer, bool p_commas = false
     s = "{";
     delim = " ";
   }
-  for (auto element : p_container) {
+  for (const auto &element : p_container) {
     s += delim + p_renderer(element);
     if (p_commas) {
       delim = ", ";

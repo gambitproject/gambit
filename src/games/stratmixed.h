@@ -375,8 +375,8 @@ template <class Generator>
 {
   auto profile = p_game->NewMixedStrategyProfile(0.0);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
-  for (auto player : p_game->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       profile[strategy] = dist(generator);
     }
   }
@@ -425,11 +425,11 @@ template <class Generator>
 NewRandomStrategyProfile(const Game &p_game, int denom, Generator &generator)
 {
   auto profile = p_game->NewMixedStrategyProfile(Rational(0));
-  for (auto player : p_game->GetPlayers()) {
+  for (const auto &player : p_game->GetPlayers()) {
     const std::list<Rational> dist =
         UniformOnSimplex(denom, player->GetStrategies().size(), generator);
     auto prob = dist.cbegin();
-    for (auto strategy : player->GetStrategies()) {
+    for (const auto &strategy : player->GetStrategies()) {
       profile[strategy] = *prob;
       ++prob;
     }

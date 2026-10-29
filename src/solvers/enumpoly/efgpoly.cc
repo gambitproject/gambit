@@ -92,13 +92,13 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
                                                                 m_support.GetInfosets().size() -
                                                                 m_support.GetPlayers().size()))
 {
-  for (auto sequence : m_support.GetSequences()) {
+  for (const auto &sequence : m_support.GetSequences()) {
     if (sequence->GetAction() && !IsEliminated(m_support, sequence)) {
       var[sequence] = var.size() + 1;
     }
   }
 
-  for (auto sequence : m_support.GetSequences()) {
+  for (const auto &sequence : m_support.GetSequences()) {
     variables.emplace(sequence, BuildSequenceVariable(*this, sequence));
   }
 }
@@ -107,11 +107,11 @@ Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &
 {
   Polynomial<double> equation(p_data.space);
 
-  for (auto profile : p_data.m_support.GetSequenceContingencies()) {
-    auto pay = profile.GetPayoff(p_player);
+  for (const auto &profile : p_data.m_support.GetSequenceContingencies()) {
+    const auto pay = profile.GetPayoff(p_player);
     if (pay != Rational(0)) {
       Polynomial<double> term(p_data.space, pay);
-      for (auto player : p_data.m_support.GetPlayers()) {
+      for (const auto &player : p_data.m_support.GetPlayers()) {
         term *= p_data.variables.at(profile.GetSequence(player));
       }
       equation += term;
@@ -122,10 +122,10 @@ Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &
 
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
-  for (auto player : p_data.m_support.GetPlayers()) {
+  for (const auto &player : p_data.m_support.GetPlayers()) {
     const Polynomial<double> payoff = BuildPayoffPolynomial(p_data, player);
-    for (auto sequence : p_data.m_support.GetSequences(player)) {
-      if (auto it = p_data.var.find(sequence); it != p_data.var.end()) {
+    for (const auto &sequence : p_data.m_support.GetSequences(player)) {
+      if (const auto it = p_data.var.find(sequence); it != p_data.var.end()) {
         p_equations.push_back(payoff.PartialDerivative(it->second));
       }
       // Sequences with no entry in p_data.var have had their variable
@@ -136,7 +136,7 @@ void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equa
 
 void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
-  for (auto sequence : p_data.m_support.GetSequences()) {
+  for (const auto &sequence : p_data.m_support.GetSequences()) {
     if (!sequence->GetAction()) {
       continue;
     }
@@ -150,7 +150,7 @@ void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<do
 std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const Vector<double> &v)
 {
   std::map<GameSequence, double> x;
-  for (auto sequence : p_data.m_support.GetSequences()) {
+  for (const auto &sequence : p_data.m_support.GetSequences()) {
     x[sequence] = p_data.variables.at(sequence).Evaluate(v);
   }
   return x;
@@ -246,7 +246,7 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
   std::list<MixedBehaviorProfile<double>> ret;
   PossibleNashBehaviorSupports possible_supports(p_game);
 
-  for (auto support : possible_supports) {
+  for (const auto &support : possible_supports) {
     p_cancel.Check();
     p_onEvent(EnumPolyCandidateSupportEvent<BehaviorSupportProfile>{support});
     bool isSingular = false;

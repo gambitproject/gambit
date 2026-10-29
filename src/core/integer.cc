@@ -151,6 +151,7 @@ static void Iclear_from(IntegerRep *rep, int p)
 
 // copy parts of a rep
 
+// NOLINTNEXTLINE(misc-const-correctness): writes through dest
 void scpy(const unsigned short *src, unsigned short *dest, int nb)
 {
   while (--nb >= 0) {
@@ -1183,7 +1184,7 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
   else {
     IntegerRep *yy = nullptr;
     IntegerRep *r = nullptr;
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q) {
       yy = multiply(y, (static_cast<long>(prescale) & I_MAXNUM), yy);
       r = multiply(x, (static_cast<long>(prescale) & I_MAXNUM), r);
@@ -1246,7 +1247,7 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
   }
   else {
     IntegerRep *r = nullptr;
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
       unsigned long prod =
           static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
@@ -1312,7 +1313,7 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
   }
   else {
     IntegerRep *r = nullptr;
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
       unsigned long prod =
           static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
@@ -1387,7 +1388,7 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
   }
   else {
     IntegerRep *yy = nullptr;
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r) {
       yy = multiply(y, static_cast<long>(prescale) & I_MAXNUM, yy);
       r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
@@ -1446,7 +1447,7 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   }
   else {
     IntegerRep *yy = nullptr;
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r) {
       yy = multiply(y, static_cast<long>(prescale) & I_MAXNUM, yy);
       r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
@@ -1508,7 +1509,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
     }
   }
   else {
-    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
+    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
       unsigned long prod =
           static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
@@ -2178,7 +2179,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
     // find power
     int bpower = 1;
     unsigned short b = base;
-    auto maxb = static_cast<unsigned short>(I_MAXNUM / base);
+    const auto maxb = static_cast<unsigned short>(I_MAXNUM / base);
     while (b < maxb) {
       b *= base;
       ++bpower;

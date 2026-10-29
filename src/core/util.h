@@ -222,7 +222,7 @@ private:
 template <class Container, class Func>
 auto maximize_function(const Container &p_container, const Func &p_function)
 {
-  auto it = p_container.begin();
+  const auto it = p_container.begin();
   using T = decltype(p_function(*it));
   return std::transform_reduce(
       std::next(it), p_container.end(), p_function(*it),
@@ -233,7 +233,7 @@ auto maximize_function(const Container &p_container, const Func &p_function)
 template <class Container, class Func>
 auto minimize_function(const Container &p_container, const Func &p_function)
 {
-  auto it = p_container.begin();
+  const auto it = p_container.begin();
   using T = decltype(p_function(*it));
   return std::transform_reduce(
       std::next(it), p_container.end(), p_function(*it),

@@ -66,7 +66,7 @@ public:
 
   void getPayoffVector(cvector &dest, int player, const cvector &s) const override
   {
-    auto ss = const_cast<cvector &>(s);
+    const auto ss = const_cast<cvector &>(s);
     const std::vector<double> sp(ss.values(), ss.values() + ss.getm());
     std::vector<double> d(aggPtr->getNumActions(player));
     aggPtr->getPayoffVector(d, player, sp);

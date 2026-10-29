@@ -219,7 +219,7 @@ public:
     T answer = coef;
 
     auto exp_it = exps.begin();
-    auto exp_end = exps.end();
+    const auto exp_end = exps.end();
     auto val_it = p_values.begin();
     for (; exp_it != exp_end; ++exp_it, ++val_it) {
       if (const int e = *exp_it; e > 0) {

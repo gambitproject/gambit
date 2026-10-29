@@ -22,6 +22,14 @@ jobs:
           python-version: "3.14"
       - name: Install pinned clang-format
         run: python -m pip install -r .github/lint-requirements.txt
+      - name: Check pre-commit clang-format version matches the pinned version
+        run: |
+          pinned=$(sed -n 's/^clang-format==//p' .github/lint-requirements.txt)
+          hook=$(grep -A1 'mirrors-clang-format' .pre-commit-config.yaml | sed -n 's/^ *rev: v//p')
+          if [ "$pinned" != "$hook" ]; then
+            echo "::error::clang-format is $pinned in .github/lint-requirements.txt but $hook in .pre-commit-config.yaml; keep them in sync."
+            exit 1
+          fi
       - name: Run clang-format style check for C/C++
         run: |
           clang-format --version

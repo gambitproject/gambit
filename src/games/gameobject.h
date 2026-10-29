@@ -316,7 +316,7 @@ public:
   /// @brief Return the total number of elements summed across all inner ranges
   std::size_t size() const
   {
-    auto outer = (m_owner.get()->*OuterMemFn)();
+    const auto outer = (m_owner.get()->*OuterMemFn)();
     return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(0),
                            [](std::size_t acc, const auto &element) {
                              return acc + (element.get()->*InnerMemFn)().size();
@@ -327,7 +327,7 @@ public:
   std::vector<std::size_t> shape() const
   {
     std::vector<std::size_t> result;
-    auto outer = (m_owner.get()->*OuterMemFn)();
+    const auto outer = (m_owner.get()->*OuterMemFn)();
     result.reserve(outer.size());
     std::transform(outer.begin(), outer.end(), std::back_inserter(result),
                    [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });
@@ -339,7 +339,7 @@ public:
   Array<std::size_t> shape_array() const
   {
     Array<std::size_t> result;
-    auto outer = (m_owner.get()->*OuterMemFn)();
+    const auto outer = (m_owner.get()->*OuterMemFn)();
     result.reserve(outer.size());
     std::transform(outer.begin(), outer.end(), std::back_inserter(result),
                    [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });

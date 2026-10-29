@@ -155,7 +155,7 @@ struct proj_func_EXIST2 : public proj_func {
   int operator()(std::multiset<int> &s) const override
   {
     int res = Default;
-    for (auto it : s) {
+    for (const auto &it : s) {
       res += weights.at(it);
     }
     return (res > 0);

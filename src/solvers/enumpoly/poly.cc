@@ -39,8 +39,8 @@ std::vector<Monomial<T>> Polynomial<T>::Adder(const std::vector<Monomial<T>> &p_
 
   auto it1 = p_one.begin();
   auto it2 = p_two.begin();
-  auto end1 = p_one.end();
-  auto end2 = p_two.end();
+  const auto end1 = p_one.end();
+  const auto end2 = p_two.end();
 
   while (it1 != end1 && it2 != end2) {
     const auto &e1 = it1->ExpV();
@@ -93,7 +93,7 @@ std::vector<Monomial<T>> Polynomial<T>::Mult(const std::vector<Monomial<T>> &p_o
   merged.reserve(result.size());
 
   auto it = result.begin();
-  auto end = result.end();
+  const auto end = result.end();
 
   while (it != end) {
     Monomial<T> current = *it;
@@ -316,10 +316,10 @@ template <class T> Polynomial<T> Polynomial<T>::Normalize() const
     return Polynomial(m_space, static_cast<T>(c > 0 ? 1 : -1));
   }
 
-  auto it = std::max_element(m_terms.begin(), m_terms.end(),
-                             [](const Monomial<T> &a, const Monomial<T> &b) {
-                               return std::abs(a.Coef()) < std::abs(b.Coef());
-                             });
+  const auto it = std::max_element(m_terms.begin(), m_terms.end(),
+                                   [](const Monomial<T> &a, const Monomial<T> &b) {
+                                     return std::abs(a.Coef()) < std::abs(b.Coef());
+                                   });
 
   const T maxc = it->Coef();
   const T absmax = std::abs(maxc);

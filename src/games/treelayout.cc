@@ -39,15 +39,22 @@ TreeLayout::TreeLayout(const GameRep &p_game)
   for (const auto &infoset : p_game.GetInfosets()) {
     const size_t count = infoset->GetActions().size();
     infosetIndex[infoset.get()] = infosets.size();
-    infosets.push_back(
-        {infoset.get(), playerIndex.at(infoset->GetPlayer().get()), first, count, {}});
+    infosets.push_back({.infoset = infoset.get(),
+                        .player = playerIndex.at(infoset->GetPlayer().get()),
+                        .firstAction = first,
+                        .numActions = count,
+                        .members = {}});
     first += count;
   }
   numActions = first - 1;
   numPersonalInfosets = infosets.size();
   for (const auto &infoset : p_game.GetChance()->GetInfosets()) {
     infosetIndex[infoset.get()] = infosets.size();
-    infosets.push_back({infoset.get(), -1, 0, infoset->GetActions().size(), {}});
+    infosets.push_back({.infoset = infoset.get(),
+                        .player = -1,
+                        .firstAction = 0,
+                        .numActions = infoset->GetActions().size(),
+                        .members = {}});
   }
 
   std::vector<GameNode> nodes;

@@ -188,7 +188,7 @@ EquationSystem::EquationSystem(const Game &p_game)
   m_equations.reserve(m_profile.MixedProfileLength());
   for (const auto &player : m_game->GetPlayers()) {
     m_equations.push_back(std::make_shared<SumToOneEquation>(player));
-    auto strategies = player->GetStrategies();
+    const auto strategies = player->GetStrategies();
     for (auto strategy = std::next(strategies.begin()); strategy != strategies.end(); ++strategy) {
       m_equations.push_back(std::make_shared<RatioEquation>(*strategy, strategies.front()));
     }
@@ -286,7 +286,7 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 void TracingCallbackFunction::OnBifurcation(const Vector<double> &p_before,
                                             const Vector<double> &p_after)
 {
-  m_bifurcations.push_back({PointToQRE(p_before), PointToQRE(p_after)});
+  m_bifurcations.push_back({.before = PointToQRE(p_before), .after = PointToQRE(p_after)});
   const auto &bifurcation = m_bifurcations.back();
   m_onEvent(LogitBifurcationEvent<LogitQREMixedStrategyProfile>{.before = bifurcation.before,
                                                                 .after = bifurcation.after});
@@ -338,7 +338,7 @@ EstimatorCallbackFunction::PointToQRE(const Vector<double> &p_point) const
 
 void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 {
-  auto qre = PointToQRE(p_point);
+  const auto qre = PointToQRE(p_point);
   m_onEvent(LogitPathEvent<LogitQREMixedStrategyProfile>{qre});
   if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
     m_bestProfile = qre;
@@ -430,7 +430,7 @@ LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
   TracingCallbackFunction callback(game, p_onEvent);
   LogitLambdaResult<LogitQREMixedStrategyProfile> ret;
   EquationSystem system(game);
-  for (auto lam : p_targetLambda) {
+  for (const auto &lam : p_targetLambda) {
     const auto result = tracer.TracePath(
         [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
           system.GetValue(p_point, p_lhs);

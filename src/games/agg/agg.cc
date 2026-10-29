@@ -344,8 +344,8 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
         // insert player i's action j's contribution to projS
         projS[Node][i].insert(make_pair(proj[Node][i][j], 1));
       } // end for(j..
-    }   // end for(i..
-  }     // end for(Node..
+    } // end for(i..
+  } // end for(Node..
 }
 
 void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtype> &projTypes,
@@ -468,14 +468,14 @@ template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) c
     throw std::runtime_error(str.str());
   };
   if constexpr (std::is_same_v<V, Rational>) {
-    auto p = exactPayoffs[Node].find(pureprofile);
+    const auto p = exactPayoffs[Node].find(pureprofile);
     if (p == exactPayoffs[Node].end()) {
       throwNotFound();
     }
     return static_cast<Rational>(p->second);
   }
   else {
-    auto p = payoffs[Node].find(pureprofile);
+    const auto p = payoffs[Node].find(pureprofile);
     if (p == payoffs[Node].end()) {
       throwNotFound();
     }

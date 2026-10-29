@@ -44,7 +44,7 @@ public:
   /// Destructor
   ~GameBAGGRep() override
   {
-    for (auto player : m_players) {
+    for (const auto &player : m_players) {
       player->Invalidate();
     }
   }
