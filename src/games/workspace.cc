@@ -403,6 +403,7 @@ std::string UnwrapPayload(std::string p_value)
 
 } // namespace
 
+// NOLINTNEXTLINE(misc-const-correctness): reads from the stream
 LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
 {
   std::ostringstream text;
@@ -490,7 +491,8 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
       result.description = UnwrapPayload(description->Text());
     }
     for (const auto *profile : analysis->Children("profile")) {
-      result.profiles.push_back({Attribute(profile, "type"), UnwrapPayload(profile->Text())});
+      result.profiles.push_back(
+          {.type = Attribute(profile, "type"), .probabilities = UnwrapPayload(profile->Text())});
     }
     workspace.analyses.push_back(std::move(result));
   }

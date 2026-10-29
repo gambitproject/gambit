@@ -431,7 +431,7 @@ public:
         if (!f.m_entered) {
           f.m_entered = true;
           if (!f.m_node->IsTerminal()) {
-            auto children = f.m_node->GetChildren();
+            const auto children = f.m_node->GetChildren();
             f.m_current = children.begin();
             f.m_end = children.end();
           }
@@ -536,7 +536,7 @@ void GameRep::WalkDFS(const Game &p_game, const GameNode &p_root, TraversalOrder
         p_callback.OnVisit(f.m_node, f.m_depth);
       }
       if (!f.m_pruned && !f.m_node->IsTerminal()) {
-        auto children = f.m_node->GetChildren();
+        const auto children = f.m_node->GetChildren();
         f.m_current = children.begin();
         f.m_end = children.end();
       }
@@ -638,7 +638,7 @@ inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(
 inline std::vector<GameSequence> GameInfosetRep::GetSequences() const
 {
   std::vector<GameSequence> result;
-  for (auto sequence : GetPlayer()->GetSequences()) {
+  for (const auto &sequence : GetPlayer()->GetSequences()) {
     if (sequence->GetAction() && sequence->GetInfoset().get() == this) {
       result.push_back(sequence);
     }

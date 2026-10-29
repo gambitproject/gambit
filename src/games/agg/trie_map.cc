@@ -267,7 +267,7 @@ template <class V> V trie_map<V>::inner_prod(trie_map<V> &other, V init /*= (V) 
   V result(init);
   for (auto p = begin(); p != end(); ++p) {
     if ((*p).second > static_cast<V>(0)) {
-      auto p2 = other.find((*p).first);
+      const auto p2 = other.find((*p).first);
       if (p2 == other.end()) {
         if (p->second > static_cast<V>(THRESH)) {
           std::stringstream str;

@@ -107,7 +107,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
       return false;
     }
     point = newpoint;
-    auto newevals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
+    const auto newevals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
     if (newevals.NormSquared() >= evals.NormSquared()) {
       return false;
     }
@@ -151,7 +151,7 @@ double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
 bool PolynomialSystemSolver::HasNoOtherRootsIn(const Rectangle<double> &r,
                                                const Vector<double> &p) const
 {
-  auto M = LUFactorization(m_derivatives.SquareDerivativeMatrix(p)).Inverse();
+  const auto M = LUFactorization(m_derivatives.SquareDerivativeMatrix(p)).Inverse();
   auto system2 = m_normalizedSystem.Translate(p).TransformCoords(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
   return (std::accumulate(system2.begin(), system2.end(), 0.0,

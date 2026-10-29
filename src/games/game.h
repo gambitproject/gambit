@@ -142,7 +142,7 @@ public:
 inline bool DecodeUtf8(const std::string &p_text, std::vector<char32_t> &p_codepoints)
 {
   p_codepoints.clear();
-  auto byte_at = [&p_text](size_t i) { return static_cast<unsigned char>(p_text[i]); };
+  const auto byte_at = [&p_text](size_t i) { return static_cast<unsigned char>(p_text[i]); };
   size_t i = 0;
   const size_t n = p_text.size();
   while (i < n) {
@@ -276,7 +276,7 @@ inline bool IsValidLabel(const std::string &p_label)
     return c <= 0x1f || c == 0x7f || (c >= 0x80 && c <= 0x9f) || c == 0x2028 || c == 0x2029;
   };
   auto is_whitespace = [](char32_t c) { return IsUnicodeSpaceSeparator(c); };
-  auto is_printable = [&](char32_t c) { return !is_control(c) && !is_whitespace(c); };
+  const auto is_printable = [&](char32_t c) { return !is_control(c) && !is_whitespace(c); };
   if (!is_printable(codepoints.front()) || !is_printable(codepoints.back())) {
     return false;
   }

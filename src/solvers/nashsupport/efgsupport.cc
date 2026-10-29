@@ -29,8 +29,8 @@ using namespace Gambit;
 
 bool AllActionsReachable(const BehaviorSupportProfile &p_support)
 {
-  for (auto player : p_support.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
+  for (const auto &player : p_support.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
       if (p_support.IsReachable(infoset) != p_support.HasAction(infoset)) {
         return false;
       }

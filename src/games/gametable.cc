@@ -403,7 +403,7 @@ Game GameTableRep::Copy() const
 
 bool GameTableRep::IsConstSum() const
 {
-  auto payoff_sum = [&](const PureStrategyProfile &p) {
+  const auto payoff_sum = [&](const PureStrategyProfile &p) {
     return sum_function(m_players, [&](const auto &player) { return p->GetPayoff(player); });
   };
   const Rational sum = payoff_sum(NewPureStrategyProfile());
@@ -452,13 +452,13 @@ Rational GameTableRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
 ///
 void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 {
-  auto players = GetPlayers();
+  const auto players = GetPlayers();
   p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl
          << std::endl;
   p_file << "{ ";
-  for (auto player : players) {
+  for (const auto &player : players) {
     p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
     }) << std::endl;
@@ -467,7 +467,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   p_file << std::quoted(GetDescription()) << std::endl << std::endl;
 
   p_file << "{" << std::endl;
-  for (auto outcome : m_outcomes) {
+  for (const auto &outcome : m_outcomes) {
     p_file << "{ " + QuoteString(outcome->GetLabel()) << ' '
            << FormatList(
                   players,
@@ -477,7 +477,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   }
   p_file << "}" << std::endl;
 
-  for (auto iter : StrategyContingencies(
+  for (const auto &iter : StrategyContingencies(
            StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
     p_file << iter->GetOutcome()->m_number << ' ';
   }
@@ -742,7 +742,8 @@ void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
       newPlayers.push_back(m_players[source[j]]);
       continue;
     }
-    auto player = std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j], 1);
+    const auto player =
+        std::make_shared<GamePlayerRep>(this, static_cast<int>(j) + 1, p_labels[j], 1);
     player->m_strategies.front()->m_label = "1";
     for (const auto &outcome : m_outcomes) {
       outcome->m_payoffs[player.get()] = Number();

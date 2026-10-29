@@ -87,13 +87,13 @@ bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_other) c
 
 void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
 {
-  auto players = m_game->GetPlayers();
+  const auto players = m_game->GetPlayers();
   p_file << "NFG 1 R " << std::quoted(m_game->GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl
          << std::endl;
   p_file << "{ ";
-  for (auto player : players) {
+  for (const auto &player : players) {
     p_file << FormatList(GetStrategies(player), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
     }) << std::endl;
@@ -119,7 +119,7 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   }
 
   auto &support = m_support[p_strategy->GetPlayer()];
-  auto pos = std::ranges::find_if(support, [p_strategy](const GameStrategy &s) {
+  const auto pos = std::ranges::find_if(support, [p_strategy](const GameStrategy &s) {
     return s->GetNumber() >= p_strategy->GetNumber();
   });
   if (pos == support.end() || *pos != p_strategy) {
@@ -130,7 +130,7 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  auto ipos = std::ranges::lower_bound(digits, digit);
+  const auto ipos = std::ranges::lower_bound(digits, digit);
   if (ipos == digits.end() || *ipos != digit) {
     digits.insert(ipos, digit);
   }
@@ -145,7 +145,7 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   if (support.size() == 1) {
     return false;
   }
-  auto pos = std::ranges::find(support, p_strategy);
+  const auto pos = std::ranges::find(support, p_strategy);
   if (pos != support.end()) {
     support.erase(pos);
   }
@@ -153,7 +153,7 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  auto ipos = std::ranges::lower_bound(digits, digit);
+  const auto ipos = std::ranges::lower_bound(digits, digit);
   if (ipos != digits.end() && *ipos == digit) {
     digits.erase(ipos);
     return true;
@@ -193,7 +193,7 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
                                          bool p_external) const
 {
   if (p_external) {
-    for (auto strategy : s->GetPlayer()->GetStrategies()) {
+    for (const auto &strategy : s->GetPlayer()->GetStrategies()) {
       if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
@@ -201,7 +201,7 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
     return false;
   }
   else {
-    for (auto strategy : GetStrategies(s->GetPlayer())) {
+    for (const auto &strategy : GetStrategies(s->GetPlayer())) {
       if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
@@ -231,7 +231,7 @@ Iterator find_minimal_elements(Iterator first, Iterator last, Comparator greater
 {
   auto min = first, dis = std::prev(last);
   while (min <= dis) {
-    auto pp = std::adjacent_find(first, last, greater);
+    const auto pp = std::adjacent_find(first, last, greater);
     if (pp < min) {
       dis--;
     }
@@ -266,14 +266,14 @@ bool UndominatedForPlayer(const StrategySupportProfile &p_support,
   std::vector<GameStrategy> set((p_external) ? p_player->GetStrategies().size()
                                              : p_support.GetStrategies(p_player).size());
   if (p_external) {
-    auto strategies = p_player->GetStrategies();
+    const auto strategies = p_player->GetStrategies();
     std::ranges::copy(strategies, set.begin());
   }
   else {
-    auto strategies = p_support.GetStrategies(p_player);
+    const auto strategies = p_support.GetStrategies(p_player);
     std::ranges::copy(strategies, set.begin());
   }
-  auto min =
+  const auto min =
       find_minimal_elements(set.begin(), set.end(),
                             [&p_support, p_strict](const GameStrategy &s, const GameStrategy &t) {
                               return p_support.Dominates(s, t, p_strict);
@@ -288,7 +288,7 @@ bool UndominatedForPlayer(const StrategySupportProfile &p_support,
 StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p_external) const
 {
   StrategySupportProfile newSupport(*this);
-  for (auto player : m_game->GetPlayers()) {
+  for (const auto &player : m_game->GetPlayers()) {
     UndominatedForPlayer(*this, newSupport, player, p_strict, p_external);
   }
   return newSupport;

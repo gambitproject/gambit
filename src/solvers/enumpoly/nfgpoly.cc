@@ -40,10 +40,10 @@ BuildStrategyVariables(std::shared_ptr<VariableSpace> space, const StrategySuppo
 {
   int index = 1;
   std::map<GameStrategy, Polynomial<double>> strategy_poly;
-  for (auto player : support.GetGame()->GetPlayers()) {
-    auto strategies = support.GetStrategies(player);
+  for (const auto &player : support.GetGame()->GetPlayers()) {
+    const auto strategies = support.GetStrategies(player);
     Polynomial<double> residual(space, 1);
-    for (auto strategy : strategies) {
+    for (const auto &strategy : strategies) {
       if (strategy != strategies.back()) {
         strategy_poly.try_emplace(strategy, space, index, 1);
         residual -= strategy_poly.at(strategy);
@@ -66,7 +66,7 @@ IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupport
 
   for (const auto &iter : StrategyContingencies(support.RestrictTo(s1))) {
     Polynomial<double> term(space, 1);
-    for (auto player : support.GetGame()->GetPlayers()) {
+    for (const auto &player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
         term *= strategy_poly.at(iter->GetStrategy(player));
       }
@@ -83,15 +83,15 @@ ConstructEquations(std::shared_ptr<VariableSpace> space, const StrategySupportPr
 {
   PolynomialSystem<double> equations(space);
   // Indifference equations between pairs of strategies for each player
-  for (auto player : support.GetPlayers()) {
-    auto strategies = support.GetStrategies(player);
+  for (const auto &player : support.GetPlayers()) {
+    const auto strategies = support.GetStrategies(player);
     for (auto s1 = strategies.begin(), s2 = std::next(strategies.begin()); s2 != strategies.end();
          ++s1, ++s2) {
       equations.push_back(IndifferenceEquation(space, support, strategy_poly, *s1, *s2));
     }
   }
   // Inequalities for last probability for each player
-  for (auto player : support.GetPlayers()) {
+  for (const auto &player : support.GetPlayers()) {
     equations.push_back(strategy_poly.at(support.GetStrategies(player).back()));
   }
   return equations;
@@ -106,10 +106,10 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
                              bool &p_budgetExceeded, std::optional<size_t> p_stopAfter,
                              size_t p_maxRectangles, const CancelToken &p_cancel)
 {
-  auto space = std::make_shared<VariableSpace>(support.MixedProfileLength() -
-                                               support.GetGame()->NumPlayers());
+  const auto space = std::make_shared<VariableSpace>(support.MixedProfileLength() -
+                                                     support.GetGame()->NumPlayers());
 
-  auto strategy_poly = BuildStrategyVariables(space, support);
+  const auto strategy_poly = BuildStrategyVariables(space, support);
   const PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
 
   Vector<double> bottoms(space->GetDimension()), tops(space->GetDimension());
@@ -131,9 +131,9 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   }
 
   std::list<MixedStrategyProfile<double>> solutions;
-  for (auto soln : roots) {
+  for (const auto &soln : roots) {
     solutions.emplace(solutions.end(), support.NewMixedStrategyProfile<double>());
-    for (auto mapping : strategy_poly) {
+    for (const auto &mapping : strategy_poly) {
       solutions.back()[mapping.first] = mapping.second.Evaluate(soln);
     }
   }
@@ -156,12 +156,12 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
   std::list<MixedStrategyProfile<double>> ret;
   PossibleNashStrategySupports possible_supports(p_game);
 
-  for (auto support : possible_supports) {
+  for (const auto &support : possible_supports) {
     p_cancel.Check();
     p_onEvent(EnumPolyCandidateSupportEvent<StrategySupportProfile>{support});
     bool is_singular;
     bool budget_exceeded;
-    for (auto solution : EnumPolyStrategySupportSolve(
+    for (const auto &solution : EnumPolyStrategySupportSolve(
              support, is_singular, budget_exceeded,
              p_stopAfter.has_value()
                  ? std::optional<size_t>(p_stopAfter.value() -

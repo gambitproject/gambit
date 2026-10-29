@@ -79,7 +79,7 @@ public:
     // fixed strategies. We display those fixed strategies here.
     if (game->NumPlayers() > 2) {
       m_result += "<center><b>Subtable with strategies:</b></center>";
-      for (auto player : game->GetPlayers()) {
+      for (const auto &player : game->GetPlayers()) {
         if (player == rowPlayer || player == colPlayer) {
           continue; // Skip the players who are free in this subtable
         }
@@ -169,7 +169,7 @@ public:
     if (game->NumPlayers() > 2) {
       m_result += "\\begin{center}\n";
       m_result += "\\textbf{Subtable with strategies:}\\\\\n";
-      for (auto player : game->GetPlayers()) {
+      for (const auto &player : game->GetPlayers()) {
         if (player == rowPlayer || player == colPlayer) {
           continue;
         }
@@ -255,9 +255,9 @@ void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
   // Create a profile where row and column players are restricted to their first
   // strategies. This allows us to find all combinations of strategies for
   // the OTHER players.
-  auto support = StrategySupportProfile(p_game)
-                     .RestrictTo(p_rowPlayer->GetStrategies().front())
-                     .RestrictTo(p_colPlayer->GetStrategies().front());
+  const auto support = StrategySupportProfile(p_game)
+                           .RestrictTo(p_rowPlayer->GetStrategies().front())
+                           .RestrictTo(p_colPlayer->GetStrategies().front());
 
   // Iterate through all subtables (contingencies for players other than row/col)
   for (const auto &iter : StrategyContingencies(support)) {

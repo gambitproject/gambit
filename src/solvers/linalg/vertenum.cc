@@ -55,7 +55,7 @@ template <class T> void Search(VertexEnumerationState<T> &state, LPTableau<T> &t
     state.vertexList.push_back(tab.GetFullBFS());
     state.dualVertexList.push_back(tab.GetDualBFS());
   }
-  auto pivot_list = tab.ComputeReversePivots();
+  const auto pivot_list = tab.ComputeReversePivots();
   if (!pivot_list.empty()) {
     state.branches[state.depth] += pivot_list.size();
     LPTableau<T> tab2(tab);

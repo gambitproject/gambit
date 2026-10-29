@@ -44,7 +44,7 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
-    auto n = m_node1.size();
+    const auto n = m_node1.size();
     if (m_node2.size() != n) {
       throw DimensionException();
     }

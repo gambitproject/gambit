@@ -146,7 +146,7 @@ public:
       m_pos.assign(n, 0);
       for (size_t i = 0; i < n; ++i) {
         const GamePlayer player = m_cont->m_support.GetGame()->GetPlayer(i + 1);
-        auto support = m_cont->m_support.GetStrategies(player);
+        const auto support = m_cont->m_support.GetStrategies(player);
         m_profile->SetStrategy(support[0]);
       }
     }
@@ -156,7 +156,7 @@ public:
       const size_t n = m_pos.size();
       for (size_t i = 0; i < n; ++i) {
         const GamePlayer player = m_cont->m_support.GetGame()->GetPlayer(i + 1);
-        auto support = m_cont->m_support.GetStrategies(player);
+        const auto support = m_cont->m_support.GetStrategies(player);
         ++m_pos[i];
         if (m_pos[i] < support.size()) {
           m_profile->SetStrategy(support[m_pos[i]]);

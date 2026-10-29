@@ -61,7 +61,7 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
   const Game &efg = p_profile.GetGame();
   std::map<GamePlayer, std::vector<GameSequence>> chains;
   std::map<GamePlayer, size_t> initialProgress;
-  for (auto player : efg->GetPlayers()) {
+  for (const auto &player : efg->GetPlayers()) {
     std::vector<GameSequence> chain;
     for (GameSequence seq = p_profile.GetSequence(player); seq; seq = seq->GetParent()) {
       chain.push_back(seq);
@@ -72,7 +72,7 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
   }
 
   std::stack<SequenceWalkFrame> frames;
-  frames.push({efg->GetRoot(), Rational(1), initialProgress});
+  frames.push({.node = efg->GetRoot(), .prob = Rational(1), .progress = initialProgress});
 
   while (!frames.empty()) {
     const SequenceWalkFrame frame = std::move(frames.top());
@@ -90,10 +90,11 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                     frame.progress});
+      for (const auto &action : n->GetInfoset()->GetActions()) {
+        frames.push(
+            {.node = n->GetChild(action),
+             .prob = frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+             .progress = frame.progress});
       }
       continue;
     }
@@ -113,7 +114,9 @@ template <class F> void WalkRealizedNodes(const PureSequenceProfile &p_profile, 
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push({n->GetChild(next->GetAction()), frame.prob, std::move(progress)});
+    frames.push({.node = n->GetChild(next->GetAction()),
+                 .prob = frame.prob,
+                 .progress = std::move(progress)});
   }
 }
 
@@ -137,7 +140,7 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
 {
   std::map<GamePlayer, std::vector<GameSequence>> chains;
   std::map<GamePlayer, size_t> initialProgress;
-  for (auto player : m_efg->GetPlayers()) {
+  for (const auto &player : m_efg->GetPlayers()) {
     std::vector<GameSequence> chain;
     for (GameSequence seq = GetSequence(player); seq; seq = seq->GetParent()) {
       chain.push_back(seq);
@@ -149,7 +152,10 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
 
   Rational payoff(0);
   std::stack<PayoffWalkFrame> frames;
-  frames.push({m_efg->GetRoot(), Rational(1), Rational(0), initialProgress});
+  frames.push({.node = m_efg->GetRoot(),
+               .prob = Rational(1),
+               .cumulative = Rational(0),
+               .progress = initialProgress});
 
   while (!frames.empty()) {
     PayoffWalkFrame frame = std::move(frames.top());
@@ -172,10 +178,12 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
       continue;
     }
     if (n->GetPlayer()->IsChance()) {
-      for (auto action : n->GetInfoset()->GetActions()) {
-        frames.push({n->GetChild(action),
-                     frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                     frame.cumulative, frame.progress});
+      for (const auto &action : n->GetInfoset()->GetActions()) {
+        frames.push(
+            {.node = n->GetChild(action),
+             .prob = frame.prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+             .cumulative = frame.cumulative,
+             .progress = frame.progress});
       }
       continue;
     }
@@ -195,8 +203,10 @@ Rational PureSequenceProfile::GetPayoff(const GamePlayer &p_player) const
     }
     auto progress = frame.progress;
     progress[n->GetPlayer()] = index + 1;
-    frames.push(
-        {n->GetChild(next->GetAction()), frame.prob, frame.cumulative, std::move(progress)});
+    frames.push({.node = n->GetChild(next->GetAction()),
+                 .prob = frame.prob,
+                 .cumulative = frame.cumulative,
+                 .progress = std::move(progress)});
   }
   return payoff;
 }
@@ -255,9 +265,9 @@ SequenceContingencies::iterator &SequenceContingencies::iterator::operator++()
 
 SequenceContingencies GameRep::GetSequenceContingencies() const
 {
-  auto sequences = std::make_shared<SequenceMap>();
-  for (auto player : GetPlayers()) {
-    for (auto sequence : player->GetSequences()) {
+  const auto sequences = std::make_shared<SequenceMap>();
+  for (const auto &player : GetPlayers()) {
+    for (const auto &sequence : player->GetSequences()) {
       (*sequences)[player].push_back(sequence);
     }
   }

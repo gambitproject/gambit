@@ -70,7 +70,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
-  auto pos = std::ranges::find_if(support, [p_action](const GameAction &a) {
+  const auto pos = std::ranges::find_if(support, [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
   });
   if (pos == support.end() || *pos != p_action) {
@@ -89,7 +89,7 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
   m_reachableInfosets.Invalidate();
   m_sequences.Invalidate();
   auto &support = m_actions.at(p_action->GetInfoset());
-  auto pos = std::ranges::find(support, p_action);
+  const auto pos = std::ranges::find(support, p_action);
   if (pos != support.end()) {
     support.erase(pos);
     for (const auto &node : p_action->GetInfoset()->GetMembers()) {
@@ -195,7 +195,7 @@ MixedBehaviorProfile<T>
 BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, T> &x) const
 {
   MixedBehaviorProfile<T> b(*this);
-  for (auto sequence : GetSequences()) {
+  for (const auto &sequence : GetSequences()) {
     if (sequence->m_action == nullptr) {
       continue;
     }
@@ -297,15 +297,15 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node,
                                                    std::map<GameInfoset, bool> &p_reachable) const
 {
   if (!p_node->IsTerminal()) {
-    auto infoset = p_node->GetInfoset();
+    const auto infoset = p_node->GetInfoset();
     p_reachable[infoset] = true;
     if (p_node->GetPlayer()->IsChance()) {
-      for (auto action : infoset->GetActions()) {
+      for (const auto &action : infoset->GetActions()) {
         FindReachableInfosets(p_node->GetChild(action), p_reachable);
       }
     }
     else {
-      for (auto action : GetActions(infoset)) {
+      for (const auto &action : GetActions(infoset)) {
         FindReachableInfosets(p_node->GetChild(action), p_reachable);
       }
     }

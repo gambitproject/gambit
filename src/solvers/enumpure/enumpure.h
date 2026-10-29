@@ -33,7 +33,7 @@ inline bool IsNash(const PureStrategyProfile &p_profile)
 {
   for (const auto &player : p_profile->GetGame()->GetPlayers()) {
     const Rational current = p_profile->GetPayoff(player);
-    for (auto strategy : player->GetStrategies()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (p_profile->GetStrategyValue(strategy) > current) {
         return false;
       }
@@ -72,7 +72,7 @@ inline EnumPureStrategyResult EnumPureStrategySolve(
 inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
 {
   for (const auto &player : p_profile.GetGame()->GetPlayers()) {
-    auto current = p_profile.GetPayoff<Rational>(player);
+    const auto current = p_profile.GetPayoff<Rational>(player);
     for (const auto &infoset : player->GetInfosets()) {
       for (const auto &action : infoset->GetActions()) {
         auto deviation = p_profile;
@@ -106,7 +106,7 @@ EnumPureAgentSolve(const Game &p_game,
 {
   EnumPureAgentResult result;
   const BehaviorSupportProfile support(p_game);
-  for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
+  for (const auto &citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     p_cancel.Check();
     if (IsAgentNash(citer)) {
       result.equilibria.push_back(citer.ToMixedBehaviorProfile());

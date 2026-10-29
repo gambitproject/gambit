@@ -79,15 +79,16 @@ public:
   iterator end() { return {m_sizes, true}; }
 };
 
-StrategySupportProfile RestrictedGame(const Game &game, const GamePlayer &player,
-                                      std::map<GamePlayer, StrategySupport> &domainStrategies)
+StrategySupportProfile
+RestrictedGame(const Game &game, const GamePlayer &player,
+               const std::map<GamePlayer, StrategySupport> &domainStrategies)
 {
   StrategySupportProfile profile(game);
   for (auto [player2, strategies] : domainStrategies) {
     if (player2 == player) {
       continue;
     }
-    for (auto strategy : player2->GetStrategies()) {
+    for (const auto &strategy : player2->GetStrategies()) {
       if (!contains(strategies, strategy)) {
         profile.RemoveStrategy(strategy);
       }
@@ -96,11 +97,11 @@ StrategySupportProfile RestrictedGame(const Game &game, const GamePlayer &player
   return profile;
 }
 
-bool AnyDominatedStrategies(const Game &game, std::map<GamePlayer, StrategySupport> &domains)
+bool AnyDominatedStrategies(const Game &game, const std::map<GamePlayer, StrategySupport> &domains)
 {
   for (auto [player, strategies] : domains) {
-    auto support_profile = RestrictedGame(game, player, domains);
-    for (auto strategy : strategies) {
+    const auto support_profile = RestrictedGame(game, player, domains);
+    for (const auto &strategy : strategies) {
       if (support_profile.IsDominated(strategy, true)) {
         return true;
       }
@@ -188,8 +189,8 @@ StrategySupportProfile
 StrategiesToSupport(const Game &p_game, const std::map<GamePlayer, StrategySupport> &p_strategies)
 {
   StrategySupportProfile support(p_game);
-  for (auto player : p_game->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (!contains(p_strategies.at(player), strategy)) {
         support.RemoveStrategy(strategy);
       }
@@ -306,7 +307,7 @@ private:
 
   void SetupDomains(const std::vector<size_t> &p_sizeProfile)
   {
-    auto players = m_game->GetPlayers();
+    const auto players = m_game->GetPlayers();
     m_domains.clear();
     size_t index = 0;
     for (const auto &player : players) {

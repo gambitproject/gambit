@@ -43,8 +43,8 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
   double last_t = 0.0;
   bool has_crossed = false;
 
-  auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret, maxRegret,
-                                &system](const Vector<double> &point) {
+  const auto termination_condition = [t_target, &last_t, &has_crossed, p_maxRegret, maxRegret,
+                                      &system](const Vector<double> &point) {
     const double t = point[1];
 
     // Path tracer reaches maximum acceptable regret
@@ -71,13 +71,13 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
     return false;
   };
 
-  auto criterion_function = [t_target](const Vector<double> &point,
-                                       const Vector<double> &tangent) -> double {
+  const auto criterion_function = [t_target](const Vector<double> &point,
+                                             const Vector<double> &tangent) -> double {
     return point[1] - t_target;
   };
 
-  auto polishing_termination_condition = [maxRegret,
-                                          &system](const Vector<double> &point) -> bool {
+  const auto polishing_termination_condition = [maxRegret,
+                                                &system](const Vector<double> &point) -> bool {
     return system.ExtractEquilibrium(point).GetMaxRegret() <= maxRegret;
   };
 

@@ -337,7 +337,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       prob = static_cast<T>(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    auto child = node->m_children[i - 1];
+    const auto child = node->m_children[i - 1];
 
     map_bvals[child] = prob * map_bvals[node->shared_from_this()];
     map_nvals[child] += map_bvals[child];
@@ -395,8 +395,8 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedSequenceProfile<T> &p_p
     }
   }
   InitializeLayout();
-  for (auto player : game->GetPlayers()) {
-    for (auto sequence : player->GetSequences()) {
+  for (const auto &player : game->GetPlayers()) {
+    for (const auto &sequence : player->GetSequences()) {
       if (!sequence->GetAction()) {
         continue;
       }
@@ -487,10 +487,10 @@ template <class T> T MixedBehaviorProfile<T>::LayoutActionProb(size_t p_node) co
 template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 {
   CheckVersion();
-  for (auto infoset : m_support.GetGame()->GetInfosets()) {
+  for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
     if (!m_support.GetActions(infoset).empty()) {
       T center = T(1) / T(m_support.GetActions(infoset).size());
-      for (auto act : m_support.GetActions(infoset)) {
+      for (const auto &act : m_support.GetActions(infoset)) {
         (*this)[act] = center;
       }
     }
@@ -501,16 +501,16 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
 {
   CheckVersion();
   const Game efg = m_support.GetGame();
-  for (auto infoset : efg->GetInfosets()) {
+  for (const auto &infoset : efg->GetInfosets()) {
     if (GetInfosetProb(infoset) > T(0)) {
       continue;
     }
-    auto actions = m_support.GetActions(infoset);
+    const auto actions = m_support.GetActions(infoset);
     T total =
         std::accumulate(actions.begin(), actions.end(), T(0),
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
-      for (auto act : actions) {
+      for (const auto &act : actions) {
         (*this)[act] = T(1) / T(m_support.GetActions(infoset).size());
       }
     }
@@ -521,18 +521,18 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
 {
   CheckVersion();
   auto norm = MixedBehaviorProfile<T>(*this);
-  for (auto infoset : m_support.GetGame()->GetInfosets()) {
+  for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
     if (GetInfosetProb(infoset) == T(0)) {
       continue;
     }
-    auto actions = m_support.GetActions(infoset);
+    const auto actions = m_support.GetActions(infoset);
     T total =
         std::accumulate(actions.begin(), actions.end(), T(0),
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
       continue;
     }
-    for (auto act : actions) {
+    for (const auto &act : actions) {
       norm[act] /= total;
     }
   }
@@ -544,9 +544,9 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
   CheckVersion();
   MixedBehaviorProfile full(GetGame());
 
-  for (auto player : m_support.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
+  for (const auto &player : m_support.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
         full[action] = (m_support.Contains(action)) ? (*this)[action] : T{0};
       }
     }
@@ -569,12 +569,12 @@ template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
   CheckVersion();
   EnsureRegrets();
   T value{0};
-  for (auto infoset : m_support.GetGame()->GetInfosets()) {
+  for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
     if (GetInfosetProb(infoset) == T{0}) {
       continue;
     }
     const auto &entry = m_layout->infosets[*InfosetIndex(infoset)];
-    for (auto action : m_support.GetActions(infoset)) {
+    for (const auto &action : m_support.GetActions(infoset)) {
       value += sqr(std::max(m_cache.m_actionValues[entry.firstAction + action->GetNumber() - 1] -
                                 m_cache.m_infosetValues[*InfosetIndex(infoset)],
                             static_cast<T>(0)));
@@ -730,7 +730,7 @@ template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 
 template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
 {
-  auto infosets = m_support.GetGame()->GetInfosets();
+  const auto infosets = m_support.GetGame()->GetInfosets();
   if (infosets.size() == 0) {
     return T{0};
   }
@@ -896,7 +896,7 @@ template <class T> void MixedBehaviorProfile<T>::DiffActionValues(Matrix<T> &p_d
 template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
 {
   CheckVersion();
-  for (auto act : p_infoset->GetActions()) {
+  for (const auto &act : p_infoset->GetActions()) {
     if (GetActionProb(act) > T(0)) {
       return true;
     }

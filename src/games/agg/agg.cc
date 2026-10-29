@@ -468,14 +468,14 @@ template <class V> V AGG::getPurePayoff(int player, const std::vector<int> &s) c
     throw std::runtime_error(str.str());
   };
   if constexpr (std::is_same_v<V, Rational>) {
-    auto p = exactPayoffs[Node].find(pureprofile);
+    const auto p = exactPayoffs[Node].find(pureprofile);
     if (p == exactPayoffs[Node].end()) {
       throwNotFound();
     }
     return static_cast<Rational>(p->second);
   }
   else {
-    auto p = payoffs[Node].find(pureprofile);
+    const auto p = payoffs[Node].find(pureprofile);
     if (p == payoffs[Node].end()) {
       throwNotFound();
     }

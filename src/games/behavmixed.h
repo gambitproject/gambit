@@ -320,9 +320,9 @@ template <class Generator>
 {
   auto profile = MixedBehaviorProfile<double>(p_game);
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
-  for (auto player : p_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
         profile[action] = dist(generator);
       }
     }
@@ -372,12 +372,12 @@ template <class Generator>
 NewRandomBehaviorProfile(const Game &p_game, int denom, Generator &generator)
 {
   auto profile = MixedBehaviorProfile<Rational>(p_game);
-  for (auto player : p_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
       const std::list<Rational> dist =
           UniformOnSimplex(denom, infoset->GetActions().size(), generator);
       auto prob = dist.cbegin();
-      for (auto action : infoset->GetActions()) {
+      for (const auto &action : infoset->GetActions()) {
         profile[action] = *prob;
         prob++;
       }

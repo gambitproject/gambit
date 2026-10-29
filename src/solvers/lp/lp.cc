@@ -105,7 +105,7 @@ template <class T> Matrix<T> ConstructMatrix(const TableauIndexMap &p_indexMap)
   // (which need not be 1 -- see PureSequenceProfile::GetRealizationProbability).
   // Player 2's payoff is not separately represented, since the game is
   // constant-sum.
-  for (auto profile : game->GetSequenceContingencies()) {
+  for (const auto &profile : game->GetSequenceContingencies()) {
     const GameSequence &seq1 = profile.GetSequence(player1);
     const GameSequence &seq2 = profile.GetSequence(player2);
     const Rational prob = profile.GetRealizationProbability();
