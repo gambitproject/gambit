@@ -986,3 +986,157 @@ class Game:
         for old, new in remap.items():
             c_labels[old.encode("utf-8")] = new.encode("utf-8")
         self.game.deref().RelabelPlayers(c_labels)
+
+    def is_degenerate(self, certificate=False):
+        """Check whether this two-player game is degenerate.
+
+        A two-player game is *nondegenerate* if no mixed strategy of support
+        size ``k`` has more than ``k`` pure best responses. A game that
+        violates this is *degenerate*; for example, a pure strategy with two
+        pure best responses.
+
+        The check is exact: payoffs are treated as rational numbers and each
+        candidate is tested with exact linear programming (pycddlib), so ties
+        are detected exactly rather than up to a numerical tolerance. The
+        search is exhaustive over supports, so its running time grows
+        exponentially with the number of strategies.
+
+        Parameters
+        ----------
+        certificate : bool, default False
+            If True, also return a witness when the game is degenerate.
+
+        Returns
+        -------
+        bool or tuple
+            Whether the game is degenerate. If ``certificate=True``, returns
+            ``(is_degenerate, witness)``. When the game is degenerate,
+            ``witness`` is ``(player, strategy)``, where ``player`` is 0 (row)
+            or 1 (column) and ``strategy`` is a numpy array of `Rational`
+            probabilities: a mixed strategy of that player against which the
+            opponent has more pure best responses than the size of the
+            strategy's support.
+            When the game is nondegenerate, ``witness`` is None.
+
+        Raises
+        ------
+        NotImplementedError
+            If the game does not have exactly two players.
+
+        Notes
+        -----
+        For each support size ``k``, each candidate support ``S`` (size ``k``)
+        of one player and each candidate set ``T`` (size ``k + 1``) of the
+        opponent's strategies, a linear feasibility problem asks whether some
+        mixed strategy on ``S`` makes every strategy in ``T`` a best response:
+        the opponent's payoffs are equal across ``T`` and no greater outside
+        ``T``. The game is degenerate if and only if one of these problems is
+        feasible.
+
+        Examples
+        --------
+        >>> import pygambit as gbt
+        >>> g = gbt.StrategicGame.from_arrays([[3, 3], [2, 5], [0, 6]],
+        ...                                   [[3, 3], [2, 6], [3, 1]])
+        >>> g.is_degenerate()
+        True
+
+        >>> g = gbt.StrategicGame.from_arrays([[1, -1], [-1, 1]], [[-1, 1], [1, -1]])
+        >>> g.is_degenerate()
+        False
+
+        >>> g = gbt.StrategicGame.from_arrays([[2, 1], [1, 1]], [[1, 1], [1, 2]])
+        >>> g.is_degenerate(certificate=True)
+        (True, (0, array([Rational(1, 1), Rational(0, 1)], dtype=object)))
+
+        A degenerate game in which no pure strategy has tied best responses;
+        only a mixed strategy reveals it:
+
+        >>> g = gbt.StrategicGame.from_arrays([[1, 2, 3], [6, 5, 4]],
+        ...                                   [[2, 0, 1], [0, 2, 1]])
+        >>> g.is_degenerate(certificate=True)
+        (True, (0, array([Rational(1, 2), Rational(1, 2)], dtype=object)))
+        """
+        if len(self.players) != 2:
+            raise NotImplementedError(
+                "is_degenerate() is only implemented for two-player games"
+            )
+
+        import cdd
+        import cdd.gmp
+
+        M1, M2 = self.to_arrays()
+        m, n = M1.shape
+        zero, one = Rational(0), Rational(1)
+
+        for player, payoff_matrix in ((0, M2), (1, M1.T)):
+            for i, payoffs in enumerate(payoff_matrix):
+                if np.count_nonzero(payoffs == max(payoffs)) > 1:
+                    if not certificate:
+                        return True
+                    strategy = np.full(payoff_matrix.shape[0], zero, dtype=object)
+                    strategy[i] = one
+                    return True, (player, strategy)
+
+        def tied_best_response_strategy(M, S, T):
+            """Return a mixed strategy on rows ``S`` of ``M`` against which every
+            column in ``T`` is a best response, or None if there is none."""
+            k = len(S)
+            sub = M[S, :]
+            ref = T[0]
+            others = [j for j in range(M.shape[1]) if j not in T]
+
+            # In cdd's format, a row [b, a_1, ..., a_k] means b + a.x >= 0,
+            # or b + a.x == 0 if its index is in the linearity set.
+            rows, equalities = [], []
+            for t in T[1:]:
+                equalities.append(len(rows))
+                rows.append([zero] + list(sub[:, ref] - sub[:, t]))
+            equalities.append(len(rows))
+            rows.append([one] + [-one] * k)
+            for j in others:
+                rows.append([zero] + list(sub[:, ref] - sub[:, j]))
+            for r in range(k):
+                rows.append([zero] + [one if c == r else zero for c in range(k)])
+
+            mat = cdd.gmp.matrix_from_array(
+                rows,
+                lin_set=frozenset(equalities),
+                rep_type=cdd.RepType.INEQUALITY,
+                obj_type=cdd.LPObjType.MAX,
+                obj_func=[zero] * (k + 1),
+            )
+            lp = cdd.gmp.linprog_from_matrix(mat)
+            cdd.gmp.linprog_solve(lp)
+
+            if lp.status == cdd.LPStatusType.OPTIMAL:
+                x = np.full(M.shape[0], zero, dtype=object)
+                x[list(S)] = [Rational(v) for v in lp.primal_solution]
+                return x
+            if lp.status in (cdd.LPStatusType.INCONSISTENT,
+                             cdd.LPStatusType.STRUC_INCONSISTENT):
+                return None
+            # The feasible region is bounded and the objective is zero,
+            # so no other status should occur.
+            raise RuntimeError(f"unexpected LP status {lp.status!r}")
+
+        for k in range(2, min(m, n) + 1):
+            # Player 0 mixes over k rows; can player 1 have k + 1 best responses?
+            for S in itertools.combinations(range(m), k):
+                for T in itertools.combinations(range(n), k + 1):
+                    strategy = tied_best_response_strategy(M2, S, T)
+                    if strategy is not None:
+                        if not certificate:
+                            return True
+                        return True, (0, strategy)
+
+            # Player 1 mixes over k columns; can player 0 have k + 1 best responses?
+            for S in itertools.combinations(range(n), k):
+                for T in itertools.combinations(range(m), k + 1):
+                    strategy = tied_best_response_strategy(M1.T, S, T)
+                    if strategy is not None:
+                        if not certificate:
+                            return True
+                        return True, (1, strategy)
+
+        return (False, None) if certificate else False

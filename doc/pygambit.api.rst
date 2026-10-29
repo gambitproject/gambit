@@ -115,6 +115,7 @@ Information about the game
    Game.is_const_sum
    Game.is_perfect_recall
    Game.has_perfect_recall
+   Game.is_degenerate
    Game.players
    Game.min_payoff
    Game.max_payoff

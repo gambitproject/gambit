@@ -206,6 +206,14 @@ Use `pip` to install from the **root directory of the source tree**:
    draw game trees in the tutorials and the games catalog, is installed separately rather than as
    part of the "doc" extra, since it is not needed by the installed `pygambit` package itself.
 
+.. note::
+
+   `pygambit` depends on `pycddlib <https://pypi.org/project/pycddlib/>`_ for exact
+   linear programming. On Linux and macOS, `pip` builds pycddlib from source, which
+   requires the cddlib and GMP development libraries
+   (e.g. ``sudo apt install libcdd-dev libgmp-dev`` on Debian/Ubuntu, or
+   ``brew install cddlib gmp`` on macOS).
+
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
