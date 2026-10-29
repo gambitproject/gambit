@@ -31,7 +31,8 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
                                  HPEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_prior.GetGame());
-  const double maxRegret = ScaleRegret(p_prior.GetGame(), p_maxRegret);
+  const double scale = p_prior.GetGame()->GetMaxPayoff() - p_prior.GetGame()->GetMinPayoff();
+  const double maxRegret = (scale != 0.0) ? p_maxRegret * scale : p_maxRegret;
   HPEquationSystem system(p_prior);
   Vector<double> x = system.ComputeInitialPoint();
 

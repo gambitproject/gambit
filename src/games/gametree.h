@@ -741,7 +741,6 @@ protected:
   /// @name Private auxiliary functions
   //@{
   static void SortInfosets(GamePlayerRep *);
-  std::vector<std::pair<Rational, Rational>> ScanExpectedPayoffRanges() const;
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
@@ -794,8 +793,6 @@ public:
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
-  std::pair<Rational, Rational> GetPlayerExpectedPayoffRange(const GamePlayer &) const override;
-  std::pair<Rational, Rational> GetExpectedPayoffRange() const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
   std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const override;
   std::shared_ptr<const TreeLayout> GetTreeLayout() const override;

@@ -37,7 +37,7 @@ public:
   explicit StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
-    m_scale = static_cast<double>(ExpectedPayoffScale(m_game));
+    m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
     m_scale = (m_scale == 0.0) ? 1.0 : 1.0 / m_scale;
   }
   ~StrategicLyapunovFunction() override = default;
