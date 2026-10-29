@@ -574,11 +574,31 @@ class HPResult(NashResultBase):
     )
 
 
+@cython.cfunc
+def _wrap_msp_d(profile: shared_ptr[c_MixedStrategyProfile[float]]) -> object:
+    game: Game = Game._wrap(deref(profile).GetGame())
+    return game._wrap_strategy_profile_double(profile)
+
+
+@cython.cfunc
+def _wrap_msp_r(profile: shared_ptr[c_MixedStrategyProfile[c_Rational]]) -> object:
+    game: Game = Game._wrap(deref(profile).GetGame())
+    return game._wrap_strategy_profile_rational(profile)
+
+
+@cython.cfunc
+def _wrap_qre_strategy(
+        qre: shared_ptr[c_LogitQREMixedStrategyProfile]
+) -> object:
+    game: Game = Game._wrap(deref(qre).GetGame())
+    return game._wrap_logit_qre_strategy(qre)
+
+
 cdef public string InvokeStrategyCallbackDouble(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]]
 ):
     try:
-        callback(MixedStrategyProfileDouble.wrap(profile))
+        callback(_wrap_msp_d(profile))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -588,7 +608,7 @@ cdef public string InvokeStrategyCallbackRational(
         callback, profile: shared_ptr[c_MixedStrategyProfile[c_Rational]]
 ):
     try:
-        callback(MixedStrategyProfileRational.wrap(profile))
+        callback(_wrap_msp_r(profile))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -618,7 +638,7 @@ cdef public string InvokeLogitStrategyPathEventCallback(
         callback, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
 ):
     try:
-        callback(LogitPathEvent(qre=LogitQREMixedStrategyProfile.wrap(qre)))
+        callback(LogitPathEvent(qre=_wrap_qre_strategy(qre)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -640,8 +660,8 @@ cdef public string InvokeLogitStrategyBifurcationEventCallback(
 ):
     try:
         callback(LogitBifurcationEvent(
-            before=LogitQREMixedStrategyProfile.wrap(before),
-            after=LogitQREMixedStrategyProfile.wrap(after),
+            before=_wrap_qre_strategy(before),
+            after=_wrap_qre_strategy(after),
         ))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
@@ -667,7 +687,7 @@ cdef public string InvokeLogitStrategyPerturbationEventCallback(
 ):
     try:
         callback(LogitPerturbationEvent(
-            active=active, qre=LogitQREMixedStrategyProfile.wrap(qre)
+            active=active, qre=_wrap_qre_strategy(qre)
         ))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
@@ -690,7 +710,7 @@ cdef public string InvokeHPStrategyEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]], t: float
 ):
     try:
-        callback(HPStepEvent(profile=MixedStrategyProfileDouble.wrap(profile), t=t))
+        callback(HPStepEvent(profile=_wrap_msp_d(profile), t=t))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -700,7 +720,7 @@ cdef public string InvokeGNMPerturbationEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]]
 ):
     try:
-        callback(GNMPerturbationEvent(profile=MixedStrategyProfileDouble.wrap(profile)))
+        callback(GNMPerturbationEvent(profile=_wrap_msp_d(profile)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -710,7 +730,7 @@ cdef public string InvokeGNMStartEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]]
 ):
     try:
-        callback(GNMStartEvent(profile=MixedStrategyProfileDouble.wrap(profile)))
+        callback(GNMStartEvent(profile=_wrap_msp_d(profile)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -720,7 +740,7 @@ cdef public string InvokeGNMStepEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]], lam: float
 ):
     try:
-        callback(GNMStepEvent(profile=MixedStrategyProfileDouble.wrap(profile), lam=lam))
+        callback(GNMStepEvent(profile=_wrap_msp_d(profile), lam=lam))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -742,7 +762,7 @@ cdef public string InvokeLiapStrategyStartEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]]
 ):
     try:
-        callback(LiapStartEvent(profile=MixedStrategyProfileDouble.wrap(profile)))
+        callback(LiapStartEvent(profile=_wrap_msp_d(profile)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -752,7 +772,7 @@ cdef public string InvokeLiapStrategyEndEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[float]], regret: float
 ):
     try:
-        callback(LiapEndEvent(profile=MixedStrategyProfileDouble.wrap(profile), regret=regret))
+        callback(LiapEndEvent(profile=_wrap_msp_d(profile), regret=regret))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -782,7 +802,7 @@ cdef public string InvokeSimpdivStartEventCallback(
         callback, profile: shared_ptr[c_MixedStrategyProfile[c_Rational]]
 ):
     try:
-        callback(SimpdivStartEvent(profile=MixedStrategyProfileRational.wrap(profile)))
+        callback(SimpdivStartEvent(profile=_wrap_msp_r(profile)))
     except BaseException as e:
         return f"{type(e).__name__}: {e}".encode("utf-8")
     return b""
@@ -794,7 +814,7 @@ cdef public string InvokeSimpdivRefinementEventCallback(
 ):
     try:
         callback(SimpdivRefinementEvent(
-            profile=MixedStrategyProfileRational.wrap(profile),
+            profile=_wrap_msp_r(profile),
             grid_size=rat_to_py(grid_size), regret=rat_to_py(regret)
         ))
     except BaseException as e:
@@ -808,7 +828,7 @@ cdef public string InvokeIPAStepEventCallback(
 ):
     try:
         callback(IPAStepEvent(
-            profile=MixedStrategyProfileDouble.wrap(profile),
+            profile=_wrap_msp_d(profile),
             iteration=iteration, z_diff=z_diff, s_diff=s_diff
         ))
     except BaseException as e:
@@ -895,16 +915,16 @@ cdef public string InvokeEnumPolyBehaviorBudgetExceededSupportEventCallback(
 @cython.cfunc
 def _convert_mspd(
         inlist: stdlist[c_MixedStrategyProfile[float]]
-) -> list[MixedStrategyProfile[double]]:
-    return [MixedStrategyProfileDouble.wrap(profile)
+) -> list:
+    return [_wrap_msp_d(profile)
             for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
 def _convert_mspr(
         inlist: stdlist[c_MixedStrategyProfile[c_Rational]]
-) -> list[MixedStrategyProfile[c_Rational]]:
-    return [MixedStrategyProfileRational.wrap(profile)
+) -> list:
+    return [_wrap_msp_r(profile)
             for profile in make_list_of_pointer(inlist)]
 
 
@@ -927,10 +947,10 @@ def _convert_mbpr(
 @cython.cfunc
 def _convert_msp_opt_d(
         opt: optional[c_MixedStrategyProfile[float]]
-) -> MixedStrategyProfile[double] | None:
+) -> object:
     if not opt.has_value():
         return None
-    return MixedStrategyProfileDouble.wrap(
+    return _wrap_msp_d(
         make_shared[c_MixedStrategyProfile[double]](opt.value())
     )
 
@@ -938,10 +958,10 @@ def _convert_msp_opt_d(
 @cython.cfunc
 def _convert_msp_opt_r(
         opt: optional[c_MixedStrategyProfile[c_Rational]]
-) -> MixedStrategyProfile[c_Rational] | None:
+) -> object:
     if not opt.has_value():
         return None
-    return MixedStrategyProfileRational.wrap(
+    return _wrap_msp_r(
         make_shared[c_MixedStrategyProfile[c_Rational]](opt.value())
     )
 
@@ -977,10 +997,10 @@ def _convert_logit_bifurcations_strategy(
     # itself) has no default constructor.
     return [
         LogitBifurcation(
-            before=LogitQREMixedStrategyProfile.wrap(
+            before=_wrap_qre_strategy(
                 make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].before)
             ),
-            after=LogitQREMixedStrategyProfile.wrap(
+            after=_wrap_qre_strategy(
                 make_shared[c_LogitQREMixedStrategyProfile](bifurcations[i].after)
             ),
         )
@@ -1199,12 +1219,44 @@ def _lp_strategy_solve_rational(game: Game, nash_callback: object = None) -> LpR
     )
 
 
+@cython.cfunc
+def _strategic_profile_d(
+        profile: object, name: str
+) -> shared_ptr[c_MixedStrategyProfile[float]]:
+    """The C++ floating-point strategic profile behind a `MixedStrategyProfileDouble` or a
+    `BAGGMixedBehaviorProfileDouble`."""
+    if isinstance(profile, BAGGMixedBehaviorProfileDouble):
+        return cython.cast(BAGGMixedBehaviorProfileDouble, profile).profile
+    if isinstance(profile, MixedStrategyProfileDouble):
+        return cython.cast(MixedStrategyProfileDouble, profile).profile
+    raise TypeError(
+        f"{name} must be a MixedStrategyProfileDouble or BAGGMixedBehaviorProfileDouble, "
+        f"not {profile.__class__.__name__}"
+    )
+
+
+@cython.cfunc
+def _strategic_profile_r(
+        profile: object, name: str
+) -> shared_ptr[c_MixedStrategyProfile[c_Rational]]:
+    """The C++ exact strategic profile behind a `MixedStrategyProfileRational` or a
+    `BAGGMixedBehaviorProfileRational`."""
+    if isinstance(profile, BAGGMixedBehaviorProfileRational):
+        return cython.cast(BAGGMixedBehaviorProfileRational, profile).profile
+    if isinstance(profile, MixedStrategyProfileRational):
+        return cython.cast(MixedStrategyProfileRational, profile).profile
+    raise TypeError(
+        f"{name} must be a MixedStrategyProfileRational or BAGGMixedBehaviorProfileRational, "
+        f"not {profile.__class__.__name__}"
+    )
+
+
 def _liap_strategy_solve(
-        start: MixedStrategyProfileDouble, maxregret: float, maxiter: int,
+        start: object, maxregret: float, maxiter: int,
         nash_callback: object = None, event_callback: object = None
 ) -> LiapResult:
     result: c_LiapStrategyResult = LiapStrategySolve(
-        deref(start.profile), maxregret, maxiter,
+        deref(_strategic_profile_d(start, "start")), maxregret, maxiter,
         MakeStrategyCallback[double](nash_callback),
         MakeLiapEventCallback[c_MixedStrategyProfile[double]](event_callback)
     )
@@ -1234,11 +1286,12 @@ def _liap_behavior_solve(
 
 
 def _simpdiv_strategy_solve(
-        start: MixedStrategyProfileRational, maxregret: Rational, gridstep: int, leash: int,
+        start: object, maxregret: Rational, gridstep: int, leash: int,
         nash_callback: object = None, event_callback: object = None
 ) -> SimpdivResult:
     result: c_SimpdivStrategyResult = SimpdivStrategySolve(
-        deref(start.profile), to_rational(str(maxregret).encode("ascii")), gridstep, leash,
+        deref(_strategic_profile_r(start, "start")),
+        to_rational(str(maxregret).encode("ascii")), gridstep, leash,
         MakeStrategyCallback[c_Rational](nash_callback), MakeSimpdivEventCallback(event_callback)
     )
     return SimpdivResult(
@@ -1249,12 +1302,12 @@ def _simpdiv_strategy_solve(
 
 
 def _ipa_strategy_solve(
-        pert: MixedStrategyProfileDouble, nash_callback: object = None,
+        pert: object, nash_callback: object = None,
         event_callback: object = None
 ) -> IPAResult:
     try:
         result: c_IPAStrategyResult = IPAStrategySolve(
-            deref(pert.profile),
+            deref(_strategic_profile_d(pert, "perturbation")),
             MakeStrategyCallback[double](nash_callback), MakeIPAEventCallback(event_callback)
         )
         return IPAResult(
@@ -1270,7 +1323,7 @@ def _ipa_strategy_solve(
 
 
 def _gnm_strategy_solve(
-        pert: MixedStrategyProfileDouble,
+        pert: object,
         end_lambda: float,
         steps: int,
         local_newton_interval: int,
@@ -1280,7 +1333,8 @@ def _gnm_strategy_solve(
 ) -> GNMResult:
     try:
         result: c_GNMStrategyResult = GNMStrategySolve(
-            deref(pert.profile), end_lambda, steps, local_newton_interval, local_newton_maxits,
+            deref(_strategic_profile_d(pert, "perturbation")), end_lambda, steps,
+            local_newton_interval, local_newton_maxits,
             MakeStrategyCallback[double](nash_callback), MakeGNMEventCallback(event_callback)
         )
         return GNMResult(
@@ -1440,7 +1494,7 @@ class LogitQREMixedStrategyProfile:
     @property
     def profile(self) -> MixedStrategyProfileDouble:
         """The mixed strategy profile."""
-        return MixedStrategyProfileDouble.wrap(
+        return _wrap_msp_d(
             make_shared[c_MixedStrategyProfile[double]](deref(self.thisptr).GetProfile())
         )
 
@@ -1453,7 +1507,7 @@ def _logit_strategy_estimate(profile: MixedStrategyProfileDouble,
     """Estimate QRE corresponding to mixed strategy profile using
     maximum likelihood along the principal branch.
     """
-    return LogitQREMixedStrategyProfile.wrap(
+    return _wrap_qre_strategy(
         LogitStrategyEstimateWrapper(
             profile.profile, local_max, first_step, max_accel,
             MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
@@ -1483,7 +1537,7 @@ def _logit_strategy_lambda(game: Game,
         game.game, lam, first_step, max_accel,
         MakeLogitEventCallback[c_LogitQREMixedStrategyProfile](event_callback)
     )
-    profiles = [LogitQREMixedStrategyProfile.wrap(profile) for profile in result.first]
+    profiles = [_wrap_qre_strategy(profile) for profile in result.first]
     if _with_stats:
         return profiles, _convert_trace_stats(result.second)
     return profiles
@@ -1497,7 +1551,7 @@ def _logit_strategy_branch(game: Game,
     result: pair[
         stdlist[c_LogitQREMixedStrategyProfile], stdvector[c_TracePathStats]
     ] = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    profiles = [LogitQREMixedStrategyProfile.wrap(profile)
+    profiles = [_wrap_qre_strategy(profile)
                 for profile in make_list_of_pointer(result.first)]
     if _with_stats:
         return profiles, _convert_trace_stats(result.second)
@@ -1612,12 +1666,12 @@ def _logit_behavior_branch(game: Game,
 
 
 def _hp_strategy_solve(
-        prior: MixedStrategyProfileDouble,
+        prior: object,
         maxregret: float,
         event_callback: object = None,
 ) -> HPResult:
     result: c_HPStrategyResult = HPStrategySolve(
-        deref(prior.profile), maxregret, MakeStrategyCallback[double](None),
+        deref(_strategic_profile_d(prior, "prior")), maxregret, MakeStrategyCallback[double](None),
         MakeHPEventCallback(event_callback)
     )
     return HPResult(

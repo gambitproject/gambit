@@ -37,7 +37,7 @@ from .common import (
     read_game,
     render_profile_csv,
     render_profile_detail,
-    resolve_strategy_starts,
+    resolve_starts,
     version_option,
 )
 
@@ -151,7 +151,7 @@ def main(
     if steps <= 0:
         raise ValueError("Value for -c (steps in support cell) must be at least 1")
     game = read_game(open_game_file(file, PROG_NAME))
-    perturbations = resolve_strategy_starts(game, n_vectors, seed, start_file)
+    perturbations = resolve_starts(game, n_vectors, seed, start_file)
 
     def render(profile, label: str = "NE") -> None:
         if detail:

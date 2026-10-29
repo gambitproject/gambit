@@ -108,6 +108,14 @@ COUNT_FIELDS = [
 
 
 def _point(qre) -> list[float]:
+    if isinstance(qre, gbt.BAGGLogitQREMixedBehaviorProfile):
+        profile = qre.profile
+        return [qre.lam] + [
+            probability
+            for player in profile.game.players
+            for infoset in profile.game.get_infosets(player)
+            for _, probability in profile[player, infoset]
+        ]
     return [qre.lam] + [qre[i] for i in range(len(qre))]
 
 

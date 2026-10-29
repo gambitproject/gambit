@@ -55,7 +55,7 @@ from pygambit.gambit import (  # noqa: F401
     SimpdivResult,
 )
 
-from . import nashlrs, nashphc
+from . import nashlrs, nashphc, util
 
 
 def _validate_stop_after(funcname: str, stop_after: int | None) -> None:
@@ -74,13 +74,17 @@ def _validate_stop_after(funcname: str, stop_after: int | None) -> None:
 
 
 def _normalize_perturbation(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfile
-) -> tuple[libgbt.Game, libgbt.MixedStrategyProfileDouble]:
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile | libgbt.BAGGMixedBehaviorProfile,
+        solver: str,
+) -> tuple[libgbt.Game, libgbt.MixedStrategyProfileDouble | libgbt.BAGGMixedBehaviorProfileDouble]:
     """Shared normalization of a `perturbation` parameter, accepted by `ipa_solve`/
     `gnm_solve`: a `Game` becomes a profile with probability 1 on each player's first
-    strategy and 0 elsewhere; a `MixedStrategyProfile` is converted to floating-point
-    via `as_float()`. Returns (game, perturbation).
+    strategy and 0 elsewhere; a `MixedStrategyProfile` or `BAGGMixedBehaviorProfile` is
+    converted to floating-point via `as_float()`.  On a Bayesian game only the profile is
+    accepted.  Returns (game, perturbation).
     """
+    if isinstance(perturbation, libgbt.BayesianActionGraphGame):
+        _reject_game_as_profile(perturbation, "perturbation", solver)
     if isinstance(perturbation, libgbt.Game):
         game = perturbation
         perturbation = game.mixed_strategy_profile(rational=False)
@@ -89,15 +93,26 @@ def _normalize_perturbation(
             perturbation[player] = {
                 s: (1.0 if s == strategies[0] else 0.0) for s in strategies
             }
-    elif isinstance(perturbation, libgbt.MixedStrategyProfile):
+    elif isinstance(perturbation, libgbt.MixedStrategyProfile | libgbt.BAGGMixedBehaviorProfile):
         game = perturbation.game
         perturbation = perturbation.as_float()
     else:
         raise TypeError(
-            f"parameter must be Game or MixedStrategyProfile, "
-            f"not {perturbation.__class__.__name__}"
+            f"{solver}(): perturbation must be Game, MixedStrategyProfile or "
+            f"BAGGMixedBehaviorProfile, not {perturbation.__class__.__name__}"
         )
     return game, perturbation
+
+
+def _reject_game_as_profile(value: object, name: str, solver: str) -> None:
+    """Raise `TypeError` if `value` is a game where a profile is required."""
+    if isinstance(value, libgbt.BayesianActionGraphGame):
+        raise TypeError(
+            f"{solver}(): {name} must be a BAGGMixedBehaviorProfile "
+            f"on a Bayesian game, not a game"
+        )
+    if isinstance(value, libgbt.Game):
+        raise TypeError(f"{solver}(): {name} must be a mixed strategy profile, not a game")
 
 
 def enumpure_solve(
@@ -113,7 +128,8 @@ def enumpure_solve(
 
     .. versionchanged:: 17.0.0
 
-       Added `nash_callback` parameter.
+       Added `nash_callback` parameter.  On a Bayesian action-graph game, solves the
+       agent form and returns `BAGGMixedBehaviorProfile` equilibria.
 
     Parameters
     ----------
@@ -164,10 +180,18 @@ def enumpure_agent_solve(
     res : EnumPureResult
         The result represented as an ``EnumPureResult`` object.
 
+    Raises
+    ------
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game.
+
+        .. versionadded:: 17.0.0
+
     See Also
     --------
     enumpure_solve
     """
+    util.reject_bayesian(game, "enumpure_agent_solve")
     return libgbt._enumpure_agent_solve(game, nash_callback)
 
 
@@ -222,6 +246,11 @@ def enummixed_solve(
     RuntimeError
         If game has more than two players.
 
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game.
+
+        .. versionadded:: 17.0.0
+
     ValueError
         If both `lrsnash_path` and `nash_callback` are specified, or both
         `lrsnash_path` and `cliques` are specified.
@@ -230,6 +259,7 @@ def enummixed_solve(
     -----
     `lrsnash` is part of `lrslib`, available at http://cgm.cs.mcgill.ca/~avis/C/lrs.html
     """
+    util.reject_bayesian(game, "enummixed_solve")
     if lrsnash_path is not None:
         if nash_callback is not None:
             raise ValueError(
@@ -310,9 +340,15 @@ def lcp_solve(
     RuntimeError
         If game has more than two players.
 
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game.
+
+        .. versionadded:: 17.0.0
+
     ValueError
         If stop_after or max_depth are supplied for use on the tree representation.
     """
+    util.reject_bayesian(game, "lcp_solve")
     if isinstance(game, libgbt.ExtensiveGame) and not use_strategic:
         if stop_after is not None:
             raise ValueError(
@@ -374,7 +410,13 @@ def lp_solve(
     ------
     RuntimeError
         If game has more than two players or is not constant sum.
+
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game.
+
+        .. versionadded:: 17.0.0
     """
+    util.reject_bayesian(game, "lp_solve")
     use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if use_strategic:
         if rational:
@@ -386,7 +428,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: libgbt.MixedStrategyProfile,
+        start: libgbt.MixedStrategyProfile | libgbt.BAGGMixedBehaviorProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
@@ -412,14 +454,17 @@ def liap_solve(
 
        `start` may now also be a `MixedStrategyProfileRational`; it is converted to
        floating-point via `~MixedStrategyProfile.as_float` before minimization.
+       On a Bayesian action-graph game, `start` is a `BAGGMixedBehaviorProfile` and the
+       equilibrium is returned as one.
 
     Parameters
     ----------
-    start : MixedStrategyProfile
+    start : MixedStrategyProfile or BAGGMixedBehaviorProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.  If a `MixedStrategyProfileRational` is
-        given, it is converted to floating-point precision first.
+        given, it is converted to floating-point precision first.  On a Bayesian
+        action-graph game, only a `BAGGMixedBehaviorProfile` is accepted; a game is rejected.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -453,6 +498,7 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    _reject_game_as_profile(start, "start", "liap_solve")
     return libgbt._liap_strategy_solve(
         start.as_float(), maxregret=maxregret, maxiter=maxiter,
         nash_callback=nash_callback, event_callback=event_callback
@@ -514,7 +560,15 @@ def liap_agent_solve(
     -------
     res : LiapResult
         The result represented as a ``LiapResult`` object.
+
+    Raises
+    ------
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game.
+
+        .. versionadded:: 17.0.0
     """
+    util.reject_bayesian(start.game, "liap_agent_solve")
     if maxregret <= 0.0:
         raise ValueError("liap_agent_solve(): maxregret argument must be positive")
     return libgbt._liap_behavior_solve(
@@ -524,7 +578,7 @@ def liap_agent_solve(
 
 
 def simpdiv_solve(
-        start: libgbt.MixedStrategyProfileRational,
+        start: libgbt.MixedStrategyProfileRational | libgbt.BAGGMixedBehaviorProfileRational,
         maxregret: libgbt.Rational | None = None,
         refine: int = 2,
         leash: int | None = None,
@@ -540,9 +594,14 @@ def simpdiv_solve(
 
        Method now takes a starting point, as a mixed strategy profile, instead of a game.
 
+    .. versionchanged:: 17.0.0
+
+       On a Bayesian action-graph game, `start` is a `BAGGMixedBehaviorProfileRational`
+       and the equilibrium is returned as one.
+
     Parameters
     ----------
-    start: MixedStrategyProfileRational
+    start: MixedStrategyProfileRational or BAGGMixedBehaviorProfileRational
         The starting profile for the algorithm.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
@@ -582,6 +641,7 @@ def simpdiv_solve(
     res : SimpdivResult
         The result represented as a ``SimpdivResult`` object.
     """
+    _reject_game_as_profile(start, "start", "simpdiv_solve")
     if not isinstance(refine, int) or refine < 2:
         raise ValueError("simpdiv_solve(): refine must be an integer no less than 2")
     if leash is not None and (not isinstance(leash, int) or leash <= 0):
@@ -596,7 +656,7 @@ def simpdiv_solve(
 
 
 def ipa_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile | libgbt.BAGGMixedBehaviorProfile,
         nash_callback: Callable[[libgbt.MixedStrategyProfileDouble], None] | None = None,
         event_callback: Callable[
             [libgbt.IPAStepEvent | libgbt.IPATerminationEvent], None
@@ -607,12 +667,13 @@ def ipa_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfile
+    perturbation : Game, MixedStrategyProfile or BAGGMixedBehaviorProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
         strategy for each player and 0 for all other strategies.  If a
         `MixedStrategyProfileRational` is given, it is converted to
-        floating-point precision first.
+        floating-point precision first.  On a Bayesian action-graph game, only a
+        `BAGGMixedBehaviorProfile` is accepted.
 
         .. versionchanged:: 16.2.0
 
@@ -622,6 +683,11 @@ def ipa_solve(
 
            Accept a `MixedStrategyProfileRational`, converted to floating-point via
            `~MixedStrategyProfile.as_float`.
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `BAGGMixedBehaviorProfile` on a Bayesian action-graph game, whose
+           equilibria are returned as `BAGGMixedBehaviorProfile` objects.
 
     nash_callback : Callable[[MixedStrategyProfileDouble], None], optional
         If specified, called with the equilibrium found, if any.
@@ -646,12 +712,12 @@ def ipa_solve(
     res : IPAResult
         The result represented as an ``IPAResult`` object.
     """
-    _, perturbation = _normalize_perturbation(perturbation)
+    _, perturbation = _normalize_perturbation(perturbation, "ipa_solve")
     return libgbt._ipa_strategy_solve(perturbation, nash_callback, event_callback)
 
 
 def gnm_solve(
-        perturbation: libgbt.Game | libgbt.MixedStrategyProfile,
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfile | libgbt.BAGGMixedBehaviorProfile,
         end_lambda: float = -10.0,
         steps: int = 100,
         local_newton_interval: int = 3,
@@ -672,12 +738,13 @@ def gnm_solve(
 
     Parameters
     ----------
-    perturbation : Game or MixedStrategyProfile
+    perturbation : Game, MixedStrategyProfile or BAGGMixedBehaviorProfile
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
         strategy for each player and 0 for all other strategies.  If a
         `MixedStrategyProfileRational` is given, it is converted to
-        floating-point precision first.
+        floating-point precision first.  On a Bayesian action-graph game, only a
+        `BAGGMixedBehaviorProfile` is accepted.
 
         .. versionchanged:: 16.2.0
 
@@ -687,6 +754,11 @@ def gnm_solve(
 
            Accept a `MixedStrategyProfileRational`, converted to floating-point via
            `~MixedStrategyProfile.as_float`.
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `BAGGMixedBehaviorProfile` on a Bayesian action-graph game, whose
+           equilibria are returned as `BAGGMixedBehaviorProfile` objects.
 
     end_lambda : float, default -10.0
         The value of the perturbation magnitude lambda at which to terminate
@@ -743,7 +815,7 @@ GNMTerminationEvent], None], optional
     res : GNMResult
         The result represented as a ``GNMResult`` object.
     """
-    _, perturbation = _normalize_perturbation(perturbation)
+    _, perturbation = _normalize_perturbation(perturbation, "gnm_solve")
     if end_lambda >= 0.0:
         raise ValueError(f"end_lambda must be a negative number; got {end_lambda}")
     if steps <= 0:
@@ -811,6 +883,11 @@ def enumpoly_solve(
     of strategies or actions, and for each support finding all totally-mixed equilibria of
     the game over that support. <enumpoly>`
 
+    .. versionchanged:: 17.0.0
+
+       On a Bayesian action-graph game, solves the agent form and returns
+       `BAGGMixedBehaviorProfile` equilibria.
+
     Parameters
     ----------
     game : Game
@@ -870,6 +947,11 @@ def enumpoly_solve(
 
     Raises
     ------
+    UnsupportedForBayesianGameError
+        If game is a Bayesian action-graph game and `phcpack_path` is specified.
+
+        .. versionadded:: 17.0.0
+
     ValueError
         If either `nash_callback` or `event_callback` is specified along with
         `phcpack_path`.
@@ -890,6 +972,7 @@ def enumpoly_solve(
         )
     use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if phcpack_path is not None:
+        util.reject_bayesian(game, "enumpoly_solve")
         if not use_strategic:
             raise ValueError(
                 "enumpoly_solve(): only solving on the strategic representation is "
@@ -938,6 +1021,14 @@ def logit_solve(
 
     Returns an approximation to the limiting point on the principal branch of
     the correspondence for the game.
+
+    On a Bayesian action-graph game the correspondence traced is the type-level
+    (Bayesian) QRE: every type of every player responds with the same precision
+    `lam`, as in the agent QRE of an extensive game.  It is not the QRE of the strategic
+    form of the Bayesian game, which would give a type with prior probability ``P(t)``
+    the precision ``lam * P(t)``.  Both reach Nash equilibria as `lam` tends to infinity.
+    The equilibrium is a `BAGGMixedBehaviorProfile`, and the points of the path
+    reported to `event_callback` are `BAGGLogitQREMixedBehaviorProfile` objects.
 
     Parameters
     ----------
@@ -995,7 +1086,7 @@ LogitPerturbationEvent], None], optional
 
 
 def hp_solve(
-        prior: libgbt.MixedStrategyProfileDouble,
+        prior: libgbt.MixedStrategyProfileDouble | libgbt.BAGGMixedBehaviorProfileDouble,
         maxregret: float = 1.0e-8,
         event_callback: Callable[[libgbt.HPStepEvent], None] | None = None,
 ) -> HPResult:
@@ -1006,8 +1097,13 @@ def hp_solve(
 
     Parameters
     ----------
-    prior : MixedStrategyProfileDouble
-        The prior distribution over strategies.
+    prior : MixedStrategyProfileDouble or BAGGMixedBehaviorProfileDouble
+        The prior distribution over strategies.  On a Bayesian action-graph game this
+        is a `BAGGMixedBehaviorProfileDouble`, and the equilibrium is returned as one.
+
+        .. versionchanged:: 17.0.0
+
+           Accept a `BAGGMixedBehaviorProfileDouble`.
 
     maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -1029,4 +1125,5 @@ def hp_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("hp_solve(): maxregret argument must be positive")
+    _reject_game_as_profile(prior, "prior", "hp_solve")
     return libgbt._hp_strategy_solve(prior, maxregret, event_callback)

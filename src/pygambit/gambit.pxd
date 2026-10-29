@@ -357,7 +357,11 @@ cdef extern from "games/gameagg.h":
 
 cdef extern from "games/gamebagg.h":
     cdef cppclass c_GameBAGGRep "GameBAGGRep" (c_GameRep):
-        pass
+        int NumBaggPlayers() except +
+        int NumTypes(int) except +
+        c_Rational GetTypePrior(int, int) except +
+        int GetAgentNumber(int, int) except +
+        pair[int, int] GetPlayerType(int) except +
 
 
 cdef extern from "games/stratpure.h":

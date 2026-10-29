@@ -314,6 +314,21 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
   IndexStrategies();
 }
 
+int GameBAGGRep::GetAgentNumber(int p_player, int p_type) const
+{
+  int agent = p_type;
+  for (int pl = 1; pl < p_player; pl++) {
+    agent += baggPtr->getNumTypes(pl - 1);
+  }
+  return agent;
+}
+
+std::pair<int, int> GameBAGGRep::GetPlayerType(int p_agent) const
+{
+  const int player = agent2baggPlayer[p_agent];
+  return {player, p_agent - GetAgentNumber(player, 0)};
+}
+
 Game GameBAGGRep::Copy() const
 {
   std::ostringstream os;

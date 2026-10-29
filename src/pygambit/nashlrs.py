@@ -44,6 +44,7 @@ def _parse_lrs_output(game: gbt.Game, txt: str) -> list[gbt.MixedStrategyProfile
 
 def lrsnash_solve(game: gbt.Game,
                   lrsnash_path: pathlib.Path | str) -> list[gbt.MixedStrategyProfileRational]:
+    util.reject_bayesian(game, "lrsnash_solve")
     if len(game.players) != 2:
         raise RuntimeError("Method only valid for two-player games.")
     with util.make_temporary(_generate_lrs_input(game)) as infn:

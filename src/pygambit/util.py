@@ -3,6 +3,9 @@ import pathlib
 import tempfile
 import typing
 
+from pygambit.error import UnsupportedForBayesianGameError
+from pygambit.gambit import BayesianActionGraphGame, Game
+
 
 @contextlib.contextmanager
 def make_temporary(content: str | None = None) -> typing.Generator[pathlib.Path, None, None]:
@@ -22,3 +25,22 @@ def make_temporary(content: str | None = None) -> typing.Generator[pathlib.Path,
         yield filepath
     finally:
         filepath.unlink(missing_ok=True)
+
+
+def reject_bayesian(game: Game, solver: str) -> None:
+    """Raise if `game` is a Bayesian action-graph game.
+
+    Parameters
+    ----------
+    game : Game
+        The game a solver has been asked to solve.
+    solver : str
+        The name of the solver, used in the error message.
+
+    Raises
+    ------
+    UnsupportedForBayesianGameError
+        If `game` is a Bayesian action-graph game.
+    """
+    if isinstance(game, BayesianActionGraphGame):
+        raise UnsupportedForBayesianGameError(f"{solver}(): not defined for Bayesian games")

@@ -22,11 +22,37 @@ def _random_table_game(shape: tuple[int, ...], seed: int) -> gbt.Game:
 
 def _interior_profile(game: gbt.Game, seed: int):
     rng = random.Random(seed)
+    if isinstance(game, gbt.BayesianActionGraphGame):
+        profile = game.mixed_behavior_profile()
+        for player in game.players:
+            for infoset in game.get_infosets(player):
+                actions = [action for action, _ in profile[player, infoset]]
+                weights = [rng.uniform(0.2, 1.0) for _ in actions]
+                profile[player, infoset] = {
+                    action: w / sum(weights) for action, w in zip(actions, weights, strict=True)
+                }
+        return profile
     data = []
     for player in game.players:
         weights = [rng.uniform(0.2, 1.0) for _ in game.get_strategies(player)]
         data.append([w / sum(weights) for w in weights])
     return game.mixed_strategy_profile(data=data, rational=False)
+
+
+def _bagg_removals(game: gbt.BayesianActionGraphGame, profile) -> list[list[tuple]]:
+    """As `_removals`, for the agents (player, information set) of a Bayesian game, whose
+    strategies are the information set's actions."""
+    agents = [
+        (player, infoset, [action for action, _ in profile[player, infoset]])
+        for player in game.players
+        for infoset in game.get_infosets(player)
+    ]
+    agents = [agent for agent in agents if len(agent[2]) > 1]
+    return [
+        [],
+        [(player, infoset, actions[0]) for player, infoset, actions in agents],
+        [(agents[0][0], agents[0][1], agents[0][2][-1])] if agents else [],
+    ]
 
 
 def _removals(game: gbt.Game) -> list[list[tuple[str, str]]]:
@@ -65,5 +91,10 @@ def test_payoff_derivs_are_partial_derivatives(game: gbt.Game, block_tolerance: 
 @pytest.mark.parametrize("game,block_tolerance", GAMES)
 def test_payoff_deriv_block_matches_separate_computation(game: gbt.Game, block_tolerance: float):
     profile = _interior_profile(game, seed=4)
-    for removed in _removals(game):
+    removals = (
+        _bagg_removals(game, profile)
+        if isinstance(game, gbt.BayesianActionGraphGame)
+        else _removals(game)
+    )
+    for removed in removals:
         assert profile._payoff_deriv_block_discrepancy(removed) <= block_tolerance

@@ -35,7 +35,7 @@ from .common import (
     load_game,
     render_profile_csv,
     render_profile_detail,
-    resolve_strategy_starts,
+    resolve_starts,
     version_option,
 )
 
@@ -103,7 +103,7 @@ def main(
     verbose: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME, _EXTRA_BANNER)
-    perturbations = resolve_strategy_starts(game, n_vectors, seed, start_file)
+    perturbations = resolve_starts(game, n_vectors, seed, start_file)
 
     def render(profile, label: str = "NE") -> None:
         if detail:

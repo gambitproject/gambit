@@ -317,14 +317,8 @@ def test_strategy_label_duplicate_within_player_raises_valueerror():
         # with non-terminal outcomes
         (games.create_kuhn_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
         (games.create_stripped_down_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
-        # AGGs/BAGGs
+        # AGGs (per-player payoff bounds raise on a BAGG; see test_agg.py)
         (games.read_from_file("2x2.agg"), [-10, -10], [95, 95]),
-        (games.read_from_file("2x2.bagg"), [-10, -10], [95, 95]),
-        (
-            games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg"),
-            [0, 0, 0, 0, 0, 0],
-            [99, 90, 99, 90, 99, 90],
-        ),
     ],
 )
 def test_player_get_min_max_payoff(game: gbt.Game, exp_min_payoffs: list, exp_max_payoffs: list):

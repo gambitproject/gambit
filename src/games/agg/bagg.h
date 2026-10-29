@@ -55,6 +55,11 @@ public:
   int getNumPlayers() const { return numPlayers; }
   int getNumTypes() const { return typeOffset[numPlayers]; }
   int getNumTypes(int i) const { return numTypes[i]; }
+  /// Returns the exact prior probability of type t of player pl (0-based)
+  Rational getTypeProb(int pl, int t) const
+  {
+    return static_cast<Rational>(exactIndepTypeDist[pl][t]);
+  }
   int getNumActions(int pl, int t) const { return typeActionSets[pl][t].size(); }
 
   int getNumActionNodes() const { return numActionNodes; }
