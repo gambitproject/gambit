@@ -23,11 +23,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <numeric>
-#include <map>
-#include <optional>
 #include <set>
 #include <stack>
 #include <unordered_map>
@@ -1262,108 +1259,6 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
   return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
     return maximize_function(range, value_fn);
   });
-}
-
-namespace {
-
-// Enumerates pure behavior profiles lazily, branching on an information set only when the walk
-// first reaches it.  Profiles that agree on every information set they reach have the same
-// payoffs, so each such class is visited once.
-class PureBehaviorRangeScanner {
-  using Pending = std::vector<std::pair<GameNode, Rational>>;
-
-  std::vector<GamePlayer> m_players;
-  std::map<GameInfoset, GameAction> m_assigned;
-  std::vector<std::optional<std::pair<Rational, Rational>>> m_ranges;
-
-  void Explore(Pending p_pending, std::vector<Rational> p_totals)
-  {
-    while (!p_pending.empty()) {
-      const auto [node, weight] = p_pending.back();
-      p_pending.pop_back();
-      for (size_t pl = 0; pl < m_players.size(); pl++) {
-        p_totals[pl] += weight * node->GetOutcome()->GetPayoff<Rational>(m_players[pl]);
-      }
-      if (node->IsTerminal()) {
-        continue;
-      }
-      const GameInfoset infoset = node->GetInfoset();
-      if (infoset->IsChanceInfoset()) {
-        for (const auto &action : infoset->GetActions()) {
-          p_pending.emplace_back(
-              node->GetChild(action),
-              weight * static_cast<const Rational &>(infoset->GetActionProb(action)));
-        }
-      }
-      else if (const auto assigned = m_assigned.find(infoset); assigned != m_assigned.end()) {
-        p_pending.emplace_back(node->GetChild(assigned->second), weight);
-      }
-      else {
-        for (const auto &action : infoset->GetActions()) {
-          m_assigned[infoset] = action;
-          Pending branch = p_pending;
-          branch.emplace_back(node->GetChild(action), weight);
-          Explore(std::move(branch), p_totals);
-        }
-        m_assigned.erase(infoset);
-        return;
-      }
-    }
-    for (size_t pl = 0; pl < m_players.size(); pl++) {
-      auto &range = m_ranges[pl];
-      range = range ? std::pair{std::min(range->first, p_totals[pl]),
-                                std::max(range->second, p_totals[pl])}
-                    : std::pair{p_totals[pl], p_totals[pl]};
-    }
-  }
-
-public:
-  explicit PureBehaviorRangeScanner(const Game &p_game)
-    : m_players(p_game->GetPlayers().begin(), p_game->GetPlayers().end()),
-      m_ranges(m_players.size())
-  {
-  }
-
-  std::vector<std::pair<Rational, Rational>> Scan(const GameNode &p_root)
-  {
-    Explore({{p_root, Rational(1)}}, std::vector<Rational>(m_players.size(), Rational(0)));
-    std::vector<std::pair<Rational, Rational>> result;
-    std::ranges::transform(m_ranges, std::back_inserter(result),
-                           [](const auto &range) { return *range; });
-    return result;
-  }
-};
-
-} // end anonymous namespace
-
-std::vector<std::pair<Rational, Rational>> GameTreeRep::ScanExpectedPayoffRanges() const
-{
-  if (!GetAbsentMindedReentries().empty()) {
-    throw UndefinedException(
-        "Expected payoff ranges are not defined for games with absent-mindedness.");
-  }
-  const Game game(const_cast<GameTreeRep *>(this)->shared_from_this());
-  return PureBehaviorRangeScanner(game).Scan(m_root);
-}
-
-std::pair<Rational, Rational>
-GameTreeRep::GetPlayerExpectedPayoffRange(const GamePlayer &p_player) const
-{
-  if (p_player->GetGame().get() != this) {
-    throw MismatchException();
-  }
-  return ScanExpectedPayoffRanges().at(p_player->GetNumber() - 1);
-}
-
-std::pair<Rational, Rational> GameTreeRep::GetExpectedPayoffRange() const
-{
-  const auto ranges = ScanExpectedPayoffRanges();
-  return {std::ranges::min_element(ranges,
-                                   [](const auto &a, const auto &b) { return a.first < b.first; })
-              ->first,
-          std::ranges::max_element(ranges, [](const auto &a, const auto &b) {
-            return a.second < b.second;
-          })->second};
 }
 
 bool GameTreeRep::IsPerfectRecall() const

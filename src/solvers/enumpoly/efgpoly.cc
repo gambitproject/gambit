@@ -238,7 +238,10 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
 {
   RequirePerfectRecall(p_game);
 
-  p_maxregret = ScaleRegret(p_game, p_maxregret);
+  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
+  if (scale != 0.0) {
+    p_maxregret *= scale;
+  }
 
   std::list<MixedBehaviorProfile<double>> ret;
   PossibleNashBehaviorSupports possible_supports(p_game);

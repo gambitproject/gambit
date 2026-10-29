@@ -507,7 +507,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
 {
   RequirePerfectRecall(p_start.GetGame());
   Rational d(Integer(1), find_lcd(p_start.GetProbVector()));
-  const Rational maxRegret = ScaleRegret(p_start.GetGame(), m_maxregret);
+  const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);
   m_onEvent(SimpdivStartEvent{y});
@@ -516,7 +516,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
     d /= Rational(m_gridResize);
     const Rational regret = Simplex(y, d);
     m_onEvent(SimpdivRefinementEvent{.profile = y, .gridSize = d, .regret = regret});
-    if (regret <= maxRegret) {
+    if (regret <= m_maxregret * scale) {
       break;
     }
   }

@@ -173,7 +173,8 @@ inline LogitStrategyResult LogitStrategySolveEquilibrium(
   const auto trace = LogitStrategySolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
                                         Nash::NullStrategyCallback<double>, p_onEvent, p_cancel);
   const MixedStrategyProfile<double> &candidate = trace.profiles.back().GetProfile();
-  const double regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
+  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
   if (candidate.GetMaxRegret() > regret) {
     return {.equilibrium = std::nullopt,
             .success = false,
@@ -234,8 +235,9 @@ inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
   const auto trace = LogitBehaviorSolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
                                         Nash::NullBehaviorCallback<double>, p_onEvent, p_cancel);
   const MixedBehaviorProfile<double> &candidate = trace.profiles.back().GetProfile();
-  const double regret = Nash::ScaleRegret(p_start.GetGame(), p_regret);
-  if (candidate.GetMaxRegret() > regret) {
+  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
+  if (candidate.GetAgentMaxRegret() > regret) {
     return {.equilibrium = std::nullopt,
             .success = false,
             .reason = LogitTerminationReason::RegretTargetNotReached,
