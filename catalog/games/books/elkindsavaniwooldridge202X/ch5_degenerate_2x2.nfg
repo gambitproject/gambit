@@ -1,0 +1,14 @@
+NFG 1 R "Degenerate 2x2 game" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "r" }
+}
+"A degenerate game from Chapter 5 (Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X`: both T and B are best responses to r. The equilibria form a segment, (x, r) with prob(B) between 5/6 and 1."
+
+{
+{ "" 0, 5 }
+{ "" 2, 0 }
+{ "" 1, 0 }
+{ "" 1, 1 }
+}
+1 2 3 4

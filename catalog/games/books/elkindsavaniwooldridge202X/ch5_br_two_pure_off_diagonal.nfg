@@ -1,0 +1,14 @@
+NFG 1 R "Best response correspondences: two pure equilibria off the diagonal" { "1" "2" }
+
+{ { "Top" "Bottom" }
+{ "left" "right" }
+}
+"One of four 2x2 examples of best response correspondences in Chapter 5 (Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X`: pure equilibria (Top, right) and (Bottom, left), and one mixed equilibrium."
+
+{
+{ "" 0, 0 }
+{ "" 2, 1 }
+{ "" 1, 5 }
+{ "" 0, 0 }
+}
+1 2 3 4

@@ -1,0 +1,16 @@
+NFG 1 R "Degenerate 2x3 game with unequal-sized supports" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "c" "r" }
+}
+"A degenerate game from Chapter 6 (Algorithms for Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X` whose equilibria all have supports of different sizes: player 1 mixes T and B with prob(T) between 1/3 and 2/3, and player 2 plays l. Used to motivate support enumeration for general bimatrix games."
+
+{
+{ "" 2, 2 }
+{ "" 2, 2 }
+{ "" 0, 3 }
+{ "" 2, 0 }
+{ "" 2, 0 }
+{ "" 0, 3 }
+}
+1 2 3 4 5 6
