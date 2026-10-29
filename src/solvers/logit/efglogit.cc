@@ -135,21 +135,17 @@ void ComputeLogPathValues(const TreeLayout &p_layout, const std::vector<double> 
   v.belief.assign(numNodes, 0.0);
   for (size_t i = 0; i < p_layout.numPersonalInfosets; i++) {
     const auto &members = p_layout.infosets[i].members;
-    double infosetProb = 0.0;
+    double maxLogProb = v.logRealizProb[members.front()];
     for (const size_t m : members) {
-      infosetProb += std::exp(v.logRealizProb[m]);
+      maxLogProb = std::max(maxLogProb, v.logRealizProb[m]);
     }
-    if (infosetProb == 0.0) {
+    if (std::isinf(maxLogProb)) {
       // Possible when a zero-probability chance action makes the information set
       // unreachable; beliefs are then taken to be uniform
       for (const size_t m : members) {
         v.belief[m] = 1.0 / static_cast<double>(members.size());
       }
       continue;
-    }
-    double maxLogProb = v.logRealizProb[members.front()];
-    for (const size_t m : members) {
-      maxLogProb = std::max(maxLogProb, v.logRealizProb[m]);
     }
     double total = 0.0;
     for (const size_t m : members) {

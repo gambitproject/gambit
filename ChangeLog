@@ -1,6 +1,9 @@
 ## [17.0.0-beta.3] - unreleased
 
-### Changed
+### Fixed
+- Corrected logic for distinguishing zero-probability information sets from ones with just very small
+  realisation probability; this was causing tracing to terminate early by accidentally creating an
+  incorrect jump in beliefs from the correct ones to uniform.
 - Reverted the change in #1168 which applied strategic form (expected) payoffs to scaling regret, as this
   scales very poorly.  The regret bounds are now proportional to the range of payoffs in the representation
   being used.
