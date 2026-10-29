@@ -1,5 +1,6 @@
 EFG 2 R "Banks-Camerer-Porter (GEB 94), Game 4" { "Player 1" "Player 2" }
-""
+"Game 4 of the sender-receiver signaling game experiment in :cite:p:`BanCamPor94`,
+reanalyzed using agent quantal response equilibrium in :cite:p:`McKPal98`."
 
 c "" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
 p "" 1 1 "(1,1)" { "m1" "m2" "m3" } 0

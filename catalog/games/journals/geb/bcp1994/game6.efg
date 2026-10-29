@@ -1,0 +1,32 @@
+EFG 2 R "Banks-Camerer-Porter (GEB 94), Game 6" { "Player 1" "Player 2" }
+"Game 6 of the sender-receiver signaling game experiment in :cite:p:`BanCamPor94`,
+used to test the discriminatory power of the never-a-weak-best-response
+(NWBR) criterion relative to universal divinity."
+
+c "" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
+p "" 1 1 "(1,1)" { "m1" "m2" "m3" } 0
+p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
+t "" 1 "a" { 2, 2 }
+t "" 2 "b" { 0, 3 }
+t "" 3 "c" { 5, 2 }
+p "" 2 2 "(2,2)" { "a1" "a2" "a3" } 0
+t "" 4 "d" { 1, 5 }
+t "" 5 "e" { 5, 3 }
+t "" 6 "f" { 1, 0 }
+p "" 2 3 "(2,3)" { "a1" "a2" "a3" } 0
+t "" 7 "g" { 2, 1 }
+t "" 8 "h" { 3, 3 }
+t "" 9 "i" { 0, 4 }
+p "" 1 2 "(1,2)" { "m1" "m2" "m3" } 0
+p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
+t "" 10 "j" { 0, 2 }
+t "" 11 "k" { 2, 0 }
+t "" 12 "l" { 5, 1 }
+p "" 2 2 "(2,2)" { "a1" "a2" "a3" } 0
+t "" 13 "m" { 4, 0 }
+t "" 14 "n" { 4, 1 }
+t "" 15 "o" { 0, 2 }
+p "" 2 3 "(2,3)" { "a1" "a2" "a3" } 0
+t "" 16 "p" { 1, 4 }
+t "" 17 "q" { 3, 3 }
+t "" 18 "r" { 2, 1 }
