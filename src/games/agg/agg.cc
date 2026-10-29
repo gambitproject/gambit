@@ -344,8 +344,8 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
         // insert player i's action j's contribution to projS
         projS[Node][i].insert(make_pair(proj[Node][i][j], 1));
       } // end for(j..
-    }   // end for(i..
-  }     // end for(Node..
+    } // end for(i..
+  } // end for(Node..
 }
 
 void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtype> &projTypes,
