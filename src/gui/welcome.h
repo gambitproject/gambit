@@ -15,6 +15,7 @@ enum class WelcomeNewProblemKind { NormalForm, ExtensiveForm };
 
 wxDECLARE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
+wxDECLARE_EVENT(wxEVT_WELCOME_CATALOG, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_WELCOME_OPEN_RECENT, wxCommandEvent);
 
 class WelcomePanel : public wxPanel {
@@ -31,10 +32,12 @@ private:
   void OnOpen(wxCommandEvent &p_event);
   void OnNewNormalForm(wxCommandEvent &p_event);
   void OnNewExtensiveForm(wxCommandEvent &p_event);
+  void OnCatalog(wxCommandEvent &p_event);
   void OnShowRecent(wxCommandEvent &p_event);
 
   void SendOpenEvent();
   void SendNewEvent(WelcomeNewProblemKind p_kind);
+  void SendCatalogEvent();
 
   wxStaticBitmap *m_logoBitmap{nullptr};
   wxStaticText *m_titleText{nullptr};
@@ -43,6 +46,7 @@ private:
   wxButton *m_recentButton{nullptr};
   wxCommandLinkButton *m_newNormalFormButton{nullptr};
   wxCommandLinkButton *m_newExtensiveFormButton{nullptr};
+  wxCommandLinkButton *m_catalogButton{nullptr};
 
   RecentFilesPopup *m_recentPopup{nullptr};
 };
@@ -57,12 +61,14 @@ private:
 
   void OnWelcomeOpen(wxCommandEvent &p_event);
   void OnWelcomeNew(wxCommandEvent &p_event);
+  void OnWelcomeCatalog(wxCommandEvent &p_event);
   void OnWelcomeOpenRecent(wxCommandEvent &p_event);
   void OnClose(wxCloseEvent &p_event);
 
   bool DoOpen();
   bool DoOpenRecent(const wxString &p_filename);
   bool DoCreateNew(WelcomeNewProblemKind p_kind);
+  bool DoCatalog();
 
 private:
   WelcomePanel *m_panel{nullptr};

@@ -19,6 +19,7 @@
 
 #include "welcome.h"
 #include "app.h"
+#include "dlcatalog.h"
 #include "dlnewtable.h"
 #include "gamedoc.h"
 #include "gameframe.h"
@@ -28,6 +29,7 @@ using namespace Gambit::GUI;
 
 wxDEFINE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_WELCOME_CATALOG, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WELCOME_OPEN_RECENT, wxCommandEvent);
 
 namespace {
@@ -35,6 +37,7 @@ constexpr int ID_WELCOME_OPEN = wxID_HIGHEST + 100;
 constexpr int ID_WELCOME_NEW_NORMAL_FORM = wxID_HIGHEST + 101;
 constexpr int ID_WELCOME_NEW_EXTENSIVE_FORM = wxID_HIGHEST + 102;
 constexpr int ID_WELCOME_RECENT = wxID_HIGHEST + 103;
+constexpr int ID_WELCOME_CATALOG = wxID_HIGHEST + 104;
 
 constexpr int BUTTON_WIDTH = 340;
 constexpr int BUTTON_HEIGHT = 72;
@@ -352,6 +355,9 @@ void WelcomePanel::CreateControls()
       new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive form game",
                               "Create a game with a tree representation");
 
+  m_catalogButton = new wxCommandLinkButton(this, ID_WELCOME_CATALOG, "Browse catalog",
+                                            "Open a curated game from Gambit's games catalog");
+
   m_openButton->SetBitmap(wxBitmapBundle::FromSVG(open_svg, wxSize(24, 24)));
   m_openButton->SetBitmapMargins(24, 12);
 
@@ -365,6 +371,7 @@ void WelcomePanel::CreateControls()
   m_openButton->SetMinSize(wxSize(BUTTON_WIDTH - RECENT_BUTTON_WIDTH, BUTTON_HEIGHT));
   m_newNormalFormButton->SetMinSize(wxSize(BUTTON_WIDTH, BUTTON_HEIGHT));
   m_newExtensiveFormButton->SetMinSize(wxSize(BUTTON_WIDTH, BUTTON_HEIGHT));
+  m_catalogButton->SetMinSize(wxSize(BUTTON_WIDTH, BUTTON_HEIGHT));
 
   m_recentButton = new wxButton(this, ID_WELCOME_RECENT, wxEmptyString, wxDefaultPosition,
                                 wxDefaultSize, wxBU_EXACTFIT);
@@ -375,6 +382,7 @@ void WelcomePanel::CreateControls()
   Bind(wxEVT_BUTTON, &WelcomePanel::OnOpen, this, ID_WELCOME_OPEN);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewNormalForm, this, ID_WELCOME_NEW_NORMAL_FORM);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewExtensiveForm, this, ID_WELCOME_NEW_EXTENSIVE_FORM);
+  Bind(wxEVT_BUTTON, &WelcomePanel::OnCatalog, this, ID_WELCOME_CATALOG);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnShowRecent, this, ID_WELCOME_RECENT);
 }
 
@@ -391,14 +399,17 @@ void WelcomePanel::LayoutControls()
   auto *row = new wxBoxSizer(wxHORIZONTAL);
   auto *content = new wxBoxSizer(wxVERTICAL);
 
-  content->Add(m_logoBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 16);
-  content->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 20);
+  content->Add(m_logoBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 20);
+  content->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 28);
 
   auto *openRow = new wxBoxSizer(wxHORIZONTAL);
   openRow->Add(m_openButton, 1, wxEXPAND);
   openRow->Add(m_recentButton, 0, wxEXPAND);
 
+  // "Open" and "Browse catalog" are both ways to load an existing game, grouped above
+  // the two "New ..." buttons, which create one from scratch.
   content->Add(openRow, 0, wxEXPAND | wxBOTTOM, 16);
+  content->Add(m_catalogButton, 0, wxEXPAND | wxBOTTOM, 16);
   content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, 16);
   content->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
 
@@ -425,6 +436,7 @@ void WelcomePanel::OnNewExtensiveForm(wxCommandEvent &)
   SendNewEvent(WelcomeNewProblemKind::ExtensiveForm);
 }
 
+void WelcomePanel::OnCatalog(wxCommandEvent &) { SendCatalogEvent(); }
 void WelcomePanel::OnShowRecent(wxCommandEvent &)
 {
   if (!m_recentPopup) {
@@ -463,12 +475,19 @@ void WelcomePanel::SendNewEvent(WelcomeNewProblemKind p_kind)
   GetParent()->ProcessWindowEvent(event);
 }
 
+void WelcomePanel::SendCatalogEvent()
+{
+  wxCommandEvent event(wxEVT_WELCOME_CATALOG);
+  event.SetEventObject(this);
+  GetParent()->ProcessWindowEvent(event);
+}
+
 // --------------------
 // WelcomeFrame
 // --------------------
 
 WelcomeFrame::WelcomeFrame(wxWindow *parent)
-  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 500),
+  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 620),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
   CreateControls();
@@ -476,6 +495,7 @@ WelcomeFrame::WelcomeFrame(wxWindow *parent)
 
   Bind(wxEVT_WELCOME_OPEN, &WelcomeFrame::OnWelcomeOpen, this);
   Bind(wxEVT_WELCOME_NEW, &WelcomeFrame::OnWelcomeNew, this);
+  Bind(wxEVT_WELCOME_CATALOG, &WelcomeFrame::OnWelcomeCatalog, this);
   Bind(wxEVT_WELCOME_OPEN_RECENT, &WelcomeFrame::OnWelcomeOpenRecent, this);
   Bind(wxEVT_CLOSE_WINDOW, &WelcomeFrame::OnClose, this);
 
@@ -503,6 +523,13 @@ void WelcomeFrame::OnWelcomeNew(wxCommandEvent &p_event)
   const auto kind = static_cast<WelcomeNewProblemKind>(p_event.GetInt());
 
   if (DoCreateNew(kind)) {
+    Destroy();
+  }
+}
+
+void WelcomeFrame::OnWelcomeCatalog(wxCommandEvent &)
+{
+  if (DoCatalog()) {
     Destroy();
   }
 }
@@ -557,4 +584,13 @@ bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
   }
 
   return true;
+}
+
+bool WelcomeFrame::DoCatalog()
+{
+  CatalogBrowserDialog dialog(this);
+  if (dialog.ShowModal() != wxID_OK) {
+    return false;
+  }
+  return wxGetApp().LoadFile(dialog.GetSelectedFilePath(), this) == AppLoadResult::Success;
 }
