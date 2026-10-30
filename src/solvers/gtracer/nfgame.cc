@@ -22,6 +22,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <numeric>
 #include <vector>
 #include "cmatrix.h"
@@ -152,6 +153,10 @@ double *nfgame::scaleMatrix(const cvector &s, double *m, int n) const
         }
       }
     }
+  }
+  if (newbase < 0) {
+    std::fill(m, m + blockSize[n], 0.0);
+    return m;
   }
   return m + newbase;
 }
