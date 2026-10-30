@@ -266,6 +266,20 @@ Probability distributions over behavior
    HistoryValuesVector
 
 
+Probability distributions over behavior in Bayesian games
+.........................................................
+
+.. autosummary::
+   :toctree: api/
+
+   BAGGMixedBehaviorProfile
+   BAGGMixedBehaviorProfileDouble
+   BAGGMixedBehaviorProfileRational
+   BAGGMixedBehavior
+   BAGGLogitQREMixedBehaviorProfile
+   UnsupportedForBayesianGameError
+
+
 Representation of supports
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

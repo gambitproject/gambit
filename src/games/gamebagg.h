@@ -28,6 +28,10 @@
 
 namespace Gambit {
 
+/// @brief The agent form of a simultaneous-move Bayesian action-graph game
+///
+/// Each type of each Bayesian player is a player of this game.  The accessors below
+/// relate those agents to the Bayesian players and types they represent.
 class GameBAGGRep : public GameRep {
   template <class T> friend class BAGGMixedStrategyProfileRep;
   friend class BAGGPureStrategyProfileRep;
@@ -56,6 +60,23 @@ public:
   //@{
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
+  //@}
+
+  /// @name Bayesian structure (all numbering is 1-based)
+  //@{
+  /// Returns the number of Bayesian players
+  int NumBaggPlayers() const { return baggPtr->getNumPlayers(); }
+  /// Returns the number of types of Bayesian player p_player
+  int NumTypes(int p_player) const { return baggPtr->getNumTypes(p_player - 1); }
+  /// Returns the exact prior probability of type p_type of Bayesian player p_player
+  Rational GetTypePrior(int p_player, int p_type) const
+  {
+    return baggPtr->getTypeProb(p_player - 1, p_type - 1);
+  }
+  /// Returns the number of the agent player for the given Bayesian player and type
+  int GetAgentNumber(int p_player, int p_type) const;
+  /// Returns the Bayesian player and type represented by the agent player p_agent
+  std::pair<int, int> GetPlayerType(int p_agent) const;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

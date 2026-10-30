@@ -42,6 +42,24 @@ class Game:
     def __init__(self) -> None:
         raise ValueError("Use ExtensiveGame(...) or StrategicGame(...) to create a new game")
 
+    @cython.cfunc
+    def _wrap_strategy_profile_double(
+            self, profile: shared_ptr[c_MixedStrategyProfile[float]]
+    ) -> object:
+        return MixedStrategyProfileDouble.wrap(profile)
+
+    @cython.cfunc
+    def _wrap_strategy_profile_rational(
+            self, profile: shared_ptr[c_MixedStrategyProfile[c_Rational]]
+    ) -> object:
+        return MixedStrategyProfileRational.wrap(profile)
+
+    @cython.cfunc
+    def _wrap_logit_qre_strategy(
+            self, qre: shared_ptr[c_LogitQREMixedStrategyProfile]
+    ) -> object:
+        return LogitQREMixedStrategyProfile.wrap(qre)
+
     @staticmethod
     @cython.cfunc
     def _wrap(game: c_Game) -> Game:

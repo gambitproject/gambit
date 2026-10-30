@@ -36,7 +36,7 @@ from .common import (
     render_profile_csv,
     render_profile_detail,
     resolve_behavior_starts,
-    resolve_strategy_starts,
+    resolve_starts,
     version_option,
 )
 
@@ -154,7 +154,7 @@ def main(
                 event_callback=render_event,
             )
     else:
-        starts = resolve_strategy_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
+        starts = resolve_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
         for start in starts:
             gbt.nash.liap_solve(
                 start,

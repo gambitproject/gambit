@@ -30,6 +30,7 @@ from collections.abc import Callable
 import scipy.optimize
 
 import pygambit.gambit as libgbt
+from pygambit import util
 
 
 def logit_solve_branch(
@@ -381,12 +382,19 @@ LogitPerturbationEvent], None], optional
         ``LogitQREMixedStrategyFitResult`` or ``LogitQREMixedBehaviorFitResult``
         object, as appropriate.
 
+    Raises
+    ------
+    UnsupportedForBayesianGameError
+        If `data` is a profile of a Bayesian action-graph game.
+
     References
     ----------
     .. [1] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
+    if isinstance(data, libgbt.BAGGMixedBehaviorProfile):
+        util.reject_bayesian(data.game, "logit_estimate")
     if use_empirical and event_callback is not None:
         raise ValueError(
             "logit_estimate(): event_callback cannot be used with use_empirical"

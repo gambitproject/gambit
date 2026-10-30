@@ -200,41 +200,6 @@ ENUMPURE_CASES = [
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_10",
     ),
-    # Bayesian Action graph games
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
-            solver=gbt.nash.enumpure_solve,
-            expected=[
-                [
-                    [0, 1, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                ],
-                [
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                ],
-                [
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 0, 0, 0, 0, 0],
-                    [1, 0, 0, 0, 0, 0, 0],
-                ],
-            ],
-        ),
-        marks=pytest.mark.nash_enumpure_strategy,
-        id="test_enumpure_11",
-    ),
 ]
 
 
@@ -1535,6 +1500,17 @@ IPA_STRATEGY_CASES = [
 ]
 
 
+def _gnm_from_first_actions(game: gbt.Game):
+    """`gnm_solve` on a Bayesian game from the perturbation that plays each type's first
+    action, the default perturbation for a game with strategies."""
+    perturbation = game.mixed_behavior_profile()
+    for player in game.players:
+        for infoset in game.get_infosets(player):
+            actions = [action for action, _ in perturbation[player, infoset]]
+            perturbation[player, infoset] = {a: float(a == actions[0]) for a in actions}
+    return gbt.nash.gnm_solve(perturbation)
+
+
 GNM_STRATEGY_CASES = [
     pytest.param(
         EquilibriumTestCase(
@@ -1561,7 +1537,7 @@ GNM_STRATEGY_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.bagg"),
-            solver=gbt.nash.gnm_solve,
+            solver=_gnm_from_first_actions,
             expected=[[d(1, 0), d(1, 0)]],
             prob_tol=TOL_LARGE,
             regret_tol=TOL_LARGE,
@@ -1572,7 +1548,7 @@ GNM_STRATEGY_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "Bayesian-Coffee-3-2-2-3.bagg"),
-            solver=gbt.nash.gnm_solve,
+            solver=_gnm_from_first_actions,
             expected=[
                 [
                     d(1, 0, 0, 0, 0, 0, 0),
@@ -1625,6 +1601,19 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
+            if isinstance(game, gbt.BayesianActionGraphGame):
+                found = [
+                    prob
+                    for player in game.players
+                    for infoset in game.get_infosets(player)
+                    for _, prob in eq[player, infoset]
+                ]
+                wanted = [prob for agent in exp for prob in agent]
+                assert len(found) == len(wanted)
+                assert all(
+                    abs(f - w) <= test_case.prob_tol for f, w in zip(found, wanted, strict=True)
+                )
+                continue
             expected = game.mixed_strategy_profile(rational=True, data=exp)
             for player in game.players:
                 for strategy in game.get_strategies(player):

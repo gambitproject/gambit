@@ -30,9 +30,12 @@ import scipy.optimize
 import scipy.stats
 
 import pygambit.gambit as libgbt
+from pygambit import util
 
 
 def logit_br(game, profile, lam):
+    util.reject_bayesian(game, "logit_br")
+
     def do_sum(maxi, logpi, lam, values):
         logp = [logpi + lam * (values[j] - values[maxi])
                 for j in range(len(values))]
@@ -69,6 +72,7 @@ def compute_coghier(game, tau, lam):
     a Poisson distribution of types with mean 'tau', with precision of
     best responses 'lam'.
     """
+    util.reject_bayesian(game, "compute_coghier")
     p = game.mixed_strategy_profile()
     if tau <= 0.0 or lam <= 0.0:
         return CognitiveHierarchyProfile(tau, lam, p)
@@ -91,6 +95,8 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
     Newton function minimization starting at the top 'sample_cands'
     points, to polish the maximizer.
     """
+    util.reject_bayesian(game, "fit_coghier")
+
     def log_like(profile, data):
         return sum(math.log(p) * d for (p, d) in zip(profile, data, strict=True))
 

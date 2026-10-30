@@ -32,13 +32,14 @@ import numpy as np
 import pygambit as gbt
 
 from .common import (
+    bagg_slots,
     handle_errors,
     open_game_file,
     print_banner,
     read_game,
-    read_strategy_profiles_csv,
     render_profile_csv,
     render_profile_detail,
+    resolve_starts,
     version_option,
 )
 
@@ -46,8 +47,17 @@ DESCRIPTION = "Compute Nash equilibria using simplicial subdivision"
 PROG_NAME = "gambit-simpdiv"
 
 
-def _default_start(game: gbt.Game) -> gbt.MixedStrategyProfileRational:
-    """Each player's first strategy, matching the C++ library's `SimpdivDefaultStart`."""
+def _default_start(
+    game: gbt.Game,
+) -> gbt.MixedStrategyProfileRational | gbt.BAGGMixedBehaviorProfileRational:
+    """Each player's first strategy, matching the C++ library's `SimpdivDefaultStart`;
+    for a Bayesian action-graph game, each type's first action.
+    """
+    if isinstance(game, gbt.BayesianActionGraphGame):
+        start = game.mixed_behavior_profile(rational=True)
+        for slot in bagg_slots(game):
+            start[slot.player, slot.infoset] = {slot.actions[0]: 1}
+        return start
     start = game.mixed_strategy_profile(rational=True)
     for player in game.players:
         first_strategy = next(iter(game.get_strategies(player)))
@@ -154,10 +164,15 @@ def main(
     as_float = decimals > 0
 
     if start_file is not None:
-        starts = read_strategy_profiles_csv(start_file, game)
+        starts = resolve_starts(game, None, None, start_file)
     elif rand_denom is not None:
+        draw = (
+            game.random_behavior_profile
+            if isinstance(game, gbt.BayesianActionGraphGame)
+            else game.random_strategy_profile
+        )
         starts = [
-            game.random_strategy_profile(denom=rand_denom, gen=np.random.default_rng(seed))
+            draw(denom=rand_denom, gen=np.random.default_rng(seed))
             for _ in range(n_tries if n_tries is not None else 1)
         ]
     else:

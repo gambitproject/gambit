@@ -65,6 +65,13 @@ def test_logit_branch_trace_stats(game: gbt.Game, branch):
     _check_trace_invariants(stats[0])
 
 
+def test_logit_branch_trace_stats_on_a_bagg_carry_bagg_qre_profiles():
+    game = games.read_from_file("2x2_fraction_types.bagg")
+    profiles, stats = gbt.gambit._logit_strategy_branch(game, 0.01, 0.1, 1.1, _with_stats=True)
+    assert all(isinstance(p, gbt.BAGGLogitQREMixedBehaviorProfile) for p in profiles)
+    assert stats[0].accepted_steps == len(profiles) - 1
+
+
 def test_logit_branch_without_stats_returns_profiles_only():
     game = games.create_stripped_down_poker_efg()
     profiles = gbt.gambit._logit_behavior_branch(game, 0.01, 0.1, 1.1)

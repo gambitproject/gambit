@@ -28,6 +28,7 @@ import functools
 import io
 import pathlib
 import sys
+import typing
 
 import click
 import numpy as np
@@ -274,6 +275,8 @@ def render_profile_detail(
     `MixedBehaviorProfileDetailRenderer` in the C++ tools.  See `format_value` for
     the meaning of `fixed` and `as_float`.
     """
+    if isinstance(profile, gbt.BAGGMixedBehaviorProfile):
+        return _render_bagg_detail(profile, decimals, fixed, as_float)
     if _is_behavior_profile(profile):
         return _render_behavior_detail(profile, decimals, fixed, as_float)
     return _render_strategy_detail(profile, decimals, fixed, as_float)
@@ -304,6 +307,28 @@ def _render_strategy_detail(
             value = format_value(values[strategy], decimals, fixed, as_float)
             lines.append(f"{strategy:>8}    {prob:>10}   {value:>11}")
     return "\n".join(lines)
+
+
+def _render_bagg_detail(
+    profile: gbt.BAGGMixedBehaviorProfile,
+    decimals: int,
+    fixed: bool = True,
+    as_float: bool = False,
+) -> str:
+    lines = []
+    action_values = profile.action_values
+    for player in profile.game.players:
+        lines.append(f"Behavior profile for {player}:")
+        lines.append("Infoset    Action     Prob          Value")
+        lines.append("-------    -------    -----------   -----------")
+        values = action_values[player]
+        for infoset, mixed_action in profile[player]:
+            for action, prob in mixed_action:
+                prob_text = format_value(prob, decimals, fixed, as_float)
+                value_text = format_value(values[infoset][action], decimals, fixed, as_float)
+                lines.append(f"{infoset:>7}    {action:>7}   {prob_text:>11}   {value_text:>11}")
+        lines.append("")
+    return "\n".join(lines).rstrip("\n")
 
 
 def _render_behavior_detail(
@@ -407,6 +432,35 @@ def read_strategy_profiles_csv(
     return profiles
 
 
+class BAGGSlot(typing.NamedTuple):
+    """One (player, type) pair of a Bayesian action-graph game and its action labels."""
+
+    player: str
+    infoset: str
+    actions: list[str]
+
+
+def bagg_slots(game: gbt.BayesianActionGraphGame) -> list[BAGGSlot]:
+    """The player-type slots of a Bayesian action-graph game.
+
+    Parameters
+    ----------
+    game : BayesianActionGraphGame
+        The game to enumerate.
+
+    Returns
+    -------
+    list of BAGGSlot
+        One entry per player and type, in the order a behavior profile lists them.
+    """
+    profile = game.mixed_behavior_profile()
+    return [
+        BAGGSlot(player, infoset, [label for label, _prob in profile[player][infoset]])
+        for player in game.players
+        for infoset in game.get_infosets(player)
+    ]
+
+
 def read_behavior_profiles_csv(
     path: str, game: gbt.Game
 ) -> list[gbt.MixedBehaviorProfileRational]:
@@ -416,10 +470,15 @@ def read_behavior_profiles_csv(
     as exact rationals; a method which requires floating-point starting points converts
     the result via `~MixedBehaviorProfile.as_float`.
     """
-    count = sum(
-        len(game.get_actions(gbt.H.path(*history.actions)))
-        for player in game.players
-        for history in game.get_infosets(player)
+    slots = bagg_slots(game) if isinstance(game, gbt.BayesianActionGraphGame) else None
+    count = (
+        sum(len(slot.actions) for slot in slots)
+        if slots is not None
+        else sum(
+            len(game.get_actions(gbt.H.path(*history.actions)))
+            for player in game.players
+            for history in game.get_infosets(player)
+        )
     )
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -432,10 +491,14 @@ def read_behavior_profiles_csv(
         except (ValueError, IndexError) as exc:
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
         profile = game.mixed_behavior_profile(rational=True)
-        for player in game.players:
-            for history in game.get_infosets(player):
-                selector = gbt.H.path(*history.actions)
-                profile[selector] = {a: next(values) for a in game.get_actions(selector)}
+        if slots is not None:
+            for slot in slots:
+                profile[slot.player, slot.infoset] = {a: next(values) for a in slot.actions}
+        else:
+            for player in game.players:
+                for history in game.get_infosets(player):
+                    selector = gbt.H.path(*history.actions)
+                    profile[selector] = {a: next(values) for a in game.get_actions(selector)}
         profiles.append(profile)
     return profiles
 
@@ -453,25 +516,27 @@ def _validate_random_start_options(
         raise ValueError("The -R option requires -n.")
 
 
-def resolve_strategy_starts(
+def resolve_starts(
     game: gbt.Game,
     n: int | None,
     seed: int | None,
     start_file: str | None,
     default_count: int = 1,
-) -> list[gbt.MixedStrategyProfile]:
+) -> list[gbt.MixedStrategyProfile | gbt.BAGGMixedBehaviorProfile]:
     """Resolve strategy starting points for a `-n`/`-R`/`-s`-style tool: read from
     `start_file` if given, otherwise `n` uniform-random draws (`default_count` if `n`
-    is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, and
-    gambit-liap's non-agent form.
+    is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, gambit-hp and
+    gambit-liap's non-agent form.  For a Bayesian action-graph game, whose profiles are
+    behavior profiles over players and types, the starting points are such profiles.
     """
+    if isinstance(game, gbt.BayesianActionGraphGame):
+        return resolve_behavior_starts(game, n, seed, start_file, default_count)
     _validate_random_start_options(n, seed, start_file)
     if start_file is not None:
         return read_strategy_profiles_csv(start_file, game)
     gen = np.random.default_rng(seed)
     return [
-        game.random_strategy_profile(gen=gen)
-        for _ in range(n if n is not None else default_count)
+        game.random_strategy_profile(gen=gen) for _ in range(n if n is not None else default_count)
     ]
 
 
@@ -482,7 +547,7 @@ def resolve_behavior_starts(
     start_file: str | None,
     default_count: int = 1,
 ) -> list[gbt.MixedBehaviorProfile]:
-    """Behavior-profile counterpart to `resolve_strategy_starts`; see there for the
+    """Behavior-profile counterpart to `resolve_starts`; see there for the
     shared `-n`/`-R`/`-s` semantics. Used by gambit-liap's agent form.
     """
     _validate_random_start_options(n, seed, start_file)
@@ -490,6 +555,5 @@ def resolve_behavior_starts(
         return read_behavior_profiles_csv(start_file, game)
     gen = np.random.default_rng(seed)
     return [
-        game.random_behavior_profile(gen=gen)
-        for _ in range(n if n is not None else default_count)
+        game.random_behavior_profile(gen=gen) for _ in range(n if n is not None else default_count)
     ]

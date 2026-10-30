@@ -31,6 +31,13 @@ class UndefinedOperationError(ValueError):
     pass
 
 
+class UnsupportedForBayesianGameError(UndefinedOperationError):
+    """Raised when an operation that has no meaning for a Bayesian game is attempted on one.
+
+    .. versionadded:: 17.0.0
+    """
+
+
 class GameStructureChangedError(ValueError):
     """Raised when an object is no longer valid after a game structure change."""
     pass

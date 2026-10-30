@@ -272,6 +272,7 @@ def _solve_support(support: gbt.StrategySupportProfile,
 
 def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
                   maxregret: float) -> list[gbt.MixedStrategyProfileDouble]:
+    util.reject_bayesian(game, "phcpack_solve")
     negtol = 1.0e-6
     return [
         eqm
