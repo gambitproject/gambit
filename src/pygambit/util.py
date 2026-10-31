@@ -7,6 +7,25 @@ from pygambit.error import UnsupportedForBayesianGameError
 from pygambit.gambit import BayesianActionGraphGame, Game
 
 
+_T = typing.TypeVar("_T")
+
+
+def _call_strategic_solver(call: typing.Callable[[], _T]) -> _T:
+    """Call a strategic-form solver, adding context to allocation failures."""
+    try:
+        return call()
+    except RuntimeError as exc:
+        message = str(exc)
+        if message == "vector" or "bad_alloc" in message or "bad allocation" in message:
+            raise RuntimeError(
+                "The strategic representation is too large to solve in memory; "
+                "the solver could not allocate its required vectors and matrices. "
+                "For an extensive game, use the behavior representation instead "
+                "(leave use_strategic=False)."
+            ) from None
+        raise
+
+
 @contextlib.contextmanager
 def make_temporary(content: str | None = None) -> typing.Generator[pathlib.Path, None, None]:
     """Context manager to create a temporary file containing `content', and

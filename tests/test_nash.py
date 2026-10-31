@@ -3734,6 +3734,29 @@ def test_logit_solve_branch_and_lambda_on_extensive_game():
     assert len(events) > 0
 
 
+@pytest.mark.parametrize(
+    "solver",
+    [
+        lambda game: gbt.nash.logit_solve(game, use_strategic=True),
+        lambda game: gbt.qre.logit_solve_branch(game, use_strategic=True),
+        lambda game: gbt.qre.logit_solve_lambda(game, lam=1.0, use_strategic=True),
+    ],
+)
+def test_logit_strategic_allocation_error_is_actionable(monkeypatch, solver):
+    game = games.create_stripped_down_poker_efg()
+
+    def fail_to_allocate(*args, **kwargs):
+        raise RuntimeError("vector")
+
+    monkeypatch.setattr(gbt.nash.libgbt, "_logit_strategy_solve", fail_to_allocate)
+    monkeypatch.setattr(gbt.qre.libgbt, "_logit_strategy_branch", fail_to_allocate)
+    monkeypatch.setattr(gbt.qre.libgbt, "_logit_strategy_lambda", fail_to_allocate)
+
+    with pytest.raises(RuntimeError, match="strategic representation is too large") as excinfo:
+        solver(game)
+    assert "use_strategic=False" in str(excinfo.value)
+
+
 def test_logit_solve_lambda_reports_bifurcation_and_perturbation_events():
     """The 2x2 symmetric coordination game's logit QRE correspondence has a
     well-known bifurcation; tracing far enough past it should report it via

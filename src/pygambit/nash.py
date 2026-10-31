@@ -1081,7 +1081,11 @@ LogitPerturbationEvent], None], optional
         raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
     use_strategic = not isinstance(game, libgbt.ExtensiveGame) or use_strategic
     if use_strategic:
-        return libgbt._logit_strategy_solve(game, maxregret, first_step, max_accel, event_callback)
+        return util._call_strategic_solver(
+            lambda: libgbt._logit_strategy_solve(
+                game, maxregret, first_step, max_accel, event_callback
+            )
+        )
     return libgbt._logit_behavior_solve(game, maxregret, first_step, max_accel, event_callback)
 
 

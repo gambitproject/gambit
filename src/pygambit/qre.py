@@ -47,7 +47,9 @@ def logit_solve_branch(
     if max_accel < 1.0:
         raise ValueError("logit_solve_branch(): max_accel argument must be at least 1.0")
     if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
-        return libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
+        return util._call_strategic_solver(
+            lambda: libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
+        )
     else:
         return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
 
@@ -81,8 +83,10 @@ def logit_solve_lambda(
     if max_accel < 1.0:
         raise ValueError("logit_solve_lambda(): max_accel argument must be at least 1.0")
     if not isinstance(game, libgbt.ExtensiveGame) or use_strategic:
-        return libgbt._logit_strategy_lambda(
-            game, lam, first_step, max_accel, event_callback
+        return util._call_strategic_solver(
+            lambda: libgbt._logit_strategy_lambda(
+                game, lam, first_step, max_accel, event_callback
+            )
         )
     else:
         return libgbt._logit_behavior_lambda(
