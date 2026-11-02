@@ -9,6 +9,9 @@
   Calculations are now supported using profiles correctly labeled as being behavior profiles, and
   Nash solvers handle these correctly.  There is no change in functionality; this is clarifying labeling
   as the previous interface required calling code and users to understand the agent mapping which was implicit.
+- `nash.liap_agent_solve` and `gambit-liap -A` now minimise the Lyapunov function of the agent normal form,
+  and accept a profile when the maximum, over information sets, of reach probability times regret is
+  within `maxregret` (scaled as before).  Previously the function summed squared conditional regrets.
 
 ### Fixed
 - Corrected logic for distinguishing zero-probability information sets from ones with just very small

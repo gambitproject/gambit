@@ -527,6 +527,13 @@ def liap_agent_solve(
        `start` may now also be a `MixedBehaviorProfileRational`; it is converted to
        floating-point via `~MixedBehaviorProfile.as_float` before minimization.
 
+    .. versionchanged:: 17.0.0
+
+       The function minimized is the Lyapunov function of the agent normal form, so information
+       sets that are unreached at the start or at the minimizer are handled correctly, and agent
+       Nash equilibria which leave an information set unreached can be found.  Acceptance is
+       by the agent normal form's maximum regret (see `maxregret`).
+
     Parameters
     ----------
     start : MixedBehaviorProfile
@@ -536,10 +543,11 @@ def liap_agent_solve(
         given, it is converted to floating-point precision first.
 
     maxregret : float, default 1e-4
-        The acceptance criterion for approximate Nash equilibrium; the maximum
-        regret of any player must be no more than `maxregret` times the
+        The acceptance criterion for approximate agent Nash equilibrium; the maximum,
+        over information sets, of the information set's probability of being reached times its
+        regret must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of any play of the game, as the
-        game is represented (see :ref:`pygambit-nash-maxregret`)
+        game is represented (see :ref:`pygambit-nash-maxregret`).
 
     maxiter : int, default 1000
         Maximum number of iterations in function minimization.

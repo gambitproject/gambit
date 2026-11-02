@@ -3555,6 +3555,32 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
                         ) <= test_case.prob_tol
 
 
+@pytest.mark.nash
+@pytest.mark.nash_liap_agent
+def test_liap_agent_start_with_unreached_infoset() -> None:
+    """A start at which an information set has reach zero is a valid input, not an error."""
+    game = gbt.catalog.load("journals/ijgt/selten1975/fig2")
+    start = game.mixed_behavior_profile(data=[[[1, 0], [0.5, 0.5]], [[0.5, 0.5]]])
+    result = gbt.nash.liap_agent_solve(start)
+    equilibria = _equilibria(result)
+    assert len(equilibria) == 1
+    assert equilibria[0].agent_max_regret() <= TOL_LARGE
+
+
+@pytest.mark.nash
+@pytest.mark.nash_liap_agent
+def test_liap_agent_equilibrium_with_unreached_infoset() -> None:
+    """From near (Exit, Bad), an agent Nash equilibrium which leaves the second information
+    set unreached, minimization ends there instead of running away to (Continue, Good)."""
+    game = games.read_from_file("exit_or_continue.efg")
+    start = game.mixed_behavior_profile(data=[[[0.999, 0.001], [0.001, 0.999]]])
+    result = gbt.nash.liap_agent_solve(start)
+    equilibria = _equilibria(result)
+    assert len(equilibria) == 1
+    assert equilibria[0][gbt.H.path()]["Exit"] > 0.999
+    assert equilibria[0][gbt.H.path("Continue")]["Good"] < 0.5
+
+
 ##################################################################################################
 # QRE solvers
 ##################################################################################################

@@ -1,0 +1,8 @@
+EFG 2 R "Exit or continue" { "P1" }
+""
+
+p "" 1 1 "I1" { "Exit" "Continue" } 0
+t "" 1 "Exit" { 1 }
+p "" 1 2 "I2" { "Good" "Bad" } 0
+t "" 2 "Good" { 2 }
+t "" 3 "Bad" { 0 }

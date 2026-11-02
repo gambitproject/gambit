@@ -185,6 +185,12 @@ points and using conjugate gradient descent to minimize the Lyapunov
 function of the game. This is a nonnegative function which is
 zero exactly at strategy profiles which are Nash equilibria.
 
+For an extensive game, the function can be applied to the strategic form, or, to compute agent
+Nash equilibria, to the agent normal form.
+The Lyapunov function of the agent normal form
+is zero exactly at agent Nash equilibria, including those which leave some information sets
+unreached.
+
 Note that this procedure is not globally convergent. That is, it is
 not guaranteed to find all, or even any, Nash equilibria.
 

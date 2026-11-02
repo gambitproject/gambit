@@ -69,15 +69,36 @@ inline double sum_infoset_probs(const MixedBehaviorProfile<double> &p_profile,
                       [&p_profile](const auto &action) { return p_profile[action]; });
 }
 
+namespace {
+
+// The value to the infoset's owner of taking `p_action` at the infoset, weighted by the
+// probability of reaching each member node.
+double UnconditionalActionValue(const MixedBehaviorProfile<double> &p_profile,
+                                const GameAction &p_action)
+{
+  const auto infoset = p_action->GetInfoset();
+  const auto player = infoset->GetPlayer();
+  return sum_function(infoset->GetMembers(), [&](const auto &node) -> double {
+    return p_profile.GetRealizProb(node) * p_profile.GetPayoff(player, node->GetChild(p_action));
+  });
+}
+
+} // namespace
+
 double
 AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_profile) const
 {
   double value = 0.0;
-  // Liapunov function proper.
+  // Lyapunov function of the agent normal form.
   for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
-    double infosetValue = p_profile.GetPayoff(infoset).value();
-    value += sum_function(infoset->GetActions(), [&](const auto &action) -> double {
-      return sqr(std::max(m_scale * (p_profile.GetPayoff(action).value() - infosetValue), 0.0));
+    std::vector<double> actionValues;
+    double infosetValue = 0.0;
+    for (const auto &action : infoset->GetActions()) {
+      actionValues.push_back(UnconditionalActionValue(p_profile, action));
+      infosetValue += p_profile[action] * actionValues.back();
+    }
+    value += sum_function(actionValues, [&](double v) -> double {
+      return sqr(std::max(m_scale * (v - infosetValue), 0.0));
     });
   }
   // Penalty function for non-negativity constraint for each action
@@ -126,6 +147,16 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
   return profile.Normalize();
 }
 
+double AgentNormalFormMaxRegret(const MixedBehaviorProfile<double> &p_profile)
+{
+  double maxRegret = 0.0;
+  for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
+    maxRegret =
+        std::max(maxRegret, p_profile.GetInfosetProb(infoset) * p_profile.GetRegret(infoset));
+  }
+  return maxRegret;
+}
+
 } // namespace
 
 LiapAgentResult LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret,
@@ -165,7 +196,7 @@ LiapAgentResult LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, doub
   }
 
   auto p2 = EnforceNonnegativity(p);
-  const double regret = p2.GetAgentMaxRegret() * F.GetScale();
+  const double regret = AgentNormalFormMaxRegret(p2) * F.GetScale();
   if (regret < p_maxregret) {
     p_onEquilibrium(p2);
     return {.equilibrium = p2, .success = true, .reason = LiapTerminationReason::Converged};
