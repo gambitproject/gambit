@@ -73,6 +73,7 @@ class GameFrame final : public wxFrame, public GameView {
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewZoom(wxCommandEvent &);
+  void OnCharHook(wxKeyEvent &);
   void OnViewStrategic(wxCommandEvent &);
 
   void OnFormatLayout(wxCommandEvent &);

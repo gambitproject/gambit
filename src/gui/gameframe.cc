@@ -229,6 +229,7 @@ EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
 EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
 EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
 EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
+EVT_CHAR_HOOK(GameFrame::OnCharHook)
 EVT_MENU(GBT_MENU_VIEW_ZOOMIN, GameFrame::OnViewZoom)
 EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, GameFrame::OnViewZoom)
 EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, GameFrame::OnViewZoom)
@@ -920,6 +921,40 @@ void GameFrame::OnViewZoom(wxCommandEvent &p_event)
   if (m_efgPanel && m_efgPanel->IsShown()) {
     wxPostEvent(m_efgPanel, p_event);
   }
+}
+
+void GameFrame::OnCharHook(wxKeyEvent &p_event)
+{
+  // Windows does not reliably deliver Ctrl+'+', Ctrl+'-' or Ctrl+'0' (main row or numpad)
+  // through accelerator tables, so the zoom shortcuts are matched on the key itself.
+  if (p_event.ControlDown() && !p_event.AltDown()) {
+    int id = 0;
+    switch (p_event.GetKeyCode()) {
+    case '+':
+    case '=':
+    case WXK_ADD:
+    case WXK_NUMPAD_ADD:
+      id = GBT_MENU_VIEW_ZOOMIN;
+      break;
+    case '-':
+    case WXK_SUBTRACT:
+    case WXK_NUMPAD_SUBTRACT:
+      id = GBT_MENU_VIEW_ZOOMOUT;
+      break;
+    case '0':
+    case WXK_NUMPAD0:
+      id = GBT_MENU_VIEW_ZOOM100;
+      break;
+    default:
+      break;
+    }
+    if (id != 0) {
+      wxCommandEvent event(wxEVT_MENU, id);
+      OnViewZoom(event);
+      return;
+    }
+  }
+  p_event.Skip();
 }
 
 void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
