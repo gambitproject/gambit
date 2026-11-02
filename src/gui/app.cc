@@ -26,6 +26,7 @@
 #endif // WX_PRECOMP
 #include <wx/artprov.h>
 #include <wx/display.h>
+#include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/scopeguard.h>
@@ -219,6 +220,21 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
     (void)new GameFrame(nullptr, doc);
     return AppLoadResult::Success;
   }
+}
+
+bool Application::ChooseAndLoadFile(wxWindow *p_parent)
+{
+  wxFileDialog dialog(
+      p_parent, _("Choose file to open"), GetCurrentDir(), _T(""),
+      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
+
+  if (dialog.ShowModal() != wxID_OK) {
+    return false;
+  }
+  const wxString filename = dialog.GetPath();
+  SetCurrentDir(wxPathOnly(filename));
+  return LoadFile(filename, p_parent) == AppLoadResult::Success;
 }
 
 std::vector<wxString> Application::GetRecentFiles() const

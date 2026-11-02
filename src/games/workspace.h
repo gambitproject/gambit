@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/games/workspace.h
-// Reader and writer for Gambit's legacy .gbt workspace format
+// Reader and writer for Gambit's .gbt workspace format
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 namespace Gambit {
 
-struct LegacyWorkspaceFile {
+struct WorkspaceFile {
   struct Color {
     int player{-2};
     int red{0};
@@ -86,11 +86,11 @@ struct LegacyWorkspaceFile {
   std::vector<Analysis> analyses;
 };
 
-/// Read a legacy .gbt workspace. Throws std::runtime_error if malformed.
-LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream);
+/// Read a .gbt workspace. Throws std::runtime_error if malformed.
+WorkspaceFile ReadWorkspace(std::istream &p_stream);
 
-/// Write a legacy .gbt workspace in the canonical format.
-void WriteLegacyWorkspace(std::ostream &p_stream, const LegacyWorkspaceFile &p_workspace);
+/// Write a .gbt workspace in the canonical format.
+void WriteWorkspace(std::ostream &p_stream, const WorkspaceFile &p_workspace);
 
 } // namespace Gambit
 

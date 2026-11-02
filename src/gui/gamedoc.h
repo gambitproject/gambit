@@ -202,8 +202,8 @@ public:
   bool CanStrategyElim() const;
   int GetStrategyElimLevel() const;
 
-  std::vector<LegacyWorkspaceFile::Analysis> Save() const;
-  bool Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses);
+  std::vector<WorkspaceFile::Analysis> Save() const;
+  bool Load(const std::vector<WorkspaceFile::Analysis> &p_analyses);
 };
 
 // Generates a label guaranteed not to collide with any of p_game's current outcome labels, of

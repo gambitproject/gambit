@@ -112,8 +112,7 @@ MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &
 } // end anonymous namespace
 
 // Load a profile list from the neutral workspace representation.
-template <class T>
-void AnalysisProfileList<T>::Load(const LegacyWorkspaceFile::Analysis &p_analysis)
+template <class T> void AnalysisProfileList<T>::Load(const WorkspaceFile::Analysis &p_analysis)
 {
   Clear();
   m_description = wxString(p_analysis.description.c_str(), *wxConvCurrent);
@@ -414,9 +413,9 @@ int AnalysisProfileList<T>::CompareStrategyProb(int p_strategy, int p_left, int 
                         GetStrategyProbEntry(p_strategy, p_right));
 }
 
-template <class T> LegacyWorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
+template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 {
-  LegacyWorkspaceFile::Analysis result;
+  WorkspaceFile::Analysis result;
   result.description = m_description.ToStdString();
   if (As<GameTreeRep>(m_doc->GetGame())) {
     for (int j = 1; j <= NumProfiles(); j++) {

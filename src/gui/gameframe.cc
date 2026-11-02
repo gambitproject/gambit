@@ -549,19 +549,7 @@ void GameFrame::OnFileNewNfg(wxCommandEvent &)
   new GameFrame(nullptr, NewTableDocument(dialog.GetDimensions()));
 }
 
-void GameFrame::OnFileOpen(wxCommandEvent &)
-{
-  wxFileDialog dialog(
-      this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
-      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
-
-  if (dialog.ShowModal() == wxID_OK) {
-    const wxString filename = dialog.GetPath();
-    wxGetApp().SetCurrentDir(wxPathOnly(filename));
-    wxGetApp().LoadFile(filename, this);
-  }
-}
+void GameFrame::OnFileOpen(wxCommandEvent &) { wxGetApp().ChooseAndLoadFile(this); }
 
 void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
@@ -610,13 +598,13 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
   if (!filename.HasExt()) {
     switch (dialog.GetFilterIndex()) {
     case 0:
-      filename.SetExt(wxT("gbt"));
-      format = GameDocument::GameSaveFormat::Workspace;
+      filename.SetExt(nativeExt);
+      format = nativeFormat;
       break;
 
     case 1:
-      filename.SetExt(nativeExt);
-      format = nativeFormat;
+      filename.SetExt(wxT("gbt"));
+      format = GameDocument::GameSaveFormat::Workspace;
       break;
 
     default:

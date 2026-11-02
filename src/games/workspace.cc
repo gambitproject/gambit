@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/games/workspace.cc
-// Reader and writer for Gambit's legacy .gbt workspace format
+// Reader and writer for Gambit's .gbt workspace format
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -404,7 +404,7 @@ std::string UnwrapPayload(std::string p_value)
 } // namespace
 
 // NOLINTNEXTLINE(misc-const-correctness): reads from the stream
-LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
+WorkspaceFile ReadWorkspace(std::istream &p_stream)
 {
   std::ostringstream text;
   text << p_stream.rdbuf();
@@ -415,10 +415,10 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
     return document ? document->Child(name) : Root(roots, name);
   };
 
-  LegacyWorkspaceFile workspace;
+  WorkspaceFile workspace;
   if (const Element *colors = topLevel("colors")) {
     for (const auto *player : colors->Children("player")) {
-      LegacyWorkspaceFile::Color color;
+      WorkspaceFile::Color color;
       player->IntAttribute("id", color.player);
       player->IntAttribute("red", color.red);
       player->IntAttribute("green", color.green);
@@ -427,7 +427,7 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
     }
   }
   if (const Element *font = topLevel("font")) {
-    workspace.font = LegacyWorkspaceFile::Font{};
+    workspace.font = WorkspaceFile::Font{};
     font->IntAttribute("size", workspace.font->size);
     font->IntAttribute("family", workspace.font->family);
     workspace.font->face = Attribute(font, "face");
@@ -435,7 +435,7 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
     font->IntAttribute("weight", workspace.font->weight);
   }
   if (const Element *layout = topLevel("autolayout")) {
-    workspace.layout = LegacyWorkspaceFile::Layout{};
+    workspace.layout = WorkspaceFile::Layout{};
     if (const Element *nodes = layout->Child("nodes")) {
       nodes->IntAttribute("size", workspace.layout->node_size);
       nodes->IntAttribute("spacing", workspace.layout->terminal_spacing);
@@ -454,7 +454,7 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
     }
   }
   if (const Element *labels = topLevel("labels")) {
-    workspace.labels = LegacyWorkspaceFile::Labels{};
+    workspace.labels = WorkspaceFile::Labels{};
     workspace.labels->node_above = Attribute(labels, "abovenode", "label");
     workspace.labels->node_below = Attribute(labels, "belownode", "isetid");
     workspace.labels->branch_above = Attribute(labels, "abovebranch", "label");
@@ -486,7 +486,7 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
     if (Attribute(analysis, "type") != "list") {
       continue;
     }
-    LegacyWorkspaceFile::Analysis result;
+    WorkspaceFile::Analysis result;
     if (const Element *description = analysis->Child("description")) {
       result.description = UnwrapPayload(description->Text());
     }
@@ -499,7 +499,7 @@ LegacyWorkspaceFile ReadLegacyWorkspace(std::istream &p_stream)
   return workspace;
 }
 
-void WriteLegacyWorkspace(std::ostream &p_stream, const LegacyWorkspaceFile &p_workspace)
+void WriteWorkspace(std::ostream &p_stream, const WorkspaceFile &p_workspace)
 {
   if (p_workspace.game_format != "efg" && p_workspace.game_format != "nfg") {
     throw std::runtime_error("Invalid game format for .gbt workspace");

@@ -128,7 +128,7 @@ public:
   /// Map all behavior profiles to corresponding mixed profiles
   virtual void BuildNfg() = 0;
 
-  virtual LegacyWorkspaceFile::Analysis Save() const = 0;
+  virtual WorkspaceFile::Analysis Save() const = 0;
 };
 
 //!
@@ -211,8 +211,8 @@ public:
   //! @name Saving and loading profile lists
   //!
   //@{
-  void Load(const LegacyWorkspaceFile::Analysis &p_analysis);
-  LegacyWorkspaceFile::Analysis Save() const override;
+  void Load(const WorkspaceFile::Analysis &p_analysis);
+  WorkspaceFile::Analysis Save() const override;
   //@}
 
 private:

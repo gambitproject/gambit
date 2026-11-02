@@ -160,16 +160,16 @@ bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanElim
 
 int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
-std::vector<LegacyWorkspaceFile::Analysis> AnalysisWorkspace::Save() const
+std::vector<WorkspaceFile::Analysis> AnalysisWorkspace::Save() const
 {
-  std::vector<LegacyWorkspaceFile::Analysis> result;
+  std::vector<WorkspaceFile::Analysis> result;
   for (const auto &analysis : m_profiles) {
     result.push_back(analysis->Save());
   }
   return result;
 }
 
-bool AnalysisWorkspace::Load(const std::vector<LegacyWorkspaceFile::Analysis> &p_analyses)
+bool AnalysisWorkspace::Load(const std::vector<WorkspaceFile::Analysis> &p_analyses)
 {
   m_stratSupports.Reset();
 
@@ -224,7 +224,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 
   // First, see whether this is a Gambit workspace (.gbt) file.
   try {
-    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
+    const WorkspaceFile workspace = ReadWorkspace(input);
     std::istringstream game_text(workspace.game);
     auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
     if (doc->m_workspace.Load(workspace.analyses)) {
@@ -258,7 +258,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 
 void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
-  LegacyWorkspaceFile workspace;
+  WorkspaceFile workspace;
   m_style.Save(workspace);
   workspace.game_format = As<GameTreeRep>(m_game) ? "efg" : "nfg";
   if (!As<GameTreeRep>(m_game)) {
@@ -272,7 +272,7 @@ void GameDocument::SaveWorkspace(std::ostream &p_file) const
     workspace.game.pop_back();
   }
   workspace.analyses = m_workspace.Save();
-  Gambit::WriteLegacyWorkspace(p_file, workspace);
+  Gambit::WriteWorkspace(p_file, workspace);
 }
 
 void GameDocument::NotifyChanged(GameModificationType p_modifications)
@@ -311,7 +311,7 @@ void GameDocument::ResetUndoHistory()
 void GameDocument::RestoreSnapshot(const std::string &p_snapshot)
 {
   std::istringstream input(p_snapshot);
-  const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(input);
+  const WorkspaceFile workspace = ReadWorkspace(input);
   std::istringstream game_text(workspace.game);
   m_game = ReadGame(game_text);
   m_workspace.Load(workspace.analyses);

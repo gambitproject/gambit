@@ -36,7 +36,7 @@
 	    <key>CFBundleTypeIconFile</key>
 	    <string>gambit.icns</string>
 	    <key>CFBundleTypeName</key>
-	    <string>Gambit Document</string>
+	    <string>Gambit Workspace</string>
 	    <key>CFBundleTypeOSTypes</key>
             <array>
 	      <string>GBT </string>
