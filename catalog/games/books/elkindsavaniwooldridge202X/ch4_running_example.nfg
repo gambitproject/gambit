@@ -1,0 +1,14 @@
+NFG 1 R "Running example for strategic form games" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "r" }
+}
+"The running example of Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, used to introduce best responses, dominant strategies and Nash equilibrium. T is a dominant strategy for player 1, and (T, l) is the unique Nash equilibrium."
+
+{
+{ "" 1, 1 }
+{ "" 0, 0 }
+{ "" 1, 0 }
+{ "" 0, 1 }
+}
+1 2 3 4

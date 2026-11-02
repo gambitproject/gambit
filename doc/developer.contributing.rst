@@ -167,6 +167,8 @@ You can also run the tests locally before submitting your pull request, using `p
 
 .. tip::
     You can omit the `--run-tutorials` to skip running the tutorial notebook tests which take longest to run.
+    The textbook companion notebooks in ``doc/tutorials/textbook`` are skipped unless you also
+    pass `--run-textbook`.
     Running tests including tutorials requires `doc` as well as `test` dependencies; see :ref:`build-python`.
 
 Adding to the test suite

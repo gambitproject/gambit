@@ -1,4 +1,30 @@
 CATALOG_FILES = \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_bach_or_stravinsky.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_chicken.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_coordination.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_iterated_dominance.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_matching_pennies.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_myopic_best_response_cycle.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_payoff_dominant_coordination.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_prisoners_dilemma.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_prisoners_dilemma_axelrod.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_running_example.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch4_stag_hunt.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_br_strict_dominance.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_br_two_pure_off_diagonal.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_br_unique_mixed.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_degenerate_2x2.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_difference_trick.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_indifference_not_enough_3x2.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_matching_pennies_variant.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch5_nash_theorem_2x2.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_degenerate_2x3.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_multiple_equilibria_2x3.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_unequal_supports_2x3.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_unique_equilibrium_2x3.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_upper_envelope_2x5.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch6_zero_identity_2x2.nfg \
+	catalog/games/books/elkindsavaniwooldridge202X/ch8_simple_extensive_game.efg \
 	catalog/games/books/myerson1991/fig2_1.efg \
 	catalog/games/books/myerson1991/fig4_2.efg \
 	catalog/games/books/shohamleytonbrown2008/fig5_1.efg \

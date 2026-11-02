@@ -1,0 +1,14 @@
+NFG 1 R "Coordination game with a payoff-dominant equilibrium" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "r" }
+}
+"A coordination game from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X` in which the equilibrium (T, l) payoff-dominates (B, r)."
+
+{
+{ "" 100, 100 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 1, 1 }
+}
+1 2 3 4
