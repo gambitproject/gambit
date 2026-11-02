@@ -230,45 +230,45 @@ TreeRenderConfig::GetBranchLabelGenerator(BranchLabelStyle p_which,
   return [fn, &p_workspace](const GameNode &n) { return fn(n, p_workspace); };
 }
 
-void TreeRenderConfig::Save(LegacyWorkspaceFile &p_workspace) const
+void TreeRenderConfig::Save(WorkspaceFile &p_workspace) const
 {
   const auto color = [](int player, const wxColour &value) {
-    return LegacyWorkspaceFile::Color{player, value.Red(), value.Green(), value.Blue()};
+    return WorkspaceFile::Color{player, value.Red(), value.Green(), value.Blue()};
   };
   p_workspace.colors = {color(-1, m_terminalColor), color(0, m_chanceColor)};
   for (size_t player = 1; player <= m_playerColors.size(); ++player) {
     p_workspace.colors.push_back(color(player, m_playerColors[player]));
   }
 
-  p_workspace.font = LegacyWorkspaceFile::Font{
-      m_font.GetPointSize(), static_cast<int>(m_font.GetFamily()),
-      m_font.GetFaceName().ToStdString(), static_cast<int>(m_font.GetStyle()),
-      static_cast<int>(m_font.GetWeight())};
+  p_workspace.font =
+      WorkspaceFile::Font{m_font.GetPointSize(), static_cast<int>(m_font.GetFamily()),
+                          m_font.GetFaceName().ToStdString(), static_cast<int>(m_font.GetStyle()),
+                          static_cast<int>(m_font.GetWeight())};
   static const std::string node_tokens[] = {"line", "box", "circle", "diamond", "dot"};
   static const std::string branch_styles[] = {"line", "forktine"};
   static const std::string branch_labels[] = {"horizontal", "rotated"};
   static const std::string infoset_styles[] = {"lines", "circles"};
-  p_workspace.layout = LegacyWorkspaceFile::Layout{m_nodeSize,
-                                                   m_terminalSpacing,
-                                                   node_tokens[m_chanceToken],
-                                                   node_tokens[m_playerToken],
-                                                   node_tokens[m_terminalToken],
-                                                   m_branchLength,
-                                                   m_tineLength,
-                                                   branch_styles[m_branchStyle],
-                                                   branch_labels[m_branchLabels],
-                                                   infoset_styles[m_infosetJoin]};
+  p_workspace.layout = WorkspaceFile::Layout{m_nodeSize,
+                                             m_terminalSpacing,
+                                             node_tokens[m_chanceToken],
+                                             node_tokens[m_playerToken],
+                                             node_tokens[m_terminalToken],
+                                             m_branchLength,
+                                             m_tineLength,
+                                             branch_styles[m_branchStyle],
+                                             branch_labels[m_branchLabels],
+                                             infoset_styles[m_infosetJoin]};
 
   static const std::string node_labels[] = {"none",   "label",      "player",     "isetlabel",
                                             "isetid", "realizprob", "beliefprob", "value"};
   static const std::string edge_labels[] = {"none", "label", "probs", "value"};
-  p_workspace.labels = LegacyWorkspaceFile::Labels{
-      node_labels[m_nodeAboveLabel], node_labels[m_nodeBelowLabel],
-      edge_labels[m_branchAboveLabel], edge_labels[m_branchBelowLabel]};
+  p_workspace.labels =
+      WorkspaceFile::Labels{node_labels[m_nodeAboveLabel], node_labels[m_nodeBelowLabel],
+                            edge_labels[m_branchAboveLabel], edge_labels[m_branchBelowLabel]};
   p_workspace.decimals = m_numDecimals;
 }
 
-void TreeRenderConfig::Load(const LegacyWorkspaceFile &p_workspace)
+void TreeRenderConfig::Load(const WorkspaceFile &p_workspace)
 {
   for (const auto &color : p_workspace.colors) {
     const wxColour value(color.red, color.green, color.blue);

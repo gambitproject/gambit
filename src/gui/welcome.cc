@@ -342,7 +342,7 @@ void WelcomePanel::CreateControls()
   m_titleText->SetFont(titleFont);
 
   m_openButton = new wxCommandLinkButton(this, ID_WELCOME_OPEN, "Open existing game",
-                                         "Load a saved .efg or .nfg file");
+                                         "Load a saved game or workspace (.efg, .nfg, .gbt)");
 
   m_newNormalFormButton =
       new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, "New strategic form game",
@@ -516,20 +516,7 @@ void WelcomeFrame::OnWelcomeOpenRecent(wxCommandEvent &p_event)
 
 void WelcomeFrame::OnClose(wxCloseEvent &p_event) { p_event.Skip(); }
 
-bool WelcomeFrame::DoOpen()
-{
-  wxFileDialog dialog(
-      this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
-      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
-
-  if (dialog.ShowModal() != wxID_OK) {
-    return false;
-  }
-  const wxString filename = dialog.GetPath();
-  wxGetApp().SetCurrentDir(wxPathOnly(filename));
-  return wxGetApp().LoadFile(filename, this) == AppLoadResult::Success;
-}
+bool WelcomeFrame::DoOpen() { return wxGetApp().ChooseAndLoadFile(this); }
 
 bool WelcomeFrame::DoOpenRecent(const wxString &p_filename)
 {

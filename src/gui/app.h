@@ -69,6 +69,9 @@ public:
   void SetCurrentDir(const wxString &p_dir);
 
   wxString GetHistoryFile(int index) const { return m_fileHistory.GetHistoryFile(index); }
+  //! Let the user choose a game or workspace file, and open it in a new window.
+  //! Returns true if a file was chosen and loaded successfully.
+  bool ChooseAndLoadFile(wxWindow *p_parent);
   //! The recently-used files, most recent first.
   std::vector<wxString> GetRecentFiles() const;
   void AddMenu(wxMenu *p_menu)

@@ -1007,7 +1007,7 @@ Game ReadNfgFile(std::istream &p_stream)
 Game ReadGbtFile(std::istream &p_stream)
 {
   try {
-    const LegacyWorkspaceFile workspace = ReadLegacyWorkspace(p_stream);
+    const WorkspaceFile workspace = ReadWorkspace(p_stream);
     std::istringstream game_text(workspace.game);
     auto game = ReadGame(game_text);
     NormalizeGameLabels(game);

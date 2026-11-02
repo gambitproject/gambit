@@ -71,7 +71,7 @@ def open_game_file(path: str | None, prog_name: str) -> io.IOBase:
 def read_game(source: io.IOBase) -> gbt.Game:
     """Read a game from an open file (or standard input), auto-detecting its file
     format the way the underlying C++ tools' ``ReadGame()`` does: first as a
-    (legacy) ``.gbt`` workspace, and, failing that, by the leading token of the
+    ``.gbt`` workspace, and, failing that, by the leading token of the
     file, which identifies it as an NFG, EFG, AGG, or BAGG representation.
     """
     data = source.read()
