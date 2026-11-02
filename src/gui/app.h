@@ -44,6 +44,9 @@ enum class AppLoadResult : unsigned int {
 class Application final : public wxApp {
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory{10};
+  bool m_reportingException{false};
+  std::string m_lastExceptionMessage;
+  wxLongLong m_lastExceptionReportEnd{0};
   std::list<GameDocument *> m_documents;
   wxSplashScreen *m_splash{nullptr};
   wxStopWatch m_splashTimer;

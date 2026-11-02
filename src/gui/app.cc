@@ -28,6 +28,7 @@
 #include <wx/display.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include <wx/scopeguard.h>
 
 #include "games.h"
 
@@ -229,24 +230,53 @@ std::vector<wxString> Application::GetRecentFiles() const
   return files;
 }
 
-// Reached when an exception escapes an event handler. The wx default is a bare Abort/Retry/Ignore
-// box that says nothing about what was thrown; report the message instead and carry on, as
-// "Ignore" would.
-bool Application::OnExceptionInMainLoop()
+namespace {
+// Must be called from within a catch block.
+std::string DescribeCurrentException()
 {
-  std::string message;
   try {
     throw;
   }
   catch (const std::exception &ex) {
-    message = ex.what();
+    return ex.what();
   }
   catch (...) {
-    message = "An unknown exception was thrown.";
+    return "An unknown exception was thrown.";
   }
-  ExceptionDialog dialog(GetTopWindow(), message);
-  dialog.SetExtendedMessage(_("The operation was abandoned. Gambit will continue running."));
-  dialog.ShowModal();
+}
+
+// How long after a report is dismissed that the same message is treated as a repeat of it.
+constexpr long kRepeatSuppressionMs = 2000;
+} // namespace
+
+// Reached when an exception escapes an event handler. The wx default is a bare Abort/Retry/Ignore
+// box that says nothing about what was thrown; report the message instead and carry on, as
+// "Ignore" would.
+//
+// The dialog's modal loop dispatches paint and focus events, so an exception that recurs from one
+// of those handlers would otherwise open a further dialog from inside this one, without end.
+// Likewise, a handler that throws on every repaint would reopen the dialog each time it is
+// dismissed. Exceptions raised while a report is showing, and the same message arising again
+// just after one is dismissed, are therefore dropped.
+bool Application::OnExceptionInMainLoop()
+{
+  const std::string message = DescribeCurrentException();
+
+  if (m_reportingException ||
+      (message == m_lastExceptionMessage &&
+       (wxGetLocalTimeMillis() - m_lastExceptionReportEnd).ToLong() < kRepeatSuppressionMs)) {
+    return true;
+  }
+
+  m_reportingException = true;
+  {
+    wxON_BLOCK_EXIT_SET(m_reportingException, false);
+    ExceptionDialog dialog(GetTopWindow(), message);
+    dialog.SetExtendedMessage(_("The operation was abandoned. Gambit will continue running."));
+    dialog.ShowModal();
+  }
+  m_lastExceptionMessage = message;
+  m_lastExceptionReportEnd = wxGetLocalTimeMillis();
   return true;
 }
 
