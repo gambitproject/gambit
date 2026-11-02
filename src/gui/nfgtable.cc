@@ -560,8 +560,18 @@ void TableWidget::SetHoverOutcome(const GameOutcome &p_outcome)
   m_payoffGrid->Refresh();
 }
 
+GameOutcome TableWidget::GetCellOutcome(int row, int col) const
+{
+  try {
+    return GetPayoffProfile(row, col)->GetOutcome();
+  }
+  catch (const UndefinedException &) {
+    return {};
+  }
+}
+
 bool TableWidget::IsPayoffCellHighlighted(int row, int col) const
 {
-  return m_hoverOutcome && GetPayoffProfile(row, col)->GetOutcome() == m_hoverOutcome;
+  return m_hoverOutcome && GetCellOutcome(row, col) == m_hoverOutcome;
 }
 } // namespace Gambit::GUI

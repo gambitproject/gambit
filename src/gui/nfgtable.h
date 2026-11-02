@@ -453,6 +453,12 @@ public:
   int GetPayoffColumnsPerContingency() const;
   bool IsPayoffStrategyDominated(int row, int col, bool strict) const;
 
+  /// The outcome attached to the given cell's contingency, or the null handle if it has none
+  /// or none can be attributed to it (a game derived from a tree can have contingencies whose
+  /// path crosses more than one outcome-bearing node). Never throws for that reason, so it is
+  /// safe to call from paint and mouse-motion handlers.
+  GameOutcome GetCellOutcome(int row, int col) const;
+
   /// Sets the outcome to highlight in the payoff grid (every cell sharing it), e.g. as
   /// the mouse moves over the grid; pass the null handle (or the game's null outcome) to
   /// clear the highlight. Repaints the payoff grid if the highlighted outcome changes.

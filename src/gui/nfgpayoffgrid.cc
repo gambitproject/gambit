@@ -636,6 +636,9 @@ void PayoffGrid::ShowEditOutcomeDialog(const GameOutcome &p_outcome)
 
 void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
 {
+  if (m_table->IsReadOnly()) {
+    return;
+  }
   const std::vector<PureStrategyProfile> profiles =
       GetSelectedContingencies(p_event.GetRow(), p_event.GetCol());
 
@@ -689,8 +692,7 @@ void PayoffGrid::OnMotion(wxMouseEvent &p_event)
   }
   const wxGridCellCoords coords = XYToCell(p_event.GetPosition());
   if (coords.GetRow() >= 0 && coords.GetCol() >= 0) {
-    m_table->SetHoverOutcome(
-        m_table->GetPayoffProfile(coords.GetRow(), coords.GetCol())->GetOutcome());
+    m_table->SetHoverOutcome(m_table->GetCellOutcome(coords.GetRow(), coords.GetCol()));
   }
   else {
     m_table->SetHoverOutcome(GameOutcome());
