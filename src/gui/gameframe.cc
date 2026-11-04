@@ -51,6 +51,7 @@
 #include "nfgpanel.h"
 #include "nfgprofile.h"
 
+#include "dlcatalog.h"
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
@@ -212,6 +213,7 @@ BEGIN_EVENT_TABLE(GameFrame, wxFrame)
 EVT_MENU(GBT_MENU_FILE_NEW_EFG, GameFrame::OnFileNewEfg)
 EVT_MENU(GBT_MENU_FILE_NEW_NFG, GameFrame::OnFileNewNfg)
 EVT_MENU(wxID_OPEN, GameFrame::OnFileOpen)
+EVT_MENU(GBT_MENU_FILE_OPEN_CATALOG, GameFrame::OnFileOpenCatalog)
 EVT_MENU(wxID_CLOSE, GameFrame::OnFileClose)
 EVT_MENU(wxID_SAVE, GameFrame::OnFileSave)
 EVT_MENU(wxID_SAVEAS, GameFrame::OnFileSave)
@@ -393,6 +395,8 @@ void GameFrame::MakeMenus()
   fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu, _("Create a new game"));
 
   fileMenu->Append(wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"));
+  fileMenu->Append(GBT_MENU_FILE_OPEN_CATALOG, _("Open from &Catalog..."),
+                   _("Browse and open a game from Gambit's games catalog"));
   fileMenu->AppendSeparator();
 
   fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
@@ -551,6 +555,14 @@ void GameFrame::OnFileNewNfg(wxCommandEvent &)
 }
 
 void GameFrame::OnFileOpen(wxCommandEvent &) { wxGetApp().ChooseAndLoadFile(this); }
+
+void GameFrame::OnFileOpenCatalog(wxCommandEvent &)
+{
+  CatalogBrowserDialog dialog(this);
+  if (dialog.ShowModal() == wxID_OK) {
+    wxGetApp().LoadFile(dialog.GetSelectedFilePath(), this);
+  }
+}
 
 void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 

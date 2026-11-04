@@ -50,4 +50,5 @@ CATALOG_FILES = \
 	catalog/games/journals/mor/vonstengelforges2008/fig9__Original_Layout.ef \
 	catalog/games/journals/other/reiley2008/fig1.efg \
 	catalog/games/journals/other/shapley1974/fig2.nfg \
-	catalog/games/journals/other/shapley1974/fig3.nfg
+	catalog/games/journals/other/shapley1974/fig3.nfg \
+	catalog/games/manifest.json
