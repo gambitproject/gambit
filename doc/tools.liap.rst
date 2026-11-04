@@ -43,6 +43,12 @@ See the :ref:`algorithm description <liap>` for full details.
    an effect for extensive games, as strategic games have only
    one information set per player.
 
+   .. versionchanged:: 17.0.0
+
+      The function minimized is the Lyapunov function of the agent normal form.
+      An equilibrium is accepted if the maximum, over information sets, of the information set's
+      probability of being reached times its regret is within the `-m` criterion.
+
 .. cmdoption:: -d
 
    Express all output using decimal representations with the
