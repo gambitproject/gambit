@@ -30,6 +30,7 @@ dependencies = [
     "scipy",
     "pandas",
     "click",
+    "pycddlib>=3.0",
 ]
 
 [project.scripts]
