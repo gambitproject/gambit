@@ -1,4 +1,4 @@
-## [17.0.0-beta.3] - unreleased
+## [17.0.0-beta.3] - 2026-11-08
 
 ### Changed
 - Reverted the change in #1168 which applied strategic form (expected) payoffs to scaling regret, as this
