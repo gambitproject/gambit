@@ -282,24 +282,10 @@ class BAGGMixedBehaviorProfile:
         """
         self._check_validity()
         player, infoset = self._parse_index(index)
-        if not isinstance(distribution, collections.abc.Mapping):
-            raise TypeError(
-                f"a mixed action must be set from a Mapping from action label to "
-                f"weight, not {distribution.__class__.__name__}"
-            )
-        labels = self._action_labels(player, infoset)
-        unknown = set(distribution.keys()) - set(labels)
-        if unknown:
-            raise ValueError(
-                f"not an action label at this information set: {', '.join(sorted(unknown))}"
-            )
-        zero = self._to_prob(0)
-        values = {label: zero for label in labels}
-        values.update({label: self._to_prob(weight) for label, weight in distribution.items()})
-        if any(v < 0 for v in values.values()):
-            raise ValueError("a mixed action's weights must be non-negative")
-        if all(v == 0 for v in values.values()):
-            raise ValueError("a mixed action's weights must not all be zero")
+        values = validate_distribution(
+            self._action_labels(player, infoset), distribution, True, self._to_prob,
+            "mixed action", INFOSET_ACTIONS,
+        )
         for label, value in values.items():
             self._setprob(player, infoset, label, value)
 
@@ -639,11 +625,7 @@ class BAGGMixedBehaviorProfileDouble(BAGGMixedBehaviorProfile):
         return Game._wrap(deref(self.profile).GetGame())
 
     def _to_prob(self, value: typing.Any) -> float:
-        normalized = _to_number_string(value)
-        try:
-            return float(normalized)
-        except ValueError:
-            return float(Rational(normalized))
+        return to_float_prob(value)
 
     def _coerce(self, value: typing.Any) -> float:
         return float(value)
@@ -722,7 +704,7 @@ class BAGGMixedBehaviorProfileRational(BAGGMixedBehaviorProfile):
         return Game._wrap(deref(self.profile).GetGame())
 
     def _to_prob(self, value: typing.Any) -> Rational:
-        return Rational(_to_number_string(value))
+        return to_rational_prob(value)
 
     def _coerce(self, value: typing.Any) -> Rational:
         return Rational(value)

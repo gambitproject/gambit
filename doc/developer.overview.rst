@@ -67,3 +67,26 @@ polynomial-system machinery in ``src/solvers/enumpoly``) should depend only on
 This discipline will allow ``src/core``, ``src/games``, and ``src/solvers``
 to be built and installed as a standalone C++ library, should we decide to offer
 that in future.
+
+.. _pygambit-layers:
+
+Layers of pygambit
+------------------
+
+Code in ``pygambit`` belongs to one of three layers:
+
+* C++ (``src/core``, ``src/games``, ``src/solvers``): game semantics and algorithms.
+* Cython (``src/pygambit/*.pyx`` and ``*.pxi``): converting values and handles between Python and C++.
+* Python (``src/pygambit/**/*.py``): validation, label resolution, error messages,
+  value types and presentation.
+
+Code goes in the lowest layer that can do its job: validate and resolve labels in Python,
+then pass the Cython layer values and handles it can hand to C++ without further decisions.
+
+CI enforces this by limiting the size of the Cython layer.
+``build_support/cython_lines.py`` counts the lines of code in the compiled module's sources
+(comments, blank lines and docstrings are not counted),
+and the ``cython-lines`` job in ``.github/workflows/lint.yml`` fails if the count exceeds the
+ceiling given there as ``--max``.
+When code moves out of Cython into Python, lower the ceiling to the new count.
+Raise it only to add a binding for new C++ functionality.

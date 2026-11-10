@@ -77,6 +77,34 @@ jobs:
       - name: cython-lint
         run: cython-lint .
 
+  mypy:
+    name: mypy --strict on pygambit's Python modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install mypy and the typed dependencies
+        run: python -m pip install mypy numpy scipy scipy-stubs
+      - name: mypy
+        # The leaf modules import nothing compiled. Widen this to `mypy -p pygambit`
+        # when pygambit.gambit has a stub.
+        run: mypy src/pygambit/_[a-z]*.py
+
+  cython-lines:
+    name: Cython lines do not exceed the ceiling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Count Cython lines in pygambit
+        run: python build_support/cython_lines.py --max 4767
+
   catalog-am-sync:
     name: catalog.am is up to date
     runs-on: ubuntu-latest
