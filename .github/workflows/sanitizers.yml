@@ -1,0 +1,49 @@
+name: Sanitizers
+
+# Builds pygambit, including the C++ library, with AddressSanitizer, UndefinedBehaviorSanitizer
+# and libstdc++ assertions, and runs the test suite. It is not run on every push: run it by hand
+# on a branch that changes C++ ownership, lifetimes or raw indexing
+# (gh workflow run sanitizers.yml --ref <branch>). It also runs weekly on the default branch.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sanitizers:
+    runs-on: ubuntu-24.04
+    env:
+      CXXFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g -O1 -D_GLIBCXX_ASSERTIONS
+      CFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g -O1 -D_GLIBCXX_ASSERTIONS
+      LDFLAGS: -fsanitize=address,undefined
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Build extension with sanitizers
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -v ".[test]"
+      - name: Run tests
+        # The interpreter is not instrumented, so the ASan runtime is preloaded.
+        # --capture=sys lets ASan's report, written to file descriptor 2, reach the log.
+        env:
+          ASAN_OPTIONS: detect_leaks=0:detect_stack_use_after_return=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          PYTHONMALLOC: malloc
+        run: |
+          export LD_PRELOAD=$(gcc -print-file-name=libasan.so)
+          pytest --capture=sys

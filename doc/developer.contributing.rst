@@ -176,6 +176,40 @@ You can also run the tests locally before submitting your pull request, using `p
     You can omit the `--run-tutorials` to skip running the tutorial notebook tests which take longest to run.
     Running tests including tutorials requires `doc` as well as `test` dependencies; see :ref:`build-python`.
 
+Running the tests with sanitizers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The `Sanitizers` workflow builds pygambit, including the C++ library, with AddressSanitizer and
+UndefinedBehaviorSanitizer, and runs the test suite; any report fails the run.
+It runs weekly on the default branch, or by manual dispatch, either from the
+Actions tab or with ::
+
+    gh workflow run sanitizers.yml --ref <branch>
+
+To run the same test locally on Linux with GCC, from the repository root: ::
+
+    SAN="-fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer -g -O1 -D_GLIBCXX_ASSERTIONS"
+    CXXFLAGS="$SAN" CFLAGS="$SAN" LDFLAGS="-fsanitize=address,undefined" pip install -v ".[test]"
+    LD_PRELOAD=$(gcc -print-file-name=libasan.so) \
+    ASAN_OPTIONS=detect_leaks=0:detect_stack_use_after_return=1 \
+    UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
+    PYTHONMALLOC=malloc \
+    pytest --capture=sys
+
+The Python interpreter is not instrumented, so the ASan runtime is preloaded.
+`--capture=sys` is needed because with pytest's default capture of file descriptors,
+ASan's report is lost when it aborts the process.
+Both `CXXFLAGS` and `CFLAGS` are needed: without `CXXFLAGS`, the C++ files are compiled without the flags.
+
+On macOS with Apple clang, use the same flags without `-D_GLIBCXX_ASSERTIONS`,
+and preload the runtime with `DYLD_INSERT_LIBRARIES` instead of `LD_PRELOAD`: ::
+
+    DYLD_INSERT_LIBRARIES=$(clang -print-file-name=libclang_rt.asan_osx_dynamic.dylib) \
+    ASAN_OPTIONS=detect_leaks=0 pytest --capture=sys
+
+The tests in `tests/cli/test_smoke.py` run the installed `gambit-*` scripts as subprocesses,
+which do not get the ASan runtime on macOS, so they fail there; deselect them with `--ignore=tests/cli/test_smoke.py`.
+
 Adding to the test suite
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
