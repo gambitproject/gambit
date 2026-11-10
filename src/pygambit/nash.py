@@ -269,7 +269,9 @@ def enummixed_solve(
             raise ValueError(
                 "enummixed_solve(): cliques cannot be used with lrsnash_path"
             )
-        equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
+        equilibria: MixedStrategyEquilibriumSet = list(
+            nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
+        )
         return EnumMixedResult(
             game=game,
             rational=True,
@@ -991,7 +993,9 @@ def enumpoly_solve(
                 "enumpoly_solve(): nash_callback and event_callback cannot be used "
                 "with phcpack_path"
             )
-        equilibria = nashphc.phcpack_solve(game, phcpack_path, maxregret)
+        equilibria: MixedStrategyEquilibriumSet = list(
+            nashphc.phcpack_solve(game, phcpack_path, maxregret)
+        )
         return EnumPolyResult(
             game=game,
             rational=False,

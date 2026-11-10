@@ -76,7 +76,7 @@ class Game:
         obj.game = game
         return obj
 
-    def to_arrays(self, dtype: typing.Type = Rational) -> list[np.array]:
+    def to_arrays(self, dtype: typing.Type = Rational) -> list[np.ndarray]:
         """Generate the payoff tables for players represented as numpy arrays.
 
         Parameters
@@ -87,7 +87,7 @@ class Game:
 
         Returns
         -------
-        list of np.array
+        list of np.ndarray
 
         See Also
         --------
@@ -458,7 +458,27 @@ class Game:
             }
         return profile
 
-    def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
+    @typing.overload
+    def mixed_strategy_profile(
+        self, data: typing.Any = None, rational: typing.Literal[False] = False
+    ) -> MixedStrategyProfileDouble: ...
+
+    @typing.overload
+    def mixed_strategy_profile(
+        self, data: typing.Any = None, *, rational: typing.Literal[True]
+    ) -> MixedStrategyProfileRational: ...
+
+    @typing.overload
+    def mixed_strategy_profile(
+        self, data: typing.Any, rational: typing.Literal[True]
+    ) -> MixedStrategyProfileRational: ...
+
+    @typing.overload
+    def mixed_strategy_profile(
+        self, data: typing.Any = None, rational: bool = False
+    ) -> MixedStrategyProfile: ...
+
+    def mixed_strategy_profile(self, data=None, rational=False):
         """Create a mixed strategy profile over the game.
 
         If `data` is not specified, the mixed
@@ -500,11 +520,21 @@ class Game:
             ))
             return self._fill_strategy_profile(mspd, data, float)
 
+    @typing.overload
+    def random_strategy_profile(
+        self, denom: None = None, gen: np.random.Generator | None = None
+    ) -> MixedStrategyProfileDouble: ...
+
+    @typing.overload
+    def random_strategy_profile(
+        self, denom: int, gen: np.random.Generator | None = None
+    ) -> MixedStrategyProfileRational: ...
+
     def random_strategy_profile(
             self,
-            denom: int = None,
+            denom: int | None = None,
             gen: np.random.Generator | None = None
-    ) -> MixedStrategyProfile:
+    ):
         """Create a `MixedStrategy` on the game, with probabilities drawn
         from the uniform distribution over the set of mixed strategy profiles.
 

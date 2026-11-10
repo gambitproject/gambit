@@ -27,6 +27,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 
+import numpy as np
 import scipy.optimize
 
 import pygambit.gambit as libgbt
@@ -242,8 +243,12 @@ def _estimate_strategy_empirical(
     strategy_regrets = data.normalize().strategy_regrets
     regrets = [[-strategy_regrets[player][s] for s in data.game.get_strategies(player)]
                for player in data.game.players]
+
+    def neg_log_like(x: np.ndarray) -> float:
+        return -_empirical_log_like(x[0], regrets, flattened_data)
+
     res = scipy.optimize.minimize(
-        lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
+        neg_log_like,
         (0.1,),
         bounds=((0.0, None),)
     )
@@ -276,8 +281,12 @@ def _estimate_behavior_empirical(
         for player in data.game.players
         for history in data.game.get_infosets(player)
     ]
+
+    def neg_log_like(x: np.ndarray) -> float:
+        return -_empirical_log_like(x[0], regrets, flattened_data)
+
     res = scipy.optimize.minimize(
-        lambda x: -_empirical_log_like(x[0], regrets, flattened_data),
+        neg_log_like,
         (0.1,),
         bounds=((0.0, None),)
     )

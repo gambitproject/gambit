@@ -216,7 +216,27 @@ class BayesianActionGraphGame(Game):
             )
         )
 
-    def mixed_behavior_profile(self, data=None, rational=False) -> BAGGMixedBehaviorProfile:
+    @typing.overload
+    def mixed_behavior_profile(
+        self, data: typing.Any = None, rational: typing.Literal[False] = False
+    ) -> BAGGMixedBehaviorProfileDouble: ...
+
+    @typing.overload
+    def mixed_behavior_profile(
+        self, data: typing.Any = None, *, rational: typing.Literal[True]
+    ) -> BAGGMixedBehaviorProfileRational: ...
+
+    @typing.overload
+    def mixed_behavior_profile(
+        self, data: typing.Any, rational: typing.Literal[True]
+    ) -> BAGGMixedBehaviorProfileRational: ...
+
+    @typing.overload
+    def mixed_behavior_profile(
+        self, data: typing.Any = None, rational: bool = False
+    ) -> BAGGMixedBehaviorProfile: ...
+
+    def mixed_behavior_profile(self, data=None, rational=False):
         """Create a mixed behavior profile over the game.
 
         If `data` is not specified, the profile is initialized to uniform randomization
@@ -260,11 +280,21 @@ class BayesianActionGraphGame(Game):
                     profile[player, infoset] = dict(zip(actions, values, strict=True))
         return profile
 
+    @typing.overload
+    def random_behavior_profile(
+        self, denom: None = None, gen: np.random.Generator | None = None
+    ) -> BAGGMixedBehaviorProfileDouble: ...
+
+    @typing.overload
+    def random_behavior_profile(
+        self, denom: int, gen: np.random.Generator | None = None
+    ) -> BAGGMixedBehaviorProfileRational: ...
+
     def random_behavior_profile(
             self,
-            denom: int = None,
+            denom: int | None = None,
             gen: np.random.Generator | None = None
-    ) -> BAGGMixedBehaviorProfile:
+    ):
         """Create a `BAGGMixedBehaviorProfile` on the game, with probabilities drawn
         from the uniform distribution over the set of mixed behavior profiles.
 

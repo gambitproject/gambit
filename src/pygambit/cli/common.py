@@ -54,7 +54,7 @@ def _gambit_version() -> str:
     return gbt.__version__
 
 
-def open_game_file(path: str | None, prog_name: str) -> io.IOBase:
+def open_game_file(path: str | None, prog_name: str) -> typing.BinaryIO:
     """Open `path` for reading, or return standard input if `path` is `None` or
     `"-"`.  A failure to open the file is reported the way the C++ tools' call to
     `perror()` does, and exits with status 1.
@@ -68,7 +68,7 @@ def open_game_file(path: str | None, prog_name: str) -> io.IOBase:
         sys.exit(1)
 
 
-def read_game(source: io.IOBase) -> gbt.Game:
+def read_game(source: typing.BinaryIO) -> gbt.Game:
     """Read a game from an open file (or standard input), auto-detecting its file
     format the way the underlying C++ tools' ``ReadGame()`` does: first as a
     ``.gbt`` workspace, and, failing that, by the leading token of the
@@ -126,7 +126,9 @@ def load_game(
     return read_game(open_game_file(file, prog_name))
 
 
-def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> callable:
+def version_option(
+    description: str, extra_lines: tuple[str, ...] = ()
+) -> typing.Callable[[typing.Callable[..., typing.Any]], typing.Callable[..., typing.Any]]:
     """A ``-v``/``--version`` option which prints the tool's banner and exits,
     matching the behavior of the C++ command-line tools.  See `print_banner` for
     the meaning of `extra_lines`.
@@ -149,7 +151,7 @@ def version_option(description: str, extra_lines: tuple[str, ...] = ()) -> calla
     )
 
 
-def handle_errors(f: callable) -> callable:
+def handle_errors(f: typing.Callable[..., typing.Any]) -> typing.Callable[..., typing.Any]:
     """Decorator which reports errors the way the C++ command-line tools do:
     a message on standard error and exit code 1, instead of a Python traceback.
     """
@@ -277,7 +279,7 @@ def render_profile_detail(
     """
     if isinstance(profile, gbt.BAGGMixedBehaviorProfile):
         return _render_bagg_detail(profile, decimals, fixed, as_float)
-    if _is_behavior_profile(profile):
+    if isinstance(profile, gbt.MixedBehaviorProfile):
         return _render_behavior_detail(profile, decimals, fixed, as_float)
     return _render_strategy_detail(profile, decimals, fixed, as_float)
 
@@ -461,26 +463,37 @@ def bagg_slots(game: gbt.BayesianActionGraphGame) -> list[BAGGSlot]:
     ]
 
 
+@typing.overload
 def read_behavior_profiles_csv(
-    path: str, game: gbt.Game
-) -> list[gbt.MixedBehaviorProfileRational]:
+    path: str, game: gbt.ExtensiveGame
+) -> list[gbt.MixedBehaviorProfile]: ...
+
+
+@typing.overload
+def read_behavior_profiles_csv(
+    path: str, game: gbt.BayesianActionGraphGame
+) -> list[gbt.BAGGMixedBehaviorProfile]: ...
+
+
+def read_behavior_profiles_csv(
+    path: str, game: gbt.ExtensiveGame | gbt.BayesianActionGraphGame
+) -> list[typing.Any]:
     """Read one mixed behavior profile per line from `path`, each a flat comma-separated
     list of probabilities in the same order as a profile's CSV row (excluding any
     leading label), matching the C++ tools' `ReadBehaviorProfiles`.  Values are parsed
     as exact rationals; a method which requires floating-point starting points converts
     the result via `~MixedBehaviorProfile.as_float`.
     """
-    slots = bagg_slots(game) if isinstance(game, gbt.BayesianActionGraphGame) else None
-    count = (
-        sum(len(slot.actions) for slot in slots)
-        if slots is not None
-        else sum(
+    slots = bagg_slots(game) if isinstance(game, gbt.BayesianActionGraphGame) else []
+    if isinstance(game, gbt.BayesianActionGraphGame):
+        count = sum(len(slot.actions) for slot in slots)
+    else:
+        count = sum(
             len(game.get_actions(gbt.H.path(*history.actions)))
             for player in game.players
             for history in game.get_infosets(player)
         )
-    )
-    profiles = []
+    profiles: list[gbt.MixedBehaviorProfile | gbt.BAGGMixedBehaviorProfile] = []
     for line in pathlib.Path(path).read_text().splitlines():
         line = line.strip()
         if not line:
@@ -490,16 +503,18 @@ def read_behavior_profiles_csv(
             values = iter([gbt.Rational(fields[i]) for i in range(count)])
         except (ValueError, IndexError) as exc:
             raise ValueError(f"Error reading behavior profile from '{path}': {exc}") from None
-        profile = game.mixed_behavior_profile(rational=True)
-        if slots is not None:
+        if isinstance(game, gbt.BayesianActionGraphGame):
+            bagg_profile = game.mixed_behavior_profile(rational=True)
             for slot in slots:
-                profile[slot.player, slot.infoset] = {a: next(values) for a in slot.actions}
+                bagg_profile[slot.player, slot.infoset] = {a: next(values) for a in slot.actions}
+            profiles.append(bagg_profile)
         else:
+            profile = game.mixed_behavior_profile(rational=True)
             for player in game.players:
                 for history in game.get_infosets(player):
                     selector = gbt.H.path(*history.actions)
                     profile[selector] = {a: next(values) for a in game.get_actions(selector)}
-        profiles.append(profile)
+            profiles.append(profile)
     return profiles
 
 
@@ -522,7 +537,7 @@ def resolve_starts(
     seed: int | None,
     start_file: str | None,
     default_count: int = 1,
-) -> list[gbt.MixedStrategyProfile | gbt.BAGGMixedBehaviorProfile]:
+) -> typing.Sequence[gbt.MixedStrategyProfile | gbt.BAGGMixedBehaviorProfile]:
     """Resolve strategy starting points for a `-n`/`-R`/`-s`-style tool: read from
     `start_file` if given, otherwise `n` uniform-random draws (`default_count` if `n`
     is not given), seeded by `seed`. Shared by gambit-gnm, gambit-ipa, gambit-hp and
@@ -540,13 +555,33 @@ def resolve_starts(
     ]
 
 
+@typing.overload
 def resolve_behavior_starts(
-    game: gbt.Game,
+    game: gbt.ExtensiveGame,
     n: int | None,
     seed: int | None,
     start_file: str | None,
     default_count: int = 1,
-) -> list[gbt.MixedBehaviorProfile]:
+) -> list[gbt.MixedBehaviorProfile]: ...
+
+
+@typing.overload
+def resolve_behavior_starts(
+    game: gbt.BayesianActionGraphGame,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[gbt.BAGGMixedBehaviorProfile]: ...
+
+
+def resolve_behavior_starts(
+    game: gbt.ExtensiveGame | gbt.BayesianActionGraphGame,
+    n: int | None,
+    seed: int | None,
+    start_file: str | None,
+    default_count: int = 1,
+) -> list[typing.Any]:
     """Behavior-profile counterpart to `resolve_starts`; see there for the
     shared `-n`/`-R`/`-s` semantics. Used by gambit-liap's agent form.
     """

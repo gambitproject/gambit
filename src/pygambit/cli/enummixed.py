@@ -78,7 +78,7 @@ def main(
         nash_callback=lambda profile: echo_profile(profile, "NE"),
         cliques=cliques,
     )
-    if cliques:
+    if cliques and result.cliques is not None:
         for index, clique in enumerate(result.cliques, start=1):
             label = f"convex-{index}"
             for profile in clique:

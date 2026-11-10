@@ -34,7 +34,7 @@ def _parse_lrs_output(game: gbt.Game, txt: str) -> list[gbt.MixedStrategyProfile
     data = "\n".join([x for x in txt.splitlines() if not x.startswith("*")]).strip()
     eqa = []
     for component in data.split("\n\n"):
-        profiles = {"1": [], "2": []}
+        profiles: dict[str, list[list[gbt.Rational]]] = {"1": [], "2": []}
         for line in component.strip().splitlines():
             profiles[line[0]].append([gbt.Rational(x) for x in line[1:].strip().split()[:-1]])
         for p1, p2 in itertools.product(profiles["1"], profiles["2"]):

@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from importlib.resources import as_file, files
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -17,7 +17,7 @@ import pygambit as gbt
 # path first means it's never even consulted when a checkout is present (gambit#920).
 _repo_catalog = Path(__file__).parent.parent.parent / "catalog" / "games"
 _CATALOG_RESOURCE = (
-    _repo_catalog if _repo_catalog.is_dir() else files("pygambit") / "catalog_data"
+    _repo_catalog if _repo_catalog.is_dir() else cast(Path, files("pygambit") / "catalog_data")
 )
 
 READERS = {

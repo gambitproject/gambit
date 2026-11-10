@@ -219,13 +219,13 @@ def main(
     # list of strategy counts.
     if mle_file is not None and (strategic or not isinstance(game, gbt.ExtensiveGame)):
         frequencies = _read_frequencies(mle_file, game)
-        result = gbt.qre.logit_estimate(
+        fit = gbt.qre.logit_estimate(
             frequencies,
             first_step=first_step,
             max_accel=max_accel,
             event_callback=event_callback,
         )
-        click.echo(_render_qre_row(result, decimals))
+        click.echo(_render_qre_row(fit, decimals))
         return
 
     if target_lambda:
