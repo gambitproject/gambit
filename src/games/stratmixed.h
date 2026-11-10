@@ -104,7 +104,7 @@ public:
   }
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
-  virtual bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const { return false; }
+  virtual bool GetPayoffDerivs(int /*pl*/, Vector<T> & /*p_derivs*/) const { return false; }
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
   /// Computes the payoffs of the strategies of player pl, and their derivatives with respect to
   /// the probabilities of the strategies of the other players; see

@@ -83,7 +83,7 @@ NumberValidator::NumberValidator(wxString *p_value, const Rational &p_minValue,
 }
 
 NumberValidator::NumberValidator(const NumberValidator &p_validator)
-  : m_stringValue(nullptr), m_hasMin(false), m_hasMax(true)
+  : wxValidator(p_validator), m_stringValue(nullptr), m_hasMin(false), m_hasMax(true)
 {
   Copy(p_validator);
 }
@@ -213,9 +213,6 @@ void NumberValidator::OnChar(wxKeyEvent &p_event)
     }
 
     if (keyCode == '-') {
-      // Only permit minus signs at the start of the text
-      long start, end;
-      control->GetSelection(&start, &end);
 
       if (start == end) {
         // No selection; just see if inserting is OK

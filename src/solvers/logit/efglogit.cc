@@ -475,8 +475,8 @@ LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
         },
         x, p_direction, x.size(), LambdaPositiveTerminationFunction,
         [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
-        [lam](const Vector<double> &x, const Vector<double> &) -> double {
-          return x.back() - lam;
+        [lam](const Vector<double> &p_x, const Vector<double> &) -> double {
+          return p_x.back() - lam;
         },
         NullCriterionBracketFunction, CancelToken(),
         [&callback](const Vector<double> &p_before, const Vector<double> &p_after) {

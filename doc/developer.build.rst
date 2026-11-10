@@ -170,6 +170,10 @@ Navigate to the Gambit source directory (use the "MSYS2 UCRT64" terminal on Wind
 
       ./configure --disable-gui
 
+.. note::
+   Developers can pass ``--enable-werror`` to the configure step to treat compiler warnings as errors.
+   This is off by default, and is used by the Linux continuous-integration build.
+
 .. warning::
    If wxWidgets isn't installed in a standard place (e.g., ``/usr`` or
    ``/usr/local``), you'll need to tell ``configure`` where to find it with the

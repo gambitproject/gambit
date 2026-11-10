@@ -606,7 +606,7 @@ public:
   std::map<int, std::map<int, GameInfoset>> m_infosetMap;
 };
 
-void ReadPlayers(GameFileLexer &p_state, const Game &p_game, const TreeData &p_treeData)
+void ReadPlayers(GameFileLexer &p_state, const Game &p_game, const TreeData & /*p_treeData*/)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   // Buffer the raw player labels so they can be normalized (made unique and nonempty)

@@ -213,7 +213,7 @@ public:
     constexpr wxSignal signal = wxSIGTERM;
 #endif
 
-    switch (const auto rc = wxProcess::Kill(m_pid, signal)) {
+    switch (wxProcess::Kill(m_pid, signal)) {
     case wxKILL_OK:
       return true;
     case wxKILL_NO_PROCESS:
@@ -462,8 +462,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
   }
 
   m_runner = std::make_unique<ExternalProcessRunner>(this, m_doc->GetGame(), *m_output);
-  switch (const auto result = m_runner->Start(p_command->GetCommand(),
-                                              wxString(s.str().c_str(), *wxConvCurrent))) {
+  switch (m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent))) {
   case ExternalProcessRunner::RunnerStartResult::Ok:
     SetStatusRunning();
     break;

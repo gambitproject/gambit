@@ -31,15 +31,15 @@
 
 namespace Gambit::gametracer {
 
-nfgame::nfgame(const std::vector<int> &actions)
-  : gnmgame(actions),
-    payoffs(std::accumulate(actions.begin(), actions.end(), actions.size(),
+nfgame::nfgame(const std::vector<int> &p_actions)
+  : gnmgame(p_actions),
+    payoffs(std::accumulate(p_actions.begin(), p_actions.end(), p_actions.size(),
                             [](int ncont, int nstrat) { return ncont * nstrat; })),
-    blockSize(actions.size() + 1)
+    blockSize(p_actions.size() + 1)
 {
   blockSize[0] = 1;
   for (int i = 1; i <= numPlayers; i++) {
-    blockSize[i] = blockSize[i - 1] * actions[i - 1];
+    blockSize[i] = blockSize[i - 1] * p_actions[i - 1];
   }
 }
 

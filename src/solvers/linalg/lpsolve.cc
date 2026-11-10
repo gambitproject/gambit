@@ -36,7 +36,7 @@ template <class T> struct LPSolveState {
   int flag{0};
   int nvars{0}, neqns{0}, nequals{0};
   T totalCost, eps1, eps2, eps3, tmin;
-  BFS<T> optBfs, dualBfs;
+  BFS<T> optBfs{}, dualBfs{};
   LPTableau<T> tab;
   Array<bool> UB, LB;
   Array<T> ub, lb;

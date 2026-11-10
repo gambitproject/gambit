@@ -506,9 +506,8 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
       continue;
     }
     const auto actions = m_support.GetActions(infoset);
-    T total =
-        std::accumulate(actions.begin(), actions.end(), T(0),
-                        [this](T total, GameAction act) { return total + GetActionProb(act); });
+    T total = std::accumulate(actions.begin(), actions.end(), T(0),
+                              [this](T sum, GameAction act) { return sum + GetActionProb(act); });
     if (total == T(0)) {
       for (const auto &act : actions) {
         (*this)[act] = T(1) / T(m_support.GetActions(infoset).size());
@@ -526,9 +525,8 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
       continue;
     }
     const auto actions = m_support.GetActions(infoset);
-    T total =
-        std::accumulate(actions.begin(), actions.end(), T(0),
-                        [this](T total, GameAction act) { return total + GetActionProb(act); });
+    T total = std::accumulate(actions.begin(), actions.end(), T(0),
+                              [this](T sum, GameAction act) { return sum + GetActionProb(act); });
     if (total == T(0)) {
       continue;
     }

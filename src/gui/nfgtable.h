@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GUI_NFGTABLE_H
 #define GAMBIT_GUI_NFGTABLE_H
 
+#include <utility>
+
 #include <wx/grid.h>
 
 #include "games/stratpure.h"
@@ -101,7 +103,7 @@ public:
     if (m_doc->GetGame()->NumPlayers() >= 2) {
       m_colPlayers.push_back(2);
     }
-    for (int pl = 3; pl <= m_doc->GetGame()->NumPlayers(); ++pl) {
+    for (int pl = 3; std::cmp_less_equal(pl, m_doc->GetGame()->NumPlayers()); ++pl) {
       m_rowPlayers.push_back(pl);
     }
   }

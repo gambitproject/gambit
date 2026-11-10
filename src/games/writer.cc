@@ -133,9 +133,9 @@ public:
     m_result += "</b></td>";
   }
 
-  void WriteRowEnd(bool isLast) override { m_result += "</tr>"; }
+  void WriteRowEnd(bool /*isLast*/) override { m_result += "</tr>"; }
 
-  void WriteCell(const std::string &payoffs, bool isLastCol) override
+  void WriteCell(const std::string &payoffs, bool /*isLastCol*/) override
   {
     m_result += "<td align=center>" + payoffs + "</td>";
   }
@@ -215,15 +215,15 @@ public:
     m_result += " \\\\\n";
   }
 
-  void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
-                bool isFirst) override
+  void BeginRow(const GamePlayer & /*rowPlayer*/, const GameStrategy &rowStrategy,
+                bool /*isFirst*/) override
   {
     m_result += "\\textbf{";
     m_result += rowStrategy->GetLabel();
     m_result += "} & ";
   }
 
-  void WriteRowEnd(bool isLast) override { m_result += " \\\\\n"; }
+  void WriteRowEnd(bool /*isLast*/) override { m_result += " \\\\\n"; }
 
   void WriteCell(const std::string &payoffs, bool isLastCol) override
   {

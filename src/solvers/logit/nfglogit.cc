@@ -115,8 +115,9 @@ public:
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
-                               const MixedStrategyProfile<double> &p_logProfile,
-                               const Vector<double> &p_strategyValues, double p_lambda) const
+                               const MixedStrategyProfile<double> & /*p_logProfile*/,
+                               const Vector<double> & /*p_strategyValues*/,
+                               double /*p_lambda*/) const
 {
   double value = -1.0;
   for (int col = m_firstIndex; col < m_lastIndex; col++) {
@@ -154,7 +155,7 @@ public:
                const Vector<double> &p_strategyValues, double p_lambda) const override;
 };
 
-double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
+double RatioEquation::Value(const MixedStrategyProfile<double> & /*p_profile*/,
                             const MixedStrategyProfile<double> &p_logProfile,
                             const Vector<double> &p_strategyValues, double p_lambda) const
 {
@@ -440,8 +441,8 @@ LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
         },
         x, p_direction, x.size(), LambdaPositiveTerminationFunction,
         [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
-        [lam](const Vector<double> &x, const Vector<double> &) -> double {
-          return x.back() - lam;
+        [lam](const Vector<double> &p_x, const Vector<double> &) -> double {
+          return p_x.back() - lam;
         },
         NullCriterionBracketFunction, CancelToken(),
         [&callback](const Vector<double> &p_before, const Vector<double> &p_after) {

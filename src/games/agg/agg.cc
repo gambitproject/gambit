@@ -34,17 +34,17 @@ namespace Gambit::agg {
 
 inline int select2nd(const pair<int, int> &x) { return x.second; }
 
-AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
+AGG::AGG(int _numPlayers, std::vector<int> &_actions, int numANodes, int _numPNodes,
          vector<vector<int>> &_actionSets, vector<vector<int>> &neighb,
          vector<projtype> &projTypes, vector<vector<vector<Config>>> &proj,
          vector<vector<projtype>> &projF, vector<vector<vector<int>>> &Po,
          vector<PayoffTable> &_payoffs, vector<ExactPayoffTable> &_exactPayoffs)
-  : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
+  : numPlayers(_numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
-    exactPayoffs(_exactPayoffs), projection(proj), m_state(numANodes, numPlayers),
-    m_exactState(numANodes, numPlayers), projFunctions(projF), Porder(Po), isPure(numANodes, true),
-    node2Action(numANodes, vector<int>(numPlayers)), player2Class(numPlayers),
-    kSymStrategyOffset(1, 0)
+    exactPayoffs(_exactPayoffs), projection(proj), m_state(numANodes, _numPlayers),
+    m_exactState(numANodes, _numPlayers), projFunctions(projF), Porder(Po),
+    isPure(numANodes, true), node2Action(numANodes, vector<int>(_numPlayers)),
+    player2Class(_numPlayers), kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -1045,8 +1045,8 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
       std::ranges::copy(key, ostream_iterator<int>(str, " "));
       throw std::runtime_error(str.str());
     }
-    const Number num(word);
-    const auto u = static_cast<double>(num);
+    const Number exactValue(word);
+    const auto u = static_cast<double>(exactValue);
 
     // insert
     const pair<trie_map<double>::iterator, bool> r = pay.insert(make_pair(key, u));
@@ -1057,7 +1057,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
       str << "]";
       throw std::runtime_error(str.str());
     }
-    if (!exactPay.insert(make_pair(key, num)).second) {
+    if (!exactPay.insert(make_pair(key, exactValue)).second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";
       std::ranges::copy(key, ostream_iterator<int>(str, " "));

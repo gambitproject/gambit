@@ -454,7 +454,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
                                                     Array<int> &ylabel,
                                                     SegmentedVector<Rational> &besty)
 {
-  Rational maxz(-1000000);
+  Rational maxzval(-1000000);
   ylabel[1] = 1;
   ylabel[2] = 1;
 
@@ -471,14 +471,14 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
         jj = j;
       }
     }
-    if (maxval - payoff > maxz) {
-      maxz = maxval - payoff;
+    if (maxval - payoff > maxzval) {
+      maxzval = maxval - payoff;
       ylabel[1] = i;
       ylabel[2] = jj;
     }
   }
-  if (maxz < bestz) {
-    bestz = maxz;
+  if (maxzval < bestz) {
+    bestz = maxzval;
     for (int i = 1; std::cmp_less_equal(i, yy.GetGame()->NumPlayers()); i++) {
       const GamePlayer player = yy.GetGame()->GetPlayer(i);
       for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
@@ -486,7 +486,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
       }
     }
   }
-  return maxz;
+  return maxzval;
 }
 
 //-------------------------------------------------------------------------

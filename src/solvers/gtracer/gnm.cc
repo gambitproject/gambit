@@ -120,9 +120,9 @@ GNMResult GNM(const gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq,
   std::list<cvector> equilibria;
   int numSteps = 0, numBoundaryCrossings = 0, numLNMCalls = 0;
 
-  int n_hat,          // player whose pure strategy next enters or leaves the support
+  int n_hat = -1,     // player whose pure strategy next enters or leaves the support
       s_hat_old = -1, // the last pure strategy to enter or leave the support
-      s_hat,          // the next pure strategy to enter or leave the support
+      s_hat = -1,     // the next pure strategy to enter or leave the support
       Index = 1,      // index of the equilibrium we're moving towards
       stepsLeft;      // number of linear steps remaining until we hit the boundary
 

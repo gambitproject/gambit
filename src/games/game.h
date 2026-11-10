@@ -734,11 +734,17 @@ public:
   virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns the set of terminal nodes which are descendants of node
-  virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
+  virtual std::vector<GameNode> GetPlays(GameNode /*node*/) const { throw UndefinedException(); }
   /// Returns the set of terminal nodes which are descendants of members of an infoset
-  virtual std::vector<GameNode> GetPlays(GameInfoset infoset) const { throw UndefinedException(); }
+  virtual std::vector<GameNode> GetPlays(GameInfoset /*infoset*/) const
+  {
+    throw UndefinedException();
+  }
   /// Returns the set of terminal nodes which are descendants of members of an action
-  virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
+  virtual std::vector<GameNode> GetPlays(GameAction /*action*/) const
+  {
+    throw UndefinedException();
+  }
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
@@ -770,12 +776,13 @@ public:
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
-  virtual void Write(std::ostream &p_stream, const std::string &p_format = "native") const
+  virtual void Write(std::ostream & /*p_stream*/,
+                     const std::string & /*p_format*/ = "native") const
   {
     throw UndefinedException();
   }
   /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &, const GameNode &subtree = nullptr) const
+  virtual void WriteEfgFile(std::ostream &, const GameNode & /*subtree*/ = nullptr) const
   {
     throw UndefinedException();
   }
@@ -784,49 +791,51 @@ public:
   //@}
 
   /// Append a move for p_player at p_node, with actions labeled per p_actions.
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
-                                 const std::vector<std::string> &p_actions)
+  virtual GameInfoset AppendMove(GameNode /*p_node*/, GamePlayer /*p_player*/,
+                                 const std::vector<std::string> & /*p_actions*/)
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset)
+  virtual GameInfoset AppendMove(GameNode /*p_node*/, GameInfoset /*p_infoset*/)
   {
     throw UndefinedException();
   }
   /// Insert a move for p_player prior to p_node, with p_actions actions bearing
   /// automatically generated, sequentially numbered labels.
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode /*p_node*/, GamePlayer /*p_player*/, int /*p_actions*/)
   {
     throw UndefinedException();
   }
   /// Insert a move for p_player prior to p_node, with actions labeled per p_actions.
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
-                                 const std::vector<std::string> &p_actions)
+  virtual GameInfoset InsertMove(GameNode /*p_node*/, GamePlayer /*p_player*/,
+                                 const std::vector<std::string> & /*p_actions*/)
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset)
+  virtual GameInfoset InsertMove(GameNode /*p_node*/, GameInfoset /*p_infoset*/)
   {
     throw UndefinedException();
   }
   /// Add a chance move for p_actions, with distribution p_probs, at terminal p_node.
-  virtual GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
-                                  const std::vector<Number> &p_probs)
+  virtual GameInfoset AppendEvent(GameNode /*p_node*/,
+                                  const std::vector<std::string> & /*p_actions*/,
+                                  const std::vector<Number> & /*p_probs*/)
   {
     throw UndefinedException();
   }
   /// Insert a chance move for p_actions, with distribution p_probs, prior to p_node.
-  virtual GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
-                                  const std::vector<Number> &p_probs)
+  virtual GameInfoset InsertEvent(GameNode /*p_node*/,
+                                  const std::vector<std::string> & /*p_actions*/,
+                                  const std::vector<Number> & /*p_probs*/)
   {
     throw UndefinedException();
   }
   virtual void DeleteParent(GameNode) { throw UndefinedException(); }
   virtual void DeleteTree(GameNode) { throw UndefinedException(); }
-  virtual void CopyTree(GameNode dest, GameNode src) { throw UndefinedException(); }
+  virtual void CopyTree(GameNode /*dest*/, GameNode /*src*/) { throw UndefinedException(); }
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame(GameNode) const { throw UndefinedException(); }
-  virtual void MoveTree(GameNode dest, GameNode src) { throw UndefinedException(); }
+  virtual void MoveTree(GameNode /*dest*/, GameNode /*src*/) { throw UndefinedException(); }
   virtual GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                                   const std::string &)
   {
@@ -834,7 +843,10 @@ public:
   }
   /// Reveals the move made at p_infoset to p_player: splits p_player's information sets
   /// so that any two nodes reached via different actions at p_infoset are distinguished.
-  virtual void Reveal(GameInfoset p_infoset, GamePlayer p_player) { throw UndefinedException(); }
+  virtual void Reveal(GameInfoset /*p_infoset*/, GamePlayer /*p_player*/)
+  {
+    throw UndefinedException();
+  }
   /// Simultaneously reassign action labels at an information set.
   /// Keys of p_labels are current action labels; values are their replacements.
   virtual void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &)
@@ -922,7 +934,7 @@ public:
       NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetInfosets>;
 
   /// Returns the iset'th information set in the game (numbered globally)
-  virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
+  virtual GameInfoset GetInfoset(int /*iset*/) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
   virtual Infosets GetInfosets() const
   {
@@ -930,7 +942,7 @@ public:
   }
 
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
-  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
+  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset & /*p_infoset*/) const
   {
     throw UndefinedException();
   }
@@ -982,7 +994,7 @@ public:
   /// Returns the number of non-terminal nodes in the game
   virtual size_t NumNonterminalNodes() const = 0;
   /// Returns the last action taken by the node's owner before reaching this node
-  virtual GameAction GetOwnPriorAction(const GameNode &p_node) const
+  virtual GameAction GetOwnPriorAction(const GameNode & /*p_node*/) const
   {
     throw UndefinedException();
   }

@@ -362,7 +362,11 @@ endif
 # Define VERSION for all C++ compilations and set include paths
 AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
 
-AM_CXXFLAGS = ${LLVM_CXXFLAGS} -Wall -Wsign-compare -Wunreachable-code
+# One list of warning flags, shared by the build and clang-tidy
+GAMBIT_WARNING_FLAGS = -Wall -Wextra -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion \
+	-Wshadow -Wnon-virtual-dtor -Woverloaded-virtual -Wimplicit-fallthrough
+
+AM_CXXFLAGS = ${LLVM_CXXFLAGS} $(GAMBIT_WARNING_FLAGS) $(WERROR_FLAGS)
 
 ## Convenience libraries
 ##
@@ -499,4 +503,4 @@ CLANG_TIDY = clang-tidy
 
 clang-tidy:
 	$(CLANG_TIDY) --version
-	$(CLANG_TIDY) ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion
+	$(CLANG_TIDY) ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS)

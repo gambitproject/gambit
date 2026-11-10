@@ -1008,8 +1008,6 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
     m_efgPanel->SetFocus();
   }
 
-  const bool canZoomTree = m_efgPanel && m_efgPanel->IsShown();
-
   GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
   GetMenuBar()->Enable(GBT_MENU_TOOLS_DOMINANCE, m_nfgPanel->IsShown());
 

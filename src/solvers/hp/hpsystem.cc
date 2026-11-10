@@ -93,8 +93,8 @@ public:
 
   ~ProbabilitySumEquation() override = default;
 
-  double Value(const Vector<double> &point, const MixedStrategyProfile<double> &current_sigma,
-               const std::vector<double> &payoffs_against_prior) const override
+  double Value(const Vector<double> &point, const MixedStrategyProfile<double> & /*current_sigma*/,
+               const std::vector<double> & /*payoffs_against_prior*/) const override
   {
     double sum_sigma = 0.0;
     for (int i = m_first_alpha_idx; i < m_last_alpha_idx; ++i) {

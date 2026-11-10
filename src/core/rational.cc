@@ -368,10 +368,8 @@ bool Rational::OK() const
 
 bool Rational::fits_in_float() const
 {
-  // NOLINTBEGIN(clang-diagnostic-double-promotion)
-  return Rational(std::numeric_limits<float>::min()) <= *this &&
-         *this <= Rational(std::numeric_limits<float>::max());
-  // NOLINTEND(clang-diagnostic-double-promotion)
+  return Rational(static_cast<double>(std::numeric_limits<float>::min())) <= *this &&
+         *this <= Rational(static_cast<double>(std::numeric_limits<float>::max()));
 }
 
 bool Rational::fits_in_double() const

@@ -90,7 +90,7 @@ void ConjugatePRMinimizer::TakeStep(const Vector<double> &p_x, const Vector<doub
 
 void ConjugatePRMinimizer::IntermediatePoint(const Function &p_fdf, const Vector<double> &p_x,
                                              const Vector<double> &p_p, double p_lambda,
-                                             double p_pg, double p_stepa, double p_stepc,
+                                             double p_pg, double /*p_stepa*/, double p_stepc,
                                              double p_fa, double p_fc, Vector<double> &p_x1,
                                              Vector<double> &p_dx, Vector<double> &p_gradient,
                                              double &p_step, double &p_f)

@@ -190,7 +190,8 @@ static IntegerRep *Inew(int newlen)
 
 static void Ifree(IntegerRep *rep) noexcept
 {
-  if (rep != nullptr && !IsStaticIntegerRep(rep)) {
+  // The pointer test is redundant with IsStaticIntegerRep; GCC cannot prove it once inlined.
+  if (rep != nullptr && rep != &ZeroRep && !IsStaticIntegerRep(rep)) {
     delete[] reinterpret_cast<char *>(rep);
   }
 }
