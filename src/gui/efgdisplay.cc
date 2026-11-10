@@ -184,8 +184,6 @@ namespace {
 
 constexpr int kMinZoom = 10;
 constexpr int kMaxZoom = 150;
-constexpr int kZoomStep = 10;
-constexpr int kScrollPixelsPerUnit = 1;
 
 int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
 

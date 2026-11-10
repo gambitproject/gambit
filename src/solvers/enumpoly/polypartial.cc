@@ -54,7 +54,7 @@ T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Node &n, const 
 {
   T answer = static_cast<T>(0);
   int i = 1;
-  for (const auto child : n.children) {
+  for (const auto &child : n.children) {
     wrtos[i]++;
 
     T increment = Gambit::abs(child.data.Evaluate(p));

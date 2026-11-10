@@ -23,6 +23,7 @@
 #include "polysolver.h"
 
 #include <algorithm>
+#include <utility>
 #include "indexproduct.h"
 #include "lufactor.h"
 
@@ -76,7 +77,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
     }
     catch (SingularMatrixException &) {
       bool perturbed = false;
-      for (int i = 1; i <= point.size(); i++) {
+      for (int i = 1; std::cmp_less_equal(i, point.size()); i++) {
         Vector<double> perturbed_point(point);
         if (r.Side(i).UpperBound() > point[i]) {
           perturbed_point[i] += (r.Side(i).UpperBound() - point[i]) / 10;

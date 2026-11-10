@@ -69,7 +69,6 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
 {
   const int M = FromDIP(20);
   const int S = FromDIP(10);
-  const int XS = FromDIP(6);
 
   // Brand colour sampled earlier (adjust if desired)
   const wxColour kBrandGreen(54, 100, 96);

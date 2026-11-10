@@ -220,6 +220,8 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
     (void)new GameFrame(nullptr, doc);
     return AppLoadResult::Success;
   }
+  // Every LoadResult is handled above.
+  return AppLoadResult::OpenFailed;
 }
 
 bool Application::ChooseAndLoadFile(wxWindow *p_parent)

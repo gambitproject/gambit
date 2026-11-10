@@ -113,12 +113,6 @@ void MixedBehaviorProfileList::OnSelectCell(wxGridEvent &p_event)
   ClearSelection();
 }
 
-static wxColour GetPlayerColor(const std::shared_ptr<GameDocument> &p_doc, int p_index)
-{
-  const GameAction action = p_doc->GetAction(p_index + 1);
-  return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());
-}
-
 void MixedBehaviorProfileList::ResizeGrid(int p_rows, int p_cols)
 {
   if (GetNumberRows() > p_rows) {

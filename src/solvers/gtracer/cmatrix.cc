@@ -55,7 +55,7 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
     vv[i] = 1 / vv[i];
   }
   double sum, big;
-  int imax;
+  int imax = 0;
   for (j = 0; j < n; j++) {
     for (i = 0; i < j; i++) {
       sum = LU.x[i * n + j];

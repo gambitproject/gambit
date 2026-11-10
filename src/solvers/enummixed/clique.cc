@@ -186,10 +186,11 @@ void CliqueEnumerator::extend(int stk[], // stack
     }
   }
 
-  else {                                      //  CAND not empty
-    int cmax;                                 // maximal number of candidates on either side
-    int firstlist, savelist, tmplist, posfix; // stack positions
-    int fixp;                                 // the fixpoint
+  else {                              //  CAND not empty
+    int cmax;                         // maximal number of candidates on either side
+    int firstlist, savelist, tmplist; // stack positions
+    int posfix = -1;                  // position of the fixpoint on the stack
+    int fixp = -1;                    // the fixpoint
     int minnod;
     bool bfound, bfixin1, bcandfix;
 
