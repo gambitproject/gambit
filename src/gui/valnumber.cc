@@ -213,9 +213,6 @@ void NumberValidator::OnChar(wxKeyEvent &p_event)
     }
 
     if (keyCode == '-') {
-      // Only permit minus signs at the start of the text
-      long start, end;
-      control->GetSelection(&start, &end);
 
       if (start == end) {
         // No selection; just see if inserting is OK

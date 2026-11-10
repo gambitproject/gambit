@@ -36,11 +36,11 @@ TreeLayout::TreeLayout(const GameRep &p_game)
   numPlayers = m_players.size();
 
   size_t first = 1;
-  for (const auto &infoset : p_game.GetInfosets()) {
-    const size_t count = infoset->GetActions().size();
-    infosetIndex[infoset.get()] = infosets.size();
-    infosets.push_back({.infoset = infoset.get(),
-                        .player = playerIndex.at(infoset->GetPlayer().get()),
+  for (const auto &iset : p_game.GetInfosets()) {
+    const size_t count = iset->GetActions().size();
+    infosetIndex[iset.get()] = infosets.size();
+    infosets.push_back({.infoset = iset.get(),
+                        .player = playerIndex.at(iset->GetPlayer().get()),
                         .firstAction = first,
                         .numActions = count,
                         .members = {}});
@@ -48,12 +48,12 @@ TreeLayout::TreeLayout(const GameRep &p_game)
   }
   numActions = first - 1;
   numPersonalInfosets = infosets.size();
-  for (const auto &infoset : p_game.GetChance()->GetInfosets()) {
-    infosetIndex[infoset.get()] = infosets.size();
-    infosets.push_back({.infoset = infoset.get(),
+  for (const auto &iset : p_game.GetChance()->GetInfosets()) {
+    infosetIndex[iset.get()] = infosets.size();
+    infosets.push_back({.infoset = iset.get(),
                         .player = -1,
                         .firstAction = 0,
-                        .numActions = infoset->GetActions().size(),
+                        .numActions = iset->GetActions().size(),
                         .members = {}});
   }
 

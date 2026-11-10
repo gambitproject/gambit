@@ -223,13 +223,13 @@ double cmatrix::adjoint()
       j = lastj - 1;
     }
   }
-  int s = 0;
+  int swaps = 0;
   i = 0;
   r2 = r;
   while (i < m - 1) {
     j = r2[i];
     if (i != j) {
-      s++;
+      swaps++;
       r2[i] = r2[j];
       r2[j] = j;
     }
@@ -242,7 +242,7 @@ double cmatrix::adjoint()
       x[i * n + j] = retval(c[i], r[j]);
     }
   }
-  if (s % 2 == 1) {
+  if (swaps % 2 == 1) {
     negate();
     D = -D;
   }

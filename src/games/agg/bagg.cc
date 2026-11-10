@@ -10,12 +10,12 @@ using namespace std;
 
 namespace Gambit::agg {
 
-BAGG::BAGG(int N, int S, vector<int> &numTypes, vector<ProbDist> &TDist,
-           vector<vector<Number>> &exactTDist, vector<vector<vector<int>>> &typeActionSets,
-           vector<vector<vector<int>>> &ta2a, std::shared_ptr<AGG> aggPtr)
-  : numPlayers(N), numActionNodes(S), numTypes(numTypes), indepTypeDist(TDist),
-    exactIndepTypeDist(exactTDist), typeActionSets(typeActionSets), typeAction2ActionIndex(ta2a),
-    aggPtr(aggPtr)
+BAGG::BAGG(int N, int S, vector<int> &_numTypes, vector<ProbDist> &TDist,
+           vector<vector<Number>> &exactTDist, vector<vector<vector<int>>> &_typeActionSets,
+           vector<vector<vector<int>>> &ta2a, std::shared_ptr<AGG> _aggPtr)
+  : numPlayers(N), numActionNodes(S), numTypes(_numTypes), indepTypeDist(TDist),
+    exactIndepTypeDist(exactTDist), typeActionSets(_typeActionSets), typeAction2ActionIndex(ta2a),
+    aggPtr(_aggPtr)
 {
   typeOffset = std::vector<int>(numPlayers + 1);
   typeOffset[0] = 0;

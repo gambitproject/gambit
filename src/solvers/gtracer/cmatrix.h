@@ -104,13 +104,13 @@ public:
 
   cvector() : m(1), x(new double[1]) {}
 
-  explicit cvector(int m) : m(m), x(new double[m]) {}
+  explicit cvector(int _m) : m(_m), x(new double[_m]) {}
 
   ~cvector() { delete[] x; }
 
   cvector(const cvector &v) : m(v.m), x(new double[m]) { memcpy(x, v.x, m * sizeof(double)); }
 
-  cvector(int m, double a) : m(m), x(new double[m])
+  cvector(int _m, double a) : m(_m), x(new double[_m])
   {
     for (int i = 0; i < m; i++) {
       x[i] = a;
@@ -373,7 +373,7 @@ inline std::ostream &operator<<(std::ostream &s, const cvector &v)
 
 class cmatrix {
 public:
-  explicit cmatrix(int m = 1, int n = 1) : m(m), n(n), s(m * n), x(new double[s]) {}
+  explicit cmatrix(int _m = 1, int _n = 1) : m(_m), n(_n), s(_m * _n), x(new double[s]) {}
 
   ~cmatrix() { delete[] x; }
 
@@ -395,8 +395,8 @@ public:
     }
   }
 
-  cmatrix(int m, int n, const double &a, bool diaonly = false)
-    : m(m), n(n), s(m * n), x(new double[s])
+  cmatrix(int _m, int _n, const double &a, bool diaonly = false)
+    : m(_m), n(_n), s(_m * _n), x(new double[s])
   {
     if (diaonly) {
       int i;
@@ -427,7 +427,7 @@ public:
   }
 
   // put v on the diagonal
-  cmatrix(int m, int n, const cvector &v) : m(m), n(n), s(m * n), x(new double[s])
+  cmatrix(int _m, int _n, const cvector &v) : m(_m), n(_n), s(_m * _n), x(new double[s])
   {
     // for(int i=0;i<s;i++) x[i] = 0;
     memset(x, 0, s * sizeof(double));

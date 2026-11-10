@@ -364,7 +364,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
 
 # One list of warning flags, shared by the build and clang-tidy
 GAMBIT_WARNING_FLAGS = -Wall -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion \
-	-Wnon-virtual-dtor -Woverloaded-virtual -Wimplicit-fallthrough
+	-Wshadow -Wnon-virtual-dtor -Woverloaded-virtual -Wimplicit-fallthrough
 
 AM_CXXFLAGS = ${LLVM_CXXFLAGS} $(GAMBIT_WARNING_FLAGS)
 
