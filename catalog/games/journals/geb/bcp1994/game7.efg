@@ -1,0 +1,32 @@
+EFG 2 R "Banks-Camerer-Porter (GEB 94), Game 7" { "Player 1" "Player 2" }
+"Game 7 of the sender-receiver signaling game experiment in :cite:p:`BanCamPor94`,
+used to test the discriminatory power of stability relative to the NWBR
+criterion."
+
+c "" 1 "(0,1)" { "type 1" 1/2 "type 2" 1/2 } 0
+p "" 1 1 "(1,1)" { "m1" "m2" "m3" } 0
+p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
+t "" 1 "a" { 1, 6 }
+t "" 2 "b" { 2, 5 }
+t "" 3 "c" { 2, 0 }
+p "" 2 2 "(2,2)" { "a1" "a2" "a3" } 0
+t "" 4 "d" { 0, 5 }
+t "" 5 "e" { 3, 4 }
+t "" 6 "f" { 1, 2 }
+p "" 2 3 "(2,3)" { "a1" "a2" "a3" } 0
+t "" 7 "g" { 4, 2 }
+t "" 8 "h" { 1, 1 }
+t "" 9 "i" { 0, 3 }
+p "" 1 2 "(1,2)" { "m1" "m2" "m3" } 0
+p "" 2 1 "(2,1)" { "a1" "a2" "a3" } 0
+t "" 10 "j" { 2, 0 }
+t "" 11 "k" { 2, 5 }
+t "" 12 "l" { 0, 6 }
+p "" 2 2 "(2,2)" { "a1" "a2" "a3" } 0
+t "" 13 "m" { 1, 2 }
+t "" 14 "n" { 3, 4 }
+t "" 15 "o" { 0, 5 }
+p "" 2 3 "(2,3)" { "a1" "a2" "a3" } 0
+t "" 16 "p" { 1, 2 }
+t "" 17 "q" { 0, 4 }
+t "" 18 "r" { 3, 3 }

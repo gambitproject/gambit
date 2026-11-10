@@ -1,8 +1,9 @@
 EFG 2 R "Brandts-Holt, IJGT 93, Game 4" { "Player 1" "Player 2" }
-""
+"Game 4 of the sender-receiver signaling game experiment in :cite:p:`BraHol93`,
+reanalyzed using agent quantal response equilibrium in :cite:p:`McKPal98`."
 
 c "" 1 "(0,1)" { "Type A" 1/2 "Type B" 1/2 } 0
-p "" 1 1 "(1,1)" { "N" "S" } 0
+p "" 1 1 "(1,1)" { "I" "S" } 0
 p "" 2 1 "(2,1)" { "C" "D" "E" } 0
 t "" 1 "Outcome 1" { 30, 30 }
 t "" 2 "Outcome 2" { 0, 0 }
@@ -11,7 +12,7 @@ p "" 2 2 "(2,2)" { "C" "D" "E" } 0
 t "" 4 "Outcome 4" { 45, 90 }
 t "" 5 "Outcome 5" { 15, 15 }
 t "" 6 "Outcome 6" { 100, 30 }
-p "" 1 2 "(1,2)" { "N" "S" } 0
+p "" 1 2 "(1,2)" { "I" "S" } 0
 p "" 2 1 "(2,1)" { "C" "D" "E" } 0
 t "" 7 "Outcome 7" { 30, 30 }
 t "" 8 "Outcome 8" { 30, 45 }
