@@ -1,0 +1,14 @@
+NFG 1 R "Prisoner's Dilemma (Axelrod's payoffs)" { "1" "2" }
+
+{ { "D" "C" }
+{ "d" "c" }
+}
+"The Prisoner's Dilemma with Axelrod's payoffs, from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, where it is used to compute a Price of Anarchy of 3."
+
+{
+{ "" 1, 1 }
+{ "" 0, 5 }
+{ "" 5, 0 }
+{ "" 3, 3 }
+}
+1 2 3 4

@@ -41,7 +41,7 @@ _NOTEBOOKS = _find_tutorial_notebooks()
 
 @pytest.mark.tutorials
 @pytest.mark.parametrize("nb_path", _NOTEBOOKS, ids=[p.name for p in _NOTEBOOKS])
-def test_execute_notebook(nb_path):
+def test_execute_notebook(nb_path, request):
     """Execute a single Jupyter notebook and fail if any cell errors occur.
 
     This uses nbclient.NotebookClient to run the notebook in its parent directory
@@ -60,6 +60,10 @@ def test_execute_notebook(nb_path):
     # GAMUT notebook requires Java and gamut.jar; outputs are pre-saved for docs builds
     if "gamut" in nb_path.name.lower():
         pytest.skip("GAMUT notebook requires Java and gamut.jar (see catalog documentation)")
+
+    # Textbook companion notebooks are opt-in, to keep the default tutorial run short
+    if "textbook" in nb_path.parent.parts and not request.config.getoption("--run-textbook"):
+        pytest.skip("textbook companion notebook: need --run-textbook option to run")
 
     nb = nbformat.read(str(nb_path), as_version=4)
 

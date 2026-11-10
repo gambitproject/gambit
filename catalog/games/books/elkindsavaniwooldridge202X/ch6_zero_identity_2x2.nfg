@@ -1,0 +1,14 @@
+NFG 1 R "Degenerate 2x2 game with A = 0 and B = I" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "r" }
+}
+"A degenerate game from Chapter 6 (Algorithms for Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X` in which player 1 is always indifferent. Its equilibria form one component made of three maximal Nash subsets."
+
+{
+{ "" 0, 1 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 0, 1 }
+}
+1 2 3 4
