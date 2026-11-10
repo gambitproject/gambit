@@ -77,6 +77,18 @@ jobs:
       - name: cython-lint
         run: cython-lint .
 
+  cython-lines:
+    name: Cython lines do not exceed the ceiling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Count Cython lines in pygambit
+        run: python build_support/cython_lines.py --max 5015
+
   catalog-am-sync:
     name: catalog.am is up to date
     runs-on: ubuntu-latest
