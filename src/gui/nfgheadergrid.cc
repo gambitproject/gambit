@@ -178,7 +178,8 @@ void RowPlayerTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -187,7 +188,8 @@ void RowPlayerTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -197,7 +199,8 @@ void RowPlayerTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -206,7 +209,8 @@ void RowPlayerTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -712,7 +716,8 @@ void ColPlayerTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -721,7 +726,8 @@ void ColPlayerTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -731,7 +737,8 @@ void ColPlayerTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -740,7 +747,8 @@ void ColPlayerTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }

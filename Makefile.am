@@ -506,7 +506,7 @@ CLANG_TIDY_FILES = ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${to
 if WITH_GUI
 CLANG_TIDY_FILES += ${top_srcdir}/src/gui/*.cc
 endif
-CLANG_TIDY_FLAGS = --std=c++20 -I ${abs_top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS) $(WX_CXXFLAGS)
+CLANG_TIDY_FLAGS = --std=c++20 -I ${abs_top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS) -Wno-cast-function-type-mismatch $(WX_CXXFLAGS)
 BASE = origin/master
 
 # Check every source file, CLANG_TIDY_JOBS at a time. xargs exits non-zero if any run fails.

@@ -209,7 +209,8 @@ void PayoffTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -218,7 +219,8 @@ void PayoffTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -228,7 +230,8 @@ void PayoffTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -237,7 +240,8 @@ void PayoffTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
-      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -556,8 +560,9 @@ std::vector<PureStrategyProfile> PayoffGrid::GetSelectedContingencies(int p_fall
     }
   }
   const wxGridCellCoordsArray selectedCells = GetSelectedCells();
-  for (const auto selectedCell : selectedCells) {
-    blocks.emplace(selectedCell.GetRow(), selectedCell.GetCol() / perContingency);
+  // NOLINTNEXTLINE(modernize-loop-convert): wxVector in wxWidgets 3.2 has no begin() or end()
+  for (size_t i = 0; i < selectedCells.size(); ++i) {
+    blocks.emplace(selectedCells[i].GetRow(), selectedCells[i].GetCol() / perContingency);
   }
   if (blocks.empty()) {
     blocks.emplace(p_fallbackRow, p_fallbackCol / perContingency);

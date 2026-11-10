@@ -209,7 +209,8 @@ public:
     if (m_numCols == 0) {
       m_numCols = static_cast<int>(p_qre.size()) + 1;
       if (view) {
-        const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, m_numCols);
+        // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, m_numCols);
         view->ProcessTableMessage(msg);
       }
     }
@@ -221,7 +222,8 @@ public:
       const int newRows = static_cast<int>(m_profiles.size()) - m_numRows;
       m_numRows = static_cast<int>(m_profiles.size());
       if (view) {
-        const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newRows);
+        // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newRows);
         view->ProcessTableMessage(msg);
         view->MakeCellVisible(m_numRows - 1, 0);
       }
