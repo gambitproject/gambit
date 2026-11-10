@@ -695,15 +695,16 @@ void GameTreeRep::DeleteParent(const GameNode &p_node)
     return;
   }
   IncrementVersion();
-  auto *oldParent = node->m_parent;
+  // Hold the old parent: the last owning reference to it is released below, when the
+  // grandparent's child list (or the root) is updated.
+  const auto oldParent = node->m_parent->shared_from_this();
 
   oldParent->m_children.erase(std::ranges::find(oldParent->m_children, node->shared_from_this()));
-  DeleteTree(oldParent->shared_from_this());
+  DeleteTree(oldParent);
   node->m_parent = oldParent->m_parent;
   m_numNodes--;
   if (node->m_parent) {
-    std::ranges::replace(node->m_parent->m_children, oldParent->shared_from_this(),
-                         node->shared_from_this());
+    std::ranges::replace(node->m_parent->m_children, oldParent, node->shared_from_this());
   }
   else {
     m_root = p_node;
