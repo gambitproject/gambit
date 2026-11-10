@@ -857,6 +857,8 @@ public:
   void MoveTree(GameNode dest, GameNode src) override;
   void DeleteParent(GameNode) override;
   void DeleteTree(GameNode) override;
+  using GameRep::MakeOutcome;
+  using GameRep::MakeOutcomeNull;
   GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
                           const std::string &) override;
   void MakeOutcomeNull(const std::vector<GameNode> &) override;

@@ -75,6 +75,8 @@ public:
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
   explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
+  using GameRep::MakeOutcome;
+  using GameRep::MakeOutcomeNull;
   GameOutcome MakeOutcome(const std::vector<std::vector<GameStrategy>> &,
                           const std::vector<Number> &, const std::string &) override;
   void MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> &) override;

@@ -82,7 +82,6 @@ public:
   void RemoveMenu(wxMenu *p_menu) { m_fileHistory.RemoveMenu(p_menu); }
 
   AppLoadResult LoadFile(const wxString &, wxWindow *);
-  ;
 #ifdef __WXMAC__
   void MacOpenFile(const wxString &filename) override { LoadFile(filename, nullptr); }
 #endif // __WXMAC__

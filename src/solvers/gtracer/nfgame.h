@@ -52,6 +52,7 @@ public:
 
   double getMixedPayoff(int player, const cvector &s) const override;
 
+  using gnmgame::payoffMatrix;
   void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
 
   void getPayoffVector(cvector &dest, int player, const cvector &s) const override;

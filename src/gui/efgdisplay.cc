@@ -104,7 +104,7 @@ void EfgDisplay::OnLeftClick(wxMouseEvent &)
 
 void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
 {
-  if (const double factor = 1.0 + p_event.GetMagnification(); factor > 0.0) {
+  if (const double factor = 1.0 + static_cast<double>(p_event.GetMagnification()); factor > 0.0) {
     ZoomByFactor(factor, p_event.GetPosition());
   }
 }
