@@ -166,10 +166,12 @@ public:
   explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
   /// Make a copy of the mixed strategy profile
   MixedStrategyProfile(const MixedStrategyProfile &p_profile) : m_rep(p_profile.m_rep->Copy()) {}
+  MixedStrategyProfile(MixedStrategyProfile &&) = default;
   /// Destructor
   ~MixedStrategyProfile() = default;
 
   MixedStrategyProfile &operator=(const MixedStrategyProfile &);
+  MixedStrategyProfile &operator=(MixedStrategyProfile &&) = default;
   MixedStrategyProfile &operator=(const Vector<T> &v)
   {
     InvalidateCache();

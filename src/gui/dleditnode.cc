@@ -34,6 +34,7 @@ namespace Gambit::GUI {
 //                      class EditNodeDialog
 //======================================================================
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
@@ -131,11 +132,11 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
         item += ",...)";
       }
       else {
-        item += ")";
+        item += ')';
       }
     }
     else {
-      item += ")";
+      item += ')';
     }
 
     m_outcome->Append(wxString::FromUTF8(item));

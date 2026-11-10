@@ -41,7 +41,7 @@ constexpr int gbtPlayerMenuCount = 64;
 
 class EfgDisplay final : public wxScrolledWindow, public GameView {
   TreeLayout m_layout;
-  int m_zoom;
+  int m_zoom{100};
   wxMenu *m_nodeMenu{nullptr};
   // The node the right-click (or double-click) node menu was last shown for -- the target
   // of whichever of that menu's commands the user picks. Purely local to the tree display;

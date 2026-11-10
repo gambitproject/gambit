@@ -209,6 +209,7 @@ public:
     if (m_numCols == 0) {
       m_numCols = static_cast<int>(p_qre.size()) + 1;
       if (view) {
+        // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, m_numCols);
         view->ProcessTableMessage(msg);
       }
@@ -221,6 +222,7 @@ public:
       const int newRows = static_cast<int>(m_profiles.size()) - m_numRows;
       m_numRows = static_cast<int>(m_profiles.size());
       if (view) {
+        // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newRows);
         view->ProcessTableMessage(msg);
         view->MakeCellVisible(m_numRows - 1, 0);
@@ -305,6 +307,7 @@ template <class Traits> class LogitThreadRunner final : public wxThread {
           },
           m_cancel);
     }
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const ComputationCanceledException &) {
       // Not an error -- LogitDialog's m_stopRequested flag (already set before
       // RequestCancel() was called) is what determines that the "finished" event below is
@@ -317,7 +320,7 @@ template <class Traits> class LogitThreadRunner final : public wxThread {
     auto *evt = new wxThreadEvent(wxEVT_LOGIT_FINISHED);
     evt->SetInt(exitCode);
     wxQueueEvent(m_parent, evt);
-    return static_cast<wxThread::ExitCode>(0);
+    return static_cast<wxThread::ExitCode>(nullptr);
   }
 
 public:
@@ -450,7 +453,8 @@ public:
 
     auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    m_statusText =
+    // Child windows are created in order, which sets the tab order, so these stay in the body
+    m_statusText = // NOLINT(cppcoreguidelines-prefer-member-initializer)
         new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
     m_statusText->SetForegroundColour(*wxBLUE);
     startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, S);
@@ -467,14 +471,17 @@ public:
     sizer->Add(m_list, 1, wxALL | wxEXPAND, S);
 
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
+    m_saveButton = // NOLINT(cppcoreguidelines-prefer-member-initializer)
+        new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
     m_saveButton->Enable(false);
     buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, S);
     m_saveButton->Bind(wxEVT_BUTTON, &LogitDialog::OnSave, this);
 
     buttonSizer->AddStretchSpacer();
     buttonSizer->Add(CreateStdDialogButtonSizer(wxOK), 0, wxALL | wxALIGN_CENTER, S);
-    m_okButton = dynamic_cast<wxButton *>(FindWindow(wxID_OK));
+    // The OK button exists only once the sizer has been created
+    m_okButton = // NOLINT(cppcoreguidelines-prefer-member-initializer)
+        dynamic_cast<wxButton *>(FindWindow(wxID_OK));
     m_okButton->Enable(false);
 
     sizer->Add(buttonSizer, 0, wxEXPAND | wxALL, S);

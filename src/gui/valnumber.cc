@@ -21,6 +21,7 @@
 //
 
 #include <cctype>
+#include <utility>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -39,7 +40,7 @@ static bool IsNumeric(const wxString &p_value)
 {
   bool seenDigit = false, seenSeparator = false;
 
-  for (int i = 0; i < static_cast<int>(p_value.Length()); i++) {
+  for (int i = 0; std::cmp_less(i, p_value.Length()); i++) {
     if (isdigit(p_value[i])) {
       seenDigit = true;
       continue;
@@ -160,6 +161,7 @@ bool NumberValidator::TransferFromWindow()
   return TRUE;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void NumberValidator::OnChar(wxKeyEvent &p_event)
 {
   if (m_validatorWindow) {
@@ -175,7 +177,7 @@ void NumberValidator::OnChar(wxKeyEvent &p_event)
       return;
     }
 
-    auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
+    const auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
     const wxString value = control->GetValue();
 
     long start, end;

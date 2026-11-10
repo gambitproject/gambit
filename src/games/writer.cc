@@ -207,7 +207,7 @@ public:
     for (const auto &strategy : colPlayer->GetStrategies()) {
       m_result += "\\textbf{";
       m_result += strategy->GetLabel();
-      m_result += "}";
+      m_result += '}';
       if (strategy != colPlayer->GetStrategies().back()) {
         m_result += " & ";
       }
@@ -247,6 +247,7 @@ private:
  * of the "fixed" players and for each, creates a table showing all
  * strategy combinations of the row and column players.
  */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
                             const GamePlayer &p_colPlayer, TableFormatter &p_formatter)
 {
@@ -285,7 +286,7 @@ void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
               payoffs += profile->GetOutcome()->GetPayoff<std::string>(player);
             }
             else {
-              payoffs += "0";
+              payoffs += '0';
             }
           }
           catch (UndefinedException &) {
@@ -293,7 +294,7 @@ void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
             payoffs += lexical_cast<std::string>(profile->GetPayoff(player));
           }
           if (player != p_game->GetPlayers().back()) {
-            payoffs += ",";
+            payoffs += ',';
           }
         }
 

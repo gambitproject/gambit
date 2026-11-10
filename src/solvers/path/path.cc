@@ -195,15 +195,15 @@ void NewtonStep(const GivensQR &p_qr, const Matrix<double> &b, Vector<double> &u
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
-TracePathResult
-PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-                      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                      Vector<double> &x, TraceDirection p_direction, size_t p_trackingIndex,
-                      TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
-                      CriterionFunctionType p_criterion,
-                      CriterionBracketFunctionType p_criterionBracket, const CancelToken &p_cancel,
-                      BifurcationBracketFunctionType p_onBifurcation,
-                      PerturbationEventFunctionType p_onPerturbation) const
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+TracePathResult PathTracer::TracePath(
+    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
+    TraceDirection p_direction, size_t p_trackingIndex, TerminationFunctionType p_terminate,
+    CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
+    const CriterionBracketFunctionType &p_criterionBracket, const CancelToken &p_cancel,
+    const BifurcationBracketFunctionType &p_onBifurcation,
+    const PerturbationEventFunctionType &p_onPerturbation) const
 {
   const double c_tol = 1.0e-4;       // tolerance for corrector iteration
   const double c_maxDist = 0.4;      // maximal distance to curve
@@ -457,11 +457,12 @@ PathTracer::TracePath(std::function<void(const Vector<double> &, Vector<double> 
   return finish(true, "Path tracing terminated successfully.");
 }
 
-PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-                         std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                         Vector<double> &x, double fixed_value, size_t fixed_index,
-                         TerminationFunctionType p_terminate, int max_iter,
-                         CallbackFunctionType p_callback)
+PolishResult
+PolishPoint(const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
+            const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
+            Vector<double> &x, double fixed_value, size_t fixed_index,
+            TerminationFunctionType p_terminate, int max_iter,
+            const CallbackFunctionType &p_callback)
 {
   x[fixed_index] = fixed_value;
 

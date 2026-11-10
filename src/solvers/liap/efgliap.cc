@@ -159,10 +159,11 @@ double AgentNormalFormMaxRegret(const MixedBehaviorProfile<double> &p_profile)
 
 } // namespace
 
-LiapAgentResult LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret,
-                               int p_maxitsN, BehaviorCallbackType<double> p_onEquilibrium,
-                               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent,
-                               const CancelToken &p_cancel)
+LiapAgentResult
+LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+               const BehaviorCallbackType<double> &p_onEquilibrium,
+               const LiapEventCallbackType<MixedBehaviorProfile<double>> &p_onEvent,
+               const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_start.GetGame());
 

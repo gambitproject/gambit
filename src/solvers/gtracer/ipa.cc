@@ -76,6 +76,7 @@ int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &c
   return p;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void LemkeHowson(const gnmgame &game, cvector &dest, cmatrix &T, std::vector<int> &Im)
 {
   const double BIGFLOAT = 3.0e+28;
@@ -209,9 +210,10 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
               unsigned int maxiter,
-              std::function<void(int, const cvector &, double, double)> p_onStep,
+              const std::function<void(int, const cvector &, double, double)> &p_onStep,
               const CancelToken &p_cancel)
 {
   const int N = A.getNumPlayers(),

@@ -35,12 +35,11 @@ namespace Gambit::GUI {
 
 MixedBehaviorProfileList::MixedBehaviorProfileList(wxWindow *p_parent,
                                                    const std::shared_ptr<GameDocument> &p_doc)
-  : wxGrid(p_parent, wxID_ANY), GameView(p_doc)
+  : wxGrid(p_parent, wxID_ANY), GameView(p_doc), m_labels(new ProfileLabelProvider)
 {
   CreateGrid(0, 0);
 
   // The table takes ownership of the provider
-  m_labels = new ProfileLabelProvider;
   GetTable()->SetAttrProvider(m_labels);
 
   SetRowLabelSize(40);
@@ -166,7 +165,7 @@ void MixedBehaviorProfileList::UpdateCells()
           wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, profile).c_str(),
                    *wxConvCurrent));
 
-      wxGridCellAttr *attr = new wxGridCellAttr;
+      auto *attr = new wxGridCellAttr;
       attr->SetFont(profile == currentProfile ? boldFont : normalFont);
       attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
       attr->SetReadOnly(true);
@@ -182,6 +181,7 @@ void MixedBehaviorProfileList::UpdateCells()
           attr->SetBackgroundColour(wxColour(225, 225, 225));
         }
       }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (std::out_of_range &) {
         // If GetAction() throws this, just handle it silently; can occur
         // when solving a trivial game via the strategic form

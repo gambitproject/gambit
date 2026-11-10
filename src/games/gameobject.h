@@ -25,6 +25,7 @@
 
 #include <compare>
 #include <memory>
+#include <utility>
 
 namespace Gambit {
 
@@ -66,11 +67,13 @@ template <class T> class GameObjectPtr {
 public:
   GameObjectPtr() = default;
   GameObjectPtr(std::nullptr_t r) : m_rep(r), m_game(nullptr) {}
-  GameObjectPtr(std::shared_ptr<T> r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
+  GameObjectPtr(const std::shared_ptr<T> &r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
   GameObjectPtr(const GameObjectPtr<T> &) = default;
+  GameObjectPtr(GameObjectPtr<T> &&) = default;
   ~GameObjectPtr() = default;
 
   GameObjectPtr<T> &operator=(const GameObjectPtr<T> &) = default;
+  GameObjectPtr<T> &operator=(GameObjectPtr<T> &&) = default;
 
   /// Access the shared pointer to the object representing the game element
   ///
@@ -167,8 +170,10 @@ public:
     {
     }
     iterator(const iterator &) = default;
+    iterator(iterator &&) = default;
     ~iterator() = default;
     iterator &operator=(const iterator &) = default;
+    iterator &operator=(iterator &&) = default;
 
     bool operator==(const iterator &p_iter) const
     {
@@ -209,8 +214,10 @@ public:
   {
   }
   ElementCollection(const ElementCollection<P, T> &) = default;
+  ElementCollection(ElementCollection<P, T> &&) = default;
   ~ElementCollection() = default;
   ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+  ElementCollection &operator=(ElementCollection<P, T> &&) = default;
 
   bool operator==(const ElementCollection<P, T> &p_other) const
   {
@@ -275,7 +282,7 @@ public:
     iterator() = default;
 
     iterator(T p_owner, const bool p_isEnd)
-      : m_iterOwner(p_owner), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
+      : m_iterOwner(std::move(p_owner)), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
         m_outerIt(std::begin(m_outerRange)), m_outerEnd(std::end(m_outerRange))
     {
       if (p_isEnd) {
@@ -311,7 +318,7 @@ public:
     }
   };
 
-  explicit NestedElementCollection(T owner) : m_owner(owner) {}
+  explicit NestedElementCollection(T owner) : m_owner(std::move(owner)) {}
 
   /// @brief Return the total number of elements summed across all inner ranges
   std::size_t size() const
@@ -349,7 +356,7 @@ public:
   /// @brief Returns the Cartesian product of the sizes of the inner ranges
   std::size_t extent_product() const
   {
-    auto outer = (m_owner.get()->*OuterMemFn)();
+    const auto outer = (m_owner.get()->*OuterMemFn)();
     return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(1),
                            [](std::size_t acc, const auto &element) {
                              return acc * (element.get()->*InnerMemFn)().size();

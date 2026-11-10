@@ -168,8 +168,8 @@ PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument>
                          const std::function<void()> &p_onChanged)
   : wxScrolledWindow(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                      wxVSCROLL | wxTAB_TRAVERSAL),
-    m_doc(p_doc), m_defaultBg(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW)),
-    m_onChanged(p_onChanged)
+    m_doc(p_doc), m_topSizer(new wxBoxSizer(wxVERTICAL)),
+    m_defaultBg(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW)), m_onChanged(p_onChanged)
 {
   for (const auto &player : m_doc->GetGame()->GetPlayers()) {
     Row row;
@@ -180,7 +180,6 @@ PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument>
     m_rows.push_back(std::move(row));
   }
 
-  m_topSizer = new wxBoxSizer(wxVERTICAL);
   SetSizer(m_topSizer);
   SetScrollRate(0, FromDIP(10));
 
@@ -253,6 +252,7 @@ wxString PlayerPanel::BlockedDeleteReason(const Row &row) const
   return {};
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void PlayerPanel::Rebuild()
 {
   m_rebuilding = true;
@@ -496,7 +496,7 @@ wxString PlayerPanel::ValidateLabels()
 
 wxBitmapButton *PlayerPanel::MakeColorButton(int p_index)
 {
-  Row &row = m_rows.at(p_index);
+  const Row &row = m_rows.at(p_index);
   auto *button = new wxBitmapButton(this, wxID_ANY, MakeColorSwatch(row.color), wxDefaultPosition,
                                     wxDefaultSize, wxNO_BORDER);
   button->SetToolTip(_("Change the color for this player"));

@@ -353,7 +353,7 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &p_input, Vector<T>
   p_output = T{0};
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     auto row = m_data.GetRowView(i);
-    const T k = p_input[i];
+    const T &k = p_input[i];
     auto dst = p_output.begin();
     for (auto it = row.begin(); it != row.end(); ++it, ++dst) {
       *dst += (*it) * k;

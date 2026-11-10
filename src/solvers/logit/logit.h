@@ -26,6 +26,7 @@
 #include <functional>
 #include <list>
 #include <optional>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -42,7 +43,12 @@ public:
   {
   }
   LogitQRE(const LogitQRE &p_qre) = default;
+  // moving the profile copies its support, which can throw
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  LogitQRE(LogitQRE &&) = default;
   ~LogitQRE() = default;
+  LogitQRE &operator=(const LogitQRE &) = default;
+  LogitQRE &operator=(LogitQRE &&) = default;
 
   double GetLambda() const { return m_lambda; }
 
@@ -92,6 +98,8 @@ template <class QRE> struct LogitPathEvent {
 
 /// @brief The last-accepted point and the rejected point bracketing a detected bifurcation,
 ///        held by value since a LogitBifurcation may outlive the trace that produced it
+// moving a QRE copies its profile's support, which can throw
+// NOLINTNEXTLINE(bugprone-exception-escape)
 template <class QRE> struct LogitBifurcation {
   QRE before;
   QRE after;
@@ -145,7 +153,7 @@ enum class LogitTerminationReason {
 LogitTrace<LogitQREMixedStrategyProfile> LogitStrategySolve(
     const LogitQREMixedStrategyProfile &p_start, double p_regret,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
-    Nash::StrategyCallbackType<double> p_onEquilibrium = Nash::NullStrategyCallback<double>,
+    const Nash::StrategyCallbackType<double> &p_onEquilibrium = Nash::NullStrategyCallback<double>,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
         NullLogitEventCallback<LogitQREMixedStrategyProfile>,
     const CancelToken &p_cancel = CancelToken());
@@ -170,8 +178,9 @@ inline LogitStrategyResult LogitStrategySolveEquilibrium(
     PathTracer::TraceDirection p_direction = PathTracer::TraceDirection::Positive,
     const CancelToken &p_cancel = CancelToken())
 {
-  const auto trace = LogitStrategySolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
-                                        Nash::NullStrategyCallback<double>, p_onEvent, p_cancel);
+  const auto trace =
+      LogitStrategySolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
+                         Nash::NullStrategyCallback<double>, std::move(p_onEvent), p_cancel);
   const MixedStrategyProfile<double> &candidate = trace.profiles.back().GetProfile();
   const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
   const double regret = (scale != 0.0) ? p_regret * scale : p_regret;
@@ -207,7 +216,7 @@ using LogitQREMixedBehaviorProfile = LogitQRE<MixedBehaviorProfile<double>>;
 LogitTrace<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(
     const LogitQREMixedBehaviorProfile &p_start, double p_regret,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
-    Nash::BehaviorCallbackType<double> p_onEquilibrium = Nash::NullBehaviorCallback<double>,
+    const Nash::BehaviorCallbackType<double> &p_onEquilibrium = Nash::NullBehaviorCallback<double>,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
         NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
     const CancelToken &p_cancel = CancelToken());
@@ -232,8 +241,9 @@ inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
     PathTracer::TraceDirection p_direction = PathTracer::TraceDirection::Positive,
     const CancelToken &p_cancel = CancelToken())
 {
-  const auto trace = LogitBehaviorSolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
-                                        Nash::NullBehaviorCallback<double>, p_onEvent, p_cancel);
+  const auto trace =
+      LogitBehaviorSolve(p_start, p_regret, p_direction, p_firstStep, p_maxAccel,
+                         Nash::NullBehaviorCallback<double>, std::move(p_onEvent), p_cancel);
   const MixedBehaviorProfile<double> &candidate = trace.profiles.back().GetProfile();
   const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
   const double regret = (scale != 0.0) ? p_regret * scale : p_regret;

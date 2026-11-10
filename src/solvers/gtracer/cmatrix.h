@@ -26,8 +26,10 @@
 #define GAMBIT_SOLVERS_GTRACER_CMATRIX_H
 
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include "core/util.h"
@@ -110,6 +112,12 @@ public:
 
   cvector(const cvector &v) : m(v.m), x(new double[m]) { memcpy(x, v.x, m * sizeof(double)); }
 
+  cvector(cvector &&v) noexcept : m(v.m), x(v.x)
+  {
+    v.m = 0;
+    v.x = nullptr;
+  }
+
   cvector(int _m, double a) : m(_m), x(new double[_m])
   {
     for (int i = 0; i < m; i++) {
@@ -131,6 +139,13 @@ public:
     for (int i = 0; i < m; i++) {
       x[i] = a;
     }
+    return *this;
+  }
+
+  cvector &operator=(cvector &&v) noexcept
+  {
+    std::swap(m, v.m);
+    std::swap(x, v.x);
     return *this;
   }
 
@@ -235,22 +250,18 @@ public:
 
   double max() const
   {
-    double t, ma = x[0];
+    double ma = x[0];
     for (int i = 1; i < m; i++) {
-      if ((t = x[i]) > ma) {
-        ma = t;
-      }
+      ma = std::max(ma, x[i]);
     }
     return ma;
   }
 
   double min() const
   {
-    double t, mi = x[0];
+    double mi = x[0];
     for (int i = 1; i < m; i++) {
-      if ((t = x[i]) < mi) {
-        mi = t;
-      }
+      mi = std::min(mi, x[i]);
     }
     return mi;
   }
@@ -511,6 +522,21 @@ public:
     return *this;
   }
 
+  cmatrix(cmatrix &&ma) noexcept : m(ma.m), n(ma.n), s(ma.s), x(ma.x)
+  {
+    ma.m = ma.n = ma.s = 0;
+    ma.x = nullptr;
+  }
+
+  cmatrix &operator=(cmatrix &&ma) noexcept
+  {
+    std::swap(m, ma.m);
+    std::swap(n, ma.n);
+    std::swap(s, ma.s);
+    std::swap(x, ma.x);
+    return *this;
+  }
+
   cmatrix &operator=(const cmatrix &ma)
   {
     if (&ma == this) {
@@ -645,22 +671,18 @@ public:
 
   double max() const
   {
-    double t, ma = x[0];
+    double ma = x[0];
     for (int i = 1; i < s; i++) {
-      if ((t = x[i]) > ma) {
-        ma = t;
-      }
+      ma = std::max(ma, x[i]);
     }
     return ma;
   }
 
   double min() const
   {
-    double t, mi = x[0];
+    double mi = x[0];
     for (int i = 1; i < s; i++) {
-      if ((t = x[i]) < mi) {
-        mi = t;
-      }
+      mi = std::min(mi, x[i]);
     }
     return mi;
   }
@@ -769,7 +791,7 @@ inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
 {
   for (int i = 0; i < ma.s; i++) {
     if (i % ma.n == 0) {
-      s << std::endl;
+      s << '\n';
     }
     s << ma.x[i];
     if (i != ma.s) {

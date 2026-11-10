@@ -560,7 +560,7 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   const bool isExtensiveGame = As<GameTreeRep>(m_doc->GetGame()) != nullptr;
 
-  auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
+  const auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
       m_doc->DoSave(path, format);
     }
@@ -829,6 +829,7 @@ void GameFrame::OnEditUndo(wxCommandEvent &) { m_doc->Undo(); }
 
 void GameFrame::OnEditRedo(wxCommandEvent &) { m_doc->Redo(); }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameFrame::OnEditGame(wxCommandEvent &)
 {
   GamePropertiesDialog dialog(this, m_doc);
@@ -1166,23 +1167,23 @@ CloseWarningText CloseWarningMessage(const std::shared_ptr<GameDocument> &p_doc)
   const bool workspaceModified = p_doc->IsWorkspaceModified();
 
   if (gameModified && !workspaceModified) {
-    return {_("This game has unsaved changes."),
-            _("If you close this window now, changes to the game will be lost.")};
+    return {.primary = _("This game has unsaved changes."),
+            .secondary = _("If you close this window now, changes to the game will be lost.")};
   }
 
   if (!gameModified && workspaceModified) {
-    return {_("There are unsaved computational results."),
-            _("These results can be saved in a Gambit workspace file. "
-              "If you close this window now, the unsaved results will be lost.")};
+    return {.primary = _("There are unsaved computational results."),
+            .secondary = _("These results can be saved in a Gambit workspace file. "
+                           "If you close this window now, the unsaved results will be lost.")};
   }
 
   if (gameModified && workspaceModified) {
-    return {_("This game and its computational results have unsaved changes."),
-            _("If you close this window now, changes to the game and unsaved "
-              "computational results will be lost.")};
+    return {.primary = _("This game and its computational results have unsaved changes."),
+            .secondary = _("If you close this window now, changes to the game and unsaved "
+                           "computational results will be lost.")};
   }
 
-  return {wxEmptyString, wxEmptyString};
+  return {.primary = wxEmptyString, .secondary = wxEmptyString};
 }
 
 class CloseWarningDialog final : public wxDialog {

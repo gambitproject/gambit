@@ -105,6 +105,7 @@ public:
   {
   }
 
+  PureStrategyProfile(PureStrategyProfile &&) = default;
   ~PureStrategyProfile() = default;
 
   PureStrategyProfile &operator=(const PureStrategyProfile &r)
@@ -114,6 +115,7 @@ public:
     }
     return *this;
   }
+  PureStrategyProfile &operator=(PureStrategyProfile &&) = default;
 
   std::shared_ptr<PureStrategyProfileRep> operator->() const { return rep; }
 };

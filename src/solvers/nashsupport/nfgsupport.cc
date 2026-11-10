@@ -24,6 +24,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <utility>
 
 #include "nashsupport.h"
 
@@ -84,7 +85,7 @@ RestrictedGame(const Game &game, const GamePlayer &player,
                const std::map<GamePlayer, StrategySupport> &domainStrategies)
 {
   StrategySupportProfile profile(game);
-  for (auto [player2, strategies] : domainStrategies) {
+  for (const auto &[player2, strategies] : domainStrategies) {
     if (player2 == player) {
       continue;
     }
@@ -99,7 +100,7 @@ RestrictedGame(const Game &game, const GamePlayer &player,
 
 bool AnyDominatedStrategies(const Game &game, const std::map<GamePlayer, StrategySupport> &domains)
 {
-  for (auto [player, strategies] : domains) {
+  for (const auto &[player, strategies] : domains) {
     const auto support_profile = RestrictedGame(game, player, domains);
     for (const auto &strategy : strategies) {
       if (support_profile.IsDominated(strategy, true)) {
@@ -177,7 +178,9 @@ public:
 std::vector<size_t> ComputeOuterDim(const std::vector<size_t> &numActions, bool preferBalance,
                                     int numPlayers)
 {
-  const int maxsize = std::accumulate(numActions.begin(), numActions.end(), 0) - numPlayers + 1;
+  const int maxsize =
+      static_cast<int>(std::accumulate(numActions.begin(), numActions.end(), size_t{0})) -
+      numPlayers + 1;
   const int maxdiff = *std::ranges::max_element(numActions);
   std::vector<size_t> dim(2);
   dim[0] = preferBalance ? maxsize : maxdiff;
@@ -296,7 +299,8 @@ private:
       ++m_spIt;
       if (*std::ranges::max_element(sizeProfile) - *std::ranges::min_element(sizeProfile) !=
               m_diff ||
-          std::accumulate(sizeProfile.cbegin(), sizeProfile.cend(), 0) != m_size) {
+          std::cmp_not_equal(std::accumulate(sizeProfile.cbegin(), sizeProfile.cend(), size_t{0}),
+                             m_size)) {
         continue;
       }
       SetupDomains(sizeProfile);

@@ -102,7 +102,7 @@ public:
       return;
     }
 
-    auto player = m_table->GetPayoffPlayer(col);
+    const auto player = m_table->GetPayoffPlayer(col);
 
     if (m_table->IsPayoffStrategyDominated(row, col, false)) {
       if (m_table->IsPayoffStrategyDominated(row, col, true)) {
@@ -137,6 +137,8 @@ public:
   {
   }
 
+  PayoffTable(const PayoffTable &) = delete;
+  PayoffTable &operator=(const PayoffTable &) = delete;
   ~PayoffTable() override
   {
     m_renderer->DecRef();
@@ -207,6 +209,7 @@ void PayoffTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
       wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
@@ -216,6 +219,7 @@ void PayoffTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
       wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
@@ -226,6 +230,7 @@ void PayoffTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
       wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
@@ -235,6 +240,7 @@ void PayoffTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
+      // NOLINTNEXTLINE(misc-const-correctness): wxWidgets 3.2 takes a non-const reference
       wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
@@ -353,7 +359,9 @@ public:
     auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
     labelSizer->Add(new wxStaticText(this, wxID_ANY, _("Label")), 0,
                     wxALL | wxALIGN_CENTRE_VERTICAL, 5);
-    m_labelCtrl = new LabelTextCtrl(this, wxID_ANY, p_label);
+    // Child windows are created in order, which sets the tab order, so these stay in the body
+    m_labelCtrl = // NOLINT(cppcoreguidelines-prefer-member-initializer)
+        new LabelTextCtrl(this, wxID_ANY, p_label);
     labelSizer->Add(m_labelCtrl, 1, wxALL | wxEXPAND, 5);
     topSizer->Add(labelSizer, 0, wxEXPAND | wxALL, 5);
 
@@ -373,7 +381,7 @@ public:
         p_textEvent.Skip();
       });
       payoffSizer->Add(ctrl, 1, wxEXPAND);
-      m_payoffRows.push_back({player, ctrl});
+      m_payoffRows.push_back({.player = player, .payoffCtrl = ctrl});
       ++index;
     }
     topSizer->Add(payoffSizer, 0, wxEXPAND | wxALL, 5);
@@ -397,7 +405,8 @@ public:
       UpdateValidation();
       p_textEvent.Skip();
     });
-    m_okButton = static_cast<wxButton *>(FindWindow(wxID_OK));
+    m_okButton = // NOLINT(cppcoreguidelines-prefer-member-initializer)
+        static_cast<wxButton *>(FindWindow(wxID_OK));
     Bind(wxEVT_BUTTON, &SetOutcomeDialog::OnOK, this, wxID_OK);
 
     UpdateValidation();
@@ -551,6 +560,7 @@ std::vector<PureStrategyProfile> PayoffGrid::GetSelectedContingencies(int p_fall
     }
   }
   const wxGridCellCoordsArray selectedCells = GetSelectedCells();
+  // NOLINTNEXTLINE(modernize-loop-convert): wxVector in wxWidgets 3.2 has no begin() or end()
   for (size_t i = 0; i < selectedCells.size(); ++i) {
     blocks.emplace(selectedCells[i].GetRow(), selectedCells[i].GetCol() / perContingency);
   }
@@ -568,10 +578,10 @@ std::vector<PureStrategyProfile> PayoffGrid::GetSelectedContingencies(int p_fall
 
 GameOutcome PayoffGrid::GetSharedOutcome(const std::vector<PureStrategyProfile> &p_profiles)
 {
-  GameOutcome shared = p_profiles.front()->GetOutcome();
+  const GameOutcome shared = p_profiles.front()->GetOutcome();
   for (const auto &profile : p_profiles) {
     if (profile->GetOutcome() != shared) {
-      return GameOutcome();
+      return {};
     }
   }
   return (shared && !shared->IsNull()) ? shared : GameOutcome();
@@ -643,7 +653,7 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
       GetSelectedContingencies(p_event.GetRow(), p_event.GetCol());
 
   const bool anyHasOutcome =
-      std::any_of(profiles.begin(), profiles.end(), [](const PureStrategyProfile &p_profile) {
+      std::ranges::any_of(profiles, [](const PureStrategyProfile &p_profile) {
         return !p_profile->GetOutcome()->IsNull();
       });
   const GameOutcome shared = GetSharedOutcome(profiles);

@@ -131,6 +131,7 @@ void stripComment(istream &in)
 
 } // namespace
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::shared_ptr<AGG> AGG::makeAGG(istream &in)
 {
   int i, j, n, S, P;
@@ -330,7 +331,7 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
             // break;
           }
           else if (neighb[Node][k] >= S) {
-            const projtype f = projTypes[neighb[Node][k] - S];
+            const projtype &f = projTypes[neighb[Node][k] - S];
             if (!f) {
               throw ValueException("AGG: encountered a null projection function");
             }
@@ -698,6 +699,7 @@ void AGG::getSymPayoffVector(std::vector<double> &dest, StrategyProfile<double> 
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
 {
   const int numNei = neighbors[node].size();
@@ -776,6 +778,7 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
 // plClass: the index for the player class
 // s: mixed strat for that player class
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlClass, int act,
                            ConfigDistribution<double> &dest, int plClass2, int act2)
 {
@@ -984,6 +987,7 @@ double AGG::getKSymMixedPayoff(const StrategyProfile<double> &s, int pClass1, in
   return d.inner_prod(payoffs[uniqueActionSets[pClass1][act1]]);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable &exactPay,
                             int numNei)
 {

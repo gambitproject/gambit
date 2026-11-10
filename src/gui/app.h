@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GUI_APP_H
 #define GAMBIT_GUI_APP_H
 
+#include <algorithm>
 #include <vector>
 
 #include <wx/wx.h>
@@ -93,7 +94,7 @@ public:
   void AddDocument(GameDocument *p_doc) { m_documents.push_back(p_doc); }
   void RemoveDocument(const GameDocument *p_doc)
   {
-    m_documents.erase(std::find(m_documents.begin(), m_documents.end(), p_doc));
+    m_documents.erase(std::ranges::find(m_documents, p_doc));
   }
   //@}
 };

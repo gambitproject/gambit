@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <utility>
 
 #include "profilesort.h"
 
@@ -61,7 +62,7 @@ void ProfileSortOrder::Rebuild(int p_numProfiles, int p_numCols, const CompareFu
   // the columns from left to right.  std::stable_sort leaves profiles which
   // compare equal throughout in the order in which they were computed, in
   // both sort directions.
-  std::stable_sort(m_profiles.begin(), m_profiles.end(), [&](int p_left, int p_right) {
+  std::ranges::stable_sort(m_profiles, [&](int p_left, int p_right) {
     const int direction = m_ascending ? 1 : -1;
 
     const int onSortColumn = p_compare(m_column, p_left, p_right);
@@ -80,7 +81,7 @@ void ProfileSortOrder::Rebuild(int p_numProfiles, int p_numCols, const CompareFu
 
 int ProfileSortOrder::GetProfile(int p_row) const
 {
-  if (p_row < 0 || p_row >= static_cast<int>(m_profiles.size())) {
+  if (p_row < 0 || std::cmp_greater_equal(p_row, m_profiles.size())) {
     return 0;
   }
   return m_profiles[p_row];
@@ -88,7 +89,7 @@ int ProfileSortOrder::GetProfile(int p_row) const
 
 int ProfileSortOrder::GetRow(int p_profile) const
 {
-  const auto row = std::find(m_profiles.begin(), m_profiles.end(), p_profile);
+  const auto row = std::ranges::find(m_profiles, p_profile);
   return (row == m_profiles.end()) ? -1 : static_cast<int>(row - m_profiles.begin());
 }
 

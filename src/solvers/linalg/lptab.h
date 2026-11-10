@@ -34,9 +34,11 @@ public:
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
   LPTableau(const LPTableau<T> &) = default;
+  LPTableau(LPTableau<T> &&) = default;
   ~LPTableau() = default;
 
   LPTableau<T> &operator=(const LPTableau<T> &) = default;
+  LPTableau<T> &operator=(LPTableau<T> &&) = default;
 
   /// @name Cost information
   //@{

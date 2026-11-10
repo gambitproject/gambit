@@ -70,21 +70,21 @@ struct GNMStrategyResult {
   gametracer::GNMTerminationReason reason{gametracer::GNMTerminationReason::NoMoreBoundaries};
 };
 
-GNMStrategyResult
-GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
-                 int p_localNewtonMaxits,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 GNMEventCallbackType p_onEvent = NullGNMEventCallback,
-                 const CancelToken &p_cancel = CancelToken());
+GNMStrategyResult GNMStrategySolve(
+    const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
+    int p_localNewtonMaxits,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const GNMEventCallbackType &p_onEvent = NullGNMEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
-GNMStrategyResult
-GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
-                 int p_localNewtonInterval, int p_localNewtonMaxits,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 GNMEventCallbackType p_onEvent = NullGNMEventCallback,
-                 const CancelToken &p_cancel = CancelToken());
+GNMStrategyResult GNMStrategySolve(
+    const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
+    int p_localNewtonInterval, int p_localNewtonMaxits,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const GNMEventCallbackType &p_onEvent = NullGNMEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash
 

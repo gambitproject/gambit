@@ -108,7 +108,7 @@ void div(const Rational &x, const Rational &y, Rational &r)
     Integer tmp;
     mul(x.num, y.den, tmp);
     mul(y.num, x.den, r.den);
-    r.num = tmp;
+    r.num = std::move(tmp);
   }
   r.normalize();
 }
@@ -280,6 +280,7 @@ std::ostream &operator<<(std::ostream &s, const Rational &y)
   return s;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::istream &operator>>(std::istream &f, Rational &y)
 {
   char ch = ' ';
@@ -390,6 +391,8 @@ Rational::~Rational() = default;
 
 Rational::Rational(const Rational &y) = default;
 
+Rational::Rational(Rational &&y) noexcept = default;
+
 Rational::Rational(const Integer &n) : num(n), den(&OneRep) {}
 
 Rational::Rational(const Integer &n, const Integer &d) : num(n), den(d)
@@ -423,6 +426,8 @@ Rational::Rational(int n, int d) : num(n), den(d)
 }
 
 Rational &Rational::operator=(const Rational &y) = default;
+
+Rational &Rational::operator=(Rational &&y) noexcept = default;
 
 bool Rational::operator==(const Rational &y) const
 {
@@ -511,6 +516,7 @@ Rational Rational::operator/(const Rational &y) const
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <> Rational lexical_cast(const std::string &f)
 {
   char ch = ' ';

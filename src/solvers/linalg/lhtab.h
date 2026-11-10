@@ -38,9 +38,11 @@ public:
   {
   }
   LHTableau(const LHTableau<T> &) = default;
+  LHTableau(LHTableau<T> &&) = default;
   ~LHTableau() = default;
 
   LHTableau<T> &operator=(const LHTableau<T> &) = delete;
+  LHTableau<T> &operator=(LHTableau<T> &&) = delete;
   //@}
 
   /// @name General information

@@ -232,8 +232,8 @@ namespace Gambit::Nash {
 
 EnumPolyBehaviorResult
 EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
-                      size_t p_maxRectangles, BehaviorCallbackType<double> p_onEquilibrium,
-                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent,
+                      size_t p_maxRectangles, const BehaviorCallbackType<double> &p_onEquilibrium,
+                      const EnumPolyEventCallbackType<BehaviorSupportProfile> &p_onEvent,
                       const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_game);

@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GUI_GAMEDOC_H
 #define GAMBIT_GUI_GAMEDOC_H
 
+#include <algorithm>
 #include <map>
 
 #include "games/behavspt.h"
@@ -45,7 +46,7 @@ class StrategyDominanceStack {
   bool m_strict;
   Array<std::shared_ptr<StrategySupportProfile>> m_supports;
   size_t m_current{0};
-  bool m_noFurther;
+  bool m_noFurther{false};
 
 public:
   StrategyDominanceStack(GameDocument *p_doc, bool p_strict);
@@ -171,7 +172,7 @@ class AnalysisWorkspace {
   StrategyDominanceStack m_stratSupports;
 
   Array<std::shared_ptr<AnalysisOutput>> m_profiles;
-  int m_currentProfileList;
+  int m_currentProfileList{0};
 
 public:
   explicit AnalysisWorkspace(GameDocument *p_doc);
@@ -182,7 +183,7 @@ public:
 
   const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
   const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs);
   void SelectEquilibriumOutput(int p_index);
   int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
@@ -218,16 +219,13 @@ class GameDocument {
   std::list<GameView *> m_views;
 
   void AddView(GameView *p_view) { m_views.push_back(p_view); }
-  void RemoveView(GameView *p_view)
-  {
-    m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
-  }
+  void RemoveView(GameView *p_view) { m_views.erase(std::ranges::find(m_views, p_view)); }
 
   Game m_game;
   wxString m_filename;
 
   TreeRenderConfig m_style;
-  bool m_gameModified, m_workspaceModified;
+  bool m_gameModified{false}, m_workspaceModified{false};
 
   AnalysisWorkspace m_workspace;
   NashChoice m_nashChoice;
@@ -299,7 +297,7 @@ public:
 
   GameAction GetAction(int p_index) const;
 
-  void DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void DoAddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs);
   void DoSelectEquilibriumOutput(int p_index);
   void DoSelectProfile(int p_profile);
 
@@ -356,10 +354,11 @@ public:
   /// labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order
   /// means a rename that reuses a label freed up by a simultaneous deletion never collides
   /// with the not-yet-renamed original.
-  void DoSetStrategies(GamePlayer p_player, const std::vector<std::string> &p_stableLabels,
+  void DoSetStrategies(const GamePlayer &p_player, const std::vector<std::string> &p_stableLabels,
                        const std::vector<std::string> &p_labels);
-  void DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label);
-  void DoRelabelActions(GameInfoset p_infoset, const std::map<std::string, std::string> &p_labels);
+  void DoSetInfosetLabel(const GameInfoset &p_infoset, const wxString &p_label);
+  void DoRelabelActions(const GameInfoset &p_infoset,
+                        const std::map<std::string, std::string> &p_labels);
   /// Declare the actions of `p_infoset` in a single operation, covering any combination
   /// of adding, deleting, reordering, and relabeling actions.
   ///
@@ -370,41 +369,41 @@ public:
   /// `p_probs`; labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in
   /// this order means a rename that reuses a label freed up by a simultaneous deletion
   /// never collides with the not-yet-renamed original.
-  void DoSetActions(GameInfoset p_infoset, const std::vector<std::string> &p_stableLabels,
+  void DoSetActions(const GameInfoset &p_infoset, const std::vector<std::string> &p_stableLabels,
                     const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
-  void DoSetInfoset(GameNode p_node, GameInfoset p_infoset);
-  void DoLeaveInfoset(GameNode p_node);
-  void DoRevealAction(GameInfoset p_infoset, GamePlayer p_player);
-  void DoSetNodeLabel(GameNode p_node, const wxString &p_label);
-  void DoAppendMove(GameNode p_node, GameInfoset p_infoset);
+  void DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset);
+  void DoLeaveInfoset(const GameNode &p_node);
+  void DoRevealAction(const GameInfoset &p_infoset, const GamePlayer &p_player);
+  void DoSetNodeLabel(const GameNode &p_node, const wxString &p_label);
+  void DoAppendMove(const GameNode &p_node, const GameInfoset &p_infoset);
   // Appends a fresh move for p_player at the terminal node p_node, with actions labeled per
   // p_labels. p_probs gives the chance distribution when p_player is the chance player, and
   // is ignored otherwise.
-  void DoAppendMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
-                    const std::vector<Number> &p_probs);
+  void DoAppendMove(const GameNode &p_node, const GamePlayer &p_player,
+                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
   // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
   // and everything below it becomes the first action's subtree. p_probs gives the chance
   // distribution when p_player is the chance player, and is ignored otherwise.
-  void DoInsertMove(GameNode p_node, GamePlayer p_player, const std::vector<std::string> &p_labels,
-                    const std::vector<Number> &p_probs);
-  void DoCopyTree(GameNode p_destNode, GameNode p_srcNode);
-  void DoMoveTree(GameNode p_destNode, GameNode p_srcNode);
-  void DoDeleteParent(GameNode p_node);
-  void DoDeleteTree(GameNode p_node);
-  void DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player);
-  void DoSetPlayer(GameNode p_node, GamePlayer p_player);
+  void DoInsertMove(const GameNode &p_node, const GamePlayer &p_player,
+                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
+  void DoCopyTree(const GameNode &p_destNode, const GameNode &p_srcNode);
+  void DoMoveTree(const GameNode &p_destNode, const GameNode &p_srcNode);
+  void DoDeleteParent(const GameNode &p_node);
+  void DoDeleteTree(const GameNode &p_node);
+  void DoSetPlayer(const GameInfoset &p_infoset, const GamePlayer &p_player);
+  void DoSetPlayer(const GameNode &p_node, const GamePlayer &p_player);
   void DoNewOutcome(GameNode p_node);
   void DoNewOutcome(const PureStrategyProfile &p_profile);
-  void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
+  void DoSetOutcome(const GameNode &p_node, const GameOutcome &p_outcome);
   void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
-  void DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+  void DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
                         const std::vector<wxString> &p_payoffs);
-  void DoRemoveOutcome(GameNode p_node);
+  void DoRemoveOutcome(const GameNode &p_node);
   void DoRemoveOutcome(const PureStrategyProfile &p_profile);
   void DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
                      const std::vector<Number> &p_payoffs, const std::string &p_label);
-  void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
+  void DoSetPayoff(const GameOutcome &p_outcome, int p_player, const wxString &p_value);
 
   void DoAnalysisOutputChanged();
 };
@@ -438,6 +437,8 @@ public:
   {
     m_doc->AddView(this);
   }
+  GameView(const GameView &) = delete;
+  GameView &operator=(const GameView &) = delete;
   virtual ~GameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;

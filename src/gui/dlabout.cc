@@ -38,7 +38,7 @@
 
 namespace Gambit::GUI {
 
-static wxBitmap ScaleBitmapToMaxDIP(wxWindow *w, const wxBitmap &src, int maxDip)
+static wxBitmap ScaleBitmapToMaxDIP(const wxWindow *w, const wxBitmap &src, int maxDip)
 {
   const int maxPx = w->FromDIP(maxDip);
 
@@ -60,7 +60,7 @@ static wxBitmap ScaleBitmapToMaxDIP(wxWindow *w, const wxBitmap &src, int maxDip
   const int nh = std::max(1, int(std::lround(sh * scale)));
 
   img.Rescale(nw, nh, wxIMAGE_QUALITY_HIGH);
-  return wxBitmap(img);
+  return {img};
 }
 
 AboutDialog::AboutDialog(wxWindow *p_parent)
@@ -84,8 +84,8 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
   const int railW = FromDIP(120);
   left->SetMinSize(wxSize(railW, -1));
 
-  wxBitmap raw(gambitbig_xpm);
-  wxBitmap scaled = ScaleBitmapToMaxDIP(panel, raw, 120);
+  const wxBitmap raw(gambitbig_xpm);
+  const wxBitmap scaled = ScaleBitmapToMaxDIP(panel, raw, 120);
   auto *logo = new wxStaticBitmap(left, wxID_ANY, scaled);
 
   auto *leftSizer = new wxBoxSizer(wxVERTICAL);

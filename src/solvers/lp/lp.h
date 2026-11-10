@@ -38,7 +38,7 @@ template <class T> struct LpStrategyResult {
 template <class T>
 LpStrategyResult<T>
 LpStrategySolve(const Game &p_game,
-                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                const StrategyCallbackType<T> &p_onEquilibrium = NullStrategyCallback<T>,
                 const CancelToken &p_cancel = CancelToken());
 
 /// @brief The result of computing a Nash equilibrium of an extensive game via linear programming
@@ -50,7 +50,7 @@ template <class T> struct LpBehaviorResult {
 template <class T>
 LpBehaviorResult<T>
 LpBehaviorSolve(const Game &p_game,
-                BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
+                const BehaviorCallbackType<T> &p_onEquilibrium = NullBehaviorCallback<T>,
                 const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash

@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <compare>
 #include <memory>
+#include <utility>
 
 #include "core/core.h"
 
@@ -67,13 +68,13 @@ public:
   using iterator = Vector<int>::iterator;
   using const_iterator = Vector<int>::const_iterator;
 
-  explicit ExponentVector(std::shared_ptr<VariableSpace> p)
+  explicit ExponentVector(const std::shared_ptr<VariableSpace> &p)
     : m_space(p), m_components(p->GetDimension())
   {
     m_components = 0;
   }
   // Construct x_i^j
-  ExponentVector(std::shared_ptr<VariableSpace> p, const int i, const int j)
+  ExponentVector(const std::shared_ptr<VariableSpace> &p, const int i, const int j)
     : m_space(p), m_components(p->GetDimension())
   {
     m_components = 0;
@@ -82,6 +83,8 @@ public:
   ExponentVector(const ExponentVector &) = default;
   ~ExponentVector() = default;
   ExponentVector &operator=(const ExponentVector &) = default;
+  ExponentVector(ExponentVector &&) = default;
+  ExponentVector &operator=(ExponentVector &&) = default;
 
   auto begin() const noexcept { return m_components.begin(); }
   auto end() const noexcept { return m_components.end(); }
@@ -153,7 +156,7 @@ template <class T> class Monomial {
   }
 
 public:
-  Monomial(std::shared_ptr<VariableSpace> p, const T &x) : coef(x), exps(p) {}
+  Monomial(const std::shared_ptr<VariableSpace> &p, const T &x) : coef(x), exps(p) {}
   Monomial(const T &x, const ExponentVector &e) : coef(x), exps(e)
   {
     if (!exps.GetSpace()) {
@@ -247,9 +250,9 @@ template <class T> class Polynomial {
   Polynomial MonoInNewCoordinates(const Monomial<T> &, const Matrix<T> &) const;
 
 public:
-  explicit Polynomial(std::shared_ptr<VariableSpace> p) : m_space(p) {}
+  explicit Polynomial(std::shared_ptr<VariableSpace> p) : m_space(std::move(p)) {}
   // A constant polynomial
-  explicit Polynomial(std::shared_ptr<VariableSpace> p, const T &constant) : m_space(p)
+  explicit Polynomial(const std::shared_ptr<VariableSpace> &p, const T &constant) : m_space(p)
   {
     if (constant != static_cast<T>(0)) {
       m_terms.push_back(Monomial<T>(p, constant));
@@ -259,7 +262,7 @@ public:
   Polynomial(Polynomial &&) = default;
   Polynomial &operator=(Polynomial &&) = default;
   // Constructs a polynomial x_{var_no}^exp
-  explicit Polynomial(std::shared_ptr<VariableSpace> p, const int var_no, const int exp)
+  explicit Polynomial(const std::shared_ptr<VariableSpace> &p, const int var_no, const int exp)
     : m_space(p)
   {
     m_terms.push_back(Monomial<T>(static_cast<T>(1), ExponentVector(p, var_no, exp)));

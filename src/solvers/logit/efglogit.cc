@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 #include <vector>
 
 #include "games.h"
@@ -109,6 +110,7 @@ std::vector<double> ComputePathPayoffs(const TreeLayout &p_layout)
   return pathPayoffs;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void ComputeLogPathValues(const TreeLayout &p_layout, const std::vector<double> &p_logChanceProb,
                           const std::vector<double> &p_pathPayoffs, const Vector<double> &p_point,
                           LogPathValues &p_values)
@@ -285,7 +287,7 @@ class TracingCallbackFunction {
 public:
   TracingCallbackFunction(const Game &p_game,
                           LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
-    : m_game(p_game), m_onEvent(p_onEvent)
+    : m_game(p_game), m_onEvent(std::move(p_onEvent))
   {
   }
   ~TracingCallbackFunction() = default;
@@ -358,7 +360,7 @@ private:
 EstimatorCallbackFunction::EstimatorCallbackFunction(
     const Game &p_game, const Vector<double> &p_frequencies,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
-  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(p_onEvent),
+  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(std::move(p_onEvent)),
     m_bestProfile(MixedBehaviorProfile<double>(p_game), 0.0,
                   LogLike(p_frequencies, static_cast<const Vector<double> &>(
                                              MixedBehaviorProfile<double>(p_game))))
@@ -401,7 +403,7 @@ void EstimatorCallbackFunction::OnPerturbation(bool p_active, const Vector<doubl
 LogitTrace<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
                    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
-                   Nash::BehaviorCallbackType<double> p_onEquilibrium,
+                   const Nash::BehaviorCallbackType<double> &p_onEquilibrium,
                    LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent,
                    const CancelToken &p_cancel)
 {
@@ -419,7 +421,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   }
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_onEvent);
+  TracingCallbackFunction callback(game, std::move(p_onEvent));
   EquationSystem system(game);
   const auto result = tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
@@ -462,7 +464,7 @@ LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_onEvent);
+  TracingCallbackFunction callback(game, std::move(p_onEvent));
   EquationSystem system(game);
   LogitLambdaResult<LogitQREMixedBehaviorProfile> ret;
   for (const auto &lam : p_targetLambda) {
@@ -497,7 +499,7 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
                       double p_firstStep, double p_maxAccel,
                       LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent)
 {
-  const LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
+  LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
   if (start.size() == 0) {
     return start;
   }
@@ -508,7 +510,7 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
   Vector<double> x(ProfileToPoint(start)), restart(x);
   const Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
   EstimatorCallbackFunction callback(
-      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_onEvent);
+      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), std::move(p_onEvent));
   EquationSystem system(start.GetGame());
   while (true) {
     tracer.TracePath(
@@ -523,7 +525,7 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
           return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
         },
         [&callback](const Vector<double> &p_point) -> void { callback.EvaluatePoint(p_point); },
-        [freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
+        [&freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
           return DiffLogLike(freq_vector, p_tangent);
         },
         [&restart](const Vector<double> &, const Vector<double> &p_restart) -> void {

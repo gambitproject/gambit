@@ -133,11 +133,11 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 
 } // namespace
 
-LiapStrategyResult LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
-                                     double p_maxregret, int p_maxitsN,
-                                     StrategyCallbackType<double> p_onEquilibrium,
-                                     LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent,
-                                     const CancelToken &p_cancel)
+LiapStrategyResult
+LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+                  const StrategyCallbackType<double> &p_onEquilibrium,
+                  const LiapEventCallbackType<MixedStrategyProfile<double>> &p_onEvent,
+                  const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_start.GetGame());
 

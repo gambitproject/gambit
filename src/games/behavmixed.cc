@@ -91,6 +91,8 @@ size_t BestActionPosition(const DeviationProblem<T> &p_problem,
   for (size_t position = 0; position < layout.infosets[p_infoset].numActions; position++) {
     T actionValue = static_cast<T>(0);
     for (const size_t member : layout.infosets[p_infoset].members) {
+      // the children of the information set's nodes have been evaluated
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       actionValue += p_state.reach[member] * *p_state.value[ChildAt(layout, member, position)];
     }
     if (position == 0 || actionValue > bestValue) {
@@ -105,6 +107,7 @@ size_t BestActionPosition(const DeviationProblem<T> &p_problem,
 /// A node is evaluated once the nodes it depends on are; the dependencies of a node of the
 /// player are, by perfect recall, never its own ancestors, so the walk terminates.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void EvaluateBackwardInduction(const DeviationProblem<T> &p_problem, BackwardInduction<T> &p_state)
 {
   const auto &layout = p_problem.layout;
@@ -131,6 +134,8 @@ void EvaluateBackwardInduction(const DeviationProblem<T> &p_problem, BackwardInd
       }
       for (size_t j = 0; j < layout.numChildren[node]; j++) {
         const size_t child = ChildAt(layout, node, j);
+        // the children are evaluated before their parent
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
         value += p_problem.actionProb[child] * *p_state.value[child];
       }
     }
@@ -147,11 +152,15 @@ void EvaluateBackwardInduction(const DeviationProblem<T> &p_problem, BackwardInd
         }
         p_state.best[info] = BestActionPosition(p_problem, p_state, info);
       }
+      // best[info] was set above if it was empty
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       const size_t child = ChildAt(layout, node, *p_state.best[info]);
       pushMissing(child);
       if (stack.size() > size) {
         continue;
       }
+      // the child is evaluated before its parent
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       value += *p_state.value[child];
     }
     p_state.value[node] = value;
@@ -167,6 +176,8 @@ template <class T> T PerfectRecallBestResponse(const DeviationProblem<T> &p_prob
                              std::vector<std::optional<T>>(p_problem.layout.parent.size()),
                              std::vector<std::optional<size_t>>(p_problem.layout.infosets.size())};
   EvaluateBackwardInduction(p_problem, state);
+  // the walk evaluates the root last
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return *state.value[0];
 }
 
@@ -190,6 +201,7 @@ template <class T> struct SearchFrame {
 /// Best-response value of a player without absent-mindedness, by depth-first enumeration of
 /// the player's pure behavior profiles, in which an information set is branched on only when
 /// the walk of the tree reaches it
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> T PureEnumerationBestResponse(const DeviationProblem<T> &p_problem)
 {
   const auto &layout = p_problem.layout;
@@ -506,8 +518,9 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
       continue;
     }
     const auto actions = m_support.GetActions(infoset);
-    T total = std::accumulate(actions.begin(), actions.end(), T(0),
-                              [this](T sum, GameAction act) { return sum + GetActionProb(act); });
+    T total = std::accumulate(
+        actions.begin(), actions.end(), T(0),
+        [this](const T &sum, const GameAction &act) { return sum + GetActionProb(act); });
     if (total == T(0)) {
       for (const auto &act : actions) {
         (*this)[act] = T(1) / T(m_support.GetActions(infoset).size());
@@ -525,8 +538,9 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
       continue;
     }
     const auto actions = m_support.GetActions(infoset);
-    T total = std::accumulate(actions.begin(), actions.end(), T(0),
-                              [this](T sum, GameAction act) { return sum + GetActionProb(act); });
+    T total = std::accumulate(
+        actions.begin(), actions.end(), T(0),
+        [this](const T &sum, const GameAction &act) { return sum + GetActionProb(act); });
     if (total == T(0)) {
       continue;
     }
@@ -568,13 +582,14 @@ template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
   EnsureRegrets();
   T value{0};
   for (const auto &infoset : m_support.GetGame()->GetInfosets()) {
-    if (GetInfosetProb(infoset) == T{0}) {
+    const auto index = InfosetIndex(infoset);
+    if (!index || GetInfosetProb(infoset) == T{0}) {
       continue;
     }
-    const auto &entry = m_layout->infosets[*InfosetIndex(infoset)];
+    const auto &entry = m_layout->infosets[*index];
     for (const auto &action : m_support.GetActions(infoset)) {
       value += sqr(std::max(m_cache.m_actionValues[entry.firstAction + action->GetNumber() - 1] -
-                                m_cache.m_infosetValues[*InfosetIndex(infoset)],
+                                m_cache.m_infosetValues[*index],
                             static_cast<T>(0)));
     }
   }
@@ -641,10 +656,11 @@ std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &p_infoset
 {
   CheckVersion();
   EnsureRegrets();
-  if (GetInfosetProb(p_infoset) == T{0}) {
+  const auto index = InfosetIndex(p_infoset);
+  if (!index || GetInfosetProb(p_infoset) == T{0}) {
     return std::nullopt;
   }
-  return m_cache.m_infosetValues[*InfosetIndex(p_infoset)];
+  return m_cache.m_infosetValues[*index];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &action) const
@@ -663,10 +679,11 @@ template <class T> std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const Gam
 {
   CheckVersion();
   EnsureActionValues();
-  if (GetInfosetProb(act->GetInfoset()) == T{0}) {
+  const auto index = InfosetIndex(act->GetInfoset());
+  if (!index || GetInfosetProb(act->GetInfoset()) == T{0}) {
     return std::nullopt;
   }
-  const size_t info = *InfosetIndex(act->GetInfoset());
+  const size_t info = *index;
   if (info >= m_layout->numPersonalInfosets) {
     return T(0);
   }
@@ -677,10 +694,11 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameAction &act) c
 {
   CheckVersion();
   EnsureRegrets();
-  if (GetInfosetProb(act->GetInfoset()) == T{0}) {
+  const auto index = InfosetIndex(act->GetInfoset());
+  if (!index || GetInfosetProb(act->GetInfoset()) == T{0}) {
     return T{0};
   }
-  const size_t info = *InfosetIndex(act->GetInfoset());
+  const size_t info = *index;
   if (info >= m_layout->numPersonalInfosets) {
     throw std::out_of_range("Regrets are not defined for chance actions");
   }
@@ -691,10 +709,11 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 {
   CheckVersion();
   EnsureRegrets();
-  if (GetInfosetProb(p_infoset) == T{0}) {
+  const auto index = InfosetIndex(p_infoset);
+  if (!index || GetInfosetProb(p_infoset) == T{0}) {
     return T{0};
   }
-  const size_t info = *InfosetIndex(p_infoset);
+  const size_t info = *index;
   const auto &entry = m_layout->infosets[info];
   T br_payoff = m_cache.m_actionValues[entry.firstAction];
   for (size_t a = entry.firstAction + 1; a < entry.firstAction + entry.numActions; a++) {
@@ -718,6 +737,8 @@ template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
   }
   T maxRegret = static_cast<T>(0);
   for (const auto &player : game->GetPlayers()) {
+    // the players of the game are not chance and belong to the game
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     const DeviationProblem<T> problem{*m_layout, actionProb, *PlayerIndex(player)};
     const T bestResponse =
         perfectRecall ? PerfectRecallBestResponse(problem) : PureEnumerationBestResponse(problem);
@@ -891,7 +912,7 @@ template <class T> void MixedBehaviorProfile<T>::DiffActionValues(Matrix<T> &p_d
   }
 }
 
-template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infoset) const
+template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(const GameInfoset &p_infoset) const
 {
   CheckVersion();
   for (const auto &act : p_infoset->GetActions()) {

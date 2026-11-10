@@ -103,18 +103,18 @@ wxBitmap MakeScaledBitmap(const char *const *xpm, int targetHeight)
   wxImage image(xpm);
 
   if (!image.IsOk()) {
-    return wxBitmap();
+    return {};
   }
 
   const int width = image.GetWidth();
   const int height = image.GetHeight();
   if (width <= 0 || height <= 0) {
-    return wxBitmap();
+    return {};
   }
 
   const int targetWidth = (width * targetHeight) / height;
   image.Rescale(targetWidth, targetHeight, wxIMAGE_QUALITY_HIGH);
-  return wxBitmap(image);
+  return {image};
 }
 
 } // namespace
@@ -279,7 +279,8 @@ void RecentFilesList::OnKeyDown(wxKeyEvent &p_event)
 }
 
 RecentFilesPopup::RecentFilesPopup(WelcomePanel *p_panel, int p_width)
-  : wxPopupTransientWindow(p_panel, wxBORDER_SIMPLE), m_panel(p_panel)
+  : wxPopupTransientWindow(p_panel, wxBORDER_SIMPLE), m_panel(p_panel),
+    m_list(new RecentFilesList(this, p_width))
 {
   SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
@@ -288,8 +289,6 @@ RecentFilesPopup::RecentFilesPopup(WelcomePanel *p_panel, int p_width)
   headingFont.MakeSmaller();
   heading->SetFont(headingFont);
   heading->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
-
-  m_list = new RecentFilesList(this, p_width);
 
   auto *sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, 12);

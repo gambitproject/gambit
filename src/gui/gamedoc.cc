@@ -20,9 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <sstream>
 #include <fstream>
 #include <set>
+#include <utility>
 
 #include "games.h"
 #include "games/gametree.h"
@@ -40,7 +42,7 @@ namespace Gambit::GUI {
 //=========================================================================
 
 StrategyDominanceStack::StrategyDominanceStack(GameDocument *p_doc, bool p_strict)
-  : m_doc(p_doc), m_strict(p_strict), m_noFurther(false)
+  : m_doc(p_doc), m_strict(p_strict)
 {
   Reset();
 }
@@ -101,7 +103,7 @@ bool StrategyDominanceStack::PreviousLevel()
 //=========================================================================
 
 AnalysisWorkspace::AnalysisWorkspace(GameDocument *p_doc)
-  : m_doc(p_doc), m_stratSupports(p_doc, true), m_currentProfileList(0)
+  : m_doc(p_doc), m_stratSupports(p_doc, true)
 {
 }
 
@@ -127,10 +129,10 @@ void AnalysisWorkspace::ResetForGameChange()
 void AnalysisWorkspace::BuildNfg()
 {
   m_stratSupports.Reset();
-  std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
+  std::ranges::for_each(m_profiles, std::mem_fn(&AnalysisOutput::BuildNfg));
 }
 
-void AnalysisWorkspace::AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
+void AnalysisWorkspace::AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
 {
   m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.size();
@@ -186,12 +188,12 @@ bool AnalysisWorkspace::Load(const std::vector<WorkspaceFile::Analysis> &p_analy
       }
     }
     if (isFloat) {
-      auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
+      const auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
       plist->Load(analysis);
       m_profiles.push_back(plist);
     }
     else {
-      auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
+      const auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
       plist->Load(analysis);
       m_profiles.push_back(plist);
     }
@@ -206,8 +208,7 @@ bool AnalysisWorkspace::Load(const std::vector<WorkspaceFile::Analysis> &p_analy
 //                          class GameDocument
 //=========================================================================
 
-GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_gameModified(false), m_workspaceModified(false), m_workspace(this)
+GameDocument::GameDocument(Game p_game) : m_game(std::move(p_game)), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
   ResetUndoHistory();
@@ -219,21 +220,22 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
 {
   std::ifstream input(p_filename.mb_str());
   if (!input) {
-    return {LoadResult::OpenFailed, nullptr};
+    return {.result = LoadResult::OpenFailed, .document = nullptr};
   }
 
   // First, see whether this is a Gambit workspace (.gbt) file.
   try {
     const WorkspaceFile workspace = ReadWorkspace(input);
     std::istringstream game_text(workspace.game);
-    auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
+    const auto doc = std::make_shared<GameDocument>(ReadGame(game_text));
     if (doc->m_workspace.Load(workspace.analyses)) {
       doc->m_style.Load(workspace);
       doc->SetFilename(p_filename);
       doc->ResetUndoHistory();
-      return {LoadResult::Success, doc};
+      return {.result = LoadResult::Success, .document = doc};
     }
   }
+  // NOLINTNEXTLINE(bugprone-empty-catch)
   catch (const std::exception &) {
     // Not a recognized (or not fully valid) workspace file; fall through to
     // try it as a bare game file instead.
@@ -245,14 +247,14 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
   try {
     const Game game = ReadGame(input);
     if (As<GameAGGRep>(game) || As<GameBAGGRep>(game)) {
-      return {LoadResult::UnsupportedRepresentation, nullptr};
+      return {.result = LoadResult::UnsupportedRepresentation, .document = nullptr};
     }
-    auto doc = std::make_shared<GameDocument>(game);
+    const auto doc = std::make_shared<GameDocument>(game);
     doc->SetFilename(p_filename);
-    return {LoadResult::Success, doc};
+    return {.result = LoadResult::Success, .document = doc};
   }
   catch (const InvalidFileException &) {
-    return {LoadResult::ParseFailed, nullptr};
+    return {.result = LoadResult::ParseFailed, .document = nullptr};
   }
 }
 
@@ -296,7 +298,7 @@ void GameDocument::NotifyChanged(GameModificationType p_modifications)
 
 void GameDocument::UpdateViews()
 {
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
+  std::ranges::for_each(m_views, std::mem_fn(&GameView::OnUpdate));
 }
 
 void GameDocument::ResetUndoHistory()
@@ -344,7 +346,7 @@ void GameDocument::Redo()
 
 void GameDocument::PostPendingChanges()
 {
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::PostPendingChanges));
+  std::ranges::for_each(m_views, std::mem_fn(&GameView::PostPendingChanges));
 }
 
 void GameDocument::BuildNfg()
@@ -357,9 +359,9 @@ void GameDocument::BuildNfg()
 GameAction GameDocument::GetAction(int p_index) const
 {
   int index = 1;
-  for (auto player : m_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
+  for (const auto player : m_game->GetPlayers()) {
+    for (const auto infoset : player->GetInfosets()) {
+      for (const auto action : infoset->GetActions()) {
         if (index++ == p_index) {
           return action;
         }
@@ -381,7 +383,7 @@ void GameDocument::DoSelectProfile(int p_profile)
   UpdateViews();
 }
 
-void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
+void GameDocument::DoAddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
 {
   m_workspace.AddEquilibriumOutput(p_profs);
   NotifyChanged(GameModificationType::Workspace);
@@ -507,7 +509,7 @@ void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetStrategies(GamePlayer p_player,
+void GameDocument::DoSetStrategies(const GamePlayer &p_player,
                                    const std::vector<std::string> &p_stableLabels,
                                    const std::vector<std::string> &p_labels)
 {
@@ -529,20 +531,20 @@ void GameDocument::DoSetStrategies(GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
+void GameDocument::DoSetInfosetLabel(const GameInfoset &p_infoset, const wxString &p_label)
 {
   p_infoset->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoRelabelActions(GameInfoset p_infoset,
+void GameDocument::DoRelabelActions(const GameInfoset &p_infoset,
                                     const std::map<std::string, std::string> &p_labels)
 {
   m_game->RelabelActions(p_infoset, p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActions(GameInfoset p_infoset,
+void GameDocument::DoSetActions(const GameInfoset &p_infoset,
                                 const std::vector<std::string> &p_stableLabels,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
@@ -570,7 +572,7 @@ void GameDocument::DoSetActions(GameInfoset p_infoset,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset)
 {
   if (p_node->GetInfoset() == p_infoset) {
     return;
@@ -581,13 +583,13 @@ void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoLeaveInfoset(GameNode p_node)
+void GameDocument::DoLeaveInfoset(const GameNode &p_node)
 {
   const GameInfoset infoset = p_node->GetInfoset();
   if (!infoset) {
     return;
   }
-  std::vector<GameNode> members(infoset->GetMembers().begin(), infoset->GetMembers().end());
+  const std::vector<GameNode> members(infoset->GetMembers().begin(), infoset->GetMembers().end());
   if (members.size() == 1) {
     // Already a singleton: a no-op that keeps the infoset's identity and label.
     return;
@@ -596,25 +598,25 @@ void GameDocument::DoLeaveInfoset(GameNode p_node)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoRevealAction(const GameInfoset &p_infoset, const GamePlayer &p_player)
 {
   m_game->Reveal(p_infoset, p_player);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
+void GameDocument::DoSetNodeLabel(const GameNode &p_node, const wxString &p_label)
 {
   p_node->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoAppendMove(const GameNode &p_node, const GameInfoset &p_infoset)
 {
   m_game->AppendMove(p_node, p_infoset);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+void GameDocument::DoAppendMove(const GameNode &p_node, const GamePlayer &p_player,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
 {
@@ -627,7 +629,7 @@ void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+void GameDocument::DoInsertMove(const GameNode &p_node, const GamePlayer &p_player,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
 {
@@ -640,19 +642,19 @@ void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoCopyTree(const GameNode &p_destNode, const GameNode &p_srcNode)
 {
   m_game->CopyTree(p_destNode, p_srcNode);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoMoveTree(const GameNode &p_destNode, const GameNode &p_srcNode)
 {
   m_game->MoveTree(p_destNode, p_srcNode);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoDeleteParent(GameNode p_node)
+void GameDocument::DoDeleteParent(const GameNode &p_node)
 {
   if (!p_node || !p_node->GetParent()) {
     return;
@@ -661,13 +663,13 @@ void GameDocument::DoDeleteParent(GameNode p_node)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoDeleteTree(GameNode p_node)
+void GameDocument::DoDeleteTree(const GameNode &p_node)
 {
   m_game->DeleteTree(p_node);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoSetPlayer(const GameInfoset &p_infoset, const GamePlayer &p_player)
 {
   if (p_player->IsChance() || p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
@@ -676,12 +678,13 @@ void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   if (p_infoset->GetPlayer() == p_player) {
     return;
   }
-  std::vector<GameNode> members(p_infoset->GetMembers().begin(), p_infoset->GetMembers().end());
+  const std::vector<GameNode> members(p_infoset->GetMembers().begin(),
+                                      p_infoset->GetMembers().end());
   m_game->MakeInfoset(members, p_player, p_infoset->GetLabel());
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
+void GameDocument::DoSetPlayer(const GameNode &p_node, const GamePlayer &p_player)
 {
   DoSetPlayer(p_node->GetInfoset(), p_player);
 }
@@ -701,7 +704,7 @@ std::string GenerateOutcomeLabel(const Game &p_game)
 
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->MakeOutcome({p_node}, std::vector<Number>(m_game->NumPlayers(), Number()),
+  m_game->MakeOutcome({std::move(p_node)}, std::vector<Number>(m_game->NumPlayers(), Number()),
                       GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
@@ -718,7 +721,7 @@ void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
+void GameDocument::DoSetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
 {
   if (!p_outcome) {
     m_game->MakeOutcomeNull({p_node});
@@ -759,7 +762,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   }
 
   const std::string label = p_label.ToStdString(wxConvUTF8);
-  GameOutcome outcome = p_node->GetOutcome();
+  const GameOutcome outcome = p_node->GetOutcome();
 
   bool changed = outcome->IsNull();
 
@@ -800,7 +803,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoRemoveOutcome(GameNode p_node)
+void GameDocument::DoRemoveOutcome(const GameNode &p_node)
 {
   if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
@@ -840,7 +843,7 @@ void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profi
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+void GameDocument::DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
                                     const std::vector<wxString> &p_payoffs)
 {
   if (p_payoffs.size() != m_game->NumPlayers()) {
@@ -854,7 +857,7 @@ void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_lab
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
+void GameDocument::DoSetPayoff(const GameOutcome &p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   NotifyChanged(GameModificationType::GamePayoffs);

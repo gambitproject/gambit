@@ -44,7 +44,7 @@ inline std::string QuoteString(const std::string &s)
 /// @param[in] p_braces     Whether to include curly braces on either side of the list
 /// @returns  The formatted list as a string following the conventions of Gambit savefiles.
 template <class C, class T>
-std::string FormatList(const C &p_container, T p_renderer, bool p_commas = false,
+std::string FormatList(const C &p_container, const T &p_renderer, bool p_commas = false,
                        bool p_braces = true)
 {
   std::string s, delim;

@@ -271,6 +271,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
 // for a derivative with respect to a strategy of player j, the probability is the product,
 // in order of player number, of the probabilities of the players other than pl and j.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void TableMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
                                                           Matrix<T> &p_derivs) const
 {
@@ -455,33 +456,33 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   const auto players = GetPlayers();
   p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
-         << std::endl
-         << std::endl;
+         << '\n'
+         << '\n';
   p_file << "{ ";
   for (const auto &player : players) {
     p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
-    }) << std::endl;
+    }) << '\n';
   }
-  p_file << "}" << std::endl;
-  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
+  p_file << "}" << '\n';
+  p_file << std::quoted(GetDescription()) << '\n' << '\n';
 
-  p_file << "{" << std::endl;
+  p_file << "{" << '\n';
   for (const auto &outcome : m_outcomes) {
     p_file << "{ " + QuoteString(outcome->GetLabel()) << ' '
            << FormatList(
                   players,
                   [outcome](const GamePlayer &p) { return outcome->GetPayoff<std::string>(p); },
                   true, false)
-           << " }" << std::endl;
+           << " }" << '\n';
   }
-  p_file << "}" << std::endl;
+  p_file << "}" << '\n';
 
   for (const auto &iter : StrategyContingencies(
            StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
     p_file << iter->GetOutcome()->m_number << ' ';
   }
-  p_file << std::endl;
+  p_file << '\n';
 }
 
 //------------------------------------------------------------------------
@@ -555,7 +556,7 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
   CheckOutcomeLabel(p_label, absorbed);
 
   IncrementVersion();
-  auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label);
+  const auto outcome = std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1, p_label);
   AddOutcome(outcome);
   for (const auto &[pl, player] : enumerate(m_players)) {
     outcome->SetPayoff(player, p_payoffs[pl]);
@@ -674,6 +675,7 @@ void GameTableRep::SetStrategies(const GamePlayer &p_player,
     }
   }
   std::vector<long> old_radices;
+  old_radices.reserve(m_players.size());
   for (const auto &player : m_players) {
     old_radices.push_back(player->m_strategies.size());
   }
@@ -699,6 +701,7 @@ void GameTableRep::SetStrategies(const GamePlayer &p_player,
   RebuildTable(old_radices, p_player->GetNumber() - 1, old_to_new);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
 {
   if (p_labels.empty()) {

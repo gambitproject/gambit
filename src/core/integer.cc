@@ -131,7 +131,8 @@ static void Icheck(IntegerRep *rep)
   while (l > 0 && *--p == 0) {
     --l;
   }
-  if ((rep->len = l) == 0) {
+  rep->len = l;
+  if (rep->len == 0) {
     rep->sgn = I_POSITIVE;
   }
 }
@@ -375,6 +376,7 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 // convert to a legal two's complement long if possible
 // if too big, return most negative/positive value
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 long Itolong(const IntegerRep *rep)
 {
   if (static_cast<unsigned>(rep->len) > SHORT_PER_LONG) {
@@ -422,13 +424,13 @@ int Iislong(const IntegerRep *rep)
   if (l < SHORT_PER_LONG) {
     return 1;
   }
-  else if (l > SHORT_PER_LONG) {
+  if (l > SHORT_PER_LONG) {
     return 0;
   }
-  else if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
+  if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
     return 1;
   }
-  else if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
+  if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
     for (unsigned int i = 0; i < SHORT_PER_LONG - 1; ++i) {
       if (rep->s[i] != 0) {
         return 0;
@@ -436,9 +438,7 @@ int Iislong(const IntegerRep *rep)
     }
     return 1;
   }
-  else {
-    return 0;
-  }
+  return 0;
 }
 
 // convert to a double
@@ -495,6 +495,7 @@ int Iisdouble(const IntegerRep *rep)
 
 // real division of num / den
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double ratio(const Integer &num, const Integer &den)
 {
   Integer q, r;
@@ -640,6 +641,7 @@ int ucompare(const IntegerRep *x, long y)
 
 // arithmetic functions
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negatey, IntegerRep *r)
 {
   nonnil(x);
@@ -760,6 +762,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -873,6 +876,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 {
   nonnil(x);
@@ -970,6 +974,7 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -1535,6 +1540,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -1635,6 +1641,7 @@ IntegerRep *lshift(const IntegerRep *x, const IntegerRep *yy, int negatey, Integ
   return lshift(x, y, r);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char op)
 {
   nonnil(x);
@@ -1852,6 +1859,7 @@ int testbit(const Integer &x, long b)
 // A  version of knuth's algorithm B / ex. 4.5.3.34
 // A better version that doesn't bother shifting all of `t' forthcoming
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
 {
   nonnil(x);
@@ -1992,7 +2000,8 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
       if (y & 1) {
         r = multiply(r, b, r);
       }
-      if ((y >>= 1) == 0) {
+      y >>= 1;
+      if (y == 0) {
         break;
       }
       else {
@@ -2146,16 +2155,17 @@ std::string Itoa(const IntegerRep *x, int base, int width)
 {
   check_base(base);
   nonnil(x);
-  int fmtlen = static_cast<int>((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
+  int fmtlen = static_cast<int>((static_cast<long>(x->len) + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
-    fmtbase += " ";
+    fmtbase += ' ';
   }
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
 std::ostream &operator<<(std::ostream &s, const Integer &y) { return s << Itoa(y.rep); }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base, int showbase,
                     int width, int align_right, char fillchar, char Xcase, int showpos)
 {
@@ -2325,8 +2335,18 @@ void Integer::error(const char *msg) { throw std::runtime_error(msg); }
 
 Integer::Integer() : rep(&ZeroRep) {}
 
+Integer::Integer(Integer &&y) noexcept : rep(y.rep) { y.rep = &ZeroRep; }
+
 Integer::~Integer() { Ifree(rep); }
 
+Integer &Integer::operator=(Integer &&y) noexcept
+{
+  std::swap(rep, y.rep);
+  return *this;
+}
+
+// Icopy returns at once when both representations are the same
+// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
 Integer &Integer::operator=(const Integer &y)
 {
   rep = Icopy(rep, y.rep);

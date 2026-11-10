@@ -38,7 +38,7 @@ template <class T> struct LcpStrategyResult {
 template <class T>
 LcpStrategyResult<T>
 LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_maxDepth,
-                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                 const StrategyCallbackType<T> &p_onEquilibrium = NullStrategyCallback<T>,
                  const CancelToken &p_cancel = CancelToken());
 
 /// @brief The result of computing a Nash equilibrium of an extensive game via LCP
@@ -50,7 +50,7 @@ template <class T> struct LcpBehaviorResult {
 template <class T>
 LcpBehaviorResult<T>
 LcpBehaviorSolve(const Game &p_game,
-                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>,
+                 const BehaviorCallbackType<T> &p_onEquilibrium = NullBehaviorCallback<T>,
                  const CancelToken &p_cancel = CancelToken());
 
 } // end namespace Gambit::Nash

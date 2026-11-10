@@ -81,7 +81,8 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
 
 template <class T>
 std::shared_ptr<EnumMixedStrategySolution<T>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium,
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T> &p_onEquilibrium,
                                const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
@@ -205,10 +206,12 @@ template class EnumMixedStrategySolution<double>;
 template class EnumMixedStrategySolution<Rational>;
 
 template std::shared_ptr<EnumMixedStrategySolution<double>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium,
+EnumMixedStrategySolveDetailed(const Game &p_game,
+                               const StrategyCallbackType<double> &p_onEquilibrium,
                                const CancelToken &p_cancel);
 template std::shared_ptr<EnumMixedStrategySolution<Rational>>
-EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<Rational> p_onEquilibrium,
+EnumMixedStrategySolveDetailed(const Game &p_game,
+                               const StrategyCallbackType<Rational> &p_onEquilibrium,
                                const CancelToken &p_cancel);
 
 } // end namespace Gambit::Nash

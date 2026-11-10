@@ -148,6 +148,7 @@ template <class T> void LPTableau<T>::Pivot(int outrow, int col)
   SolveDual();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
 {
   std::list<Array<int>> pivot_list;
@@ -206,12 +207,9 @@ template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
               if (k != best_set[i]) {
                 a_ik = -a_ij * tmpcol[k];
                 b_k = solution[k] - b_i * tmpcol[k];
-                if (this->IsGtZero(a_ik) && this->IsGtZero(b_k / a_ik - ratio)) {
-                  best_set.erase_at(i);
-                  flag = true;
-                }
-                else if (this->IsGtZero(a_ik) && this->IsEqZero(b_k / a_ik - ratio) &&
-                         this->GetLabel(k) < j) {
+                if (this->IsGtZero(a_ik) &&
+                    (this->IsGtZero(b_k / a_ik - ratio) ||
+                     (this->IsEqZero(b_k / a_ik - ratio) && this->GetLabel(k) < j))) {
                   best_set.erase_at(i);
                   flag = true;
                 }
@@ -282,6 +280,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
   return pivot_list;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 {
   // first check that pivot preserves dual feasibility

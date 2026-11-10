@@ -21,6 +21,7 @@
 //
 
 #include <algorithm>
+#include <utility>
 #include "games.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/gtracer/gtracer.h"
@@ -50,8 +51,9 @@ std::string IPATerminationMessage(const IPAResult &p_result)
 namespace Gambit::Nash {
 
 IPAStrategyResult IPAStrategySolve(const Game &p_game,
-                                   StrategyCallbackType<double> p_onEquilibrium,
-                                   IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
+                                   const StrategyCallbackType<double> &p_onEquilibrium,
+                                   const IPAEventCallbackType &p_onEvent,
+                                   const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_game);
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
@@ -67,8 +69,9 @@ IPAStrategyResult IPAStrategySolve(const Game &p_game,
 }
 
 IPAStrategyResult IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                   StrategyCallbackType<double> p_onEquilibrium,
-                                   IPAEventCallbackType p_onEvent, const CancelToken &p_cancel)
+                                   const StrategyCallbackType<double> &p_onEquilibrium,
+                                   const IPAEventCallbackType &p_onEvent,
+                                   const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_pert.GetGame());
 

@@ -27,7 +27,7 @@
 
 namespace Gambit::Nash {
 HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret,
-                                 StrategyCallbackType<double> p_onEquilibrium,
+                                 const StrategyCallbackType<double> &p_onEquilibrium,
                                  HPEventCallbackType p_onEvent, const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_prior.GetGame());

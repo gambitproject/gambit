@@ -153,6 +153,7 @@ void CliqueEnumerator::candtry2(int stk[], // stack
 }
 
 // --------------------------------------------------
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void CliqueEnumerator::extend(int stk[], // stack
                               bool connected[MAXM][MAXN], int clique1[],
                               int cliqsize1,                // CLIQUE so far in NODES1
@@ -400,6 +401,7 @@ void CliqueEnumerator::genincidence(int e, Array<Edge> &edgelist, int orignode1[
 }
 
 // --------------------------------------------------
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 int CliqueEnumerator::getconnco(Array<int> &p_firstedge, Array<Edge> &edgelist)
 
 /* reads edges of bipartite graph from input, puts them in disjoint

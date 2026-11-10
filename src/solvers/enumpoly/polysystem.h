@@ -25,6 +25,7 @@
 
 #include <list>
 #include <memory>
+#include <utility>
 
 #include "poly.h"
 
@@ -38,10 +39,12 @@ public:
   using iterator = typename std::list<Polynomial<T>>::iterator;
   using const_iterator = typename std::list<Polynomial<T>>::const_iterator;
 
-  PolynomialSystem(std::shared_ptr<VariableSpace> p_space) : m_space(p_space) {}
+  PolynomialSystem(std::shared_ptr<VariableSpace> p_space) : m_space(std::move(p_space)) {}
   PolynomialSystem(const PolynomialSystem<T> &) = default;
+  PolynomialSystem(PolynomialSystem<T> &&) = default;
   ~PolynomialSystem() = default;
   PolynomialSystem<T> &operator=(const PolynomialSystem<T> &) = default;
+  PolynomialSystem<T> &operator=(PolynomialSystem<T> &&) = default;
 
   iterator begin() { return m_system.begin(); }
   const_iterator begin() const { return m_system.begin(); }

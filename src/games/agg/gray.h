@@ -38,6 +38,7 @@ public:
 
   const std::vector<int> &get() { return current; }
 
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   void incr()
   {
     int b = -1;

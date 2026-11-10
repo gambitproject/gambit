@@ -22,7 +22,8 @@
 
 #include <cmath>
 #include <algorithm> // for std::min, std::max
-#include <numeric>   // for std::partial_sum
+#include <numbers>
+#include <numeric> // for std::partial_sum
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -201,11 +202,12 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
           p_entry->m_branchAboveLabel,
           (xbar - textHeight * std::sin(theta) - textWidth * std::cos(theta) / 2.0),
           (ybar - textHeight * std::cos(theta) + textWidth * std::sin(theta) / 2.0),
-          theta * 180.0 / 3.14159);
+          theta * 180.0 / std::numbers::pi);
 
       p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
       p_dc.DrawRotatedText(p_entry->m_branchBelowLabel, (xbar - textWidth * std::cos(theta) / 2.0),
-                           (ybar + textWidth * std::sin(theta) / 2.0), theta * 180.0 / 3.14159);
+                           (ybar + textWidth * std::sin(theta) / 2.0),
+                           theta * 180.0 / std::numbers::pi);
     }
   }
   else {
@@ -457,10 +459,10 @@ void TreeLayout::ComputeTokenGeometry(const std::shared_ptr<NodeEntry> &p_entry)
 
 GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
 {
-  const auto hit = std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                                [p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
-                                  return p_entry->NodeHitTest(p_x, p_y);
-                                });
+  const auto hit = std::ranges::find_if(
+      m_nodeList, [p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
+        return p_entry->NodeHitTest(p_x, p_y);
+      });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
@@ -486,7 +488,7 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
   using enum HitRegion;
   for (const auto &entry : m_nodeList) {
     if (entry->NodeHitTest(p_x, p_y)) {
-      return {Node, entry->GetNode()};
+      return {.region = Node, .node = entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
@@ -494,20 +496,20 @@ HitResult TreeLayout::HitTest(int p_x, int p_y) const
       const auto &payoffs = entry->m_geometry.payoffs;
       for (int pl = payoffs.front_index(); pl <= payoffs.back_index(); ++pl) {
         if (payoffs[pl].Contains(p_x, p_y)) {
-          return {Payoff, entry->GetNode(), pl};
+          return {.region = Payoff, .node = entry->GetNode(), .payoffPlayer = pl};
         }
       }
-      return {Outcome, entry->GetNode()};
+      return {.region = Outcome, .node = entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
     if (entry->BranchAboveHitTest(p_x, p_y)) {
-      return {BranchAbove, entry->GetNode()};
+      return {.region = BranchAbove, .node = entry->GetNode()};
     }
   }
   for (const auto &entry : m_nodeList) {
     if (entry->BranchBelowHitTest(p_x, p_y)) {
-      return {BranchBelow, entry->GetNode()};
+      return {.region = BranchBelow, .node = entry->GetNode()};
     }
   }
   return {};
@@ -517,7 +519,7 @@ std::shared_ptr<NodeEntry>
 TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
   const auto &members = p_entry->m_node->GetInfoset()->GetMembers();
-  const auto member = std::next(std::find(members.begin(), members.end(), p_entry->m_node));
+  const auto member = std::next(std::ranges::find(members, p_entry->m_node));
   return (member != members.end()) ? GetNodeEntry(*member) : nullptr;
 }
 
@@ -587,7 +589,7 @@ void TreeLayout::Layout(const Game &p_game)
   }
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
-  for (auto [node, entry] : layout.GetNodeMap()) {
+  for (const auto &[node, entry] : layout.GetNodeMap()) {
     m_nodeMap[node]->m_level = entry->m_level;
     m_nodeMap[node]->m_sublevel = entry->m_sublevel;
     m_nodeMap[node]->SetY(entry->m_offset * spacing + c_topMargin);
@@ -645,17 +647,18 @@ void TreeLayout::GenerateLabels() const
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
   const TreeRenderConfig &settings = m_doc->GetStyle();
 
   for (const auto &entry : m_nodeList) {
-    auto parentEntry = entry->GetParent();
+    const auto parentEntry = entry->GetParent();
 
     if (entry->GetChildNumber() == 1) {
       DrawNode(p_dc, parentEntry, p_noHints);
 
-      if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
+      if (const auto nextMember = ComputeNextInInfoset(parentEntry)) {
         const int nextY = nextMember->GetY();
         p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
                           wxPENSTYLE_DOT));

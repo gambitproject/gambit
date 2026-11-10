@@ -98,8 +98,8 @@ bool TableWidget::IsColHeaderStrategyDominated(int headerRow, int headerCol, boo
 
 TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id,
                          const std::shared_ptr<GameDocument> &p_doc)
-  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent), m_payoffGrid(nullptr),
-    m_rowGrid(nullptr), m_colGrid(nullptr), m_layout(std::make_shared<StrategicTableLayout>(p_doc))
+  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent),
+    m_layout(std::make_shared<StrategicTableLayout>(p_doc))
 {
   // These depend on the row and column player lists having been populated,
   // which suggests some refactoring ought to be done as to where/how those
@@ -466,8 +466,8 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  auto posX = (double)((w - (maxX * scale)) / 2.0);
-  auto posY = (double)((h - (maxY * scale)) / 2.0);
+  const auto posX = (double)((w - (maxX * scale)) / 2.0);
+  const auto posY = (double)((h - (maxY * scale)) / 2.0);
 
   // The X and Y coordinates of the upper left of the payoff table
   const int payoffX = static_cast<int>(
@@ -540,13 +540,13 @@ int TableWidget::GetPayoffColumnsPerContingency() const { return m_doc->GetGame(
 bool TableWidget::IsPayoffStrategyDominated(int row, int col, bool strict) const
 {
   const PureStrategyProfile profile = GetPayoffProfile(row, col);
-  auto player = GetPayoffPlayer(col);
+  const auto player = GetPayoffPlayer(col);
   return GetSupport().IsDominated(profile->GetStrategy(player), strict);
 }
 
 GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) const
 {
-  auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
+  const auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
   return *std::next(strategies.begin(), strategy - 1);
 }
 

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <type_traits>
+#include <utility>
 #include "games/agg/bagg.h"
 
 using namespace std;
@@ -15,7 +16,7 @@ BAGG::BAGG(int N, int S, vector<int> &_numTypes, vector<ProbDist> &TDist,
            vector<vector<vector<int>>> &ta2a, std::shared_ptr<AGG> _aggPtr)
   : numPlayers(N), numActionNodes(S), numTypes(_numTypes), indepTypeDist(TDist),
     exactIndepTypeDist(exactTDist), typeActionSets(_typeActionSets), typeAction2ActionIndex(ta2a),
-    aggPtr(_aggPtr)
+    aggPtr(std::move(_aggPtr))
 {
   typeOffset = std::vector<int>(numPlayers + 1);
   typeOffset[0] = 0;
@@ -64,6 +65,7 @@ void stripComment(istream &in)
 
 } // namespace
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
 {
   int N, S, P;
@@ -162,22 +164,22 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
 
   // stream for constructing agg
   stringstream aggss(stringstream::in | stringstream::out);
-  aggss << N << endl << S << endl << P << endl;
+  aggss << N << '\n' << S << '\n' << P << '\n';
   for (int i = 0; i < N; i++) {
-    aggss << aggActionSets[i].size() << endl;
+    aggss << aggActionSets[i].size() << '\n';
   }
   for (int i = 0; i < N; i++) {
     for (const int j : aggActionSets[i]) {
       aggss << j << " ";
     }
-    aggss << endl;
+    aggss << '\n';
   }
 
   // copy rest of input into aggss
   while (in) {
     string ln;
     getline(in, ln);
-    aggss << ln << endl;
+    aggss << ln << '\n';
   }
 
   const std::shared_ptr<AGG> aggPtr = AGG::makeAGG(aggss);
@@ -330,27 +332,27 @@ double BAGG::getSymMixedPayoff(int tp, int act, StrategyProfile<double> &s)
 ostream &operator<<(ostream &s, const BAGG &g)
 {
   // BAGG identifier for Gambit ReadGame
-  s << "#BAGG" << endl;
+  s << "#BAGG" << '\n';
 
   // num players
-  s << g.getNumPlayers() << endl;
+  s << g.getNumPlayers() << '\n';
   // num action nodes
-  s << g.getNumActionNodes() << endl;
+  s << g.getNumActionNodes() << '\n';
   // num func nodes
-  s << g.getNumFunctionNodes() << endl;
+  s << g.getNumFunctionNodes() << '\n';
 
   // num types
   for (int i = 0; i < g.getNumPlayers(); ++i) {
     s << g.getNumTypes(i) << " ";
   }
-  s << endl;
+  s << '\n';
 
   // type distrib
   for (int i = 0; i < g.getNumPlayers(); ++i) {
     for (int j = 0; j < g.getNumTypes(i); ++j) {
       s << g.exactIndepTypeDist[i][j] << " ";
     }
-    s << endl;
+    s << '\n';
   }
 
   // sizes of type action sets
@@ -358,7 +360,7 @@ ostream &operator<<(ostream &s, const BAGG &g)
     for (int j = 0; j < g.getNumTypes(i); ++j) {
       s << g.typeActionSets[i][j].size() << " ";
     }
-    s << endl;
+    s << '\n';
   }
 
   // type action sets
@@ -366,23 +368,23 @@ ostream &operator<<(ostream &s, const BAGG &g)
     for (int j = 0; j < g.getNumTypes(i); ++j) {
       copy(g.typeActionSets[i][j].begin(), g.typeActionSets[i][j].end(),
            ostream_iterator<int>(s, " "));
-      s << endl;
+      s << '\n';
     }
   }
 
   // action graph
   g.aggPtr->printActionGraph(s);
-  s << endl;
+  s << '\n';
 
   // types of func nodes
   g.aggPtr->printTypes(s);
-  s << endl;
+  s << '\n';
 
   // payoffs
   for (int i = 0; i < g.getNumActionNodes(); ++i) {
-    s << "1" << endl; // type of payoff output
+    s << "1" << '\n'; // type of payoff output
     g.aggPtr->printPayoffs(s, i);
-    s << endl;
+    s << '\n';
   }
 
   return s;

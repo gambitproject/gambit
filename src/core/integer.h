@@ -96,9 +96,11 @@ public:
   explicit Integer(unsigned long y) : rep(Icopy_ulong(nullptr, y)) {}
   explicit Integer(IntegerRep *r) : rep(r) {}
   Integer(const Integer &y) : rep(Icopy(nullptr, y.rep)) {}
+  Integer(Integer &&y) noexcept;
   ~Integer();
 
   Integer &operator=(const Integer &);
+  Integer &operator=(Integer &&y) noexcept;
   Integer &operator=(long);
   //@}
 

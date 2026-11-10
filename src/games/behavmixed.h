@@ -169,6 +169,11 @@ public:
   explicit MixedBehaviorProfile(const Game &);
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &) = default;
+  // BehaviorSupportProfile declares a destructor, so its "move" copies its maps and can throw
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  MixedBehaviorProfile(MixedBehaviorProfile<T> &&) = default;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  MixedBehaviorProfile<T> &operator=(MixedBehaviorProfile<T> &&) = default;
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   MixedBehaviorProfile(const MixedSequenceProfile<T> &);
   ~MixedBehaviorProfile() = default;
@@ -236,7 +241,7 @@ public:
   /// Returns whether the profile has been invalidated by a subsequent revision to the game
   bool IsInvalidated() const { return m_gameversion != m_support.GetGame()->GetVersion(); }
 
-  bool IsDefinedAt(GameInfoset p_infoset) const;
+  bool IsDefinedAt(const GameInfoset &p_infoset) const;
   //@}
 
   /// @name Computation of interesting quantities

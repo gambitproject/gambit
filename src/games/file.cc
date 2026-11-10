@@ -125,6 +125,7 @@ void GameFileLexer::IncreaseLine()
   m_currentColumn = 1;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 GameFileToken GameFileLexer::GetNextToken()
 {
   char c = ' ';
@@ -704,6 +705,7 @@ void ParseOutcome(GameFileLexer &p_state, const Game &p_game, TreeData &p_treeDa
 void CreateOutcomes(const Game &p_game, const TreeData &p_treeData)
 {
   std::vector<std::string> labels;
+  labels.reserve(p_treeData.m_outcomeOrder.size());
   for (const int id : p_treeData.m_outcomeOrder) {
     labels.push_back(p_treeData.m_outcomeRecords.at(id).m_label);
   }
@@ -783,7 +785,8 @@ void CheckChanceProbs(const GameFileLexer &p_state, const int p_infosetId,
   }
 }
 
-void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData);
+void ParseNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
+               TreeData &p_treeData);
 
 void ParseChanceNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
                      TreeData &p_treeData)
@@ -792,7 +795,7 @@ void ParseChanceNode(GameFileLexer &p_state, const Game &p_game, const GameNode 
   p_node->SetLabel(p_state.GetLastText());
 
   p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
-  const int infosetId = atoi(p_state.GetLastText().c_str());
+  const int infosetId = std::stoi(p_state.GetLastText());
   GameInfoset infoset = p_treeData.m_infosetMap[0][infosetId];
 
   if (p_state.GetNextToken() == TOKEN_TEXT) {
@@ -840,7 +843,8 @@ void ParseChanceNode(GameFileLexer &p_state, const Game &p_game, const GameNode 
   }
 }
 
-void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
+void ParsePersonalNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
+                       TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
@@ -894,7 +898,8 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
   }
 }
 
-void ParseTerminalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
+void ParseTerminalNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
+                       TreeData &p_treeData)
 {
   p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
@@ -902,7 +907,8 @@ void ParseTerminalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
   ParseOutcome(p_state, p_game, p_treeData, p_node);
 }
 
-void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
+void ParseNode(GameFileLexer &p_state, const Game &p_game, const GameNode &p_node,
+               TreeData &p_treeData)
 {
   if (p_state.GetLastText() == "c") {
     ParseChanceNode(p_state, p_game, p_node, p_treeData);
@@ -989,6 +995,7 @@ Game ReadNfgFile(std::istream &p_stream)
     // NOLINTBEGIN(misc-const-correctness)
     std::vector<std::string> player_labels;
     // NOLINTEND(misc-const-correctness)
+    player_labels.reserve(data.m_players.size());
     for (const auto &player : data.m_players) {
       player_labels.push_back(player.m_name);
     }

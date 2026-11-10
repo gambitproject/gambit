@@ -66,7 +66,7 @@ struct HPStrategyResult {
 /// Herings and Peeters (2001)
 HPStrategyResult
 HPStrategySolve(const MixedStrategyProfile<double> &p_prior, double p_maxRegret = 1.0e-8,
-                StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
+                const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
                 HPEventCallbackType p_onEvent = NullHPEventCallback,
                 const CancelToken &p_cancel = CancelToken());
 

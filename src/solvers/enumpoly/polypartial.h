@@ -40,7 +40,10 @@ private:
 
     Node(const Polynomial<T> &p_data) : data(p_data) {}
     Node(const Node &) = default;
+    Node(Node &&) = default;
     ~Node() = default;
+    Node &operator=(const Node &) = default;
+    Node &operator=(Node &&) = default;
   };
 
   Node m_treeroot;
@@ -55,7 +58,10 @@ public:
     BuildTree(m_treeroot);
   }
   PolynomialDerivatives(const PolynomialDerivatives<T> &) = default;
+  PolynomialDerivatives(PolynomialDerivatives<T> &&) = default;
   ~PolynomialDerivatives() = default;
+  PolynomialDerivatives<T> &operator=(const PolynomialDerivatives<T> &) = default;
+  PolynomialDerivatives<T> &operator=(PolynomialDerivatives<T> &&) = default;
 
   int GetDimension() const { return m_treeroot.data.GetDimension(); }
 
@@ -84,8 +90,10 @@ public:
     }
   }
   PolynomialSystemDerivatives(const PolynomialSystemDerivatives<T> &) = default;
+  PolynomialSystemDerivatives(PolynomialSystemDerivatives<T> &&) = default;
   ~PolynomialSystemDerivatives() = default;
   PolynomialSystemDerivatives<T> &operator=(const PolynomialSystemDerivatives<T> &) = delete;
+  PolynomialSystemDerivatives<T> &operator=(PolynomialSystemDerivatives<T> &&) = delete;
 
   iterator begin() { return m_system.begin(); }
   const_iterator begin() const { return m_system.begin(); }

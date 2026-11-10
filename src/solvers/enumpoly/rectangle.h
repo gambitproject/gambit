@@ -38,9 +38,11 @@ public:
   {
   }
   Interval(const T &p_low, const T &p_high) : lower_bd(p_low), upper_bd(p_high) {}
+  Interval(Interval<T> &&) = default;
   ~Interval() = default;
 
   Interval<T> &operator=(const Interval<T> &y) = delete;
+  Interval<T> &operator=(Interval<T> &&) = delete;
 
   bool operator==(const Interval<T> &p_rhs) const
   {
@@ -131,9 +133,11 @@ public:
                    [](const T &x, const T &y) { return Interval<T>(x, y); });
   }
   Rectangle(const Rectangle<T> &) = default;
+  Rectangle(Rectangle<T> &&) = default;
   ~Rectangle() = default;
 
   Rectangle<T> &operator=(const Rectangle<T> &) = delete;
+  Rectangle<T> &operator=(Rectangle<T> &&) = delete;
   bool operator==(const Rectangle<T> &y) const { return sides == y.sides; }
 
   int Dmnsn() const { return sides.size(); }

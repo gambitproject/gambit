@@ -23,6 +23,7 @@
 //
 
 #include <algorithm>
+#include <cstddef>
 #include <numeric>
 #include <vector>
 #include "cmatrix.h"
@@ -30,6 +31,13 @@
 #include "games.h"
 
 namespace Gambit::gametracer {
+
+namespace {
+
+// The offset of the p_block-th block of p_size elements, computed without overflowing int
+std::ptrdiff_t Offset(int p_block, int p_size) { return std::ptrdiff_t{p_block} * p_size; }
+
+} // namespace
 
 nfgame::nfgame(const std::vector<int> &p_actions)
   : gnmgame(p_actions),
@@ -55,25 +63,26 @@ int nfgame::findIndex(int player, const std::vector<int> &s) const
 double nfgame::getMixedPayoff(int player, const cvector &s) const
 {
   std::vector<double> m(blockSize[numPlayers]);
-  memcpy(m.data(), payoffs.values() + player * blockSize[numPlayers],
+  memcpy(m.data(), payoffs.values() + Offset(player, blockSize[numPlayers]),
          blockSize[numPlayers] * sizeof(double));
   return localPayoff(s, m.data(), numPlayers - 1);
 }
 
 void nfgame::getPayoffVector(cvector &dest, int player, const cvector &s) const
 {
-  std::vector<double> t(payoffs.values() + player * blockSize[numPlayers],
-                        payoffs.values() + (player + 1) * blockSize[numPlayers]);
+  std::vector<double> t(payoffs.values() + Offset(player, blockSize[numPlayers]),
+                        payoffs.values() + Offset(player + 1, blockSize[numPlayers]));
 
   localPayoffVector(dest.values(), player, const_cast<cvector &>(s), &(t[0]), numPlayers - 1);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   int rown, coln, rowi, coli;
   double fuzzcount;
   std::vector<double> m(blockSize[numPlayers]);
-  std::vector<double> local(maxActions * maxActions);
+  std::vector<double> local(static_cast<size_t>(maxActions) * static_cast<size_t>(maxActions));
   for (rown = 0; rown < numPlayers; rown++) {
     for (coln = 0; coln < numPlayers; coln++) {
       if (rown == coln) {
@@ -87,17 +96,17 @@ void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
       }
       else {
         // set m to be the payoffs for player rown
-        memcpy(m.data(), payoffs.values() + rown * blockSize[numPlayers],
+        memcpy(m.data(), payoffs.values() + Offset(rown, blockSize[numPlayers]),
                blockSize[numPlayers] * sizeof(double));
         localPayoffMatrix(local.data(), rown, coln, s, m.data(), numPlayers - 1);
         for (rowi = firstAction(rown); rowi < lastAction(rown); rowi++) {
           for (coli = firstAction(coln); coli < lastAction(coln); coli++) {
             if (rown > coln) {
-              dest(rowi, coli) = *(local.data() + (rowi - firstAction(rown)) * actions[coln] +
+              dest(rowi, coli) = *(local.data() + Offset(rowi - firstAction(rown), actions[coln]) +
                                    (coli - firstAction(coln)));
             }
             else {
-              dest(rowi, coli) = *(local.data() + (coli - firstAction(coln)) * actions[rown] +
+              dest(rowi, coli) = *(local.data() + Offset(coli - firstAction(coln), actions[rown]) +
                                    (rowi - firstAction(rown)));
             }
           }
@@ -117,14 +126,14 @@ void nfgame::localPayoffMatrix(double *dest, int player1, int player2, const cve
   int i;
   if (player1 == n) {
     for (i = 0; i < actions[player1]; i++) {
-      localPayoffVector(dest + i * actions[player2], player2, s, m + i * blockSize[player1],
-                        n - 1);
+      localPayoffVector(dest + Offset(i, actions[player2]), player2, s,
+                        m + Offset(i, blockSize[player1]), n - 1);
     }
   }
   else if (player2 == n) {
     for (i = 0; i < actions[player2]; i++) {
-      localPayoffVector(dest + i * actions[player1], player1, s, m + i * blockSize[player2],
-                        n - 1);
+      localPayoffVector(dest + Offset(i, actions[player1]), player1, s,
+                        m + Offset(i, blockSize[player2]), n - 1);
     }
   }
   else {
@@ -165,7 +174,7 @@ void nfgame::localPayoffVector(double *dest, int player, const cvector &s, doubl
 {
   if (player == n) {
     for (int i = 0; i < actions[player]; i++) {
-      dest[i] = localPayoff(s, m + i * blockSize[player], n - 1);
+      dest[i] = localPayoff(s, m + Offset(i, blockSize[player]), n - 1);
     }
   }
   else {

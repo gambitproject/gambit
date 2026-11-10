@@ -21,6 +21,7 @@
 //
 
 #include <algorithm>
+#include <utility>
 
 #include "games.h"
 #include "solvers/linalg/lhtab.h"
@@ -116,8 +117,8 @@ public:
   NashLcpStrategySolver(std::optional<size_t> p_stopAfter, int p_maxDepth,
                         StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
                         const CancelToken &p_cancel = CancelToken())
-    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth),
-      m_cancel(p_cancel)
+    : m_onEquilibrium(std::move(p_onEquilibrium)), m_stopAfter(p_stopAfter),
+      m_maxDepth(p_maxDepth), m_cancel(p_cancel)
   {
   }
   ~NashLcpStrategySolver() = default;
@@ -293,9 +294,9 @@ std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p
 }
 
 template <class T>
-LcpStrategyResult<T> LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter,
-                                      int p_maxDepth, StrategyCallbackType<T> p_onEquilibrium,
-                                      const CancelToken &p_cancel)
+LcpStrategyResult<T>
+LcpStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, int p_maxDepth,
+                 const StrategyCallbackType<T> &p_onEquilibrium, const CancelToken &p_cancel)
 {
   return {
       NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium, p_cancel).Solve(p_game),
@@ -303,10 +304,10 @@ LcpStrategyResult<T> LcpStrategySolve(const Game &p_game, std::optional<size_t> 
 }
 
 template LcpStrategyResult<double> LcpStrategySolve(const Game &, std::optional<size_t>, int,
-                                                    StrategyCallbackType<double>,
+                                                    const StrategyCallbackType<double> &,
                                                     const CancelToken &);
 template LcpStrategyResult<Rational> LcpStrategySolve(const Game &, std::optional<size_t>, int,
-                                                      StrategyCallbackType<Rational>,
+                                                      const StrategyCallbackType<Rational> &,
                                                       const CancelToken &);
 
 } // end namespace Gambit::Nash

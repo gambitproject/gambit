@@ -36,8 +36,8 @@ public:
       SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback,
       const CancelToken &p_cancel = CancelToken())
     : m_gridResize(p_gridResize), m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
-      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium), m_onEvent(p_onEvent),
-      m_cancel(p_cancel)
+      m_maxregret(p_maxregret), m_onEquilibrium(std::move(p_onEquilibrium)),
+      m_onEvent(std::move(p_onEvent)), m_cancel(p_cancel)
   {
   }
   ~NashSimpdivStrategySolver() = default;
@@ -97,6 +97,7 @@ public:
 
 /// @brief Implementation of the piecewise path-following algorithm
 /// @returns The maximum regret of any player at the terminal profile
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
                                             const Rational &d) const
 {
@@ -345,6 +346,7 @@ end:
   return maxz;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void NashSimpdivStrategySolver::update(State &state, RectArray<int> &pi, RectArray<int> &labels,
                                        SegmentedVector<Rational> &ab,
                                        const SegmentedVector<int> &U, int j, int i)
@@ -551,9 +553,10 @@ SimpdivStrategyResult SimpdivStrategySolve(const MixedStrategyProfile<Rational> 
                                            SimpdivEventCallbackType p_onEvent,
                                            const CancelToken &p_cancel)
 {
-  const auto solutions = NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
-                                                   p_onEquilibrium, p_onEvent, p_cancel)
-                             .Solve(p_start);
+  const auto solutions =
+      NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
+                                std::move(p_onEquilibrium), std::move(p_onEvent), p_cancel)
+          .Solve(p_start);
   return {.equilibrium = solutions.back(), .success = true};
 }
 

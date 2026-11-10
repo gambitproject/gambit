@@ -234,7 +234,7 @@ BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::e
 }
 
 BehaviorSupportProfile::Sequences::iterator::iterator(
-    const std::shared_ptr<SequenceMap> p_sequences, const GameRep::Players &p_players, bool p_end)
+    const std::shared_ptr<SequenceMap> &p_sequences, const GameRep::Players &p_players, bool p_end)
   : m_sequences(p_sequences), m_players(p_players)
 {
   if (p_end) {
@@ -293,7 +293,7 @@ size_t BehaviorSupportProfile::PlayerSequences::size() const
 //                 BehaviorSupportProfile: Reachable Information Sets
 //========================================================================
 
-void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node,
+void BehaviorSupportProfile::FindReachableInfosets(const GameNode &p_node,
                                                    std::map<GameInfoset, bool> &p_reachable) const
 {
   if (!p_node->IsTerminal()) {

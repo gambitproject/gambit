@@ -66,8 +66,8 @@ public:
 
   Segmented() = delete;
   explicit Segmented(const Array<size_t> &p_shape)
-    : m_values(std::accumulate(p_shape.begin(), p_shape.end(), 0)), m_offsets(p_shape.size()),
-      m_shape(p_shape)
+    : m_values(std::accumulate(p_shape.begin(), p_shape.end(), size_t{0})),
+      m_offsets(p_shape.size()), m_shape(p_shape)
   {
     for (size_t index = 0, i = 1; i <= m_shape.size(); i++) {
       m_offsets[i] = index;

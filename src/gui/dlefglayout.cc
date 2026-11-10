@@ -263,8 +263,7 @@ LayoutInfosetsPanel::LayoutInfosetsPanel(wxWindow *p_parent, const TreeRenderCon
 
 LayoutDialog::LayoutDialog(wxWindow *p_parent, const TreeRenderConfig &p_settings)
   : wxDialog(p_parent, wxID_ANY, _("Layout options"), wxDefaultPosition, wxDefaultSize,
-             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-    m_toDefaults(false)
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   const int S = FromDIP(5);
 

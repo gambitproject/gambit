@@ -31,6 +31,7 @@
 #include <numeric>
 #include <map>
 #include <optional>
+#include <utility>
 
 namespace Gambit {
 
@@ -69,7 +70,7 @@ public:
     using base_iterator = decltype(std::begin(std::declval<C &>()));
 
     iterator(const std::size_t p_index, base_iterator p_current)
-      : m_index(p_index), m_current(p_current)
+      : m_index(p_index), m_current(std::move(p_current))
     {
     }
 
@@ -116,7 +117,7 @@ public:
     using pointer = typename std::iterator_traits<Iter>::pointer;
 
     iterator(Iter current, Iter end, Pred pred)
-      : m_current(current), m_end(end), m_pred(std::move(pred))
+      : m_current(std::move(current)), m_end(std::move(end)), m_pred(std::move(pred))
     {
       advance_next_valid();
     }
@@ -180,7 +181,7 @@ public:
     using pointer = Value;
 
     iterator(std::optional<Value> first, Iter current, Iter end)
-      : m_first(std::move(first)), m_current(current), m_end(end)
+      : m_first(std::move(first)), m_current(std::move(current)), m_end(std::move(end))
     {
     }
 
@@ -207,7 +208,7 @@ public:
     Iter m_current, m_end;
   };
 
-  prepend_value(Value first, Range range) : m_first(first), m_range(std::move(range)) {}
+  prepend_value(Value first, Range range) : m_first(std::move(first)), m_range(std::move(range)) {}
 
   iterator begin() const { return {m_first, std::begin(m_range), std::end(m_range)}; }
 

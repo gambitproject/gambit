@@ -101,6 +101,7 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
   m_strategies.push_back(strategy);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
                                       std::map<GameInfosetRep *, int> &behav,
                                       std::map<GameNodeRep *, GameNodeRep *> &ptr,
@@ -229,16 +230,16 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
   const auto players = GetPlayers();
   p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
-         << std::endl
-         << std::endl;
+         << '\n'
+         << '\n';
   p_file << "{ ";
   for (const auto &player : players) {
     p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
-    }) << std::endl;
+    }) << '\n';
   }
-  p_file << "}" << std::endl;
-  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
+  p_file << "}" << '\n';
+  p_file << std::quoted(GetDescription()) << '\n' << '\n';
 
   for (auto iter : StrategyContingencies(
            StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
@@ -248,7 +249,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
                     return lexical_cast<std::string>(iter->GetPayoff(p));
                   },
                   false, false)
-           << std::endl;
+           << '\n';
   };
 }
 

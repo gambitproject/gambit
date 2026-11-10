@@ -64,8 +64,8 @@ struct LiapAgentResult {
 
 LiapAgentResult
 LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-               BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
-               LiapEventCallbackType<MixedBehaviorProfile<double>> p_onEvent =
+               const BehaviorCallbackType<double> &p_onEquilibrium = NullBehaviorCallback<double>,
+               const LiapEventCallbackType<MixedBehaviorProfile<double>> &p_onEvent =
                    NullLiapEventCallback<MixedBehaviorProfile<double>>,
                const CancelToken &p_cancel = CancelToken());
 
@@ -76,12 +76,12 @@ struct LiapStrategyResult {
   LiapTerminationReason reason{LiapTerminationReason::RegretTargetNotReached};
 };
 
-LiapStrategyResult
-LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                  LiapEventCallbackType<MixedStrategyProfile<double>> p_onEvent =
-                      NullLiapEventCallback<MixedStrategyProfile<double>>,
-                  const CancelToken &p_cancel = CancelToken());
+LiapStrategyResult LiapStrategySolve(
+    const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const LiapEventCallbackType<MixedStrategyProfile<double>> &p_onEvent =
+        NullLiapEventCallback<MixedStrategyProfile<double>>,
+    const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

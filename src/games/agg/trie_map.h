@@ -100,8 +100,8 @@ public:
 
   // assignment
   trie_map<V> &operator=(const trie_map<V> &other);
-
-  void swap(trie_map<V> &other);
+  trie_map(trie_map<V> &&) = delete;
+  trie_map<V> &operator=(trie_map<V> &&) = delete;
 
   size_type size() const { return data.size(); }
   bool empty() const { return data.empty(); }
@@ -261,7 +261,7 @@ private:
     {
     }
 
-    void add(const std::vector<int> &conf, V y);
+    void add(const std::vector<int> &conf, const V &y);
     void operator()(iterator p);
 
     int pivot;

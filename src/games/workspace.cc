@@ -110,6 +110,16 @@ class Parser {
     return m_input.substr(begin, m_pos - begin);
   }
 
+  // Consume p_char if it is next, and report whether it was
+  bool Consume(char p_char)
+  {
+    if (m_pos < m_input.size() && m_input[m_pos] == p_char) {
+      ++m_pos;
+      return true;
+    }
+    return false;
+  }
+
   static void AppendUtf8(std::string &p_out, unsigned long p_codepoint)
   {
     if (p_codepoint <= 0x7f) {
@@ -186,9 +196,10 @@ class Parser {
 public:
   explicit Parser(const std::string &p_input) : m_input(p_input) {}
 
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   std::unique_ptr<Element> ParseElement()
   {
-    if (m_pos >= m_input.size() || m_input[m_pos++] != '<') {
+    if (!Consume('<')) {
       Fail("expected '<'");
     }
     auto element = std::make_unique<Element>();
@@ -205,7 +216,7 @@ public:
       }
       const std::string name = Name();
       SkipWhitespace();
-      if (m_pos >= m_input.size() || m_input[m_pos++] != '=') {
+      if (!Consume('=')) {
         Fail("expected '='");
       }
       SkipWhitespace();
@@ -245,7 +256,7 @@ public:
         m_pos += 2;
         const std::string closing = Name();
         SkipWhitespace();
-        if (m_pos >= m_input.size() || m_input[m_pos++] != '>') {
+        if (!Consume('>')) {
           Fail("expected '>'");
         }
         if (closing != element->m_name) {
@@ -403,7 +414,7 @@ std::string UnwrapPayload(std::string p_value)
 
 } // namespace
 
-// NOLINTNEXTLINE(misc-const-correctness): reads from the stream
+// NOLINTNEXTLINE(misc-const-correctness,readability-function-cognitive-complexity)
 WorkspaceFile ReadWorkspace(std::istream &p_stream)
 {
   std::ostringstream text;

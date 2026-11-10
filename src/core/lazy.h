@@ -54,7 +54,14 @@ template <class T> class Lazy {
 public:
   Lazy() = default;
   Lazy(const Lazy &) {}
+  Lazy(Lazy &&) noexcept {}
+  ~Lazy() = default;
   Lazy &operator=(const Lazy &)
+  {
+    Invalidate();
+    return *this;
+  }
+  Lazy &operator=(Lazy &&) noexcept
   {
     Invalidate();
     return *this;
@@ -64,7 +71,10 @@ public:
   /// (or if invalidated since the last build).
   template <class F> const T &Get(F &&p_builder) const
   {
+    // m_flag always holds a flag, and call_once leaves m_value built
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     std::call_once(*m_flag, [&] { m_value = std::forward<F>(p_builder)(); });
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return *m_value;
   }
 
@@ -113,7 +123,14 @@ class LazyAction {
 public:
   LazyAction() = default;
   LazyAction(const LazyAction &) {}
+  LazyAction(LazyAction &&) noexcept {}
+  ~LazyAction() = default;
   LazyAction &operator=(const LazyAction &)
+  {
+    Invalidate();
+    return *this;
+  }
+  LazyAction &operator=(LazyAction &&) noexcept
   {
     Invalidate();
     return *this;
@@ -123,6 +140,8 @@ public:
   /// last Invalidate().
   template <class F> void Ensure(F &&p_action) const
   {
+    // m_flag always holds a flag
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     std::call_once(*m_flag, [&] {
       std::forward<F>(p_action)();
       m_built = true;

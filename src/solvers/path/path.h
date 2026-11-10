@@ -125,17 +125,16 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
-  TracePathResult
-  TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-            std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-            Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
-            TerminationFunctionType p_terminate,
-            CallbackFunctionType p_callback = NullCallbackFunction,
-            CriterionFunctionType p_criterion = NullCriterionFunction,
-            CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction,
-            const CancelToken &p_cancel = CancelToken(),
-            BifurcationBracketFunctionType p_onBifurcation = NullBifurcationBracketFunction,
-            PerturbationEventFunctionType p_onPerturbation = NullPerturbationEventFunction) const;
+  TracePathResult TracePath(
+      std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+      Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
+      TerminationFunctionType p_terminate, CallbackFunctionType p_callback = NullCallbackFunction,
+      CriterionFunctionType p_criterion = NullCriterionFunction,
+      const CriterionBracketFunctionType &p_criterionBracker = NullCriterionBracketFunction,
+      const CancelToken &p_cancel = CancelToken(),
+      const BifurcationBracketFunctionType &p_onBifurcation = NullBifurcationBracketFunction,
+      const PerturbationEventFunctionType &p_onPerturbation = NullPerturbationEventFunction) const;
 
 private:
   double m_maxDecel{1.1}, m_hStart{0.03};
@@ -144,11 +143,12 @@ private:
 // This function reduces the regret of a point that is close to an equilibrium that has been found
 // by the path-following algorithm.  Fixing the value of a component of the point, it uses a
 // Newton-type method to find a nearby point with lower regret.
-PolishResult PolishPoint(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-                         std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                         Vector<double> &p_x, double fixed_value, size_t fixed_index,
-                         TerminationFunctionType p_terminate, int max_iter = 100,
-                         CallbackFunctionType p_callback = NullCallbackFunction);
+PolishResult
+PolishPoint(const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
+            const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
+            Vector<double> &p_x, double fixed_value, size_t fixed_index,
+            TerminationFunctionType p_terminate, int max_iter = 100,
+            const CallbackFunctionType &p_callback = NullCallbackFunction);
 
 } // end namespace Gambit
 

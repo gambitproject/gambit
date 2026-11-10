@@ -139,9 +139,11 @@ class ExternalProcessRunner final : public wxEvtHandler {
       }
 
       auto *event = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_PROFILE);
-      event->SetPayload(std::move(*profile));
+      event->SetPayload(*profile);
       wxQueueEvent(m_parent, event);
     }
+    // A line that is not a profile is ignored
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const std::exception &) {
     }
   }
@@ -164,6 +166,8 @@ public:
     Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
   }
 
+  ExternalProcessRunner(const ExternalProcessRunner &) = delete;
+  ExternalProcessRunner &operator=(const ExternalProcessRunner &) = delete;
   ~ExternalProcessRunner() override
   {
     m_timer.Stop();
@@ -275,6 +279,7 @@ class SolverThreadRunner final : public wxThread {
     try {
       m_solver(m_game, [this](const ComputedProfile &p) { PostProfile(p); }, m_cancel);
     }
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const ComputationCanceledException &) {
       // Not an error -- NashMonitorDialog's m_stopRequested flag (already
       // set before RequestCancel() was called) is what determines that the
@@ -287,7 +292,7 @@ class SolverThreadRunner final : public wxThread {
     auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
     evt->SetInt(exitCode);
     wxQueueEvent(m_parent, evt);
-    return static_cast<wxThread::ExitCode>(0);
+    return static_cast<wxThread::ExitCode>(nullptr);
   }
 
 public:
@@ -435,7 +440,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
       // EnsureInfosetOrdering() itself is protected; constructing a
       // profile forces it via the same public code path the worker's own
       // starting profile will use.
-      MixedBehaviorProfile<double> warmup(m_doc->GetGame());
+      const MixedBehaviorProfile<double> warmup(m_doc->GetGame());
       m_doc->GetGame()->EnsureSequences();
     }
     else {
