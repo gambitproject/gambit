@@ -5,9 +5,9 @@ import pickle
 import pytest
 
 import pygambit as gbt
-from pygambit import _labels, _layout, _numbers, _random
+from pygambit import _hsel, _labels, _layout, _numbers, _random
 
-_LEAVES = [_labels, _layout, _numbers, _random]
+_LEAVES = [_hsel, _labels, _layout, _numbers, _random]
 
 
 def _runtime_imports(module) -> list[str]:
@@ -39,6 +39,9 @@ def test_public_classes_are_defined_in_leaf_modules_and_reexported():
     assert gbt.Decimal is _numbers.Decimal
     assert gbt.TreeLayout is _layout.TreeLayout
     assert gbt.TreeLayoutCoordinates is _layout.TreeLayoutCoordinates
+    for name in ("History", "HistoryTransition", "Selector", "GroupedSelector", "H"):
+        assert getattr(gbt, name) is getattr(_hsel, name)
+        assert getattr(gbt, name).__module__ == "pygambit._hsel"
 
 
 def test_rational_pickles():

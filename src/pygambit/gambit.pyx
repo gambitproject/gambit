@@ -26,6 +26,17 @@ import typing
 
 import cython
 
+from ._hsel import (  # no-cython-lint
+    GroupedSelector,
+    H,  # no-cython-lint
+    History,
+    HistoryTransition,
+    Selector,
+    _AfterStep,
+    _FilterStep,
+    _PathStep,
+    _PlaysStep,
+)
 from ._labels import _compute_relabeling, _reconcile_labels, _resolve_infoset_or_event_kind
 from ._layout import TreeLayout, TreeLayoutCoordinates
 from ._numbers import Decimal, Rational  # no-cython-lint

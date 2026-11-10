@@ -87,7 +87,7 @@ jobs:
         with:
           python-version: "3.14"
       - name: Count Cython lines in pygambit
-        run: python build_support/cython_lines.py --max 4908
+        run: python build_support/cython_lines.py --max 4828
 
   catalog-am-sync:
     name: catalog.am is up to date

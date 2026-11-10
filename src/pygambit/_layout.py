@@ -27,7 +27,7 @@ import dataclasses
 import typing
 
 if typing.TYPE_CHECKING:
-    from .gambit import History  # type: ignore[import-not-found]
+    from ._hsel import History
 
 
 @dataclasses.dataclass
