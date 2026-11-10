@@ -26,6 +26,13 @@ import typing
 
 import cython
 
+from ._distributions import (
+    INFOSET_ACTIONS,
+    PLAYER_STRATEGIES,
+    to_float_prob,
+    to_rational_prob,
+    validate_distribution,
+)
 from ._hsel import (  # no-cython-lint
     GroupedSelector,
     H,  # no-cython-lint

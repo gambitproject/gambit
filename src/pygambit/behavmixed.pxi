@@ -616,30 +616,9 @@ class MixedBehaviorProfile:
         having weight zero; if False, `distribution` must specify a weight for every
         action. Weights must be non-negative and not all zero.
         """
-        if not isinstance(distribution, collections.abc.Mapping):
-            raise TypeError(
-                f"a mixed action must be set from a Mapping from action label to "
-                f"weight, not {distribution.__class__.__name__}"
-            )
-        labels = set(node.actions)
-        given = set(distribution.keys())
-        unknown = given - labels
-        if unknown:
-            raise ValueError(
-                f"not an action label at this information set: {', '.join(sorted(unknown))}"
-            )
-        if not sparse and given != labels:
-            raise ValueError(
-                "a distribution must specify exactly one weight for each action at the "
-                "information set, unless sparse=True"
-            )
-        zero = self._to_prob(0)
-        values = {label: zero for label in labels}
-        values.update({label: self._to_prob(weight) for label, weight in distribution.items()})
-        if any(v < 0 for v in values.values()):
-            raise ValueError("a mixed action's weights must be non-negative")
-        if all(v == 0 for v in values.values()):
-            raise ValueError("a mixed action's weights must not all be zero")
+        values = validate_distribution(
+            node.actions, distribution, sparse, self._to_prob, "mixed action", INFOSET_ACTIONS
+        )
         for a in cython.cast(Node, node)._infoset_handle().deref().GetActions():
             self._setprob_action(a, values[a.deref().GetLabel().decode("utf-8")])
 
@@ -1120,12 +1099,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         setitem_mbpd_action(deref(self.profile), index, value)
 
     def _to_prob(self, value: typing.Any) -> float:
-        normalized = _to_number_string(value)
-        try:
-            return float(normalized)
-        except ValueError:
-            # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
-            return float(Rational(normalized))
+        return to_float_prob(value)
 
     def _payoff(self, player: str) -> float:
         game: Game = cython.cast(ExtensiveGame, self.game)
@@ -1262,7 +1236,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
                             to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
-        return Rational(_to_number_string(value))
+        return to_rational_prob(value)
 
     def _payoff(self, player: str) -> Rational:
         game: Game = cython.cast(ExtensiveGame, self.game)

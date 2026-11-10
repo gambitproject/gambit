@@ -258,31 +258,10 @@ class MixedStrategyProfile:
         must be non-negative and not all zero. Weights need not sum to one; see
         `normalize`.
         """
-        if not isinstance(distribution, collections.abc.Mapping):
-            raise TypeError(
-                f"a mixed strategy must be set from a Mapping from strategy label to "
-                f"weight, not {distribution.__class__.__name__}"
-            )
         strategies = self.game.get_strategies(player)
-        labels = set(strategies)
-        given = set(distribution.keys())
-        unknown = given - labels
-        if unknown:
-            raise ValueError(
-                f"not a strategy label for this player: {', '.join(sorted(unknown))}"
-            )
-        if not sparse and given != labels:
-            raise ValueError(
-                "a distribution must specify exactly one weight for each of the "
-                "player's strategies, by label, unless sparse=True"
-            )
-        zero = self._to_prob(0)
-        values = {label: zero for label in labels}
-        values.update({label: self._to_prob(weight) for label, weight in distribution.items()})
-        if any(v < 0 for v in values.values()):
-            raise ValueError("a mixed strategy's weights must be non-negative")
-        if all(v == 0 for v in values.values()):
-            raise ValueError("a mixed strategy's weights must not all be zero")
+        values = validate_distribution(
+            strategies, distribution, sparse, self._to_prob, "mixed strategy", PLAYER_STRATEGIES
+        )
         for s in strategies:
             self._setprob_strategy(player, s, values[s])
 
@@ -653,12 +632,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         setitem_mspd_strategy(deref(self.profile), handle, value)
 
     def _to_prob(self, value: typing.Any) -> float:
-        normalized = _to_number_string(value)
-        try:
-            return float(normalized)
-        except ValueError:
-            # normalized is a fraction-form string (e.g. "1/2"), which float() rejects
-            return float(Rational(normalized))
+        return to_float_prob(value)
 
     def _payoff(self, player: str) -> float:
         game: Game = cython.cast(Game, self.game)
@@ -759,7 +733,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
                               to_rational(str(value).encode("ascii")))
 
     def _to_prob(self, value: typing.Any) -> Rational:
-        return Rational(_to_number_string(value))
+        return to_rational_prob(value)
 
     def _payoff(self, player: str) -> Rational:
         game: Game = cython.cast(Game, self.game)

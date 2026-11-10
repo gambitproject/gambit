@@ -5,9 +5,9 @@ import pickle
 import pytest
 
 import pygambit as gbt
-from pygambit import _hsel, _labels, _layout, _numbers, _random
+from pygambit import _distributions, _hsel, _labels, _layout, _numbers, _random
 
-_LEAVES = [_hsel, _labels, _layout, _numbers, _random]
+_LEAVES = [_distributions, _hsel, _labels, _layout, _numbers, _random]
 
 
 def _runtime_imports(module) -> list[str]:
