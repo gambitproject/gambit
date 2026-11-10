@@ -93,6 +93,8 @@ select = [
     "W293", # blank-line-with-whitespace
     "W391", # too-many-newlines-at-end-of-file
     "W605", # invalid-escape-sequence
+    "C901", # mccabe complexity; the ceiling below is today's maximum, so it can only fall
+    "PLR0913", # too many arguments; likewise
     # pycodestyle whitespace and blank-line rules, still preview-only in ruff
     "E111", "E112", "E113", "E114", "E115", "E116", "E117",
     "E201", "E202", "E211",
@@ -112,9 +114,34 @@ unfixable = []
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[tool.ruff.lint.mccabe]
+max-complexity = 24
+
+[tool.ruff.lint.pylint]
+max-args = 13
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+
+[tool.mypy]
+strict = true
+# Only the Python leaf modules (src/pygambit/_*.py) are checked, and they import nothing compiled.
+# Naming them pulls in __init__.py, which star-imports the extension; it has no stub yet.
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["pygambit", "pygambit.gambit"]
+ignore_missing_imports = true
+
+
+[tool.coverage.run]
+source = ["pygambit"]
+
+
+[tool.coverage.report]
+show_missing = true
 
 
 [tool.cython-lint]

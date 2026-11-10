@@ -42,7 +42,13 @@ jobs:
           pip install -v "${sdist}[test,doc]"
           pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
       - name: Run tests
+        if: matrix.python-version != '3.14'
         run: pytest --run-tutorials
+      - name: Run tests and report coverage
+        if: matrix.python-version == '3.14'
+        run: |
+          pip install pytest-cov
+          pytest --run-tutorials --cov=pygambit --cov-report=term-missing
 
   macos-latest:
     runs-on: macos-latest
