@@ -14,7 +14,7 @@ permissions:
 jobs:
   linux:
     name: Linux (wxWidgets 3.2)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
       - uses: actions/checkout@v7
@@ -27,7 +27,7 @@ jobs:
           aclocal
           automake --add-missing
           autoconf
-          ./configure
+          ./configure --enable-werror
       - name: Make source tarball
         run: make dist
       - name: Build from source tarball
@@ -35,7 +35,7 @@ jobs:
           tar zxvf gambit*.tar.gz
           rm gambit*.tar.gz
           cd gambit-*
-          ./configure
+          ./configure --enable-werror
           make
           sudo make install
 

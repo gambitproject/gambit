@@ -366,7 +366,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
 GAMBIT_WARNING_FLAGS = -Wall -Wextra -Wsign-compare -Wunreachable-code -Wextra-semi -Wdouble-promotion \
 	-Wshadow -Wnon-virtual-dtor -Woverloaded-virtual -Wimplicit-fallthrough
 
-AM_CXXFLAGS = ${LLVM_CXXFLAGS} $(GAMBIT_WARNING_FLAGS)
+AM_CXXFLAGS = ${LLVM_CXXFLAGS} $(GAMBIT_WARNING_FLAGS) $(WERROR_FLAGS)
 
 ## Convenience libraries
 ##

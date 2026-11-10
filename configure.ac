@@ -36,6 +36,16 @@ AC_ARG_ENABLE(gui,
  esac], [with_gui=true])
 AM_CONDITIONAL(WITH_GUI, test x$with_gui = xtrue)
 
+dnl Treat compiler warnings as errors; for CI, off by default
+AC_ARG_ENABLE(werror,
+[  --enable-werror         treat compiler warnings as errors (default: no) ],
+[ case "${enableval}" in
+  yes) WERROR_FLAGS="-Werror" ;;
+  no)  WERROR_FLAGS="" ;;
+  *)  AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
+ esac], [WERROR_FLAGS=""])
+AC_SUBST(WERROR_FLAGS)
+
 AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
 [AC_CACHE_CHECK([whether we are building for a Win32 host],
                 [mingw_cv_win32_host],
