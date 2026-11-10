@@ -969,6 +969,7 @@ void AppendMovePopup::SetRowCount(int p_count)
       try {
         remaining -= static_cast<Rational>(Number(row.prob.ToStdString()));
       }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (const std::exception &) {
         // Not parseable (yet) -- contributes nothing to the running sum, since there's no
         // sensible number to subtract.

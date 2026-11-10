@@ -2,7 +2,11 @@
 Checks: |
   -*,
   clang-diagnostic-*,
-  bugprone-reserved-identifier,
+  bugprone-*,
+  -bugprone-narrowing-conversions,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-signed-bitwise,
+  -bugprone-throwing-static-initialization,
   modernize-avoid-bind,
   modernize-concat-nested-namespaces,
   modernize-deprecated-headers,

@@ -305,6 +305,7 @@ template <class Traits> class LogitThreadRunner final : public wxThread {
           },
           m_cancel);
     }
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const ComputationCanceledException &) {
       // Not an error -- LogitDialog's m_stopRequested flag (already set before
       // RequestCancel() was called) is what determines that the "finished" event below is

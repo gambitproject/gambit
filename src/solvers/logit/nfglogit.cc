@@ -490,7 +490,7 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
           return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
         },
         [&callback](const Vector<double> &p_point) -> void { callback.EvaluatePoint(p_point); },
-        [freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
+        [&freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
           return DiffLogLike(freq_vector, p_tangent);
         },
         [&restart](const Vector<double> &, const Vector<double> &p_restart) -> void {

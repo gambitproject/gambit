@@ -91,6 +91,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
           break;
         }
         catch (SingularMatrixException &) {
+          continue; // try the next perturbation
         }
       }
       if (!perturbed) {

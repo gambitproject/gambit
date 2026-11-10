@@ -57,8 +57,11 @@ public:
     using pointer = const StrategySupportProfile *;
     using reference = const StrategySupportProfile &;
 
+    // Dereferencing the end iterator is a precondition violation
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     reference operator*() const { return *m_current; }
     pointer operator->() const { return &*m_current; }
+    // NOLINTEND(bugprone-unchecked-optional-access)
     iterator &operator++()
     {
       m_current = m_generator->Next();
@@ -122,8 +125,11 @@ public:
     using pointer = const BehaviorSupportProfile *;
     using reference = const BehaviorSupportProfile &;
 
+    // Dereferencing the end iterator is a precondition violation
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     reference operator*() const { return *m_current; }
     pointer operator->() const { return &*m_current; }
+    // NOLINTEND(bugprone-unchecked-optional-access)
     iterator &operator++()
     {
       m_current = m_generator->Next();

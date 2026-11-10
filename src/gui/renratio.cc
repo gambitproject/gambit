@@ -191,6 +191,8 @@ void RationalCellEditor::SetSize(const wxRect &rect)
 
 bool RationalCellEditor::IsAcceptedKey(wxKeyEvent &p_event)
 {
+  // The check of wxGridCellEditor, not wxGridCellTextEditor's, is the one this editor extends
+  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
   if (wxGridCellEditor::IsAcceptedKey(p_event)) {
     const int keycode = p_event.GetKeyCode();
     char tmpbuf[2];

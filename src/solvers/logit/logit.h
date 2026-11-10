@@ -43,6 +43,8 @@ public:
   {
   }
   LogitQRE(const LogitQRE &p_qre) = default;
+  // moving the profile copies its support, which can throw
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   LogitQRE(LogitQRE &&) = default;
   ~LogitQRE() = default;
   LogitQRE &operator=(const LogitQRE &) = default;
@@ -96,6 +98,8 @@ template <class QRE> struct LogitPathEvent {
 
 /// @brief The last-accepted point and the rejected point bracketing a detected bifurcation,
 ///        held by value since a LogitBifurcation may outlive the trace that produced it
+// moving a QRE copies its profile's support, which can throw
+// NOLINTNEXTLINE(bugprone-exception-escape)
 template <class QRE> struct LogitBifurcation {
   QRE before;
   QRE after;

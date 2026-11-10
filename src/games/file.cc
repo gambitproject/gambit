@@ -794,7 +794,7 @@ void ParseChanceNode(GameFileLexer &p_state, const Game &p_game, const GameNode 
   p_node->SetLabel(p_state.GetLastText());
 
   p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
-  const int infosetId = atoi(p_state.GetLastText().c_str());
+  const int infosetId = std::stoi(p_state.GetLastText());
   GameInfoset infoset = p_treeData.m_infosetMap[0][infosetId];
 
   if (p_state.GetNextToken() == TOKEN_TEXT) {

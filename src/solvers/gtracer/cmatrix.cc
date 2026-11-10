@@ -44,7 +44,8 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
     vv[i] = fabs(x[k]);
     k++;
     for (j = 1; j < n; j++, k++) {
-      if (vv[i] < (dum = fabs(x[k]))) {
+      dum = fabs(x[k]);
+      if (vv[i] < dum) {
         vv[i] = dum;
       }
     }
@@ -71,7 +72,8 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
         sum -= LU.x[i * n + k] * LU.x[k * n + j];
       }
       LU.x[i * n + j] = sum;
-      if ((dum = vv[i] * fabs(sum)) >= big) {
+      dum = vv[i] * fabs(sum);
+      if (dum >= big) {
         big = dum;
         imax = i;
       }

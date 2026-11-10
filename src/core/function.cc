@@ -173,10 +173,8 @@ mid_trial:
     du = e1 / e2;
   }
 
-  if (du > 0 && du < (p_stepc - p_stepb) && fabs(du) < 0.5 * old2) {
-    stepm = u + du;
-  }
-  else if (du < 0 && du > (p_stepa - p_stepb) && fabs(du) < 0.5 * old2) {
+  if (((du > 0 && du < (p_stepc - p_stepb)) || (du < 0 && du > (p_stepa - p_stepb))) &&
+      fabs(du) < 0.5 * old2) {
     stepm = u + du;
   }
   else if ((p_stepc - p_stepb) > (p_stepb - p_stepa)) {

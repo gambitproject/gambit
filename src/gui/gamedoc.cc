@@ -235,6 +235,7 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
       return {.result = LoadResult::Success, .document = doc};
     }
   }
+  // NOLINTNEXTLINE(bugprone-empty-catch)
   catch (const std::exception &) {
     // Not a recognized (or not fully valid) workspace file; fall through to
     // try it as a bare game file instead.

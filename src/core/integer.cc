@@ -131,7 +131,8 @@ static void Icheck(IntegerRep *rep)
   while (l > 0 && *--p == 0) {
     --l;
   }
-  if ((rep->len = l) == 0) {
+  rep->len = l;
+  if (rep->len == 0) {
     rep->sgn = I_POSITIVE;
   }
 }
@@ -422,13 +423,13 @@ int Iislong(const IntegerRep *rep)
   if (l < SHORT_PER_LONG) {
     return 1;
   }
-  else if (l > SHORT_PER_LONG) {
+  if (l > SHORT_PER_LONG) {
     return 0;
   }
-  else if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
+  if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
     return 1;
   }
-  else if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
+  if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
     for (unsigned int i = 0; i < SHORT_PER_LONG - 1; ++i) {
       if (rep->s[i] != 0) {
         return 0;
@@ -436,9 +437,7 @@ int Iislong(const IntegerRep *rep)
     }
     return 1;
   }
-  else {
-    return 0;
-  }
+  return 0;
 }
 
 // convert to a double
@@ -1992,7 +1991,8 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
       if (y & 1) {
         r = multiply(r, b, r);
       }
-      if ((y >>= 1) == 0) {
+      y >>= 1;
+      if (y == 0) {
         break;
       }
       else {
@@ -2146,7 +2146,7 @@ std::string Itoa(const IntegerRep *x, int base, int width)
 {
   check_base(base);
   nonnil(x);
-  int fmtlen = static_cast<int>((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
+  int fmtlen = static_cast<int>((static_cast<long>(x->len) + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
     fmtbase += ' ';
@@ -2335,6 +2335,8 @@ Integer &Integer::operator=(Integer &&y) noexcept
   return *this;
 }
 
+// Icopy returns at once when both representations are the same
+// NOLINTNEXTLINE(bugprone-unhandled-self-assignment)
 Integer &Integer::operator=(const Integer &y)
 {
   rep = Icopy(rep, y.rep);

@@ -26,6 +26,7 @@
 #define GAMBIT_SOLVERS_GTRACER_CMATRIX_H
 
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <utility>
@@ -249,22 +250,18 @@ public:
 
   double max() const
   {
-    double t, ma = x[0];
+    double ma = x[0];
     for (int i = 1; i < m; i++) {
-      if ((t = x[i]) > ma) {
-        ma = t;
-      }
+      ma = std::max(ma, x[i]);
     }
     return ma;
   }
 
   double min() const
   {
-    double t, mi = x[0];
+    double mi = x[0];
     for (int i = 1; i < m; i++) {
-      if ((t = x[i]) < mi) {
-        mi = t;
-      }
+      mi = std::min(mi, x[i]);
     }
     return mi;
   }
@@ -674,22 +671,18 @@ public:
 
   double max() const
   {
-    double t, ma = x[0];
+    double ma = x[0];
     for (int i = 1; i < s; i++) {
-      if ((t = x[i]) > ma) {
-        ma = t;
-      }
+      ma = std::max(ma, x[i]);
     }
     return ma;
   }
 
   double min() const
   {
-    double t, mi = x[0];
+    double mi = x[0];
     for (int i = 1; i < s; i++) {
-      if ((t = x[i]) < mi) {
-        mi = t;
-      }
+      mi = std::min(mi, x[i]);
     }
     return mi;
   }

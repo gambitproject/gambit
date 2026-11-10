@@ -103,8 +103,6 @@ public:
   trie_map(trie_map<V> &&) = delete;
   trie_map<V> &operator=(trie_map<V> &&) = delete;
 
-  void swap(trie_map<V> &other);
-
   size_type size() const { return data.size(); }
   bool empty() const { return data.empty(); }
   iterator begin() { return data.begin(); }

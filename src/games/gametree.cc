@@ -2318,10 +2318,9 @@ protected:
     PureBehaviorProfile behav(m_game);
     for (const auto &player : m_game->GetPlayers()) {
       for (const auto &infoset : player->GetInfosets()) {
-        try {
-          behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav.at(infoset.get())));
-        }
-        catch (std::out_of_range &) {
+        const auto &behavior = GetStrategy(player)->m_behav;
+        if (const auto action = behavior.find(infoset.get()); action != behavior.end()) {
+          behav.SetAction(infoset->GetAction(action->second));
         }
       }
     }

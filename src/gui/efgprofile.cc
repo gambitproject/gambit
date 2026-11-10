@@ -181,6 +181,7 @@ void MixedBehaviorProfileList::UpdateCells()
           attr->SetBackgroundColour(wxColour(225, 225, 225));
         }
       }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (std::out_of_range &) {
         // If GetAction() throws this, just handle it silently; can occur
         // when solving a trivial game via the strategic form

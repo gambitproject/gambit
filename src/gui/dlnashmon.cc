@@ -142,6 +142,8 @@ class ExternalProcessRunner final : public wxEvtHandler {
       event->SetPayload(*profile);
       wxQueueEvent(m_parent, event);
     }
+    // A line that is not a profile is ignored
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const std::exception &) {
     }
   }
@@ -277,6 +279,7 @@ class SolverThreadRunner final : public wxThread {
     try {
       m_solver(m_game, [this](const ComputedProfile &p) { PostProfile(p); }, m_cancel);
     }
+    // NOLINTNEXTLINE(bugprone-empty-catch)
     catch (const ComputationCanceledException &) {
       // Not an error -- NashMonitorDialog's m_stopRequested flag (already
       // set before RequestCancel() was called) is what determines that the

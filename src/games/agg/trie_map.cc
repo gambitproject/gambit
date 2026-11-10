@@ -110,15 +110,6 @@ template <class V> trie_map<V> &trie_map<V>::operator=(const trie_map<V> &other)
   return *this;
 }
 
-template <class V> void trie_map<V>::swap(trie_map<V> &other)
-{
-  if (this != &other) {
-    const trie_map<V> temp = *this;
-    *this = other;
-    other = temp;
-  }
-}
-
 template <class V>
 void trie_map<V>::multiply(const trie_map<V> &t1, const trie_map<V> &t2, size_t keylen,
                            std::vector<projtype> &f)

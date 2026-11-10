@@ -206,12 +206,9 @@ template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
               if (k != best_set[i]) {
                 a_ik = -a_ij * tmpcol[k];
                 b_k = solution[k] - b_i * tmpcol[k];
-                if (this->IsGtZero(a_ik) && this->IsGtZero(b_k / a_ik - ratio)) {
-                  best_set.erase_at(i);
-                  flag = true;
-                }
-                else if (this->IsGtZero(a_ik) && this->IsEqZero(b_k / a_ik - ratio) &&
-                         this->GetLabel(k) < j) {
+                if (this->IsGtZero(a_ik) &&
+                    (this->IsGtZero(b_k / a_ik - ratio) ||
+                     (this->IsEqZero(b_k / a_ik - ratio) && this->GetLabel(k) < j))) {
                   best_set.erase_at(i);
                   flag = true;
                 }

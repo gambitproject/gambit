@@ -23,6 +23,7 @@
 #ifndef GAMBIT_CORE_RECARRAY_H
 #define GAMBIT_CORE_RECARRAY_H
 
+#include <cstddef>
 #include <vector>
 #include "util.h"
 
@@ -34,7 +35,10 @@ protected:
   int m_minrow, m_maxrow, m_mincol, m_maxcol;
   std::vector<T> m_storage;
 
-  size_t row_stride() const { return static_cast<size_t>(m_maxcol - m_mincol + 1); }
+  size_t row_stride() const
+  {
+    return static_cast<size_t>(std::ptrdiff_t{m_maxcol} - m_mincol + 1);
+  }
 
   size_t index(int r, int c) const
   {

@@ -354,7 +354,9 @@ public:
   void Pivot(int outrow, int col);
   /// Column in new basis
   void SolveColumn(int, Vector<Rational> &);
-  /// Column in new basis
+  /// Column in new basis, scaled by the total denominator
+  // This deliberately hides TableauBase::GetColumn, which does not scale
+  // NOLINTNEXTLINE(bugprone-derived-method-shadowing-base-method)
   void GetColumn(int, Vector<Rational> &) const;
   //@}
 
