@@ -90,16 +90,16 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
   const auto players = m_game->GetPlayers();
   p_file << "NFG 1 R " << std::quoted(m_game->GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
-         << std::endl
-         << std::endl;
+         << '\n'
+         << '\n';
   p_file << "{ ";
   for (const auto &player : players) {
     p_file << FormatList(GetStrategies(player), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
-    }) << std::endl;
+    }) << '\n';
   }
-  p_file << "}" << std::endl;
-  p_file << std::quoted(m_game->GetDescription()) << std::endl << std::endl;
+  p_file << "}" << '\n';
+  p_file << std::quoted(m_game->GetDescription()) << '\n' << '\n';
 
   for (const auto &iter : StrategyContingencies(*this)) {
     p_file << FormatList(
@@ -108,7 +108,7 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
                     return lexical_cast<std::string>(iter->GetPayoff(p));
                   },
                   false, false)
-           << std::endl;
+           << '\n';
   };
 }
 

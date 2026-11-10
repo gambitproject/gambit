@@ -141,7 +141,7 @@ template <class T> int Exit(LPSolveState<T> &state, int in)
     t = state.xx[col] - state.lb[col];
   }
   if (t.has_value() && *t > state.eps2 && (!best.has_value() || *t < *best - state.eps2)) {
-    best = t;
+    best = std::move(t);
     out = -1;
   }
 

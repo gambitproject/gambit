@@ -36,7 +36,8 @@ namespace {
 // The polynomial representation of each strategy probability, substituting in
 // the sum-to-one equation for the probability of the last strategy for each player
 std::map<GameStrategy, Polynomial<double>>
-BuildStrategyVariables(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support)
+BuildStrategyVariables(const std::shared_ptr<VariableSpace> &space,
+                       const StrategySupportProfile &support)
 {
   int index = 1;
   std::map<GameStrategy, Polynomial<double>> strategy_poly;
@@ -58,7 +59,8 @@ BuildStrategyVariables(std::shared_ptr<VariableSpace> space, const StrategySuppo
 }
 
 Polynomial<double>
-IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support,
+IndifferenceEquation(const std::shared_ptr<VariableSpace> &space,
+                     const StrategySupportProfile &support,
                      const std::map<GameStrategy, Polynomial<double>> &strategy_poly,
                      const GameStrategy &s1, const GameStrategy &s2)
 {
@@ -78,7 +80,8 @@ IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupport
 }
 
 PolynomialSystem<double>
-ConstructEquations(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support,
+ConstructEquations(const std::shared_ptr<VariableSpace> &space,
+                   const StrategySupportProfile &support,
                    const std::map<GameStrategy, Polynomial<double>> &strategy_poly)
 {
   PolynomialSystem<double> equations(space);
@@ -142,8 +145,8 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 
 EnumPolyStrategyResult
 EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
-                      size_t p_maxRectangles, StrategyCallbackType<double> p_onEquilibrium,
-                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent,
+                      size_t p_maxRectangles, const StrategyCallbackType<double> &p_onEquilibrium,
+                      const EnumPolyEventCallbackType<StrategySupportProfile> &p_onEvent,
                       const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_game);

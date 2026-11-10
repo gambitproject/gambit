@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <iostream>
+#include <utility>
 
 #include "games.h"
 #include "gameagg.h"
@@ -223,7 +224,7 @@ template class AGGMixedStrategyProfileRep<Rational>;
 //                        GameAGGRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
+GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(std::move(p_aggPtr))
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
     m_players.push_back(std::make_shared<GamePlayerRep>(this, pl, lexical_cast<std::string>(pl),
@@ -340,30 +341,30 @@ void GameAGGRep::Write(std::ostream &p_stream, const std::string &p_format /*="n
 
 void GameAGGRep::WriteAggFile(std::ostream &s) const
 {
-  s << "#AGG" << std::endl;
-  s << aggPtr->getNumPlayers() << std::endl;
-  s << aggPtr->getNumActionNodes() << std::endl;
-  s << aggPtr->getNumFunctionNodes() << std::endl;
+  s << "#AGG" << '\n';
+  s << aggPtr->getNumPlayers() << '\n';
+  s << aggPtr->getNumActionNodes() << '\n';
+  s << aggPtr->getNumFunctionNodes() << '\n';
   for (int i = 0; i < aggPtr->getNumPlayers(); i++) {
     s << aggPtr->getNumActions(i) << " ";
   }
-  s << std::endl;
+  s << '\n';
   for (int i = 0; i < aggPtr->getNumPlayers(); i++) {
     std::copy(aggPtr->getActionSet(i).begin(), aggPtr->getActionSet(i).end(),
               std::ostream_iterator<int>(s, " "));
-    s << std::endl;
+    s << '\n';
   }
   aggPtr->printActionGraph(s);
-  s << std::endl;
+  s << '\n';
   // types of function nodes
   aggPtr->printTypes(s);
-  s << std::endl;
+  s << '\n';
 
   // payoffs
   for (int i = 0; i < aggPtr->getNumActionNodes(); i++) {
-    s << "1" << std::endl; // type of payoff output
+    s << "1" << '\n'; // type of payoff output
     aggPtr->printPayoffs(s, i);
-    s << std::endl;
+    s << '\n';
   }
 }
 

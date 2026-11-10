@@ -68,13 +68,13 @@ struct EnumPolyStrategyResult {
   bool success{true};
 };
 
-EnumPolyStrategyResult
-EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
-                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
-                      StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                      EnumPolyEventCallbackType<StrategySupportProfile> p_onEvent =
-                          NullEnumPolyEventCallback<StrategySupportProfile>,
-                      const CancelToken &p_cancel = CancelToken());
+EnumPolyStrategyResult EnumPolyStrategySolve(
+    const Game &p_game, std::optional<size_t> p_stopAfter, double p_maxregret,
+    size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const EnumPolyEventCallbackType<StrategySupportProfile> &p_onEvent =
+        NullEnumPolyEventCallback<StrategySupportProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
 /// @brief The result of enumerating Nash equilibria of an extensive game via enumpoly
 struct EnumPolyBehaviorResult {
@@ -82,13 +82,13 @@ struct EnumPolyBehaviorResult {
   bool success{true};
 };
 
-EnumPolyBehaviorResult
-EnumPolyBehaviorSolve(const Game &, std::optional<size_t> p_stopAfter, double p_maxregret,
-                      size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
-                      BehaviorCallbackType<double> p_onEquilibrium = NullBehaviorCallback<double>,
-                      EnumPolyEventCallbackType<BehaviorSupportProfile> p_onEvent =
-                          NullEnumPolyEventCallback<BehaviorSupportProfile>,
-                      const CancelToken &p_cancel = CancelToken());
+EnumPolyBehaviorResult EnumPolyBehaviorSolve(
+    const Game &, std::optional<size_t> p_stopAfter, double p_maxregret,
+    size_t p_maxRectangles = kDefaultEnumPolyMaxRectangles,
+    const BehaviorCallbackType<double> &p_onEquilibrium = NullBehaviorCallback<double>,
+    const EnumPolyEventCallbackType<BehaviorSupportProfile> &p_onEvent =
+        NullEnumPolyEventCallback<BehaviorSupportProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

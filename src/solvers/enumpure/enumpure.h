@@ -54,7 +54,7 @@ struct EnumPureStrategyResult {
 ///
 inline EnumPureStrategyResult EnumPureStrategySolve(
     const Game &p_game,
-    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>,
+    const StrategyCallbackType<Rational> &p_onEquilibrium = NullStrategyCallback<Rational>,
     const CancelToken &p_cancel = CancelToken())
 {
   RequirePerfectRecall(p_game);
@@ -99,10 +99,10 @@ struct EnumPureAgentResult {
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-inline EnumPureAgentResult
-EnumPureAgentSolve(const Game &p_game,
-                   BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>,
-                   const CancelToken &p_cancel = CancelToken())
+inline EnumPureAgentResult EnumPureAgentSolve(
+    const Game &p_game,
+    const BehaviorCallbackType<Rational> &p_onEquilibrium = NullBehaviorCallback<Rational>,
+    const CancelToken &p_cancel = CancelToken())
 {
   EnumPureAgentResult result;
   const BehaviorSupportProfile support(p_game);

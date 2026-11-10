@@ -24,6 +24,8 @@
 #include "agg.h"
 #include "trie_map.h"
 
+#include <utility>
+
 namespace Gambit::agg {
 
 template <class V>
@@ -264,7 +266,7 @@ void trie_map<V>::power(size_t p, trie_map<V> &dest, trie_map<V> &scratch, size_
 
 template <class V> V trie_map<V>::inner_prod(trie_map<V> &other, V init /*= (V) (0)*/) const
 {
-  V result(init);
+  V result(std::move(init));
   for (auto p = begin(); p != end(); ++p) {
     if ((*p).second > static_cast<V>(0)) {
       const auto p2 = other.find((*p).first);
@@ -289,7 +291,7 @@ template <class V>
 V trie_map<V>::inner_prod(const std::vector<int> &x, size_t keylen, std::vector<projtype> &f,
                           trie_map<V> &other, V init /* = (V) (0)*/) const
 {
-  V result(init);
+  V result(std::move(init));
   V th(THRESH);
   static iterator p2;
   // V s(-1);
@@ -402,7 +404,7 @@ template <class V> void trie_map<V>::deleteNodes(TrieNode<V> *n)
   delete n;
 }
 
-template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
+template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, const V &y)
 {
   const size_t keylen = conf.size();
   const double th(THRESH / static_cast<double>(denom[pivot]));

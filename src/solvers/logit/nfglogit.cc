@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 #include "games.h"
 #include "logit.h"
@@ -205,7 +206,7 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
   for (const auto &strategy : m_game->GetStrategies()) {
     m_strategyValues[col++] = m_profile.GetPayoff(strategy);
   }
-  std::ranges::transform(m_equations, p_lhs.begin(), [this, lambda](auto e) {
+  std::ranges::transform(m_equations, p_lhs.begin(), [this, lambda](const auto &e) {
     return e->Value(m_profile, m_logProfile, m_strategyValues, lambda);
   });
 }
@@ -247,7 +248,7 @@ class TracingCallbackFunction {
 public:
   TracingCallbackFunction(const Game &p_game,
                           LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
-    : m_game(p_game), m_onEvent(p_onEvent)
+    : m_game(p_game), m_onEvent(std::move(p_onEvent))
   {
   }
   ~TracingCallbackFunction() = default;
@@ -323,7 +324,7 @@ private:
 EstimatorCallbackFunction::EstimatorCallbackFunction(
     const Game &p_game, const Vector<double> &p_frequencies,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
-  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(p_onEvent),
+  : m_game(p_game), m_frequencies(p_frequencies), m_onEvent(std::move(p_onEvent)),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0), 0.0,
                   LogLike(p_frequencies, p_game->NewMixedStrategyProfile(0.0).GetProbVector()))
 {
@@ -365,7 +366,7 @@ void EstimatorCallbackFunction::OnPerturbation(bool p_active, const Vector<doubl
 LogitTrace<LogitQREMixedStrategyProfile>
 LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
                    PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
-                   Nash::StrategyCallbackType<double> p_onEquilibrium,
+                   const Nash::StrategyCallbackType<double> &p_onEquilibrium,
                    LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent,
                    const CancelToken &p_cancel)
 {
@@ -384,7 +385,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
 
   const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_onEvent);
+  TracingCallbackFunction callback(game, std::move(p_onEvent));
   EquationSystem system(game);
   const auto result = tracer.TracePath(
       [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
@@ -428,7 +429,7 @@ LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
 
   const Game game = p_start.GetGame();
   Vector x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(game, p_onEvent);
+  TracingCallbackFunction callback(game, std::move(p_onEvent));
   LogitLambdaResult<LogitQREMixedStrategyProfile> ret;
   EquationSystem system(game);
   for (const auto &lam : p_targetLambda) {
@@ -463,7 +464,7 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
                       double p_firstStep, double p_maxAccel,
                       LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent)
 {
-  const LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
+  LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
   if (start.size() == 0) {
     return start;
   }
@@ -473,8 +474,8 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
 
   const Game game = start.GetGame();
   Vector<double> x(ProfileToPoint(start)), restart(x);
-  const Vector freq_vector(p_frequencies.GetProbVector());
-  EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), p_onEvent);
+  const Vector<double> &freq_vector(p_frequencies.GetProbVector());
+  EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), std::move(p_onEvent));
   EquationSystem system(game);
   while (true) {
     tracer.TracePath(

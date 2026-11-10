@@ -263,7 +263,7 @@ private:
     {
     }
 
-    void add(const std::vector<int> &conf, V y);
+    void add(const std::vector<int> &conf, const V &y);
     void operator()(iterator p);
 
     int pivot;

@@ -242,6 +242,7 @@ bool Application::ChooseAndLoadFile(wxWindow *p_parent)
 std::vector<wxString> Application::GetRecentFiles() const
 {
   std::vector<wxString> files;
+  files.reserve(m_fileHistory.GetCount());
   for (size_t i = 0; i < m_fileHistory.GetCount(); i++) {
     files.push_back(m_fileHistory.GetHistoryFile(i));
   }

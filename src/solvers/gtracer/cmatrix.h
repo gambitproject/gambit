@@ -798,7 +798,7 @@ inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
 {
   for (int i = 0; i < ma.s; i++) {
     if (i % ma.n == 0) {
-      s << std::endl;
+      s << '\n';
     }
     s << ma.x[i];
     if (i != ma.s) {

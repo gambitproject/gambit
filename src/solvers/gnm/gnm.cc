@@ -21,6 +21,7 @@
 //
 
 #include <numeric>
+#include <utility>
 #include "games.h"
 #include "solvers/gnm/gnm.h"
 #include "solvers/gtracer/gtracer.h"
@@ -33,8 +34,9 @@ namespace {
 Nash::GNMStrategyResult Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep,
                               const cvector &p_pert, double p_lambdaEnd, int p_steps,
                               int p_localNewtonInterval, int p_localNewtonMaxits,
-                              Nash::StrategyCallbackType<double> p_onEquilibrium,
-                              Nash::GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
+                              const Nash::StrategyCallbackType<double> &p_onEquilibrium,
+                              const Nash::GNMEventCallbackType &p_onEvent,
+                              const CancelToken &p_cancel)
 {
   const double FUZZ = 1e-12;
   const bool WOBBLE = false;
@@ -85,8 +87,9 @@ namespace Gambit::Nash {
 
 GNMStrategyResult GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps,
                                    int p_localNewtonInterval, int p_localNewtonMaxits,
-                                   StrategyCallbackType<double> p_onEquilibrium,
-                                   GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
+                                   const StrategyCallbackType<double> &p_onEquilibrium,
+                                   const GNMEventCallbackType &p_onEvent,
+                                   const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_game);
   const std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
@@ -105,8 +108,9 @@ GNMStrategyResult GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p
 
 GNMStrategyResult GNMStrategySolve(const MixedStrategyProfile<double> &p_pert, double p_lambdaEnd,
                                    int p_steps, int p_localNewtonInterval, int p_localNewtonMaxits,
-                                   StrategyCallbackType<double> p_onEquilibrium,
-                                   GNMEventCallbackType p_onEvent, const CancelToken &p_cancel)
+                                   const StrategyCallbackType<double> &p_onEquilibrium,
+                                   const GNMEventCallbackType &p_onEvent,
+                                   const CancelToken &p_cancel)
 {
   RequirePerfectRecall(p_pert.GetGame());
   const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), true);

@@ -23,6 +23,8 @@
 #ifndef GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H
 #define GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H
 
+#include <utility>
+
 #include "solvers/nash.h"
 
 namespace Gambit::Nash {
@@ -63,10 +65,9 @@ public:
 };
 
 template <class T>
-std::shared_ptr<EnumMixedStrategySolution<T>>
-EnumMixedStrategySolveDetailed(const Game &p_game,
-                               StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
-                               const CancelToken &p_cancel = CancelToken());
+std::shared_ptr<EnumMixedStrategySolution<T>> EnumMixedStrategySolveDetailed(
+    const Game &p_game, const StrategyCallbackType<T> &p_onEquilibrium = NullStrategyCallback<T>,
+    const CancelToken &p_cancel = CancelToken());
 
 /// @brief The result of enumerating all extreme mixed-strategy Nash equilibria of a
 ///        two-player game
@@ -78,7 +79,7 @@ template <class T> struct EnumMixedStrategyResult {
 template <class T>
 EnumMixedStrategyResult<T>
 EnumMixedStrategySolve(const Game &p_game,
-                       StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>,
+                       const StrategyCallbackType<T> &p_onEquilibrium = NullStrategyCallback<T>,
                        const CancelToken &p_cancel = CancelToken())
 {
   const auto solution = EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium, p_cancel);

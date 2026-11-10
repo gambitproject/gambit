@@ -1275,6 +1275,7 @@ bool AppendMovePopup::Commit()
   }
 
   std::vector<std::string> labels;
+  labels.reserve(m_rows.size());
   for (const auto &row : m_rows) {
     labels.push_back(row.labelCtrl->GetValue().ToStdString(wxConvUTF8));
   }

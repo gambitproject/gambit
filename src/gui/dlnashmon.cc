@@ -139,7 +139,7 @@ class ExternalProcessRunner final : public wxEvtHandler {
       }
 
       auto *event = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_PROFILE);
-      event->SetPayload(std::move(*profile));
+      event->SetPayload(*profile);
       wxQueueEvent(m_parent, event);
     }
     catch (const std::exception &) {

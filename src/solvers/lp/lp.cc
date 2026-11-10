@@ -212,7 +212,8 @@ void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int neq
 }
 
 template <class T>
-LpBehaviorResult<T> LpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> p_onEquilibrium,
+LpBehaviorResult<T> LpBehaviorSolve(const Game &p_game,
+                                    const BehaviorCallbackType<T> &p_onEquilibrium,
                                     const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
@@ -238,13 +239,14 @@ LpBehaviorResult<T> LpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> 
   return {profile, true};
 }
 
-template LpBehaviorResult<double> LpBehaviorSolve(const Game &, BehaviorCallbackType<double>,
-                                                  const CancelToken &);
-template LpBehaviorResult<Rational> LpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>,
-                                                    const CancelToken &);
+template LpBehaviorResult<double>
+LpBehaviorSolve(const Game &, const BehaviorCallbackType<double> &, const CancelToken &);
+template LpBehaviorResult<Rational>
+LpBehaviorSolve(const Game &, const BehaviorCallbackType<Rational> &, const CancelToken &);
 
 template <class T>
-LpStrategyResult<T> LpStrategySolve(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium,
+LpStrategyResult<T> LpStrategySolve(const Game &p_game,
+                                    const StrategyCallbackType<T> &p_onEquilibrium,
                                     const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
@@ -297,9 +299,9 @@ LpStrategyResult<T> LpStrategySolve(const Game &p_game, StrategyCallbackType<T> 
   return {eqm, true};
 }
 
-template LpStrategyResult<double> LpStrategySolve(const Game &, StrategyCallbackType<double>,
-                                                  const CancelToken &);
-template LpStrategyResult<Rational> LpStrategySolve(const Game &, StrategyCallbackType<Rational>,
-                                                    const CancelToken &);
+template LpStrategyResult<double>
+LpStrategySolve(const Game &, const StrategyCallbackType<double> &, const CancelToken &);
+template LpStrategyResult<Rational>
+LpStrategySolve(const Game &, const StrategyCallbackType<Rational> &, const CancelToken &);
 
 } // end namespace Gambit::Nash

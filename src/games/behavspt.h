@@ -58,7 +58,8 @@ private:
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
   std::shared_ptr<SequenceMap> GetSequenceMap() const;
-  void FindReachableInfosets(GameNode p_node, std::map<GameInfoset, bool> &p_reachable) const;
+  void FindReachableInfosets(const GameNode &p_node,
+                             std::map<GameInfoset, bool> &p_reachable) const;
 
 public:
   class Support {
@@ -143,7 +144,7 @@ public:
     {
       const auto reachable_infosets = m_support->GetReachableInfosets();
       size_t count = 0;
-      for (auto [infoset, is_reachable] : *reachable_infosets) {
+      for (const auto &[infoset, is_reachable] : *reachable_infosets) {
         if (is_reachable && !infoset->GetPlayer()->IsChance()) {
           ++count;
         }
@@ -169,7 +170,7 @@ public:
       std::vector<GameSequence>::const_iterator m_currentSequence;
 
     public:
-      iterator(const std::shared_ptr<SequenceMap> p_sequences, const GameRep::Players &p_players,
+      iterator(const std::shared_ptr<SequenceMap> &p_sequences, const GameRep::Players &p_players,
                bool p_end);
 
       GameSequence operator*() const { return *m_currentSequence; }

@@ -330,7 +330,7 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
             // break;
           }
           else if (neighb[Node][k] >= S) {
-            const projtype f = projTypes[neighb[Node][k] - S];
+            const projtype &f = projTypes[neighb[Node][k] - S];
             if (!f) {
               throw ValueException("AGG: encountered a null projection function");
             }

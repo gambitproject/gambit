@@ -107,7 +107,7 @@ public:
   public:
     using iterator_category = std::input_iterator_tag;
 
-    iterator(const Game &p_efg, const std::shared_ptr<SequenceMap> p_sequences,
+    iterator(const Game &p_efg, const std::shared_ptr<SequenceMap> &p_sequences,
              bool p_end = false);
 
     PureSequenceProfile operator*() const;

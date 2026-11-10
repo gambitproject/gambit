@@ -62,17 +62,17 @@ struct IPAStrategyResult {
   gametracer::IPATerminationReason reason{gametracer::IPATerminationReason::MaxIterationsReached};
 };
 
-IPAStrategyResult
-IPAStrategySolve(const Game &p_game,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 IPAEventCallbackType p_onEvent = NullIPAEventCallback,
-                 const CancelToken &p_cancel = CancelToken());
+IPAStrategyResult IPAStrategySolve(
+    const Game &p_game,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const IPAEventCallbackType &p_onEvent = NullIPAEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
-IPAStrategyResult
-IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                 StrategyCallbackType<double> p_onEquilibrium = NullStrategyCallback<double>,
-                 IPAEventCallbackType p_onEvent = NullIPAEventCallback,
-                 const CancelToken &p_cancel = CancelToken());
+IPAStrategyResult IPAStrategySolve(
+    const MixedStrategyProfile<double> &p_pert,
+    const StrategyCallbackType<double> &p_onEquilibrium = NullStrategyCallback<double>,
+    const IPAEventCallbackType &p_onEvent = NullIPAEventCallback,
+    const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit::Nash
 

@@ -75,16 +75,16 @@ private:
 
 inline std::ostream &operator<<(std::ostream &s, nfgame &g)
 {
-  s << g.numPlayers << std::endl;
+  s << g.numPlayers << '\n';
   for (int i = 0; i < g.numPlayers; i++) {
     if (i > 0) {
       s << " ";
     }
     s << g.actions[i];
   }
-  s << std::endl;
+  s << '\n';
   s << g.payoffs;
-  s << std::endl;
+  s << '\n';
   return s;
 }
 

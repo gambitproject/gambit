@@ -57,7 +57,7 @@ void AnalysisProfileList<T>::AddProfile(const MixedBehaviorProfile<T> &p_profile
 
 template <class T> void AnalysisProfileList<T>::BuildNfg()
 {
-  for (const auto profile : m_behavProfiles) {
+  for (const auto &profile : m_behavProfiles) {
     m_mixedProfiles.push_back(
         std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
   }

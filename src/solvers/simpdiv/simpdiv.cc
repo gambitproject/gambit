@@ -36,8 +36,8 @@ public:
       SimpdivEventCallbackType p_onEvent = NullSimpdivEventCallback,
       const CancelToken &p_cancel = CancelToken())
     : m_gridResize(p_gridResize), m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
-      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium), m_onEvent(p_onEvent),
-      m_cancel(p_cancel)
+      m_maxregret(p_maxregret), m_onEquilibrium(std::move(p_onEquilibrium)),
+      m_onEvent(std::move(p_onEvent)), m_cancel(p_cancel)
   {
   }
   ~NashSimpdivStrategySolver() = default;
@@ -551,9 +551,10 @@ SimpdivStrategyResult SimpdivStrategySolve(const MixedStrategyProfile<Rational> 
                                            SimpdivEventCallbackType p_onEvent,
                                            const CancelToken &p_cancel)
 {
-  const auto solutions = NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
-                                                   p_onEquilibrium, p_onEvent, p_cancel)
-                             .Solve(p_start);
+  const auto solutions =
+      NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret,
+                                std::move(p_onEquilibrium), std::move(p_onEvent), p_cancel)
+          .Solve(p_start);
   return {.equilibrium = solutions.back(), .success = true};
 }
 

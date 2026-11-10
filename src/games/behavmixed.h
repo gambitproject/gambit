@@ -238,7 +238,7 @@ public:
   /// Returns whether the profile has been invalidated by a subsequent revision to the game
   bool IsInvalidated() const { return m_gameversion != m_support.GetGame()->GetVersion(); }
 
-  bool IsDefinedAt(GameInfoset p_infoset) const;
+  bool IsDefinedAt(const GameInfoset &p_infoset) const;
   //@}
 
   /// @name Computation of interesting quantities

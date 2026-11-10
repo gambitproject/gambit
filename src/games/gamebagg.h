@@ -44,7 +44,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor
-  explicit GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr);
+  explicit GameBAGGRep(const std::shared_ptr<agg::BAGG> &_baggPtr);
   /// Destructor
   GameBAGGRep(const GameBAGGRep &) = delete;
   GameBAGGRep &operator=(const GameBAGGRep &) = delete;

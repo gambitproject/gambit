@@ -84,7 +84,7 @@ RestrictedGame(const Game &game, const GamePlayer &player,
                const std::map<GamePlayer, StrategySupport> &domainStrategies)
 {
   StrategySupportProfile profile(game);
-  for (auto [player2, strategies] : domainStrategies) {
+  for (const auto &[player2, strategies] : domainStrategies) {
     if (player2 == player) {
       continue;
     }
@@ -99,7 +99,7 @@ RestrictedGame(const Game &game, const GamePlayer &player,
 
 bool AnyDominatedStrategies(const Game &game, const std::map<GamePlayer, StrategySupport> &domains)
 {
-  for (auto [player, strategies] : domains) {
+  for (const auto &[player, strategies] : domains) {
     const auto support_profile = RestrictedGame(game, player, domains);
     for (const auto &strategy : strategies) {
       if (support_profile.IsDominated(strategy, true)) {

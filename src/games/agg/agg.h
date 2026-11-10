@@ -215,11 +215,11 @@ public:
 
   void printPayoffs(std::ostream &s, int node) const
   {
-    s << exactPayoffs.at(node).size() << std::endl;
+    s << exactPayoffs.at(node).size() << '\n';
     for (const auto &entry : exactPayoffs.at(node)) {
       s << "[ ";
       std::ranges::copy(entry.first, std::ostream_iterator<int>(s, " "));
-      s << "] " << entry.second << std::endl;
+      s << "] " << entry.second << '\n';
     }
   }
 
@@ -228,7 +228,7 @@ public:
     for (const auto &neighbor : neighbors) {
       s << neighbor.size() << "\t";
       std::ranges::copy(neighbor, std::ostream_iterator<int>(s, " "));
-      s << std::endl;
+      s << '\n';
     }
   }
 

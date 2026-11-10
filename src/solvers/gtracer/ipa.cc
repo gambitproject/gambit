@@ -211,7 +211,7 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
 
 IPAResult IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz,
               unsigned int maxiter,
-              std::function<void(int, const cvector &, double, double)> p_onStep,
+              const std::function<void(int, const cvector &, double, double)> &p_onStep,
               const CancelToken &p_cancel)
 {
   const int N = A.getNumPlayers(),

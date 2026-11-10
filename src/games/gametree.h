@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 
 namespace Gambit {
 
@@ -134,7 +135,7 @@ public:
   GameNode GetMember(int p_index) const;
   Members GetMembers() const;
 
-  bool Precedes(GameNode) const;
+  bool Precedes(const GameNode &) const;
 
   std::set<GameAction> GetOwnPriorActions() const;
 
@@ -263,7 +264,7 @@ public:
 
   GameOutcome GetOutcome() const { return m_outcome->shared_from_this(); }
 
-  bool IsSuccessorOf(GameNode from) const;
+  bool IsSuccessorOf(const GameNode &from) const;
   bool IsSubgameRoot() const;
   bool IsStrategyReachable() const;
 };
@@ -351,7 +352,7 @@ inline GameNodeRep::Actions::iterator GameNodeRep::Actions::end() const
 
 inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterator p_action_it,
                                                 GameNodeRep::Children::iterator p_child_it)
-  : m_action_it(p_action_it), m_child_it(p_child_it)
+  : m_action_it(std::move(p_action_it)), m_child_it(std::move(p_child_it))
 {
 }
 
@@ -848,21 +849,22 @@ public:
 
   /// @name Modification
   //@{
-  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player,
+  GameInfoset AppendMove(const GameNode &p_node, const GamePlayer &p_player,
                          const std::vector<std::string> &p_actions) override;
-  GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player,
+  GameInfoset AppendMove(const GameNode &p_node, const GameInfoset &p_infoset) override;
+  GameInfoset InsertMove(const GameNode &p_node, const GamePlayer &p_player,
+                         int p_actions) override;
+  GameInfoset InsertMove(const GameNode &p_node, const GamePlayer &p_player,
                          const std::vector<std::string> &p_actions) override;
-  GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset AppendEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+  GameInfoset InsertMove(const GameNode &p_node, const GameInfoset &p_infoset) override;
+  GameInfoset AppendEvent(const GameNode &p_node, const std::vector<std::string> &p_actions,
                           const std::vector<Number> &p_probs) override;
-  GameInfoset InsertEvent(GameNode p_node, const std::vector<std::string> &p_actions,
+  GameInfoset InsertEvent(const GameNode &p_node, const std::vector<std::string> &p_actions,
                           const std::vector<Number> &p_probs) override;
-  void CopyTree(GameNode dest, GameNode src) override;
-  void MoveTree(GameNode dest, GameNode src) override;
-  void DeleteParent(GameNode) override;
-  void DeleteTree(GameNode) override;
+  void CopyTree(const GameNode &dest, const GameNode &src) override;
+  void MoveTree(const GameNode &dest, const GameNode &src) override;
+  void DeleteParent(const GameNode &) override;
+  void DeleteTree(const GameNode &) override;
   using GameRep::MakeOutcome;
   using GameRep::MakeOutcomeNull;
   GameOutcome MakeOutcome(const std::vector<GameNode> &, const std::vector<Number> &,
@@ -870,18 +872,18 @@ public:
   void MakeOutcomeNull(const std::vector<GameNode> &) override;
   GameInfoset MakeInfoset(const std::vector<GameNode> &, const GamePlayer &,
                           const std::string &) override;
-  void Reveal(GameInfoset, GamePlayer) override;
+  void Reveal(const GameInfoset &, const GamePlayer &) override;
   GameInfoset MakeEvent(const std::vector<GameNode> &, const std::vector<Number> &,
                         const std::string &) override;
   void RelabelActions(const GameInfoset &, const std::map<std::string, std::string> &) override;
   void SetMoveActions(const GameInfoset &, const std::vector<std::string> &) override;
   void SetEventActions(const GameInfoset &, const std::vector<std::string> &,
                        const std::vector<Number> &) override;
-  std::vector<GameNode> GetPlays(GameNode node) const override;
-  std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
-  std::vector<GameNode> GetPlays(GameAction action) const override;
+  std::vector<GameNode> GetPlays(const GameNode &node) const override;
+  std::vector<GameNode> GetPlays(const GameInfoset &infoset) const override;
+  std::vector<GameNode> GetPlays(const GameAction &action) const override;
 
-  Game CopySubgame(GameNode) const override;
+  Game CopySubgame(const GameNode &) const override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

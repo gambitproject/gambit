@@ -108,7 +108,7 @@ void div(const Rational &x, const Rational &y, Rational &r)
     Integer tmp;
     mul(x.num, y.den, tmp);
     mul(y.num, x.den, r.den);
-    r.num = tmp;
+    r.num = std::move(tmp);
   }
   r.normalize();
 }

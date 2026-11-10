@@ -25,6 +25,7 @@
 
 #include <compare>
 #include <memory>
+#include <utility>
 
 namespace Gambit {
 
@@ -66,7 +67,7 @@ template <class T> class GameObjectPtr {
 public:
   GameObjectPtr() = default;
   GameObjectPtr(std::nullptr_t r) : m_rep(r), m_game(nullptr) {}
-  GameObjectPtr(std::shared_ptr<T> r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
+  GameObjectPtr(const std::shared_ptr<T> &r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
   GameObjectPtr(const GameObjectPtr<T> &) = default;
   GameObjectPtr(GameObjectPtr<T> &&) = default;
   ~GameObjectPtr() = default;
@@ -281,7 +282,7 @@ public:
     iterator() = default;
 
     iterator(T p_owner, const bool p_isEnd)
-      : m_iterOwner(p_owner), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
+      : m_iterOwner(std::move(p_owner)), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
         m_outerIt(std::begin(m_outerRange)), m_outerEnd(std::end(m_outerRange))
     {
       if (p_isEnd) {
@@ -317,7 +318,7 @@ public:
     }
   };
 
-  explicit NestedElementCollection(T owner) : m_owner(owner) {}
+  explicit NestedElementCollection(T owner) : m_owner(std::move(owner)) {}
 
   /// @brief Return the total number of elements summed across all inner ranges
   std::size_t size() const

@@ -2149,7 +2149,7 @@ std::string Itoa(const IntegerRep *x, int base, int width)
   int fmtlen = static_cast<int>((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
-    fmtbase += " ";
+    fmtbase += ' ';
   }
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }

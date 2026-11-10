@@ -98,7 +98,7 @@ struct proj_func {
     out << Type;
     out << " " << Default << " ";
     std::ranges::copy(weights, std::ostream_iterator<int>(out, " "));
-    out << std::endl;
+    out << '\n';
   }
 };
 
@@ -109,7 +109,7 @@ struct proj_func_SUM : public proj_func {
 
   int operator()(std::multiset<int> &s) const override { return s.size(); }
 
-  void print(std::ostream &out) const override { out << P_SUM << std::endl; }
+  void print(std::ostream &out) const override { out << P_SUM << '\n'; }
 };
 
 struct proj_func_SUM2 : public proj_func {
@@ -134,7 +134,7 @@ struct proj_func_EXIST : public proj_func {
 
   int operator()(std::multiset<int> &s) const override { return !s.empty(); }
 
-  void print(std::ostream &out) const override { out << P_EXIST << std::endl; }
+  void print(std::ostream &out) const override { out << P_EXIST << '\n'; }
 };
 
 struct proj_func_EXIST2 : public proj_func {
@@ -184,7 +184,7 @@ struct proj_func_HIGH : public proj_func {
     return *(s.rbegin());
   }
 
-  void print(std::ostream &out) const override { out << P_HIGH << std::endl; }
+  void print(std::ostream &out) const override { out << P_HIGH << '\n'; }
 };
 
 struct proj_func_HIGH2 : public proj_func {
@@ -237,7 +237,7 @@ struct proj_func_LOW : public proj_func {
     return *(s.begin());
   }
 
-  void print(std::ostream &out) const override { out << P_LOW << std::endl; }
+  void print(std::ostream &out) const override { out << P_LOW << '\n'; }
 };
 
 struct proj_func_LOW2 : public proj_func {

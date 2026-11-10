@@ -162,7 +162,7 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
   for (const auto &[sequence, idx] : p_indexMap.index) {
     T value{0};
     if (tab.IsMember(idx)) {
-      const T candidate = sol[tab.GetPosition(idx)];
+      const T &candidate = sol[tab.GetPosition(idx)];
       if (candidate > eps) {
         value = candidate;
       }
@@ -179,7 +179,8 @@ MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vec
 // as refined by Eaves for degenerate problems, starting from the primary ray.
 //
 template <class T>
-LcpBehaviorResult<T> LcpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T> p_onEquilibrium,
+LcpBehaviorResult<T> LcpBehaviorSolve(const Game &p_game,
+                                      const BehaviorCallbackType<T> &p_onEquilibrium,
                                       const CancelToken &p_cancel)
 {
   if (p_game->NumPlayers() != 2) {
@@ -202,9 +203,9 @@ LcpBehaviorResult<T> LcpBehaviorSolve(const Game &p_game, BehaviorCallbackType<T
   return {profile, true};
 }
 
-template LcpBehaviorResult<double> LcpBehaviorSolve(const Game &, BehaviorCallbackType<double>,
-                                                    const CancelToken &);
-template LcpBehaviorResult<Rational> LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>,
-                                                      const CancelToken &);
+template LcpBehaviorResult<double>
+LcpBehaviorSolve(const Game &, const BehaviorCallbackType<double> &, const CancelToken &);
+template LcpBehaviorResult<Rational>
+LcpBehaviorSolve(const Game &, const BehaviorCallbackType<Rational> &, const CancelToken &);
 
 } // end namespace Gambit::Nash

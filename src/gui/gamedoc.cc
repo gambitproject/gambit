@@ -24,6 +24,7 @@
 #include <sstream>
 #include <fstream>
 #include <set>
+#include <utility>
 
 #include "games.h"
 #include "games/gametree.h"
@@ -131,7 +132,7 @@ void AnalysisWorkspace::BuildNfg()
   std::ranges::for_each(m_profiles, std::mem_fn(&AnalysisOutput::BuildNfg));
 }
 
-void AnalysisWorkspace::AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
+void AnalysisWorkspace::AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
 {
   m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.size();
@@ -207,7 +208,7 @@ bool AnalysisWorkspace::Load(const std::vector<WorkspaceFile::Analysis> &p_analy
 //                          class GameDocument
 //=========================================================================
 
-GameDocument::GameDocument(Game p_game) : m_game(p_game), m_workspace(this)
+GameDocument::GameDocument(Game p_game) : m_game(std::move(p_game)), m_workspace(this)
 {
   wxGetApp().AddDocument(this);
   ResetUndoHistory();
@@ -381,7 +382,7 @@ void GameDocument::DoSelectProfile(int p_profile)
   UpdateViews();
 }
 
-void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
+void GameDocument::DoAddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
 {
   m_workspace.AddEquilibriumOutput(p_profs);
   NotifyChanged(GameModificationType::Workspace);
@@ -507,7 +508,7 @@ void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetStrategies(GamePlayer p_player,
+void GameDocument::DoSetStrategies(const GamePlayer &p_player,
                                    const std::vector<std::string> &p_stableLabels,
                                    const std::vector<std::string> &p_labels)
 {
@@ -529,20 +530,20 @@ void GameDocument::DoSetStrategies(GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
+void GameDocument::DoSetInfosetLabel(const GameInfoset &p_infoset, const wxString &p_label)
 {
   p_infoset->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoRelabelActions(GameInfoset p_infoset,
+void GameDocument::DoRelabelActions(const GameInfoset &p_infoset,
                                     const std::map<std::string, std::string> &p_labels)
 {
   m_game->RelabelActions(p_infoset, p_labels);
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActions(GameInfoset p_infoset,
+void GameDocument::DoSetActions(const GameInfoset &p_infoset,
                                 const std::vector<std::string> &p_stableLabels,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
@@ -570,7 +571,7 @@ void GameDocument::DoSetActions(GameInfoset p_infoset,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset)
 {
   if (p_node->GetInfoset() == p_infoset) {
     return;
@@ -581,7 +582,7 @@ void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoLeaveInfoset(GameNode p_node)
+void GameDocument::DoLeaveInfoset(const GameNode &p_node)
 {
   const GameInfoset infoset = p_node->GetInfoset();
   if (!infoset) {
@@ -596,25 +597,25 @@ void GameDocument::DoLeaveInfoset(GameNode p_node)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoRevealAction(const GameInfoset &p_infoset, const GamePlayer &p_player)
 {
   m_game->Reveal(p_infoset, p_player);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
+void GameDocument::DoSetNodeLabel(const GameNode &p_node, const wxString &p_label)
 {
   p_node->SetLabel(p_label.ToStdString(wxConvUTF8));
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoAppendMove(const GameNode &p_node, const GameInfoset &p_infoset)
 {
   m_game->AppendMove(p_node, p_infoset);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
+void GameDocument::DoAppendMove(const GameNode &p_node, const GamePlayer &p_player,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
 {
@@ -627,7 +628,7 @@ void GameDocument::DoAppendMove(GameNode p_node, GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
+void GameDocument::DoInsertMove(const GameNode &p_node, const GamePlayer &p_player,
                                 const std::vector<std::string> &p_labels,
                                 const std::vector<Number> &p_probs)
 {
@@ -640,19 +641,19 @@ void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player,
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoCopyTree(const GameNode &p_destNode, const GameNode &p_srcNode)
 {
   m_game->CopyTree(p_destNode, p_srcNode);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoMoveTree(const GameNode &p_destNode, const GameNode &p_srcNode)
 {
   m_game->MoveTree(p_destNode, p_srcNode);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoDeleteParent(GameNode p_node)
+void GameDocument::DoDeleteParent(const GameNode &p_node)
 {
   if (!p_node || !p_node->GetParent()) {
     return;
@@ -661,13 +662,13 @@ void GameDocument::DoDeleteParent(GameNode p_node)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoDeleteTree(GameNode p_node)
+void GameDocument::DoDeleteTree(const GameNode &p_node)
 {
   m_game->DeleteTree(p_node);
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoSetPlayer(const GameInfoset &p_infoset, const GamePlayer &p_player)
 {
   if (p_player->IsChance() || p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
@@ -682,7 +683,7 @@ void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   NotifyChanged(GameModificationType::GameForm);
 }
 
-void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
+void GameDocument::DoSetPlayer(const GameNode &p_node, const GamePlayer &p_player)
 {
   DoSetPlayer(p_node->GetInfoset(), p_player);
 }
@@ -702,7 +703,7 @@ std::string GenerateOutcomeLabel(const Game &p_game)
 
 void GameDocument::DoNewOutcome(GameNode p_node)
 {
-  m_game->MakeOutcome({p_node}, std::vector<Number>(m_game->NumPlayers(), Number()),
+  m_game->MakeOutcome({std::move(p_node)}, std::vector<Number>(m_game->NumPlayers(), Number()),
                       GenerateOutcomeLabel(m_game));
   NotifyChanged(GameModificationType::GamePayoffs);
 }
@@ -719,7 +720,7 @@ void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
+void GameDocument::DoSetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
 {
   if (!p_outcome) {
     m_game->MakeOutcomeNull({p_node});
@@ -801,7 +802,7 @@ void GameDocument::DoSetOutcomeData(const GameNode &p_node, const wxString &p_la
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoRemoveOutcome(GameNode p_node)
+void GameDocument::DoRemoveOutcome(const GameNode &p_node)
 {
   if (!p_node || p_node->GetOutcome()->IsNull()) {
     return;
@@ -841,7 +842,7 @@ void GameDocument::DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profi
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_label,
+void GameDocument::DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
                                     const std::vector<wxString> &p_payoffs)
 {
   if (p_payoffs.size() != m_game->NumPlayers()) {
@@ -855,7 +856,7 @@ void GameDocument::DoSetOutcomeData(GameOutcome p_outcome, const wxString &p_lab
   NotifyChanged(GameModificationType::GamePayoffs);
 }
 
-void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
+void GameDocument::DoSetPayoff(const GameOutcome &p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   NotifyChanged(GameModificationType::GamePayoffs);

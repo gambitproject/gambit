@@ -296,7 +296,7 @@ template class BAGGMixedStrategyProfileRep<Rational>;
 //                      GameBAGGRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
+GameBAGGRep::GameBAGGRep(const std::shared_ptr<agg::BAGG> &_baggPtr)
   : baggPtr(_baggPtr), agent2baggPlayer(_baggPtr->getNumTypes())
 {
   int k = 1;

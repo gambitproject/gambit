@@ -589,7 +589,7 @@ void TreeLayout::Layout(const Game &p_game)
   }
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
-  for (auto [node, entry] : layout.GetNodeMap()) {
+  for (const auto &[node, entry] : layout.GetNodeMap()) {
     m_nodeMap[node]->m_level = entry->m_level;
     m_nodeMap[node]->m_sublevel = entry->m_sublevel;
     m_nodeMap[node]->SetY(entry->m_offset * spacing + c_topMargin);
