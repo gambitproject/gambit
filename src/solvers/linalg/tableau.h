@@ -88,9 +88,11 @@ public:
                           [n = -m_basisLabels.front_index()]() mutable { return n--; });
   }
   Basis(const Basis &) = default;
+  Basis(Basis &&) = default;
   ~Basis() = default;
 
   Basis &operator=(const Basis &) = default;
+  Basis &operator=(Basis &&) = default;
 
   int GetFirst() const { return m_basisLabels.front_index(); }
   int GetLast() const { return m_basisLabels.back_index(); }
@@ -200,9 +202,11 @@ public:
     }
   }
   TableauBase(const TableauBase<T> &) = default;
+  TableauBase(TableauBase<T> &&) = default;
   ~TableauBase() = default;
 
   TableauBase<T> &operator=(const TableauBase<T> &) = default;
+  TableauBase<T> &operator=(TableauBase<T> &&) = default;
 
   /// @name Information
   //@{
@@ -291,6 +295,8 @@ public:
   ~Tableau() = default;
 
   Tableau<double> &operator=(const Tableau<double> &);
+  Tableau(Tableau<double> &&) = delete;
+  Tableau<double> &operator=(Tableau<double> &&) = delete;
   //@}
 
   /// @name Pivoting
@@ -339,6 +345,8 @@ public:
   ~Tableau() = default;
 
   Tableau<Rational> &operator=(const Tableau<Rational> &) = default;
+  Tableau(Tableau<Rational> &&) = default;
+  Tableau<Rational> &operator=(Tableau<Rational> &&) = default;
 
   /// @name Pivoting
   //@{

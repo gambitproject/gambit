@@ -484,6 +484,8 @@ public:
   }
   GamePlayerRep(GameRep *p_game, int p_id, const std::string &p_label, int p_strats);
   ~GamePlayerRep();
+  GamePlayerRep(const GamePlayerRep &) = delete;
+  GamePlayerRep &operator=(const GamePlayerRep &) = delete;
 
   bool IsValid() const { return m_valid; }
   void Invalidate() { m_valid = false; }
@@ -693,6 +695,8 @@ public:
   //@{
   /// Clean up the game
   virtual ~GameRep();
+  GameRep(const GameRep &) = delete;
+  GameRep &operator=(const GameRep &) = delete;
 
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;

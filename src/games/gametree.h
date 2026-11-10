@@ -97,6 +97,8 @@ public:
 
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
   ~GameInfosetRep();
+  GameInfosetRep(const GameInfosetRep &) = delete;
+  GameInfosetRep &operator=(const GameInfosetRep &) = delete;
 
   bool IsValid() const { return m_valid; }
   void Invalidate() { m_valid = false; }
@@ -222,6 +224,8 @@ public:
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
   ~GameNodeRep();
+  GameNodeRep(const GameNodeRep &) = delete;
+  GameNodeRep &operator=(const GameNodeRep &) = delete;
 
   bool IsValid() const { return m_valid; }
   void Invalidate() { m_valid = false; }
@@ -780,6 +784,8 @@ public:
   //@{
   GameTreeRep();
   ~GameTreeRep() override;
+  GameTreeRep(const GameTreeRep &) = delete;
+  GameTreeRep &operator=(const GameTreeRep &) = delete;
   Game Copy() const override;
   //@}
 

@@ -68,9 +68,11 @@ public:
   GameObjectPtr(std::nullptr_t r) : m_rep(r), m_game(nullptr) {}
   GameObjectPtr(std::shared_ptr<T> r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
   GameObjectPtr(const GameObjectPtr<T> &) = default;
+  GameObjectPtr(GameObjectPtr<T> &&) = default;
   ~GameObjectPtr() = default;
 
   GameObjectPtr<T> &operator=(const GameObjectPtr<T> &) = default;
+  GameObjectPtr<T> &operator=(GameObjectPtr<T> &&) = default;
 
   /// Access the shared pointer to the object representing the game element
   ///
@@ -167,8 +169,10 @@ public:
     {
     }
     iterator(const iterator &) = default;
+    iterator(iterator &&) = default;
     ~iterator() = default;
     iterator &operator=(const iterator &) = default;
+    iterator &operator=(iterator &&) = default;
 
     bool operator==(const iterator &p_iter) const
     {
@@ -209,8 +213,10 @@ public:
   {
   }
   ElementCollection(const ElementCollection<P, T> &) = default;
+  ElementCollection(ElementCollection<P, T> &&) = default;
   ~ElementCollection() = default;
   ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+  ElementCollection &operator=(ElementCollection<P, T> &&) = default;
 
   bool operator==(const ElementCollection<P, T> &p_other) const
   {

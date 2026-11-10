@@ -45,7 +45,10 @@ public:
     {
     }
     iterator(const iterator &) = default;
+    iterator(iterator &&) = default;
     ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+    iterator &operator=(iterator &&) = default;
 
     const Array<int> &operator*() const { return m_current; }
 
@@ -75,9 +78,10 @@ public:
   {
   }
   CartesianIndexProduct(const CartesianIndexProduct &) = default;
+  CartesianIndexProduct(CartesianIndexProduct &&) = default;
   ~CartesianIndexProduct() = default;
-
   CartesianIndexProduct &operator=(const CartesianIndexProduct &) = default;
+  CartesianIndexProduct &operator=(CartesianIndexProduct &&) = default;
 
   iterator begin() { return {this, false}; }
   iterator end() { return {this, true}; }

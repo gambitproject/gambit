@@ -82,6 +82,8 @@ public:
   ExponentVector(const ExponentVector &) = default;
   ~ExponentVector() = default;
   ExponentVector &operator=(const ExponentVector &) = default;
+  ExponentVector(ExponentVector &&) = default;
+  ExponentVector &operator=(ExponentVector &&) = default;
 
   auto begin() const noexcept { return m_components.begin(); }
   auto end() const noexcept { return m_components.end(); }

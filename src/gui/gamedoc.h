@@ -436,6 +436,8 @@ public:
   {
     m_doc->AddView(this);
   }
+  GameView(const GameView &) = delete;
+  GameView &operator=(const GameView &) = delete;
   virtual ~GameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;

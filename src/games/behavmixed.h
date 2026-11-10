@@ -169,6 +169,8 @@ public:
   explicit MixedBehaviorProfile(const Game &);
   explicit MixedBehaviorProfile(const BehaviorSupportProfile &);
   MixedBehaviorProfile(const MixedBehaviorProfile<T> &) = default;
+  MixedBehaviorProfile(MixedBehaviorProfile<T> &&) = default;
+  MixedBehaviorProfile<T> &operator=(MixedBehaviorProfile<T> &&) = default;
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   MixedBehaviorProfile(const MixedSequenceProfile<T> &);
   ~MixedBehaviorProfile() = default;

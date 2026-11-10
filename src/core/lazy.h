@@ -54,7 +54,14 @@ template <class T> class Lazy {
 public:
   Lazy() = default;
   Lazy(const Lazy &) {}
+  Lazy(Lazy &&) noexcept {}
+  ~Lazy() = default;
   Lazy &operator=(const Lazy &)
+  {
+    Invalidate();
+    return *this;
+  }
+  Lazy &operator=(Lazy &&) noexcept
   {
     Invalidate();
     return *this;
@@ -113,7 +120,14 @@ class LazyAction {
 public:
   LazyAction() = default;
   LazyAction(const LazyAction &) {}
+  LazyAction(LazyAction &&) noexcept {}
+  ~LazyAction() = default;
   LazyAction &operator=(const LazyAction &)
+  {
+    Invalidate();
+    return *this;
+  }
+  LazyAction &operator=(LazyAction &&) noexcept
   {
     Invalidate();
     return *this;

@@ -42,7 +42,10 @@ public:
   {
   }
   LogitQRE(const LogitQRE &p_qre) = default;
+  LogitQRE(LogitQRE &&) = default;
   ~LogitQRE() = default;
+  LogitQRE &operator=(const LogitQRE &) = default;
+  LogitQRE &operator=(LogitQRE &&) = default;
 
   double GetLambda() const { return m_lambda; }
 

@@ -164,6 +164,8 @@ public:
     Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
   }
 
+  ExternalProcessRunner(const ExternalProcessRunner &) = delete;
+  ExternalProcessRunner &operator=(const ExternalProcessRunner &) = delete;
   ~ExternalProcessRunner() override
   {
     m_timer.Stop();

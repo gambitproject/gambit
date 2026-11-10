@@ -137,6 +137,8 @@ public:
   {
   }
 
+  PayoffTable(const PayoffTable &) = delete;
+  PayoffTable &operator=(const PayoffTable &) = delete;
   ~PayoffTable() override
   {
     m_renderer->DecRef();

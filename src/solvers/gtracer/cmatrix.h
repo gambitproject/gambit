@@ -28,6 +28,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include "core/util.h"
@@ -110,6 +111,12 @@ public:
 
   cvector(const cvector &v) : m(v.m), x(new double[m]) { memcpy(x, v.x, m * sizeof(double)); }
 
+  cvector(cvector &&v) noexcept : m(v.m), x(v.x)
+  {
+    v.m = 0;
+    v.x = nullptr;
+  }
+
   cvector(int _m, double a) : m(_m), x(new double[_m])
   {
     for (int i = 0; i < m; i++) {
@@ -131,6 +138,13 @@ public:
     for (int i = 0; i < m; i++) {
       x[i] = a;
     }
+    return *this;
+  }
+
+  cvector &operator=(cvector &&v) noexcept
+  {
+    std::swap(m, v.m);
+    std::swap(x, v.x);
     return *this;
   }
 
@@ -508,6 +522,21 @@ public:
         x[i] = a;
       }
     }
+    return *this;
+  }
+
+  cmatrix(cmatrix &&ma) noexcept : m(ma.m), n(ma.n), s(ma.s), x(ma.x)
+  {
+    ma.m = ma.n = ma.s = 0;
+    ma.x = nullptr;
+  }
+
+  cmatrix &operator=(cmatrix &&ma) noexcept
+  {
+    std::swap(m, ma.m);
+    std::swap(n, ma.n);
+    std::swap(s, ma.s);
+    std::swap(x, ma.x);
     return *this;
   }
 

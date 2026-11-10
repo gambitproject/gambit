@@ -94,6 +94,8 @@ public:
   {
   }
 
+  RowPlayerTable(const RowPlayerTable &) = delete;
+  RowPlayerTable &operator=(const RowPlayerTable &) = delete;
   ~RowPlayerTable() override { m_renderer->DecRef(); }
 
   int GetNumberRows() override { return m_numRows; }
@@ -631,6 +633,8 @@ public:
   {
   }
 
+  ColPlayerTable(const ColPlayerTable &) = delete;
+  ColPlayerTable &operator=(const ColPlayerTable &) = delete;
   ~ColPlayerTable() override { m_renderer->DecRef(); }
 
   int GetNumberRows() override { return m_numRows; }

@@ -46,6 +46,8 @@ public:
   /// Constructor
   explicit GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr);
   /// Destructor
+  GameBAGGRep(const GameBAGGRep &) = delete;
+  GameBAGGRep &operator=(const GameBAGGRep &) = delete;
   ~GameBAGGRep() override
   {
     for (const auto &player : m_players) {

@@ -101,6 +101,8 @@ public:
   // CONSTRUCTOR AND DESTRUCTOR
   GameFrame(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~GameFrame() override;
+  GameFrame(const GameFrame &) = delete;
+  GameFrame &operator=(const GameFrame &) = delete;
 
   DECLARE_EVENT_TABLE()
 };

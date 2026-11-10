@@ -56,9 +56,11 @@ public:
   explicit Rational(const Integer &n);
   Rational(const Integer &n, const Integer &d);
   Rational(const Rational &);
+  Rational(Rational &&) noexcept;
   ~Rational();
 
   Rational &operator=(const Rational &y);
+  Rational &operator=(Rational &&y) noexcept;
 
   bool operator==(const Rational &y) const;
   bool operator<(const Rational &y) const;

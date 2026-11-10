@@ -390,6 +390,8 @@ Rational::~Rational() = default;
 
 Rational::Rational(const Rational &y) = default;
 
+Rational::Rational(Rational &&y) noexcept = default;
+
 Rational::Rational(const Integer &n) : num(n), den(&OneRep) {}
 
 Rational::Rational(const Integer &n, const Integer &d) : num(n), den(d)
@@ -423,6 +425,8 @@ Rational::Rational(int n, int d) : num(n), den(d)
 }
 
 Rational &Rational::operator=(const Rational &y) = default;
+
+Rational &Rational::operator=(Rational &&y) noexcept = default;
 
 bool Rational::operator==(const Rational &y) const
 {

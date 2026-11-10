@@ -2325,7 +2325,15 @@ void Integer::error(const char *msg) { throw std::runtime_error(msg); }
 
 Integer::Integer() : rep(&ZeroRep) {}
 
+Integer::Integer(Integer &&y) noexcept : rep(y.rep) { y.rep = &ZeroRep; }
+
 Integer::~Integer() { Ifree(rep); }
+
+Integer &Integer::operator=(Integer &&y) noexcept
+{
+  std::swap(rep, y.rep);
+  return *this;
+}
 
 Integer &Integer::operator=(const Integer &y)
 {

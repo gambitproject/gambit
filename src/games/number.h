@@ -66,9 +66,12 @@ public:
       m_double(static_cast<double>(p_rational))
   {
   }
+  Number(const Number &) = default;
+  Number(Number &&) = default;
   ~Number() = default;
 
   Number &operator=(const Number &p_number) = default;
+  Number &operator=(Number &&) = default;
   Number &operator=(const std::string &p_text)
   {
     // We call lexical_cast<Rational>() first because it throws a ValueException

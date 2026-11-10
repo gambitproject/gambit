@@ -41,6 +41,9 @@ public:
   NumberValidator(wxString *, const Rational &);
   NumberValidator(wxString *, const Rational &, const Rational &);
   NumberValidator(const NumberValidator &);
+  NumberValidator(NumberValidator &&) = delete;
+  NumberValidator &operator=(const NumberValidator &) = delete;
+  NumberValidator &operator=(NumberValidator &&) = delete;
   ~NumberValidator() override = default;
 
   wxObject *Clone() const override { return new NumberValidator(*this); }

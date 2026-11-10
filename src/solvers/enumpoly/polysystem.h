@@ -40,8 +40,10 @@ public:
 
   PolynomialSystem(std::shared_ptr<VariableSpace> p_space) : m_space(p_space) {}
   PolynomialSystem(const PolynomialSystem<T> &) = default;
+  PolynomialSystem(PolynomialSystem<T> &&) = default;
   ~PolynomialSystem() = default;
   PolynomialSystem<T> &operator=(const PolynomialSystem<T> &) = default;
+  PolynomialSystem<T> &operator=(PolynomialSystem<T> &&) = default;
 
   iterator begin() { return m_system.begin(); }
   const_iterator begin() const { return m_system.begin(); }

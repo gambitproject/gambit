@@ -100,6 +100,8 @@ public:
 
   // assignment
   trie_map<V> &operator=(const trie_map<V> &other);
+  trie_map(trie_map<V> &&) = delete;
+  trie_map<V> &operator=(trie_map<V> &&) = delete;
 
   void swap(trie_map<V> &other);
 
