@@ -26,51 +26,18 @@ import typing
 
 import cython
 
+from ._labels import _compute_relabeling, _reconcile_labels, _resolve_infoset_or_event_kind
+from ._layout import TreeLayout, TreeLayoutCoordinates
+from ._numbers import Decimal, Rational  # no-cython-lint
+from ._numbers import to_number_string as _to_number_string
+from ._random import _dirichlet_distribution, _grid_distribution
 from .error import *
-
-
-class Decimal(decimal.Decimal):
-    pass
-
-
-class Rational(fractions.Fraction):
-    """Represents a rational number in specifying numerical data for a game,
-    or in a strategy profile.
-
-    .. versionadded:: 15.0.0
-    """
-    def _repr_latex_(self) -> str:
-        if self.denominator != 1:
-            return r"$\frac{%s}{%s}$" % (self.numerator, self.denominator)
-        else:
-            return r"$%s$" % self.numerator
 
 
 @cython.cfunc
 def rat_to_py(r: c_Rational):
     """Convert a C++ Rational number to a Python Rational."""
     return Rational(to_string(r).decode("ascii"))
-
-
-@cython.cfunc
-def _to_number_string(value: typing.Any) -> str:
-    """Coerce a value (int, float, str, Decimal, or Rational) into a canonical string
-    representation of a number, following Gambit's usual numeric coercion rules.
-    """
-    if isinstance(value, (int, Decimal, Rational)):
-        return str(value)
-    if "/" in str(value):
-        try:
-            return str(Rational(str(value)))
-        except ValueError:
-            raise ValueError(f"Cannot convert '{value}' to a number") from None
-    # This slightly indirect way of converting deals best with
-    # rounding of floating point numbers - so calling code gets
-    # the value it expects when using a float
-    try:
-        return str(Decimal(str(value)))
-    except decimal.InvalidOperation:
-        raise ValueError(f"Cannot convert '{value}' to a number") from None
 
 
 @cython.cfunc
