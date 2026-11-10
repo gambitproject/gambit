@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GUI_GAMEDOC_H
 #define GAMBIT_GUI_GAMEDOC_H
 
+#include <algorithm>
 #include <map>
 
 #include "games/behavspt.h"
@@ -45,7 +46,7 @@ class StrategyDominanceStack {
   bool m_strict;
   Array<std::shared_ptr<StrategySupportProfile>> m_supports;
   size_t m_current{0};
-  bool m_noFurther;
+  bool m_noFurther{false};
 
 public:
   StrategyDominanceStack(GameDocument *p_doc, bool p_strict);
@@ -171,7 +172,7 @@ class AnalysisWorkspace {
   StrategyDominanceStack m_stratSupports;
 
   Array<std::shared_ptr<AnalysisOutput>> m_profiles;
-  int m_currentProfileList;
+  int m_currentProfileList{0};
 
 public:
   explicit AnalysisWorkspace(GameDocument *p_doc);
@@ -218,16 +219,13 @@ class GameDocument {
   std::list<GameView *> m_views;
 
   void AddView(GameView *p_view) { m_views.push_back(p_view); }
-  void RemoveView(GameView *p_view)
-  {
-    m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
-  }
+  void RemoveView(GameView *p_view) { m_views.erase(std::ranges::find(m_views, p_view)); }
 
   Game m_game;
   wxString m_filename;
 
   TreeRenderConfig m_style;
-  bool m_gameModified, m_workspaceModified;
+  bool m_gameModified{false}, m_workspaceModified{false};
 
   AnalysisWorkspace m_workspace;
   NashChoice m_nashChoice;

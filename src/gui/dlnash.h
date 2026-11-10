@@ -36,7 +36,7 @@
 namespace Gambit::GUI {
 class NashChoiceDialog final : public wxDialog {
   std::shared_ptr<GameDocument> m_doc;
-  wxRadioButton *m_goalButtons[3];
+  wxRadioButton *m_goalButtons[3]{};
   wxStaticText *m_goalNote;
   wxStaticText *m_warning;
   wxCollapsiblePane *m_details;
@@ -73,7 +73,7 @@ public:
   bool UseStrategic() const;
 
   /// The goal and explicitly picked variant, for the document to remember.
-  NashChoice GetChoice() const { return {GetGoal(), m_userChoice}; }
+  NashChoice GetChoice() const { return {.goal = GetGoal(), .variant = m_userChoice}; }
 };
 } // namespace Gambit::GUI
 

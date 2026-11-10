@@ -57,7 +57,7 @@ void AnalysisProfileList<T>::AddProfile(const MixedBehaviorProfile<T> &p_profile
 
 template <class T> void AnalysisProfileList<T>::BuildNfg()
 {
-  for (auto profile : m_behavProfiles) {
+  for (const auto profile : m_behavProfiles) {
     m_mixedProfiles.push_back(
         std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
   }
@@ -427,7 +427,7 @@ template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
         }
         probabilities << behav[k];
       }
-      result.profiles.push_back({"behav", probabilities.str()});
+      result.profiles.push_back({.type = "behav", .probabilities = probabilities.str()});
     }
   }
   else {
@@ -440,7 +440,7 @@ template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
         }
         probabilities << mixed[k];
       }
-      result.profiles.push_back({"mixed", probabilities.str()});
+      result.profiles.push_back({.type = "mixed", .probabilities = probabilities.str()});
     }
   }
   return result;

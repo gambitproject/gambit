@@ -47,7 +47,7 @@ Checks: |
   cppcoreguidelines-prefer-member-initializer,
   misc-const-correctness
 WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
+HeaderFilterRegex: '.*/src/(core|games|solvers|gui)/.*'
 FormatStyle:     none
 CheckOptions:
   - key:             modernize-loop-convert.MinConfidence

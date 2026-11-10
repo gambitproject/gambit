@@ -28,7 +28,7 @@
 
 namespace Gambit::GUI {
 class LayoutDialog final : public wxDialog {
-  bool m_toDefaults;
+  bool m_toDefaults{false};
   wxNotebook *m_notebook;
 
   // Event handlers

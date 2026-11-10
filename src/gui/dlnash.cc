@@ -511,7 +511,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, const std::shared_ptr<Gam
                 [this, child](wxMouseEvent &p_event) { OnListMotion(child, p_event); });
   }
 
-  int displayIndex = wxDisplay::GetFromWindow(p_parent ? p_parent : this);
+  const int displayIndex = wxDisplay::GetFromWindow(p_parent ? p_parent : this);
   const wxRect area = wxDisplay(displayIndex == wxNOT_FOUND ? 0 : displayIndex).GetClientArea();
   m_list->SetMinSize(wxSize(std::min(FromDIP(660), area.width * 8 / 10),
                             std::min(FromDIP(300), area.height * 4 / 10)));
@@ -590,7 +590,7 @@ void NashChoiceDialog::OnListMotion(wxWindow *p_window, wxMouseEvent &p_event)
   const wxPoint position = m_list->ScreenToClient(p_window->ClientToScreen(p_event.GetPosition()));
   const long row = m_list->HitTest(position, flags);
   wxString tip;
-  if (row != wxNOT_FOUND && row < static_cast<long>(m_rows.size())) {
+  if (row != wxNOT_FOUND && std::cmp_less(row, m_rows.size())) {
     if (const auto reason = UnavailableReason(*m_rows[row], m_doc->GetGame())) {
       tip = FromStd(*reason);
     }
@@ -619,7 +619,7 @@ void NashChoiceDialog::SelectRow(const NashVariant &p_variant)
 {
   const bool wasRefreshing = m_refreshing;
   m_refreshing = true;
-  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+  for (int row = 0; std::cmp_less(row, m_rows.size()); row++) {
     if (m_rows[row] == &p_variant) {
       m_list->SetItemState(row, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
                            wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
@@ -660,7 +660,7 @@ void NashChoiceDialog::RefreshList()
   m_refreshing = true;
   m_list->DeleteAllItems();
   const wxColour grey = wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT);
-  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+  for (int row = 0; std::cmp_less(row, m_rows.size()); row++) {
     const auto &variant = *m_rows[row];
     const auto reason = UnavailableReason(variant, game);
     const wxString label = VariantLabel(variant);
@@ -682,7 +682,7 @@ void NashChoiceDialog::RefreshList()
 void NashChoiceDialog::UpdateRecommendation()
 {
   const auto *recommended = &RecommendedVariant(GetGoal(), m_doc->GetGame());
-  for (int row = 0; row < static_cast<int>(m_rows.size()); row++) {
+  for (int row = 0; std::cmp_less(row, m_rows.size()); row++) {
     m_list->SetItem(row, COL_STAR,
                     m_rows[row] == recommended ? wxString::FromUTF8("\xE2\x98\x85") : wxString{});
   }
@@ -721,11 +721,13 @@ NashComputationSpec NashChoiceDialog::GetComputation() const
 {
   const auto goal = GetGoal();
   const auto &variant = GetSelectedVariant();
-  return {variant.representation == VariantRepresentation::Strategic
-              ? NashRepresentation::Strategic
-              : NashRepresentation::Behavior,
-          GetTarget(goal), ResolveMethod(variant.method, goal), m_userChoice == nullptr,
-          variant.solves == VariantConcept::AgentNash};
+  return {.representation = variant.representation == VariantRepresentation::Strategic
+                                ? NashRepresentation::Strategic
+                                : NashRepresentation::Behavior,
+          .target = GetTarget(goal),
+          .method = ResolveMethod(variant.method, goal),
+          .selectedByRecommendation = m_userChoice == nullptr,
+          .agentNash = variant.solves == VariantConcept::AgentNash};
 }
 
 std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const

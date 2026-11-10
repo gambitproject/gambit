@@ -287,7 +287,7 @@ class SolverThreadRunner final : public wxThread {
     auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
     evt->SetInt(exitCode);
     wxQueueEvent(m_parent, evt);
-    return static_cast<wxThread::ExitCode>(0);
+    return static_cast<wxThread::ExitCode>(nullptr);
   }
 
 public:
@@ -435,7 +435,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
       // EnsureInfosetOrdering() itself is protected; constructing a
       // profile forces it via the same public code path the worker's own
       // starting profile will use.
-      MixedBehaviorProfile<double> warmup(m_doc->GetGame());
+      const MixedBehaviorProfile<double> warmup(m_doc->GetGame());
       m_doc->GetGame()->EnsureSequences();
     }
     else {

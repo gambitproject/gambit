@@ -142,7 +142,8 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
                          const std::function<void()> &p_onChanged)
   : wxScrolledWindow(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                      wxVSCROLL | wxTAB_TRAVERSAL),
-    m_isChance(p_infoset->IsChanceInfoset()), m_onChanged(p_onChanged)
+    m_isChance(p_infoset->IsChanceInfoset()), m_topSizer(new wxBoxSizer(wxVERTICAL)),
+    m_onChanged(p_onChanged)
 {
   // Explicit, rather than inherited from the dialog: this is what gives the action list a
   // visible contrast against the shaded header panel above it, the same white-against-shaded
@@ -160,7 +161,6 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
     m_rows.push_back(std::move(row));
   }
 
-  m_topSizer = new wxBoxSizer(wxVERTICAL);
   SetSizer(m_topSizer);
   SetScrollRate(0, FromDIP(10));
 

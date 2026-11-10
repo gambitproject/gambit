@@ -503,13 +503,16 @@ CLANG_TIDY = clang-tidy
 CLANG_TIDY_DIFF = clang-tidy-diff.py
 CLANG_TIDY_JOBS = 1
 CLANG_TIDY_FILES = ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc
-CLANG_TIDY_FLAGS = --std=c++20 -I ${abs_top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS)
+if WITH_GUI
+CLANG_TIDY_FILES += ${top_srcdir}/src/gui/*.cc
+endif
+CLANG_TIDY_FLAGS = --std=c++20 -I ${abs_top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS) $(WX_CXXFLAGS)
 BASE = origin/master
 
 # Check every source file, CLANG_TIDY_JOBS at a time. xargs exits non-zero if any run fails.
 clang-tidy:
 	$(CLANG_TIDY) --version
-	printf '%s\n' $(CLANG_TIDY_FILES) | xargs -n 1 -P $(CLANG_TIDY_JOBS) sh -c '$(CLANG_TIDY) "$$1" -- $(CLANG_TIDY_FLAGS)' sh
+	printf '%s\n' $(CLANG_TIDY_FILES) | xargs -n 1 -P $(CLANG_TIDY_JOBS) sh -c 'echo "$$1"; $(CLANG_TIDY) "$$1" -- $(CLANG_TIDY_FLAGS)' sh
 
 # Check only the lines changed since $(BASE), in .cc files: a change to a header alone is not checked.
 clang-tidy-diff:

@@ -349,7 +349,7 @@ public:
   /// @brief Returns the Cartesian product of the sizes of the inner ranges
   std::size_t extent_product() const
   {
-    auto outer = (m_owner.get()->*OuterMemFn)();
+    const auto outer = (m_owner.get()->*OuterMemFn)();
     return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(1),
                            [](std::size_t acc, const auto &element) {
                              return acc * (element.get()->*InnerMemFn)().size();

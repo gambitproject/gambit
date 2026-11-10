@@ -85,9 +85,7 @@ wxString LabelTextCtrl::Normalize(const wxString &p_value, bool p_stripTrailing)
   bool sawNonWhitespace = false;
   bool previousWasSpace = false;
 
-  for (wxString::const_iterator iter = p_value.begin(); iter != p_value.end(); ++iter) {
-    const wxUniChar ch = *iter;
-
+  for (const auto ch : p_value) {
     if (IsLabelWhitespace(ch)) {
       if (!sawNonWhitespace) {
         continue;

@@ -22,6 +22,7 @@
 
 #include <map>
 #include <sstream>
+#include <utility>
 
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -53,7 +54,7 @@ static wxColour s_defaultColors[8] = {
 //!
 const wxColour &TreeRenderConfig::GetPlayerColor(const int pl) const
 {
-  while (pl > static_cast<int>(m_playerColors.size())) {
+  while (std::cmp_greater(pl, m_playerColors.size())) {
     m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
   }
   return m_playerColors[pl];
@@ -233,38 +234,41 @@ TreeRenderConfig::GetBranchLabelGenerator(BranchLabelStyle p_which,
 void TreeRenderConfig::Save(WorkspaceFile &p_workspace) const
 {
   const auto color = [](int player, const wxColour &value) {
-    return WorkspaceFile::Color{player, value.Red(), value.Green(), value.Blue()};
+    return WorkspaceFile::Color{
+        .player = player, .red = value.Red(), .green = value.Green(), .blue = value.Blue()};
   };
   p_workspace.colors = {color(-1, m_terminalColor), color(0, m_chanceColor)};
   for (size_t player = 1; player <= m_playerColors.size(); ++player) {
     p_workspace.colors.push_back(color(player, m_playerColors[player]));
   }
 
-  p_workspace.font =
-      WorkspaceFile::Font{m_font.GetPointSize(), static_cast<int>(m_font.GetFamily()),
-                          m_font.GetFaceName().ToStdString(), static_cast<int>(m_font.GetStyle()),
-                          static_cast<int>(m_font.GetWeight())};
+  p_workspace.font = WorkspaceFile::Font{.size = m_font.GetPointSize(),
+                                         .family = static_cast<int>(m_font.GetFamily()),
+                                         .face = m_font.GetFaceName().ToStdString(),
+                                         .style = static_cast<int>(m_font.GetStyle()),
+                                         .weight = static_cast<int>(m_font.GetWeight())};
   static const std::string node_tokens[] = {"line", "box", "circle", "diamond", "dot"};
   static const std::string branch_styles[] = {"line", "forktine"};
   static const std::string branch_labels[] = {"horizontal", "rotated"};
   static const std::string infoset_styles[] = {"lines", "circles"};
-  p_workspace.layout = WorkspaceFile::Layout{m_nodeSize,
-                                             m_terminalSpacing,
-                                             node_tokens[m_chanceToken],
-                                             node_tokens[m_playerToken],
-                                             node_tokens[m_terminalToken],
-                                             m_branchLength,
-                                             m_tineLength,
-                                             branch_styles[m_branchStyle],
-                                             branch_labels[m_branchLabels],
-                                             infoset_styles[m_infosetJoin]};
+  p_workspace.layout = WorkspaceFile::Layout{.node_size = m_nodeSize,
+                                             .terminal_spacing = m_terminalSpacing,
+                                             .chance_token = node_tokens[m_chanceToken],
+                                             .player_token = node_tokens[m_playerToken],
+                                             .terminal_token = node_tokens[m_terminalToken],
+                                             .branch_length = m_branchLength,
+                                             .tine_length = m_tineLength,
+                                             .branch_style = branch_styles[m_branchStyle],
+                                             .branch_labels = branch_labels[m_branchLabels],
+                                             .infoset_style = infoset_styles[m_infosetJoin]};
 
   static const std::string node_labels[] = {"none",   "label",      "player",     "isetlabel",
                                             "isetid", "realizprob", "beliefprob", "value"};
   static const std::string edge_labels[] = {"none", "label", "probs", "value"};
-  p_workspace.labels =
-      WorkspaceFile::Labels{node_labels[m_nodeAboveLabel], node_labels[m_nodeBelowLabel],
-                            edge_labels[m_branchAboveLabel], edge_labels[m_branchBelowLabel]};
+  p_workspace.labels = WorkspaceFile::Labels{.node_above = node_labels[m_nodeAboveLabel],
+                                             .node_below = node_labels[m_nodeBelowLabel],
+                                             .branch_above = edge_labels[m_branchAboveLabel],
+                                             .branch_below = edge_labels[m_branchBelowLabel]};
   p_workspace.decimals = m_numDecimals;
 }
 

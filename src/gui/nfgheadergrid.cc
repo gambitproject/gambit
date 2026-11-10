@@ -176,7 +176,7 @@ void RowPlayerTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -185,7 +185,7 @@ void RowPlayerTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -195,7 +195,7 @@ void RowPlayerTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -204,7 +204,7 @@ void RowPlayerTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -360,13 +360,13 @@ private:
     SetSizerAndFit(popupSizer);
   }
 
-  wxPanel *m_contentPanel;
-  wxStaticText *m_heading;
-  wxStaticText *m_description;
-  wxBoxSizer *m_profileSizer;
-  wxStaticText *m_probText;
-  wxStaticText *m_valueText;
-  wxStaticText *m_payoffText;
+  wxPanel *m_contentPanel{};
+  wxStaticText *m_heading{};
+  wxStaticText *m_description{};
+  wxBoxSizer *m_profileSizer{};
+  wxStaticText *m_probText{};
+  wxStaticText *m_valueText{};
+  wxStaticText *m_payoffText{};
 };
 
 } // namespace
@@ -708,7 +708,7 @@ void ColPlayerTable::OnUpdate()
     const int added = newCols - m_numCols;
     m_numCols = newCols;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -717,7 +717,7 @@ void ColPlayerTable::OnUpdate()
     const int pos = newCols;
     m_numCols = newCols;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }
@@ -727,7 +727,7 @@ void ColPlayerTable::OnUpdate()
     const int added = newRows - m_numRows;
     m_numRows = newRows;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, added);
       view->ProcessTableMessage(msg);
     }
   }
@@ -736,7 +736,7 @@ void ColPlayerTable::OnUpdate()
     const int pos = newRows;
     m_numRows = newRows;
     if (view) {
-      wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
+      const wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, pos, removed);
       view->ProcessTableMessage(msg);
     }
   }

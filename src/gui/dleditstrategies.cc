@@ -123,7 +123,7 @@ StrategyPanel::StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
                              const std::function<void()> &p_onChanged)
   : wxScrolledWindow(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                      wxVSCROLL | wxTAB_TRAVERSAL),
-    m_onChanged(p_onChanged)
+    m_topSizer(new wxBoxSizer(wxVERTICAL)), m_onChanged(p_onChanged)
 {
   for (const auto &strategy : p_player->GetStrategies()) {
     Row row;
@@ -132,7 +132,6 @@ StrategyPanel::StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
     m_rows.push_back(std::move(row));
   }
 
-  m_topSizer = new wxBoxSizer(wxVERTICAL);
   SetSizer(m_topSizer);
   SetScrollRate(0, FromDIP(10));
 

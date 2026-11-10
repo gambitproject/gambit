@@ -64,7 +64,7 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 EfgDisplay::EfgDisplay(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
-  : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100)
+  : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc)
 {
   wxWindow::SetBackgroundColour(wxColour(250, 250, 250));
 
@@ -281,7 +281,7 @@ void EfgDisplay::FocusNode(const GameNode &p_node, double p_xFrac, double p_yFra
     return;
   }
 
-  auto entry = m_layout.GetNodeEntry(p_node);
+  const auto entry = m_layout.GetNodeEntry(p_node);
   if (!entry) {
     return;
   }

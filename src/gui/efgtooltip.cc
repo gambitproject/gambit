@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -117,12 +118,12 @@ private:
 
   GameNode m_node;
 
-  wxPanel *m_contentPanel;
+  wxPanel *m_contentPanel{nullptr};
   // Shaded strip holding the outcome label field, divided from the payoff grid below by a
   // wxStaticLine -- the same header/white-list treatment EditMoveDialog and AppendMovePopup give
   // their own header field(s) and action/row lists (see BuildControls).
-  wxPanel *m_headerPanel;
-  LabelTextCtrl *m_labelCtrl;
+  wxPanel *m_headerPanel{nullptr};
+  LabelTextCtrl *m_labelCtrl{nullptr};
   // The label field's background before any validation failure has tinted it -- like
   // EditMoveDialog's m_infosetLabelDefaultBg, the colour ValidateLabel() restores it to once
   // it's valid again.
@@ -130,7 +131,7 @@ private:
   // Scrolls once the payoff list grows past kMaxGridHeightDIP, rather than growing the dialog
   // (and the screen it's anchored to) without bound -- relevant for games with many players.
   wxScrolledWindow *m_gridScroller{nullptr};
-  wxStaticText *m_errorText;
+  wxStaticText *m_errorText{nullptr};
   std::vector<Row> m_payoffRows;
   // A freshly created payoff field's background, captured the first time BuildControls creates
   // one; the colour ValidatePayoffs() restores a field to once it's valid again.
@@ -147,8 +148,7 @@ private:
 OutcomeEditorPopup::OutcomeEditorPopup(EfgDisplay *p_owner,
                                        const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_owner, wxID_ANY, _("Edit outcome"), wxDefaultPosition, wxDefaultSize, wxCAPTION),
-    m_owner(p_owner), m_doc(p_doc), m_contentPanel(nullptr), m_headerPanel(nullptr),
-    m_labelCtrl(nullptr), m_errorText(nullptr)
+    m_owner(p_owner), m_doc(p_doc)
 {
   BuildControls();
 
@@ -319,7 +319,7 @@ void OutcomeEditorPopup::PositionPopup()
     return;
   }
 
-  auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
+  const auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
   }
@@ -367,7 +367,7 @@ void OutcomeEditorPopup::OnOpenTimer(wxTimerEvent &)
   }
   Show();
 
-  if (m_initialPlayer > 0 && m_initialPlayer <= static_cast<int>(m_payoffRows.size())) {
+  if (m_initialPlayer > 0 && std::cmp_less_equal(m_initialPlayer, m_payoffRows.size())) {
     wxTextCtrl *ctrl = m_payoffRows[m_initialPlayer - 1].payoffCtrl;
     ctrl->SetFocus();
     ctrl->SelectAll();
@@ -540,7 +540,7 @@ bool OutcomeEditorPopup::Commit()
 
   std::vector<wxString> payoffs;
   payoffs.reserve(m_payoffRows.size());
-  for (auto &row : m_payoffRows) {
+  for (const auto &row : m_payoffRows) {
     payoffs.push_back(row.payoffCtrl->GetValue());
   }
 
@@ -738,20 +738,20 @@ private:
   // to decide between DoInsertMove/DoAppendMove, and by RebuildGrid() for the header sentence.
   bool m_isInsert{false};
 
-  wxPanel *m_contentPanel;
+  wxPanel *m_contentPanel{nullptr};
   // Shaded strip holding the "Append/Insert move for <player> with <count> actions" sentence,
   // divided from the action list below by a wxStaticLine (see BuildControls).
-  wxPanel *m_headerPanel;
-  wxStaticText *m_verbText; // "Append move for" or "Insert move for", per m_isInsert
-  wxStaticBitmap *m_playerSwatch;
-  wxStaticText *m_playerNameText;
-  wxSpinCtrl *m_countCtrl;
+  wxPanel *m_headerPanel{nullptr};
+  wxStaticText *m_verbText{nullptr}; // "Append move for" or "Insert move for", per m_isInsert
+  wxStaticBitmap *m_playerSwatch{nullptr};
+  wxStaticText *m_playerNameText{nullptr};
+  wxSpinCtrl *m_countCtrl{nullptr};
   // Scrolls once the row list grows past kMaxGridHeight, rather than growing the dialog (and
   // the screen it's anchored to) without bound.
   wxScrolledWindow *m_gridScroller{nullptr};
   wxBoxSizer *m_gridContainer{nullptr};
-  wxStaticText *m_hintText;
-  wxStaticText *m_errorText;
+  wxStaticText *m_hintText{nullptr};
+  wxStaticText *m_errorText{nullptr};
   std::vector<Row> m_rows;
   // A freshly created LabelTextCtrl's background, captured the first time RebuildGrid creates
   // one; the colour ValidateLabels() restores a row to once it's no longer empty/duplicate.
@@ -766,9 +766,7 @@ private:
 
 AppendMovePopup::AppendMovePopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc)
   : wxDialog(p_owner, wxID_ANY, _("Append move"), wxDefaultPosition, wxDefaultSize, wxCAPTION),
-    m_owner(p_owner), m_doc(p_doc), m_contentPanel(nullptr), m_headerPanel(nullptr),
-    m_verbText(nullptr), m_playerSwatch(nullptr), m_playerNameText(nullptr), m_countCtrl(nullptr),
-    m_hintText(nullptr), m_errorText(nullptr)
+    m_owner(p_owner), m_doc(p_doc)
 {
   BuildControls();
 
@@ -978,7 +976,7 @@ void AppendMovePopup::SetRowCount(int p_count)
     }
   }
 
-  if (p_count < static_cast<int>(m_rows.size())) {
+  if (std::cmp_less(p_count, m_rows.size())) {
     m_rows.resize(p_count); // trim from the bottom, unconditionally -- see SetRowCount's header
   }
   else {
@@ -1022,7 +1020,8 @@ void AppendMovePopup::OnFieldKeyDown(wxKeyEvent &p_event, wxTextCtrl *p_ctrl)
   // Enter now accepts the whole panel (see OnKeyDown) rather than acting per-field, so this
   // only needs to handle Tab falling off the grid's true last field.
   if (p_event.GetKeyCode() == WXK_TAB) {
-    wxTextCtrl *const lastField = m_isChance ? m_rows.back().probCtrl : m_rows.back().labelCtrl;
+    const wxTextCtrl *const lastField =
+        m_isChance ? m_rows.back().probCtrl : m_rows.back().labelCtrl;
     if (p_ctrl == lastField) {
       SetRowCount(static_cast<int>(m_rows.size()) + 1);
       m_rows.back().labelCtrl->SetFocus();
@@ -1039,7 +1038,7 @@ void AppendMovePopup::PositionPopup()
     return;
   }
 
-  auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
+  const auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
   }
@@ -1194,7 +1193,7 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
 
   wxString message;
   bool allParsed = true;
-  for (auto &row : m_rows) {
+  for (const auto &row : m_rows) {
     bool invalid = false;
     try {
       p_probs.emplace_back(row.probCtrl->GetValue().ToStdString());
@@ -1219,7 +1218,7 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
     ValidateDistribution(p_probs);
   }
   catch (const std::exception &) {
-    for (auto &row : m_rows) {
+    for (const auto &row : m_rows) {
       row.probCtrl->SetBackgroundColour(kInvalidLabelBg);
       row.probCtrl->Refresh();
     }
@@ -1276,7 +1275,7 @@ bool AppendMovePopup::Commit()
   }
 
   std::vector<std::string> labels;
-  for (auto &row : m_rows) {
+  for (const auto &row : m_rows) {
     labels.push_back(row.labelCtrl->GetValue().ToStdString(wxConvUTF8));
   }
 
@@ -1413,7 +1412,7 @@ private:
 
   GameNode m_node;
 
-  wxPanel *m_contentPanel;
+  wxPanel *m_contentPanel{};
 
   struct PlayerRow {
     wxStaticText *nameText;
@@ -1421,12 +1420,12 @@ private:
   };
   std::vector<PlayerRow> m_playerRows;
 
-  wxBoxSizer *m_moveSizer;
-  wxStaticText *m_moveHeading;
-  wxStaticText *m_nodeProbText;
-  wxStaticText *m_infosetValueText;
-  wxStaticText *m_infosetProbText;
-  wxStaticText *m_beliefText;
+  wxBoxSizer *m_moveSizer{};
+  wxStaticText *m_moveHeading{};
+  wxStaticText *m_nodeProbText{};
+  wxStaticText *m_infosetValueText{};
+  wxStaticText *m_infosetProbText{};
+  wxStaticText *m_beliefText{};
 };
 
 NodeInfoPopup::NodeInfoPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc)
@@ -1449,7 +1448,7 @@ void NodeInfoPopup::BuildControls()
 
   const Game game = m_doc->GetGame();
   for (size_t pl = 1; pl <= game->NumPlayers(); pl++) {
-    PlayerRow row;
+    PlayerRow row{};
 
     row.nameText = new wxStaticText(m_contentPanel, wxID_ANY,
                                     wxString::FromUTF8(game->GetPlayer(pl)->GetLabel()));
@@ -1492,7 +1491,7 @@ void NodeInfoPopup::BuildControls()
 
 void NodeInfoPopup::PositionPopup()
 {
-  auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
+  const auto entry = m_owner->GetLayout().GetNodeEntry(m_node);
   if (!entry) {
     return;
   }
@@ -1516,7 +1515,7 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
   for (size_t pl = 1; pl <= m_playerRows.size(); pl++) {
     const GamePlayer player = game->GetPlayer(pl);
     const wxColour color = m_doc->GetStyle().GetPlayerColor(player);
-    PlayerRow &row = m_playerRows[pl - 1];
+    const PlayerRow &row = m_playerRows[pl - 1];
 
     row.nameText->SetForegroundColour(color);
     row.valueText->SetForegroundColour(color);

@@ -46,9 +46,9 @@ static wxBitmap MakeScaledSplashBitmap(const wxBitmap &srcBmp, double fracOfShor
 {
   const wxPoint mouse = wxGetMousePosition();
   const int dispIdx = wxDisplay::GetFromPoint(mouse);
-  wxDisplay disp(dispIdx == wxNOT_FOUND ? 0 : dispIdx);
+  const wxDisplay disp(dispIdx == wxNOT_FOUND ? 0 : dispIdx);
 
-  wxRect geom = disp.GetGeometry(); // pixels in that display
+  const wxRect geom = disp.GetGeometry(); // pixels in that display
   const int shortSide = std::min(geom.width, geom.height);
   const int targetMax = std::max(200, int(shortSide * fracOfShortSide));
 
@@ -62,7 +62,7 @@ static wxBitmap MakeScaledSplashBitmap(const wxBitmap &srcBmp, double fracOfShor
   wxImage img = srcBmp.ConvertToImage();
   img.Rescale(newW, newH, wxIMAGE_QUALITY_HIGH);
 
-  return wxBitmap(img);
+  return {img};
 }
 
 wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplashDismissTimer)

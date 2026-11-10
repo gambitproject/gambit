@@ -159,8 +159,8 @@ void EfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  auto posX = ((w - (maxX * scale)) / 2.0);
-  auto posY = ((h - (maxY * scale)) / 2.0);
+  const auto posX = ((w - (maxX * scale)) / 2.0);
+  const auto posY = ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin(static_cast<int>(posX), static_cast<int>(posY));
 
   // Draw!

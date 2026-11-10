@@ -90,7 +90,7 @@ class StrategicTableLayout {
   static GameStrategy LookupStrategy(const StrategySupportProfile &profile, int player,
                                      int strategy)
   {
-    auto strategies = profile.GetStrategies(profile.GetGame()->GetPlayer(player));
+    const auto strategies = profile.GetStrategies(profile.GetGame()->GetPlayer(player));
     return *std::next(strategies.begin(), strategy - 1);
   }
 
@@ -287,7 +287,7 @@ public:
 class TableWidget final : public wxPanel {
   std::shared_ptr<GameDocument> m_doc;
   NfgPanel *m_nfgPanel;
-  wxGrid *m_payoffGrid, *m_rowGrid, *m_colGrid;
+  wxGrid *m_payoffGrid{nullptr}, *m_rowGrid{nullptr}, *m_colGrid{nullptr};
 
   std::shared_ptr<StrategicTableLayout> m_layout;
 

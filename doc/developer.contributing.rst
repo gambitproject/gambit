@@ -125,7 +125,7 @@ To contribute code, please follow these steps:
     make clang-tidy CLANG_TIDY_JOBS=8   # every C++ source file, 8 at a time (the default is 1)
     make clang-tidy-diff                # only the lines changed since origin/master (BASE=... to change it)
 
-   ``clang-tidy-diff`` is quick, but it checks only changes to ``.cc`` files and not changes to headers alone, so the full ``clang-tidy`` run is the check that a pull request must pass.
+   The graphical interface's sources (``src/gui``) are checked when ``configure`` found wxWidgets; on macOS, set ``SDKROOT=$(xcrun --show-sdk-path)`` if ``clang-tidy`` cannot find the standard library headers. ``clang-tidy-diff`` is quick, but it checks only changes to ``.cc`` files and not changes to headers alone, so the full ``clang-tidy`` run is the check that a pull request must pass.
 
 5. Create a new branch for your changes. It's good practice to either give the branch a descriptive name or directly reference an issue number ::
 

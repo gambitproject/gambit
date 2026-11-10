@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <optional>
 
 #include <wx/wxprec.h>
@@ -79,7 +80,7 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
     auto *cb = new wxCheckBox(this, wxID_ANY, label);
     cb->SetValue(true);
     cb->Bind(wxEVT_CHECKBOX, &RevealMoveDialog::OnCheckbox, this);
-    m_entries.push_back({player, cb});
+    m_entries.push_back({.player = player, .checkbox = cb});
     playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, FromDIP(4)));
   }
 
@@ -96,9 +97,8 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
 
 void RevealMoveDialog::UpdateButtonState()
 {
-  const bool anyChecked =
-      std::any_of(m_entries.begin(), m_entries.end(),
-                  [](const PlayerEntry &entry) { return entry.checkbox->IsChecked(); });
+  const bool anyChecked = std::ranges::any_of(
+      m_entries, [](const PlayerEntry &entry) { return entry.checkbox->IsChecked(); });
   FindWindow(wxID_OK)->Enable(anyChecked);
 }
 
