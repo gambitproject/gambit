@@ -33,7 +33,7 @@ def _process_phc_output(output: str) -> list[dict]:
         secondequals = firstcut.find("TIMING")
         secondcut = firstcut[:secondequals]
 
-    solutions = []
+    solutions: list[dict[str, typing.Any]] = []
     for line in secondcut.split("\n"):
         tokens = [x.strip() for x in line.split() if x and not x.isspace()]
 
@@ -154,7 +154,7 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: str) -> 
     players = list(game.players)
     player_index = {p: i for i, p in enumerate(players)}
     player_support = support[player]
-    payoffs = {
+    payoffs: dict[str, list[str]] = {
         strategy: [] for strategy in game.get_strategies(player) if strategy in player_support
     }
 
@@ -172,8 +172,8 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: str) -> 
             if payoff_vec[player] != 0:
                 payoffs[strategy].append(f"({payoff_vec[player]}*{contingency})")
 
-    payoffs = {s: "+".join(v) for s, v in payoffs.items()}
-    equations = [f"({payoffs[strategies[0]]})-({payoffs[s]})" for s in strategies[1:]]
+    joined = {s: "+".join(v) for s, v in payoffs.items()}
+    equations = [f"({joined[strategies[0]]})-({joined[s]})" for s in strategies[1:]]
     equations.append(
         "+".join(_playerletters[player_index[player]] + str(_strategy_index(game, player, s))
                  for s in strategies) + "-1"

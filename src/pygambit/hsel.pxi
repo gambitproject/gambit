@@ -211,7 +211,7 @@ class GroupedSelector:
         base: Selector,
         key: typing.Callable,
         post_ops: tuple = (),
-        last_action_player: str = None,
+        last_action_player: str | None = None,
     ) -> None:
         self.base = base
         self.key = key

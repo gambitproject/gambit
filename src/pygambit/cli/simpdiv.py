@@ -26,6 +26,8 @@ subdivision.
 
 from __future__ import annotations
 
+import typing
+
 import click
 import numpy as np
 
@@ -54,10 +56,10 @@ def _default_start(
     for a Bayesian action-graph game, each type's first action.
     """
     if isinstance(game, gbt.BayesianActionGraphGame):
-        start = game.mixed_behavior_profile(rational=True)
+        bagg_start = game.mixed_behavior_profile(rational=True)
         for slot in bagg_slots(game):
-            start[slot.player, slot.infoset] = {slot.actions[0]: 1}
-        return start
+            bagg_start[slot.player, slot.infoset] = {slot.actions[0]: 1}
+        return bagg_start
     start = game.mixed_strategy_profile(rational=True)
     for player in game.players:
         first_strategy = next(iter(game.get_strategies(player)))
@@ -163,8 +165,13 @@ def main(
     maxregret_value = gbt.Rational(maxregret) if maxregret is not None else None
     as_float = decimals > 0
 
+    starts: list[gbt.MixedStrategyProfileRational | gbt.BAGGMixedBehaviorProfileRational]
     if start_file is not None:
-        starts = resolve_starts(game, None, None, start_file)
+        # Profiles read from a file are exact rationals.
+        starts = typing.cast(
+            "list[gbt.MixedStrategyProfileRational | gbt.BAGGMixedBehaviorProfileRational]",
+            list(resolve_starts(game, None, None, start_file)),
+        )
     elif rand_denom is not None:
         draw = (
             game.random_behavior_profile

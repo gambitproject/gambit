@@ -127,7 +127,6 @@ def main(
     verbose: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
-    use_agent = agent and isinstance(game, gbt.ExtensiveGame)
 
     def render(profile, label: str = "NE") -> None:
         if detail:
@@ -143,11 +142,11 @@ def main(
         elif isinstance(event, gbt.LiapEndEvent):
             render(event.profile, "end")
 
-    if use_agent:
-        starts = resolve_behavior_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
-        for start in starts:
+    if agent and isinstance(game, gbt.ExtensiveGame):
+        behavior_starts = resolve_behavior_starts(game, n_tries, seed, start_file, _DEFAULT_TRIES)
+        for behavior_start in behavior_starts:
             gbt.nash.liap_agent_solve(
-                start,
+                behavior_start,
                 maxregret=maxregret,
                 maxiter=maxiter,
                 nash_callback=render,
