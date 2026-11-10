@@ -101,9 +101,19 @@ cppgambit_simpdiv = solver_library_config("cppgambit_simpdiv", ["simpdiv"])
 cppgambit_enumpoly = solver_library_config("cppgambit_enumpoly", ["nashsupport", "enumpoly"])
 
 
+# The extension links the static libraries above, but `build_ext` does not know that.
+# Listing their sources and headers ensures a C++ change relinks the extension.
+cppgambit_depends = [
+    fn
+    for pattern in ("src/core/*", "src/games/*", "src/games/agg/*", "src/solvers/*/*")
+    for ext in (".cc", ".h", ".imp")
+    for fn in glob.glob(pattern + ext)
+]
+
 libgambit = setuptools.Extension(
     "pygambit.gambit",
     sources=["src/pygambit/gambit.pyx"],
+    depends=cppgambit_depends,
     language="c++",
     include_dirs=["src", "src/pygambit"],
     extra_compile_args=cppgambit_cflags
