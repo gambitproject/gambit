@@ -167,7 +167,7 @@ public:
 
   void SetValue(int, int, const wxString &) override {}
 
-  wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind) override
+  wxGridCellAttr *GetAttr(int /*row*/, int col, wxGridCellAttr::wxAttrKind) override
   {
     auto *attr = new wxGridCellAttr();
     attr->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));

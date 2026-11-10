@@ -83,7 +83,7 @@ NumberValidator::NumberValidator(wxString *p_value, const Rational &p_minValue,
 }
 
 NumberValidator::NumberValidator(const NumberValidator &p_validator)
-  : m_stringValue(nullptr), m_hasMin(false), m_hasMax(true)
+  : wxValidator(p_validator), m_stringValue(nullptr), m_hasMin(false), m_hasMax(true)
 {
   Copy(p_validator);
 }

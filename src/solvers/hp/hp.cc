@@ -72,7 +72,7 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
   };
 
   const auto criterion_function = [t_target](const Vector<double> &point,
-                                             const Vector<double> &tangent) -> double {
+                                             const Vector<double> & /*tangent*/) -> double {
     return point[1] - t_target;
   };
 

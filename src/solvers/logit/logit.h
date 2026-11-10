@@ -123,7 +123,7 @@ template <class QRE> void NullLogitEventCallback(const LogitEvent<QRE> &) {}
 template <class QRE> struct LogitTrace {
   std::list<QRE> profiles;
   std::vector<LogitBifurcation<QRE>> bifurcations;
-  std::vector<TracePathStats> stats;
+  std::vector<TracePathStats> stats{};
 };
 
 /// @brief The QREs found at each requested value of lambda, together with the tracing

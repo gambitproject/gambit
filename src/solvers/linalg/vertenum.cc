@@ -32,8 +32,8 @@ template <class T> struct VertexEnumerationState {
   Vector<T> artificialConstraint;
   bool multipleOptima{false};
   size_t depth{0};
-  Array<BFS<T>> vertexList, dualVertexList;
-  Array<long> visits, branches;
+  Array<BFS<T>> vertexList{}, dualVertexList{};
+  Array<long> visits{}, branches{};
   CancelToken cancel;
 };
 

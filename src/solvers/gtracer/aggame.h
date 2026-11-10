@@ -77,7 +77,7 @@ public:
     return aggPtr->getPurePayoff<double>(player, s);
   }
 
-  void setPurePayoff(int player, const std::vector<int> &s, double value) override
+  void setPurePayoff(int /*player*/, const std::vector<int> & /*s*/, double /*value*/) override
   {
     throw Gambit::UndefinedException();
   }

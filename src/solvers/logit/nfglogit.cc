@@ -115,8 +115,9 @@ public:
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
-                               const MixedStrategyProfile<double> &p_logProfile,
-                               const Vector<double> &p_strategyValues, double p_lambda) const
+                               const MixedStrategyProfile<double> & /*p_logProfile*/,
+                               const Vector<double> & /*p_strategyValues*/,
+                               double /*p_lambda*/) const
 {
   double value = -1.0;
   for (int col = m_firstIndex; col < m_lastIndex; col++) {
@@ -154,7 +155,7 @@ public:
                const Vector<double> &p_strategyValues, double p_lambda) const override;
 };
 
-double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
+double RatioEquation::Value(const MixedStrategyProfile<double> & /*p_profile*/,
                             const MixedStrategyProfile<double> &p_logProfile,
                             const Vector<double> &p_strategyValues, double p_lambda) const
 {

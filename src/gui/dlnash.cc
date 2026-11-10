@@ -154,7 +154,7 @@ wxString ConceptLabel(VariantConcept p_concept)
   return p_concept == VariantConcept::Nash ? wxT("Nash") : wxT("Agent Nash");
 }
 
-wxString GoalMissWarning(const NashVariant &p_variant, NashGoal p_goal)
+wxString GoalMissWarning(const NashVariant & /*p_variant*/, NashGoal p_goal)
 {
   wxString what;
   switch (p_goal) {
@@ -297,7 +297,7 @@ wxString ExternalCommand(const NashComputationSpec &p_spec)
 wxString MethodDescription(const NashMethodSpec &p_method)
 {
   return std::visit(
-      []<typename Method>(const Method &method) {
+      []<typename Method>(const Method & /*method*/) {
         if constexpr (std::is_same_v<Method, EnumPureNashSpec>) {
           return wxT("in pure strategies");
         }
