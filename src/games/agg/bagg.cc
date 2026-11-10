@@ -65,6 +65,7 @@ void stripComment(istream &in)
 
 } // namespace
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
 {
   int N, S, P;

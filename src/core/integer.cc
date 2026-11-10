@@ -376,6 +376,7 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 // convert to a legal two's complement long if possible
 // if too big, return most negative/positive value
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 long Itolong(const IntegerRep *rep)
 {
   if (static_cast<unsigned>(rep->len) > SHORT_PER_LONG) {
@@ -494,6 +495,7 @@ int Iisdouble(const IntegerRep *rep)
 
 // real division of num / den
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double ratio(const Integer &num, const Integer &den)
 {
   Integer q, r;
@@ -639,6 +641,7 @@ int ucompare(const IntegerRep *x, long y)
 
 // arithmetic functions
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negatey, IntegerRep *r)
 {
   nonnil(x);
@@ -759,6 +762,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -872,6 +876,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 {
   nonnil(x);
@@ -969,6 +974,7 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -1534,6 +1540,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
@@ -1634,6 +1641,7 @@ IntegerRep *lshift(const IntegerRep *x, const IntegerRep *yy, int negatey, Integ
   return lshift(x, y, r);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char op)
 {
   nonnil(x);
@@ -1851,6 +1859,7 @@ int testbit(const Integer &x, long b)
 // A  version of knuth's algorithm B / ex. 4.5.3.34
 // A better version that doesn't bother shifting all of `t' forthcoming
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
 {
   nonnil(x);
@@ -2156,6 +2165,7 @@ std::string Itoa(const IntegerRep *x, int base, int width)
 
 std::ostream &operator<<(std::ostream &s, const Integer &y) { return s << Itoa(y.rep); }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base, int showbase,
                     int width, int align_right, char fillchar, char Xcase, int showpos)
 {

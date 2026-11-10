@@ -247,6 +247,7 @@ private:
  * of the "fixed" players and for each, creates a table showing all
  * strategy combinations of the row and column players.
  */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
                             const GamePlayer &p_colPlayer, TableFormatter &p_formatter)
 {

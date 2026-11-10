@@ -271,6 +271,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
 // for a derivative with respect to a strategy of player j, the probability is the product,
 // in order of player number, of the probabilities of the players other than pl and j.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void TableMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
                                                           Matrix<T> &p_derivs) const
 {
@@ -700,6 +701,7 @@ void GameTableRep::SetStrategies(const GamePlayer &p_player,
   RebuildTable(old_radices, p_player->GetNumber() - 1, old_to_new);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
 {
   if (p_labels.empty()) {

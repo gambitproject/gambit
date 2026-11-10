@@ -62,6 +62,7 @@ bool PolynomialSystemSolver::SystemHasNoRootsIn(const Rectangle<double> &r) cons
           [&](const PolynomialDerivatives<double> &p) { return p.PolyEverywhereNegativeIn(r); }));
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
                                                    Vector<double> &point) const
 {

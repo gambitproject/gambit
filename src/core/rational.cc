@@ -280,6 +280,7 @@ std::ostream &operator<<(std::ostream &s, const Rational &y)
   return s;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 std::istream &operator>>(std::istream &f, Rational &y)
 {
   char ch = ' ';
@@ -515,6 +516,7 @@ Rational Rational::operator/(const Rational &y) const
   return r;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <> Rational lexical_cast(const std::string &f)
 {
   char ch = ' ';

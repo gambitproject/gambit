@@ -502,6 +502,7 @@ public:
 };
 
 template <class Callback>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameRep::WalkDFS(const Game &p_game, const GameNode &p_root, TraversalOrder p_order,
                       Callback &p_callback)
 {

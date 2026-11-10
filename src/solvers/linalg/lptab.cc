@@ -148,6 +148,7 @@ template <class T> void LPTableau<T>::Pivot(int outrow, int col)
   SolveDual();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
 {
   std::list<Array<int>> pivot_list;
@@ -279,6 +280,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ComputeReversePivots()
   return pivot_list;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 {
   // first check that pivot preserves dual feasibility

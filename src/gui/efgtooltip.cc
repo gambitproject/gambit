@@ -940,6 +940,7 @@ void AppendMovePopup::RebuildGrid()
   m_contentPanel->Layout();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void AppendMovePopup::SetRowCount(int p_count)
 {
   p_count = std::max(1, p_count);

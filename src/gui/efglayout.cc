@@ -647,6 +647,7 @@ void TreeLayout::GenerateLabels() const
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
   const TreeRenderConfig &settings = m_doc->GetStyle();

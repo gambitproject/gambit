@@ -125,6 +125,7 @@ void GameFileLexer::IncreaseLine()
   m_currentColumn = 1;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 GameFileToken GameFileLexer::GetNextToken()
 {
   char c = ' ';

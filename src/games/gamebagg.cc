@@ -133,6 +133,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 // types), times the probabilities of the types of the other BAGG players involved.  It is zero
 // if two of the strategies belong to one BAGG player, or one belongs to another type of pl's.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(
     int pl, const std::vector<GameStrategy> &p_strategies) const
 {
@@ -218,6 +219,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
 // a row of the AGG payoff Jacobian.  The Jacobian row is available in floating point only; exact
 // computation uses the default.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
                                                          Matrix<T> &p_derivs) const
 {

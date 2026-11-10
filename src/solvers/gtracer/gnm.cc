@@ -112,6 +112,7 @@ void FindUniquePerturbedEquilibrium(const gnmgame &A, const cvector &g, std::vec
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 GNMResult GNM(const gnmgame &A, cvector &g, int steps, double fuzz, int LNMFreq, int LNMMax,
               double LambdaMin, bool wobble, double threshold,
               const std::function<void(const std::string &, const cvector &)> &p_onStep,

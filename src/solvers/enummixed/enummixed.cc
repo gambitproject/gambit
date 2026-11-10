@@ -81,6 +81,7 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
 
 template <class T>
 std::shared_ptr<EnumMixedStrategySolution<T>>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T> &p_onEquilibrium,
                                const CancelToken &p_cancel)
 {

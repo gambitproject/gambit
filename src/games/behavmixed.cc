@@ -107,6 +107,7 @@ size_t BestActionPosition(const DeviationProblem<T> &p_problem,
 /// A node is evaluated once the nodes it depends on are; the dependencies of a node of the
 /// player are, by perfect recall, never its own ancestors, so the walk terminates.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void EvaluateBackwardInduction(const DeviationProblem<T> &p_problem, BackwardInduction<T> &p_state)
 {
   const auto &layout = p_problem.layout;
@@ -200,6 +201,7 @@ template <class T> struct SearchFrame {
 /// Best-response value of a player without absent-mindedness, by depth-first enumeration of
 /// the player's pure behavior profiles, in which an information set is branched on only when
 /// the walk of the tree reaches it
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> T PureEnumerationBestResponse(const DeviationProblem<T> &p_problem)
 {
   const auto &layout = p_problem.layout;

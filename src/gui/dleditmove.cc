@@ -218,6 +218,7 @@ void ActionPanel::UpdateRowStyle(Row &row)
   row.labelCtrl->Refresh();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void ActionPanel::Rebuild()
 {
   m_rebuilding = true;

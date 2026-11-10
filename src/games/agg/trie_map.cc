@@ -135,6 +135,7 @@ void trie_map<V>::multiply(const trie_map<V> &t1, const trie_map<V> &t2, size_t 
 }
 
 template <class V>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void trie_map<V>::multiply(const trie_map<V> &other, size_t keylen, std::vector<projtype> &f)
 {
   static typename std::list<typename trie_map<V>::value_type>::iterator p1;

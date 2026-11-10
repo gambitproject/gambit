@@ -122,6 +122,7 @@ trial:
   p_fdf.Gradient(p_x1, p_gradient);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void ConjugatePRMinimizer::Minimize(const Function &p_fdf, const Vector<double> &p_x,
                                     const Vector<double> &p_p, double p_lambda, double p_stepa,
                                     double p_stepb, double p_stepc, double p_fa, double p_fb,

@@ -76,6 +76,7 @@ void nfgame::getPayoffVector(cvector &dest, int player, const cvector &s) const
   localPayoffVector(dest.values(), player, const_cast<cvector &>(s), &(t[0]), numPlayers - 1);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   int rown, coln, rowi, coli;

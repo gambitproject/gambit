@@ -139,6 +139,7 @@ public:
 /// @return true if p_text is well-formed UTF-8. On failure, p_codepoints holds
 ///         only the code points decoded before the invalid byte was reached,
 ///         and should not be used.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 inline bool DecodeUtf8(const std::string &p_text, std::vector<char32_t> &p_codepoints)
 {
   p_codepoints.clear();

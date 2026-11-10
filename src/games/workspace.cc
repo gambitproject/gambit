@@ -196,6 +196,7 @@ class Parser {
 public:
   explicit Parser(const std::string &p_input) : m_input(p_input) {}
 
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   std::unique_ptr<Element> ParseElement()
   {
     if (!Consume('<')) {
@@ -413,7 +414,7 @@ std::string UnwrapPayload(std::string p_value)
 
 } // namespace
 
-// NOLINTNEXTLINE(misc-const-correctness): reads from the stream
+// NOLINTNEXTLINE(misc-const-correctness,readability-function-cognitive-complexity)
 WorkspaceFile ReadWorkspace(std::istream &p_stream)
 {
   std::ostringstream text;

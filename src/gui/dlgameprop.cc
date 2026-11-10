@@ -252,6 +252,7 @@ wxString PlayerPanel::BlockedDeleteReason(const Row &row) const
   return {};
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void PlayerPanel::Rebuild()
 {
   m_rebuilding = true;

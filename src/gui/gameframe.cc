@@ -829,6 +829,7 @@ void GameFrame::OnEditUndo(wxCommandEvent &) { m_doc->Undo(); }
 
 void GameFrame::OnEditRedo(wxCommandEvent &) { m_doc->Redo(); }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameFrame::OnEditGame(wxCommandEvent &)
 {
   GamePropertiesDialog dialog(this, m_doc);

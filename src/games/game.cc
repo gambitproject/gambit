@@ -101,6 +101,7 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
   m_strategies.push_back(strategy);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
                                       std::map<GameInfosetRep *, int> &behav,
                                       std::map<GameNodeRep *, GameNodeRep *> &ptr,

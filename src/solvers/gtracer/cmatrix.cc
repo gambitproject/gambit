@@ -29,6 +29,7 @@
 
 namespace Gambit::gametracer {
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
 {
   if (m != n || LU.m != LU.n || LU.n != n) {
@@ -155,6 +156,7 @@ bool cmatrix::solve(cvector &b, cvector &ret) const
   return true;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double cmatrix::adjoint()
 {
   int i, j, i0, j0, maxi, lastj = -1;

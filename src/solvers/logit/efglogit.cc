@@ -110,6 +110,7 @@ std::vector<double> ComputePathPayoffs(const TreeLayout &p_layout)
   return pathPayoffs;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void ComputeLogPathValues(const TreeLayout &p_layout, const std::vector<double> &p_logChanceProb,
                           const std::vector<double> &p_pathPayoffs, const Vector<double> &p_point,
                           LogPathValues &p_values)

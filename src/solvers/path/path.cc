@@ -195,6 +195,7 @@ void NewtonStep(const GivensQR &p_qr, const Matrix<double> &b, Vector<double> &u
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TracePathResult PathTracer::TracePath(
     std::function<void(const Vector<double> &, Vector<double> &)> p_function,
     std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,

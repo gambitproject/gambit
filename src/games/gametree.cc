@@ -201,6 +201,7 @@ TreeMixedStrategyProfileRep<T>::GetSequenceProbs(const TreeSequenceLayout &p_lay
 // node.  If p_pairValues is given, also accumulates, for each other player j, by the sequences of
 // the player and of j, the same quantity omitting j's probability.
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 static std::vector<T> AccumulateSequenceValues(const TreeSequenceLayout &p_layout,
                                                const std::vector<std::vector<T>> &p_seqProbs,
                                                size_t p_self,
@@ -480,6 +481,7 @@ void GameTreeRep::SetEventActions(const GameInfoset &p_infoset,
   DoSetActions(p_infoset, p_labels, p_probs);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameTreeRep::DoSetActions(const GameInfoset &p_infoset,
                                const std::vector<std::string> &p_labels,
                                const std::vector<Number> &p_probs)
@@ -1608,8 +1610,10 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   return result;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
 {
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   return m_unreachableNodes.Get([&] {
     std::set<GameNodeRep *> result;
 
@@ -1685,8 +1689,10 @@ const std::set<GameNodeRep *> &GameTreeRep::GetUnreachableNodes() const
   });
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 const GameTreeRep::SubgameData &GameTreeRep::GetSubgameData() const
 {
+  // NOLINTNEXTLINE(readability-function-cognitive-complexity)
   return m_subgameData.Get([&] {
     SubgameData sd;
     if (m_root->IsTerminal()) {
@@ -1971,6 +1977,7 @@ int GameTreeRep::BehavProfileLength() const
 //                        GameTreeRep: Players
 //------------------------------------------------------------------------
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameTreeRep::SetPlayers(const std::vector<std::string> &p_labels)
 {
   if (p_labels.empty()) {

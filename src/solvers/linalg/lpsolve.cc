@@ -93,6 +93,7 @@ template <class T> int Enter(LPSolveState<T> &state)
   return in;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> int Exit(LPSolveState<T> &state, int in)
 {
   int out = 0;
@@ -149,6 +150,7 @@ template <class T> int Exit(LPSolveState<T> &state, int in)
   return out;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 template <class T> void Solve(LPSolveState<T> &state, int phase)
 {
   int in, xlab;
@@ -202,6 +204,7 @@ template <class T> void Solve(LPSolveState<T> &state, int phase)
 } // end anonymous namespace
 
 template <class T>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 LPSolveResult<T> SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals,
                          const CancelToken &p_cancel)
 {

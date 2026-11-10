@@ -161,6 +161,7 @@ bool NumberValidator::TransferFromWindow()
   return TRUE;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void NumberValidator::OnChar(wxKeyEvent &p_event)
 {
   if (m_validatorWindow) {

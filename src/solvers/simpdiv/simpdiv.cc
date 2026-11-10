@@ -97,6 +97,7 @@ public:
 
 /// @brief Implementation of the piecewise path-following algorithm
 /// @returns The maximum regret of any player at the terminal profile
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
                                             const Rational &d) const
 {
@@ -345,6 +346,7 @@ end:
   return maxz;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void NashSimpdivStrategySolver::update(State &state, RectArray<int> &pi, RectArray<int> &labels,
                                        SegmentedVector<Rational> &ab,
                                        const SegmentedVector<int> &U, int j, int i)
