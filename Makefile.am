@@ -500,7 +500,17 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 CLANG_TIDY = clang-tidy
+CLANG_TIDY_DIFF = clang-tidy-diff.py
+CLANG_TIDY_JOBS = 1
+CLANG_TIDY_FILES = ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc
+CLANG_TIDY_FLAGS = --std=c++20 -I ${abs_top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS)
+BASE = origin/master
 
+# Check every source file, CLANG_TIDY_JOBS at a time. xargs exits non-zero if any run fails.
 clang-tidy:
 	$(CLANG_TIDY) --version
-	$(CLANG_TIDY) ${top_srcdir}/src/core/*.cc ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc ${top_srcdir}/src/solvers/*/*.cc -- --std=c++20 -I ${top_srcdir}/src -DVERSION=\"$(VERSION)\" $(GAMBIT_WARNING_FLAGS)
+	printf '%s\n' $(CLANG_TIDY_FILES) | xargs -n 1 -P $(CLANG_TIDY_JOBS) sh -c '$(CLANG_TIDY) "$$1" -- $(CLANG_TIDY_FLAGS)' sh
+
+# Check only the lines changed since $(BASE), in .cc files: a change to a header alone is not checked.
+clang-tidy-diff:
+	cd ${abs_top_srcdir} && git diff -U0 --no-prefix $(BASE) -- 'src/*.cc' 'src/*.h' | $(CLANG_TIDY_DIFF) -p0 -iregex '.*\.cc' -j $(CLANG_TIDY_JOBS) -- $(CLANG_TIDY_FLAGS)

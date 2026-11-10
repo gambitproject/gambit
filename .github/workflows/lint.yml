@@ -54,7 +54,7 @@ jobs:
       - run: automake --add-missing
       - run: autoconf
       - run: ./configure
-      - run: make clang-tidy
+      - run: make clang-tidy CLANG_TIDY_JOBS=$(nproc)
 
   ruff:
     runs-on: ubuntu-latest
