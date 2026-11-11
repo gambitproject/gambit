@@ -33,6 +33,7 @@ Monkeypatching strategy
    temporary directory and avoiding any reads from or writes to the repo.
 """
 
+import json
 import textwrap
 
 import pytest
@@ -94,6 +95,34 @@ def _write_yaml(path, content=_YAML_CONFIG):
     path)`` without touching the real config file.
     """
     path.write_text(content, encoding="utf-8")
+    return path
+
+
+def _write_efg_game(path, title="Test Game", description=""):
+    """Write a minimal, valid, 2-player extensive-form game file to *path*."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f'EFG 2 R "{title}" {{ "P1" "P2" }}\n'
+        f'"{description}"\n'
+        'p "" 1 1 "" { "l" "r" } 0\n'
+        't "" 1 "" { 1, -1 }\n'
+        't "" 2 "" { 2, -2 }\n',
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_nfg_game(path, title="Test NFG Game", description=""):
+    """Write a minimal, valid, 2-player 2x2 normal-form game file to *path*."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f'NFG 1 R "{title}" {{ "P1" "P2" }}\n\n'
+        '{ { "1" "2" }\n{ "1" "2" }\n}\n'
+        f'"{description}"\n\n'
+        '{\n{ "" 1, 1 }\n{ "" 0, 0 }\n{ "" 0, 0 }\n{ "" 1, 1 }\n}\n'
+        "1 2 3 4\n",
+        encoding="utf-8",
+    )
     return path
 
 
@@ -897,3 +926,208 @@ class TestWarnMissingDescriptions:
         build._warn_missing_descriptions(df)
         err = capsys.readouterr().err
         assert err == ""
+
+
+# ---------------------------------------------------------------------------
+# Tests for the GUI-facing manifest (citation resolution, stats, build/write)
+# ---------------------------------------------------------------------------
+
+_TEST_BIB = textwrap.dedent("""\
+    @article{Solo2020,
+      author = {Solo, A.},
+      year = {2020},
+    }
+    @article{Duo2019,
+      author = {First, A. and Second, B.},
+      year = {2019},
+    }
+    @article{Trio2018,
+      author = {One, A. and Two, B. and Three, C.},
+      year = {2018},
+    }
+    @article{VonParticle2021,
+      author = {von Particle, X.},
+      year = {2021},
+    }
+""")
+
+
+def _write_bib(path, content=_TEST_BIB):
+    path.write_text(content, encoding="utf-8")
+    return path
+
+
+@pytest.mark.catalog_update
+class TestCitationResolution:
+    """Tests for ``load_citation_texts`` and ``resolve_citations``."""
+
+    def test_single_author(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Solo2020"] == "(Solo 2020)"
+
+    def test_two_authors(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Duo2019"] == "(First and Second 2019)"
+
+    def test_three_or_more_authors_uses_et_al(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["Trio2018"] == "(One et al. 2018)"
+
+    def test_von_particle_kept_with_last_name(self, tmp_path):
+        """A "von"-style name particle must not be dropped (gambit's own bibliography
+        is full of these, e.g. "von Stengel")."""
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        assert texts["VonParticle2021"] == "(von Particle 2021)"
+
+    def test_resolve_citations_substitutes_known_keys(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        result = build.resolve_citations("See :cite:p:`Solo2020` for details.", texts)
+        assert result == "See (Solo 2020) for details."
+
+    def test_resolve_citations_substitutes_multiple_keys(self, tmp_path):
+        texts = build.load_citation_texts(_write_bib(tmp_path / "refs.bib"))
+        result = build.resolve_citations(
+            "Compare :cite:p:`Solo2020` and :cite:p:`Duo2019`.", texts
+        )
+        assert result == "Compare (Solo 2020) and (First and Second 2019)."
+
+    def test_resolve_citations_falls_back_for_unknown_key(self):
+        result = build.resolve_citations("See :cite:p:`Missing2099`.", {})
+        assert result == "See (Missing2099)."
+
+    def test_resolve_citations_no_markup_is_unchanged(self):
+        assert build.resolve_citations("Plain text, no citations.", {}) == (
+            "Plain text, no citations."
+        )
+
+
+@pytest.mark.catalog_update
+class TestHierarchyBreadcrumbs:
+    """Tests for ``_hierarchy_breadcrumbs``."""
+
+    def test_breadcrumbs_use_yaml_labels(self, tmp_path, monkeypatch):
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("cat/src/game1", labels) == [
+            "My Category",
+            "My Source",
+        ]
+
+    def test_breadcrumbs_fallback_for_unknown_prefix(self, tmp_path, monkeypatch):
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("other/unknown_group/game1", labels) == [
+            "Other",
+            "Unknown Group",
+        ]
+
+    def test_breadcrumbs_empty_for_top_level_slug(self, tmp_path, monkeypatch):
+        """A slug with no parent directories has no breadcrumbs."""
+        yaml_file = _write_yaml(tmp_path / "hier.yaml", _HIERARCHY_YAML)
+        monkeypatch.setattr(build, "CATALOG_HIERARCHY_CONFIG", yaml_file)
+        labels = build.load_hierarchy_labels()
+        assert build._hierarchy_breadcrumbs("game1", labels) == []
+
+
+@pytest.mark.catalog_update
+class TestGameStats:
+    """Tests for ``_game_stats``."""
+
+    def test_stats_of_extensive_form_game(self, tmp_path):
+        """Player 1 has 2 strategies (one decision, two actions); player 2 has no
+        decision nodes at all, so the reduced normal form gives them a single
+        trivial strategy — 2 + 1 = 3 total, not 2x2=4."""
+        efg_path = _write_efg_game(tmp_path / "game1.efg")
+        game = build.gbt.read_efg(str(efg_path))
+        stats = build._game_stats(game)
+        assert stats == {
+            "n_players": 2,
+            "is_tree": True,
+            "is_const_sum": True,
+            "n_strategies": 3,
+        }
+
+    def test_stats_of_strategic_form_game(self, tmp_path):
+        nfg_path = _write_nfg_game(tmp_path / "game1.nfg")
+        game = build.gbt.read_nfg(str(nfg_path))
+        stats = build._game_stats(game)
+        assert stats["n_players"] == 2
+        assert stats["is_tree"] is False
+        assert stats["n_strategies"] == 4
+
+
+@pytest.mark.catalog_update
+class TestBuildManifest:
+    """Tests for ``build_manifest`` and ``write_manifest``."""
+
+    def _make_catalog(self, tmp_path):
+        """Build a small fake catalog dir with one EFG and one NFG game."""
+        catalog_dir = tmp_path / "catalog"
+        _write_efg_game(
+            catalog_dir / "books" / "author2020" / "game1.efg",
+            title="Tree Game",
+            description="A tree game from :cite:p:`Solo2020`.",
+        )
+        _write_nfg_game(
+            catalog_dir / "journals" / "geb" / "author2019" / "game2.nfg",
+            title="Table Game",
+            description="A table game from :cite:p:`Duo2019`.",
+        )
+        return catalog_dir
+
+    def test_build_manifest_entries(self, tmp_path):
+        catalog_dir = self._make_catalog(tmp_path)
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        by_slug = {e["slug"]: e for e in entries}
+        assert set(by_slug) == {"books/author2020/game1", "journals/geb/author2019/game2"}
+
+        efg_entry = by_slug["books/author2020/game1"]
+        assert efg_entry["title"] == "Tree Game"
+        assert efg_entry["description"] == "A tree game from (Solo 2020)."
+        assert efg_entry["format"] == "efg"
+        assert efg_entry["is_tree"] is True
+        assert efg_entry["thumbnail"] == "img/books/author2020/game1.png"
+        assert efg_entry["category"] == "Books"
+
+        nfg_entry = by_slug["journals/geb/author2019/game2"]
+        assert nfg_entry["format"] == "nfg"
+        assert nfg_entry["is_tree"] is False
+        assert nfg_entry["description"] == "A table game from (First and Second 2019)."
+
+    def test_build_manifest_skips_games_without_description(self, tmp_path):
+        catalog_dir = tmp_path / "catalog"
+        _write_efg_game(catalog_dir / "nodesc" / "game1.efg", description="")
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        assert entries == []
+
+    def test_build_manifest_sorted_by_slug(self, tmp_path):
+        catalog_dir = self._make_catalog(tmp_path)
+        entries = build.build_manifest(
+            catalog_dir=catalog_dir, bib_path=_write_bib(tmp_path / "refs.bib")
+        )
+        assert [e["slug"] for e in entries] == sorted(e["slug"] for e in entries)
+
+    def test_write_manifest_creates_file(self, tmp_path):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        assert json.loads(manifest_path.read_text(encoding="utf-8")) == [{"slug": "a/b"}]
+
+    def test_write_manifest_no_op_when_unchanged(self, tmp_path, capsys):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        capsys.readouterr()
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        assert "No changes" in capsys.readouterr().out
+
+    def test_write_manifest_updates_on_change(self, tmp_path, capsys):
+        manifest_path = tmp_path / "manifest.json"
+        build.write_manifest([{"slug": "a/b"}], manifest_path=manifest_path)
+        capsys.readouterr()
+        build.write_manifest([{"slug": "a/c"}], manifest_path=manifest_path)
+        assert "Updated" in capsys.readouterr().out
