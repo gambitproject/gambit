@@ -1,3 +1,10 @@
+## [17.0.0-beta.4] - 2026-11-08
+
+### Fixed
+- Fixed memory corruption in `Game.delete_parent` (`GameTreeRep::DeleteParent`), which wrote to the
+  removed parent node after it had been freed.
+
+
 ## [17.0.0-beta.3] - 2026-11-08
 
 ### Changed
