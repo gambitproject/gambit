@@ -32,7 +32,7 @@ class StrategyBehavior:
 
     .. versionadded:: 17.0.0
     """
-    _game = cython.declare(Game)
+    _game = cython.declare(_StrategicFormBase)
     _player_label = cython.declare(str)
     _strategy_label = cython.declare(str)
 

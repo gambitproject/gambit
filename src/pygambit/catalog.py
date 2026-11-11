@@ -400,7 +400,8 @@ def games(
     n_nodes: int, optional
         The number of nodes in the game. Only extensive games are returned.
     n_outcomes: int, optional
-        The number of outcomes in the game.
+        The number of outcomes in the game.  Only extensive and strategic games, which
+        have outcomes, are returned.
     n_players: int, optional
         The number of players in the game.
     n_strategies: int, optional
@@ -428,29 +429,32 @@ def games(
             )
             if n_game_actions != n_actions:
                 return False
-        if n_contingencies is not None and len(game.contingencies) != n_contingencies:
+        if n_contingencies is not None and len(game.get_contingencies()) != n_contingencies:
             return False
         if n_infosets is not None:
             if not isinstance(game, gbt.ExtensiveGame):
                 return False
             if sum(len(game.get_infosets(p)) for p in game.players) != n_infosets:
                 return False
-        if is_const_sum is not None and game.is_const_sum != is_const_sum:
+        if is_const_sum is not None and game.is_const_sum() != is_const_sum:
             return False
-        if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
+        if is_perfect_recall is not None and game.is_perfect_recall() != is_perfect_recall:
             return False
         if is_tree is not None and isinstance(game, gbt.ExtensiveGame) != is_tree:
             return False
-        if min_payoff is not None and game.min_payoff < min_payoff:
+        if min_payoff is not None and game.get_min_payoff() < min_payoff:
             return False
-        if max_payoff is not None and game.max_payoff > max_payoff:
+        if max_payoff is not None and game.get_max_payoff() > max_payoff:
             return False
         if n_nodes is not None:
             if not isinstance(game, gbt.ExtensiveGame):
                 return False
             if len(game.get_histories(gbt.H.after())) != n_nodes:
                 return False
-        if n_outcomes is not None and len(game.get_outcomes()) != n_outcomes:
+        if n_outcomes is not None and (
+            not isinstance(game, (gbt.ExtensiveGame, gbt.StrategicGame))
+            or len(game.get_outcomes()) != n_outcomes
+        ):
             return False
         if n_players is not None and len(game.players) != n_players:
             return False

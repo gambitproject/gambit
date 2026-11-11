@@ -56,11 +56,11 @@ def test_bagg_repr_html_does_not_raise():
 @pytest.mark.parametrize("game_path", ["2x2.bagg", "Bayesian-Coffee-3-2-2-3.bagg"])
 def test_bagg_game_level_members_unchanged(game_path):
     game = games.read_from_file(game_path)
-    assert game.is_perfect_recall
+    assert game.is_perfect_recall()
     assert isinstance(game.title, str)
     assert isinstance(game.description, str)
-    assert game.min_payoff <= game.max_payoff
-    assert game.get_outcomes() == []
+    assert game.get_min_payoff() <= game.get_max_payoff()
+    assert not hasattr(game, "get_outcomes")
 
 
 @pytest.mark.parametrize(

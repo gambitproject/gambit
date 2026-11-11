@@ -20,7 +20,7 @@ AGG_BAGG_GAME_PATHS = [
 @pytest.mark.parametrize("game_path", ["2x2.agg", "2x2_small_payoffs.agg"])
 def test_agg_is_const_sum(game_path):
     game = games.read_from_file(game_path)
-    assert not game.is_const_sum
+    assert not game.is_const_sum()
 
 
 @pytest.mark.parametrize(
@@ -33,8 +33,8 @@ def test_agg_is_const_sum(game_path):
 )
 def test_agg_bagg_get_min_max_payoff(game_path, exp_min, exp_max):
     game = games.read_from_file(game_path)
-    assert game.min_payoff == exp_min
-    assert game.max_payoff == exp_max
+    assert game.get_min_payoff() == exp_min
+    assert game.get_max_payoff() == exp_max
 
 
 @pytest.mark.parametrize("game_path", ["2x2.agg", "2x2_small_payoffs.agg"])
@@ -46,9 +46,9 @@ def test_agg_to_nfg(game_path):
 
 ABSENT_ATTRS = ["set_players", "relabel_strategies", "set_strategies", "behavior_support_profile"]
 
-BAGG_STRATEGY_STUBS = [
+STRATEGIC_FORM_MEMBERS = [
     ("get_strategies", lambda g: g.get_strategies("1")),
-    ("contingencies", lambda g: g.contingencies),
+    ("get_contingencies", lambda g: g.get_contingencies()),
     ("get_payoffs", lambda g: g.get_payoffs({})),
     ("mixed_strategy_profile", lambda g: g.mixed_strategy_profile()),
     ("random_strategy_profile", lambda g: g.random_strategy_profile()),
@@ -57,12 +57,8 @@ BAGG_STRATEGY_STUBS = [
     ("to_nfg", lambda g: g.to_nfg()),
     ("to_html", lambda g: g.to_html()),
     ("to_latex", lambda g: g.to_latex()),
-    ("to_efg", lambda g: g.to_efg()),
     ("relabel_players", lambda g: g.relabel_players({"1": "a"})),
-    ("is_const_sum", lambda g: g.is_const_sum),
-    ("get_min_payoff", lambda g: g.get_min_payoff("1")),
-    ("get_max_payoff", lambda g: g.get_max_payoff("1")),
-    ("has_perfect_recall", lambda g: g.has_perfect_recall("1")),
+    ("is_const_sum", lambda g: g.is_const_sum()),
 ]
 
 
@@ -73,21 +69,51 @@ def test_agg_bagg_missing_extensive_and_strategic_only_attrs(game_path, attr):
     `behavior_support_profile` are each implemented (in C++) only for the tree and/or
     strategic representations, not for AGG/BAGG -- they must not exist as attributes
     on an `ActionGraphGame`/`BayesianActionGraphGame` at all, rather than existing and
-    raising when called.  The strategy-shaped members that a BAGG refuses (see
-    `BAGG_STRATEGY_STUBS`) do exist, and each raises the one dedicated error."""
+    raising when called."""
     game = games.read_from_file(game_path)
     assert not hasattr(game, attr)
 
 
 @pytest.mark.parametrize("game_path", ["2x2.bagg", "Bayesian-Coffee-3-2-2-3.bagg"])
 @pytest.mark.parametrize(
-    "name,call", BAGG_STRATEGY_STUBS, ids=[n for n, _ in BAGG_STRATEGY_STUBS]
+    "name,call", STRATEGIC_FORM_MEMBERS, ids=[n for n, _ in STRATEGIC_FORM_MEMBERS]
 )
-def test_bagg_strategy_shaped_members_raise(game_path, name, call):
+def test_bagg_has_no_strategic_form_members(game_path, name, call):
     game = games.read_from_file(game_path)
-    assert hasattr(type(game), name)
-    with pytest.raises(gbt.UnsupportedForBayesianGameError, match="not supported for Bayesian"):
+    assert not hasattr(type(game), name)
+    with pytest.raises(AttributeError):
         call(game)
+
+
+@pytest.mark.parametrize("game_path", ["2x2.bagg", "Bayesian-Coffee-3-2-2-3.bagg"])
+@pytest.mark.parametrize("name", ["get_min_payoff", "get_max_payoff"])
+def test_bagg_payoff_bounds_are_game_wide_only(game_path, name):
+    game = games.read_from_file(game_path)
+    assert isinstance(getattr(game, name)(), gbt.Rational)
+    with pytest.raises(TypeError):
+        getattr(game, name)("1")
+
+
+@pytest.mark.parametrize("game_path", AGG_BAGG_GAME_PATHS)
+def test_agg_bagg_have_strategic_form_members_exactly_when_they_have_one(game_path):
+    game = games.read_from_file(game_path)
+    assert isinstance(game, gbt.Game)
+    for name, _ in STRATEGIC_FORM_MEMBERS:
+        assert hasattr(type(game), name) == isinstance(game, gbt.ActionGraphGame)
+
+
+@pytest.mark.parametrize("game_path", ["2x2.bagg", "Bayesian-Coffee-3-2-2-3.bagg"])
+def test_bagg_every_player_has_perfect_recall(game_path):
+    game = games.read_from_file(game_path)
+    assert game.is_perfect_recall()
+    for player in game.players:
+        assert game.has_perfect_recall(player) is True
+    with pytest.raises(KeyError):
+        game.has_perfect_recall("no such player")
+    with pytest.raises(TypeError):
+        game.has_perfect_recall(1)
+    with pytest.raises(ValueError):
+        game.has_perfect_recall(" ")
 
 
 def test_bagg_error_is_dedicated_error_type():
@@ -104,8 +130,8 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
     95 -> 0.123456789012345.
     """
     game = games.read_from_file("2x2_fraction_payoffs.agg")
-    assert game.max_payoff == gbt.Rational(1, 3)
-    assert game.min_payoff == -10
+    assert game.get_max_payoff() == gbt.Rational(1, 3)
+    assert game.get_min_payoff() == -10
     for player in game.players:
         assert game.get_max_payoff(player) == gbt.Rational(1, 3)
         assert game.get_min_payoff(player) == -10

@@ -188,7 +188,7 @@ def main(
     quiet: bool,
 ) -> None:
     game = load_game(quiet, DESCRIPTION, file, PROG_NAME)
-    if not game.is_perfect_recall:
+    if not game.is_perfect_recall():
         raise ValueError("Computing equilibria of games with imperfect recall is not supported.")
 
     def render_equilibrium(profile) -> None:

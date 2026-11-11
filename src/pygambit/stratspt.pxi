@@ -150,7 +150,7 @@ class StrategySupportProfile:
         KeyError
             If no player in the game has the label `player`.
         """
-        game: Game = self.game
+        game: _StrategicFormBase = self.game
         resolved_player: c_GamePlayer = game._resolve_player(
             player, "StrategySupportProfile.__getitem__"
         )
@@ -175,7 +175,7 @@ class StrategySupportProfile:
         Every entry of `strategies` must be one of the player's strategy labels, and
         at least one must be given.
         """
-        game: Game = self.game
+        game: _StrategicFormBase = self.game
         player_strategies = game.get_strategies(player)
         labels = set(player_strategies)
         given = set(strategies)
@@ -272,7 +272,7 @@ class StrategySupportProfile:
             If no player in the game has the label `player`, or the player has no
             strategy with the label `strategy`.
         """
-        game: Game = self.game
+        game: _StrategicFormBase = self.game
         handle = game._resolve_strategy(player, strategy, "is_dominated", "strategy")
         return deref(self.profile).IsDominated(handle, strict, external)
 

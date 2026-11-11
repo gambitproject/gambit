@@ -79,7 +79,7 @@ def test_pure_profile_matches_per_strategy_path(game: gbt.Game):
 
 def test_imperfect_recall_falls_back_via_conversion_constructor():
     game = games.read_from_file("gilboa_two_am_agents.efg")
-    assert not game.is_perfect_recall
+    assert not game.is_perfect_recall()
     behavior = game.mixed_behavior_profile(rational=True)
     profile = behavior.as_strategy()
     max_regret, liap, _ = _reference(profile)

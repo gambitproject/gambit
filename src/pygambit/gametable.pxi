@@ -24,7 +24,7 @@ import numpy as np
 
 
 @cython.cclass
-class StrategicGame(Game):
+class StrategicGame(_StrategicFormBase):
     """A `Game` with a strategic (payoff table) representation.
 
     Constructing ``StrategicGame(dim, title)`` creates a new game with a strategic
@@ -82,7 +82,7 @@ class StrategicGame(Game):
         See Also
         --------
         from_dict : Create strategic game and set player labels
-        Game.to_arrays: Generate the payoff tables for players represented as numpy arrays
+        to_arrays : Generate the payoff tables as numpy arrays
         """
         arrays = [np.array(a) for a in arrays]
         if len(set(a.shape for a in arrays)) > 1:
@@ -408,7 +408,7 @@ class StrategicGame(Game):
         set_outcome_payoffs : Set the payoffs at an outcome.
         relabel_outcomes : Change the labels of the game's outcomes.
         """
-        resolved_payoffs = self._resolve_payoff_mapping(payoffs, "make_outcome")
+        resolved_payoffs = _resolve_payoff_mapping(self, payoffs, "make_outcome")
         c_payoffs = stdvector[c_Number]()
         for player in self.players:
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
@@ -493,7 +493,74 @@ class StrategicGame(Game):
         relabel_players : Simultaneously reassign the labels of the game's players.
         relabel_strategies : Change the labels of a player's strategies.
         """
-        self._do_relabel_outcomes(labels, strict)
+        _do_relabel_outcomes(self, labels, strict)
+
+    def get_outcomes(self) -> list[str]:
+        """Returns the labels of the outcomes in the game.
+
+        .. versionadded:: 17.0.0
+        """
+        return _get_outcomes(self)
+
+    def get_outcome_payoffs(self, label: str) -> PayoffVector:
+        """Returns the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome.
+
+        Returns
+        -------
+        PayoffVector
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`.
+        TypeError
+            If `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace.
+
+        See Also
+        --------
+        set_outcome_payoffs : Set the payoffs at an outcome.
+        get_payoffs : Get the payoffs at a pure-strategy contingency.
+        """
+        return _get_outcome_payoffs(self, label)
+
+    def set_outcome_payoffs(self, label: str, payoffs: typing.Mapping) -> None:
+        """Sets the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome to modify.
+        payoffs : Mapping
+            A complete mapping from the game's players (or their labels) to payoffs.
+            Every player must be present; zeroes must be given explicitly.
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`; or if a key of `payoffs` matches no player.
+        TypeError
+            If `payoffs` is not a mapping, or `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace; or if `payoffs` is not a
+            complete mapping over exactly the game's players.
+
+        See Also
+        --------
+        get_outcome_payoffs : Get the payoffs at an outcome.
+        make_outcome : Create a new outcome with payoffs.
+        """
+        _set_outcome_payoffs(self, label, payoffs)
 
     def set_players(self,
                     players: list[str],

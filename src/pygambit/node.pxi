@@ -28,16 +28,6 @@ public API; internal return type of the private `Node._prior_action`, pending a
 """
 
 
-@cython.cfunc
-def _decode_number(py_string: string) -> object:
-    """Internal: decode a number formatted by the C++ core as ``Decimal`` or
-    ``Rational``, matching whichever representation was used to specify it."""
-    if "." in py_string.decode("ascii"):
-        return decimal.Decimal(py_string.decode("ascii"))
-    else:
-        return Rational(py_string.decode("ascii"))
-
-
 @cython.cclass
 class NodeChildren:
     """The set of nodes which are direct descendants of a node."""

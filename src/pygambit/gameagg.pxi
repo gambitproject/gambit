@@ -21,7 +21,7 @@
 #
 
 @cython.cclass
-class ActionGraphGame(Game):
+class ActionGraphGame(_StrategicFormBase):
     """A `Game` with an action-graph game representation."""
 
 
@@ -57,23 +57,19 @@ class BAGGPlayers:
         return isinstance(label, str) and label in set(self)
 
 
-def _unsupported(*args, **kwargs):
-    """Not supported for Bayesian games."""
-    raise UnsupportedForBayesianGameError("not supported for Bayesian games")
-
-
 @cython.cclass
 class BayesianActionGraphGame(Game):
     """A `Game` with a Bayesian action-graph game representation.
 
     The game is presented as what it is: a simultaneous-move Bayesian game.  Its players
     are the Bayesian players, and each player's types are presented as information sets,
-    labelled by position.  Members of `Game` that concern strategies have no meaning for a
-    Bayesian game and raise `UnsupportedForBayesianGameError`.
+    labelled by position.  The strategic form of a Bayesian game is well defined but is not
+    implemented in pygambit, so the members concerned with strategies are absent.  Analyse
+    the game through its agent form, with behaviour profiles over types.
 
     .. versionchanged:: 17.0.0
-        Players are the Bayesian players rather than one player per type, and members
-        that concern strategies raise `UnsupportedForBayesianGameError`.
+        Players are the Bayesian players rather than one player per type, and the game
+        has no members that concern strategies.
     """
 
     @cython.cfunc
@@ -151,6 +147,35 @@ class BayesianActionGraphGame(Game):
             The Bayesian players, rather than one player per type.
         """
         return BAGGPlayers.wrap(self.game)
+
+    def has_perfect_recall(self, player: str) -> bool:
+        """Returns whether `player` has perfect recall.
+
+        By convention, every player of a Bayesian game has perfect recall, as the game
+        is treated as a simultaneous-move game.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        player : str
+            The label of the player.
+
+        Raises
+        ------
+        KeyError
+            If no player has label `player`.
+        TypeError
+            If `player` is not a `str`.
+        ValueError
+            If `player` is an empty string or all whitespace.
+
+        See Also
+        --------
+        Game.is_perfect_recall
+        """
+        self._player_position(player)
+        return True
 
     def get_infosets(self, player: str) -> list[str]:
         """Returns the labels of the information sets of `player`.
@@ -330,20 +355,3 @@ class BayesianActionGraphGame(Game):
 
     def _repr_html_(self):
         return repr(self)
-
-    contingencies = property(_unsupported)
-    is_const_sum = property(_unsupported)
-    get_strategies = _unsupported
-    get_payoffs = _unsupported
-    mixed_strategy_profile = _unsupported
-    random_strategy_profile = _unsupported
-    strategy_support_profile = _unsupported
-    to_arrays = _unsupported
-    to_nfg = _unsupported
-    to_html = _unsupported
-    to_latex = _unsupported
-    to_efg = _unsupported
-    relabel_players = _unsupported
-    get_min_payoff = _unsupported
-    get_max_payoff = _unsupported
-    has_perfect_recall = _unsupported

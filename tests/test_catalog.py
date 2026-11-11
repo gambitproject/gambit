@@ -77,7 +77,7 @@ def test_catalog_games_filter_n_contingencies(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert len(g.contingencies) == 2
+        assert len(g.get_contingencies()) == 2
 
 
 def test_catalog_games_filter_n_infosets(all_games):
@@ -97,7 +97,7 @@ def test_catalog_games_filter_is_const_sum(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert g.is_const_sum
+        assert g.is_const_sum()
 
 
 def test_catalog_games_filter_is_not_perfect_recall(all_games):
@@ -107,7 +107,7 @@ def test_catalog_games_filter_is_not_perfect_recall(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert not g.is_perfect_recall
+        assert not g.is_perfect_recall()
 
 
 def test_catalog_games_filter_is_not_tree(all_games):
@@ -127,8 +127,8 @@ def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):
     assert len(filtered_games) < len(all_games)
     if len(filtered_games) > 0:
         g = gbt.catalog.load(filtered_games.Game.iloc[0])
-        assert g.min_payoff >= 0
-        assert g.max_payoff <= 10
+        assert g.get_min_payoff() >= 0
+        assert g.get_max_payoff() <= 10
 
 
 def test_catalog_games_filter_n_nodes(all_games):

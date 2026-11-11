@@ -1,6 +1,25 @@
 ## [17.0.0-beta.4] - 2026-11-08
 
+### Changed
+- Create separate game-representation classes `ExtensiveGame`, `StrategicGame`, `ActionGraphGame`,
+  and `BayesianActionGraphGame` as subclasses of `Game`, and clarify the contract as to what
+  each provides.
+- Nontrivial queries on games are now represented as functions (generally prefixed by `get_`
+  where appropriate).
+- Numbers stored in a game are returned consistently as `Rational`.  `Rational` still retains the
+  original text representation of the value, so a `Rational` may show a decimal value in its
+  `__repr__`.  Previously `get_outcome_payoffs` and `get_action_probs` returned `Decimal` for a
+  number entered as a decimal, which meant these had unpredictable return types, and arithmetic
+  on decimal and rational is not defined.
+
+### Removed
+- `StrategicGame.to_efg` and `ActionGraphGame.to_efg`, which raised `OSError` ("Undefined operation on game")
+  on every game, are removed.  Only an `ExtensiveGame` can be written as an .efg file.
+
 ### Fixed
+- The `repr` of a game now names its concrete class (`StrategicGame`, `ExtensiveGame`,
+  `ActionGraphGame`, `BayesianActionGraphGame`) rather than `Game`, and the `repr` of an untitled game
+  now ends with its closing parenthesis.
 - Fixed memory corruption in `Game.delete_parent` (`GameTreeRep::DeleteParent`), which wrote to the
   removed parent node after it had been freed.
 

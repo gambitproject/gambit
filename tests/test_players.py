@@ -195,7 +195,7 @@ def _tag_contingencies(game: gbt.Game) -> None:
     can be recomputed from its strategies' labels after the game is mutated.
     """
     players = list(game.players)
-    for n, contingency in enumerate(game.contingencies, start=1):
+    for n, contingency in enumerate(game.get_contingencies(), start=1):
         payoffs = {
             player: int(f"{pl_index}{contingency[player]}")
             for pl_index, player in enumerate(players)
@@ -419,7 +419,7 @@ def test_set_players_add_then_drop_round_trips():
     game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
     labels = list(game.players)
     game.set_players(labels + ["X"])
-    assert all(game.get_payoffs(c)["X"] == 0 for c in game.contingencies)
+    assert all(game.get_payoffs(c)["X"] == 0 for c in game.get_contingencies())
     game.set_players(labels, drop=True)
     assert list(game.players) == labels
     assert game.to_arrays()[0].tolist() == [[1, 2], [3, 4]]

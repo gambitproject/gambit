@@ -107,3 +107,19 @@ def test_collection_rejects_integer_indexing(getter):
     collection = getter(games.create_stripped_down_poker_efg())
     with pytest.raises(TypeError):
         _ = collection[0]
+
+
+@pytest.mark.parametrize(
+    "game,class_name",
+    [
+        (gbt.read_nfg("tests/test_games/2x2_bimatrix_all_zero_payoffs.nfg"), "StrategicGame"),
+        (gbt.read_efg("tests/test_games/2_player_chance.efg"), "ExtensiveGame"),
+        (gbt.read_agg("tests/test_games/2x2.agg"), "ActionGraphGame"),
+        (gbt.read_bagg("tests/test_games/2x2.bagg"), "BayesianActionGraphGame"),
+    ],
+)
+def test_repr_names_concrete_class(game, class_name):
+    assert repr(game).startswith(f"{class_name}(")
+    assert repr(game).endswith(")")
+    game.title = "A title"
+    assert repr(game) == f"{class_name}(title='A title')"
