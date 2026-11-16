@@ -21,7 +21,7 @@ build:
     - pdf2svg
   jobs:
     post_install:
-      - pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
+      - pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@b30e09706ade54f02ad2eb1cbe9a9b04cc6958cd"
       # Regenerate catalog/doc/_table.rst (and the game images) from the current catalog.
       - $READTHEDOCS_VIRTUALENV_PATH/bin/python catalog/build.py
 
