@@ -1,0 +1,33 @@
+version: 2
+
+# This config file is for a SEPARATE ReadTheDocs project from the main Gambit docs
+# (which use the root-level .readthedocs.yml). Setting it up requires creating a second
+# project in the ReadTheDocs dashboard for this same GitHub repo, configured to use this
+# file instead of the root one — that dashboard step is not something a git commit can do.
+
+sphinx:
+  configuration: catalog/doc/conf.py
+
+formats: all
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.14"
+  apt_packages:
+    - libgmp-dev
+    - texlive-full
+    - imagemagick
+    - pdf2svg
+  jobs:
+    post_install:
+      - pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
+      # Regenerate catalog/doc/_table.rst (and the game images) from the current catalog.
+      - $READTHEDOCS_VIRTUALENV_PATH/bin/python catalog/build.py
+
+python:
+  install:
+    - method: pip
+      path: "."
+      extra_requirements:
+        - doc
