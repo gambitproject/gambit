@@ -7,6 +7,7 @@ Detailed table of contents
    :maxdepth: 3
 
    intro
+   concepts
    pygambit
    tools
    gui
