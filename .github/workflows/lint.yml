@@ -120,7 +120,7 @@ jobs:
       - name: Install pygambit (editable, picks up catalog/games directly)
         run: |
           python -m pip install -v -e ".[doc]"
-          pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@main"
+          pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@b30e09706ade54f02ad2eb1cbe9a9b04cc6958cd"
       - name: Regenerate catalog/catalog.am
         run: python catalog/build.py --build --skip-table
       - name: Fail if catalog.am is out of sync with catalog/games
