@@ -94,7 +94,7 @@ def test_is_perfect_recall(game_input, expected_result: bool):
     else:
         pytest.fail(f"Unknown type for game_input: {type(game_input)}")
 
-    assert game.is_perfect_recall == expected_result
+    assert game.is_perfect_recall() == expected_result
 
 
 @pytest.mark.parametrize("game_input,expected_result", [

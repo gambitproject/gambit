@@ -32,22 +32,22 @@ def test_game_behav_profile_error():
 
 def test_game_is_const_sum():
     game = games.read_from_file("const_sum_game.nfg")
-    assert game.is_const_sum
+    assert game.is_const_sum()
 
 
 def test_game_is_not_const_sum():
     game = games.read_from_file("non_const_sum_game.nfg")
-    assert not game.is_const_sum
+    assert not game.is_const_sum()
 
 
 def test_game_get_min_payoff():
     game = games.read_from_file("mixed_strategy.nfg")
-    assert game.min_payoff == 0
+    assert game.get_min_payoff() == 0
 
 
 def test_game_get_max_payoff():
     game = games.read_from_file("mixed_strategy.nfg")
-    assert game.max_payoff == 3
+    assert game.get_max_payoff() == 3
 
 
 def test_game_get_outcome():

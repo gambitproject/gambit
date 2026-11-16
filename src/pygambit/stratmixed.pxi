@@ -179,7 +179,7 @@ class MixedStrategyProfile:
 
     See Also
     --------
-    Game.mixed_strategy_profile
+    StrategicGame.mixed_strategy_profile
         Creates a new mixed strategy profile on a game.
     MixedBehaviorProfile
         Represents a mixed behavior profile over a ``Game`` with an extensive
@@ -585,7 +585,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         # Private, for testing: the largest discrepancy between the payoff derivative blocks of
         # the players and the same quantities computed one at a time, on the support without
         # the strategies `removed`, given as (player label, strategy label) pairs.
-        game: Game = self.game
+        game: _StrategicFormBase = self.game
         cdef stdvector[c_GameStrategy] handles
         for player, label in removed:
             handles.push_back(game._resolve_strategy(player, label, "_payoff_deriv_block"))
@@ -613,7 +613,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return len(self.game.players)
 
     def _getprob_strategy(self, player: str, label: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_getprob_strategy")
         return deref(self.profile).getitem_strategy(handle)
 
@@ -626,7 +626,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             self.profile = make_shared[c_MixedStrategyProfile[double]](deref(self.profile))
 
     def _setprob_strategy(self, player: str, label: str, value) -> None:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_setprob_strategy")
         self._ensure_unshared()
         setitem_mspd_strategy(deref(self.profile), handle, value)
@@ -635,21 +635,21 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return to_float_prob(value)
 
     def _payoff(self, player: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         return deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff"))
 
     def _strategy_value(self, player: str, label: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_strategy_value")
         return deref(self.profile).GetPayoff(handle)
 
     def _strategy_regret(self, player: str, label: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_strategy_regret")
         return deref(self.profile).GetRegret(handle)
 
     def _player_regret(self, player: str) -> float:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         return deref(self.profile).GetRegret(game._resolve_player(player, "_player_regret"))
 
     def _max_regret(self) -> float:
@@ -710,7 +710,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return len(self.game.players)
 
     def _getprob_strategy(self, player: str, label: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_getprob_strategy")
         return rat_to_py(deref(self.profile).getitem_strategy(handle))
 
@@ -726,7 +726,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         if not isinstance(value, (int, fractions.Fraction)):
             raise TypeError("probability should be int or Fraction instance; received {}"
                             .format(value.__class__.__name__))
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_setprob_strategy")
         self._ensure_unshared()
         setitem_mspr_strategy(deref(self.profile), handle,
@@ -736,21 +736,21 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return to_rational_prob(value)
 
     def _payoff(self, player: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         return rat_to_py(deref(self.profile).GetPayoff(game._resolve_player(player, "_payoff")))
 
     def _strategy_value(self, player: str, label: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_strategy_value")
         return rat_to_py(deref(self.profile).GetPayoff(handle))
 
     def _strategy_regret(self, player: str, label: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         handle = game._resolve_strategy(player, label, "_strategy_regret")
         return rat_to_py(deref(self.profile).GetRegret(handle))
 
     def _player_regret(self, player: str) -> Rational:
-        game: Game = cython.cast(Game, self.game)
+        game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
         resolved_player = game._resolve_player(player, "_player_regret")
         return rat_to_py(deref(self.profile).GetRegret(resolved_player))
 

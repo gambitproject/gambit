@@ -33,8 +33,46 @@ class Rational(fractions.Fraction):
     """Represents a rational number in specifying numerical data for a game,
     or in a strategy profile.
 
+    A `Rational` made from a string, or returned for a number stored in a game, remembers
+    that text, and `str` and `repr` give it back: a payoff entered as `1.5` prints as `1.5`.
+    Equality, hashing and arithmetic are exact, as for `fractions.Fraction`, and arithmetic
+    returns a `fractions.Fraction`.
+
     .. versionadded:: 15.0.0
     """
+
+    __slots__ = ("_text",)
+
+    _text: str | None
+
+    def __new__(cls, numerator: typing.Any = 0, denominator: typing.Any = None) -> typing.Self:
+        self = super().__new__(cls, numerator, denominator)
+        if denominator is None and isinstance(numerator, str):
+            self._text = numerator.strip()
+        elif denominator is None and isinstance(numerator, Rational):
+            self._text = numerator._text
+        else:
+            self._text = None
+        return self
+
+    def __str__(self) -> str:
+        return self._text if self._text is not None else super().__str__()
+
+    def __repr__(self) -> str:
+        if self._text is not None:
+            return f"{type(self).__name__}({self._text!r})"
+        return super().__repr__()
+
+    def __reduce__(self) -> tuple[typing.Any, ...]:
+        if self._text is not None:
+            return (type(self), (self._text,))
+        return (type(self), (self.numerator, self.denominator))
+
+    def __copy__(self) -> typing.Self:
+        return self
+
+    def __deepcopy__(self, memo: typing.Any) -> typing.Self:
+        return self
 
     def _repr_latex_(self) -> str:
         if self.denominator != 1:
@@ -51,7 +89,7 @@ def to_number_string(value: typing.Any) -> str:
         return str(value)
     if "/" in str(value):
         try:
-            return str(Rational(str(value)))
+            return str(fractions.Fraction(str(value)))
         except ValueError:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
     # This slightly indirect way of converting deals best with

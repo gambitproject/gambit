@@ -36,12 +36,20 @@ Creating, reading, and writing games
    read_bagg
 
    StrategicGame.from_arrays
-   Game.to_arrays
+   ExtensiveGame.to_arrays
+   StrategicGame.to_arrays
+   ActionGraphGame.to_arrays
    StrategicGame.from_dict
-   Game.to_efg
-   Game.to_nfg
-   Game.to_html
-   Game.to_latex
+   ExtensiveGame.to_efg
+   ExtensiveGame.to_nfg
+   StrategicGame.to_nfg
+   ActionGraphGame.to_nfg
+   ExtensiveGame.to_html
+   StrategicGame.to_html
+   ActionGraphGame.to_html
+   ExtensiveGame.to_latex
+   StrategicGame.to_latex
+   ActionGraphGame.to_latex
 
 
 Computing a tree layout for graphical display
@@ -90,7 +98,9 @@ Transforming game components
 .. autosummary::
    :toctree: api/
 
-   Game.relabel_players
+   ExtensiveGame.relabel_players
+   StrategicGame.relabel_players
+   ActionGraphGame.relabel_players
    ExtensiveGame.set_players
    StrategicGame.set_players
    StrategicGame.relabel_strategies
@@ -101,7 +111,8 @@ Transforming game components
    StrategicGame.make_outcome_null
    ExtensiveGame.relabel_outcomes
    StrategicGame.relabel_outcomes
-   Game.set_outcome_payoffs
+   ExtensiveGame.set_outcome_payoffs
+   StrategicGame.set_outcome_payoffs
 
 
 Information about the game
@@ -112,23 +123,37 @@ Information about the game
 
    Game.title
    Game.description
-   Game.is_const_sum
+   ExtensiveGame.is_const_sum
+   StrategicGame.is_const_sum
+   ActionGraphGame.is_const_sum
    Game.is_perfect_recall
    Game.has_perfect_recall
    Game.players
-   Game.min_payoff
-   Game.max_payoff
    Game.get_min_payoff
    Game.get_max_payoff
+   ExtensiveGame.get_min_payoff
+   StrategicGame.get_min_payoff
+   ActionGraphGame.get_min_payoff
+   ExtensiveGame.get_max_payoff
+   StrategicGame.get_max_payoff
+   ActionGraphGame.get_max_payoff
    ExtensiveGame.get_infosets
    ExtensiveGame.get_events
-   Game.get_strategies
-   Game.contingencies
+   ExtensiveGame.get_strategies
+   StrategicGame.get_strategies
+   ActionGraphGame.get_strategies
+   ExtensiveGame.get_contingencies
+   StrategicGame.get_contingencies
+   ActionGraphGame.get_contingencies
    ExtensiveGame.get_outcome
    StrategicGame.get_outcome
-   Game.get_outcomes
-   Game.get_outcome_payoffs
-   Game.get_payoffs
+   ExtensiveGame.get_outcomes
+   StrategicGame.get_outcomes
+   ExtensiveGame.get_outcome_payoffs
+   StrategicGame.get_outcome_payoffs
+   ExtensiveGame.get_payoffs
+   StrategicGame.get_payoffs
+   ActionGraphGame.get_payoffs
    ExtensiveGame.get_subgame_roots
    ExtensiveGame.get_minimal_subgame
    ExtensiveGame.get_strategy_unreachable
@@ -140,13 +165,36 @@ Player behavior
 .. autosummary::
    :toctree: api/
 
-   Game.mixed_strategy_profile
-   Game.random_strategy_profile
+   ExtensiveGame.mixed_strategy_profile
+   StrategicGame.mixed_strategy_profile
+   ActionGraphGame.mixed_strategy_profile
+   ExtensiveGame.random_strategy_profile
+   StrategicGame.random_strategy_profile
+   ActionGraphGame.random_strategy_profile
    ExtensiveGame.get_behavior
    ExtensiveGame.mixed_behavior_profile
    ExtensiveGame.random_behavior_profile
-   Game.strategy_support_profile
+   ExtensiveGame.strategy_support_profile
+   StrategicGame.strategy_support_profile
+   ActionGraphGame.strategy_support_profile
    ExtensiveGame.behavior_support_profile
+
+
+Numbers in games
+~~~~~~~~~~~~~~~~
+
+.. currentmodule:: pygambit
+
+Payoffs and chance probabilities are stored exactly, in the form in which they were entered.
+Every payoff and probability that a game returns is a `Rational`, which remembers its entered
+text: a payoff entered as ``1.5`` is equal to ``Fraction(3, 2)`` and prints as ``1.5``.
+`Decimal` is accepted as input, to give a number in decimal form.
+
+.. autosummary::
+   :toctree: api/
+
+   Rational
+   Decimal
 
 
 Representation of strategic behavior

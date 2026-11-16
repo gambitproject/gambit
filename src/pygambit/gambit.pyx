@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import collections.abc
-import decimal
 import fractions
 import typing
 
@@ -54,8 +53,14 @@ from .error import *
 
 @cython.cfunc
 def rat_to_py(r: c_Rational):
-    """Convert a C++ Rational number to a Python Rational."""
-    return Rational(to_string(r).decode("ascii"))
+    """Convert a C++ Rational number to a Python Rational, which carries no entered text."""
+    return Rational(fractions.Fraction(to_string(r).decode("ascii")))
+
+
+@cython.cfunc
+def _number_to_py(text: string) -> Rational:
+    """Convert a game's stored C++ Number, as text, to a Python Rational that keeps the text."""
+    return Rational(text.decode("ascii"))
 
 
 @cython.cfunc
@@ -163,6 +168,7 @@ include "behavmixed.pxi"
 include "gamecollections.pxi"
 include "gamehelpers.pxi"
 include "game.pxi"
+include "gameoutcomes.pxi"
 include "gametree.pxi"
 include "gametable.pxi"
 include "gameagg.pxi"

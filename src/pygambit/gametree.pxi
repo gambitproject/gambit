@@ -23,7 +23,7 @@ import numpy as np
 
 
 @cython.cclass
-class ExtensiveGame(Game):
+class ExtensiveGame(_StrategicFormBase):
     """A `Game` with an extensive (game tree) representation.
 
     Constructing ``ExtensiveGame(players, title)`` creates a trivial game tree,
@@ -53,6 +53,28 @@ class ExtensiveGame(Game):
             c_labels.push_back(str(player).encode("utf-8"))
         self.game = NewTree(c_labels)
         self.title = title
+
+    def to_efg(
+        self,
+        filepath_or_buffer: str | pathlib.Path | io.IOBase | None = None
+    ) -> str | None:
+        """Save the game to an .efg file or return its serialized representation
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or io.IOBase or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+
+        Return
+        ------
+        String representation of the game or None if the game is saved to a file
+
+        See Also
+        --------
+        to_nfg, to_html, to_latex
+        """
+        return self._to_format(WriteEfgFile, filepath_or_buffer)
 
     @cython.cfunc
     def _get_infosets(self, player: str) -> list[Node]:
@@ -348,7 +370,7 @@ class ExtensiveGame(Game):
             a.deref().GetLabel().decode("utf-8") for a in infoset_handle.deref().GetActions()
         ]
 
-    def get_action_probs(self, history: Selector) -> dict[str, decimal.Decimal | Rational]:
+    def get_action_probs(self, history: Selector) -> dict[str, Rational]:
         """Returns the probability of each action at the node that `history`
         resolves to, keyed by label, if it currently belongs to a chance event.
 
@@ -360,7 +382,7 @@ class ExtensiveGame(Game):
 
         Returns
         -------
-        dict of str to Decimal or Rational
+        dict of str to Rational
             The probability of each action, keyed by label, or an empty dict
             if the node does not currently belong to a chance event --
             including a terminal node, or a personal player's node.
@@ -388,7 +410,7 @@ class ExtensiveGame(Game):
             return {}
         result: dict = {}
         for a in infoset_handle.deref().GetActions():
-            result[a.deref().GetLabel().decode("utf-8")] = _decode_number(
+            result[a.deref().GetLabel().decode("utf-8")] = _number_to_py(
                 cython.cast(string, infoset_handle.deref().GetActionProb(a))
             )
         return result
@@ -1965,7 +1987,7 @@ class ExtensiveGame(Game):
         set_outcome_payoffs : Set the payoffs at an outcome.
         relabel_outcomes : Change the labels of the game's outcomes.
         """
-        resolved_payoffs = self._resolve_payoff_mapping(payoffs, "make_outcome")
+        resolved_payoffs = _resolve_payoff_mapping(self, payoffs, "make_outcome")
         c_payoffs = stdvector[c_Number]()
         for player in self.players:
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
@@ -2038,7 +2060,74 @@ class ExtensiveGame(Game):
         relabel_players : Simultaneously reassign the labels of the game's players.
         relabel_strategies : Change the labels of a player's strategies.
         """
-        self._do_relabel_outcomes(labels, strict)
+        _do_relabel_outcomes(self, labels, strict)
+
+    def get_outcomes(self) -> list[str]:
+        """Returns the labels of the outcomes in the game.
+
+        .. versionadded:: 17.0.0
+        """
+        return _get_outcomes(self)
+
+    def get_outcome_payoffs(self, label: str) -> PayoffVector:
+        """Returns the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome.
+
+        Returns
+        -------
+        PayoffVector
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`.
+        TypeError
+            If `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace.
+
+        See Also
+        --------
+        set_outcome_payoffs : Set the payoffs at an outcome.
+        get_payoffs : Get the payoffs at a pure-strategy contingency.
+        """
+        return _get_outcome_payoffs(self, label)
+
+    def set_outcome_payoffs(self, label: str, payoffs: typing.Mapping) -> None:
+        """Sets the payoff to each player at the outcome labeled `label`.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        label : str
+            The label of the outcome to modify.
+        payoffs : Mapping
+            A complete mapping from the game's players (or their labels) to payoffs.
+            Every player must be present; zeroes must be given explicitly.
+
+        Raises
+        ------
+        KeyError
+            If no outcome has label `label`; or if a key of `payoffs` matches no player.
+        TypeError
+            If `payoffs` is not a mapping, or `label` is not a `str`.
+        ValueError
+            If `label` is an empty string or all whitespace; or if `payoffs` is not a
+            complete mapping over exactly the game's players.
+
+        See Also
+        --------
+        get_outcome_payoffs : Get the payoffs at an outcome.
+        make_outcome : Create a new outcome with payoffs.
+        """
+        _set_outcome_payoffs(self, label, payoffs)
 
     def set_players(self,
                     players: list[str],
