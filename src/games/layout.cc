@@ -70,8 +70,9 @@ void Layout::LayoutTree(const Game &p_game)
   m_numSublevels.clear();
   m_infosetSublevels.clear();
 
-  m_maxOffset = 0;
-  LayoutSubtree(p_game->GetRoot(), 0, m_maxOffset);
+  double nextLeaf = 0;
+  LayoutSubtree(p_game->GetRoot(), 0, nextLeaf);
+  m_maxOffset = nextLeaf - 1;
 }
 
 } // namespace Gambit

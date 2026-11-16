@@ -226,7 +226,14 @@ class Game:
         writer: GameWriter,
         filepath_or_buffer: str | pathlib.Path | io.IOBase | None = None
     ):
-        serialized_game = writer(self.game)
+        return self._save(writer(self.game), filepath_or_buffer)
+
+    @cython.cfunc
+    def _save(
+        self,
+        serialized_game: bytes,
+        filepath_or_buffer: str | pathlib.Path | io.IOBase | None = None
+    ):
         if filepath_or_buffer is None:
             return serialized_game.decode()
         if isinstance(filepath_or_buffer, io.TextIOBase):

@@ -595,7 +595,7 @@ void TreeLayout::Layout(const Game &p_game)
     m_nodeMap[node]->SetY(entry->m_offset * spacing + c_topMargin);
   }
   m_maxY =
-      c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset());
+      c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset() + 1);
   ComputeNodeDepths(layout);
 
   GenerateLabels();

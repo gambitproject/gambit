@@ -493,12 +493,14 @@ cdef extern from "util.h":
     c_Game ParseGbtGame(string) except +IOError
     c_Game ParseEfgGame(string) except +IOError
     c_Game ParseNfgGame(string) except +IOError
+    c_Game ParseGtdrawGame(string) except +IOError
     c_Game ParseAggGame(string) except +IOError
     c_Game ParseBaggGame(string) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError
     string WriteLaTeXFile(c_Game)
+    string WriteGtdrawFile(c_Game, double, double, double, bint) except +
     string WriteHTMLFile(c_Game)
 
     stdlist[shared_ptr[T]] make_list_of_pointer[T](stdlist[T]) except +

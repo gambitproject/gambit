@@ -83,6 +83,7 @@ CAPABILITIES: dict[str, dict[str, str]] = {
         "get_behavior": "method",
         "behavior_support_profile": "method",
         "to_efg": "method",
+        "to_gtdraw": "method",
         "append_move": "method",
         "append_infoset": "method",
         "append_event": "method",

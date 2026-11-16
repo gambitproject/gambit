@@ -57,6 +57,11 @@ Game ParseNfgGame(std::string const &s)
   std::istringstream f(s);
   return ReadNfgFile(f);
 }
+Game ParseGtdrawGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadGtdrawFile(f);
+}
 Game ParseAggGame(std::string const &s)
 {
   std::istringstream f(s);
@@ -90,6 +95,13 @@ std::string WriteHTMLFile(const Game &p_game)
 std::string WriteLaTeXFile(const Game &p_game)
 {
   return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
+}
+
+std::string WriteGtdrawFile(const Game &p_game, double p_levelScaling, double p_sublevelScaling,
+                            double p_widthScaling, bool p_sharedTerminalDepth)
+{
+  return WriteGtdrawFile(
+      p_game, {p_levelScaling, p_sublevelScaling, p_widthScaling, p_sharedTerminalDepth});
 }
 
 std::string WriteNfgFileSupport(const StrategySupportProfile &p_support)
