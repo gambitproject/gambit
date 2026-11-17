@@ -193,7 +193,6 @@ core_SOURCES = \
 	src/core/recarray.h \
 	src/core/matrix.h \
 	src/core/integer.cc \
-	src/core/integer.h \
 	src/core/rational.cc \
 	src/core/rational.h \
 	src/core/matrix.cc \

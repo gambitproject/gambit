@@ -24,8 +24,6 @@
 #ifndef GAMBIT_SOLVERS_GTRACER_AGGAME_H
 #define GAMBIT_SOLVERS_GTRACER_AGGAME_H
 
-#include <algorithm>
-
 #include "cmatrix.h"
 #include "gnmgame.h"
 #include "games/agg/agg.h"
@@ -43,12 +41,6 @@ public:
   ~aggame() override = default;
   int getNumActionNodes() { return aggPtr->getNumActionNodes(); }
 
-  double getMixedPayoff(int player, const cvector &s) const override
-  {
-    const std::vector<double> sp(s.values(), s.values() + s.getm());
-    return aggPtr->getMixedPayoff(player, sp);
-  }
-
   double getKSymMixedPayoff(int cls, cvector &s)
   {
     std::vector<double> sp(s.values(), s.values() + s.getm());
@@ -64,14 +56,6 @@ public:
     return (ksym) ? KSymPayoffMatrix(dest, s, fuzz) : payoffMatrix(dest, s, fuzz);
   }
 
-  void getPayoffVector(cvector &dest, int player, const cvector &s) const override
-  {
-    const auto ss = const_cast<cvector &>(s);
-    const std::vector<double> sp(ss.values(), ss.values() + ss.getm());
-    std::vector<double> d(aggPtr->getNumActions(player));
-    aggPtr->getPayoffVector(d, player, sp);
-    std::ranges::copy(d, dest.values());
-  }
   double getPurePayoff(int player, const std::vector<int> &s) const override
   {
     return aggPtr->getPurePayoff<double>(player, s);

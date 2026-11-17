@@ -27,7 +27,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 #include <cmath>
-#include <limits>
 #include <cctype>
 
 #include "util.h"
@@ -113,21 +112,6 @@ void div(const Rational &x, const Rational &y, Rational &r)
   r.normalize();
 }
 
-void Rational::invert()
-{
-  const Integer tmp = num;
-  num = den;
-  den = tmp;
-  const int s = sign(den);
-  if (s == 0) {
-    throw ZeroDivideException();
-  }
-  else if (s < 0) {
-    den.negate();
-    num.negate();
-  }
-}
-
 int compare(const Rational &x, const Rational &y)
 {
   const int xsgn = sign(x.num);
@@ -176,27 +160,10 @@ Rational::Rational(double x) : num(0), den(1)
   normalize();
 }
 
-Integer trunc(const Rational &x) { return x.num / x.den; }
-
-Rational pow(const Rational &x, const Integer &y)
-{
-  const long yy = y.as_long();
-  return pow(x, yy);
-}
-
 Rational Rational::operator-() const
 {
   Rational r(*this);
   r.negate();
-  return r;
-}
-
-Rational abs(const Rational &x)
-{
-  Rational r(x);
-  if (sign(r.num) < 0) {
-    r.negate();
-  }
   return r;
 }
 
@@ -206,64 +173,6 @@ Rational sqr(const Rational &x)
   mul(x.num, x.num, r.num);
   mul(x.den, x.den, r.den);
   r.normalize();
-  return r;
-}
-
-Integer floor(const Rational &x)
-{
-  Integer q;
-  Integer r;
-  divide(x.num, x.den, q, r);
-  if (sign(x.num) < 0 && sign(r) != 0) {
-    --q;
-  }
-  return q;
-}
-
-Integer ceil(const Rational &x)
-{
-  Integer q;
-  Integer r;
-  divide(x.num, x.den, q, r);
-  if (sign(x.num) >= 0 && sign(r) != 0) {
-    ++q;
-  }
-  return q;
-}
-
-Integer round(const Rational &x)
-{
-  Integer q;
-  Integer r;
-  divide(x.num, x.den, q, r);
-  r <<= 1;
-  if (ucompare(r, x.den) >= 0) {
-    if (sign(x.num) >= 0) {
-      ++q;
-    }
-    else {
-      --q;
-    }
-  }
-  return q;
-}
-
-Rational pow(const Rational &x, long y)
-{
-  Rational r;
-  if (y >= 0) {
-    pow(x.num, y, r.num);
-    pow(x.den, y, r.den);
-  }
-  else {
-    y = -y;
-    pow(x.num, y, r.den);
-    pow(x.den, y, r.num);
-    if (sign(r.den) < 0) {
-      r.num.negate();
-      r.den.negate();
-    }
-  }
   return r;
 }
 
@@ -280,120 +189,18 @@ std::ostream &operator<<(std::ostream &s, const Rational &y)
   return s;
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-std::istream &operator>>(std::istream &f, Rational &y)
-{
-  char ch = ' ';
-  int sign = 1;
-  Integer num(0), denom(1);
-
-  while (isspace(ch)) {
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      f.setstate(std::ios::failbit);
-      return f;
-    }
-  }
-
-  if (ch == '-') {
-    sign = -1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-  }
-  else if ((ch < '0' || ch > '9') && ch != '.') {
-    throw ValueException();
-  }
-  while (ch >= '0' && ch <= '9') {
-    num *= 10;
-    num += (ch - '0');
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-  }
-
-  if (ch == '/') {
-    denom = 0;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9') {
-      denom *= 10;
-      denom += (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-        ch = ' ';
-      }
-    }
-  }
-  else if (ch == '.') {
-    denom = 1;
-    f.get(ch);
-    if (f.eof() || f.bad()) {
-      ch = ' ';
-    }
-    while (ch >= '0' && ch <= '9') {
-      denom *= 10;
-      num *= 10;
-      num += (ch - '0');
-      f.get(ch);
-      if (f.eof() || f.bad()) {
-        ch = ' ';
-      }
-    }
-  }
-
-  if (!f.eof() && f.good()) {
-    f.unget();
-  }
-
-  y = Rational(num * sign, denom);
-  y.normalize();
-
-  return f;
-}
-
-bool Rational::OK() const
-{
-  int v = num.OK() && den.OK(); // have valid num and denom
-  if (v) {
-    v &= sign(den) > 0;                         // denominator positive;
-    v &= ucompare(gcd(num, den), Int_One) == 0; // relatively prime
-  }
-  // if (!v) error("invariant failure");
-  return v;
-}
-
-bool Rational::fits_in_float() const
-{
-  return Rational(static_cast<double>(std::numeric_limits<float>::min())) <= *this &&
-         *this <= Rational(static_cast<double>(std::numeric_limits<float>::max()));
-}
-
-bool Rational::fits_in_double() const
-{
-  return Rational(std::numeric_limits<double>::min()) <= *this &&
-         *this <= Rational(std::numeric_limits<double>::max());
-}
-
 //
 // These were moved from the header file to eliminate warnings
 //
 
-static IntegerRep ZeroRep = {.len = 1, .sz = 0, .sgn = 1, .s = {0}};
-static IntegerRep OneRep = {.len = 1, .sz = 0, .sgn = 1, .s = {1}};
-
-Rational::Rational() : num(&ZeroRep), den(&OneRep) {}
+Rational::Rational() : num(0), den(1) {}
 Rational::~Rational() = default;
 
 Rational::Rational(const Rational &y) = default;
 
 Rational::Rational(Rational &&y) noexcept = default;
 
-Rational::Rational(const Integer &n) : num(n), den(&OneRep) {}
+Rational::Rational(const Integer &n) : num(n), den(1) {}
 
 Rational::Rational(const Integer &n, const Integer &d) : num(n), den(d)
 {
@@ -403,19 +210,9 @@ Rational::Rational(const Integer &n, const Integer &d) : num(n), den(d)
   normalize();
 }
 
-Rational::Rational(long n) : num(n), den(&OneRep) {}
+Rational::Rational(int n) : num(n), den(1) {}
 
-Rational::Rational(int n) : num(n), den(&OneRep) {}
-
-Rational::Rational(size_t n) : num(int(n)), den(&OneRep) {}
-
-Rational::Rational(long n, long d) : num(n), den(d)
-{
-  if (d == 0) {
-    throw ZeroDivideException();
-  }
-  normalize();
-}
+Rational::Rational(size_t n) : num(int(n)), den(1) {}
 
 Rational::Rational(int n, int d) : num(n), den(d)
 {
@@ -441,11 +238,6 @@ bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <=
 bool Rational::operator>(const Rational &y) const { return compare(*this, y) > 0; }
 
 bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >= 0; }
-
-std::strong_ordering Rational::operator<=>(const Rational &y) const
-{
-  return compare(*this, y) <=> 0;
-}
 
 void Rational::negate() { num.negate(); }
 

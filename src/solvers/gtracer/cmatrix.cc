@@ -253,16 +253,4 @@ double cmatrix::adjoint()
   return D;
 }
 
-double cmatrix::trace() const
-{
-  if (n != m) {
-    throw std::out_of_range("non-square matrix in call to trace()");
-  }
-  double sum = 0.0;
-  for (int i = 0; i < n; i++) {
-    sum += x[i * n + i];
-  }
-  return sum;
-}
-
 } // end namespace Gambit::gametracer

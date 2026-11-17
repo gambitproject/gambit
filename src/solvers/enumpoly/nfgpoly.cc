@@ -73,7 +73,7 @@ IndifferenceEquation(const std::shared_ptr<VariableSpace> &space,
         term *= strategy_poly.at(iter->GetStrategy(player));
       }
     }
-    term *= iter->GetStrategyValue(s1) - iter->GetStrategyValue(s2);
+    term *= static_cast<double>(iter->GetStrategyValue(s1) - iter->GetStrategyValue(s2));
     equation += term;
   }
   return equation;
@@ -151,7 +151,7 @@ EnumPolyStrategySolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
 {
   RequirePerfectRecall(p_game);
 
-  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
+  const double scale = static_cast<double>(p_game->GetMaxPayoff() - p_game->GetMinPayoff());
   if (scale != 0.0) {
     p_maxregret *= scale;
   }

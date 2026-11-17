@@ -110,7 +110,7 @@ Polynomial<double> BuildPayoffPolynomial(ProblemData &p_data, const GamePlayer &
   for (const auto &profile : p_data.m_support.GetSequenceContingencies()) {
     const auto pay = profile.GetPayoff(p_player);
     if (pay != Rational(0)) {
-      Polynomial<double> term(p_data.space, pay);
+      Polynomial<double> term(p_data.space, static_cast<double>(pay));
       for (const auto &player : p_data.m_support.GetPlayers()) {
         term *= p_data.variables.at(profile.GetSequence(player));
       }
@@ -238,7 +238,7 @@ EnumPolyBehaviorSolve(const Game &p_game, std::optional<size_t> p_stopAfter, dou
 {
   RequirePerfectRecall(p_game);
 
-  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
+  const double scale = static_cast<double>(p_game->GetMaxPayoff() - p_game->GetMinPayoff());
   if (scale != 0.0) {
     p_maxregret *= scale;
   }

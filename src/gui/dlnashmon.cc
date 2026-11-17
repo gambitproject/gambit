@@ -108,7 +108,8 @@ class ExternalProcessRunner final : public wxEvtHandler {
         return std::nullopt;
       }
       for (size_t i = 1; i <= profile.BehaviorProfileLength(); ++i) {
-        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+        profile[i] =
+            static_cast<T>(lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str())));
       }
       return ComputedProfile(std::move(profile));
     }
@@ -118,7 +119,8 @@ class ExternalProcessRunner final : public wxEvtHandler {
         return std::nullopt;
       }
       for (size_t i = 1; i <= profile.MixedProfileLength(); ++i) {
-        profile[i] = lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str()));
+        profile[i] =
+            static_cast<T>(lexical_cast<Rational>(std::string(tokens.GetNextToken().mb_str())));
       }
       return ComputedProfile(std::move(profile));
     }

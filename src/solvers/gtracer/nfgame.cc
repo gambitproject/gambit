@@ -60,22 +60,6 @@ int nfgame::findIndex(int player, const std::vector<int> &s) const
   return retIndex;
 }
 
-double nfgame::getMixedPayoff(int player, const cvector &s) const
-{
-  std::vector<double> m(blockSize[numPlayers]);
-  memcpy(m.data(), payoffs.values() + Offset(player, blockSize[numPlayers]),
-         blockSize[numPlayers] * sizeof(double));
-  return localPayoff(s, m.data(), numPlayers - 1);
-}
-
-void nfgame::getPayoffVector(cvector &dest, int player, const cvector &s) const
-{
-  std::vector<double> t(payoffs.values() + Offset(player, blockSize[numPlayers]),
-                        payoffs.values() + Offset(player + 1, blockSize[numPlayers]));
-
-  localPayoffVector(dest.values(), player, const_cast<cvector &>(s), &(t[0]), numPlayers - 1);
-}
-
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {

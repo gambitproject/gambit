@@ -271,7 +271,7 @@ LpStrategyResult<T> LpStrategySolve(const Game &p_game,
     profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(i));
     for (int j = 1; j <= m; j++) {
       profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(j));
-      A(i, j) = minpay - profile->GetPayoff(p_game->GetPlayer(1));
+      A(i, j) = static_cast<T>(minpay - profile->GetPayoff(p_game->GetPlayer(1)));
     }
     A(i, m + 1) = static_cast<T>(1);
   }

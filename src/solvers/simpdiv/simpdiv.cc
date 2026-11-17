@@ -91,7 +91,7 @@ public:
     if (m_leashLength == 0) {
       return true;
     }
-    return p_dist < m_leashLength * d;
+    return p_dist < Rational(m_leashLength) * d;
   }
 };
 

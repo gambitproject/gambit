@@ -90,7 +90,7 @@ MixedStrategyProfile<T> TextToMixedProfile(GameDocument *p_doc, const wxString &
   wxStringTokenizer tok(p_text, wxT(","));
 
   for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-    profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
+    profile[i] = static_cast<T>(lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str())));
   }
 
   return profile;
@@ -103,7 +103,7 @@ MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-    profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
+    profile[i] = static_cast<T>(lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str())));
   }
 
   return profile;
