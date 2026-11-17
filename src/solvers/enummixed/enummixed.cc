@@ -104,7 +104,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
     max = Rational(0);
   }
 
-  const Rational fac(1, max - min);
+  const Rational fac = Rational(1) / (max - min);
 
   // Construct matrices A1, A2
   Matrix<T> A1(1, p_game->GetPlayer(1)->GetStrategies().size(), 1,
@@ -116,8 +116,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (size_t j = 1; j <= p_game->GetPlayer(2)->GetStrategies().size(); j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A1(i, j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
-      A2(j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
+      A1(i, j) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min));
+      A2(j, i) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min));
     }
   }
 

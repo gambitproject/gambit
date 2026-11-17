@@ -30,13 +30,104 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <cmath>
 #include <compare>
+#include <iosfwd>
 #include <string>
 
 #include "util.h"
 
-#include "integer.h"
-
 namespace Gambit {
+
+// The representation of Integer is private to integer.cc.
+struct IntegerRep;
+
+class Integer {
+private:
+  IntegerRep *rep;
+
+public:
+  /// @name Lifecycle
+  //@{
+  Integer();
+  explicit Integer(int y);
+  Integer(const Integer &y);
+  Integer(Integer &&y) noexcept;
+  ~Integer();
+
+  Integer &operator=(const Integer &);
+  Integer &operator=(Integer &&y) noexcept;
+  Integer &operator=(long);
+  //@}
+
+  /// @name Unary operations on self
+  //@{
+  void negate(); // negate in-place
+  void abs();    // absolute-value in-place
+  //@}
+
+  /// @name Comparison operators
+  //@{
+  bool operator==(const Integer &) const;
+  bool operator==(long) const;
+  std::strong_ordering operator<=>(long) const;
+  //@}
+
+  /// @name Assignment-based operations
+  //@{
+  Integer &operator+=(const Integer &);
+  Integer &operator+=(long);
+  Integer &operator-=(long);
+  Integer &operator*=(long);
+  Integer &operator<<=(long);
+  Integer &operator*=(const Integer &);
+  Integer &operator/=(const Integer &);
+  //@}
+
+  /// @name Operator overloading
+  //@{
+  Integer operator-() const;
+  Integer operator+(const Integer &) const;
+  Integer operator-(const Integer &) const;
+  Integer operator*(const Integer &) const;
+  Integer operator*(long) const;
+  Integer operator/(const Integer &) const;
+  //@}
+
+  // builtin Integer functions that must be friends
+
+  friend double ratio(const Integer &x, const Integer &y);
+  // return x/y as a double
+
+  friend Integer gcd(const Integer &, const Integer &);
+  friend int sign(const Integer &); // returns -1, 0, +1
+
+  // procedural versions of operators
+
+  friend void abs(const Integer &x, Integer &dest);
+  friend void negate(const Integer &x, Integer &dest);
+
+  friend int compare(const Integer &, const Integer &);
+  friend int ucompare(const Integer &, const Integer &);
+  friend void add(const Integer &x, const Integer &y, Integer &dest);
+  friend void sub(const Integer &x, const Integer &y, Integer &dest);
+  friend void mul(const Integer &x, const Integer &y, Integer &dest);
+  friend void div(const Integer &x, const Integer &y, Integer &dest);
+  friend void divide(const Integer &x, const Integer &y, Integer &q, Integer &r);
+
+  friend void mul(const Integer &x, long y, Integer &dest);
+
+  // coercion & conversion
+
+  double as_double() const;
+
+  friend std::ostream &operator<<(std::ostream &s, const Integer &y);
+
+  bool initialized() const { return rep != nullptr; }
+  static void error(const char *msg);
+};
+
+Integer abs(const Integer &); // absolute value
+
+extern Integer lcm(const Integer &x, const Integer &y); // least common mult
 
 /// A representation of an arbitrary-precision rational number
 class Rational {
@@ -50,9 +141,7 @@ public:
   explicit Rational(double);
   explicit Rational(int);
   explicit Rational(size_t);
-  explicit Rational(long n);
   Rational(int n, int d);
-  Rational(long n, long d);
   explicit Rational(const Integer &n);
   Rational(const Integer &n, const Integer &d);
   Rational(const Rational &);
@@ -67,7 +156,6 @@ public:
   bool operator<=(const Rational &y) const;
   bool operator>(const Rational &y) const;
   bool operator>=(const Rational &y) const;
-  std::strong_ordering operator<=>(const Rational &y) const;
 
   Rational operator+(const Rational &y) const;
   Rational operator-(const Rational &y) const;
@@ -84,29 +172,17 @@ public:
   // builtin Rational functions
 
   void negate(); // x = -x
-  void invert(); // x = 1/x
 
   friend int sign(const Rational &x);     // -1, 0, or +1
-  friend Rational abs(const Rational &x); // absolute value
   friend Rational sqr(const Rational &x); // square
-  friend Rational pow(const Rational &x, long y);
-  friend Rational pow(const Rational &x, const Integer &y);
   const Integer &numerator() const;
   const Integer &denominator() const;
 
   // coercion & conversion
 
-  operator double() const;
-  friend Integer floor(const Rational &x);
-  friend Integer ceil(const Rational &x);
-  friend Integer trunc(const Rational &x);
-  friend Integer round(const Rational &x);
+  explicit operator double() const;
 
-  friend std::istream &operator>>(std::istream &s, Rational &y);
   friend std::ostream &operator<<(std::ostream &s, const Rational &y);
-
-  bool fits_in_float() const;
-  bool fits_in_double() const;
 
   // procedural versions of operators
 
@@ -115,9 +191,6 @@ public:
   friend void sub(const Rational &x, const Rational &y, Rational &dest);
   friend void mul(const Rational &x, const Rational &y, Rational &dest);
   friend void div(const Rational &x, const Rational &y, Rational &dest);
-
-  // error detection
-  bool OK() const;
 };
 
 // Naming compatible with Boost's lexical_cast concept for potential future compatibility.

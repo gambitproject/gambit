@@ -32,8 +32,6 @@ namespace Gambit::gametracer {
 
 class nfgame : public gnmgame {
 public:
-  friend std::ostream &operator<<(std::ostream &s, nfgame &g);
-
   nfgame(const std::vector<int> &actions);
 
   ~nfgame() override = default;
@@ -50,12 +48,8 @@ public:
     payoffs[findIndex(player, s)] = value;
   }
 
-  double getMixedPayoff(int player, const cvector &s) const override;
-
   using gnmgame::payoffMatrix;
   void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
-
-  void getPayoffVector(cvector &dest, int player, const cvector &s) const override;
 
 private:
   int findIndex(int player, const std::vector<int> &s) const;
@@ -72,21 +66,6 @@ private:
   cvector payoffs;
   std::vector<int> blockSize;
 };
-
-inline std::ostream &operator<<(std::ostream &s, nfgame &g)
-{
-  s << g.numPlayers << '\n';
-  for (int i = 0; i < g.numPlayers; i++) {
-    if (i > 0) {
-      s << " ";
-    }
-    s << g.actions[i];
-  }
-  s << '\n';
-  s << g.payoffs;
-  s << '\n';
-  return s;
-}
 
 } // end namespace Gambit::gametracer
 

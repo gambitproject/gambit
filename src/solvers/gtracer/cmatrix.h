@@ -25,7 +25,6 @@
 #ifndef GAMBIT_SOLVERS_GTRACER_CMATRIX_H
 #define GAMBIT_SOLVERS_GTRACER_CMATRIX_H
 
-#include <iostream>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -54,7 +53,6 @@ public:
 
     iterator(cvector *p_vector, int p_index) : m_vector(p_vector), m_index(p_index) {}
     reference operator*() { return (*m_vector)[m_index]; }
-    pointer operator->() { return &(*m_vector)[m_index]; }
     iterator &operator++()
     {
       m_index++;
@@ -86,7 +84,6 @@ public:
 
     const_iterator(const cvector *p_vector, int p_index) : m_vector(p_vector), m_index(p_index) {}
     double operator*() const { return (*m_vector)[m_index]; }
-    double operator->() const { return (*m_vector)[m_index]; }
     const_iterator &operator++()
     {
       m_index++;
@@ -103,8 +100,6 @@ public:
       return (m_vector == it.m_vector) && (m_index == it.m_index);
     }
   };
-
-  cvector() : m(1), x(new double[1]) {}
 
   explicit cvector(int _m) : m(_m), x(new double[_m]) {}
 
@@ -123,23 +118,6 @@ public:
     for (int i = 0; i < m; i++) {
       x[i] = a;
     }
-  }
-
-  cvector operator-() const
-  {
-    cvector const ret(m);
-    for (int i = 0; i < m; i++) {
-      ret.x[i] = -x[i];
-    }
-    return ret;
-  }
-
-  cvector &operator=(double a)
-  {
-    for (int i = 0; i < m; i++) {
-      x[i] = a;
-    }
-    return *this;
   }
 
   cvector &operator=(cvector &&v) noexcept
@@ -175,20 +153,12 @@ public:
     return ret;
   }
 
-  size_t size() const { return m; }
-
   double operator[](int i) const { return x[i]; }
 
   double &operator[](int i) { return x[i]; }
 
   /// Return a forward iterator starting at the beginning of the vector
   iterator begin() { return {this, 0}; }
-  /// Return a forward iterator past the end of the vector
-  iterator end() { return {this, m}; }
-  /// Return a const forward iterator starting at the beginning of the vector
-  const_iterator begin() const { return {this, 0}; }
-  /// Return a const forward iterator past the end of the vector
-  const_iterator end() const { return {this, m}; }
   /// Return a const forward iterator starting at the beginning of the vector
   const_iterator cbegin() const { return {this, 0}; }
   /// Return a const forward iterator past the end of the vector
@@ -224,22 +194,6 @@ public:
     return *this;
   }
 
-  cvector &operator+=(double a)
-  {
-    for (int i = 0; i < m; i++) {
-      x[i] += a;
-    }
-    return *this;
-  }
-
-  cvector &operator-=(double a)
-  {
-    for (int i = 0; i < m; i++) {
-      x[i] -= a;
-    }
-    return *this;
-  }
-
   cvector &operator/=(double a)
   {
     for (int i = 0; i < m; i++) {
@@ -266,37 +220,6 @@ public:
     return mi;
   }
 
-  double normalize()
-  {
-    double norm = 0.0;
-    for (int i = 0; i < m; i++) {
-      norm += x[i] * x[i];
-    }
-    norm = std::sqrt(norm);
-    for (int i = 0; i < m; i++) {
-      x[i] /= norm;
-    }
-    return norm;
-  }
-
-  bool operator==(const cvector &v) const
-  {
-    if (m != v.m) {
-      return false;
-    }
-    return memcmp(x, v.x, m * sizeof(double)) == 0;
-  }
-
-  bool operator==(const double &a) const
-  {
-    for (int i = 0; i < m; i++) {
-      if (a != x[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   double norm2() const
   {
     double ret = x[0] * x[0];
@@ -307,8 +230,6 @@ public:
   }
 
   double norm() const { return std::sqrt(norm2()); }
-
-  friend std::ostream &operator<<(std::ostream &s, const cvector &v);
 
   double *values() const { return x; }
 
@@ -321,15 +242,6 @@ public:
         x[i] = 0.0;
       }
     }
-  }
-
-  double sum()
-  {
-    double total = 0.0;
-    for (int i = 0; i < m; i++) {
-      total += x[i];
-    }
-    return total;
   }
 
   void support(std::vector<int> &s)
@@ -353,34 +265,7 @@ private:
   double *x;
 };
 
-inline cvector operator+(const cvector &a, const cvector &b) { return cvector(a) += b; }
-
-inline cvector operator-(const cvector &a, const cvector &b) { return cvector(a) -= b; }
-
-inline cvector operator+(const cvector &a, const double &b) { return cvector(a) += b; }
-
-inline cvector operator-(const cvector &a, const double &b) { return cvector(a) -= b; }
-
-inline cvector operator+(const double &a, const cvector &b) { return cvector(b) += a; }
-
-inline cvector operator-(const double &a, const cvector &b) { return cvector(b.getm(), a) -= b; }
-
-inline cvector operator*(const cvector &a, const double &b) { return cvector(a) *= b; }
-
-inline cvector operator*(const double &a, const cvector &b) { return cvector(b) *= a; }
-
 inline cvector operator/(const cvector &a, const double &b) { return cvector(a) /= b; }
-
-inline std::ostream &operator<<(std::ostream &s, const cvector &v)
-{
-  for (int i = 0; i < v.m; i++) {
-    s << v.x[i];
-    if (i != v.m) {
-      s << ' ';
-    }
-  }
-  return s;
-}
 
 class cmatrix {
 public:
@@ -388,22 +273,9 @@ public:
 
   ~cmatrix() { delete[] x; }
 
-  cmatrix(const cmatrix &ma, bool transpose = false)
-    : m((transpose) ? ma.n : ma.m), n((transpose) ? ma.m : ma.n), s(m * n), x(new double[s])
+  cmatrix(const cmatrix &ma) : m(ma.m), n(ma.n), s(ma.s), x(new double[s])
   {
-    if (transpose) {
-      int c = 0;
-      for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++, c++) {
-          x[c] = ma.x[i + j * m];
-        }
-      }
-    }
-    else {
-      for (int i = 0; i < s; i++) {
-        x[i] = ma.x[i];
-      }
-    }
+    memcpy(x, ma.x, s * sizeof(double));
   }
 
   cmatrix(int _m, int _n, const double &a, bool diaonly = false)
@@ -435,91 +307,6 @@ public:
         }
       }
     }
-  }
-
-  // put v on the diagonal
-  cmatrix(int _m, int _n, const cvector &v) : m(_m), n(_n), s(_m * _n), x(new double[s])
-  {
-    // for(int i=0;i<s;i++) x[i] = 0;
-    memset(x, 0, s * sizeof(double));
-    int l = m;
-    if (n < l) {
-      l = n;
-    }
-    if (v.m < l) {
-      l = v.m;
-    }
-    for (int i = 0, c = 0; i < l; i++, c += n + 1) {
-      x[c] = v.x[i];
-    }
-  }
-
-  explicit cmatrix(const cvector &v) : m(v.m), n(1), s(m), x(new double[s])
-  {
-    // for(int i=0;i<s;i++) x[i] = v.x[i];
-    memcpy(x, v.x, s * sizeof(double));
-  }
-
-  // forms a cmatrix of the outer product (ie v1*v2') -- v2 is
-  // "transposed" temporarily for this operation
-  cmatrix(const cmatrix &v1, const cmatrix &v2)
-  {
-    if (v1.n != v2.n) {
-      s = 1;
-      m = 1;
-      n = 1;
-      x = new double[1];
-      // x[0] = NaN;
-      // x[0] = 0.0/0.0;
-      x[0] = 0;
-    }
-    else {
-      n = v2.m;
-      m = v1.m;
-      s = n * m;
-      x = new double[s];
-      int i, j, k, c = 0;
-      for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++, c++) {
-          x[c] = 0;
-          for (k = 0; k < v1.n; k++) {
-            x[c] += v1.x[i * v1.n + k] * v2.x[j * v1.n + k];
-          }
-        }
-      }
-    }
-  }
-
-  cmatrix(const cvector &v1, const cvector &v2) : m(v1.m), n(v2.m), s(m * n), x(new double[s])
-  {
-    int c = 0;
-    for (int i = 0; i < m; i++) {
-      for (int j = 0; j < n; j++, c++) {
-        x[c] = v1.x[i] * v2.x[j];
-      }
-    }
-  }
-
-  cmatrix operator-() const
-  {
-    cmatrix const ret(m, n);
-    for (int i = 0; i < s; i++) {
-      ret.x[i] = -x[i];
-    }
-    return ret;
-  }
-
-  cmatrix &operator=(double a)
-  {
-    if (a == 0) {
-      memset(x, 0, s * sizeof(double));
-    }
-    else {
-      for (int i = 0; i < s; i++) {
-        x[i] = a;
-      }
-    }
-    return *this;
   }
 
   cmatrix(cmatrix &&ma) noexcept : m(ma.m), n(ma.n), s(ma.s), x(ma.x)
@@ -554,45 +341,9 @@ public:
     return *this;
   }
 
-  cmatrix operator*(const cmatrix &ma) const
-  {
-    if (n != ma.m) {
-      throw std::out_of_range("invalid cmatrix multiply");
-    }
-    cmatrix const ret(m, ma.n);
-    int c = 0;
-    for (int i = 0; i < m; i++) {
-      for (int j = 0; j < ma.n; j++, c++) {
-        ret.x[c] = 0;
-        for (int k = 0; k < n; k++) {
-          ret.x[c] += x[i * n + k] * ma.x[k * ma.n + j];
-        }
-      }
-    }
-    return ret;
-  }
-
-  cvector operator*(const cvector &v) const
-  {
-    if (n != v.m) {
-      throw std::out_of_range("invalid cvector-cmatrix multiply");
-    }
-    cvector const ret(m);
-    int c = 0;
-    for (int i = 0; i < m; i++, c += n) {
-      ret.x[i] = 0;
-      for (int j = 0; j < n; j++) {
-        ret.x[i] += x[c + j] * v.x[j];
-      }
-    }
-    return ret;
-  }
-
   double operator()(int i, int j) const { return x[i * n + j]; }
 
   double &operator()(int i, int j) { return x[i * n + j]; }
-
-  cmatrix t() const { return {*this, true}; }
 
   cmatrix &operator+=(const cmatrix &ma)
   {
@@ -637,30 +388,6 @@ public:
     return *this;
   }
 
-  cmatrix &operator+=(const double &a)
-  {
-    for (int i = 0; i < s; i++) {
-      x[i] += a;
-    }
-    return *this;
-  }
-
-  cmatrix &operator-=(const double &a)
-  {
-    for (int i = 0; i < s; i++) {
-      x[i] -= a;
-    }
-    return *this;
-  }
-
-  cmatrix &operator*=(const double &a)
-  {
-    for (int i = 0; i < s; i++) {
-      x[i] *= a;
-    }
-    return *this;
-  }
-
   cmatrix &operator/=(const double &a)
   {
     for (int i = 0; i < s; i++) {
@@ -668,59 +395,6 @@ public:
     }
     return *this;
   }
-
-  double max() const
-  {
-    double ma = x[0];
-    for (int i = 1; i < s; i++) {
-      ma = std::max(ma, x[i]);
-    }
-    return ma;
-  }
-
-  double min() const
-  {
-    double mi = x[0];
-    for (int i = 1; i < s; i++) {
-      mi = std::min(mi, x[i]);
-    }
-    return mi;
-  }
-
-  bool operator==(const cmatrix &ma) const
-  {
-    if (ma.n != n || ma.m != m) {
-      return false;
-    }
-    return memcmp(ma.x, x, s * sizeof(double)) == 0;
-  }
-
-  bool operator==(const double &a) const
-  {
-    for (int i = 0; i < s; i++) {
-      if (x[i] != a) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // returns the square of the frobenius norm
-  double norm2() const
-  {
-    double ret = x[0] * x[0];
-    for (int i = 1; i < s; i++) {
-      ret += x[i] * x[i];
-    }
-    return ret;
-  }
-
-  // returns the frobenius norm
-  double norm() const { return std::sqrt(norm2()); }
-
-  friend std::ostream &operator<<(std::ostream &s, const cmatrix &ma);
-
-  friend std::istream &operator>>(std::istream &s, cmatrix &ma);
 
   // LU decomposition -- ix is the row permutations
   int LUdecomp(cmatrix &LU, std::vector<int> &ix) const;
@@ -741,8 +415,6 @@ public:
 
   double adjoint();
 
-  double trace() const;
-
   void multiply(const cvector &source, cvector &dest) const
   {
     if (n != source.m || m != dest.m) {
@@ -757,49 +429,10 @@ public:
     }
   }
 
-  int getm() const { return m; }
-
-  int getn() const { return n; }
-
 private:
   int m, n, s;
   double *x;
 };
-
-inline cmatrix operator+(const cmatrix &a, const cmatrix &b) { return cmatrix(a) += b; }
-
-inline cmatrix operator-(const cmatrix &a, const cmatrix &b) { return cmatrix(a) -= b; }
-
-inline cmatrix operator+(const cmatrix &a, const double &b) { return cmatrix(a) += b; }
-
-inline cmatrix operator-(const cmatrix &a, const double &b) { return cmatrix(a) -= b; }
-
-inline cmatrix operator+(const double &a, const cmatrix &b) { return cmatrix(b) += a; }
-
-inline cmatrix operator-(const double &a, const cmatrix &b)
-{
-  return cmatrix(b.getn(), b.getm(), a) -= b;
-}
-
-inline cmatrix operator*(const cmatrix &a, const double &b) { return cmatrix(a) *= b; }
-
-inline cmatrix operator*(const double &b, const cmatrix &a) { return cmatrix(a) *= b; }
-
-inline cmatrix operator/(const cmatrix &a, const double &b) { return cmatrix(a) /= b; }
-
-inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
-{
-  for (int i = 0; i < ma.s; i++) {
-    if (i % ma.n == 0) {
-      s << '\n';
-    }
-    s << ma.x[i];
-    if (i != ma.s) {
-      s << ' ';
-    }
-  }
-  return s;
-}
 
 } // end namespace Gambit::gametracer
 

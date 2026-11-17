@@ -35,7 +35,8 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
   }
   const Rational maxPay = p_game->GetMaxPayoff();
   const Rational minPay = p_game->GetMinPayoff();
-  const double scale = (p_scaled && maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
+  const double scale =
+      (p_scaled && maxPay > minPay) ? 1.0 / static_cast<double>(maxPay - minPay) : 1.0;
 
   const auto players = p_game->GetPlayers();
   std::vector<int> actions(players.size());
@@ -50,7 +51,7 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
     });
     for (const auto &player : players) {
       A->setPurePayoff(player->GetNumber() - 1, profile,
-                       scale * (iter->GetPayoff(player) - minPay));
+                       scale * static_cast<double>(iter->GetPayoff(player) - minPay));
     }
   }
   return A;

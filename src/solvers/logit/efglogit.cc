@@ -415,7 +415,8 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double scale =
+      static_cast<double>(p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff());
   if (scale != 0.0) {
     p_regret *= scale;
   }

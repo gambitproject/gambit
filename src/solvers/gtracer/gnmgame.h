@@ -50,20 +50,6 @@ public:
 
   // s is the mixed strategy profile.  It is of length numActions, and
   // s[i] is the probability that the appropriate player takes action i.
-  virtual double getMixedPayoff(int player, const cvector &s) const = 0;
-
-  virtual double getSymMixedPayoff(const cvector &s)
-  {
-    cvector fulls(getNumActions());
-    const int nact = getNumActions(0);
-    for (int i = 0; i < getNumPlayers(); ++i) {
-      for (int j = 0; j < nact; ++j) {
-        fulls[j + firstAction(i)] = s[j];
-      }
-    }
-    return getMixedPayoff(0, fulls);
-  }
-
   // s is the mixed strategy profile, as above.  This function stores
   // the Jacobian of the payoff function G, where G(i) is the payoff to
   // the owner of action i if he deviates from s by choosing i instead.
@@ -77,10 +63,6 @@ public:
     }
     payoffMatrix(dest, s, fuzz);
   }
-
-  // store in dest the payoff function G, where G(i) is the payoff to
-  // the owner of action i if he deviates from s by choosing i instead.
-  virtual void getPayoffVector(cvector &dest, int player, const cvector &s) const = 0;
 
   // this stores the Jacobian of the retraction function in dest.
   void retractJac(cmatrix &dest, const std::vector<int> &support) const;

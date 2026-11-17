@@ -200,7 +200,7 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, T> &
       continue;
     }
     const T parent_prob = x.at(sequence->m_parent.lock());
-    if (parent_prob > 0) {
+    if (parent_prob > T{0}) {
       b[sequence->m_action->shared_from_this()] = x.at(sequence) / parent_prob;
     }
     else {

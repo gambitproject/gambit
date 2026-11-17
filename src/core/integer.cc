@@ -38,10 +38,44 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdexcept>
 #include <utility>
 
-#include "integer.h"
+#include "rational.h"
 #include "util.h"
 
 namespace Gambit {
+
+struct IntegerRep // internal Integer representations
+{
+  unsigned short len;  // current length
+  unsigned short sz;   // allocated space (0 means static).
+  short sgn;           // 1 means >= 0; 0 means < 0
+  unsigned short s[1]; // represented as ushort array starting here
+};
+
+// True if REP is statically or manually allocated,
+// and should not be deleted by an Integer destructor.
+static inline bool IsStaticIntegerRep(const IntegerRep *rep) noexcept { return rep->sz == 0; }
+
+static IntegerRep *Ialloc(IntegerRep *, const unsigned short *, int, int, int);
+static IntegerRep *Icalloc(IntegerRep *, int);
+static IntegerRep *Icopy_ulong(IntegerRep *, unsigned long);
+static IntegerRep *Icopy_long(IntegerRep *, long);
+static IntegerRep *Icopy(IntegerRep *, const IntegerRep *);
+static IntegerRep *Iresize(IntegerRep *, int);
+static IntegerRep *add(const IntegerRep *, int, const IntegerRep *, int, IntegerRep *);
+static IntegerRep *multiply(const IntegerRep *, const IntegerRep *, IntegerRep *);
+static IntegerRep *multiply(const IntegerRep *, long, IntegerRep *);
+static IntegerRep *div(const IntegerRep *, const IntegerRep *, IntegerRep *);
+static IntegerRep *abs(const IntegerRep *, IntegerRep *);
+static IntegerRep *negate(const IntegerRep *, IntegerRep *);
+static IntegerRep *gcd(const IntegerRep *, const IntegerRep *y);
+static int compare(const IntegerRep *, const IntegerRep *);
+static int compare(const IntegerRep *, long);
+static int ucompare(const IntegerRep *, const IntegerRep *);
+static std::string Itoa(const IntegerRep *x, int base = 10, int width = 0);
+static std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
+                           int showbase, int width, int align_right, char fillchar, char Xcase,
+                           int showpos);
+static double Itodouble(const IntegerRep *);
 
 long lg(unsigned long x)
 {
@@ -62,7 +96,6 @@ long lg(unsigned long x)
 constexpr int I_SHIFT = std::numeric_limits<unsigned short>::digits;
 constexpr unsigned long I_RADIX = 1UL << I_SHIFT;
 constexpr unsigned long I_MAXNUM = I_RADIX - 1UL;
-constexpr unsigned long I_MINNUM = I_RADIX >> 1;
 
 constexpr short I_POSITIVE = 1;
 constexpr short I_NEGATIVE = 0;
@@ -376,70 +409,9 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 // convert to a legal two's complement long if possible
 // if too big, return most negative/positive value
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-long Itolong(const IntegerRep *rep)
-{
-  if (static_cast<unsigned>(rep->len) > SHORT_PER_LONG) {
-    return (rep->sgn == I_POSITIVE) ? std::numeric_limits<long>::max()
-                                    : std::numeric_limits<long>::min();
-  }
-  else if (rep->len == 0) {
-    return 0;
-  }
-  else if (static_cast<unsigned>(rep->len) < SHORT_PER_LONG) {
-    unsigned long a = rep->s[rep->len - 1];
-    if constexpr (SHORT_PER_LONG > 2) // normally optimized out
-    {
-      for (int i = rep->len - 2; i >= 0; --i) {
-        a = up(a) | rep->s[i];
-      }
-    }
-    return (rep->sgn == I_POSITIVE) ? a : -(static_cast<long>(a));
-  }
-  else {
-    unsigned long a = rep->s[SHORT_PER_LONG - 1];
-    if (a >= I_MINNUM) {
-      return (rep->sgn == I_POSITIVE) ? std::numeric_limits<long>::max()
-                                      : std::numeric_limits<long>::min();
-    }
-    else {
-      a = up(a) | rep->s[SHORT_PER_LONG - 2];
-      if constexpr (SHORT_PER_LONG > 2) {
-        for (int i = SHORT_PER_LONG - 3; i >= 0; --i) {
-          a = up(a) | rep->s[i];
-        }
-      }
-      return (rep->sgn == I_POSITIVE) ? a : -(static_cast<long>(a));
-    }
-  }
-}
-
 // test whether op long() will work.
 // careful about asymmetry between std::numeric_limits<long>::max() &
 // std::numeric_limits<long>::min()
-
-int Iislong(const IntegerRep *rep)
-{
-  const unsigned int l = rep->len;
-  if (l < SHORT_PER_LONG) {
-    return 1;
-  }
-  if (l > SHORT_PER_LONG) {
-    return 0;
-  }
-  if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
-    return 1;
-  }
-  if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
-    for (unsigned int i = 0; i < SHORT_PER_LONG - 1; ++i) {
-      if (rep->s[i] != 0) {
-        return 0;
-      }
-    }
-    return 1;
-  }
-  return 0;
-}
 
 // convert to a double
 
@@ -472,26 +444,6 @@ double Itodouble(const IntegerRep *rep)
 // see whether op double() will work-
 // have to actually try it in order to find out
 // since otherwise might trigger fp exception
-
-int Iisdouble(const IntegerRep *rep)
-{
-  double d = 0.0;
-  constexpr double bound = std::numeric_limits<double>::max() / 2.0;
-  for (int i = rep->len - 1; i >= 0; --i) {
-    auto a = static_cast<unsigned short>(I_RADIX >> 1);
-    while (a != 0) {
-      if (d > bound || (d == bound && (i > 0 || (rep->s[i] & a)))) {
-        return 0;
-      }
-      d *= 2.0;
-      if (rep->s[i] & a) {
-        d += 1.0;
-      }
-      a >>= 1;
-    }
-  }
-  return 1;
-}
 
 // real division of num / den
 
@@ -608,31 +560,6 @@ int compare(const IntegerRep *x, long y)
       }
       if (xsgn == I_NEGATIVE) {
         diff = -diff;
-      }
-    }
-    return diff;
-  }
-}
-
-int ucompare(const IntegerRep *x, long y)
-{
-  const int xl = x->len;
-  if (y == 0) {
-    return xl;
-  }
-  else {
-    unsigned long uy = magnitude(y);
-    int diff = xl - SHORT_PER_LONG;
-    if (diff <= 0) {
-      unsigned short tmp[SHORT_PER_LONG];
-      int yl = 0;
-      while (uy != 0) {
-        tmp[yl++] = extract(uy);
-        uy = down(uy);
-      }
-      diff = xl - yl;
-      if (diff == 0) {
-        diff = docmp(x->s, tmp, xl);
       }
     }
     return diff;
@@ -1216,146 +1143,6 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
   return q;
 }
 
-IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
-{
-  nonnil(x);
-  const int xl = x->len;
-  if (y == 0) {
-    throw ZeroDivideException();
-  }
-
-  unsigned short ys[SHORT_PER_LONG];
-  const int ysgn = y >= 0;
-  unsigned long u = magnitude(y);
-  int yl = 0;
-  while (u != 0) {
-    ys[yl++] = extract(u);
-    u = down(u);
-  }
-
-  int comp = xl - yl;
-  if (comp == 0) {
-    comp = docmp(x->s, ys, xl);
-  }
-
-  const int xsgn = x->sgn;
-  const int samesign = xsgn == ysgn;
-
-  if (comp < 0) {
-    q = Icopy_zero(q);
-  }
-  else if (comp == 0) {
-    q = Icopy_one(q, samesign);
-  }
-  else if (yl == 1) {
-    q = Icopy(q, x);
-    unscale(q->s, q->len, ys[0], q->s);
-  }
-  else {
-    IntegerRep *r = nullptr;
-    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
-    if (prescale != 1) {
-      unsigned long prod =
-          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
-      ys[0] = extract(prod);
-      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
-      ys[1] = extract(prod);
-      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
-    }
-    else {
-      r = Icalloc(r, xl + 1);
-      scpy(x->s, r->s, xl);
-    }
-
-    const int ql = xl - yl + 1;
-
-    q = Icalloc(q, ql);
-    do_divide(r->s, ys, yl, q->s, ql);
-
-    Ifree(r);
-  }
-  q->sgn = samesign;
-  Icheck(q);
-  return q;
-}
-
-void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
-{
-  const IntegerRep *x = Ix.rep;
-  nonnil(x);
-  IntegerRep *q = Iq.rep;
-  const int xl = x->len;
-  if (y == 0) {
-    throw ZeroDivideException();
-  }
-  unsigned short ys[SHORT_PER_LONG];
-  const int ysgn = y >= 0;
-  unsigned long u = magnitude(y);
-  int yl = 0;
-  while (u != 0) {
-    ys[yl++] = extract(u);
-    u = down(u);
-  }
-
-  int comp = xl - yl;
-  if (comp == 0) {
-    comp = docmp(x->s, ys, xl);
-  }
-
-  const int xsgn = x->sgn;
-  const int samesign = xsgn == ysgn;
-
-  if (comp < 0) {
-    rem = Itolong(x);
-    q = Icopy_zero(q);
-  }
-  else if (comp == 0) {
-    q = Icopy_one(q, samesign);
-    rem = 0;
-  }
-  else if (yl == 1) {
-    q = Icopy(q, x);
-    rem = unscale(q->s, q->len, ys[0], q->s);
-  }
-  else {
-    IntegerRep *r = nullptr;
-    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
-    if (prescale != 1) {
-      unsigned long prod =
-          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
-      ys[0] = extract(prod);
-      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
-      ys[1] = extract(prod);
-      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
-    }
-    else {
-      r = Icalloc(r, xl + 1);
-      scpy(x->s, r->s, xl);
-    }
-
-    const int ql = xl - yl + 1;
-
-    q = Icalloc(q, ql);
-
-    do_divide(r->s, ys, yl, q->s, ql);
-
-    if (prescale != 1) {
-      Icheck(r);
-      unscale(r->s, r->len, prescale, r->s);
-    }
-    Icheck(r);
-    rem = Itolong(r);
-    Ifree(r);
-  }
-  rem = abs(Integer(rem)).as_long();
-  if (xsgn == I_NEGATIVE) {
-    rem = -rem;
-  }
-  q->sgn = samesign;
-  Icheck(q);
-  Iq.rep = q;
-}
-
 void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
 {
   const IntegerRep *x = Ix.rep;
@@ -1423,121 +1210,6 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
   Iq.rep = q;
   Icheck(r);
   Ir.rep = r;
-}
-
-IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
-{
-  nonnil(x);
-  nonnil(y);
-  const int xl = x->len;
-  const int yl = y->len;
-  if (yl == 0) {
-    throw ZeroDivideException();
-  }
-
-  const int comp = ucompare(x, y);
-  const int xsgn = x->sgn;
-
-  if (comp < 0) {
-    r = Icopy(r, x);
-  }
-  else if (comp == 0) {
-    r = Icopy_zero(r);
-  }
-  else if (yl == 1) {
-    const int rem = unscale(x->s, xl, y->s[0], nullptr);
-    r = Icopy_long(r, rem);
-    if (rem != 0) {
-      r->sgn = xsgn;
-    }
-  }
-  else {
-    IntegerRep *yy = nullptr;
-    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
-    if (prescale != 1 || y == r) {
-      yy = multiply(y, static_cast<long>(prescale) & I_MAXNUM, yy);
-      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
-    }
-    else {
-      yy = const_cast<IntegerRep *>(y);
-      r = Icalloc(r, xl + 1);
-      scpy(x->s, r->s, xl);
-    }
-
-    do_divide(r->s, yy->s, yl, nullptr, xl - yl + 1);
-
-    if (yy != y) {
-      Ifree(yy);
-    }
-
-    if (prescale != 1) {
-      Icheck(r);
-      unscale(r->s, r->len, prescale, r->s);
-    }
-  }
-  Icheck(r);
-  return r;
-}
-
-IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
-{
-  nonnil(x);
-  const int xl = x->len;
-  if (y == 0) {
-    throw ZeroDivideException();
-  }
-  unsigned short ys[SHORT_PER_LONG];
-  unsigned long u = magnitude(y);
-  int yl = 0;
-  while (u != 0) {
-    ys[yl++] = extract(u);
-    u = down(u);
-  }
-
-  int comp = xl - yl;
-  if (comp == 0) {
-    comp = docmp(x->s, ys, xl);
-  }
-
-  const int xsgn = x->sgn;
-
-  if (comp < 0) {
-    r = Icopy(r, x);
-  }
-  else if (comp == 0) {
-    r = Icopy_zero(r);
-  }
-  else if (yl == 1) {
-    const int rem = unscale(x->s, xl, ys[0], nullptr);
-    r = Icopy_long(r, rem);
-    if (rem != 0) {
-      r->sgn = xsgn;
-    }
-  }
-  else {
-    const auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
-    if (prescale != 1) {
-      unsigned long prod =
-          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
-      ys[0] = extract(prod);
-      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
-      ys[1] = extract(prod);
-      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
-    }
-    else {
-      r = Icalloc(r, xl + 1);
-      scpy(x->s, r->s, xl);
-    }
-
-    do_divide(r->s, ys, yl, nullptr, xl - yl + 1);
-
-    if (prescale != 1) {
-      Icheck(r);
-      unscale(r->s, r->len, prescale, r->s);
-    }
-  }
-  Icheck(r);
-  return r;
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
@@ -1629,231 +1301,6 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
   r->sgn = rsgn;
   Icheck(r);
   return r;
-}
-
-IntegerRep *lshift(const IntegerRep *x, const IntegerRep *yy, int negatey, IntegerRep *r)
-{
-  long y = Itolong(yy);
-  if (negatey) {
-    y = -y;
-  }
-
-  return lshift(x, y, r);
-}
-
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char op)
-{
-  nonnil(x);
-  nonnil(y);
-  const int xl = x->len;
-  const int yl = y->len;
-  const int xsgn = x->sgn;
-  const int xrsame = x == r;
-  const int yrsame = y == r;
-  if (xrsame || yrsame) {
-    r = Iresize(r, calc_len(xl, yl, 0));
-  }
-  else {
-    r = Icalloc(r, calc_len(xl, yl, 0));
-  }
-  r->sgn = xsgn;
-  unsigned short *rs = r->s;
-  // NOLINTBEGIN(misc-const-correctness)
-  unsigned short *topr = &(rs[r->len]);
-  // NOLINTEND(misc-const-correctness)
-  const unsigned short *as;
-  const unsigned short *bs;
-  const unsigned short *topb;
-  if (xl >= yl) {
-    as = (xrsame) ? rs : x->s;
-    bs = (yrsame) ? rs : y->s;
-    topb = &(bs[yl]);
-  }
-  else {
-    bs = (xrsame) ? rs : x->s;
-    topb = &(bs[xl]);
-    as = (yrsame) ? rs : y->s;
-  }
-
-  switch (op) {
-  case '&':
-    while (bs < topb) {
-      *rs++ = *as++ & *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = 0;
-    }
-    break;
-  case '|':
-    while (bs < topb) {
-      *rs++ = *as++ | *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = *as++;
-    }
-    break;
-  case '^':
-    while (bs < topb) {
-      *rs++ = *as++ ^ *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = *as++;
-    }
-    break;
-  default:
-    Integer::error("Unknown bitwise operation");
-  }
-
-  Icheck(r);
-  return r;
-}
-
-IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
-{
-  nonnil(x);
-  unsigned short tmp[SHORT_PER_LONG];
-  unsigned long u = magnitude(y);
-
-  int l = 0;
-  while (u != 0) {
-    tmp[l++] = extract(u);
-    u = down(u);
-  }
-
-  const int xl = x->len;
-  const int yl = l;
-  const int xsgn = x->sgn;
-  const int xrsame = x == r;
-  if (xrsame) {
-    r = Iresize(r, calc_len(xl, yl, 0));
-  }
-  else {
-    r = Icalloc(r, calc_len(xl, yl, 0));
-  }
-  r->sgn = xsgn;
-  unsigned short *rs = r->s;
-  // NOLINTBEGIN(misc-const-correctness)
-  unsigned short *topr = &(rs[r->len]);
-  // NOLINTEND(misc-const-correctness)
-  const unsigned short *as;
-  const unsigned short *bs;
-  const unsigned short *topb;
-  if (xl >= yl) {
-    as = (xrsame) ? rs : x->s;
-    bs = tmp;
-    topb = &(bs[yl]);
-  }
-  else {
-    bs = (xrsame) ? rs : x->s;
-    topb = &(bs[xl]);
-    as = tmp;
-  }
-
-  switch (op) {
-  case '&':
-    while (bs < topb) {
-      *rs++ = *as++ & *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = 0;
-    }
-    break;
-  case '|':
-    while (bs < topb) {
-      *rs++ = *as++ | *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = *as++;
-    }
-    break;
-  case '^':
-    while (bs < topb) {
-      *rs++ = *as++ ^ *bs++;
-    }
-    while (rs < topr) {
-      *rs++ = *as++;
-    }
-    break;
-  default:
-    Integer::error("Unknown bitwise operation");
-  }
-  Icheck(r);
-  return r;
-}
-
-IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
-{
-  nonnil(src);
-  r = Icopy(r, src);
-  if (r->len == 0) {
-    return r;
-  }
-
-  unsigned short *s = r->s;
-  const unsigned short *top = &(s[r->len - 1]);
-
-  while (s < top) {
-    const unsigned short cmp = ~(*s);
-    *s++ = cmp;
-  }
-
-  unsigned short a = *s;
-  unsigned short b = 0;
-  while (a != 0) {
-    b <<= 1;
-    if (!(a & 1)) {
-      b |= 1;
-    }
-    a >>= 1;
-  }
-
-  *s = b;
-  Icheck(r);
-  return r;
-}
-
-void setbit(Integer &x, long b)
-{
-  if (b >= 0) {
-    const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
-    const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
-    const int xl = x.rep ? x.rep->len : 0;
-    if (xl <= bw) {
-      x.rep = Iresize(x.rep, calc_len(xl, bw + 1, 0));
-    }
-    x.rep->s[bw] |= (1 << sw);
-    Icheck(x.rep);
-  }
-}
-
-void clearbit(Integer &x, long b)
-{
-  if (b >= 0) {
-    if (x.rep == nullptr) {
-      x.rep = &ZeroRep;
-    }
-    else {
-      const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
-      const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
-      if (std::cmp_greater(x.rep->len, bw)) {
-        x.rep->s[bw] &= ~(1 << sw);
-      }
-    }
-    Icheck(x.rep);
-  }
-}
-
-int testbit(const Integer &x, long b)
-{
-  if (x.rep != nullptr && b >= 0) {
-    const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
-    const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
-    return (std::cmp_less(bw, x.rep->len) && (x.rep->s[bw] & (1 << sw)) != 0);
-  }
-  else {
-    return 0;
-  }
 }
 
 // A  version of knuth's algorithm B / ex. 4.5.3.34
@@ -1950,71 +1397,6 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
   return u;
 }
 
-long lg(const IntegerRep *x)
-{
-  nonnil(x);
-  const int xl = x->len;
-  if (xl == 0) {
-    return 0;
-  }
-
-  long l = (xl - 1) * I_SHIFT - 1;
-  unsigned short a = x->s[xl - 1];
-
-  while (a != 0) {
-    a = a >> 1;
-    ++l;
-  }
-  return l;
-}
-
-IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
-{
-  nonnil(x);
-  int sgn;
-  if (x->sgn == I_POSITIVE || (!(y & 1))) {
-    sgn = I_POSITIVE;
-  }
-  else {
-    sgn = I_NEGATIVE;
-  }
-
-  const int xl = x->len;
-
-  if (y == 0 || (xl == 1 && x->s[0] == 1)) {
-    r = Icopy_one(r, sgn);
-  }
-  else if (xl == 0 || y < 0) {
-    r = Icopy_zero(r);
-  }
-  else if (y == 1 || y == -1) {
-    r = Icopy(r, x);
-  }
-  else {
-    const int maxsize = static_cast<int>(((lg(x) + 1) * y) / I_SHIFT + 2); // pre-allocate space
-    IntegerRep *b = Ialloc(nullptr, x->s, xl, I_POSITIVE, maxsize);
-    b->len = xl;
-    r = Icalloc(r, maxsize);
-    r = Icopy_one(r, I_POSITIVE);
-    for (;;) {
-      if (y & 1) {
-        r = multiply(r, b, r);
-      }
-      y >>= 1;
-      if (y == 0) {
-        break;
-      }
-      else {
-        b = multiply(b, b, b);
-      }
-    }
-    Ifree(b);
-  }
-  r->sgn = sgn;
-  Icheck(r);
-  return r;
-}
-
 IntegerRep *abs(const IntegerRep *src, IntegerRep *dest)
 {
   nonnil(src);
@@ -2037,31 +1419,6 @@ IntegerRep *negate(const IntegerRep *src, IntegerRep *dest)
   return dest;
 }
 
-Integer sqrt(const Integer &x)
-{
-  Integer r(x);
-  const int s = sign(x);
-
-  if (s < 0) {
-    x.error("Attempted square root of negative Integer");
-  }
-
-  if (s != 0) {
-    r >>= (lg(x) / 2); // get close
-
-    Integer q;
-    div(x, r, q);
-
-    while (q < r) {
-      r += q;
-      r >>= 1;
-      div(x, r, q);
-    }
-  }
-
-  return r;
-}
-
 Integer lcm(const Integer &x, const Integer &y)
 {
   Integer r;
@@ -2080,74 +1437,6 @@ Integer lcm(const Integer &x, const Integer &y)
 
   div(x, g, r);
   mul(r, y, r);
-  return r;
-}
-
-IntegerRep *atoIntegerRep(const char *s, int base)
-{
-  check_base(base);
-  if (s == nullptr) {
-    throw std::invalid_argument("null string passed to atoIntegerRep");
-  }
-
-  while (std::isspace(static_cast<unsigned char>(*s))) {
-    ++s;
-  }
-
-  int sgn = I_POSITIVE;
-  if (*s == '-') {
-    sgn = I_NEGATIVE;
-    ++s;
-  }
-  else if (*s == '+') {
-    ++s;
-  }
-
-  const char *digits = s;
-  int digit_count = 0;
-
-  for (const char *p = digits;; ++p) {
-    int digit;
-    if (*p >= '0' && *p <= '9') {
-      digit = *p - '0';
-    }
-    else if (*p >= 'a' && *p <= 'z') {
-      digit = *p - 'a' + 10;
-    }
-    else if (*p >= 'A' && *p <= 'Z') {
-      digit = *p - 'A' + 10;
-    }
-    else {
-      break;
-    }
-
-    if (digit >= base) {
-      break;
-    }
-
-    ++digit_count;
-  }
-
-  IntegerRep *r = Icalloc(nullptr, static_cast<int>(digit_count * (lg(base) + 1) / I_SHIFT + 1));
-
-  for (int i = 0; i < digit_count; ++i, ++digits) {
-    long digit;
-    if (*digits >= '0' && *digits <= '9') {
-      digit = *digits - '0';
-    }
-    else if (*digits >= 'a' && *digits <= 'z') {
-      digit = *digits - 'a' + 10;
-    }
-    else {
-      digit = *digits - 'A' + 10;
-    }
-
-    r = multiply(r, base, r);
-    r = add(r, 0, digit, r);
-  }
-
-  r->sgn = sgn;
-  Icheck(r);
   return r;
 }
 
@@ -2264,80 +1553,17 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
   }
 }
 
-std::istream &operator>>(std::istream &s, Integer &y)
-{
-  char sgn = 0;
-  char ch = 0;
-  y.rep = Icopy_zero(y.rep);
-
-  while (s.get(ch) && std::isspace(static_cast<unsigned char>(ch))) {
-  }
-
-  if (!s) {
-    return s;
-  }
-
-  s.unget();
-
-  bool putback = false;
-
-  while (s.get(ch)) {
-    if (ch == '-') {
-      if (sgn == 0) {
-        sgn = '-';
-      }
-      else {
-        putback = true;
-        break;
-      }
-    }
-    else if (ch >= '0' && ch <= '9') {
-      const long digit = ch - '0';
-      y *= 10;
-      y += digit;
-    }
-    else {
-      putback = true;
-      break;
-    }
-  }
-
-  if (putback) {
-    s.unget();
-  }
-
-  if (sgn == '-') {
-    y.negate();
-  }
-
-  return s;
-}
-
-bool Integer::OK() const
-{
-  if (rep != nullptr) {
-    const int l = rep->len;
-    const int s = rep->sgn;
-    int v = std::cmp_less_equal(l, rep->sz) || IsStaticIntegerRep(rep); // length within bounds
-    v &= s == 0 || s == 1;                                              // legal sign
-    Icheck(rep);                                                        // and correctly adjusted
-    v &= std::cmp_equal(rep->len, l);
-    v &= rep->sgn == s;
-    if (v) {
-      return v;
-    }
-  }
-  error("invariant failure");
-  return false;
-}
-
-void Integer::error(const char *msg) { throw std::runtime_error(msg); }
-
 Integer::Integer() : rep(&ZeroRep) {}
+
+Integer::Integer(int y) : rep(Icopy_long(nullptr, y)) {}
+
+Integer::Integer(const Integer &y) : rep(Icopy(nullptr, y.rep)) {}
 
 Integer::Integer(Integer &&y) noexcept : rep(y.rep) { y.rep = &ZeroRep; }
 
 Integer::~Integer() { Ifree(rep); }
+
+double Integer::as_double() const { return Itodouble(rep); }
 
 Integer &Integer::operator=(Integer &&y) noexcept
 {
@@ -2365,14 +1591,6 @@ int compare(const Integer &x, const Integer &y) { return compare(x.rep, y.rep); 
 
 int ucompare(const Integer &x, const Integer &y) { return ucompare(x.rep, y.rep); }
 
-int compare(const Integer &x, long y) { return compare(x.rep, y); }
-
-int ucompare(const Integer &x, long y) { return ucompare(x.rep, y); }
-
-int compare(long x, const Integer &y) { return -compare(y.rep, x); }
-
-int ucompare(long x, const Integer &y) { return -ucompare(y.rep, x); }
-
 void add(const Integer &x, const Integer &y, Integer &dest)
 {
   dest.rep = add(x.rep, 0, y.rep, 0, dest.rep);
@@ -2393,76 +1611,19 @@ void div(const Integer &x, const Integer &y, Integer &dest)
   dest.rep = div(x.rep, y.rep, dest.rep);
 }
 
-void mod(const Integer &x, const Integer &y, Integer &dest)
-{
-  dest.rep = mod(x.rep, y.rep, dest.rep);
-}
-
-void lshift(const Integer &x, const Integer &y, Integer &dest)
-{
-  dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
-}
-
-void rshift(const Integer &x, const Integer &y, Integer &dest)
-{
-  dest.rep = lshift(x.rep, y.rep, 1, dest.rep);
-}
-
-void pow(const Integer &x, const Integer &y, Integer &dest)
-{
-  dest.rep = power(x.rep, Itolong(y.rep), dest.rep); // not incorrect
-}
-
-void add(const Integer &x, long y, Integer &dest) { dest.rep = add(x.rep, 0, y, dest.rep); }
-
-void sub(const Integer &x, long y, Integer &dest)
-{
-  const Integer yy(y);
-  sub(x, yy, dest);
-}
-
 void mul(const Integer &x, long y, Integer &dest) { dest.rep = multiply(x.rep, y, dest.rep); }
-
-void div(const Integer &x, long y, Integer &dest) { dest.rep = div(x.rep, y, dest.rep); }
-
-void mod(const Integer &x, long y, Integer &dest) { dest.rep = mod(x.rep, y, dest.rep); }
-
-void lshift(const Integer &x, long y, Integer &dest) { dest.rep = lshift(x.rep, y, dest.rep); }
-
-void rshift(const Integer &x, long y, Integer &dest)
-{
-  if (y == std::numeric_limits<long>::min()) {
-    throw std::overflow_error("Integer shift count too large");
-  }
-  dest.rep = lshift(x.rep, -y, dest.rep);
-}
-
-void pow(const Integer &x, long y, Integer &dest) { dest.rep = power(x.rep, y, dest.rep); }
 
 void abs(const Integer &x, Integer &dest) { dest.rep = abs(x.rep, dest.rep); }
 
 void negate(const Integer &x, Integer &dest) { dest.rep = negate(x.rep, dest.rep); }
 
-void complement(const Integer &x, Integer &dest) { dest.rep = Compl(x.rep, dest.rep); }
-
-void add(long x, const Integer &y, Integer &dest) { dest.rep = add(y.rep, 0, x, dest.rep); }
-
-void sub(long x, const Integer &y, Integer &dest) { dest.rep = add(y.rep, 1, x, dest.rep); }
-
-void mul(long x, const Integer &y, Integer &dest) { dest.rep = multiply(y.rep, x, dest.rep); }
-
 // operator versions
 
 bool Integer::operator==(const Integer &y) const { return compare(*this, y) == 0; }
 
-bool Integer::operator==(long y) const { return compare(*this, y) == 0; }
+bool Integer::operator==(long y) const { return compare(rep, y) == 0; }
 
-std::strong_ordering Integer::operator<=>(const Integer &y) const
-{
-  return compare(*this, y) <=> 0;
-}
-
-std::strong_ordering Integer::operator<=>(long y) const { return compare(*this, y) <=> 0; }
+std::strong_ordering Integer::operator<=>(long y) const { return compare(rep, y) <=> 0; }
 
 Integer &Integer::operator+=(const Integer &y)
 {
@@ -2472,33 +1633,29 @@ Integer &Integer::operator+=(const Integer &y)
 
 Integer &Integer::operator+=(long y)
 {
-  add(*this, y, *this);
-  return *this;
-}
-
-void Integer::operator++() { add(*this, 1, *this); }
-
-Integer &Integer::operator-=(const Integer &y)
-{
-  sub(*this, y, *this);
+  rep = add(rep, 0, y, rep);
   return *this;
 }
 
 Integer &Integer::operator-=(long y)
 {
-  sub(*this, y, *this);
+  sub(*this, Integer(y), *this);
   return *this;
 }
 
-void Integer::operator--() { add(*this, -1, *this); }
-
-Integer &Integer::operator*=(const Integer &y)
+Integer &Integer::operator*=(long y)
 {
   mul(*this, y, *this);
   return *this;
 }
 
-Integer &Integer::operator*=(long y)
+Integer &Integer::operator<<=(long y)
+{
+  rep = lshift(rep, y, rep);
+  return *this;
+}
+
+Integer &Integer::operator*=(const Integer &y)
 {
   mul(*this, y, *this);
   return *this;
@@ -2510,49 +1667,13 @@ Integer &Integer::operator/=(const Integer &y)
   return *this;
 }
 
-Integer &Integer::operator/=(long y)
-{
-  div(*this, y, *this);
-  return *this;
-}
-
-Integer &Integer::operator<<=(const Integer &y)
-{
-  lshift(*this, y, *this);
-  return *this;
-}
-
-Integer &Integer::operator<<=(long y)
-{
-  lshift(*this, y, *this);
-  return *this;
-}
-
-Integer &Integer::operator>>=(const Integer &y)
-{
-  rshift(*this, y, *this);
-  return *this;
-}
-
-Integer &Integer::operator>>=(long y)
-{
-  rshift(*this, y, *this);
-  return *this;
-}
+void Integer::error(const char *msg) { throw std::runtime_error(msg); }
 
 void Integer::abs() { Gambit::abs(*this, *this); }
 
 void Integer::negate() { Gambit::negate(*this, *this); }
 
 int sign(const Integer &x) { return (x.rep->len == 0) ? 0 : ((x.rep->sgn == 1) ? 1 : -1); }
-
-int even(const Integer &y) { return y.rep->len == 0 || !(y.rep->s[0] & 1); }
-
-int odd(const Integer &y) { return y.rep->len > 0 && (y.rep->s[0] & 1); }
-
-std::string Itoa(const Integer &y, int base, int width) { return Itoa(y.rep, base, width); }
-
-long lg(const Integer &x) { return lg(x.rep); }
 
 // constructive operations
 
@@ -2563,21 +1684,7 @@ Integer Integer::operator+(const Integer &y) const
   return r;
 }
 
-Integer Integer::operator+(long y) const
-{
-  Integer r;
-  add(*this, y, r);
-  return r;
-}
-
 Integer Integer::operator-(const Integer &y) const
-{
-  Integer r;
-  sub(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator-(long y) const
 {
   Integer r;
   sub(*this, y, r);
@@ -2598,87 +1705,10 @@ Integer Integer::operator*(long y) const
   return r;
 }
 
-Integer sqr(const Integer &x)
-{
-  Integer r;
-  mul(x, x, r);
-  return r;
-}
-
 Integer Integer::operator/(const Integer &y) const
 {
   Integer r;
   div(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator/(long y) const
-{
-  Integer r;
-  div(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator%(const Integer &y) const
-{
-  Integer r;
-  mod(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator%(long y) const
-{
-  Integer r;
-  mod(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator<<(const Integer &y) const
-{
-  Integer r;
-  lshift(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator<<(long y) const
-{
-  Integer r;
-  lshift(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator>>(const Integer &y) const
-{
-  Integer r;
-  rshift(*this, y, r);
-  return r;
-}
-
-Integer Integer::operator>>(long y) const
-{
-  Integer r;
-  rshift(*this, y, r);
-  return r;
-}
-
-Integer pow(const Integer &x, long y)
-{
-  Integer r;
-  pow(x, y, r);
-  return r;
-}
-
-Integer Ipow(long x, long y)
-{
-  Integer r(x);
-  pow(r, y, r);
-  return r;
-}
-
-Integer pow(const Integer &x, const Integer &y)
-{
-  Integer r;
-  pow(x, y, r);
   return r;
 }
 
@@ -2696,30 +1726,11 @@ Integer Integer::operator-() const
   return r;
 }
 
-Integer atoI(const char *s, int base)
-{
-  Integer r;
-  r.rep = atoIntegerRep(s, base);
-  return r;
-}
-
 Integer gcd(const Integer &x, const Integer &y)
 {
   Integer r;
   r.rep = gcd(x.rep, y.rep);
   return r;
-}
-
-Integer &Integer::operator%=(const Integer &y)
-{
-  *this = *this % y; // mod(*this, y, *this) doesn't work.
-  return *this;
-}
-
-Integer &Integer::operator%=(long y)
-{
-  *this = *this % y; // mod(*this, y, *this) doesn't work.
-  return *this;
 }
 
 } // namespace Gambit

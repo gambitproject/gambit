@@ -51,13 +51,13 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
     max = Rational(0);
   }
 
-  const Rational fac(1, max - min);
+  const Rational fac = Rational(1) / (max - min);
 
   for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A1(i, n1 + j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
+      A1(i, n1 + j) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min));
     }
   }
   return A1;
@@ -82,13 +82,13 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
     max = Rational(0);
   }
 
-  const Rational fac(1, max - min);
+  const Rational fac(1, static_cast<int>(static_cast<double>(max - min)));
 
   for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A2(n1 + j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
+      A2(n1 + j, i) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min));
     }
   }
   return A2;
