@@ -34,6 +34,7 @@ Creating, reading, and writing games
    read_nfg
    read_agg
    read_bagg
+   read_gtdraw
 
    StrategicGame.from_arrays
    ExtensiveGame.to_arrays
@@ -44,6 +45,7 @@ Creating, reading, and writing games
    ExtensiveGame.to_nfg
    StrategicGame.to_nfg
    ActionGraphGame.to_nfg
+   ExtensiveGame.to_gtdraw
    ExtensiveGame.to_html
    StrategicGame.to_html
    ActionGraphGame.to_html

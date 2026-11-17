@@ -1212,8 +1212,24 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
-/// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
+/// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile, ReadGtdrawFile
 [[nodiscard]] Game ReadGbtFile(std::istream &p_stream);
+
+/// @brief Reads a game from a drawing in gtdraw's format
+///
+/// A drawing restates a game: its players, the moves along each history, information sets,
+/// chance probabilities and payoffs.  The positions of the nodes are checked and dropped.
+/// A terminal node with fewer payoffs than the game has players is paid zero for the rest,
+/// and one with none has no outcome.
+/// Both EF 0 and EF 1 are read.  Numbers are integers, decimals, a/b or \frac{a}{b}, with an
+/// optional leading minus.  A chance move's probability is the last '~'-separated part of
+/// its label.
+/// @param[in] p_stream An input stream, positioned at the start of the drawing
+/// @return A handle to the extensive game constructed
+/// @throw InvalidFileException If the stream does not contain a valid drawing; the message
+///                             gives the number of the offending line.
+/// @sa WriteGtdrawFile, ReadEfgFile
+[[nodiscard]] Game ReadGtdrawFile(std::istream &p_stream);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.

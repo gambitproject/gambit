@@ -1,4 +1,8 @@
-## [17.0.0-beta.4] - 2026-11-08
+## [17.0.0-beta.4] - unreleased
+
+### Added
+- `ExtensiveGame.to_gtdraw` and `read_gtdraw` for writing and reading, respectively, extensive games as
+  drawings in gtdraw's .ef format.
 
 ### Changed
 - Create separate game-representation classes `ExtensiveGame`, `StrategicGame`, `ActionGraphGame`,

@@ -79,6 +79,23 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
                            const GamePlayer &p_colPlayer);
 
+/// Spacing options for a drawing written by WriteGtdrawFile.  Each scaling multiplies
+/// the default distance between levels, between the sublevels of a level, or between
+/// leaves.
+struct GtdrawOptions {
+  double levelScaling{1.0};
+  double sublevelScaling{1.0};
+  double widthScaling{1.0};
+  /// Draw every terminal node at the depth of the deepest node
+  bool sharedTerminalDepth{false};
+};
+
+///
+/// Write an extensive game as a drawing in gtdraw's format, positioned by CreateLayout.
+/// @throws std::invalid_argument if the game has more than four players or a scaling is negative
+///
+std::string WriteGtdrawFile(const Game &p_game, const GtdrawOptions &p_options = GtdrawOptions());
+
 } // end namespace Gambit
 
 #endif // GAMBIT_GAMES_WRITER_H

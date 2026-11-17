@@ -76,6 +76,57 @@ class ExtensiveGame(_StrategicFormBase):
         """
         return self._to_format(WriteEfgFile, filepath_or_buffer)
 
+    def to_gtdraw(
+        self,
+        filepath_or_buffer: str | pathlib.Path | io.IOBase | None = None,
+        *,
+        level_scaling: float = 1.0,
+        sublevel_scaling: float = 1.0,
+        width_scaling: float = 1.0,
+        shared_terminal_depth: bool = False,
+    ) -> str | None:
+        """Write the game as a drawing in gtdraw's format, or return it as text.
+
+        The nodes are positioned by the layout that Gambit computes for a game tree.
+        The format draws at most four players.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or io.IOBase or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+        level_scaling : float, default 1.0
+            Multiplies the distance between levels of the tree.
+        sublevel_scaling : float, default 1.0
+            Multiplies the distance between the sublevels of a level.
+        width_scaling : float, default 1.0
+            Multiplies the distance between leaves.
+        shared_terminal_depth : bool, default False
+            If True, every terminal node is drawn at the depth of the deepest node.
+
+        Return
+        ------
+        String representation of the drawing or None if it is written to a file
+
+        Raises
+        ------
+        ValueError
+            If the game has more than four players, or a scaling is negative.
+
+        See Also
+        --------
+        to_efg, to_latex
+        """
+        return self._save(
+            WriteGtdrawFile(
+                self.game, level_scaling, sublevel_scaling, width_scaling,
+                shared_terminal_depth
+            ),
+            filepath_or_buffer
+        )
+
     @cython.cfunc
     def _get_infosets(self, player: str) -> list[Node]:
         """Internal: like `get_infosets`, but keeps `Node` objects rather than

@@ -229,6 +229,8 @@ game_SOURCES = \
 	src/games/stratmixed.h \
 	src/games/stratmixed.cc \
 	src/games/file.cc \
+	src/games/fileutils.h \
+	src/games/gtdraw.cc \
 	src/games/workspace.cc \
 	src/games/workspace.h \
 	src/games/writer.cc \
