@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "games.h"
+#include "solvers/bimatrix/bimatrix.h"
 #include "solvers/linalg/lhtab.h"
 #include "solvers/lcp/lcp.h"
 
@@ -32,63 +33,27 @@ namespace Gambit::Nash {
 // Anonymous namespace to encapsulate local utility functions
 
 namespace {
-template <class T> Matrix<T> Make_A1(const Game &p_game)
+template <class T> Matrix<T> Make_A1(const Matrix<T> &p_payoffs)
 {
-  const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
-  const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
+  const int n1 = p_payoffs.NumRows();
+  const int n2 = p_payoffs.NumColumns();
   Matrix<T> A1(1, n1, n1 + 1, n1 + n2);
-
-  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
-
-  Rational min = p_game->GetMinPayoff();
-  if (min > Rational(0)) {
-    min = Rational(0);
-  }
-  min -= Rational(1);
-
-  Rational max = p_game->GetMaxPayoff();
-  if (max < Rational(0)) {
-    max = Rational(0);
-  }
-
-  const Rational fac = Rational(1) / (max - min);
-
   for (int i = 1; i <= n1; i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= n2; j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A1(i, n1 + j) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min));
+      A1(i, n1 + j) = p_payoffs(i, j);
     }
   }
   return A1;
 }
 
-template <class T> Matrix<T> Make_A2(const Game &p_game)
+template <class T> Matrix<T> Make_A2(const Matrix<T> &p_payoffs)
 {
-  const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
-  const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
+  const int n2 = p_payoffs.NumRows();
+  const int n1 = p_payoffs.NumColumns();
   Matrix<T> A2(n1 + 1, n1 + n2, 1, n1);
-
-  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
-
-  Rational min = p_game->GetMinPayoff();
-  if (min > Rational(0)) {
-    min = Rational(0);
-  }
-  min -= Rational(1);
-
-  Rational max = p_game->GetMaxPayoff();
-  if (max < Rational(0)) {
-    max = Rational(0);
-  }
-
-  const Rational fac = Rational(1) / (max - min);
-
-  for (int i = 1; i <= n1; i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
-    for (int j = 1; j <= n2; j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A2(n1 + j, i) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min));
+  for (int j = 1; j <= n2; j++) {
+    for (int i = 1; i <= n1; i++) {
+      A2(n1 + j, i) = p_payoffs(j, i);
     }
   }
   return A2;
@@ -271,15 +236,12 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game, int j, linalg::LHTableau<
 template <class T>
 std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
-  if (p_game->NumPlayers() != 2) {
-    throw UndefinedException("Method only valid for two-player games.");
-  }
-  RequirePerfectRecall(p_game);
+  const NormalisedBimatrix<T> bimatrix = BuildNormalisedBimatrix<T>(p_game);
   Solution solution;
 
-  const Matrix<T> A1 = Make_A1<T>(p_game);
+  const Matrix<T> A1 = Make_A1<T>(bimatrix.A1);
   const Vector<T> b1 = Make_b1<T>(p_game);
-  const Matrix<T> A2 = Make_A2<T>(p_game);
+  const Matrix<T> A2 = Make_A2<T>(bimatrix.A2);
   const Vector<T> b2 = Make_b2<T>(p_game);
   linalg::LHTableau<T> B(A1, A2, b1, b2);
 

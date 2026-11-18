@@ -93,7 +93,7 @@ class GambitBuildPy(setuptools.command.build_py.build_py):
 
 
 cppgambit_bimatrix = solver_library_config("cppgambit_bimatrix",
-                                           ["linalg", "lp", "lcp", "enummixed"])
+                                           ["linalg", "bimatrix", "lp", "lcp", "enummixed"])
 cppgambit_liap = solver_library_config("cppgambit_liap", ["liap"])
 cppgambit_homotopy = solver_library_config("cppgambit_homotopy", ["path", "logit", "hp"])
 cppgambit_gtracer = solver_library_config("cppgambit_gtracer", ["gtracer", "ipa", "gnm"])
