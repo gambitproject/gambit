@@ -140,6 +140,7 @@ Information about the game
    StrategicGame.get_max_payoff
    ActionGraphGame.get_max_payoff
    ExtensiveGame.get_infosets
+   BayesianActionGraphGame.get_infosets
    ExtensiveGame.get_events
    ExtensiveGame.get_strategies
    StrategicGame.get_strategies
@@ -175,7 +176,9 @@ Player behavior
    ActionGraphGame.random_strategy_profile
    ExtensiveGame.get_behavior
    ExtensiveGame.mixed_behavior_profile
+   BayesianActionGraphGame.mixed_behavior_profile
    ExtensiveGame.random_behavior_profile
+   BayesianActionGraphGame.random_behavior_profile
    ExtensiveGame.strategy_support_profile
    StrategicGame.strategy_support_profile
    ActionGraphGame.strategy_support_profile
