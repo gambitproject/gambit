@@ -493,17 +493,9 @@ void TableWidget::EditStrategies(int player)
     return;
   }
 
-  std::vector<std::string> stableLabels, labels;
-  for (int i = 0; i < dialog.NumStrategies(); i++) {
-    if (dialog.IsDeleted(i)) {
-      continue;
-    }
-    stableLabels.push_back(dialog.GetStableLabel(i));
-    labels.push_back(dialog.GetStrategyLabel(i).ToStdString(wxConvUTF8));
-  }
-
   try {
-    m_doc->DoSetStrategies(gamePlayer, stableLabels, labels);
+    const auto &strategies = dialog.GetStrategies();
+    m_doc->DoSetStrategies(gamePlayer, strategies.GetStableLabels(), strategies.GetLabels());
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();

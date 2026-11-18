@@ -28,6 +28,11 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
+#include <string>
+#include <vector>
+
+#include "labellist.h"
+
 namespace Gambit::GUI {
 
 class LabelTextCtrl final : public wxTextCtrl {
@@ -52,6 +57,19 @@ public:
 
   wxString GetNormalizedValue();
 };
+
+/// Shows the state of a row of a label list in its label control: new (bold, green), renamed
+/// from its stable label (italic, blue, with a tooltip naming the old label), or unchanged
+void StyleLabelRow(LabelTextCtrl *p_ctrl, bool p_isNew, const std::string &p_stableLabel,
+                   const std::string &p_label);
+
+/// Shades the label controls of the rows that `p_validation` finds invalid (`p_controls` holds
+/// one control per row, in order), and returns the message for the first problem, or an empty
+/// string if there is none
+wxString ValidateLabels(const LabelValidation &p_validation,
+                        const std::vector<LabelTextCtrl *> &p_controls,
+                        const wxColour &p_defaultBg, const wxString &p_emptyMessage,
+                        const wxString &p_duplicateMessage);
 
 } // namespace Gambit::GUI
 

@@ -320,6 +320,23 @@ void GameDocument::RestoreSnapshot(const std::string &p_snapshot)
   m_style.Load(workspace);
 }
 
+void GameDocument::ApplyEdit(const std::function<GameModificationType()> &p_edit)
+{
+  GameModificationType modifications = GameModificationType::None;
+  try {
+    modifications = p_edit();
+  }
+  catch (...) {
+    // The last undo entry is the state before the edit, as every change pushes one.
+    RestoreSnapshot(m_undoList.back());
+    UpdateViews();
+    throw;
+  }
+  if (modifications != GameModificationType::None) {
+    NotifyChanged(modifications);
+  }
+}
+
 void GameDocument::Undo()
 {
   if (!CanUndo()) {
@@ -455,11 +472,85 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
   UpdateViews();
 }
 
-void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment)
+namespace {
+
+// The relabelling from p_stableLabels to p_labels, by position, of the items that change label
+std::map<std::string, std::string> Relabelling(const std::vector<std::string> &p_stableLabels,
+                                               const std::vector<std::string> &p_labels)
 {
-  m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
-  m_game->SetDescription(static_cast<const char *>(p_comment.mb_str()));
-  NotifyChanged(GameModificationType::GameLabels);
+  std::map<std::string, std::string> relabels;
+  for (size_t i = 0; i < p_stableLabels.size(); i++) {
+    if (p_stableLabels[i] != p_labels[i]) {
+      relabels[p_stableLabels[i]] = p_labels[i];
+    }
+  }
+  return relabels;
+}
+
+template <class R> std::vector<std::string> LabelsOf(const R &p_items)
+{
+  std::vector<std::string> labels;
+  for (const auto &item : p_items) {
+    labels.push_back(item->GetLabel());
+  }
+  return labels;
+}
+
+} // namespace
+
+void GameDocument::DoEditGame(const GamePropertiesEdit &p_edit)
+{
+  ApplyEdit([this, &p_edit]() {
+    GameModificationType modifications = GameModificationType::None;
+    if (m_game->GetTitle() != p_edit.title || m_game->GetDescription() != p_edit.description) {
+      m_game->SetTitle(p_edit.title);
+      m_game->SetDescription(p_edit.description);
+      modifications |= GameModificationType::GameLabels;
+    }
+    modifications |= EditPlayers(p_edit.stableLabels, p_edit.labels);
+
+    TreeRenderConfig style = m_style;
+    if (As<GameTreeRep>(m_game)) {
+      style.SetChanceColor(p_edit.chanceColor);
+    }
+    // Colours are by position among the players after the edit, which is their number.
+    for (size_t i = 0; i < p_edit.playerColors.size(); i++) {
+      style.SetPlayerColor(static_cast<int>(i) + 1, p_edit.playerColors[i]);
+    }
+    bool restyled = style.ChanceColor() != m_style.ChanceColor();
+    for (size_t pl = 1; !restyled && pl <= p_edit.playerColors.size(); pl++) {
+      restyled = style.GetPlayerColor(static_cast<int>(pl)) !=
+                 m_style.GetPlayerColor(static_cast<int>(pl));
+    }
+    if (restyled) {
+      m_style = std::move(style);
+      modifications |= GameModificationType::Presentation;
+    }
+    return modifications;
+  });
+}
+
+GameModificationType GameDocument::EditPlayers(const std::vector<std::string> &p_stableLabels,
+                                               const std::vector<std::string> &p_labels)
+{
+  const auto relabels = Relabelling(p_stableLabels, p_labels);
+  if (p_stableLabels == LabelsOf(m_game->GetPlayers())) {
+    // Relabelling all players in one call lets two players' labels be swapped without
+    // tripping the duplicate-label check; and it works for a game whose `SetPlayers` is
+    // unsupported, e.g. one read from an action graph game file.
+    if (relabels.empty()) {
+      return GameModificationType::None;
+    }
+    m_game->RelabelPlayers(relabels);
+    return GameModificationType::GameLabels;
+  }
+  // Structure first, from the stable labels alone, so that a label freed by a deletion is
+  // available to the relabelling.
+  m_game->SetPlayers(p_stableLabels);
+  if (!relabels.empty()) {
+    m_game->RelabelPlayers(relabels);
+  }
+  return GameModificationType::GameForm;
 }
 
 GamePlayer GameDocument::DoAddPlayer()
@@ -482,59 +573,30 @@ GamePlayer GameDocument::DoAddPlayer()
   return m_game->GetPlayers().back();
 }
 
-void GameDocument::DoRelabelPlayers(const std::map<std::string, std::string> &p_labels)
-{
-  m_game->RelabelPlayers(p_labels);
-  NotifyChanged(GameModificationType::GameLabels);
-}
-
-void GameDocument::DoSetPlayers(const std::vector<std::string> &p_stableLabels,
-                                const std::vector<std::string> &p_labels)
-{
-  // Phase 1: structure (which players exist, and in what order), resolved purely from
-  // p_stableLabels -- untouched by any pending rename in p_labels.
-  m_game->SetPlayers(p_stableLabels);
-
-  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
-  // a deletion in phase 1 is available for reuse here.
-  std::map<std::string, std::string> relabels;
-  for (size_t i = 0; i < p_stableLabels.size(); i++) {
-    if (p_stableLabels[i] != p_labels[i]) {
-      relabels[p_stableLabels[i]] = p_labels[i];
-    }
-  }
-  if (!relabels.empty()) {
-    m_game->RelabelPlayers(relabels);
-  }
-  NotifyChanged(GameModificationType::GameForm);
-}
-
 void GameDocument::DoSetStrategies(const GamePlayer &p_player,
                                    const std::vector<std::string> &p_stableLabels,
                                    const std::vector<std::string> &p_labels)
 {
-  // Phase 1: structure (which strategies exist, and in what order), resolved purely from
-  // p_stableLabels -- untouched by any pending rename in p_labels.
-  m_game->SetStrategies(p_player, p_stableLabels);
+  ApplyEdit([this, &p_player, &p_stableLabels, &p_labels]() {
+    return EditStrategies(p_player, p_stableLabels, p_labels);
+  });
+}
 
-  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
-  // a deletion in phase 1 is available for reuse here.
-  std::map<std::string, std::string> relabels;
-  for (size_t i = 0; i < p_stableLabels.size(); i++) {
-    if (p_stableLabels[i] != p_labels[i]) {
-      relabels[p_stableLabels[i]] = p_labels[i];
-    }
+GameModificationType GameDocument::EditStrategies(const GamePlayer &p_player,
+                                                  const std::vector<std::string> &p_stableLabels,
+                                                  const std::vector<std::string> &p_labels)
+{
+  const auto relabels = Relabelling(p_stableLabels, p_labels);
+  if (relabels.empty() && p_stableLabels == LabelsOf(p_player->GetStrategies())) {
+    return GameModificationType::None;
   }
+  // Structure first, from the stable labels alone, so that a label freed by a deletion is
+  // available to the relabelling.
+  m_game->SetStrategies(p_player, p_stableLabels);
   if (!relabels.empty()) {
     m_game->RelabelStrategies(p_player, relabels);
   }
-  NotifyChanged(GameModificationType::GameForm);
-}
-
-void GameDocument::DoSetInfosetLabel(const GameInfoset &p_infoset, const wxString &p_label)
-{
-  p_infoset->SetLabel(p_label.ToStdString(wxConvUTF8));
-  NotifyChanged(GameModificationType::GameLabels);
+  return GameModificationType::GameForm;
 }
 
 void GameDocument::DoRelabelActions(const GameInfoset &p_infoset,
@@ -544,32 +606,68 @@ void GameDocument::DoRelabelActions(const GameInfoset &p_infoset,
   NotifyChanged(GameModificationType::GameLabels);
 }
 
-void GameDocument::DoSetActions(const GameInfoset &p_infoset,
-                                const std::vector<std::string> &p_stableLabels,
-                                const std::vector<std::string> &p_labels,
-                                const std::vector<Number> &p_probs)
+void GameDocument::DoEditMove(const GameInfoset &p_infoset, const MoveEdit &p_edit)
 {
-  // Phase 1: structure (which actions exist, and in what order), resolved purely from
-  // p_stableLabels -- untouched by any pending rename in p_labels.
-  if (p_infoset->IsChanceInfoset()) {
+  ApplyEdit([this, &p_infoset, &p_edit]() {
+    GameModificationType modifications = GameModificationType::None;
+    GameInfoset infoset = p_infoset;
+    if (infoset->GetLabel() != p_edit.infosetLabel) {
+      infoset->SetLabel(p_edit.infosetLabel);
+      modifications |= GameModificationType::GameLabels;
+    }
+    if (!infoset->IsChanceInfoset() && p_edit.player && !p_edit.player->IsChance() &&
+        p_edit.player != infoset->GetPlayer()) {
+      const std::vector<GameNode> members(infoset->GetMembers().begin(),
+                                          infoset->GetMembers().end());
+      m_game->MakeInfoset(members, p_edit.player, infoset->GetLabel());
+      // MakeInfoset forms a new information set, invalidating the handle; the members remain.
+      infoset = members.front()->GetInfoset();
+      modifications |= GameModificationType::GameForm;
+    }
+    modifications |= EditActions(infoset, p_edit.stableLabels, p_edit.labels, p_edit.probs);
+    return modifications;
+  });
+}
+
+GameModificationType GameDocument::EditActions(const GameInfoset &p_infoset,
+                                               const std::vector<std::string> &p_stableLabels,
+                                               const std::vector<std::string> &p_labels,
+                                               const std::vector<Number> &p_probs)
+{
+  const bool isChance = p_infoset->IsChanceInfoset();
+  bool restructured = p_stableLabels != LabelsOf(p_infoset->GetActions());
+  if (isChance && !restructured) {
+    // A probability counts as changed if its text does, e.g. from "0.5" to "1/2", since the
+    // text is what is saved.
+    size_t i = 0;
+    for (const auto &action : p_infoset->GetActions()) {
+      if (static_cast<const std::string &>(p_infoset->GetActionProb(action)) !=
+          static_cast<const std::string &>(p_probs.at(i++))) {
+        restructured = true;
+        break;
+      }
+    }
+  }
+  const auto relabels = Relabelling(p_stableLabels, p_labels);
+  if (!restructured) {
+    if (relabels.empty()) {
+      return GameModificationType::None;
+    }
+    m_game->RelabelActions(p_infoset, relabels);
+    return GameModificationType::GameLabels;
+  }
+  // Structure first, from the stable labels alone, so that a label freed by a deletion is
+  // available to the relabelling.
+  if (isChance) {
     m_game->SetEventActions(p_infoset, p_stableLabels, p_probs);
   }
   else {
     m_game->SetMoveActions(p_infoset, p_stableLabels);
   }
-
-  // Phase 2: relabeling, applied once the structure has settled, so a label freed up by
-  // a deletion in phase 1 is available for reuse here.
-  std::map<std::string, std::string> relabels;
-  for (size_t i = 0; i < p_stableLabels.size(); i++) {
-    if (p_stableLabels[i] != p_labels[i]) {
-      relabels[p_stableLabels[i]] = p_labels[i];
-    }
-  }
   if (!relabels.empty()) {
     m_game->RelabelActions(p_infoset, relabels);
   }
-  NotifyChanged(GameModificationType::GameForm);
+  return GameModificationType::GameForm;
 }
 
 void GameDocument::DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset)

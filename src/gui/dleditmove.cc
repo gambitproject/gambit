@@ -32,7 +32,6 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
-#include <set>
 
 #include "games.h"
 #include "games/gametree.h"
@@ -40,69 +39,44 @@
 #include "dleditmove.h"
 #include "valnumber.h"
 #include "editlabel.h"
+#include "labellist.h"
 
 namespace Gambit::GUI {
 
 namespace {
 const wxColour kInvalidLabelBg(255, 220, 220);
-const wxColour kNewLabelColour(0, 102, 0);      // new action: bold, dark green
-const wxColour kRenamedLabelColour(0, 51, 204); // renamed action: italic, strong blue
 } // namespace
 
 // An editable, variable-length list of the actions at an infoset, colour-coded like
-// a source-control diff (added/renamed/deleted).
-//
-// Each row's *stable label* (its label before this dialog touched it, or a placeholder for a
-// newly added row) never changes; it's what `SetMoveActions()`/`SetEventActions()` use to
-// match the row to its underlying action regardless of what the user has typed into its
-// *current* label text.
-// Deleting an existing row marks it deleted and disables it, with its delete button becoming
-// a restore button, rather than removing it outright -- a newly added row has nothing to
-// preserve, so deleting one of those does remove it.
+// a source-control diff (added/renamed/deleted), with a probability per action at a chance
+// move. The rows are held in a `LabelListEdit`; this panel draws them and forwards the user's
+// actions to it.
 class ActionPanel final : public wxScrolledWindow {
-public:
-  struct Row {
-    std::string stableLabel;
-    bool isNew = false;     // true for a row added in this dialog, with no prior action at all
-    bool isDeleted = false; // true for an existing row marked for deletion (kept, disabled)
-    wxString currentLabelText;
-    std::unique_ptr<wxString> probValue; // backing store for NumberValidator; heap-stable
-                                         // across Row moves within m_rows
-    LabelTextCtrl *labelCtrl = nullptr;
-    wxTextCtrl *probCtrl = nullptr;
-    wxButton *upButton = nullptr;
-    wxButton *downButton = nullptr;
-    wxButton *deleteButton = nullptr; // doubles as the restore button when isDeleted
-  };
+  // Each row's probability text, the backing store for its NumberValidator; heap-stable across
+  // row moves. Null for a personal move.
+  using ProbValue = std::unique_ptr<wxString>;
 
-private:
   const bool m_isChance;
-  std::vector<Row> m_rows;
+  LabelListEdit<ProbValue> m_list;
+  // One of each per row of m_list, recreated by each Rebuild(); m_probCtrls only at chance
+  std::vector<LabelTextCtrl *> m_labelCtrls;
+  std::vector<wxTextCtrl *> m_probCtrls;
   wxBoxSizer *m_topSizer;
   wxColour m_defaultBg;
   std::function<void()> m_onChanged;
   // False until the constructor completes, so Rebuild()'s initial call can't notify the
   // owning dialog through its m_actionPanel pointer before that's been assigned.
   bool m_ready = false;
-  // True from the moment a row mutation starts until its (deferred) Rebuild() finishes.
-  // Destroying/rebuilding row controls can fire a focus-kill event on whatever control had
-  // focus, reentrantly, while m_rows or the controls it points to are mid-mutation; handlers
-  // that touch either must no-op while this is true rather than act on stale state.
+  // True from the moment a row mutation starts until its (deferred) Rebuild() finishes; see
+  // StrategyPanel (dleditstrategies.cc) for why this guard is needed.
   bool m_rebuilding = false;
 
-  std::string NextPlaceholderLabel() const;
-  int ActiveCount() const
-  {
-    return static_cast<int>(
-        std::count_if(m_rows.begin(), m_rows.end(), [](const Row &r) { return !r.isDeleted; }));
-  }
   void Rebuild();
+  // See StrategyPanel::ScheduleRebuild() (dleditstrategies.cc).
+  void ScheduleRebuild(bool p_scrollToBottom = false);
   // Scrolls to show the last row -- called after AddAction() so the row just added (which a
   // long list would otherwise leave below the fold) is immediately visible.
   void ScrollToBottom();
-  // Colours a (non-deleted) row's label to reflect whether it's new, renamed from its
-  // stable label, or unchanged, and sets/clears the "renamed from" tooltip to match.
-  static void UpdateRowStyle(Row &row);
   void NotifyChanged() const
   {
     if (m_ready) {
@@ -114,17 +88,10 @@ public:
   ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
               const std::function<void()> &p_onChanged);
 
-  int NumActions() const { return static_cast<int>(m_rows.size()); }
-  bool IsDeleted(int p_index) const { return m_rows.at(p_index).isDeleted; }
-  std::string GetStableLabel(int p_index) const { return m_rows.at(p_index).stableLabel; }
-  wxString GetActionLabel(int p_index) const
-  {
-    return m_rows.at(p_index).labelCtrl->GetNormalizedValue();
-  }
-  Number GetActionProb(int p_index) const
-  {
-    return Number(m_rows.at(p_index).probCtrl->GetValue().ToStdString());
-  }
+  // The rows as edited, with each label as normalized in its control
+  const LabelListEdit<ProbValue> &GetEdit();
+  // The probabilities currently typed into the active rows, in order (chance moves only)
+  std::vector<Number> GetActiveProbs() const;
 
   void AddAction();
   // Marks an existing row deleted (or restores an already-deleted one); removes a row added
@@ -135,7 +102,7 @@ public:
 
   // Highlights any empty or duplicate action labels among active (non-deleted) rows, and
   // returns a description of the first problem found, or an empty string if all are valid.
-  wxString ValidateLabels();
+  wxString CheckLabels();
 };
 
 ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
@@ -151,14 +118,12 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
   SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
   for (const auto &action : p_infoset->GetActions()) {
-    Row row;
-    row.stableLabel = action->GetLabel();
-    row.currentLabelText = wxString::FromUTF8(row.stableLabel);
+    ProbValue probValue;
     if (m_isChance) {
-      row.probValue = std::make_unique<wxString>(
+      probValue = std::make_unique<wxString>(
           static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(), *wxConvCurrent);
     }
-    m_rows.push_back(std::move(row));
+    m_list.AddExisting(action->GetLabel(), std::move(probValue));
   }
 
   SetSizer(m_topSizer);
@@ -170,60 +135,40 @@ ActionPanel::ActionPanel(wxWindow *p_parent, const GameInfoset &p_infoset,
   SetMinSize(
       wxSize(FromDIP(m_isChance ? 460 : 360), std::min(bestSize.GetHeight(), FromDIP(250))));
 
-  if (!m_rows.empty()) {
-    m_defaultBg = m_rows.front().labelCtrl->GetBackgroundColour();
+  if (!m_labelCtrls.empty()) {
+    m_defaultBg = m_labelCtrls.front()->GetBackgroundColour();
   }
 
   m_ready = true;
 }
 
-std::string ActionPanel::NextPlaceholderLabel() const
+const LabelListEdit<ActionPanel::ProbValue> &ActionPanel::GetEdit()
 {
-  std::set<std::string> used;
-  for (const auto &row : m_rows) {
-    used.insert(row.stableLabel);
-    used.insert(row.currentLabelText.ToStdString(wxConvUTF8));
+  for (size_t i = 0; i < m_labelCtrls.size(); i++) {
+    m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
   }
-  int number = static_cast<int>(m_rows.size()) + 1;
-  while (contains(used, std::to_string(number))) {
-    number++;
-  }
-  return std::to_string(number);
+  return m_list;
 }
 
-void ActionPanel::UpdateRowStyle(Row &row)
+std::vector<Number> ActionPanel::GetActiveProbs() const
 {
-  // Colour alone can be hard to tell apart (or perceive at all); weight/slant give the same
-  // information a second way, so the state still reads even if the colours don't.
-  wxFont font = row.labelCtrl->GetFont();
-  font.SetWeight(wxFONTWEIGHT_NORMAL);
-  font.SetStyle(wxFONTSTYLE_NORMAL);
-
-  if (row.isNew) {
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    row.labelCtrl->SetForegroundColour(kNewLabelColour);
-    row.labelCtrl->UnsetToolTip();
+  std::vector<Number> probs;
+  for (size_t i = 0; i < m_probCtrls.size(); i++) {
+    if (!m_list.GetRow(i).isDeleted) {
+      probs.emplace_back(m_probCtrls[i]->GetValue().ToStdString());
+    }
   }
-  else if (row.currentLabelText.ToStdString(wxConvUTF8) != row.stableLabel) {
-    font.SetStyle(wxFONTSTYLE_ITALIC);
-    row.labelCtrl->SetForegroundColour(kRenamedLabelColour);
-    row.labelCtrl->SetToolTip(
-        wxString::Format(_("Renamed from \"%s\""), wxString::FromUTF8(row.stableLabel)));
-  }
-  else {
-    row.labelCtrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-    row.labelCtrl->UnsetToolTip();
-  }
-  row.labelCtrl->SetFont(font);
-  row.labelCtrl->Refresh();
+  return probs;
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void ActionPanel::Rebuild()
 {
   m_rebuilding = true;
-  m_topSizer->Clear(true); // destroys the previous row controls; each Row's own state
-                           // (stableLabel, currentLabelText, probValue) isn't owned by them
+  m_topSizer->Clear(true); // destroys the previous row controls; the rows themselves
+                           // (including the probability text) are in m_list
+  m_labelCtrls.clear();
+  m_probCtrls.clear();
 
   const int numColumns = m_isChance ? 3 : 2;
   auto *gridSizer = new wxFlexGridSizer(numColumns, 5, 10);
@@ -240,86 +185,84 @@ void ActionPanel::Rebuild()
   }
   gridSizer->AddSpacer(1);
 
-  const int activeCount = ActiveCount();
+  const size_t activeCount = m_list.ActiveCount();
   const wxSize buttonSize(FromDIP(28), -1);
 
-  for (size_t i = 0; i < m_rows.size(); i++) {
-    Row &row = m_rows[i];
+  for (size_t i = 0; i < m_list.Size(); i++) {
+    const auto &row = m_list.GetRow(i);
 
-    row.labelCtrl = new LabelTextCtrl(this, wxID_ANY, row.currentLabelText);
+    auto *labelCtrl = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(row.label));
+    m_labelCtrls.push_back(labelCtrl);
     if (row.isDeleted) {
-      wxFont strikeFont = row.labelCtrl->GetFont();
+      wxFont strikeFont = labelCtrl->GetFont();
       strikeFont.SetStrikethrough(true);
-      row.labelCtrl->SetFont(strikeFont);
-      row.labelCtrl->Disable();
+      labelCtrl->SetFont(strikeFont);
+      labelCtrl->Disable();
     }
     else {
-      UpdateRowStyle(row);
+      StyleLabelRow(labelCtrl, row.isNew, row.stableLabel, row.label);
     }
-    row.labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    row.labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetNormalizedValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    gridSizer->Add(row.labelCtrl, 1, wxEXPAND);
+    gridSizer->Add(labelCtrl, 1, wxEXPAND);
 
     if (m_isChance) {
-      row.probCtrl =
+      auto *probCtrl =
           new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0,
-                         NumberValidator(row.probValue.get(), Rational(0), Rational(1)));
-      row.probCtrl->Enable(!row.isDeleted);
-      gridSizer->Add(row.probCtrl, 1, wxEXPAND);
+                         NumberValidator(row.payload.get(), Rational(0), Rational(1)));
+      probCtrl->Enable(!row.isDeleted);
+      m_probCtrls.push_back(probCtrl);
+      gridSizer->Add(probCtrl, 1, wxEXPAND);
     }
 
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
     if (!row.isDeleted) {
-      row.upButton =
+      auto *upButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2191), wxDefaultPosition, buttonSize);
-      row.upButton->Enable(i > 0);
-      row.upButton->Bind(wxEVT_BUTTON,
-                         [this, i](wxCommandEvent &) { MoveActionUp(static_cast<int>(i)); });
-      buttonSizer->Add(row.upButton, 0, wxLEFT, 2);
+      upButton->Enable(i > 0);
+      upButton->Bind(wxEVT_BUTTON,
+                     [this, i](wxCommandEvent &) { MoveActionUp(static_cast<int>(i)); });
+      buttonSizer->Add(upButton, 0, wxLEFT, 2);
 
-      row.downButton =
+      auto *downButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2193), wxDefaultPosition, buttonSize);
-      row.downButton->Enable(i + 1 < m_rows.size());
-      row.downButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { MoveActionDown(static_cast<int>(i)); });
-      buttonSizer->Add(row.downButton, 0, wxLEFT, 2);
+      downButton->Enable(i + 1 < m_list.Size());
+      downButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { MoveActionDown(static_cast<int>(i)); });
+      buttonSizer->Add(downButton, 0, wxLEFT, 2);
     }
     else {
       // Keep the delete/restore button aligned under its counterpart in other rows, in
-      // place of the Up/Down buttons a deleted row no longer has. Clear() already
-      // destroyed the previous Up/Down controls these pointers referred to; null them out
-      // rather than leave them dangling.
-      row.upButton = nullptr;
-      row.downButton = nullptr;
+      // place of the Up/Down buttons a deleted row no longer has.
       buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
       buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
     }
 
-    row.deleteButton =
+    auto *deleteButton =
         new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
                      wxDefaultPosition, buttonSize);
-    row.deleteButton->SetToolTip(row.isDeleted ? _("Restore action") : _("Delete action"));
-    row.deleteButton->Enable(row.isDeleted || activeCount > 1);
-    row.deleteButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
-    buttonSizer->Add(row.deleteButton, 0, wxLEFT, 2);
+    deleteButton->SetToolTip(row.isDeleted ? _("Restore action") : _("Delete action"));
+    deleteButton->Enable(row.isDeleted || activeCount > 1);
+    deleteButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
+    buttonSizer->Add(deleteButton, 0, wxLEFT, 2);
 
     gridSizer->Add(buttonSizer, 0, wxALIGN_CENTER_VERTICAL);
   }
@@ -342,8 +285,20 @@ void ActionPanel::Rebuild()
   FitInside();
   Layout();
   m_rebuilding = false;
-  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_rows are
+  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_list are
   // responsible for notifying once Rebuild() returns.
+}
+
+void ActionPanel::ScheduleRebuild(bool p_scrollToBottom)
+{
+  m_rebuilding = true;
+  CallAfter([this, p_scrollToBottom]() {
+    Rebuild();
+    if (p_scrollToBottom) {
+      ScrollToBottom();
+    }
+    NotifyChanged();
+  });
 }
 
 void ActionPanel::AddAction()
@@ -351,25 +306,8 @@ void ActionPanel::AddAction()
   if (m_rebuilding) {
     return; // a rebuild from an earlier click is still pending; ignore this stale one
   }
-  Row row;
-  row.stableLabel = NextPlaceholderLabel();
-  row.isNew = true;
-  row.currentLabelText = wxString::FromUTF8(row.stableLabel);
-  if (m_isChance) {
-    row.probValue = std::make_unique<wxString>("0");
-  }
-  m_rows.push_back(std::move(row));
-  // Rebuild() would destroy the very "+" button whose click is invoking this method, while
-  // its handler is still on the call stack -- unsafe in wx. CallAfter() defers it to once
-  // this event finishes dispatching; raising m_rebuilding now (not just once Rebuild()
-  // starts) covers the gap where m_rows is already mutated but the stale old controls are
-  // still alive.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    ScrollToBottom();
-    NotifyChanged();
-  });
+  m_list.AddNew("", m_isChance ? std::make_unique<wxString>("0") : nullptr);
+  ScheduleRebuild(true);
 }
 
 void ActionPanel::ScrollToBottom()
@@ -383,89 +321,31 @@ void ActionPanel::ScrollToBottom()
 
 void ActionPanel::ToggleDeleted(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.ToggleDeleted(p_index)) {
+    ScheduleRebuild();
   }
-  Row &row = m_rows.at(p_index);
-  if (!row.isDeleted && ActiveCount() <= 1) {
-    return; // refuse to drop below one active action
-  }
-  if (row.isNew) {
-    m_rows.erase(m_rows.begin() + p_index);
-  }
-  else {
-    row.isDeleted = !row.isDeleted;
-  }
-  // See AddAction() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void ActionPanel::MoveActionUp(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveUp(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index <= 0) {
-    return;
-  }
-  std::swap(m_rows[p_index - 1], m_rows[p_index]);
-  // See AddAction() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void ActionPanel::MoveActionDown(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveDown(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index + 1 >= static_cast<int>(m_rows.size())) {
-    return;
-  }
-  std::swap(m_rows[p_index], m_rows[p_index + 1]);
-  // See AddAction() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
-wxString ActionPanel::ValidateLabels()
+wxString ActionPanel::CheckLabels()
 {
-  const int numActions = NumActions();
-  wxString message;
-
-  for (int act = 0; act < numActions; act++) {
-    if (m_rows[act].isDeleted) {
-      continue;
-    }
-    const wxString value = m_rows[act].labelCtrl->GetValue();
-    bool invalid = value.empty();
-    for (int other = 0; !invalid && other < numActions; other++) {
-      if (other != act && !m_rows[other].isDeleted &&
-          m_rows[other].labelCtrl->GetValue() == value) {
-        invalid = true;
-      }
-    }
-
-    m_rows[act].labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultBg);
-    m_rows[act].labelCtrl->Refresh();
-
-    if (invalid && message.empty()) {
-      message = value.empty() ? _("Action labels cannot be empty.")
-                : m_isChance  ? _("Action labels must be unique within the event.")
-                              : _("Action labels must be unique within the infoset.");
-    }
-  }
-  return message;
+  return ValidateLabels(m_list.Validate(), m_labelCtrls, m_defaultBg,
+                        _("Action labels cannot be empty."),
+                        m_isChance ? _("Action labels must be unique within the event.")
+                                   : _("Action labels must be unique within the infoset."));
 }
 
 //======================================================================
@@ -616,7 +496,7 @@ void EditMoveDialog::UpdateValidation()
                   : _("Information set label must be unique for the player.");
   }
 
-  const wxString actionMessage = m_actionPanel->ValidateLabels();
+  const wxString actionMessage = m_actionPanel->CheckLabels();
   if (message.empty()) {
     message = actionMessage;
   }
@@ -639,12 +519,7 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
     p_event.Skip();
     return;
   }
-  std::vector<Number> activeProbs;
-  for (int i = 0; i < m_actionPanel->NumActions(); i++) {
-    if (!m_actionPanel->IsDeleted(i)) {
-      activeProbs.push_back(m_actionPanel->GetActionProb(i));
-    }
-  }
+  const std::vector<Number> activeProbs = m_actionPanel->GetActiveProbs();
   Array<Number> probs(static_cast<int>(activeProbs.size()));
   for (size_t i = 0; i < activeProbs.size(); i++) {
     probs[static_cast<int>(i) + 1] = activeProbs[i];
@@ -661,23 +536,16 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
   p_event.Skip();
 }
 
-int EditMoveDialog::NumActions() const { return m_actionPanel->NumActions(); }
-
-bool EditMoveDialog::IsDeleted(int p_index) const { return m_actionPanel->IsDeleted(p_index); }
-
-std::string EditMoveDialog::GetStableLabel(int p_index) const
+MoveEdit EditMoveDialog::GetEdit() const
 {
-  return m_actionPanel->GetStableLabel(p_index);
-}
-
-wxString EditMoveDialog::GetActionLabel(int p_index) const
-{
-  return m_actionPanel->GetActionLabel(p_index);
-}
-
-Number EditMoveDialog::GetActionProb(int p_index) const
-{
-  return m_actionPanel->GetActionProb(p_index);
+  const auto &actions = m_actionPanel->GetEdit();
+  return {.infosetLabel = m_infosetLabel->GetNormalizedValue().ToStdString(wxConvUTF8),
+          .player = m_infoset->IsChanceInfoset()
+                        ? GamePlayer(nullptr)
+                        : m_infoset->GetGame()->GetPlayer(m_player->GetSelection() + 1),
+          .stableLabels = actions.GetStableLabels(),
+          .labels = actions.GetLabels(),
+          .probs = m_actionPanel->GetActiveProbs()};
 }
 
 } // namespace Gambit::GUI

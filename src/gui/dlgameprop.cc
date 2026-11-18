@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <set>
 #include <vector>
 
 #include <wx/wxprec.h>
@@ -43,13 +42,11 @@
 #include "gamedoc.h"
 #include "dlgameprop.h"
 #include "editlabel.h"
+#include "labellist.h"
 
 namespace Gambit::GUI {
 
 namespace {
-const wxColour kInvalidLabelBg(255, 220, 220);
-const wxColour kNewLabelColour(0, 102, 0);      // new player: bold, dark green
-const wxColour kRenamedLabelColour(0, 51, 204); // renamed player: italic, strong blue
 // A neutral placeholder swatch for a player that doesn't exist yet; freely overridable via
 // the row's own colour button before the dialog is committed.
 const wxColour kNewPlayerColor(200, 200, 200);
@@ -73,33 +70,21 @@ using PlatformColourDialog = wxColourDialog;
 
 // An editable, variable-length list of the game's players (not including chance), colour-coded
 // like a source-control diff (added/renamed/deleted), mirroring StrategyPanel
-// (dleditstrategies.cc) with an added per-row colour swatch.
-//
-// Each row's *stable label* (its label before this dialog touched it, or a placeholder for a
-// newly added row) never changes; it's what `Game::SetPlayers()` uses to match the row to its
-// underlying player regardless of what the user has typed into its *current* label text.
-// Deleting an existing row marks it deleted and disables it, with its delete button becoming
-// a restore button, rather than removing it outright -- a newly added row has nothing to
-// preserve, so deleting one of those does remove it.
+// (dleditstrategies.cc) with an added per-row colour swatch. The rows are held in a
+// `LabelListEdit`; this panel draws them and forwards the user's actions to it.
 class PlayerPanel final : public wxScrolledWindow {
 public:
-  struct Row {
+  struct PlayerData {
     GamePlayer player; // null for a row added in this dialog, with no prior player at all
-    std::string stableLabel;
-    bool isNew = false;     // true for a row added in this dialog
-    bool isDeleted = false; // true for an existing row marked for deletion (kept, disabled)
-    wxString currentLabelText;
-    wxColour color; // staged: not written to the document until the dialog's OK is committed
-    LabelTextCtrl *labelCtrl = nullptr;
-    wxBitmapButton *colorButton = nullptr;
-    wxButton *upButton = nullptr;
-    wxButton *downButton = nullptr;
-    wxButton *deleteButton = nullptr; // doubles as the restore button when isDeleted
+    wxColour color;    // staged: not written to the document until the dialog's OK is committed
   };
 
 private:
   std::shared_ptr<GameDocument> m_doc;
-  std::vector<Row> m_rows;
+  LabelListEdit<PlayerData> m_list;
+  // One of each per row of m_list, recreated by each Rebuild()
+  std::vector<LabelTextCtrl *> m_labelCtrls;
+  std::vector<wxBitmapButton *> m_colorButtons;
   wxBoxSizer *m_topSizer;
   wxColour m_defaultBg;
   std::function<void()> m_onChanged;
@@ -110,21 +95,14 @@ private:
   // StrategyPanel (dleditstrategies.cc) for why this guard is needed.
   bool m_rebuilding = false;
 
-  std::string NextPlaceholderLabel() const;
-  int ActiveCount() const
-  {
-    return static_cast<int>(
-        std::count_if(m_rows.begin(), m_rows.end(), [](const Row &r) { return !r.isDeleted; }));
-  }
   // The reason `row` can't be deleted because of the game's own rules -- it has decisions (in
   // an extensive game) or more than one strategy (in a strategic game) -- or an empty string
   // if there's no such structural obstruction. Independent of the separate "at least one
   // player must remain" rule enforced where this is used.
-  wxString BlockedDeleteReason(const Row &row) const;
+  wxString BlockedDeleteReason(const LabelListEdit<PlayerData>::Row &row) const;
   void Rebuild();
-  // Colours a (non-deleted) row's label to reflect whether it's new, renamed from its stable
-  // label, or unchanged, and sets/clears the "renamed from" tooltip to match.
-  static void UpdateRowStyle(Row &row);
+  // See StrategyPanel::ScheduleRebuild() (dleditstrategies.cc).
+  void ScheduleRebuild();
   void NotifyChanged() const
   {
     if (m_ready) {
@@ -142,14 +120,8 @@ public:
   PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
               const std::function<void()> &p_onChanged);
 
-  int NumPlayers() const { return static_cast<int>(m_rows.size()); }
-  bool IsDeleted(int p_index) const { return m_rows.at(p_index).isDeleted; }
-  std::string GetStableLabel(int p_index) const { return m_rows.at(p_index).stableLabel; }
-  wxString GetPlayerLabel(int p_index) const
-  {
-    return m_rows.at(p_index).labelCtrl->GetNormalizedValue();
-  }
-  wxColour GetPlayerColor(int p_index) const { return m_rows.at(p_index).color; }
+  // The rows as edited, with each label as normalized in its control
+  const LabelListEdit<PlayerData> &GetEdit();
 
   void AddPlayer();
   // Marks an existing row deleted (or restores an already-deleted one); removes a row added
@@ -161,7 +133,7 @@ public:
 
   // Highlights any empty or duplicate player labels among active (non-deleted) rows, and
   // returns a description of the first problem found, or an empty string if all are valid.
-  wxString ValidateLabels();
+  wxString CheckLabels();
 };
 
 PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc,
@@ -172,12 +144,8 @@ PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument>
     m_defaultBg(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW)), m_onChanged(p_onChanged)
 {
   for (const auto &player : m_doc->GetGame()->GetPlayers()) {
-    Row row;
-    row.player = player;
-    row.stableLabel = player->GetLabel();
-    row.currentLabelText = wxString::FromUTF8(row.stableLabel);
-    row.color = m_doc->GetStyle().GetPlayerColor(player);
-    m_rows.push_back(std::move(row));
+    m_list.AddExisting(player->GetLabel(),
+                       {.player = player, .color = m_doc->GetStyle().GetPlayerColor(player)});
   }
 
   SetSizer(m_topSizer);
@@ -188,65 +156,32 @@ PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument>
   const wxSize bestSize = m_topSizer->CalcMin();
   SetMinSize(wxSize(FromDIP(400), std::min(bestSize.GetHeight(), FromDIP(250))));
 
-  if (!m_rows.empty()) {
-    m_defaultBg = m_rows.front().labelCtrl->GetBackgroundColour();
+  if (!m_labelCtrls.empty()) {
+    m_defaultBg = m_labelCtrls.front()->GetBackgroundColour();
   }
 
   m_ready = true;
 }
 
-std::string PlayerPanel::NextPlaceholderLabel() const
+const LabelListEdit<PlayerPanel::PlayerData> &PlayerPanel::GetEdit()
 {
-  std::set<std::string> used;
-  for (const auto &row : m_rows) {
-    used.insert(row.stableLabel);
-    used.insert(row.currentLabelText.ToStdString(wxConvUTF8));
+  for (size_t i = 0; i < m_labelCtrls.size(); i++) {
+    m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
   }
-  int number = static_cast<int>(m_rows.size()) + 1;
-  while (contains(used, "Player " + std::to_string(number))) {
-    number++;
-  }
-  return "Player " + std::to_string(number);
+  return m_list;
 }
 
-void PlayerPanel::UpdateRowStyle(Row &row)
-{
-  // Colour alone can be hard to tell apart (or perceive at all); weight/slant give the same
-  // information a second way, so the state still reads even if the colours don't.
-  wxFont font = row.labelCtrl->GetFont();
-  font.SetWeight(wxFONTWEIGHT_NORMAL);
-  font.SetStyle(wxFONTSTYLE_NORMAL);
-
-  if (row.isNew) {
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    row.labelCtrl->SetForegroundColour(kNewLabelColour);
-    row.labelCtrl->UnsetToolTip();
-  }
-  else if (row.currentLabelText.ToStdString(wxConvUTF8) != row.stableLabel) {
-    font.SetStyle(wxFONTSTYLE_ITALIC);
-    row.labelCtrl->SetForegroundColour(kRenamedLabelColour);
-    row.labelCtrl->SetToolTip(
-        wxString::Format(_("Renamed from \"%s\""), wxString::FromUTF8(row.stableLabel)));
-  }
-  else {
-    row.labelCtrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-    row.labelCtrl->UnsetToolTip();
-  }
-  row.labelCtrl->SetFont(font);
-  row.labelCtrl->Refresh();
-}
-
-wxString PlayerPanel::BlockedDeleteReason(const Row &row) const
+wxString PlayerPanel::BlockedDeleteReason(const LabelListEdit<PlayerData>::Row &row) const
 {
   if (row.isNew) {
     return {}; // nothing has been committed yet -- freely removable
   }
   if (As<GameTreeRep>(m_doc->GetGame())) {
-    if (row.player->GetInfosets().size() > 0) {
+    if (row.payload.player->GetInfosets().size() > 0) {
       return _("This player has decisions in the game and cannot be deleted.");
     }
   }
-  else if (row.player->GetStrategies().size() != 1) {
+  else if (row.payload.player->GetStrategies().size() != 1) {
     return _("This player has more than one strategy and cannot be deleted.");
   }
   return {};
@@ -256,8 +191,10 @@ wxString PlayerPanel::BlockedDeleteReason(const Row &row) const
 void PlayerPanel::Rebuild()
 {
   m_rebuilding = true;
-  m_topSizer->Clear(true); // destroys the previous row controls; each Row's own state isn't
-                           // owned by them
+  m_topSizer->Clear(true); // destroys the previous row controls; the rows themselves are in
+                           // m_list, which they don't own
+  m_labelCtrls.clear();
+  m_colorButtons.clear();
 
   auto *gridSizer = new wxFlexGridSizer(4, FromDIP(5), FromDIP(10));
   gridSizer->AddGrowableCol(2, 1);
@@ -267,75 +204,72 @@ void PlayerPanel::Rebuild()
   gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
   gridSizer->AddSpacer(1);
 
-  const int activeCount = ActiveCount();
+  const size_t activeCount = m_list.ActiveCount();
   const wxSize buttonSize(FromDIP(28), -1);
   const int buttonGap = FromDIP(2);
 
-  for (size_t i = 0; i < m_rows.size(); i++) {
-    Row &row = m_rows[i];
+  for (size_t i = 0; i < m_list.Size(); i++) {
+    const auto &row = m_list.GetRow(i);
 
-    row.colorButton = MakeColorButton(static_cast<int>(i));
-    gridSizer->Add(row.colorButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+    m_colorButtons.push_back(MakeColorButton(static_cast<int>(i)));
+    gridSizer->Add(m_colorButtons.back(), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
 
     wxString number;
     number << (i + 1);
     gridSizer->Add(new wxStaticText(this, wxID_STATIC, number), 0,
                    wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
-    row.labelCtrl = new LabelTextCtrl(this, wxID_ANY, row.currentLabelText);
+    auto *labelCtrl = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(row.label));
+    m_labelCtrls.push_back(labelCtrl);
     if (row.isDeleted) {
-      wxFont strikeFont = row.labelCtrl->GetFont();
+      wxFont strikeFont = labelCtrl->GetFont();
       strikeFont.SetStrikethrough(true);
-      row.labelCtrl->SetFont(strikeFont);
-      row.labelCtrl->Disable();
+      labelCtrl->SetFont(strikeFont);
+      labelCtrl->Disable();
     }
     else {
-      UpdateRowStyle(row);
+      StyleLabelRow(labelCtrl, row.isNew, row.stableLabel, row.label);
     }
-    row.labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    row.labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetNormalizedValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    gridSizer->Add(row.labelCtrl, 1, wxEXPAND);
+    gridSizer->Add(labelCtrl, 1, wxEXPAND);
 
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
     if (!row.isDeleted) {
-      row.upButton =
+      auto *upButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2191), wxDefaultPosition, buttonSize);
-      row.upButton->Enable(i > 0);
-      row.upButton->Bind(wxEVT_BUTTON,
-                         [this, i](wxCommandEvent &) { MovePlayerUp(static_cast<int>(i)); });
-      buttonSizer->Add(row.upButton, 0, wxLEFT, buttonGap);
+      upButton->Enable(i > 0);
+      upButton->Bind(wxEVT_BUTTON,
+                     [this, i](wxCommandEvent &) { MovePlayerUp(static_cast<int>(i)); });
+      buttonSizer->Add(upButton, 0, wxLEFT, buttonGap);
 
-      row.downButton =
+      auto *downButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2193), wxDefaultPosition, buttonSize);
-      row.downButton->Enable(i + 1 < m_rows.size());
-      row.downButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { MovePlayerDown(static_cast<int>(i)); });
-      buttonSizer->Add(row.downButton, 0, wxLEFT, buttonGap);
+      downButton->Enable(i + 1 < m_list.Size());
+      downButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { MovePlayerDown(static_cast<int>(i)); });
+      buttonSizer->Add(downButton, 0, wxLEFT, buttonGap);
     }
     else {
       // Keep the delete/restore button aligned under its counterpart in other rows, in place
-      // of the Up/Down buttons a deleted row no longer has. Clear() already destroyed the
-      // previous Up/Down controls these pointers referred to; null them out rather than leave
-      // them dangling.
-      row.upButton = nullptr;
-      row.downButton = nullptr;
+      // of the Up/Down buttons a deleted row no longer has.
       buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
       buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
     }
@@ -343,25 +277,25 @@ void PlayerPanel::Rebuild()
     const wxString blockedReason = row.isDeleted ? wxString() : BlockedDeleteReason(row);
     const bool canDelete = row.isDeleted || (blockedReason.empty() && activeCount > 1);
 
-    row.deleteButton =
+    auto *deleteButton =
         new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
                      wxDefaultPosition, buttonSize);
     if (row.isDeleted) {
-      row.deleteButton->SetToolTip(_("Restore player"));
+      deleteButton->SetToolTip(_("Restore player"));
     }
     else if (!blockedReason.empty()) {
-      row.deleteButton->SetToolTip(blockedReason);
+      deleteButton->SetToolTip(blockedReason);
     }
     else if (activeCount <= 1) {
-      row.deleteButton->SetToolTip(_("At least one player must remain."));
+      deleteButton->SetToolTip(_("At least one player must remain."));
     }
     else {
-      row.deleteButton->SetToolTip(_("Delete player"));
+      deleteButton->SetToolTip(_("Delete player"));
     }
-    row.deleteButton->Enable(canDelete);
-    row.deleteButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
-    buttonSizer->Add(row.deleteButton, 0, wxLEFT, buttonGap);
+    deleteButton->Enable(canDelete);
+    deleteButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
+    buttonSizer->Add(deleteButton, 0, wxLEFT, buttonGap);
 
     gridSizer->Add(buttonSizer, 0, wxALIGN_CENTER_VERTICAL);
   }
@@ -383,8 +317,17 @@ void PlayerPanel::Rebuild()
   FitInside();
   Layout();
   m_rebuilding = false;
-  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_rows are
+  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_list are
   // responsible for notifying once Rebuild() returns.
+}
+
+void PlayerPanel::ScheduleRebuild()
+{
+  m_rebuilding = true;
+  CallAfter([this]() {
+    Rebuild();
+    NotifyChanged();
+  });
 }
 
 void PlayerPanel::AddPlayer()
@@ -392,19 +335,8 @@ void PlayerPanel::AddPlayer()
   if (m_rebuilding) {
     return; // a rebuild from an earlier click is still pending; ignore this stale one
   }
-  Row row;
-  row.stableLabel = NextPlaceholderLabel();
-  row.isNew = true;
-  row.currentLabelText = wxString::FromUTF8(row.stableLabel);
-  row.color = kNewPlayerColor;
-  m_rows.push_back(std::move(row));
-  // See StrategyPanel::AddStrategy() (dleditstrategies.cc) for why this defers Rebuild() and
-  // raises m_rebuilding immediately, rather than just once Rebuild() starts.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
+  m_list.AddNew("Player ", {.player = nullptr, .color = kNewPlayerColor});
+  ScheduleRebuild();
 }
 
 void PlayerPanel::ToggleDeleted(int p_index)
@@ -412,93 +344,40 @@ void PlayerPanel::ToggleDeleted(int p_index)
   if (m_rebuilding) {
     return; // a rebuild from an earlier click is still pending; ignore this stale one
   }
-  Row &row = m_rows.at(p_index);
-  if (!row.isDeleted) {
-    if (!BlockedDeleteReason(row).empty()) {
-      return; // structurally blocked; the disabled button shouldn't have fired regardless
-    }
-    if (ActiveCount() <= 1) {
-      return; // refuse to drop below one active player
-    }
+  const auto &row = m_list.GetRow(p_index);
+  if (!row.isDeleted && !BlockedDeleteReason(row).empty()) {
+    return; // structurally blocked; the disabled button shouldn't have fired regardless
   }
-  if (row.isNew) {
-    m_rows.erase(m_rows.begin() + p_index);
+  if (m_list.ToggleDeleted(p_index)) {
+    ScheduleRebuild();
   }
-  else {
-    row.isDeleted = !row.isDeleted;
-  }
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void PlayerPanel::MovePlayerUp(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveUp(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index <= 0) {
-    return;
-  }
-  std::swap(m_rows[p_index - 1], m_rows[p_index]);
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void PlayerPanel::MovePlayerDown(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveDown(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index + 1 >= static_cast<int>(m_rows.size())) {
-    return;
-  }
-  std::swap(m_rows[p_index], m_rows[p_index + 1]);
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
-wxString PlayerPanel::ValidateLabels()
+wxString PlayerPanel::CheckLabels()
 {
-  const int numPlayers = NumPlayers();
-  wxString message;
-
-  for (int i = 0; i < numPlayers; i++) {
-    if (m_rows[i].isDeleted) {
-      continue;
-    }
-    const wxString value = m_rows[i].labelCtrl->GetValue();
-    bool invalid = value.empty();
-    for (int other = 0; !invalid && other < numPlayers; other++) {
-      if (other != i && !m_rows[other].isDeleted && m_rows[other].labelCtrl->GetValue() == value) {
-        invalid = true;
-      }
-    }
-
-    m_rows[i].labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultBg);
-    m_rows[i].labelCtrl->Refresh();
-
-    if (invalid && message.empty()) {
-      message =
-          value.empty() ? _("Player labels cannot be empty.") : _("Player labels must be unique.");
-    }
-  }
-  return message;
+  return ValidateLabels(m_list.Validate(), m_labelCtrls, m_defaultBg,
+                        _("Player labels cannot be empty."), _("Player labels must be unique."));
 }
 
 wxBitmapButton *PlayerPanel::MakeColorButton(int p_index)
 {
-  const Row &row = m_rows.at(p_index);
-  auto *button = new wxBitmapButton(this, wxID_ANY, MakeColorSwatch(row.color), wxDefaultPosition,
-                                    wxDefaultSize, wxNO_BORDER);
+  const auto &row = m_list.GetRow(p_index);
+  auto *button = new wxBitmapButton(this, wxID_ANY, MakeColorSwatch(row.payload.color),
+                                    wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
   button->SetToolTip(_("Change the color for this player"));
   button->Bind(wxEVT_BUTTON, [this, p_index](wxCommandEvent &) { OnSetColor(p_index); });
   return button;
@@ -506,12 +385,12 @@ wxBitmapButton *PlayerPanel::MakeColorButton(int p_index)
 
 void PlayerPanel::OnSetColor(int p_index)
 {
-  Row &row = m_rows.at(p_index);
+  auto &row = m_list.GetRow(p_index);
 
   wxColourData data;
-  data.SetColour(row.color);
+  data.SetColour(row.payload.color);
   PlatformColourDialog dialog(this, &data);
-  dialog.SetTitle(wxString::Format(_("Choose color for %s"), row.currentLabelText));
+  dialog.SetTitle(wxString::Format(_("Choose color for %s"), wxString::FromUTF8(row.label)));
 
   if (dialog.ShowModal() != wxID_OK) {
     return;
@@ -519,34 +398,30 @@ void PlayerPanel::OnSetColor(int p_index)
 
   // Staged only -- not written to the document until the dialog's OK is committed (by
   // GameFrame::OnEditGame), so canceling the dialog leaves colors untouched.
-  row.color = dialog.GetColourData().GetColour();
+  row.payload.color = dialog.GetColourData().GetColour();
 
   // Recreated (rather than mutated in place via SetBitmap()) because SetBitmap() on an
   // existing wxBitmapButton visibly shifted its rendered content on this platform. Deferred
   // via CallAfter(): this destroys the very button whose click invoked this handler, which is
-  // still on the call stack -- see ActionPanel::AddAction() in dleditmove.cc for the same
-  // hazard.
+  // still on the call stack -- see StrategyPanel::ScheduleRebuild() in dleditstrategies.cc for
+  // the same hazard.
   CallAfter([this, p_index]() { RecreateColorButton(p_index); });
 }
 
 void PlayerPanel::RecreateColorButton(int p_index)
 {
-  Row &row = m_rows.at(p_index);
-
-  wxBitmapButton *oldButton = row.colorButton;
+  wxBitmapButton *oldButton = m_colorButtons.at(p_index);
   wxBitmapButton *newButton = MakeColorButton(p_index);
 
   // The button lives in a gridSizer nested inside m_topSizer, not directly in m_topSizer
   // itself, so the search needs to recurse into child sizers to find it.
   m_topSizer->Replace(oldButton, newButton, true);
   oldButton->Destroy();
-  row.colorButton = newButton;
+  m_colorButtons.at(p_index) = newButton;
 
   Layout();
 }
 
-//========================================================================
-//                   class GamePropertiesDialog
 //========================================================================
 
 GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
@@ -658,33 +533,28 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
 
 void GamePropertiesDialog::UpdateValidation()
 {
-  const wxString message = m_playerPanel->ValidateLabels();
+  const wxString message = m_playerPanel->CheckLabels();
   m_errorText->SetLabel(message);
   if (auto *ok = FindWindow(wxID_OK)) {
     ok->Enable(message.empty());
   }
 }
 
-int GamePropertiesDialog::NumPlayerRows() const { return m_playerPanel->NumPlayers(); }
-
-bool GamePropertiesDialog::IsPlayerDeleted(int p_index) const
+GamePropertiesEdit GamePropertiesDialog::GetEdit() const
 {
-  return m_playerPanel->IsDeleted(p_index);
-}
-
-std::string GamePropertiesDialog::GetPlayerStableLabel(int p_index) const
-{
-  return m_playerPanel->GetStableLabel(p_index);
-}
-
-wxString GamePropertiesDialog::GetPlayerLabel(int p_index) const
-{
-  return m_playerPanel->GetPlayerLabel(p_index);
-}
-
-wxColour GamePropertiesDialog::GetPlayerColor(int p_index) const
-{
-  return m_playerPanel->GetPlayerColor(p_index);
+  const auto &players = m_playerPanel->GetEdit();
+  GamePropertiesEdit edit{.title = m_title->GetValue().ToStdString(wxConvUTF8),
+                          .description = m_comment->GetValue().ToStdString(wxConvUTF8),
+                          .stableLabels = players.GetStableLabels(),
+                          .labels = players.GetLabels(),
+                          .playerColors = {},
+                          .chanceColor = m_chanceColor};
+  for (size_t i = 0; i < players.Size(); i++) {
+    if (!players.GetRow(i).isDeleted) {
+      edit.playerColors.push_back(players.GetRow(i).payload.color);
+    }
+  }
+  return edit;
 }
 
 wxBitmapButton *GamePropertiesDialog::MakeChanceColorButton(wxWindow *p_parent)
