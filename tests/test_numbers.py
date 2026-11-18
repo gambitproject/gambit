@@ -78,3 +78,69 @@ def test_nfg_roundtrip_text_unchanged():
     game = gbt.StrategicGame.from_arrays([[1.5, 0], [0, 1]], [[0, 1.5], [1, 0]])
     text = game.to_nfg()
     assert gbt.read_nfg(io.StringIO(text)).to_nfg() == text
+
+
+SCIENTIFIC_PAYOFFS = [
+    ("1.5e-3", fractions.Fraction(3, 2000)),
+    ("2E+4", fractions.Fraction(20000)),
+    ("3e2", fractions.Fraction(300)),
+    ("-1.25e-1", fractions.Fraction(-1, 8)),
+    ("1e0", fractions.Fraction(1)),
+    ("1.5e3", fractions.Fraction(1500)),
+]
+
+
+def _scientific_nfg(entries):
+    # 2x2 game with player 1's payoffs in the first row of entries; the rest are zero.
+    values = entries + ["0"] * (8 - len(entries))
+    return 'NFG 1 R "scientific" { "1" "2" } { 2 2 }\n\n' + " ".join(values) + "\n"
+
+
+def _scientific_efg(entries):
+    payoffs = " ".join(entries)
+    return (
+        'EFG 2 R "scientific" { "1" "2" }\n""\n\n'
+        'c "" 1 "" { "a" 1/2 "b" 1/2 } 0\n'
+        f't "" 1 "" {{ {payoffs} }}\n'
+        't "" 2 "" { 0, 0 }\n'
+    )
+
+
+@pytest.mark.parametrize(("text", "expected"), SCIENTIFIC_PAYOFFS)
+def test_read_nfg_scientific_notation_payoff(text, expected):
+    game = gbt.read_nfg(io.StringIO(_scientific_nfg([text, "0"])))
+    value = game.get_outcome_payoffs("1")[list(game.players)[0]]
+    assert type(value) is gbt.Rational
+    assert value == expected
+    assert str(value) == text
+
+
+@pytest.mark.parametrize(("text", "expected"), SCIENTIFIC_PAYOFFS)
+def test_read_efg_scientific_notation_payoff(text, expected):
+    game = gbt.read_efg(io.StringIO(_scientific_efg([text, "0"])))
+    label = game.get_outcomes()[0]
+    value = game.get_outcome_payoffs(label)[list(game.players)[0]]
+    assert type(value) is gbt.Rational
+    assert value == expected
+    assert str(value) == text
+
+
+@pytest.mark.parametrize(
+    ("first", "second", "expected"),
+    [
+        ("1.5e-3", "0.9985", fractions.Fraction(3, 2000)),
+        ("5E-1", "5e-1", fractions.Fraction(1, 2)),
+        ("1e0", "0", fractions.Fraction(1)),
+    ],
+)
+def test_read_efg_scientific_notation_chance_probability(first, second, expected):
+    efg = (
+        'EFG 2 R "scientific" { "1" }\n""\n\n'
+        f'c "" 1 "" {{ "a" {first} "b" {second} }} 0\n'
+        't "" 1 "" { 0 }\n'
+        't "" 2 "" { 0 }\n'
+    )
+    game = gbt.read_efg(io.StringIO(efg))
+    probs = game.get_action_probs(gbt.H.path())
+    assert probs["a"] == expected
+    assert str(probs["a"]) == first
