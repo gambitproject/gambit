@@ -197,14 +197,12 @@ void NewtonStep(const GivensQR &p_qr, const Matrix<double> &b, Vector<double> &u
 // point.
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TracePathResult PathTracer::TracePath(
-    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
-    TraceDirection p_direction, size_t p_trackingIndex, TerminationFunctionType p_terminate,
-    CallbackFunctionType p_callback, CriterionFunctionType p_criterion,
-    const CriterionBracketFunctionType &p_criterionBracket, const CancelToken &p_cancel,
-    const BifurcationBracketFunctionType &p_onBifurcation,
-    const PerturbationEventFunctionType &p_onPerturbation) const
+    const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
+    const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
+    Vector<double> &x, TraceDirection p_direction, size_t p_trackingIndex,
+    const TracePathOptions &p_options) const
 {
+  const auto &p_criterion = p_options.criterion;
   const double c_tol = 1.0e-4;       // tolerance for corrector iteration
   const double c_maxDist = 0.4;      // maximal distance to curve
   const double c_maxContr = 0.6;     // maximal contraction rate in corrector
@@ -261,11 +259,11 @@ TracePathResult PathTracer::TracePath(
   };
   const auto shouldTerminate = [&]() -> bool {
     const ScopedTimer timer(stats.terminate_seconds);
-    return p_terminate(x);
+    return p_options.terminate(x);
   };
   const auto callback = [&]() {
     const ScopedTimer timer(stats.callback_seconds);
-    p_callback(x);
+    p_options.callback(x);
   };
 
   int steps = 0;
@@ -299,7 +297,7 @@ TracePathResult PathTracer::TracePath(
   }
 
   while (!shouldTerminate()) {
-    p_cancel.Check();
+    p_options.cancel.Check();
 
     bool accept = true;
 
@@ -393,10 +391,10 @@ TracePathResult PathTracer::TracePath(
       // Switch on perturbation and attempt to continue following the branch that
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
-        p_onBifurcation(x, u);
+        p_options.onBifurcation(x, u);
         pert = c_pert;
         pert_countdown = std::max(std::abs(10.0 * h), min_pert_countdown);
-        p_onPerturbation(true, x);
+        p_options.onPerturbation(true, x);
       }
       if (accept) {
         // Count each rejected attempt under one reason only
@@ -423,7 +421,7 @@ TracePathResult PathTracer::TracePath(
     // new tangent oriented in the same sense.
     if (!newton && p_criterion(x, t) * p_criterion(u, newT * omega_flip) < 0.0) {
       newton = true;
-      p_criterionBracket(x, u);
+      p_options.criterionBracket(x, u);
     }
 
     const double diff = p_criterion(u, newT) - p_criterion(x, t);
@@ -450,14 +448,14 @@ TracePathResult PathTracer::TracePath(
       if (pert_countdown < 0.0) {
         pert = 0.0;
         pert_countdown = 0.0;
-        p_onPerturbation(false, x);
+        p_options.onPerturbation(false, x);
       }
     }
   }
   return finish(true, "Path tracing terminated successfully.");
 }
 
-PolishResult
+TracePathResult
 PolishPoint(const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
             const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
             Vector<double> &x, double fixed_value, size_t fixed_index,
@@ -479,7 +477,7 @@ PolishPoint(const std::function<void(const Vector<double> &, Vector<double> &)> 
   int steps = 0;
   double dist = 0.0;
 
-  const auto finish = [&](bool p_status, const std::string &p_message) -> PolishResult {
+  const auto finish = [&](bool p_status, const std::string &p_message) -> TracePathResult {
     stats.total_seconds = SecondsSince(start);
     return {.final_point = x,
             .status = p_status,

@@ -31,6 +31,9 @@ namespace Gambit {
 // Function type used for determining whether to terminate the numerical continuation
 using TerminationFunctionType = std::function<bool(const Vector<double> &)>;
 
+// Never terminates; tracing then ends only on failure or cancellation
+inline bool NullTerminationFunction(const Vector<double> &) { return false; }
+
 inline bool LambdaPositiveTerminationFunction(const Vector<double> &p_point)
 {
   return (p_point.back() < 0.0);
@@ -93,21 +96,34 @@ struct TracePathStats {
   double total_seconds{0.0};         ///< total time in the call
 };
 
+/// @brief The outcome of one call to PathTracer::TracePath() or PolishPoint()
 struct TracePathResult {
   Vector<double> final_point;
-  bool status; // true if path tracing terminated successfully, false if it terminated due to error
+  bool status; // true if the call terminated successfully, false if it terminated due to error
   std::string message; // error message if status is false
-  int steps;           // Step at which the tracing terminated
+  int steps;           // Step at which the call terminated
   TracePathStats stats;
 };
 
-struct PolishResult {
-  Vector<double> final_point;
-  bool status; // true if polishing terminated successfully, false if it terminated due to error
-  std::string message; // error message if status is false
-  int steps;           // Step at which the polishing terminated
-  TracePathStats stats;
+/// @brief The hooks and cancellation token for one call to PathTracer::TracePath(); each
+///        member not given defaults to doing nothing
+struct TracePathOptions {
+  /// Whether to stop tracing at a point
+  TerminationFunctionType terminate{NullTerminationFunction};
+  /// Called with the starting point and with each accepted point
+  CallbackFunctionType callback{NullCallbackFunction};
+  /// A function of point and tangent whose zero tracing locates by a Newton-type method
+  CriterionFunctionType criterion{NullCriterionFunction};
+  /// Called with the pair of points bracketing a sign change of the criterion
+  CriterionBracketFunctionType criterionBracket{NullCriterionBracketFunction};
+  /// Called once per detected bifurcation
+  BifurcationBracketFunctionType onBifurcation{NullBifurcationBracketFunction};
+  /// Called when the symmetry-breaking perturbation is switched on or off
+  PerturbationEventFunctionType onPerturbation{NullPerturbationEventFunction};
+  /// Checked once per step; tracing throws ComputationCanceledException once it is canceled
+  CancelToken cancel{};
 };
+
 //
 // This class implements a generic path-following algorithm for smooth curves.
 // It is based on the ideas and codes presented in Allgower and Georg's
@@ -125,16 +141,13 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
-  TracePathResult TracePath(
-      std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-      std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-      Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
-      TerminationFunctionType p_terminate, CallbackFunctionType p_callback = NullCallbackFunction,
-      CriterionFunctionType p_criterion = NullCriterionFunction,
-      const CriterionBracketFunctionType &p_criterionBracker = NullCriterionBracketFunction,
-      const CancelToken &p_cancel = CancelToken(),
-      const BifurcationBracketFunctionType &p_onBifurcation = NullBifurcationBracketFunction,
-      const PerturbationEventFunctionType &p_onPerturbation = NullPerturbationEventFunction) const;
+  /// @brief Trace the path of zeros of a system of equations from \p p_x, which on return
+  ///        holds the last point accepted
+  TracePathResult
+  TracePath(const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
+            const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
+            Vector<double> &p_x, TraceDirection p_direction, size_t p_trackingIndex,
+            const TracePathOptions &p_options = {}) const;
 
 private:
   double m_maxDecel{1.1}, m_hStart{0.03};
@@ -143,7 +156,7 @@ private:
 // This function reduces the regret of a point that is close to an equilibrium that has been found
 // by the path-following algorithm.  Fixing the value of a component of the point, it uses a
 // Newton-type method to find a nearby point with lower regret.
-PolishResult
+TracePathResult
 PolishPoint(const std::function<void(const Vector<double> &, Vector<double> &)> &p_function,
             const std::function<void(const Vector<double> &, Matrix<double> &)> &p_jacobian,
             Vector<double> &p_x, double fixed_value, size_t fixed_index,
