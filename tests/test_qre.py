@@ -120,3 +120,26 @@ def test_logit_strategy_tree_matches_table_form(game: gbt.Game):
     assert tree_counts == table_counts
     assert tree_points.shape == table_points.shape
     assert np.max(np.abs(tree_points - table_points)) <= 1.0e-12
+
+
+@pytest.mark.parametrize("use_strategic", [False, True])
+def test_logit_solve_lambda_requires_perfect_recall(use_strategic: bool):
+    """logit_solve_lambda() rejects a game with imperfect recall, raising the same exception
+    as logit_solve_branch() does on that game."""
+    game = games.read_from_file("not_perfect_recall.efg")
+    with pytest.raises(Exception, match="imperfect recall") as branch:
+        gbt.qre.logit_solve_branch(game, use_strategic=use_strategic)
+    with pytest.raises(Exception, match="imperfect recall") as at_lambda:
+        gbt.qre.logit_solve_lambda(game, [1.0], use_strategic=use_strategic)
+    assert type(at_lambda.value) is type(branch.value)
+
+
+def test_logit_estimate_behavior_requires_perfect_recall():
+    """logit_estimate() on a MixedBehaviorProfile rejects a game with imperfect recall, raising
+    the same exception as logit_solve_branch() does on that game."""
+    game = games.read_from_file("not_perfect_recall.efg")
+    with pytest.raises(Exception, match="imperfect recall") as branch:
+        gbt.qre.logit_solve_branch(game)
+    with pytest.raises(Exception, match="imperfect recall") as estimate:
+        gbt.qre.logit_estimate(game.mixed_behavior_profile())
+    assert type(estimate.value) is type(branch.value)

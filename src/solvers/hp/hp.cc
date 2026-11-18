@@ -87,12 +87,15 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);
       },
-      x, direction, tracking_index, termination_condition,
-      [&system, &p_onEvent](const Vector<double> &point) {
-        const MixedStrategyProfile<double> profile = system.ExtractEquilibrium(point);
-        p_onEvent(HPStepEvent{.profile = profile, .t = point[1]});
-      },
-      criterion_function, NullCriterionBracketFunction, p_cancel);
+      x, direction, tracking_index,
+      {.terminate = termination_condition,
+       .callback =
+           [&system, &p_onEvent](const Vector<double> &point) {
+             const MixedStrategyProfile<double> profile = system.ExtractEquilibrium(point);
+             p_onEvent(HPStepEvent{.profile = profile, .t = point[1]});
+           },
+       .criterion = criterion_function,
+       .cancel = p_cancel});
 
   if (!tracing_result.status) {
     return {.equilibrium = std::nullopt,
@@ -101,7 +104,7 @@ HPStrategyResult HPStrategySolve(const MixedStrategyProfile<double> &p_prior, do
             .stats = {tracing_result.stats}};
   }
 
-  const PolishResult polishing_result = PolishPoint(
+  const TracePathResult polishing_result = PolishPoint(
       [&system](const Vector<double> &point, Vector<double> &lhs) { system.GetValue(point, lhs); },
       [&system](const Vector<double> &point, Matrix<double> &jac) {
         system.GetJacobian(point, jac);

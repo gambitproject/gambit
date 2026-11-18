@@ -199,18 +199,24 @@ inline LogitStrategyResult LogitStrategySolveEquilibrium(
           .stats = trace.stats};
 }
 
+/// @brief Trace the principal branch of the logit QRE correspondence for a strategic game
+///        from \p p_start to each value in \p p_targetLambda in turn
 LogitLambdaResult<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
     const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
-        NullLogitEventCallback<LogitQREMixedStrategyProfile>);
+        NullLogitEventCallback<LogitQREMixedStrategyProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
+/// @brief Find the logit QRE on the principal branch for a strategic game which maximises the
+///        likelihood of \p p_frequencies
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,
                       PathTracer::TraceDirection p_direction, double p_stopAtLocal,
                       double p_firstStep, double p_maxAccel,
                       LogitEventCallbackType<LogitQREMixedStrategyProfile> p_onEvent =
-                          NullLogitEventCallback<LogitQREMixedStrategyProfile>);
+                          NullLogitEventCallback<LogitQREMixedStrategyProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
 using LogitQREMixedBehaviorProfile = LogitQRE<MixedBehaviorProfile<double>>;
 
@@ -263,18 +269,24 @@ inline LogitBehaviorResult LogitBehaviorSolveEquilibrium(
           .stats = trace.stats};
 }
 
+/// @brief Trace the principal branch of the logit QRE correspondence for an extensive game
+///        from \p p_start to each value in \p p_targetLambda in turn
 LogitLambdaResult<LogitQREMixedBehaviorProfile> LogitBehaviorSolveLambda(
     const LogitQREMixedBehaviorProfile &p_start, const std::list<double> &p_targetLambda,
     PathTracer::TraceDirection p_direction, double p_firstStep, double p_maxAccel,
     LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
-        NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
+        NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
+    const CancelToken &p_cancel = CancelToken());
 
+/// @brief Find the logit QRE on the principal branch for an extensive game which maximises the
+///        likelihood of \p p_frequencies
 LogitQREMixedBehaviorProfile
 LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
                       PathTracer::TraceDirection p_direction, double p_stopAtLocal,
                       double p_firstStep, double p_maxAccel,
                       LogitEventCallbackType<LogitQREMixedBehaviorProfile> p_onEvent =
-                          NullLogitEventCallback<LogitQREMixedBehaviorProfile>);
+                          NullLogitEventCallback<LogitQREMixedBehaviorProfile>,
+                      const CancelToken &p_cancel = CancelToken());
 
 } // namespace Gambit
 

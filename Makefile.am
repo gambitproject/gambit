@@ -323,6 +323,7 @@ path_SOURCES = \
 
 logit_SOURCES = \
     src/solvers/logit/logit.h \
+	src/solvers/logit/logitdriver.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc
 
