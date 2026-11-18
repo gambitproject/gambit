@@ -3820,3 +3820,39 @@ def test_enumpoly_solve_phcpack_reports_use_strategic_true(monkeypatch):
     monkeypatch.setattr("pygambit.nashphc.subprocess.run", _fake_run)
     res = gbt.nash.enumpoly_solve(game, phcpack_path="./phc")
     assert res.use_strategic is True
+
+
+@pytest.mark.parametrize(
+    "solver",
+    [
+        pytest.param(
+            functools.partial(gbt.nash.lcp_solve, rational=True),
+            marks=pytest.mark.nash_lcp_strategy,
+            id="lcp",
+        ),
+        pytest.param(
+            functools.partial(gbt.nash.enummixed_solve, rational=True),
+            marks=pytest.mark.nash_enummixed_strategy,
+            id="enummixed",
+        ),
+    ],
+)
+def test_two_player_solver_payoff_range_exceeding_int_max(solver):
+    """The equilibria of a two-player game do not depend on the scale of its payoffs, including
+    a payoff range larger than the range of a 32-bit integer."""
+    p1 = [[2, 0], [0, 1]]
+    p2 = [[0, 1], [1, 0]]
+    scale = 3_000_000_000
+    small = gbt.StrategicGame.from_arrays(p1, p2)
+    large = gbt.StrategicGame.from_arrays(
+        [[scale * x for x in row] for row in p1],
+        [[scale * x for x in row] for row in p2],
+    )
+    expected = [list(eq) for eq in _equilibria(solver(small))]
+    assert expected == [
+        [
+            {"1": Q(1, 2), "2": Q(1, 2)},
+            {"1": Q(1, 3), "2": Q(2, 3)},
+        ]
+    ]
+    assert [list(eq) for eq in _equilibria(solver(large))] == expected

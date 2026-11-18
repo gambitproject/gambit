@@ -293,6 +293,8 @@ nashsupport_SOURCES = \
 
 bimatrix_SOURCES = \
 	${linalg_SOURCES} \
+	src/solvers/bimatrix/bimatrix.cc \
+	src/solvers/bimatrix/bimatrix.h \
 	src/solvers/lp/lp.cc \
 	src/solvers/lp/lp.h \
 	src/solvers/lcp/efglcp.cc \

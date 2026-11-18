@@ -21,6 +21,9 @@
   on every game, are removed.  Only an `ExtensiveGame` can be written as an .efg file.
 
 ### Fixed
+- The Lemke-Howson (`lcp_solve`) and `enummixed_solve` methods on two-player strategic games now build
+  their normalised payoff matrices in one place.  Previously player 2's matrix in `lcp_solve` converted
+  the payoff range to an `int`, which is undefined for a payoff range larger than 2^31.
 - The `repr` of a game now names its concrete class (`StrategicGame`, `ExtensiveGame`,
   `ActionGraphGame`, `BayesianActionGraphGame`) rather than `Game`, and the `repr` of an untitled game
   now ends with its closing parenthesis.

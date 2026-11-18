@@ -21,6 +21,7 @@
 //
 
 #include "games.h"
+#include "solvers/bimatrix/bimatrix.h"
 #include "solvers/linalg/vertenum.h"
 #include "solvers/enummixed/enummixed.h"
 
@@ -85,41 +86,11 @@ std::shared_ptr<EnumMixedStrategySolution<T>>
 EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T> &p_onEquilibrium,
                                const CancelToken &p_cancel)
 {
-  if (p_game->NumPlayers() != 2) {
-    throw UndefinedException("Method only valid for two-player games.");
-  }
-  RequirePerfectRecall(p_game);
+  const NormalisedBimatrix<T> bimatrix = BuildNormalisedBimatrix<T>(p_game);
   std::shared_ptr<EnumMixedStrategySolution<T>> solution(new EnumMixedStrategySolution<T>(p_game));
 
-  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
-
-  Rational min = p_game->GetMinPayoff();
-  if (min > Rational(0)) {
-    min = Rational(0);
-  }
-  min -= Rational(1);
-
-  Rational max = p_game->GetMaxPayoff();
-  if (max < Rational(0)) {
-    max = Rational(0);
-  }
-
-  const Rational fac = Rational(1) / (max - min);
-
-  // Construct matrices A1, A2
-  Matrix<T> A1(1, p_game->GetPlayer(1)->GetStrategies().size(), 1,
-               p_game->GetPlayer(2)->GetStrategies().size());
-  Matrix<T> A2(1, p_game->GetPlayer(2)->GetStrategies().size(), 1,
-               p_game->GetPlayer(1)->GetStrategies().size());
-
-  for (size_t i = 1; i <= p_game->GetPlayer(1)->GetStrategies().size(); i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
-    for (size_t j = 1; j <= p_game->GetPlayer(2)->GetStrategies().size(); j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
-      A1(i, j) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min));
-      A2(j, i) = static_cast<T>(fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min));
-    }
-  }
+  const Matrix<T> &A1 = bimatrix.A1;
+  const Matrix<T> &A2 = bimatrix.A2;
 
   // Construct vectors b1, b2
   Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
