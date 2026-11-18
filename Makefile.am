@@ -437,6 +437,7 @@ gambit_SOURCES = \
 	src/gui/gamedoc.h \
 	src/gui/gameframe.cc \
 	src/gui/gameframe.h \
+	src/gui/labellist.h \
 	src/gui/menuconst.h \
 	src/gui/nfgheadergrid.cc \
 	src/gui/nfgpanel.cc \

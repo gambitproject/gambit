@@ -350,7 +350,7 @@ void EfgDisplay::OnEditNode(wxCommandEvent &)
 
 void EfgDisplay::OnEditMove(wxCommandEvent &)
 {
-  GameInfoset infoset = m_contextNode->GetInfoset();
+  const GameInfoset infoset = m_contextNode->GetInfoset();
   if (!infoset) {
     return;
   }
@@ -358,29 +358,7 @@ void EfgDisplay::OnEditMove(wxCommandEvent &)
   EditMoveDialog dialog(this, m_doc, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetLabel());
-
-      if (!infoset->IsChanceInfoset() && dialog.GetPlayer() != infoset->GetPlayer()->GetNumber()) {
-        m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
-        // DoSetPlayer reforms the members into a brand-new information set (via
-        // MakeInfoset), invalidating this handle; the node itself is still valid, so
-        // re-fetch the information set through it.
-        infoset = m_contextNode->GetInfoset();
-      }
-
-      std::vector<std::string> stableLabels, labels;
-      std::vector<Number> probs;
-      for (int i = 0; i < dialog.NumActions(); i++) {
-        if (dialog.IsDeleted(i)) {
-          continue;
-        }
-        stableLabels.push_back(dialog.GetStableLabel(i));
-        labels.push_back(dialog.GetActionLabel(i).ToStdString(wxConvUTF8));
-        if (infoset->IsChanceInfoset()) {
-          probs.push_back(dialog.GetActionProb(i));
-        }
-      }
-      m_doc->DoSetActions(infoset, stableLabels, labels, probs);
+      m_doc->DoEditMove(infoset, dialog.GetEdit());
     }
     catch (std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();

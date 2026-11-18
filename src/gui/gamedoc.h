@@ -24,6 +24,7 @@
 #define GAMBIT_GUI_GAMEDOC_H
 
 #include <algorithm>
+#include <functional>
 #include <map>
 
 #include "games/behavspt.h"
@@ -213,6 +214,31 @@ public:
 // first) use this.
 std::string GenerateOutcomeLabel(const Game &p_game);
 
+/// The edits collected by the game properties dialog, applied by `GameDocument::DoEditGame`
+struct GamePropertiesEdit {
+  std::string title;
+  std::string description;
+  /// The players (excluding chance) after the edit, identified as for `DoEditGame`
+  std::vector<std::string> stableLabels;
+  std::vector<std::string> labels;
+  /// The colour of each player, by position in `labels`
+  std::vector<wxColour> playerColors;
+  /// The colour of the chance player; used only for an extensive game
+  wxColour chanceColor;
+};
+
+/// The edits collected by the move dialog, applied by `GameDocument::DoEditMove`
+struct MoveEdit {
+  std::string infosetLabel;
+  /// The player to make the move; ignored for a chance move
+  GamePlayer player;
+  /// The actions after the edit, identified as for `DoEditMove`
+  std::vector<std::string> stableLabels;
+  std::vector<std::string> labels;
+  /// The probability of each action; used only for a chance move
+  std::vector<Number> probs;
+};
+
 class GameDocument {
   friend class GameView;
 
@@ -240,6 +266,22 @@ class GameDocument {
   /// Replace the game, workspace, and style with those saved in a snapshot
   /// previously produced by `SaveWorkspace`
   void RestoreSnapshot(const std::string &p_snapshot);
+
+  // Runs p_edit, which changes the game and style and returns the kinds of change it made, as
+  // one undoable change: one undo entry if anything changed, none otherwise. If p_edit throws,
+  // the state before the edit is restored and the exception is rethrown.
+  void ApplyEdit(const std::function<GameModificationType()> &p_edit);
+  // Each makes the change of the corresponding part of a dialog's edit, if there is one, and
+  // returns the kind of change made; they do not notify.
+  GameModificationType EditPlayers(const std::vector<std::string> &p_stableLabels,
+                                   const std::vector<std::string> &p_labels);
+  GameModificationType EditStrategies(const GamePlayer &p_player,
+                                      const std::vector<std::string> &p_stableLabels,
+                                      const std::vector<std::string> &p_labels);
+  GameModificationType EditActions(const GameInfoset &p_infoset,
+                                   const std::vector<std::string> &p_stableLabels,
+                                   const std::vector<std::string> &p_labels,
+                                   const std::vector<Number> &p_probs);
 
 public:
   explicit GameDocument(Game p_game);
@@ -325,27 +367,24 @@ public:
     return GameSaveFormat::Workspace;
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
-  void DoSetTitle(const wxString &p_title, const wxString &p_comment);
+  /// Applies the edits of the game properties dialog (title, description, players and their
+  /// colours) as one undoable change; does nothing if no part changed. If any part fails,
+  /// none is applied, and the exception is rethrown.
+  ///
+  /// The players (chance excluded) may be added, deleted, reordered and relabelled together.
+  /// `stableLabels` identifies each player as it was before the edit (an existing player's
+  /// label, or a placeholder for a new one); `labels` is that player's label after the edit.
+  /// Structure is resolved first, from `stableLabels` alone; labels are then reassigned, so a
+  /// rename that reuses the label of a deleted player does not collide with it. An edit that
+  /// only relabels does not restructure the game, so it works on games whose players cannot
+  /// be changed (e.g. action graph games) and can swap two players' labels.
+  void DoEditGame(const GamePropertiesEdit &p_edit);
   /// Adds one player to the game, via `Game::SetPlayers`, labeled with the first unused
   /// "Player N".
   GamePlayer DoAddPlayer();
-  /// Reassign player labels in a single operation; see `Game::RelabelPlayers`.
-  void DoRelabelPlayers(const std::map<std::string, std::string> &p_labels);
-  /// Declare the players of the game in a single operation, covering any combination of
-  /// adding, deleting, reordering, and relabeling players. Chance is not part of either list;
-  /// it is not affected by this operation.
-  ///
-  /// `p_stableLabels` identifies each player as it was before this edit (an existing player's
-  /// current label, or a placeholder for one newly created); `p_labels` is what that same
-  /// player, by position, is to be labeled after the edit.  Structure (which players exist,
-  /// and in what order) is resolved first, purely from `p_stableLabels`; labels are then
-  /// reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order means a rename
-  /// that reuses a label freed up by a simultaneous deletion never collides with the
-  /// not-yet-renamed original.
-  void DoSetPlayers(const std::vector<std::string> &p_stableLabels,
-                    const std::vector<std::string> &p_labels);
   /// Declare the strategies of `p_player` in a single operation, covering any combination
-  /// of adding, deleting, reordering, and relabeling strategies.
+  /// of adding, deleting, reordering, and relabeling strategies; does nothing if the
+  /// strategies and their labels are unchanged.
   ///
   /// `p_stableLabels` identifies each strategy as it was before this edit (an existing
   /// strategy's current label, or a placeholder for one newly created); `p_labels` is what
@@ -356,21 +395,15 @@ public:
   /// with the not-yet-renamed original.
   void DoSetStrategies(const GamePlayer &p_player, const std::vector<std::string> &p_stableLabels,
                        const std::vector<std::string> &p_labels);
-  void DoSetInfosetLabel(const GameInfoset &p_infoset, const wxString &p_label);
+  /// Applies the edits of the move dialog (information set label, player, actions and their
+  /// probabilities) to `p_infoset` as one undoable change; does nothing if no part changed.
+  /// If any part fails, none is applied, and the exception is rethrown.
+  ///
+  /// Actions are identified as players are in `DoEditGame`. A change of player is made only
+  /// for a personal move.
+  void DoEditMove(const GameInfoset &p_infoset, const MoveEdit &p_edit);
   void DoRelabelActions(const GameInfoset &p_infoset,
                         const std::map<std::string, std::string> &p_labels);
-  /// Declare the actions of `p_infoset` in a single operation, covering any combination
-  /// of adding, deleting, reordering, and relabeling actions.
-  ///
-  /// `p_stableLabels` identifies each action as it was before this edit (an existing
-  /// action's current label, or a placeholder for one newly created); `p_labels` is what
-  /// that same action, by position, is to be labeled after the edit.  Structure (which
-  /// actions exist, and in what order) is resolved first, purely from `p_stableLabels` and
-  /// `p_probs`; labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in
-  /// this order means a rename that reuses a label freed up by a simultaneous deletion
-  /// never collides with the not-yet-renamed original.
-  void DoSetActions(const GameInfoset &p_infoset, const std::vector<std::string> &p_stableLabels,
-                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
   void DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset);
   void DoLeaveInfoset(const GameNode &p_node);
   void DoRevealAction(const GameInfoset &p_infoset, const GamePlayer &p_player);

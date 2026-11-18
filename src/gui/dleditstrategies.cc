@@ -28,7 +28,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <set>
 
 #include "gambit.h"
 #include "dleditstrategies.h"
@@ -36,36 +35,13 @@
 
 namespace Gambit::GUI {
 
-namespace {
-const wxColour kInvalidLabelBg(255, 220, 220);
-const wxColour kNewLabelColour(0, 102, 0);      // new strategy: bold, dark green
-const wxColour kRenamedLabelColour(0, 51, 204); // renamed strategy: italic, strong blue
-} // namespace
-
 // An editable, variable-length list of a player's strategies, colour-coded like a
-// source-control diff (added/renamed/deleted).
-//
-// Each row's *stable label* (its label before this dialog touched it, or a placeholder for a
-// newly added row) never changes; it's what `SetStrategies()` uses to match the row to its
-// underlying strategy regardless of what the user has typed into its *current* label text.
-// Deleting an existing row marks it deleted and disables it, with its delete button becoming
-// a restore button, rather than removing it outright -- a newly added row has nothing to
-// preserve, so deleting one of those does remove it.
+// source-control diff (added/renamed/deleted). The rows are held in a `LabelListEdit`; this
+// panel draws them and forwards the user's actions to it.
 class StrategyPanel final : public wxScrolledWindow {
-public:
-  struct Row {
-    std::string stableLabel;
-    bool isNew = false;     // true for a row added in this dialog, with no prior strategy at all
-    bool isDeleted = false; // true for an existing row marked for deletion (kept, disabled)
-    wxString currentLabelText;
-    LabelTextCtrl *labelCtrl = nullptr;
-    wxButton *upButton = nullptr;
-    wxButton *downButton = nullptr;
-    wxButton *deleteButton = nullptr; // doubles as the restore button when isDeleted
-  };
-
-private:
-  std::vector<Row> m_rows;
+  LabelListEdit<> m_list;
+  // One per row of m_list, recreated by each Rebuild()
+  std::vector<LabelTextCtrl *> m_labelCtrls;
   wxBoxSizer *m_topSizer;
   wxColour m_defaultBg;
   std::function<void()> m_onChanged;
@@ -74,20 +50,16 @@ private:
   bool m_ready = false;
   // True from the moment a row mutation starts until its (deferred) Rebuild() finishes.
   // Destroying/rebuilding row controls can fire a focus-kill event on whatever control had
-  // focus, reentrantly, while m_rows or the controls it points to are mid-mutation; handlers
-  // that touch either must no-op while this is true rather than act on stale state.
+  // focus, reentrantly, while m_list or the controls are mid-mutation; handlers that touch
+  // either must no-op while this is true rather than act on stale state.
   bool m_rebuilding = false;
 
-  std::string NextPlaceholderLabel() const;
-  int ActiveCount() const
-  {
-    return static_cast<int>(
-        std::count_if(m_rows.begin(), m_rows.end(), [](const Row &r) { return !r.isDeleted; }));
-  }
   void Rebuild();
-  // Colours a (non-deleted) row's label to reflect whether it's new, renamed from its
-  // stable label, or unchanged, and sets/clears the "renamed from" tooltip to match.
-  static void UpdateRowStyle(Row &row);
+  // Rebuild() would destroy the very button whose click is invoking a row mutation, while its
+  // handler is still on the call stack -- unsafe in wx. CallAfter() defers it to once this
+  // event finishes dispatching; raising m_rebuilding now (not just once Rebuild() starts)
+  // covers the gap where m_list is already mutated but the stale old controls are still alive.
+  void ScheduleRebuild();
   void NotifyChanged() const
   {
     if (m_ready) {
@@ -99,13 +71,8 @@ public:
   StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
                 const std::function<void()> &p_onChanged);
 
-  int NumStrategies() const { return static_cast<int>(m_rows.size()); }
-  bool IsDeleted(int p_index) const { return m_rows.at(p_index).isDeleted; }
-  std::string GetStableLabel(int p_index) const { return m_rows.at(p_index).stableLabel; }
-  wxString GetStrategyLabel(int p_index) const
-  {
-    return m_rows.at(p_index).labelCtrl->GetNormalizedValue();
-  }
+  // The rows as edited, with each label as normalized in its control
+  const LabelListEdit<> &GetEdit();
 
   void AddStrategy();
   // Marks an existing row deleted (or restores an already-deleted one); removes a row added
@@ -116,7 +83,7 @@ public:
 
   // Highlights any empty or duplicate strategy labels among active (non-deleted) rows, and
   // returns a description of the first problem found, or an empty string if all are valid.
-  wxString ValidateLabels();
+  wxString CheckLabels();
 };
 
 StrategyPanel::StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
@@ -126,10 +93,7 @@ StrategyPanel::StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
     m_topSizer(new wxBoxSizer(wxVERTICAL)), m_onChanged(p_onChanged)
 {
   for (const auto &strategy : p_player->GetStrategies()) {
-    Row row;
-    row.stableLabel = strategy->GetLabel();
-    row.currentLabelText = wxString::FromUTF8(row.stableLabel);
-    m_rows.push_back(std::move(row));
+    m_list.AddExisting(strategy->GetLabel());
   }
 
   SetSizer(m_topSizer);
@@ -140,59 +104,27 @@ StrategyPanel::StrategyPanel(wxWindow *p_parent, const GamePlayer &p_player,
   const wxSize bestSize = m_topSizer->CalcMin();
   SetMinSize(wxSize(FromDIP(360), std::min(bestSize.GetHeight(), FromDIP(250))));
 
-  if (!m_rows.empty()) {
-    m_defaultBg = m_rows.front().labelCtrl->GetBackgroundColour();
+  if (!m_labelCtrls.empty()) {
+    m_defaultBg = m_labelCtrls.front()->GetBackgroundColour();
   }
 
   m_ready = true;
 }
 
-std::string StrategyPanel::NextPlaceholderLabel() const
+const LabelListEdit<> &StrategyPanel::GetEdit()
 {
-  std::set<std::string> used;
-  for (const auto &row : m_rows) {
-    used.insert(row.stableLabel);
-    used.insert(row.currentLabelText.ToStdString(wxConvUTF8));
+  for (size_t i = 0; i < m_labelCtrls.size(); i++) {
+    m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
   }
-  int number = static_cast<int>(m_rows.size()) + 1;
-  while (contains(used, std::to_string(number))) {
-    number++;
-  }
-  return std::to_string(number);
-}
-
-void StrategyPanel::UpdateRowStyle(Row &row)
-{
-  // Colour alone can be hard to tell apart (or perceive at all); weight/slant give the same
-  // information a second way, so the state still reads even if the colours don't.
-  wxFont font = row.labelCtrl->GetFont();
-  font.SetWeight(wxFONTWEIGHT_NORMAL);
-  font.SetStyle(wxFONTSTYLE_NORMAL);
-
-  if (row.isNew) {
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    row.labelCtrl->SetForegroundColour(kNewLabelColour);
-    row.labelCtrl->UnsetToolTip();
-  }
-  else if (row.currentLabelText.ToStdString(wxConvUTF8) != row.stableLabel) {
-    font.SetStyle(wxFONTSTYLE_ITALIC);
-    row.labelCtrl->SetForegroundColour(kRenamedLabelColour);
-    row.labelCtrl->SetToolTip(
-        wxString::Format(_("Renamed from \"%s\""), wxString::FromUTF8(row.stableLabel)));
-  }
-  else {
-    row.labelCtrl->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-    row.labelCtrl->UnsetToolTip();
-  }
-  row.labelCtrl->SetFont(font);
-  row.labelCtrl->Refresh();
+  return m_list;
 }
 
 void StrategyPanel::Rebuild()
 {
   m_rebuilding = true;
-  m_topSizer->Clear(true); // destroys the previous row controls; each Row's own state
-                           // (stableLabel, currentLabelText) isn't owned by them
+  m_topSizer->Clear(true); // destroys the previous row controls; the rows themselves are in
+                           // m_list, which they don't own
+  m_labelCtrls.clear();
 
   auto *gridSizer = new wxFlexGridSizer(3, 5, 10);
   gridSizer->AddGrowableCol(1, 1);
@@ -201,83 +133,80 @@ void StrategyPanel::Rebuild()
   gridSizer->Add(new wxStaticText(this, wxID_STATIC, _("Label")), 0, wxALIGN_CENTER_VERTICAL);
   gridSizer->AddSpacer(1);
 
-  const int activeCount = ActiveCount();
+  const size_t activeCount = m_list.ActiveCount();
   const wxSize buttonSize(FromDIP(28), -1);
 
-  for (size_t i = 0; i < m_rows.size(); i++) {
-    Row &row = m_rows[i];
+  for (size_t i = 0; i < m_list.Size(); i++) {
+    const auto &row = m_list.GetRow(i);
 
     wxString number;
     number << (i + 1);
     gridSizer->Add(new wxStaticText(this, wxID_STATIC, number), 0,
                    wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
 
-    row.labelCtrl = new LabelTextCtrl(this, wxID_ANY, row.currentLabelText);
+    auto *labelCtrl = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(row.label));
+    m_labelCtrls.push_back(labelCtrl);
     if (row.isDeleted) {
-      wxFont strikeFont = row.labelCtrl->GetFont();
+      wxFont strikeFont = labelCtrl->GetFont();
       strikeFont.SetStrikethrough(true);
-      row.labelCtrl->SetFont(strikeFont);
-      row.labelCtrl->Disable();
+      labelCtrl->SetFont(strikeFont);
+      labelCtrl->Disable();
     }
     else {
-      UpdateRowStyle(row);
+      StyleLabelRow(labelCtrl, row.isNew, row.stableLabel, row.label);
     }
-    row.labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_TEXT, [this, i](wxCommandEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    row.labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
-      if (!m_rebuilding && i < m_rows.size()) {
-        Row &changedRow = m_rows.at(i);
-        changedRow.currentLabelText = changedRow.labelCtrl->GetNormalizedValue();
-        UpdateRowStyle(changedRow);
+    labelCtrl->Bind(wxEVT_KILL_FOCUS, [this, i](wxFocusEvent &p_event) {
+      if (!m_rebuilding && i < m_list.Size()) {
+        m_list.SetLabel(i, m_labelCtrls[i]->GetNormalizedValue().ToStdString(wxConvUTF8));
+        const auto &changedRow = m_list.GetRow(i);
+        StyleLabelRow(m_labelCtrls[i], changedRow.isNew, changedRow.stableLabel, changedRow.label);
         NotifyChanged();
       }
       p_event.Skip();
     });
-    gridSizer->Add(row.labelCtrl, 1, wxEXPAND);
+    gridSizer->Add(labelCtrl, 1, wxEXPAND);
 
     auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
     if (!row.isDeleted) {
-      row.upButton =
+      auto *upButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2191), wxDefaultPosition, buttonSize);
-      row.upButton->Enable(i > 0);
-      row.upButton->Bind(wxEVT_BUTTON,
-                         [this, i](wxCommandEvent &) { MoveStrategyUp(static_cast<int>(i)); });
-      buttonSizer->Add(row.upButton, 0, wxLEFT, 2);
+      upButton->Enable(i > 0);
+      upButton->Bind(wxEVT_BUTTON,
+                     [this, i](wxCommandEvent &) { MoveStrategyUp(static_cast<int>(i)); });
+      buttonSizer->Add(upButton, 0, wxLEFT, 2);
 
-      row.downButton =
+      auto *downButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2193), wxDefaultPosition, buttonSize);
-      row.downButton->Enable(i + 1 < m_rows.size());
-      row.downButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { MoveStrategyDown(static_cast<int>(i)); });
-      buttonSizer->Add(row.downButton, 0, wxLEFT, 2);
+      downButton->Enable(i + 1 < m_list.Size());
+      downButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { MoveStrategyDown(static_cast<int>(i)); });
+      buttonSizer->Add(downButton, 0, wxLEFT, 2);
     }
     else {
       // Keep the delete/restore button aligned under its counterpart in other rows, in
-      // place of the Up/Down buttons a deleted row no longer has. Clear() already
-      // destroyed the previous Up/Down controls these pointers referred to; null them out
-      // rather than leave them dangling.
-      row.upButton = nullptr;
-      row.downButton = nullptr;
+      // place of the Up/Down buttons a deleted row no longer has.
       buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
       buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
     }
 
-    row.deleteButton =
+    auto *deleteButton =
         new wxButton(this, wxID_ANY, row.isDeleted ? wxUniChar(0x21BA) : wxUniChar(0x2715),
                      wxDefaultPosition, buttonSize);
-    row.deleteButton->SetToolTip(row.isDeleted ? _("Restore strategy") : _("Delete strategy"));
-    row.deleteButton->Enable(row.isDeleted || activeCount > 1);
-    row.deleteButton->Bind(wxEVT_BUTTON,
-                           [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
-    buttonSizer->Add(row.deleteButton, 0, wxLEFT, 2);
+    deleteButton->SetToolTip(row.isDeleted ? _("Restore strategy") : _("Delete strategy"));
+    deleteButton->Enable(row.isDeleted || activeCount > 1);
+    deleteButton->Bind(wxEVT_BUTTON,
+                       [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
+    buttonSizer->Add(deleteButton, 0, wxLEFT, 2);
 
     gridSizer->Add(buttonSizer, 0, wxALIGN_CENTER_VERTICAL);
   }
@@ -298,8 +227,17 @@ void StrategyPanel::Rebuild()
   FitInside();
   Layout();
   m_rebuilding = false;
-  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_rows are
+  // No NotifyChanged() call here -- see m_ready's comment. Callers that mutate m_list are
   // responsible for notifying once Rebuild() returns.
+}
+
+void StrategyPanel::ScheduleRebuild()
+{
+  m_rebuilding = true;
+  CallAfter([this]() {
+    Rebuild();
+    NotifyChanged();
+  });
 }
 
 void StrategyPanel::AddStrategy()
@@ -307,106 +245,36 @@ void StrategyPanel::AddStrategy()
   if (m_rebuilding) {
     return; // a rebuild from an earlier click is still pending; ignore this stale one
   }
-  Row row;
-  row.stableLabel = NextPlaceholderLabel();
-  row.isNew = true;
-  row.currentLabelText = wxString::FromUTF8(row.stableLabel);
-  m_rows.push_back(std::move(row));
-  // Rebuild() would destroy the very "+" button whose click is invoking this method, while
-  // its handler is still on the call stack -- unsafe in wx. CallAfter() defers it to once
-  // this event finishes dispatching; raising m_rebuilding now (not just once Rebuild()
-  // starts) covers the gap where m_rows is already mutated but the stale old controls are
-  // still alive.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
+  m_list.AddNew("");
+  ScheduleRebuild();
 }
 
 void StrategyPanel::ToggleDeleted(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.ToggleDeleted(p_index)) {
+    ScheduleRebuild();
   }
-  Row &row = m_rows.at(p_index);
-  if (!row.isDeleted && ActiveCount() <= 1) {
-    return; // refuse to drop below one active strategy
-  }
-  if (row.isNew) {
-    m_rows.erase(m_rows.begin() + p_index);
-  }
-  else {
-    row.isDeleted = !row.isDeleted;
-  }
-  // See AddStrategy() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void StrategyPanel::MoveStrategyUp(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveUp(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index <= 0) {
-    return;
-  }
-  std::swap(m_rows[p_index - 1], m_rows[p_index]);
-  // See AddStrategy() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
 void StrategyPanel::MoveStrategyDown(int p_index)
 {
-  if (m_rebuilding) {
-    return; // a rebuild from an earlier click is still pending; ignore this stale one
+  if (!m_rebuilding && m_list.MoveDown(p_index)) {
+    ScheduleRebuild();
   }
-  if (p_index + 1 >= static_cast<int>(m_rows.size())) {
-    return;
-  }
-  std::swap(m_rows[p_index], m_rows[p_index + 1]);
-  // See AddStrategy() for why this defers Rebuild() and raises m_rebuilding immediately.
-  m_rebuilding = true;
-  CallAfter([this]() {
-    Rebuild();
-    NotifyChanged();
-  });
 }
 
-wxString StrategyPanel::ValidateLabels()
+wxString StrategyPanel::CheckLabels()
 {
-  const int numStrategies = NumStrategies();
-  wxString message;
-
-  for (int i = 0; i < numStrategies; i++) {
-    if (m_rows[i].isDeleted) {
-      continue;
-    }
-    const wxString value = m_rows[i].labelCtrl->GetValue();
-    bool invalid = value.empty();
-    for (int other = 0; !invalid && other < numStrategies; other++) {
-      if (other != i && !m_rows[other].isDeleted && m_rows[other].labelCtrl->GetValue() == value) {
-        invalid = true;
-      }
-    }
-
-    m_rows[i].labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultBg);
-    m_rows[i].labelCtrl->Refresh();
-
-    if (invalid && message.empty()) {
-      message = value.empty() ? _("Strategy labels cannot be empty.")
-                              : _("Strategy labels must be unique for the player.");
-    }
-  }
-  return message;
+  return ValidateLabels(m_list.Validate(), m_labelCtrls, m_defaultBg,
+                        _("Strategy labels cannot be empty."),
+                        _("Strategy labels must be unique for the player."));
 }
 
 //======================================================================
@@ -451,28 +319,16 @@ EditStrategiesDialog::EditStrategiesDialog(wxWindow *p_parent, const GamePlayer 
 
 void EditStrategiesDialog::UpdateValidation()
 {
-  const wxString message = m_strategyPanel->ValidateLabels();
+  const wxString message = m_strategyPanel->CheckLabels();
   m_errorText->SetLabel(message);
   if (auto *ok = FindWindow(wxID_OK)) {
     ok->Enable(message.empty());
   }
 }
 
-int EditStrategiesDialog::NumStrategies() const { return m_strategyPanel->NumStrategies(); }
-
-bool EditStrategiesDialog::IsDeleted(int p_index) const
+const LabelListEdit<> &EditStrategiesDialog::GetStrategies() const
 {
-  return m_strategyPanel->IsDeleted(p_index);
-}
-
-std::string EditStrategiesDialog::GetStableLabel(int p_index) const
-{
-  return m_strategyPanel->GetStableLabel(p_index);
-}
-
-wxString EditStrategiesDialog::GetStrategyLabel(int p_index) const
-{
-  return m_strategyPanel->GetStrategyLabel(p_index);
+  return m_strategyPanel->GetEdit();
 }
 
 } // namespace Gambit::GUI

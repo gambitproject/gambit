@@ -829,64 +829,12 @@ void GameFrame::OnEditUndo(wxCommandEvent &) { m_doc->Undo(); }
 
 void GameFrame::OnEditRedo(wxCommandEvent &) { m_doc->Redo(); }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void GameFrame::OnEditGame(wxCommandEvent &)
 {
   GamePropertiesDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
-
-      std::vector<std::string> stableLabels, labels;
-      std::vector<wxColour> colors;
-      for (int i = 0; i < dialog.NumPlayerRows(); i++) {
-        if (dialog.IsPlayerDeleted(i)) {
-          continue;
-        }
-        stableLabels.push_back(dialog.GetPlayerStableLabel(i));
-        labels.push_back(dialog.GetPlayerLabel(i).ToStdString(wxConvUTF8));
-        colors.push_back(dialog.GetPlayerColor(i));
-      }
-
-      std::vector<std::string> currentLabels;
-      for (const auto &player : m_doc->GetGame()->GetPlayers()) {
-        currentLabels.push_back(player->GetLabel());
-      }
-
-      if (stableLabels != currentLabels) {
-        // The set, order, or count of players changed: add, delete, and/or reorder in a
-        // single operation.
-        m_doc->DoSetPlayers(stableLabels, labels);
-      }
-      else {
-        // No structural change -- relabeling all players in one call, rather than one at a
-        // time, lets two players' labels be swapped directly without tripping the
-        // duplicate-label check on an intermediate state that a per-player rename would pass
-        // through. (Also keeps this working for a game whose `Game::SetPlayers` is
-        // unsupported, e.g. one loaded from an action graph game file, as long as no
-        // structural edit was actually made.)
-        std::map<std::string, std::string> relabels;
-        for (size_t i = 0; i < stableLabels.size(); i++) {
-          if (stableLabels[i] != labels[i]) {
-            relabels[stableLabels[i]] = labels[i];
-          }
-        }
-        if (!relabels.empty()) {
-          m_doc->DoRelabelPlayers(relabels);
-        }
-      }
-
-      TreeRenderConfig style = m_doc->GetStyle();
-      if (As<GameTreeRep>(m_doc->GetGame())) {
-        style.SetChanceColor(dialog.GetChanceColor());
-      }
-      // Colors are assigned by position among the surviving rows, which matches the players'
-      // resulting numbers whether or not the block above just changed them.
-      int number = 1;
-      for (const auto &color : colors) {
-        style.SetPlayerColor(number++, color);
-      }
-      m_doc->SetStyle(style);
+      m_doc->DoEditGame(dialog.GetEdit());
     }
     catch (std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();

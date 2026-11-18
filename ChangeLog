@@ -15,6 +15,8 @@
   `__repr__`.  Previously `get_outcome_payoffs` and `get_action_probs` returned `Decimal` for a
   number entered as a decimal, which meant these had unpredictable return types, and arithmetic
   on decimal and rational is not defined.
+- In the GUI, the game properties, "Edit move" and "Edit strategies" dialogs now apply their edits
+  as a single change, which one Undo reverses.
 
 ### Removed
 - `StrategicGame.to_efg` and `ActionGraphGame.to_efg`, which raised `OSError` ("Undefined operation on game")
