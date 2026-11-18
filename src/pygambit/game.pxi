@@ -83,10 +83,7 @@ class Game:
             return f"{type(self).__name__}(id={hash(self)})"
 
     def _repr_html_(self):
-        if isinstance(self, ExtensiveGame):
-            return repr(self)
-        else:
-            return self.to_html()
+        return _draw.repr_html(self)
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -729,6 +726,42 @@ class _StrategicFormBase(Game):
         ExtensiveGame.to_efg, to_html, to_latex
         """
         return self._to_format(WriteNfgFile, filepath_or_buffer)
+
+    def draw(self, *, style: typing.Any = None, **options: typing.Any) -> typing.Any:
+        """Draw the game, for display in a Jupyter notebook.
+
+        An extensive game is drawn as a tree, laid out as `to_gtdraw` does it; a game with
+        a strategic form is drawn as a table.  Drawing is done by `gtdraw
+        <https://www.gambit-project.org/gtdraw/>`_, an optional dependency
+        (``pip install pygambit[draw]``) that compiles with LaTeX (``pdflatex`` and
+        ``pdftocairo``).  If gtdraw or LaTeX is missing, nothing is raised: an extensive game
+        returns an object whose representation says so, and a game with a strategic form
+        returns its HTML table, so a notebook that draws still runs.
+
+        .. versionadded:: 17.0.0
+
+        Parameters
+        ----------
+        style : gtdraw.Style or None, default None
+            The style to draw with.
+        **options
+            For an extensive game, the layout options of `to_gtdraw` (``level_scaling``,
+            ``sublevel_scaling``, ``width_scaling``, ``shared_terminal_depth``).  All other
+            options are style options of gtdraw (for example ``color_scheme``), and
+            override ``style``.
+
+        Returns
+        -------
+        gtdraw.Drawing
+            An object that a notebook displays as the drawing.  If gtdraw or LaTeX is missing,
+            an extensive game returns an object that displays a note, and a game with a
+            strategic form returns its HTML table (see `to_html`).
+
+        See Also
+        --------
+        to_gtdraw, to_latex, to_html
+        """
+        return _draw.draw(self, style, **options)
 
     def to_html(
         self,

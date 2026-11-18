@@ -15,11 +15,6 @@ build:
     - texlive-full
     - imagemagick
     - pdf2svg
-  jobs:
-    post_install:
-      # Required by the tutorials (jupyter_tikz game-tree rendering), not by the catalog —
-      # the catalog is now built as its own separate RTD project (see catalog/doc/).
-      - pip install "gtdraw @ git+https://github.com/gambitproject/gtdraw.git@b30e09706ade54f02ad2eb1cbe9a9b04cc6958cd"
 
 python:
   install:

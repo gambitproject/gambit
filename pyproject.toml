@@ -46,7 +46,8 @@ gambit-enumpoly = "pygambit.cli.enumpoly:main"
 gambit-hp = "pygambit.cli.hp:main"
 
 [project.optional-dependencies]
-test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
+draw = ["gtdraw>=0.13.0"]
+test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel", "pygambit[draw]"]
 doc = [
     "sphinx>=7.0",
     "pydata-sphinx-theme",
@@ -64,6 +65,7 @@ doc = [
     "pyyaml",
     "sphinxcontrib-bibtex",
     "myst-parser",
+    "pygambit[draw]",
 ]
 
 [project.urls]
@@ -132,7 +134,7 @@ strict = true
 follow_imports = "silent"
 
 [[tool.mypy.overrides]]
-module = ["pygambit", "pygambit.gambit"]
+module = ["pygambit", "pygambit.gambit", "gtdraw"]
 ignore_missing_imports = true
 
 
