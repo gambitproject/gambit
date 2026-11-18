@@ -25,6 +25,7 @@ import typing
 
 import cython
 
+from . import _draw
 from ._distributions import (
     INFOSET_ACTIONS,
     PLAYER_STRATEGIES,

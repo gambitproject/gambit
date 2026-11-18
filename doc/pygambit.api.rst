@@ -52,6 +52,9 @@ Creating, reading, and writing games
    ExtensiveGame.to_latex
    StrategicGame.to_latex
    ActionGraphGame.to_latex
+   ExtensiveGame.draw
+   StrategicGame.draw
+   ActionGraphGame.draw
 
 
 Computing a tree layout for graphical display

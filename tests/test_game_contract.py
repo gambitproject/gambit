@@ -61,6 +61,7 @@ CAPABILITIES: dict[str, dict[str, str]] = {
         "to_nfg": "method",
         "to_html": "method",
         "to_latex": "method",
+        "draw": "method",
         "relabel_players": "method",
     },
     "behavior": {

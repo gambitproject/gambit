@@ -3,6 +3,10 @@
 ### Added
 - `ExtensiveGame.to_gtdraw` and `read_gtdraw` for writing and reading, respectively, extensive games as
   drawings in gtdraw's .ef format.
+- `draw` (on `ExtensiveGame`, `StrategicGame` and `ActionGraphGame`) draws a game in a Jupyter notebook using `gtdraw`, which is now the optional
+  extra `pygambit[draw]` (requires gtdraw 0.13.0 or later and a LaTeX installation). The tutorials
+  that draw games use it, and still run without it (the drawing cells print a note); the
+  `test` and `doc` extras include it.
 
 ### Changed
 - Create separate game-representation classes `ExtensiveGame`, `StrategicGame`, `ActionGraphGame`,

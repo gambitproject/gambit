@@ -22,10 +22,11 @@ The tutorials are available as Jupyter notebooks and can be run interactively us
 
        pip install .[doc]
 
-   Several tutorials also use `gtdraw <https://github.com/gambitproject/gtdraw>`_ to draw game
-   trees.  `gtdraw` is installed separately::
+   Several tutorials also use `gtdraw <https://github.com/gambitproject/gtdraw>`_ to draw games,
+   through ``Game.draw``.  Install it with the ``draw`` extra, and install a LaTeX
+   distribution that provides ``pdflatex`` and ``pdftocairo``::
 
-       pip install gtdraw
+       pip install pygambit[draw]
 
    .. warning::
        Windows users wishing to run the "Using Gambit with OpenSpiel" tutorial will need to install OpenSpiel manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
