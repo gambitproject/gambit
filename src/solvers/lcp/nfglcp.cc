@@ -82,7 +82,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
     max = Rational(0);
   }
 
-  const Rational fac(1, static_cast<int>(static_cast<double>(max - min)));
+  const Rational fac = Rational(1) / (max - min);
 
   for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
