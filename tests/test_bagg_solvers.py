@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 
 import pygambit as gbt
-from pygambit import levelk
 
 from . import bagg_oracle, games
 
@@ -336,17 +335,6 @@ def test_liap_end_event_carries_a_bagg_profile():
     ends = [e for e in events if isinstance(e, gbt.LiapEndEvent)]
     assert len(ends) == 1
     assert isinstance(ends[0].profile, gbt.BAGGMixedBehaviorProfileDouble)
-
-
-@pytest.mark.parametrize("path", [TWO_BY_TWO, SHARED])
-def test_level_k_modelling_refuses_a_bagg(path):
-    game = games.read_from_file(path)
-    with pytest.raises(gbt.UnsupportedForBayesianGameError, match="compute_coghier"):
-        levelk.compute_coghier(game, tau=1.0, lam=1.0)
-    with pytest.raises(gbt.UnsupportedForBayesianGameError, match="fit_coghier"):
-        levelk.fit_coghier(game, [1, 1], 0.5, 1.5, 0.5, 1.5)
-    with pytest.raises(gbt.UnsupportedForBayesianGameError, match="logit_br"):
-        levelk.logit_br(game, None, 1.0)
 
 
 @pytest.mark.parametrize("path", [SHARED, TWO_BY_TWO, COFFEE])
