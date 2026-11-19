@@ -1,4 +1,4 @@
-## [17.0.0-beta.4] - unreleased
+## [17.0.0-beta.4] - 2026-11-19
 
 ### Added
 - `ExtensiveGame.to_gtdraw` and `read_gtdraw` for writing and reading, respectively, extensive games as
