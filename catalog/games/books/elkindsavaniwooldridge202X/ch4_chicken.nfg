@@ -1,0 +1,14 @@
+NFG 1 R "Chicken" { "1" "2" }
+
+{ { "D" "C" }
+{ "d" "c" }
+}
+"The game of Chicken, from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`; D means driving straight on."
+
+{
+{ "" 0, 0 }
+{ "" 2, 4 }
+{ "" 4, 2 }
+{ "" 3, 3 }
+}
+1 2 3 4

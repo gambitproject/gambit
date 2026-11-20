@@ -1,0 +1,14 @@
+NFG 1 R "Pure coordination game" { "1" "2" }
+
+{ { "A" "B" }
+{ "a" "b" }
+}
+"A pure coordination game from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, with pure equilibria (A, a) and (B, b)."
+
+{
+{ "" 1, 1 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 1, 1 }
+}
+1 2 3 4

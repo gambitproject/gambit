@@ -1,0 +1,14 @@
+NFG 1 R "Stag Hunt" { "1" "2" }
+
+{ { "Deer" "Hare" }
+{ "deer" "hare" }
+}
+"The Stag Hunt, from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`, where it is used to compute a Price of Anarchy of 7/4."
+
+{
+{ "" 7, 7 }
+{ "" 4, 0 }
+{ "" 0, 4 }
+{ "" 4, 4 }
+}
+1 2 3 4

@@ -1,0 +1,16 @@
+NFG 1 R "2x3 game with three equilibria" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "c" "r" }
+}
+"The example with multiple equilibria used in Chapter 6 (Algorithms for Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X` for the Lemke-Howson algorithm: one pure and two mixed equilibria, one of which is not reached from the artificial equilibrium."
+
+{
+{ "" 0, 1 }
+{ "" 1, 2 }
+{ "" 3, 0 }
+{ "" 2, 3 }
+{ "" 2, 2 }
+{ "" 0, 0 }
+}
+1 2 3 4 5 6
