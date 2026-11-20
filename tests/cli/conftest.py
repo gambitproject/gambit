@@ -58,6 +58,22 @@ def nfg_coordination_text() -> str:
 
 
 @pytest.fixture
+def nfg_multi_polytope_component_text() -> str:
+    """A 3x3 table game (found by random search) whose three pure-strategy
+    equilibria lie in a single connected component made of two polytopes sharing
+    a vertex -- useful for confirming that `-c/--cliques` output still labels each
+    polytope separately (each is genuinely convex; their union is not) rather than
+    collapsing touching polytopes under one label.
+    """
+    payoffs1 = [[1, 0, -2], [0, 2, -2], [1, 2, 0]]
+    payoffs2 = [[-1, -1, -2], [0, -2, -1], [0, -1, 0]]
+    game = gbt.StrategicGame.from_arrays(
+        payoffs1, payoffs2, title="Multi-polytope component"
+    )
+    return game.to_nfg()
+
+
+@pytest.fixture
 def nfg_asymmetric_table_text() -> str:
     """A 2x2 coordination-style table game whose payoffs aren't symmetric across
     players or strategies, so that a QRE branch traced from the centroid takes many

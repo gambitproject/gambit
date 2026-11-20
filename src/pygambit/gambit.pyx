@@ -46,6 +46,7 @@ from ._hsel import (  # no-cython-lint
 )
 from ._labels import _compute_relabeling, _reconcile_labels, _resolve_infoset_or_event_kind
 from ._layout import TreeLayout, TreeLayoutCoordinates
+from ._nashsets import NashComponent, NashPolytope
 from ._numbers import Decimal, Rational  # no-cython-lint
 from ._numbers import to_number_string as _to_number_string
 from ._random import _dirichlet_distribution, _grid_distribution

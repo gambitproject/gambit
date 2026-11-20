@@ -211,11 +211,14 @@ public:
 
   const Array<Array<int>> &GetCliques1() const { return m_cliques1; }
   const Array<Array<int>> &GetCliques2() const { return m_cliques2; }
+  /// Indices into GetCliques1/2 of the cliques found in each connected component
+  const Array<Array<int>> &GetComponents() const { return m_components; }
 
 private:
   Array<int> firstedge;
   int maxinp1, maxinp2;
   Array<Array<int>> m_cliques1, m_cliques2;
+  Array<Array<int>> m_components;
 
   void candtry1(int stk[], // stack
                 bool connected[MAXM][MAXN],

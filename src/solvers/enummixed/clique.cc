@@ -591,8 +591,14 @@ void CliqueEnumerator::workonco(int numco, Array<int> &p_firstedge, Array<Edge> 
           stk[tos++] = i; // CAND2 = NODES2
         }
       }
+      const auto firstNew = m_cliques1.size() + 1;
       extend(stk, connected, clique1, 0, clique2, 0, 0, 0, m, m, m, m + n, tos, orignode1,
              orignode2);
+      Array<int> component;
+      for (auto cl = firstNew; cl <= m_cliques1.size(); cl++) {
+        component.push_back(static_cast<int>(cl));
+      }
+      m_components.push_back(component);
     }
   }
 }
