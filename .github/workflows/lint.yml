@@ -119,6 +119,7 @@ jobs:
           cache-dependency-path: pyproject.toml
       - name: Install pygambit (editable, picks up catalog/games directly)
         run: |
+          sudo apt-get update && sudo apt-get install -y libcdd-dev libgmp-dev
           python -m pip install -v -e ".[doc]"
       - name: Regenerate catalog/catalog.am
         run: python catalog/build.py --build --skip-table
