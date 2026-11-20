@@ -4,6 +4,11 @@
 - `NashComponent` and `NashPolytope`, describing the connected components of the equilibrium set of a
   two-player game, returned by `enummixed_solve(..., components=True)`.
 
+### Fixed
+- Computing the components of the equilibrium set in `enummixed_solve` and `gambit-enummixed -c` no longer
+  drops equilibria when a component has more than 700 extreme strategies for one player, and no longer
+  needs about 2.5 MB of thread stack.
+
 
 ## [17.0.0-beta.4] - 2026-11-19
 

@@ -24,10 +24,13 @@
 #define GAMBIT_SOLVERS_ENUMMIXED_ENUMMIXED_H
 
 #include <utility>
+#include <vector>
 
 #include "solvers/nash.h"
 
 namespace Gambit::Nash {
+
+struct Biclique;
 
 template <class T> class EnumMixedStrategySolver;
 
@@ -52,24 +55,17 @@ public:
   std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
   bool success{true};
 
-  /// Representation of the graph connecting the extreme equilibria
+  /// Representation of the graph connecting the extreme equilibria: the mixed strategy of each
+  /// node, and one edge (player 1's node, player 2's node) for each extreme equilibrium.
+  /// Nodes are numbered from 1, and index the keys.
   ///@{
   Array<Vector<T>> m_key1, m_key2;
-  Array<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
-  int m_v1{0}, m_v2{0};
+  std::vector<std::pair<int, int>> m_edges;
   ///@}
 
-  /// Representation of the connectedness of the extreme equilibria
-  /// These are generated only on demand
-  mutable Array<Array<int>> m_cliques1, m_cliques2;
-  /// Indices into m_cliques1/m_cliques2 of the cliques in each connected component
-  mutable Array<Array<int>> m_components;
-
 private:
-  /// Populates m_cliques1/m_cliques2/m_components on first use.
-  void EnsureCliques() const;
-  /// Builds the vertex profiles for one maximal clique.
-  Array<MixedStrategyProfile<T>> BuildCliqueProfiles(size_t p_clique) const;
+  /// Builds the profiles of the vertices of one maximal biclique of the graph.
+  Array<MixedStrategyProfile<T>> BuildCliqueProfiles(const Biclique &p_biclique) const;
 };
 
 template <class T>

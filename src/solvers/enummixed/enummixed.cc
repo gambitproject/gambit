@@ -40,41 +40,21 @@ bool EqZero(const double &x)
 
 bool EqZero(const Rational &x) { return x == Rational(0); }
 
-template <class T> void EnumMixedStrategySolution<T>::EnsureCliques() const
-{
-  if (m_cliques1.empty()) {
-    // Cliques are generated on demand
-    const auto n = m_node1.size();
-    if (m_node2.size() != n) {
-      throw DimensionException();
-    }
-
-    Array<CliqueEnumerator::Edge> edgelist;
-    edgelist.reserve(n);
-    std::transform(m_node1.begin(), m_node1.end(), m_node2.begin(), std::back_inserter(edgelist),
-                   [](const int a, const int b) { return CliqueEnumerator::Edge(a, b); });
-
-    const CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
-    m_cliques1 = clique.GetCliques1();
-    m_cliques2 = clique.GetCliques2();
-    m_components = clique.GetComponents();
-  }
-}
-
 template <class T>
 Array<MixedStrategyProfile<T>>
-EnumMixedStrategySolution<T>::BuildCliqueProfiles(size_t p_clique) const
+EnumMixedStrategySolution<T>::BuildCliqueProfiles(const Biclique &p_biclique) const
 {
+  const auto player1 = m_game->GetPlayer(1);
+  const auto player2 = m_game->GetPlayer(2);
   Array<MixedStrategyProfile<T>> profiles;
-  for (size_t i = 1; i <= m_cliques1[p_clique].size(); i++) {
-    for (size_t j = 1; j <= m_cliques2[p_clique].size(); j++) {
-      MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
-
-      for (size_t k = 1; k <= m_key1[m_cliques1[p_clique][i]].size(); k++) {
-        profile[k] = m_key1[m_cliques1[p_clique][i]][k];
+  for (const int node1 : p_biclique.left) {
+    for (const int node2 : p_biclique.right) {
+      MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(T{0}));
+      for (size_t k = 1; k <= m_key1[node1].size(); k++) {
+        profile[player1->GetStrategy(k)] = m_key1[node1][k];
       }
-      for (size_t k = 1; k <= m_key2[m_cliques2[p_clique][j]].size(); k++) {
-        profile[k + m_key1[m_cliques1[p_clique][i]].size()] = m_key2[m_cliques2[p_clique][j]][k];
+      for (size_t k = 1; k <= m_key2[node2].size(); k++) {
+        profile[player2->GetStrategy(k)] = m_key2[node2][k];
       }
       profiles.push_back(profile);
     }
@@ -85,13 +65,11 @@ EnumMixedStrategySolution<T>::BuildCliqueProfiles(size_t p_clique) const
 template <class T>
 Array<Array<Array<MixedStrategyProfile<T>>>> EnumMixedStrategySolution<T>::GetComponents() const
 {
-  EnsureCliques();
-
   Array<Array<Array<MixedStrategyProfile<T>>>> components;
-  for (const auto &group : m_components) {
+  for (const auto &bicliques : EnumerateBicliqueComponents(m_edges)) {
     Array<Array<MixedStrategyProfile<T>>> polytopes;
-    for (const auto cl : group) {
-      polytopes.push_back(BuildCliqueProfiles(cl));
+    for (const auto &biclique : bicliques) {
+      polytopes.push_back(BuildCliqueProfiles(biclique));
     }
     components.push_back(polytopes);
   }
@@ -122,19 +100,19 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
 
   const auto &verts1(poly1.vertices);
   const auto &verts2(poly2.vertices);
-  solution->m_v1 = verts1.size();
-  solution->m_v2 = verts2.size();
+  const int numVerts1 = verts1.size();
+  const int numVerts2 = verts2.size();
 
-  Array<int> vert1id(solution->m_v1);
-  Array<int> vert2id(solution->m_v2);
+  Array<int> vert1id(numVerts1);
+  Array<int> vert2id(numVerts2);
   std::ranges::fill(vert1id, 0);
   std::ranges::fill(vert2id, 0);
 
   int id1 = 0, id2 = 0;
 
-  for (int i2 = 2; i2 <= solution->m_v2; i2++) {
+  for (int i2 = 2; i2 <= numVerts2; i2++) {
     const BFS<T> &bfs1 = verts2[i2];
-    for (int i1 = 2; i1 <= solution->m_v1; i1++) {
+    for (int i1 = 2; i1 <= numVerts1; i1++) {
       p_cancel.Check();
       const BFS<T> &bfs2 = verts1[i1];
 
@@ -169,10 +147,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
         solution->m_extremeEquilibria.push_back(eqm);
         p_onEquilibrium(eqm);
 
-        // note: The keys give the mixed strategy associated with each node.
-        //       The keys should also keep track of the basis
-        //       As things stand now, two different bases could lead to
-        //       the same key... BAD!
+        // The keys give the mixed strategy associated with each node.
         if (vert1id[i1] == 0) {
           id1++;
           vert1id[i1] = id1;
@@ -183,8 +158,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
           vert2id[i2] = id2;
           solution->m_key1.push_back(eqm.GetStrategy(p_game->GetPlayer(1)));
         }
-        solution->m_node1.push_back(vert2id[i2]);
-        solution->m_node2.push_back(vert1id[i1]);
+        solution->m_edges.emplace_back(vert2id[i2], vert1id[i1]);
       }
     }
   }
