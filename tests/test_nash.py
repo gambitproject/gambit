@@ -2,6 +2,7 @@
 
 import dataclasses
 import functools
+import threading
 import typing
 
 import pytest
@@ -3903,3 +3904,169 @@ def test_enummixed_solve_components_groups_polytopes_sharing_a_vertex():
     # vertex, reproduces the full set of extreme equilibria.
     assert len(component.vertices) == len(res.equilibria)
     assert all(eq in component.vertices for eq in res.equilibria)
+
+
+def _profile_key(profile, digits=9):
+    return tuple(
+        tuple((str(strategy), round(float(prob), digits)) for strategy, prob in player)
+        for player in profile
+    )
+
+
+def _check_components(result):
+    """Assert the properties of `enummixed_solve(..., components=True)` that do not depend on
+    the order in which components, polytopes or vertices are reported."""
+    equilibria = {_profile_key(eq) for eq in result.equilibria}
+    assert len(equilibria) == len(result.equilibria)
+
+    def strategies(polytope):
+        keys = [_profile_key(v) for v in polytope.vertices]
+        assert len(set(keys)) == len(keys)
+        profiles = [list(v) for v in polytope.vertices]
+        s1 = {_profile_key([p[0]]) for p in profiles}
+        s2 = {_profile_key([p[1]]) for p in profiles}
+        # A polytope's vertices are the product of its players' strategy sets
+        assert len(keys) == len(s1) * len(s2)
+        assert set(keys) <= equilibria
+        return s1, s2
+
+    owners: dict = {}
+    for index, component in enumerate(result.components):
+        sets = [strategies(polytope) for polytope in component.polytopes]
+        for key in {_profile_key(v) for p in component.polytopes for v in p.vertices}:
+            owners.setdefault(key, set()).add(index)
+        # Maximality: no polytope's strategy sets lie inside another polytope's
+        for i, (a1, a2) in enumerate(sets):
+            for j, (b1, b2) in enumerate(sets):
+                assert i == j or not (a1 <= b1 and a2 <= b2)
+        # Connectedness: polytopes are linked through shared strategies
+        reached, frontier = {0}, [0]
+        while frontier:
+            i = frontier.pop()
+            for j, (b1, b2) in enumerate(sets):
+                if j not in reached and (sets[i][0] & b1 or sets[i][1] & b2):
+                    reached.add(j)
+                    frontier.append(j)
+        assert reached == set(range(len(sets)))
+    # Every extreme equilibrium lies in exactly one component
+    assert set(owners) == equilibria
+    assert all(len(indices) == 1 for indices in owners.values())
+
+    # Different components share no strategy of either player
+    per_component = []
+    for component in result.components:
+        s1, s2 = set(), set()
+        for polytope in component.polytopes:
+            p1, p2 = strategies(polytope)
+            s1 |= p1
+            s2 |= p2
+        per_component.append((s1, s2))
+    for i, (a1, a2) in enumerate(per_component):
+        for b1, b2 in per_component[i + 1 :]:
+            assert not (a1 & b1) and not (a2 & b2)
+
+
+_COMPONENT_GAMES = {
+    "matching_pennies": ([[1, -1], [-1, 1]], [[-1, 1], [1, -1]], [1]),
+    "shared_vertex": (
+        [[1, 0, -2], [0, 2, -2], [1, 2, 0]],
+        [[-1, -1, -2], [0, -2, -1], [0, -1, 0]],
+        [2],
+    ),
+    # Two components, one of which has two polytopes
+    "two_components": (
+        [[2, -1, 0], [-1, -1, 1], [0, -2, 1]],
+        [[2, -2, -1], [0, -2, 0], [2, 1, 2]],
+        [1, 2],
+    ),
+    # A polytope of three vertices (one player has three strategies)
+    "three_vertex_polytope": (
+        [[1, 2, -2], [-1, 2, 1], [0, 1, -2]],
+        [[1, -2, 0], [2, 2, 2], [1, -1, -1]],
+        [1, 1],
+    ),
+    "constant_4x4": ([[1] * 4] * 4, [[1] * 4] * 4, [1]),
+}
+
+
+@pytest.mark.parametrize("rational", [True, False])
+@pytest.mark.parametrize("name", list(_COMPONENT_GAMES))
+def test_enummixed_solve_components_invariants(name, rational):
+    p1, p2, polytopes_per_component = _COMPONENT_GAMES[name]
+    game = gbt.StrategicGame.from_arrays(p1, p2)
+    result = gbt.nash.enummixed_solve(game, rational=rational, components=True)
+    _check_components(result)
+    assert sorted(len(c.polytopes) for c in result.components) == sorted(polytopes_per_component)
+
+
+@pytest.mark.parametrize("rational", [True, False])
+@pytest.mark.parametrize("name", list(_COMPONENT_GAMES))
+def test_enummixed_solve_components_in_small_thread_stack(name, rational):
+    """Computing the components must not need a large thread stack."""
+    p1, p2, _ = _COMPONENT_GAMES[name]
+    game = gbt.StrategicGame.from_arrays(p1, p2)
+    outcome = {}
+
+    def solve():
+        try:
+            outcome["result"] = gbt.nash.enummixed_solve(game, rational=rational, components=True)
+        except BaseException as error:  # noqa: BLE001
+            outcome["error"] = error
+
+    previous = threading.stack_size(512 * 1024)
+    try:
+        thread = threading.Thread(target=solve)
+        thread.start()
+    finally:
+        threading.stack_size(previous)
+    thread.join()
+    assert "error" not in outcome
+    _check_components(outcome["result"])
+
+
+def test_enummixed_solve_components_constant_game_is_one_polytope():
+    game = gbt.StrategicGame.from_arrays([[1] * 4] * 4, [[1] * 4] * 4)
+    result = gbt.nash.enummixed_solve(game, rational=True, components=True)
+    assert len(result.components) == 1
+    assert len(result.components[0].polytopes) == 1
+    assert len(result.components[0].polytopes[0].vertices) == 16
+    assert len(result.equilibria) == 16
+
+
+def test_enummixed_solve_components_three_strategy_polytope():
+    p1, p2, _ = _COMPONENT_GAMES["three_vertex_polytope"]
+    game = gbt.StrategicGame.from_arrays(p1, p2)
+    result = gbt.nash.enummixed_solve(game, rational=True, components=True)
+    sizes = sorted(len(p.vertices) for c in result.components for p in c.polytopes)
+    assert sizes == [1, 3]
+
+
+def test_enummixed_solve_components_exact_values():
+    """Components of a game with two components, one made of two polytopes that share a vertex."""
+    p1, p2, _ = _COMPONENT_GAMES["two_components"]
+    game = gbt.StrategicGame.from_arrays(p1, p2)
+    result = gbt.nash.enummixed_solve(game, rational=True, components=True)
+
+    def profile(x, y):
+        return (
+            tuple(zip("123", x, strict=True)),
+            tuple(zip("123", y, strict=True)),
+        )
+
+    zero, one = Q(0), Q(1)
+    pure1 = profile([one, zero, zero], [one, zero, zero])
+    s3s3 = profile([zero, zero, one], [zero, zero, one])
+    s2s3 = profile([zero, one, zero], [zero, zero, one])
+    s3mix = profile([zero, zero, one], [Q(1, 3), zero, Q(2, 3)])
+
+    def exact(component):
+        return frozenset(
+            tuple(tuple((str(s), q) for s, q in player) for player in v)
+            for polytope in component.polytopes
+            for v in polytope.vertices
+        )
+
+    assert {exact(c) for c in result.components} == {
+        frozenset({pure1}),
+        frozenset({s3s3, s2s3, s3mix}),
+    }
