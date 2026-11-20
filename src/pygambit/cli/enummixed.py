@@ -76,12 +76,15 @@ def main(
         game,
         rational=rational,
         nash_callback=lambda profile: echo_profile(profile, "NE"),
-        cliques=cliques,
+        components=cliques,
     )
-    if cliques and result.cliques is not None:
-        for index, clique in enumerate(result.cliques, start=1):
+    if cliques:
+        polytopes = [
+            polytope for component in result.components for polytope in component.polytopes
+        ]
+        for index, polytope in enumerate(polytopes, start=1):
             label = f"convex-{index}"
-            for profile in clique:
+            for profile in polytope.vertices:
                 echo_profile(profile, label)
 
 

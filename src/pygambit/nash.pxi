@@ -302,14 +302,14 @@ class EnumMixedResult(NashResultBase):
         Always True; enumeration always completes.
     lrsnash_path : pathlib.Path or str, optional
         Set if `lrsnash` was used to solve the systems of equations.
-    cliques : list of MixedStrategyEquilibriumSet, optional
-        Set if `cliques=True` was requested: the sets of extreme equilibria which
-        are connected to one another.
+    components : list of NashComponent, optional
+        Set if `components=True` was requested: the connected components of the
+        set of extreme equilibria.
     """
     equilibria: MixedStrategyEquilibriumSet
     success: bool
     lrsnash_path: pathlib.Path | str | None = None
-    cliques: list[MixedStrategyEquilibriumSet] | None = None
+    components: list[NashComponent] | None = None
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -1094,36 +1094,43 @@ def _enummixed_strategy_solve_rational(
     )
 
 
-def _enummixed_strategy_solve_cliques_double(
+def _enummixed_strategy_solve_components_double(
         game: Game, nash_callback: object = None
 ) -> EnumMixedResult:
     result: pair[
-        c_EnumMixedStrategyResult[float], stdlist[stdlist[c_MixedStrategyProfile[float]]]
-    ] = EnumMixedStrategySolveCliquesWrapper[double](
+        c_EnumMixedStrategyResult[float],
+        stdlist[stdlist[stdlist[c_MixedStrategyProfile[float]]]]
+    ] = EnumMixedStrategySolveComponentsWrapper[double](
         game.game, MakeStrategyCallback[double](nash_callback)
     )
     return EnumMixedResult(
         game=game, rational=False, use_strategic=True,
         equilibria=_convert_mspd(result.first.equilibria),
         success=result.first.success,
-        cliques=[_convert_mspd(clique) for clique in result.second],
+        components=[
+            NashComponent([NashPolytope(_convert_mspd(polytope)) for polytope in component])
+            for component in result.second
+        ],
     )
 
 
-def _enummixed_strategy_solve_cliques_rational(
+def _enummixed_strategy_solve_components_rational(
         game: Game, nash_callback: object = None
 ) -> EnumMixedResult:
     result: pair[
         c_EnumMixedStrategyResult[c_Rational],
-        stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]
-    ] = EnumMixedStrategySolveCliquesWrapper[c_Rational](
+        stdlist[stdlist[stdlist[c_MixedStrategyProfile[c_Rational]]]]
+    ] = EnumMixedStrategySolveComponentsWrapper[c_Rational](
         game.game, MakeStrategyCallback[c_Rational](nash_callback)
     )
     return EnumMixedResult(
         game=game, rational=True, use_strategic=True,
         equilibria=_convert_mspr(result.first.equilibria),
         success=result.first.success,
-        cliques=[_convert_mspr(clique) for clique in result.second],
+        components=[
+            NashComponent([NashPolytope(_convert_mspr(polytope)) for polytope in component])
+            for component in result.second
+        ],
     )
 
 

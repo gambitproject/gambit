@@ -40,8 +40,7 @@ bool EqZero(const double &x)
 
 bool EqZero(const Rational &x) { return x == Rational(0); }
 
-template <class T>
-Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
+template <class T> void EnumMixedStrategySolution<T>::EnsureCliques() const
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
@@ -58,26 +57,45 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
     const CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
+    m_components = clique.GetComponents();
   }
+}
 
-  Array<Array<MixedStrategyProfile<T>>> solution;
-  for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
-    solution.push_back(Array<MixedStrategyProfile<T>>());
-    for (size_t i = 1; i <= m_cliques1[cl].size(); i++) {
-      for (size_t j = 1; j <= m_cliques2[cl].size(); j++) {
-        MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
+template <class T>
+Array<MixedStrategyProfile<T>>
+EnumMixedStrategySolution<T>::BuildCliqueProfiles(size_t p_clique) const
+{
+  Array<MixedStrategyProfile<T>> profiles;
+  for (size_t i = 1; i <= m_cliques1[p_clique].size(); i++) {
+    for (size_t j = 1; j <= m_cliques2[p_clique].size(); j++) {
+      MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-        for (size_t k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
-          profile[k] = m_key1[m_cliques1[cl][i]][k];
-        }
-        for (size_t k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
-          profile[k + m_key1[m_cliques1[cl][i]].size()] = m_key2[m_cliques2[cl][j]][k];
-        }
-        solution[cl].push_back(profile);
+      for (size_t k = 1; k <= m_key1[m_cliques1[p_clique][i]].size(); k++) {
+        profile[k] = m_key1[m_cliques1[p_clique][i]][k];
       }
+      for (size_t k = 1; k <= m_key2[m_cliques2[p_clique][j]].size(); k++) {
+        profile[k + m_key1[m_cliques1[p_clique][i]].size()] = m_key2[m_cliques2[p_clique][j]][k];
+      }
+      profiles.push_back(profile);
     }
   }
-  return solution;
+  return profiles;
+}
+
+template <class T>
+Array<Array<Array<MixedStrategyProfile<T>>>> EnumMixedStrategySolution<T>::GetComponents() const
+{
+  EnsureCliques();
+
+  Array<Array<Array<MixedStrategyProfile<T>>>> components;
+  for (const auto &group : m_components) {
+    Array<Array<MixedStrategyProfile<T>>> polytopes;
+    for (const auto cl : group) {
+      polytopes.push_back(BuildCliqueProfiles(cl));
+    }
+    components.push_back(polytopes);
+  }
+  return components;
 }
 
 template <class T>

@@ -427,6 +427,8 @@ Each of these returns its own result type, documented below:
    NashResultBase
    EnumPureResult
    EnumMixedResult
+   NashComponent
+   NashPolytope
    EnumPolyResult
    LpResult
    LcpStrategyResult
