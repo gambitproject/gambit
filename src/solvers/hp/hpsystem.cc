@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include <iostream>
 #include "gambit.h"
 #include "solvers/hp/hpsystem.h"
@@ -31,7 +32,7 @@ public:
   virtual ~HPEquation() = default;
 
   virtual double Value(const Vector<double> &point,
-                       const MixedStrategyProfile<double> &current_sigma,
+                       const std::vector<double> &payoffs_against_sigma,
                        const std::vector<double> &payoffs_against_prior) const = 0;
 };
 
@@ -48,20 +49,19 @@ inline double AlphaToLambdaDeriv(double alpha) { return (alpha < 0.0) ? 2.0 * al
 
 // Eq (a): Best Response Equation
 class BestResponseEquation final : public HPEquation {
-  GameStrategy m_strategy;
   int m_alpha_idx;
   int m_mu_idx;
   int m_flat_s_idx;
 
 public:
-  BestResponseEquation(const GameStrategy &strat, int alpha_idx, int mu_idx, int flat_s_idx)
-    : m_strategy(strat), m_alpha_idx(alpha_idx), m_mu_idx(mu_idx), m_flat_s_idx(flat_s_idx)
+  BestResponseEquation(int alpha_idx, int mu_idx, int flat_s_idx)
+    : m_alpha_idx(alpha_idx), m_mu_idx(mu_idx), m_flat_s_idx(flat_s_idx)
   {
   }
 
   ~BestResponseEquation() override = default;
 
-  double Value(const Vector<double> &point, const MixedStrategyProfile<double> &current_sigma,
+  double Value(const Vector<double> &point, const std::vector<double> &payoffs_against_sigma,
                const std::vector<double> &payoffs_against_prior) const override
   {
     const double t = point[1];
@@ -70,7 +70,7 @@ public:
     const double mu = point[m_mu_idx];
 
     // Calculate Dynamic Payoff
-    const double payoff_vs_sigma = current_sigma.GetPayoff(m_strategy);
+    const double payoff_vs_sigma = payoffs_against_sigma[m_flat_s_idx];
     const double payoff_vs_prior = payoffs_against_prior[m_flat_s_idx];
 
     // v^i(t, s)
@@ -93,7 +93,7 @@ public:
 
   ~ProbabilitySumEquation() override = default;
 
-  double Value(const Vector<double> &point, const MixedStrategyProfile<double> & /*current_sigma*/,
+  double Value(const Vector<double> &point, const std::vector<double> & /*payoffs_against_sigma*/,
                const std::vector<double> & /*payoffs_against_prior*/) const override
   {
     double sum_sigma = 0.0;
@@ -108,7 +108,8 @@ public:
 
 HPEquationSystem::HPEquationSystem(const MixedStrategyProfile<double> &prior)
   : m_game(prior.GetGame()), m_prior(prior), m_star(prior.MixedProfileLength()),
-    m_current_sigma(prior.GetGame()->NewMixedStrategyProfile(0.0))
+    m_current_sigma(prior.GetGame()->NewMixedStrategyProfile(0.0)),
+    m_payoffs_against_sigma(m_current_sigma.MixedProfileLength())
 {
   m_payoffs_against_prior.reserve(m_prior.MixedProfileLength());
   for (const auto &player : m_game->GetPlayers()) {
@@ -130,7 +131,7 @@ HPEquationSystem::HPEquationSystem(const MixedStrategyProfile<double> &prior)
     // Instantiate Best Response Equations
     for (const auto &strategy : player->GetStrategies()) {
       m_equations.push_back(
-          std::make_shared<BestResponseEquation>(strategy, alpha_idx, mu_idx, flat_strategy_idx));
+          std::make_shared<BestResponseEquation>(alpha_idx, mu_idx, flat_strategy_idx));
       alpha_idx++;
       flat_strategy_idx++;
     }
@@ -146,10 +147,15 @@ void HPEquationSystem::GetValue(const Vector<double> &point, Vector<double> &lhs
 {
   // Update internal mutable state
   UpdateSigma(point);
+  auto value = m_payoffs_against_sigma.begin();
+  for (const auto &player : m_game->GetPlayers()) {
+    m_current_sigma.GetStrategyValues(player, m_blockValues);
+    value = std::ranges::copy(m_blockValues, value).out;
+  }
 
   // Evaluate all equations
   for (size_t i = 1; i <= m_equations.size(); ++i) {
-    lhs[i] = m_equations[i - 1]->Value(point, m_current_sigma, m_payoffs_against_prior);
+    lhs[i] = m_equations[i - 1]->Value(point, m_payoffs_against_sigma, m_payoffs_against_prior);
   }
 }
 

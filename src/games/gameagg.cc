@@ -93,46 +93,57 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  bool GetPayoffDerivs(int pl, Vector<T> &p_values) const override;
   void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
+
+private:
+  /// The AGG strategy vector of the profile; strategies not in the support have probability zero
+  std::vector<T> GetStrategyVector() const;
 };
+
+template <class T> std::vector<T> AGGMixedStrategyProfileRep<T>::GetStrategyVector() const
+{
+  const auto game = this->m_support.GetGame();
+  const auto &agg = *dynamic_cast<GameAGGRep &>(*game).aggPtr;
+  std::vector<T> s(agg.getNumActions());
+  for (int i = 0; i < agg.getNumPlayers(); ++i) {
+    for (int j = 0; j < agg.getNumActions(i); ++j) {
+      const int ind = this->m_profileIndex.at(game->GetPlayer(i + 1)->GetStrategy(j + 1));
+      s[agg.firstAction(i) + j] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
+    }
+  }
+  return s;
+}
 
 template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   const auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<T> s(g.aggPtr->getNumActions());
-  for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
-    for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
-      const GameStrategy strategy =
-          this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-      const int ind = this->m_profileIndex.at(strategy);
-      s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-    }
-  }
-  return g.aggPtr->getMixedPayoff(pl - 1, s);
+  return g.aggPtr->getMixedPayoff(pl - 1, GetStrategyVector());
 }
 
 template <class T>
 T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  const auto &g = dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<T> s(g.aggPtr->getNumActions());
-  for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
-    if (i + 1 == ps->GetPlayer()->GetNumber()) {
-      for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
-        s[g.aggPtr->firstAction(i) + j] = T(0);
-      }
-      s.at(g.aggPtr->firstAction(i) + ps->GetNumber() - 1) = T(1);
-    }
-    else {
-      for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
-        const GameStrategy strategy =
-            this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-        const int &ind = this->m_profileIndex.at(strategy);
-        s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-      }
-    }
+  auto &agg = *dynamic_cast<GameAGGRep &>(*(this->m_support.GetGame())).aggPtr;
+  auto s = GetStrategyVector();
+  const int player = ps->GetPlayer()->GetNumber() - 1;
+  std::fill(s.begin() + agg.firstAction(player),
+            s.begin() + agg.firstAction(player) + agg.getNumActions(player), T(0));
+  s[agg.firstAction(player) + ps->GetNumber() - 1] = T(1);
+  return agg.getMixedPayoff(pl - 1, s);
+}
+
+template <class T>
+bool AGGMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_values) const
+{
+  const auto game = this->m_support.GetGame();
+  const auto &g = dynamic_cast<GameAGGRep &>(*game);
+  const auto s = GetStrategyVector();
+  size_t row = 1;
+  for (const auto &strategy : this->m_support.GetStrategies(game->GetPlayer(pl))) {
+    p_values[row++] = g.aggPtr->getV(pl - 1, strategy->GetNumber() - 1, s);
   }
-  return g.aggPtr->getMixedPayoff(pl - 1, s);
+  return true;
 }
 
 template <class T>
@@ -185,13 +196,7 @@ void AGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_val
     const auto game = this->m_support.GetGame();
     const auto &g = dynamic_cast<GameAGGRep &>(*game);
     const auto &agg = *g.aggPtr;
-    std::vector<double> s(agg.getNumActions());
-    for (int i = 0; i < agg.getNumPlayers(); ++i) {
-      for (int j = 0; j < agg.getNumActions(i); ++j) {
-        const int ind = this->m_profileIndex.at(game->GetPlayer(i + 1)->GetStrategy(j + 1));
-        s[agg.firstAction(i) + j] = (ind == -1) ? 0.0 : this->m_probs.GetFlattened()[ind];
-      }
-    }
+    const auto s = GetStrategyVector();
 
     const auto player = game->GetPlayer(pl);
     const auto &strategies = this->m_support.GetStrategies(player);
@@ -201,7 +206,7 @@ void AGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_val
     std::vector<double> row(agg.getNumActions());
     size_t r = 1;
     for (const auto &strategy : strategies) {
-      p_values[r] = GetPayoffDeriv(pl, strategy);
+      p_values[r] = g.aggPtr->getV(pl - 1, strategy->GetNumber() - 1, s);
       g.aggPtr->getPayoffJacobianRow(pl - 1, strategy->GetNumber() - 1, s, row);
       for (const auto &other : game->GetPlayers()) {
         if (other == player) {

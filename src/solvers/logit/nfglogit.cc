@@ -165,9 +165,10 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
   PointToProfile(m_profile, p_point);
   PointToLogProfile(m_logProfile, p_point);
   const double lambda = p_point.back();
-  int col = 1;
-  for (const auto &strategy : m_game->GetStrategies()) {
-    m_strategyValues[col++] = m_profile.GetPayoff(strategy);
+  auto value = m_strategyValues.begin();
+  for (const auto &player : m_game->GetPlayers()) {
+    m_profile.GetStrategyValues(player, m_blockValues);
+    value = std::ranges::copy(m_blockValues, value).out;
   }
   std::ranges::transform(m_equations, p_lhs.begin(), [this, lambda](const auto &e) {
     return e->Value(m_profile, m_logProfile, m_strategyValues, lambda);

@@ -148,7 +148,8 @@ ProfileDiffActionValues(const MixedBehaviorProfile<double> &p_profile)
 }
 
 /// Largest absolute difference, over every player, between the payoffs and derivatives given by
-/// MixedStrategyProfile::GetPayoffDerivBlock and the same quantities computed one at a time.
+/// MixedStrategyProfile::GetPayoffDerivBlock, and the payoffs given by
+/// MixedStrategyProfile::GetStrategyValues, and the same quantities computed one at a time.
 /// The profile checked is on the support of p_profile's game with p_removed taken out, with the
 /// probabilities of the remaining strategies taken from p_profile.  Private, for testing.
 inline double PayoffDerivBlockDiscrepancy(const MixedStrategyProfile<double> &p_profile,
@@ -166,13 +167,15 @@ inline double PayoffDerivBlockDiscrepancy(const MixedStrategyProfile<double> &p_
     }
   }
   double worst = 0.0;
-  Vector<double> values;
+  Vector<double> values, strategyValues;
   Matrix<double> derivs;
   for (const auto &player : game->GetPlayers()) {
     profile.GetPayoffDerivBlock(player, values, derivs);
+    profile.GetStrategyValues(player, strategyValues);
     size_t row = 1;
     for (const auto &strategy : support.GetStrategies(player)) {
       worst = std::max(worst, std::abs(values[row] - profile.GetPayoff(strategy)));
+      worst = std::max(worst, std::abs(strategyValues[row] - profile.GetPayoff(strategy)));
       size_t column = 1;
       for (const auto &other : game->GetPlayers()) {
         for (const auto &otherStrategy : support.GetStrategies(other)) {

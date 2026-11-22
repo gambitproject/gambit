@@ -326,6 +326,13 @@ public:
     return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy);
   }
 
+  /// @brief Computes the payoffs of a player's strategies
+  /// @details For each strategy of \p p_player in the support, computes the payoff to playing
+  ///          it against the profile.
+  /// @param[in] p_player  The player whose strategies are evaluated
+  /// @param[out] p_values  Resized to one entry per strategy of the player in the support
+  void GetStrategyValues(const GamePlayer &p_player, Vector<T> &p_values) const;
+
   /// @brief Computes the payoffs of a player's strategies and their derivatives
   /// @details For each strategy of \p p_player in the support, computes the payoff to playing
   ///          it against the profile, and the derivatives of that payoff with respect to the
