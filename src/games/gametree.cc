@@ -772,7 +772,6 @@ void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *
     }
   }
 
-  dest->m_label = src->m_label;
   AttachOutcome(dest->m_outcome, src->m_outcome);
 }
 

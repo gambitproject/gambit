@@ -4,6 +4,9 @@
 - `NashComponent` and `NashPolytope`, describing the connected components of the equilibrium set of a
   two-player game, returned by `enummixed_solve(..., components=True)`.
 
+### Changed
+- `ExtensiveGame.copy_tree` (and copying a subtree in the GUI) no longer copies node labels.
+
 
 ## [17.0.0-beta.4] - 2026-11-19
 

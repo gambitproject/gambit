@@ -176,6 +176,8 @@ node. Moving a subtree onto one of its own descendants is never
 offered (though shown, disabled), since the destination would cease to
 exist partway through the move; copying onto a descendant remains
 available, since the copy is made before anything is removed.
+Node labels are unique within a game, so they are not copied: the
+nodes of the copy are unlabelled.
 
 
 Removing parts of a game tree

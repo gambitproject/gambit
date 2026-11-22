@@ -1406,6 +1406,7 @@ class ExtensiveGame(_StrategicFormBase):
         so no infinite recursion is triggered.
 
         The outcome associated with `dest` is not changed by this operation.
+        Node labels are not copied: all new nodes are unlabelled.
 
         `src` and `dest` are each a `Selector` (an `H`-built expression, evaluated
         against this game) that must resolve to exactly one node.
