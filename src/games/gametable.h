@@ -63,10 +63,11 @@ private:
   /// contingency gives exactly one strategy per player and is referenced only once.
   std::set<long>
   ResolveContingencies(const std::vector<std::vector<GameStrategy>> &p_contingencies) const;
-  /// Returns the subset of p_covered no longer referenced by any contingency outside p_selected.
-  std::set<const GameOutcomeRep *>
-  ComputeAbsorbedOutcomes(const std::set<long> &p_selected,
-                          const std::set<const GameOutcomeRep *> &p_covered) const;
+  /// Returns the number of contingencies in p_selected to which each non-null outcome is attached.
+  std::map<const GameOutcomeRep *, std::size_t>
+  CountCoveredOutcomes(const std::set<long> &p_selected) const;
+  /// Recompute the use count of each outcome from the table of contingencies.
+  void CountOutcomeUses();
   //@}
 
 public:

@@ -251,3 +251,70 @@ def test_outcome_labels_of_dense_strategic_game_are_indexed():
     assert "renamed" in game.get_outcomes()
     with pytest.raises(ValueError):
         game.relabel_outcomes({labels[1]: "renamed"})
+
+
+def test_outcome_copied_by_copy_tree_is_not_absorbed_until_every_copy_is_covered():
+    game = gbt.ExtensiveGame(["Alice"])
+    game.append_move(gbt.H.path(), "Alice", ["U", "D"])
+    game.append_move(gbt.H.path("U"), "Alice", ["a", "b"])
+    game.make_outcome(gbt.H.path("U", "a"), {"Alice": 1}, "w")
+    game.copy_tree(gbt.H.path("U"), gbt.H.path("D"))
+    assert game.get_outcome(gbt.H.path("D", "a")) == "w"
+    with pytest.raises(ValueError):
+        game.make_outcome(gbt.H.path("U", "a"), {"Alice": 2}, "w")
+    game.make_outcome(gbt.H.path("U", "a"), {"Alice": 2}, "v")
+    assert set(game.get_outcomes()) == {"w", "v"}
+    game.make_outcome(gbt.H.path("D", "a"), {"Alice": 3}, "w")
+    assert set(game.get_outcomes()) == {"w", "v"}
+    assert game.get_outcome_payoffs("w")["Alice"] == 3
+
+
+def test_outcome_in_deleted_subtree_no_longer_counts_as_used():
+    game = gbt.ExtensiveGame(["Alice"])
+    game.append_move(gbt.H.path(), "Alice", ["U", "D"])
+    game.append_move(gbt.H.path(...), "Alice", ["a", "b"])
+    game.make_outcome(
+        gbt.H.path(..., ...).filter(lambda h: h[1].action == "a"), {"Alice": 1}, "w"
+    )
+    game.delete_tree(gbt.H.path("U"))
+    game.make_outcome(gbt.H.path("D", "a"), {"Alice": 2}, "w")
+    assert game.get_outcomes() == ["w"]
+    assert game.get_outcome_payoffs("w")["Alice"] == 2
+
+
+def test_outcome_at_move_tree_destination_no_longer_counts_as_used():
+    game = gbt.ExtensiveGame(["Alice"])
+    game.append_move(gbt.H.path(), "Alice", ["U", "M", "D"])
+    game.append_move(gbt.H.path("U"), "Alice", ["a", "b"])
+    game.make_outcome(
+        gbt.H.path(...).filter(lambda h: h[0].action in ("M", "D")), {"Alice": 1}, "w"
+    )
+    game.move_tree(gbt.H.path("U"), gbt.H.path("M"))
+    game.make_outcome(gbt.H.path("D"), {"Alice": 2}, "w")
+    assert game.get_outcomes() == ["w"]
+
+
+def test_table_outcome_in_dropped_strategy_no_longer_counts_as_used():
+    game = gbt.StrategicGame([2, 2])
+    game.make_outcome([{"1": "1", "2": "1"}, {"1": "2", "2": "1"}], {"1": 1, "2": 0}, "w")
+    game.set_strategies("1", ["1"], drop=True)
+    game.make_outcome({"1": "1", "2": "1"}, {"1": 2, "2": 0}, "w")
+    assert game.get_outcome_payoffs("w")["1"] == 2
+
+
+def test_table_outcome_kept_by_set_players_is_counted():
+    game = gbt.StrategicGame([2, 2])
+    game.make_outcome([{"1": "1", "2": "1"}, {"1": "1", "2": "2"}], {"1": 1, "2": 0}, "w")
+    game.set_players(["2", "1"])
+    with pytest.raises(ValueError):
+        game.make_outcome({"1": "1", "2": "1"}, {"1": 2, "2": 0}, "w")
+    game.make_outcome([{"1": "1", "2": "1"}, {"1": "1", "2": "2"}], {"1": 2, "2": 0}, "w")
+    assert game.get_outcome_payoffs("w")["1"] == 2
+
+
+def test_dense_table_outcomes_are_absorbed_when_replaced():
+    game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[4, 3], [2, 1]])
+    old = game.get_outcome({"1": "1", "2": "1"})
+    game.make_outcome({"1": "1", "2": "1"}, {"1": 0, "2": 0}, old)
+    assert len(game.get_outcomes()) == 4
+    assert game.get_outcome_payoffs(old)["1"] == 0

@@ -386,6 +386,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
     });
     std::ranges::transform(m_outcomes, m_results.begin(),
                            [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
+    CountOutcomeUses();
     IndexOutcomeLabels();
   }
 }
@@ -519,20 +520,28 @@ std::set<long> GameTableRep::ResolveContingencies(
   return selected;
 }
 
-std::set<const GameOutcomeRep *>
-GameTableRep::ComputeAbsorbedOutcomes(const std::set<long> &p_selected,
-                                      const std::set<const GameOutcomeRep *> &p_covered) const
+std::map<const GameOutcomeRep *, std::size_t>
+GameTableRep::CountCoveredOutcomes(const std::set<long> &p_selected) const
 {
-  std::set<const GameOutcomeRep *> absorbed;
-  if (!p_covered.empty()) {
-    absorbed = p_covered;
-    for (size_t index = 0; index < m_results.size() && !absorbed.empty(); index++) {
-      if (!p_selected.contains(static_cast<long>(index))) {
-        absorbed.erase(m_results[index]);
-      }
+  std::map<const GameOutcomeRep *, std::size_t> covered;
+  for (const auto index : p_selected) {
+    if (!m_results[index]->IsNull()) {
+      covered[m_results[index]]++;
     }
   }
-  return absorbed;
+  return covered;
+}
+
+void GameTableRep::CountOutcomeUses()
+{
+  for (const auto &outcome : m_outcomes) {
+    outcome->m_useCount = 0;
+  }
+  for (auto *outcome : m_results) {
+    if (!outcome->IsNull()) {
+      outcome->m_useCount++;
+    }
+  }
 }
 
 GameOutcome
@@ -546,13 +555,7 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
     throw ValueException("A payoff must be specified for each player");
   }
   const auto selected = ResolveContingencies(p_contingencies);
-  std::set<const GameOutcomeRep *> covered;
-  for (const auto index : selected) {
-    if (!m_results[index]->IsNull()) {
-      covered.insert(m_results[index]);
-    }
-  }
-  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+  const auto absorbed = AbsorbedOutcomes(CountCoveredOutcomes(selected));
   CheckOutcomeLabel(p_label, absorbed);
 
   IncrementVersion();
@@ -562,7 +565,7 @@ GameTableRep::MakeOutcome(const std::vector<std::vector<GameStrategy>> &p_contin
     outcome->SetPayoff(player, p_payoffs[pl]);
   }
   for (const auto index : selected) {
-    m_results[index] = outcome.get();
+    AttachOutcome(m_results[index], outcome.get());
   }
   if (!absorbed.empty()) {
     EraseOutcomes(absorbed);
@@ -576,17 +579,11 @@ void GameTableRep::MakeOutcomeNull(const std::vector<std::vector<GameStrategy>> 
     throw ValueException("At least one contingency must be specified");
   }
   const auto selected = ResolveContingencies(p_contingencies);
-  std::set<const GameOutcomeRep *> covered;
-  for (const auto index : selected) {
-    if (!m_results[index]->IsNull()) {
-      covered.insert(m_results[index]);
-    }
-  }
-  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+  const auto absorbed = AbsorbedOutcomes(CountCoveredOutcomes(selected));
 
   IncrementVersion();
   for (const auto index : selected) {
-    m_results[index] = m_nullOutcome.get();
+    AttachOutcome(m_results[index], m_nullOutcome.get());
   }
   if (!absorbed.empty()) {
     EraseOutcomes(absorbed);
@@ -794,6 +791,7 @@ void GameTableRep::SetPlayers(const std::vector<std::string> &p_labels)
     newResults[new_index] = m_results[old_index];
   }
   m_results.swap(newResults);
+  CountOutcomeUses();
   IndexStrategies();
 }
 
@@ -874,6 +872,7 @@ void GameTableRep::RebuildTable(const std::vector<long> &old_radices, long p_pla
     }
   }
   m_results.swap(newResults);
+  CountOutcomeUses();
   IndexStrategies();
 }
 
