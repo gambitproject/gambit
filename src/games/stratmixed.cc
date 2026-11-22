@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cmath>
+
 #include "games.h"
 
 // The reference to the tree representation violates the logic
@@ -82,6 +84,32 @@ std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normaliz
     }
   }
   return norm;
+}
+
+namespace {
+
+bool SumsToOne(const Rational &p_sum) { return p_sum == Rational(1); }
+
+bool SumsToOne(double p_sum)
+{
+  constexpr double tolerance = 1.0e-9;
+  return std::abs(p_sum - 1.0) <= tolerance;
+}
+
+} // namespace
+
+template <class T> bool MixedStrategyProfileRep<T>::IsNormalized() const
+{
+  for (const auto &player : m_support.GetGame()->GetPlayers()) {
+    T sum = T{0};
+    for (const auto &strategy : m_support.GetStrategies(player)) {
+      sum += (*this)[strategy];
+    }
+    if (!SumsToOne(sum)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 //========================================================================

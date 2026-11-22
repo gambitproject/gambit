@@ -61,6 +61,7 @@ public:
 
   void SetCentroid();
   std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
+  bool IsNormalized() const;
   const T &operator[](int i) const { return m_probs.GetFlattened()[i]; }
   T &operator[](int i)
   {
@@ -264,6 +265,13 @@ public:
   {
     CheckVersion();
     return MixedStrategyProfile<T>(m_rep->Normalize());
+  }
+  /// Returns whether each player's strategy probabilities sum to one (exactly for rational
+  /// profiles, within rounding tolerance for floating-point profiles)
+  bool IsNormalized() const
+  {
+    CheckVersion();
+    return m_rep->IsNormalized();
   }
 
   /// Returns the total number of strategies in the profile

@@ -8,6 +8,8 @@
 - `ExtensiveGame.copy_tree` (and copying a subtree in the GUI) no longer copies node labels.
 - `MixedBehaviorProfile.as_strategy` now raises `UndefinedOperationError` on a game with absent-minded
   information sets.
+- `MixedStrategyProfile.as_behavior` now raises `UndefinedOperationError` unless each player's
+  strategy probabilities sum to one; call `normalize` first.
 
 
 ## [17.0.0-beta.4] - 2026-11-19

@@ -174,6 +174,8 @@ public:
   MixedBehaviorProfile(MixedBehaviorProfile<T> &&) = default;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   MixedBehaviorProfile<T> &operator=(MixedBehaviorProfile<T> &&) = default;
+  /// Constructs the behavior profile equivalent to a mixed strategy profile.
+  /// Throws UndefinedException unless each player's probabilities sum to one.
   explicit MixedBehaviorProfile(const MixedStrategyProfile<T> &);
   MixedBehaviorProfile(const MixedSequenceProfile<T> &);
   ~MixedBehaviorProfile() = default;
