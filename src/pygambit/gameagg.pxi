@@ -26,38 +26,6 @@ class ActionGraphGame(_StrategicFormBase):
 
 
 @cython.cclass
-class BAGGPlayers:
-    """The labels of the players of a Bayesian action-graph game.
-
-    .. versionadded:: 17.0.0
-    """
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create BAGGPlayers outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> BAGGPlayers:
-        obj: BAGGPlayers = BAGGPlayers.__new__(BAGGPlayers)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"BAGGPlayers(game={Game._wrap(self.game)})"
-
-    def __len__(self) -> int:
-        return As[c_GameBAGGRep](self.game).get().NumBaggPlayers()
-
-    def __iter__(self) -> typing.Iterator[str]:
-        for i in range(len(self)):
-            yield str(i + 1)
-
-    def __contains__(self, label: str) -> bool:
-        return isinstance(label, str) and label in set(self)
-
-
-@cython.cclass
 class BayesianActionGraphGame(Game):
     """A `Game` with a Bayesian action-graph game representation.
 
@@ -134,19 +102,24 @@ class BayesianActionGraphGame(Game):
             raise TypeError(f"player must be str, not {player.__class__.__name__}")
         if not player.strip():
             raise ValueError("player cannot be an empty string or all spaces")
-        for i, label in enumerate(self.players):
+        for i, label in enumerate(self.get_players()):
             if label == player:
                 return i + 1
         raise KeyError(f"no player with label '{player}'")
 
-    @property
-    def players(self) -> BAGGPlayers:
-        """The set of players in the game.
+    def get_players(self) -> list[str]:
+        """Returns the labels of the players in the game.
 
         .. versionchanged:: 17.0.0
-            The Bayesian players, rather than one player per type.
+            The Bayesian players, rather than one player per type.  Replaces the
+            ``Game.players`` property.
+
+        Returns
+        -------
+        list of str
         """
-        return BAGGPlayers.wrap(self.game)
+        n = As[c_GameBAGGRep](self.game).get().NumBaggPlayers()
+        return [str(i) for i in range(1, n + 1)]
 
     def has_perfect_recall(self, player: str) -> bool:
         """Returns whether `player` has perfect recall.
@@ -285,7 +258,7 @@ class BayesianActionGraphGame(Game):
         """
         profile = self._new_profile(rational)
         if data is not None:
-            players = list(self.players)
+            players = self.get_players()
             if len(data) != len(players):
                 raise ValueError("data must have one entry for each player")
             for player, player_data in zip(players, data, strict=True):
@@ -344,7 +317,7 @@ class BayesianActionGraphGame(Game):
         if denom is not None and denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
         profile = self._new_profile(denom is not None)
-        for player in self.players:
+        for player in self.get_players():
             for infoset in self.get_infosets(player):
                 actions = profile._action_labels(player, infoset)
                 profile[player, infoset] = (

@@ -8,7 +8,7 @@ from . import games
 def test_strategic_game_get_infosets():
     """`get_infosets` does not exist on a game with a strategic representation."""
     game = gbt.StrategicGame([2, 2])
-    player, _ = game.players
+    player, _ = game.get_players()
     with pytest.raises(AttributeError):
         _ = game.get_infosets(player)
 
@@ -58,7 +58,7 @@ def test_game_get_outcome():
 
 def test_game_get_outcome_by_relabeled_strategies():
     game = gbt.StrategicGame([2, 2])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
     game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
     game.make_outcome({pl1: "defect", pl2: "cooperate"}, {"1": 0, "2": 0}, "corner")
@@ -97,7 +97,7 @@ def test_game_get_outcome_unknown_strategy_label_raises():
 
 def test_game_get_outcome_unmatched_label_after_relabel_raises():
     game = gbt.StrategicGame([2, 2])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     game.relabel_strategies(pl1, {next(iter(game.get_strategies(pl1))): "defect"})
     game.relabel_strategies(pl2, {next(iter(game.get_strategies(pl2))): "cooperate"})
     with pytest.raises(KeyError):

@@ -424,7 +424,7 @@ def games(
                 return False
             n_game_actions = sum(
                 len(game.get_actions(gbt.H.path(*history.actions)))
-                for player in game.players
+                for player in game.get_players()
                 for history in game.get_infosets(player)
             )
             if n_game_actions != n_actions:
@@ -434,7 +434,7 @@ def games(
         if n_infosets is not None:
             if not isinstance(game, gbt.ExtensiveGame):
                 return False
-            if sum(len(game.get_infosets(p)) for p in game.players) != n_infosets:
+            if sum(len(game.get_infosets(p)) for p in game.get_players()) != n_infosets:
                 return False
         if is_const_sum is not None and game.is_const_sum() != is_const_sum:
             return False
@@ -456,9 +456,9 @@ def games(
             or len(game.get_outcomes()) != n_outcomes
         ):
             return False
-        if n_players is not None and len(game.players) != n_players:
+        if n_players is not None and len(game.get_players()) != n_players:
             return False
-        total_strategies = sum(len(game.get_strategies(p)) for p in game.players)
+        total_strategies = sum(len(game.get_strategies(p)) for p in game.get_players())
         return not (n_strategies is not None and total_strategies != n_strategies)
 
     def append_record(

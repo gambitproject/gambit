@@ -112,7 +112,7 @@ def _point(qre) -> list[float]:
         profile = qre.profile
         return [qre.lam] + [
             probability
-            for player in profile.game.players
+            for player in profile.game.get_players()
             for infoset in profile.game.get_infosets(player)
             for _, probability in profile[player, infoset]
         ]

@@ -172,7 +172,7 @@ class BAGGMixedBehaviorProfile:
         raise ValueError("Cannot create a BAGGMixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str([self[player] for player in self.game.players])
+        return str([self[player] for player in self.game.get_players()])
 
     @property
     def game(self) -> Game:
@@ -180,11 +180,11 @@ class BAGGMixedBehaviorProfile:
         return self._game
 
     def __len__(self) -> int:
-        return len(self.game.players)
+        return len(self.game.get_players())
 
     def __iter__(self) -> typing.Iterator[BAGGMixedBehavior, None, None]:
         """Iterate over the players' mixed behaviors, in the order of the game's players."""
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield self[player]
 
     @cython.cfunc
@@ -325,7 +325,7 @@ class BAGGMixedBehaviorProfile:
         payoff conditional on that type.
         """
         self._check_validity()
-        return PayoffVector({p: self._player_payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._player_payoff(p) for p in self.game.get_players()})
 
     @property
     def infoset_probs(self) -> BAGGInfosetProbVector:
@@ -335,7 +335,7 @@ class BAGGMixedBehaviorProfile:
         """
         self._check_validity()
         return BAGGInfosetProbVector({
-            player: dict(self._types(player)) for player in self.game.players
+            player: dict(self._types(player)) for player in self.game.get_players()
         })
 
     @property
@@ -354,7 +354,7 @@ class BAGGMixedBehaviorProfile:
                 infoset: self._agent_payoff(player, infoset)
                 for infoset in self.game.get_infosets(player)
             }
-            for player in self.game.players
+            for player in self.game.get_players()
         })
 
     @property
@@ -377,7 +377,7 @@ class BAGGMixedBehaviorProfile:
                 infoset: self._agent_regret(player, infoset)
                 for infoset in self.game.get_infosets(player)
             }
-            for player in self.game.players
+            for player in self.game.get_players()
         })
 
     @property
@@ -403,7 +403,7 @@ class BAGGMixedBehaviorProfile:
                 })
                 for infoset in self.game.get_infosets(player)
             }
-            for player in self.game.players
+            for player in self.game.get_players()
         })
 
     @property
@@ -430,7 +430,7 @@ class BAGGMixedBehaviorProfile:
                 })
                 for infoset in self.game.get_infosets(player)
             }
-            for player in self.game.players
+            for player in self.game.get_players()
         })
 
     def agent_liap_value(self) -> ProfileDType:
@@ -465,7 +465,7 @@ class BAGGMixedBehaviorProfile:
         self._check_validity()
         zero = self._to_prob(0)
         total = zero
-        for player in self.game.players:
+        for player in self.game.get_players():
             for infoset, prior in self._types(player):
                 value = self._agent_payoff(player, infoset)
                 for action in self._action_labels(player, infoset):
@@ -488,7 +488,7 @@ class BAGGMixedBehaviorProfile:
         self._check_validity()
         return max(
             (self._agent_regret(player, infoset)
-             for player in self.game.players for infoset in self.game.get_infosets(player)),
+             for player in self.game.get_players() for infoset in self.game.get_infosets(player)),
             default=self._to_prob(0)
         )
 
@@ -505,7 +505,7 @@ class BAGGMixedBehaviorProfile:
         """
         self._check_validity()
         return max(
-            (self._player_regret(player) for player in self.game.players),
+            (self._player_regret(player) for player in self.game.get_players()),
             default=self._to_prob(0)
         )
 
@@ -759,7 +759,7 @@ class BAGGMixedBehaviorProfileRational(BAGGMixedBehaviorProfile):
 
     def _as_float(self) -> BAGGMixedBehaviorProfileDouble:
         result = self._bagg()._new_profile(False)
-        for player in self.game.players:
+        for player in self.game.get_players():
             for infoset in self.game.get_infosets(player):
                 result[player, infoset] = {
                     action: float(self._getprob(player, infoset, action))

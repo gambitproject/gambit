@@ -162,7 +162,7 @@ def test_make_outcome_null_resets_given_contingencies_to_null():
 def test_make_outcome_null_removes_fully_orphaned_outcome():
     game = gbt.StrategicGame.from_arrays([[0, 0], [0, 0]], [[0, 0], [0, 0]])
     outcome_count = len(game.get_outcomes())
-    p1, p2 = game.players
+    p1, p2 = game.get_players()
     s1 = next(iter(game.get_strategies(p1)))
     s2 = next(iter(game.get_strategies(p2)))
     game.make_outcome_null({p1: s1, p2: s2})

@@ -14,8 +14,8 @@ def test_constructor_fail():
 def test_from_arrays():
     m = np.array([[8, 2], [10, 5]])
     game = gbt.StrategicGame.from_arrays(m, m.transpose())
-    pl1, pl2 = game.players
-    assert len(game.players) == 2
+    pl1, pl2 = game.get_players()
+    assert len(game.get_players()) == 2
     assert len(game.get_strategies(pl1)) == 2
     assert len(game.get_strategies(pl2)) == 2
 
@@ -89,24 +89,20 @@ def test_3d_to_arrays():
 def test_from_dict():
     m = np.array([[8, 2], [10, 5]])
     game = gbt.StrategicGame.from_dict({"a": m, "b": m.transpose()})
-    pl1, pl2 = game.players
-    assert len(game.players) == 2
+    pl1, pl2 = game.get_players()
+    assert len(game.get_players()) == 2
     assert len(game.get_strategies(pl1)) == 2
     assert len(game.get_strategies(pl2)) == 2
     assert pl1 == "a"
     assert pl2 == "b"
 
 
-COLLECTION_GETTERS = [
-    pytest.param(lambda g: g.players, id="GamePlayers"),
-]
-
-
-@pytest.mark.parametrize("getter", COLLECTION_GETTERS)
-def test_collection_rejects_integer_indexing(getter):
-    collection = getter(games.create_stripped_down_poker_efg())
-    with pytest.raises(TypeError):
-        _ = collection[0]
+def test_get_players_returns_list_of_labels():
+    game = games.create_stripped_down_poker_efg()
+    players = game.get_players()
+    assert players == ["Alice", "Bob"]
+    players.append("Carol")
+    assert game.get_players() == ["Alice", "Bob"]
 
 
 @pytest.mark.parametrize(

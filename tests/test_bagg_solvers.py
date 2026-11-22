@@ -21,7 +21,7 @@ COFFEE = "Bayesian-Coffee-3-2-2-3.bagg"
 def _grouped(profile) -> dict:
     return {
         (player, infoset): [probability for _, probability in profile[player, infoset]]
-        for player in profile.game.players
+        for player in profile.game.get_players()
         for infoset in profile.game.get_infosets(player)
     }
 
@@ -167,7 +167,7 @@ def _start_near_a_pure_equilibrium(game, offset=0, rational=False):
     pure = gbt.nash.enumpure_solve(game).equilibria[0]
     start = game.mixed_behavior_profile(rational=rational)
     offset = gbt.Rational(offset) if rational else float(offset)
-    for player in game.players:
+    for player in game.get_players():
         for infoset in game.get_infosets(player):
             weights = [(action, float(prob)) for action, prob in pure[player, infoset]]
             start[player, infoset] = {
@@ -366,7 +366,7 @@ def test_logit_path_events_carry_bagg_qre_profiles(path):
         assert isinstance(qre.log_like, float)
     assert paths[0].qre.lam == 0.0
     uniform = paths[0].qre.profile
-    for player in uniform.game.players:
+    for player in uniform.game.get_players():
         for infoset in uniform.game.get_infosets(player):
             probs = [float(p) for _, p in uniform[player, infoset]]
             assert probs == pytest.approx([1 / len(probs)] * len(probs))

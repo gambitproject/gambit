@@ -106,7 +106,7 @@ def test_agg_bagg_have_strategic_form_members_exactly_when_they_have_one(game_pa
 def test_bagg_every_player_has_perfect_recall(game_path):
     game = games.read_from_file(game_path)
     assert game.is_perfect_recall()
-    for player in game.players:
+    for player in game.get_players():
         assert game.has_perfect_recall(player) is True
     with pytest.raises(KeyError):
         game.has_perfect_recall("no such player")
@@ -132,14 +132,14 @@ def test_agg_fraction_and_long_decimal_payoffs_parsed_exactly():
     game = games.read_from_file("2x2_fraction_payoffs.agg")
     assert game.get_max_payoff() == gbt.Rational(1, 3)
     assert game.get_min_payoff() == -10
-    for player in game.players:
+    for player in game.get_players():
         assert game.get_max_payoff(player) == gbt.Rational(1, 3)
         assert game.get_min_payoff(player) == -10
 
     # pure-strategy payoff lookup (AGGPureStrategyProfileRep::GetPayoff) also reports the
     # exact value, not a double-rounded approximation -- for both the fraction and the long
     # decimal payoff
-    p0, p1 = game.players
+    p0, p1 = game.get_players()
     s0 = game.get_strategies(p0)
     s1 = game.get_strategies(p1)
 
@@ -195,16 +195,16 @@ def test_agg_bagg_mixed_strategy_profile_rational_exact_payoff(game_path):
     game = games.read_from_file(game_path)
     if isinstance(game, gbt.BayesianActionGraphGame):
         profile = game.mixed_behavior_profile(rational=True)
-        for player in game.players:
+        for player in game.get_players():
             profile[player, "1"] = {"1": gbt.Rational(10, 11), "2": gbt.Rational(1, 11)}
     else:
         profile = game.mixed_strategy_profile(rational=True)
-        for player in game.players:
+        for player in game.get_players():
             strategies = game.get_strategies(player)
             profile[player] = {
                 strategies[0]: gbt.Rational(10, 11), strategies[1]: gbt.Rational(1, 11)
             }
-    for player in game.players:
+    for player in game.get_players():
         assert profile.payoffs[player] == gbt.Rational(-5, 11)
     assert profile.max_regret() == 0
 
@@ -224,11 +224,11 @@ def test_agg_rational_algorithms_find_exact_mixed_equilibrium():
         mixed = [
             eq for eq in result.equilibria
             if any(
-                0 < eq[p][s] < 1 for p in game.players for s in game.get_strategies(p)
+                0 < eq[p][s] < 1 for p in game.get_players() for s in game.get_strategies(p)
             )
         ]
         assert len(mixed) == 1
-        for player in game.players:
+        for player in game.get_players():
             for strategy in game.get_strategies(player):
                 assert mixed[0][player][strategy] in (
                     gbt.Rational(10, 11), gbt.Rational(1, 11)
@@ -251,7 +251,7 @@ def _assert_exact_pure_payoffs_match_double(game, contingencies):
     for contingency in contingencies:
         exact = _pure_behavior_profile(game, True, contingency)
         dbl = _pure_behavior_profile(game, False, contingency)
-        for player in game.players:
+        for player in game.get_players():
             assert float(exact.payoffs[player]) == pytest.approx(dbl.payoffs[player])
 
 
@@ -262,7 +262,7 @@ def test_bagg_pure_strategy_payoff_matches_degenerate_mixed_profile(game_path):
     ex-ante payoff of a pure profile is its type-weighted average of conditional payoffs.
     """
     game = games.read_from_file(game_path)
-    slots = [(p, t) for p in game.players for t in game.get_infosets(p)]
+    slots = [(p, t) for p in game.get_players() for t in game.get_infosets(p)]
     sizes = [len(game.mixed_behavior_profile()[p, t]) for p, t in slots]
     contingencies = [
         dict(zip(slots, choice, strict=True))
@@ -277,7 +277,7 @@ def test_bagg_pure_strategy_payoff_with_multiple_players_and_types():
     handling of more than one other player's type distribution at once.
     """
     game = games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg")
-    slots = [(p, t) for p in game.players for t in game.get_infosets(p)]
+    slots = [(p, t) for p in game.get_players() for t in game.get_infosets(p)]
     sizes = [len(game.mixed_behavior_profile()[p, t]) for p, t in slots]
     choices = [
         tuple(0 for _ in sizes),

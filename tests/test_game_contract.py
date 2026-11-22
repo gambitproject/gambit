@@ -34,8 +34,7 @@ from . import games
 # ---------------------------------------------------------------------------------------
 
 # Member name -> kind.  "method" is an accessor or an operation, "property" a stored and
-# settable attribute, "classmethod" a constructor and "any" a member whose shape is owned by
-# another piece of work (`players`).
+# settable attribute and "classmethod" a constructor.
 #
 # `get_min_payoff` and `get_max_payoff` are listed under Core, which gives the game-wide
 # bound.  The strategic-form capability adds the `player` form under the same name.
@@ -43,7 +42,7 @@ CAPABILITIES: dict[str, dict[str, str]] = {
     "core": {
         "title": "property",
         "description": "property",
-        "players": "any",
+        "get_players": "method",
         "get_min_payoff": "method",
         "get_max_payoff": "method",
         "is_perfect_recall": "method",
@@ -231,7 +230,7 @@ def _kind_of(cls: type, name: str) -> str:
             (cls, name)
             for cls in CLASSES
             for name, kind in members_of(cls).items()
-            if kind != "any" and name in dir(cls)
+            if name in dir(cls)
         ],
     ),
 )
@@ -291,14 +290,14 @@ def test_core_queries(cls):
     assert isinstance(game.get_max_payoff(), gbt.Rational)
     assert game.get_min_payoff() <= game.get_max_payoff()
     assert isinstance(game.is_perfect_recall(), bool)
-    for player in game.players:
+    for player in game.get_players():
         assert isinstance(game.has_perfect_recall(player), bool)
 
 
 def _efg_with_decimal_payoffs() -> gbt.Game:
     game = games.read_from_file(SAMPLE_GAMES[gbt.ExtensiveGame])
     for outcome in game.get_outcomes():
-        game.set_outcome_payoffs(outcome, {p: gbt.Decimal("1.5") for p in game.players})
+        game.set_outcome_payoffs(outcome, {p: gbt.Decimal("1.5") for p in game.get_players()})
     return game
 
 
@@ -320,7 +319,7 @@ PAYOFF_MEMBERS = ("get_payoffs", "get_min_payoff", "get_max_payoff", "get_outcom
 
 
 def _payoff_values(game: gbt.Game, member: str) -> list:
-    players = list(game.players)
+    players = game.get_players()
     if member == "get_payoffs":
         contingency = {p: game.get_strategies(p)[0] for p in players}
         payoffs = game.get_payoffs(contingency)
@@ -358,11 +357,11 @@ def test_payoff_valued_members_return_rational(cls, member):
 
 
 def _first(game: gbt.Game) -> str:
-    return list(game.players)[0]
+    return game.get_players()[0]
 
 
 def _contingency(game: gbt.Game) -> dict:
-    return {p: game.get_strategies(p)[0] for p in game.players}
+    return {p: game.get_strategies(p)[0] for p in game.get_players()}
 
 
 def _unknown_strategy(game: gbt.Game) -> dict:

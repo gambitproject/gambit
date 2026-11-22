@@ -11,8 +11,8 @@ from . import games
 )
 def test_new_tree(players: list, title: str | None):
     game = gbt.ExtensiveGame(players=players, title=title)
-    assert len(game.players) == len(players)
-    for player, label in zip(game.players, players, strict=True):
+    assert len(game.get_players()) == len(players)
+    for player, label in zip(game.get_players(), players, strict=True):
         assert player == label
     assert game.title == title
 
@@ -55,7 +55,7 @@ def test_game_title_accepts_text_invalid_for_a_label(text: str):
 def test_game_set_players_label(players: list):
     game = gbt.ExtensiveGame()
     game.set_players(players)
-    for player, label in zip(game.players, players, strict=True):
+    for player, label in zip(game.get_players(), players, strict=True):
         assert player == label
 
 
@@ -111,7 +111,7 @@ def test_has_perfect_recall(game_input, expected_result: dict):
     with and without perfect recall, and in each representation.
     """
     game = (games.read_from_file(game_input) if isinstance(game_input, str) else game_input)
-    assert set(game.players) == set(expected_result)
+    assert set(game.get_players()) == set(expected_result)
     for player, expected in expected_result.items():
         assert game.has_perfect_recall(player) == expected
 
@@ -414,7 +414,7 @@ def test_reduced_strategic_form(
     arrays = game.to_arrays()
 
     for player, labels, exp_raw, arr in zip(
-        game.players, strategy_labels, np_arrays_of_rsf, arrays, strict=True
+        game.get_players(), strategy_labels, np_arrays_of_rsf, arrays, strict=True
     ):
         assert labels == game.get_strategies(player)
         assert (arr == games.vectorized_make_rational(exp_raw)).all()
@@ -528,7 +528,7 @@ def test_reduced_strategy_maps(game: gbt.Game, strategy_maps: list):
     `Game.get_behavior`.  A "*" marks an information set at which the strategy
     prescribes no action, being unreachable given the strategy's own earlier actions.
     """
-    for player, expected_maps in zip(game.players, strategy_maps, strict=True):
+    for player, expected_maps in zip(game.get_players(), strategy_maps, strict=True):
         for strategy, expected in zip(game.get_strategies(player), expected_maps, strict=True):
             behavior = game.get_behavior(player, strategy)
             assert tuple(

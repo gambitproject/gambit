@@ -8,11 +8,11 @@ from . import games
 def test_mixed_strategy_profile_game_structure_changed_no_tree():
     game = gbt.StrategicGame.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
-    player = next(iter(game.players))
+    player = game.get_players()[0]
     distribution = {s: 0 for s in game.get_strategies(player)}
     game.make_outcome(
-        {p: "1" for p in game.players},
-        {p: (3 if p == player else 0) for p in game.players},
+        {p: "1" for p in game.get_players()},
+        {p: (3 if p == player else 0) for p in game.get_players()},
         "trigger",
     )
     for profile in profiles:
@@ -46,7 +46,7 @@ def test_mixed_strategy_profile_game_structure_changed_no_tree():
 def test_mixed_strategy_profile_game_structure_changed_tree():
     game = games.read_from_file("basic_extensive_game.efg")
     profiles = [game.mixed_strategy_profile(rational=b) for b in [False, True]]
-    player = next(iter(game.players))
+    player = game.get_players()[0]
     game.set_move_actions(gbt.H.path(), ["D1"], drop=True)
     distribution = {s: 0 for s in game.get_strategies(player)}
     for profile in profiles:

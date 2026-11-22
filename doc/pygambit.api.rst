@@ -133,7 +133,7 @@ Information about the game
    ActionGraphGame.is_const_sum
    Game.is_perfect_recall
    Game.has_perfect_recall
-   Game.players
+   Game.get_players
    Game.get_min_payoff
    Game.get_max_payoff
    ExtensiveGame.get_min_payoff

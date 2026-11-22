@@ -44,7 +44,7 @@ def oracle() -> gbt.Game:
 
 
 def test_oracle_structure(oracle):
-    assert list(oracle.players) == ["1", "2"]
+    assert oracle.get_players() == ["1", "2"]
     for player in ("1", "2"):
         assert len(oracle.get_infosets(player)) == 2
 

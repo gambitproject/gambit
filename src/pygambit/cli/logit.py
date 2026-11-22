@@ -76,7 +76,7 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
     comma-separated list of counts, one per strategy, in the same order as a profile's
     CSV row, matching the C++ tool's `ReadProfile`.
     """
-    count = sum(len(game.get_strategies(player)) for player in game.players)
+    count = sum(len(game.get_strategies(player)) for player in game.get_players())
     try:
         fields = pathlib.Path(path).read_text().split(",")
         values = [float(fields[i]) for i in range(count)]
@@ -84,7 +84,7 @@ def _read_frequencies(path: str, game: gbt.Game) -> gbt.MixedStrategyProfileDoub
         raise ValueError(f"Error reading strategy frequencies from '{path}'.") from None
     frequencies = game.mixed_strategy_profile(rational=False)
     it = iter(values)
-    for player in game.players:
+    for player in game.get_players():
         frequencies[player] = {s: next(it) for s in game.get_strategies(player)}
     return frequencies
 

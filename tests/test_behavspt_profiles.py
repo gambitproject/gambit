@@ -88,8 +88,8 @@ def test_iter_yields_one_support_per_player():
     game = games.read_from_file("mixed_behavior_game.efg")
     profile = game.behavior_support_profile()
     supports = list(profile)
-    assert len(supports) == len(game.players)
-    assert {s.player for s in supports} == set(game.players)
+    assert len(supports) == len(game.get_players())
+    assert {s.player for s in supports} == set(game.get_players())
 
 
 def test_behaviorsupport_iter():

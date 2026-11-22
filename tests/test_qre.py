@@ -15,7 +15,7 @@ def _asymmetric_2x2() -> gbt.Game:
 def _asymmetric_poker_behavior_data() -> gbt.MixedBehaviorProfile:
     game = games.create_stripped_down_poker_efg()
     data = game.mixed_behavior_profile(rational=False)
-    for player in game.players:
+    for player in game.get_players():
         for history in games.player_infosets(game, player):
             selector = gbt.H.path(*history.actions)
             data[selector] = {
@@ -49,7 +49,7 @@ def test_logit_estimate_strategy_rational_and_float_data_agree():
     float_result = gbt.qre.logit_estimate(float_data)
 
     assert rational_result.lam == pytest.approx(float_result.lam)
-    for player in game.players:
+    for player in game.get_players():
         for strategy in game.get_strategies(player):
             assert (
                 rational_result.profile[player][strategy]
@@ -77,7 +77,7 @@ def test_logit_estimate_behavior_completes(use_empirical: bool, local_max: bool)
     data = _asymmetric_poker_behavior_data()
     result = gbt.qre.logit_estimate(data, use_empirical=use_empirical, local_max=local_max)
     assert isinstance(result.profile, gbt.MixedBehaviorProfileDouble)
-    for player in data.game.players:
+    for player in data.game.get_players():
         for history in games.player_infosets(data.game, player):
             selector = gbt.H.path(*history.actions)
             probs = dict(result.profile[selector])

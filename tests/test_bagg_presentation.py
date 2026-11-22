@@ -16,17 +16,17 @@ from . import games
 )
 def test_bagg_players_and_infosets(game_path, players, infosets):
     game = games.read_from_file(game_path)
-    assert list(game.players) == players
-    assert len(game.players) == len(players)
+    assert game.get_players() == players
+    assert len(game.get_players()) == len(players)
     for player in players:
-        assert player in game.players
+        assert player in game.get_players()
         assert game.get_infosets(player) == infosets
-    assert "4" not in game.players
+    assert "4" not in game.get_players()
 
 
 def test_bagg_infosets_differ_by_player_in_type_count():
     game = games.read_from_file("2x2_fraction_types.bagg")
-    assert list(game.players) == ["1", "2"]
+    assert game.get_players() == ["1", "2"]
     assert game.get_infosets("1") == ["1", "2"]
     assert game.get_infosets("2") == ["1"]
 
@@ -75,11 +75,4 @@ def test_bagg_infosets_absent_on_other_game_types(game_path):
 def test_other_games_do_not_get_bagg_infosets_semantics():
     game = games.read_from_file("2x2.agg")
     assert not hasattr(game, "get_infosets")
-    assert list(game.players) == ["1", "2"]
-
-
-def test_bagg_players_is_not_indexable_by_label():
-    """Players collections identify players by label: there is nothing to look up."""
-    game = games.read_from_file("2x2.bagg")
-    with pytest.raises(TypeError):
-        game.players["1"]
+    assert game.get_players() == ["1", "2"]

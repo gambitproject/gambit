@@ -61,7 +61,7 @@ def _default_start(
             bagg_start[slot.player, slot.infoset] = {slot.actions[0]: 1}
         return bagg_start
     start = game.mixed_strategy_profile(rational=True)
-    for player in game.players:
+    for player in game.get_players():
         first_strategy = next(iter(game.get_strategies(player)))
         start[player] = {first_strategy: 1}
     return start

@@ -81,7 +81,7 @@ def test_append_move_creates_single_infoset_list_of_nodes():
     """Test that appending a Selector matching several nodes creates a single
     infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     matches = (("2", "1"), ("1", "1"), ("1", "2"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
@@ -93,7 +93,7 @@ def test_append_move_creates_single_infoset_list_of_nodes():
 def test_append_move_same_infoset_list_of_nodes():
     """Test that nodes matched by a Selector are resolved in the same infoset."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
@@ -107,7 +107,7 @@ def test_append_move_actions_list_of_nodes():
     have the same actions.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
@@ -121,7 +121,7 @@ def test_append_move_labels_list_of_nodes():
     have the same labels per action.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     matches = (("2", "1"), ("1", "1"))
     game.append_move(
         gbt.H.path(..., ...).filter(lambda h: (h[0].action, h[1].action) in matches),
@@ -136,7 +136,7 @@ def test_append_move_node_list_with_non_terminal_node():
     append_move matches a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_move(gbt.H.path(...), "Player 3", ["B", "F"])
 
@@ -146,7 +146,7 @@ def test_append_move_node_list_is_empty():
     matches no nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     with pytest.raises(ValueError):
         game.append_move(gbt.H.path(...).filter(lambda h: False), "Player 3", ["B", "F"])
 
@@ -156,7 +156,7 @@ def test_append_infoset_node_list_with_non_terminal_node():
     append_infoset matches a non-terminal node.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     game.append_move(gbt.H.path("1", "1"), "Player 3", ["B", "F"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_infoset(gbt.H.path(...), gbt.H.path("1", "1"))
@@ -167,7 +167,7 @@ def test_append_infoset_node_list_is_empty():
     matches no nodes.
     """
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     game.append_move(gbt.H.path("1", "1"), "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
         game.append_infoset(gbt.H.path(...).filter(lambda h: False), gbt.H.path("1", "1"))
@@ -176,7 +176,7 @@ def test_append_infoset_node_list_is_empty():
 def test_append_infoset_error_infoset_not_a_selector():
     """Test that we get a TypeError when `infoset` is not a Selector."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     game.append_move(gbt.H.path("1", "1"), "Player 3", ["B", "F"])
     with pytest.raises(TypeError):
         game.append_infoset(gbt.H.path("1", "2"), 42)
@@ -186,7 +186,7 @@ def test_append_infoset_error_infoset_terminal():
     """Test that we get an UndefinedOperationError when `infoset` resolves to a
     terminal node."""
     game = games.read_from_file("sample_extensive_game.efg")
-    game.set_players(list(game.players) + ["Player 3"])
+    game.set_players(game.get_players() + ["Player 3"])
     with pytest.raises(gbt.UndefinedOperationError):
         game.append_infoset(gbt.H.path("1", "2"), gbt.H.path("1", "1"))
 
@@ -467,7 +467,7 @@ def test_make_infoset_change_player_keeps_membership():
     """Re-forming an information set under a different player retains its
     membership."""
     game = games.read_from_file("basic_extensive_game.efg")
-    _, p2, *_ = game.players
+    _, p2, *_ = game.get_players()
     members = game.get_members(gbt.H.path())
     game.make_infoset(games.selector_for_histories(members), p2)
     assert game.get_player(gbt.H.path()) == p2

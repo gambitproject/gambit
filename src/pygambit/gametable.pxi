@@ -90,7 +90,7 @@ class StrategicGame(_StrategicFormBase):
         shape = arrays[0].shape
         g: StrategicGame = StrategicGame.__new__(StrategicGame)
         g.game = NewTable(list(shape), False)
-        players = list(g.players)
+        players = g.get_players()
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
             resolved_outcome = g._get_contingency_outcome(contingency, "from_arrays")
@@ -143,9 +143,9 @@ class StrategicGame(_StrategicFormBase):
         g: StrategicGame = StrategicGame.__new__(StrategicGame)
         g.game = NewTable(list(shape), False)
         g.relabel_players(
-            {player: label for player, label in zip(g.players, payoffs, strict=True)}
+            {player: label for player, label in zip(g.get_players(), payoffs, strict=True)}
         )
-        players = list(g.players)
+        players = g.get_players()
         for profile in itertools.product(*(range(s) for s in shape)):
             contingency = {p: str(i + 1) for p, i in zip(players, profile, strict=True)}
             resolved_outcome = g._get_contingency_outcome(contingency, "from_dict")
@@ -410,13 +410,13 @@ class StrategicGame(_StrategicFormBase):
         """
         resolved_payoffs = _resolve_payoff_mapping(self, payoffs, "make_outcome")
         c_payoffs = stdvector[c_Number]()
-        for player in self.players:
+        for player in self.get_players():
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
         resolved = self._resolve_outcome_contingencies(location, "make_outcome")
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
         for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
-            for player in self.players:
+            for player in self.get_players():
                 c_one.push_back(
                     self._resolve_strategy(player, contingency[player], "make_outcome")
                 )
@@ -453,7 +453,7 @@ class StrategicGame(_StrategicFormBase):
         c_contingencies = stdvector[stdvector[c_GameStrategy]]()
         for contingency in resolved:
             c_one = stdvector[c_GameStrategy]()
-            for player in self.players:
+            for player in self.get_players():
                 c_one.push_back(
                     self._resolve_strategy(player, contingency[player], "make_outcome_null")
                 )
@@ -608,7 +608,7 @@ class StrategicGame(_StrategicFormBase):
             If a label in `players` is repeated, empty, or is not a valid label.
         """
         labels = self._validate_player_labels(players, "set_players")
-        current = list(self.players)
+        current = self.get_players()
         _, missing = _reconcile_labels(
             current, labels, add, drop, "set_players",
             "game", "player", "players", "their payoffs at every outcome"

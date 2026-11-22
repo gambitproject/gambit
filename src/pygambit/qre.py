@@ -238,11 +238,11 @@ def _estimate_strategy_empirical(
         data: libgbt.MixedStrategyProfile
 ) -> LogitQREMixedStrategyFitResult:
     flattened_data = [
-        data[p][s] for p in data.game.players for s in data.game.get_strategies(p)
+        data[p][s] for p in data.game.get_players() for s in data.game.get_strategies(p)
     ]
     strategy_regrets = data.normalize().strategy_regrets
     regrets = [[-strategy_regrets[player][s] for s in data.game.get_strategies(player)]
-               for player in data.game.players]
+               for player in data.game.get_players()]
 
     def neg_log_like(x: np.ndarray) -> float:
         return -_empirical_log_like(x[0], regrets, flattened_data)
@@ -254,7 +254,7 @@ def _estimate_strategy_empirical(
     )
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
     profile = data.game.mixed_strategy_profile()
-    for player in data.game.players:
+    for player in data.game.get_players():
         profile[player] = {
             s: math.exp(next(log_probs)) for s in data.game.get_strategies(player)
         }
@@ -268,7 +268,7 @@ def _estimate_behavior_empirical(
 ) -> LogitQREMixedBehaviorFitResult:
     flattened_data = [
         data[libgbt.H.path(*history.actions)][a]
-        for p in data.game.players
+        for p in data.game.get_players()
         for history in data.game.get_infosets(p)
         for a in data.game.get_actions(libgbt.H.path(*history.actions))
     ]
@@ -278,7 +278,7 @@ def _estimate_behavior_empirical(
             -normalized.action_regrets[libgbt.H.path(*history.actions)][a]
             for a in data.game.get_actions(libgbt.H.path(*history.actions))
         ]
-        for player in data.game.players
+        for player in data.game.get_players()
         for history in data.game.get_infosets(player)
     ]
 
@@ -292,7 +292,7 @@ def _estimate_behavior_empirical(
     )
     profile = data.game.mixed_behavior_profile()
     log_probs = iter(_empirical_log_logit_probs(res.x[0], regrets))
-    for player in data.game.players:
+    for player in data.game.get_players():
         for history in data.game.get_infosets(player):
             selector = libgbt.H.path(*history.actions)
             profile[selector] = {

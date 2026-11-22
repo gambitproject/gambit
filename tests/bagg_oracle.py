@@ -139,7 +139,7 @@ def bagg_to_efg(source: str | pathlib.Path | BAGGDescription) -> gbt.Game:
 
 def infoset_selector(game: gbt.Game, player: int, type_: int) -> gbt.Selector:
     """A selector for the information set of 1-based `player` at 1-based `type_`."""
-    n = len(game.players)
+    n = len(game.get_players())
     chance_prefix = ["1"] * n
     chance_prefix[player - 1] = str(type_)
     return gbt.H.path(*chance_prefix, *["1"] * (player - 1))

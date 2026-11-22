@@ -131,10 +131,23 @@ class Game:
     def description(self, value: str) -> None:
         self.game.deref().SetDescription(value.encode("utf-8"))
 
-    @property
-    def players(self) -> GamePlayers:
-        """The set of players in the game."""
-        return GamePlayers.wrap(self.game)
+    def get_players(self) -> list[str]:
+        """Returns the labels of the players in the game.
+
+        The chance player is not included.
+
+        .. versionchanged:: 17.0.0
+            Replaces the ``Game.players`` property, which gave a collection of
+            ``Player`` objects.
+
+        Returns
+        -------
+        list of str
+        """
+        return [
+            player.deref().GetLabel().decode("utf-8")
+            for player in self.game.deref().GetPlayers()
+        ]
 
     def is_perfect_recall(self) -> bool:
         """Returns whether the game is perfect recall.
@@ -334,7 +347,7 @@ class _StrategicFormBase(Game):
         """
         arrays = []
 
-        players = list(self.players)
+        players = self.get_players()
         player_strategies = {player: self.get_strategies(player) for player in players}
         shape = tuple(len(player_strategies[player]) for player in players)
         for player in players:
@@ -483,7 +496,7 @@ class _StrategicFormBase(Game):
                 raise ValueError(f"{funcname}(): each player may appear only once in {argname}")
             self._resolve_strategy(player_label, strategy_label, funcname, argname)
             resolved[player_label] = strategy_label
-        if set(resolved) != set(self.players):
+        if set(resolved) != set(self.get_players()):
             raise ValueError(
                 f"{funcname}(): {argname} must specify exactly one strategy "
                 f"for each player of the game"
@@ -497,7 +510,7 @@ class _StrategicFormBase(Game):
         psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
             self.game.deref().NewPureStrategyProfile()
         )
-        for player_label in self.players:
+        for player_label in self.get_players():
             handle = self._resolve_strategy(
                 player_label, resolved[player_label], "_make_pure_strategy_profile"
             )
@@ -538,7 +551,7 @@ class _StrategicFormBase(Game):
         resolved = self._resolve_contingency(contingency, "get_payoffs")
         psp = self._make_pure_strategy_profile(resolved)
         values = {}
-        for player in self.players:
+        for player in self.get_players():
             values[player] = rat_to_py(
                 deref(deref(psp).deref()).GetPayoff(self._resolve_player(player, "get_payoffs"))
             )
@@ -551,9 +564,9 @@ class _StrategicFormBase(Game):
         """Utility function to fill a `MixedStrategyProfile` with the data from a nested list."""
         if data is None:
             return profile
-        if len(data) != len(self.players):
+        if len(data) != len(self.get_players()):
             raise ValueError("Number of elements does not match number of players")
-        for (p, d) in zip(self.players, data, strict=True):
+        for (p, d) in zip(self.get_players(), data, strict=True):
             strategies = self.get_strategies(p)
             if len(strategies) != len(d):
                 raise ValueError(
@@ -666,14 +679,14 @@ class _StrategicFormBase(Game):
         """
         if denom is None:
             profile = self.mixed_strategy_profile()
-            for player in self.players:
+            for player in self.get_players():
                 profile[player] = _dirichlet_distribution(self.get_strategies(player), gen)
             return profile
         elif denom < 1:
             raise ValueError("random_strategy_profile(): denom must be positive")
         else:
             profile = self.mixed_strategy_profile(rational=True)
-            for player in self.players:
+            for player in self.get_players():
                 profile[player] = _grid_distribution(self.get_strategies(player), denom, gen)
             return profile
 
@@ -695,7 +708,7 @@ class _StrategicFormBase(Game):
         """
         profile = StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](self.game))
         if strategies is not None:
-            for player in self.players:
+            for player in self.get_players():
                 for label in self.get_strategies(player):
                     if not strategies(player, label):
                         handle = self._resolve_strategy(
@@ -898,7 +911,7 @@ class _StrategicFormBase(Game):
                 f"relabel_players(): labels must be a mapping, "
                 f"not {labels.__class__.__name__}"
             )
-        current = list(self.players)
+        current = self.get_players()
         chance_label = (
             self.game.deref().GetChance().deref().GetLabel().decode("utf-8")
             if isinstance(self, ExtensiveGame) else None

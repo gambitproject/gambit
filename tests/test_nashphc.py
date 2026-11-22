@@ -42,7 +42,7 @@ def test_strategy_index(matching_pennies):
 
 
 def test_contingencies_skips_given_player(matching_pennies):
-    players = list(matching_pennies.players)
+    players = matching_pennies.get_players()
     p1, p2 = players
     support = matching_pennies.strategy_support_profile()
     conts = list(_contingencies(support, p1))
@@ -51,7 +51,7 @@ def test_contingencies_skips_given_player(matching_pennies):
 
 
 def test_equilibrium_equations(matching_pennies):
-    p1, p2 = matching_pennies.players
+    p1, p2 = matching_pennies.get_players()
     support = matching_pennies.strategy_support_profile()
     equations = _equilibrium_equations(support, p1)
     assert equations == [

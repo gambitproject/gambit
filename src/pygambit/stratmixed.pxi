@@ -189,7 +189,7 @@ class MixedStrategyProfile:
         raise ValueError("Cannot create a MixedStrategyProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player: self[player] for player in self.game.players})
+        return str({player: self[player] for player in self.game.get_players()})
 
     def _repr_latex_(self) -> str:
         return (
@@ -197,7 +197,7 @@ class MixedStrategyProfile:
             ",".join(
                 r"\text{" + player + "}:" +
                 self[player]._repr_latex_().replace("$", "")
-                for player in self.game.players
+                for player in self.game.get_players()
             ) +
             r"\right\}$"
         )
@@ -221,7 +221,7 @@ class MixedStrategyProfile:
         strategy : MixedStrategy
             The player's mixed strategy specified in the profile
         """
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield self[player]
 
     def __getitem__(self, player: str) -> MixedStrategy:
@@ -358,7 +358,7 @@ class MixedStrategyProfile:
         the profile.
         """
         self._check_validity()
-        return PayoffVector({p: self._payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._payoff(p) for p in self.game.get_players()})
 
     @property
     def strategy_values(self) -> StrategyValuesVector:
@@ -370,7 +370,7 @@ class MixedStrategyProfile:
             p: StrategyValueVector({
                 s: self._strategy_value(p, s) for s in self.game.get_strategies(p)
             })
-            for p in self.game.players
+            for p in self.game.get_players()
         })
 
     @property
@@ -392,7 +392,7 @@ class MixedStrategyProfile:
             p: StrategyRegretVector({
                 s: self._strategy_regret(p, s) for s in self.game.get_strategies(p)
             })
-            for p in self.game.players
+            for p in self.game.get_players()
         })
 
     @property
@@ -406,7 +406,7 @@ class MixedStrategyProfile:
         max_regret
         """
         self._check_validity()
-        return PlayerRegretVector({p: self._player_regret(p) for p in self.game.players})
+        return PlayerRegretVector({p: self._player_regret(p) for p in self.game.get_players()})
 
     def max_regret(self) -> ProfileDType:
         """Returns the maximum regret of any player.
@@ -625,7 +625,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
-        return len(self.game.players)
+        return len(self.game.get_players())
 
     def _getprob_strategy(self, player: str, label: str) -> float:
         game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
@@ -725,7 +725,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
-        return len(self.game.players)
+        return len(self.game.get_players())
 
     def _getprob_strategy(self, player: str, label: str) -> Rational:
         game: _StrategicFormBase = cython.cast(_StrategicFormBase, self.game)
@@ -796,7 +796,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _as_float(self) -> MixedStrategyProfileDouble:
         profile: MixedStrategyProfileDouble = self.game.mixed_strategy_profile()
-        for player in self.game.players:
+        for player in self.game.get_players():
             profile[player] = {
                 s: float(self._getprob_strategy(player, s))
                 for s in self.game.get_strategies(player)
