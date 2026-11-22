@@ -74,7 +74,7 @@ def test_game_set_players_label(players: list):
     # Games with imperfect recall from files (game_input is a string)
     # - imperfect recall without absent-mindedness
     (gbt.catalog.load("journals/geb/wichardt2008"), False),  # forgetting past action
-    ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
+    ("gilboa_two_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
     ("noPR-AM-driver-one-player.efg", False),  # 1 player, one infoset unreached
     ("noPR-AM-driver-two-players.efg", False),  # 2 players, one infoset unreached
@@ -102,7 +102,7 @@ def test_is_perfect_recall(game_input, expected_result: bool):
     ("noPR-information-no-deflate.efg", {"Player 1": True, "Player 2": False}),
     ("noPR-action-AM.efg", {"Player 1": False, "Player 2": True}),
     ("stripped_down_poker.efg", {"Alice": True, "Bob": True}),
-    ("gilboa_two_am_agents.efg", {"Player 1": False, "Player 2": True}),
+    ("gilboa_two_agents.efg", {"Player 1": False, "Player 2": True}),
     ("2x2.agg", {"1": True, "2": True}),
 ])
 def test_has_perfect_recall(game_input, expected_result: dict):
