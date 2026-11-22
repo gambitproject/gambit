@@ -73,6 +73,49 @@ def test_read_bagg_zero_header():
         gbt.read_bagg(io.StringIO("0 0 0\n"))
 
 
+def _two_type_bagg(p1_dist, p2_dist):
+    """2x2_fraction_types.bagg (player 1 has two types, player 2 one) with the given type
+    distributions."""
+    return (
+        f"#BAGG\n2\n2\n0\n2 1\n{p1_dist}\n{p2_dist}\n2 2 2\n0 1\n0 1\n0 1\n"
+        "2 0 1\n2 1 0\n\n0\t35 -4\n0\t-10 95\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "p1_dist,p2_dist",
+    [
+        pytest.param("1/3 2/3", "1", id="fractions"),
+        pytest.param("0.25 0.75", "1", id="decimals"),
+        pytest.param("0.25 3/4", "1.0", id="mixed_notation"),
+    ],
+)
+def test_read_bagg_valid_type_distribution(p1_dist, p2_dist):
+    game = gbt.read_bagg(io.StringIO(_two_type_bagg(p1_dist, p2_dist)))
+    assert isinstance(game, gbt.Game)
+
+
+@pytest.mark.parametrize(
+    "p1_dist,p2_dist",
+    [
+        pytest.param("0.3333 0.6666", "1", id="sum_not_exactly_one"),
+        pytest.param("1/3 1/3", "1", id="sum_below_one"),
+        pytest.param("1/2 2/3", "1", id="sum_above_one"),
+        pytest.param("0 1", "1", id="zero_probability_type"),
+        pytest.param("-1/2 3/2", "1", id="negative_probability"),
+        pytest.param("1/3 2/3", "1/2", id="second_player_sum"),
+    ],
+)
+def test_read_bagg_invalid_type_distribution(p1_dist, p2_dist):
+    with pytest.raises(ValueError, match="type probabilities"):
+        gbt.read_bagg(io.StringIO(_two_type_bagg(p1_dist, p2_dist)))
+
+
+def test_read_bagg_player_without_types():
+    with pytest.raises(ValueError, match="number of types"):
+        gbt.read_bagg(io.StringIO("#BAGG\n2\n2\n0\n0 1\n1\n2\n0 1\n2 0 1\n2 1 0\n"))
+
+
 def test_read_gbt_invalid():
     game_path = os.path.join(
         "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
