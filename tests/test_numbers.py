@@ -49,7 +49,7 @@ def test_outcome_payoffs_keep_entered_text_and_can_be_summed():
     game = gbt.StrategicGame.from_arrays([[1.5, "1/3"], [0, 1]], [[0, 1], [1, 0]])
     first = game.get_outcome_payoffs("1")
     second = game.get_outcome_payoffs("3")
-    player = list(game.players)[0]
+    player = game.get_players()[0]
     assert type(first[player]) is gbt.Rational
     assert first[player] == fractions.Fraction(3, 2)
     assert str(first[player]) == "1.5"
@@ -59,8 +59,8 @@ def test_outcome_payoffs_keep_entered_text_and_can_be_summed():
 
 def test_computed_payoffs_carry_no_text():
     game = gbt.StrategicGame.from_arrays([[1.5, 0], [0, 1]], [[0, 1.5], [1, 0]])
-    contingency = {p: game.get_strategies(p)[0] for p in game.players}
-    value = game.get_payoffs(contingency)[list(game.players)[0]]
+    contingency = {p: game.get_strategies(p)[0] for p in game.get_players()}
+    value = game.get_payoffs(contingency)[game.get_players()[0]]
     assert type(value) is gbt.Rational
     assert repr(value) == "Rational(3, 2)"
 
@@ -109,7 +109,7 @@ def _scientific_efg(entries):
 @pytest.mark.parametrize(("text", "expected"), SCIENTIFIC_PAYOFFS)
 def test_read_nfg_scientific_notation_payoff(text, expected):
     game = gbt.read_nfg(io.StringIO(_scientific_nfg([text, "0"])))
-    value = game.get_outcome_payoffs("1")[list(game.players)[0]]
+    value = game.get_outcome_payoffs("1")[game.get_players()[0]]
     assert type(value) is gbt.Rational
     assert value == expected
     assert str(value) == text
@@ -119,7 +119,7 @@ def test_read_nfg_scientific_notation_payoff(text, expected):
 def test_read_efg_scientific_notation_payoff(text, expected):
     game = gbt.read_efg(io.StringIO(_scientific_efg([text, "0"])))
     label = game.get_outcomes()[0]
-    value = game.get_outcome_payoffs(label)[list(game.players)[0]]
+    value = game.get_outcome_payoffs(label)[game.get_players()[0]]
     assert type(value) is gbt.Rational
     assert value == expected
     assert str(value) == text

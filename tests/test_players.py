@@ -7,21 +7,21 @@ from . import games
 
 def test_player_count():
     game = gbt.StrategicGame([2, 2])
-    assert len(game.players) == 2
+    assert len(game.get_players()) == 2
 
 
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_player_label(label):
     game = gbt.StrategicGame([2, 2])
-    player, other = game.players
+    player, other = game.get_players()
     game.relabel_players({player: label})
-    assert list(game.players) == [label, other]
+    assert game.get_players() == [label, other]
 
 
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_player_label_invalid_raises_valueerror(label):
     game = gbt.StrategicGame([2, 2])
-    player = next(iter(game.players))
+    player = game.get_players()[0]
     with pytest.raises(ValueError):
         game.relabel_players({player: label})
 
@@ -30,9 +30,9 @@ def test_player_label_invalid_raises_valueerror(label):
 def test_player_label_unicode_accepted(label):
     """Non-ASCII UTF-8 labels are accepted as of #862 (17.0)."""
     game = gbt.StrategicGame([2, 2])
-    player, other = game.players
+    player, other = game.get_players()
     game.relabel_players({player: label})
-    assert list(game.players) == [label, other]
+    assert game.get_players() == [label, other]
 
 
 def test_set_players_requires_iterable_of_str():
@@ -45,25 +45,25 @@ def test_set_players_requires_iterable_of_str():
 
 def test_set_players_duplicate_label_raises_and_leaves_game_unchanged():
     game = gbt.StrategicGame([2, 2])
-    labels = list(game.players)
+    labels = game.get_players()
     with pytest.raises(ValueError):
         game.set_players(labels + [labels[0]])
-    assert list(game.players) == labels
+    assert game.get_players() == labels
 
 
 def test_set_players_empty_label_raises_and_leaves_game_unchanged():
     game = gbt.StrategicGame([2, 2])
-    labels = list(game.players)
+    labels = game.get_players()
     with pytest.raises(ValueError):
         game.set_players(labels + [""])
-    assert list(game.players) == labels
+    assert game.get_players() == labels
 
 
 def test_set_players_reserved_chance_label_raises_and_leaves_game_unchanged():
     game = gbt.ExtensiveGame()
     with pytest.raises(ValueError):
         game.set_players(["Chance"])
-    assert len(game.players) == 0
+    assert len(game.get_players()) == 0
 
 
 def test_chance_player_label_cannot_be_changed():
@@ -76,49 +76,49 @@ def test_chance_player_label_cannot_be_changed():
 def test_regular_player_cannot_be_relabeled_to_chance():
     game = gbt.ExtensiveGame()
     game.set_players(["Alice"])
-    player = next(iter(game.players))
+    player = game.get_players()[0]
     with pytest.raises(ValueError):
         game.relabel_players({player: "Chance"})
 
 
 def test_player_relabel_visible_via_membership():
     game = gbt.StrategicGame([2, 2])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     game.relabel_players({pl1: "Alphonse", pl2: "Gaston"})
-    assert "Alphonse" in game.players
-    assert "Gaston" in game.players
+    assert "Alphonse" in game.get_players()
+    assert "Gaston" in game.get_players()
 
 
 def test_set_empty_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
-    player = next(iter(game.players))
+    player = game.get_players()[0]
     with pytest.raises(ValueError):
         game.relabel_players({player: ""})
 
 
 def test_set_duplicate_player_raises_valueerror():
     game = games.create_stripped_down_poker_efg()
-    pl1, pl2, *_ = game.players
+    pl1, pl2, *_ = game.get_players()
     with pytest.raises(ValueError):
         game.relabel_players({pl1: pl2})
 
 
 def test_relabel_players_swap():
     game = gbt.StrategicGame([2, 2])
-    a, b = game.players
+    a, b = game.get_players()
     game.relabel_players({a: b, b: a})
-    assert list(game.players) == [b, a]
+    assert game.get_players() == [b, a]
 
 
 def test_relabel_players_swap_tree():
     game = gbt.ExtensiveGame(["Alice", "Bob"])
     game.relabel_players({"Alice": "Bob", "Bob": "Alice"})
-    assert list(game.players) == ["Bob", "Alice"]
+    assert game.get_players() == ["Bob", "Alice"]
 
 
 def test_relabel_players_duplicate_raises_valueerror():
     game = gbt.StrategicGame([2, 2, 2])
-    a, b, _ = game.players
+    a, b, _ = game.get_players()
     with pytest.raises(ValueError):
         game.relabel_players({a: b})
     with pytest.raises(ValueError):
@@ -128,19 +128,19 @@ def test_relabel_players_duplicate_raises_valueerror():
 @pytest.mark.parametrize("bad", ["", " x"])
 def test_relabel_players_bad_label_raises_and_leaves_game_unchanged(bad: str):
     game = gbt.StrategicGame([2, 2])
-    a, b = game.players
+    a, b = game.get_players()
     with pytest.raises(ValueError):
         game.relabel_players({a: "X", b: bad})
-    assert list(game.players) == [a, b]
+    assert game.get_players() == [a, b]
 
 
 def test_relabel_players_unknown_label_strictness():
     game = gbt.StrategicGame([2, 2])
-    a = next(iter(game.players))
+    a = game.get_players()[0]
     with pytest.raises(KeyError):
         game.relabel_players({"no-such-player": "X"})
     game.relabel_players({"no-such-player": "X", a: "Y"}, strict=False)
-    assert next(iter(game.players)) == "Y"
+    assert game.get_players()[0] == "Y"
 
 
 def test_relabel_players_chance_key_raises_even_when_not_strict():
@@ -154,10 +154,10 @@ def test_relabel_players_chance_key_raises_even_when_not_strict():
 
 def test_strategic_game_set_players_add():
     game = gbt.StrategicGame([2, 2])
-    labels = list(game.players)
+    labels = game.get_players()
     game.set_players(labels + ["Player 3"])
     new_player = "Player 3"
-    assert len(game.players) == 3
+    assert len(game.get_players()) == 3
     assert len(game.get_strategies(new_player)) == 1
     assert next(iter(game.get_strategies(new_player))) == "1"
 
@@ -165,15 +165,15 @@ def test_strategic_game_set_players_add():
 def test_extensive_game_set_players_add():
     game = gbt.ExtensiveGame()
     game.set_players(["Alice"])
-    pl1 = next(iter(game.players))
-    assert len(game.players) == 1
+    pl1 = game.get_players()[0]
+    assert len(game.get_players()) == 1
     assert len(game.get_infosets(pl1)) == 0
     assert len(game.get_strategies(pl1)) == 1
 
 
 def test_strategic_game_set_strategies_add():
     game = gbt.StrategicGame([2, 2])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     game.set_strategies(pl1, list(game.get_strategies(pl1)) + ["new strategy"])
     assert len(game.get_strategies(pl1)) == 3
     # This second add also ensures that we are testing the case where there
@@ -194,7 +194,7 @@ def _tag_contingencies(game: gbt.Game) -> None:
     strategy labels of the contingency, so a contingency's expected payoffs
     can be recomputed from its strategies' labels after the game is mutated.
     """
-    players = list(game.players)
+    players = game.get_players()
     for n, contingency in enumerate(game.get_contingencies(), start=1):
         payoffs = {
             player: int(f"{pl_index}{contingency[player]}")
@@ -205,7 +205,7 @@ def _tag_contingencies(game: gbt.Game) -> None:
 
 def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
     game = gbt.StrategicGame([4, 2, 2])
-    pl1, pl2, pl3 = game.players
+    pl1, pl2, pl3 = game.get_players()
     _tag_contingencies(game)
 
     # Record expected payoffs by label (a stable identity), for the
@@ -233,7 +233,7 @@ def test_strategic_game_set_strategies_drop_preserves_other_payoffs():
 
 def test_strategic_game_set_strategies_drop_first_preserves_other_payoffs():
     game = gbt.StrategicGame([3, 2])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     _tag_contingencies(game)
 
     surviving = [s for s in game.get_strategies(pl1) if s != "1"]
@@ -255,7 +255,7 @@ def test_strategic_game_set_strategies_drop_first_preserves_other_payoffs():
 
 def test_strategic_game_set_strategies_empty():
     game = gbt.StrategicGame([1, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     with pytest.raises(gbt.UndefinedOperationError):
         game.set_strategies(pl1, [], drop=True)
 
@@ -263,7 +263,7 @@ def test_strategic_game_set_strategies_empty():
 @pytest.mark.parametrize("label", games.VALID_LABELS)
 def test_set_strategies_label_valid(label):
     game = gbt.StrategicGame([2, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     game.set_strategies(pl1, list(game.get_strategies(pl1)) + [label])
     assert list(game.get_strategies(pl1))[-1] == label
 
@@ -271,14 +271,14 @@ def test_set_strategies_label_valid(label):
 @pytest.mark.parametrize("label", games.INVALID_LABELS)
 def test_set_strategies_label_invalid_raises_valueerror(label):
     game = gbt.StrategicGame([2, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     with pytest.raises(ValueError):
         game.set_strategies(pl1, list(game.get_strategies(pl1)) + [label])
 
 
 def test_set_strategies_requires_iterable_of_str():
     game = gbt.StrategicGame([2, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     with pytest.raises(TypeError):
         game.set_strategies(pl1, "12")
     with pytest.raises(TypeError):
@@ -287,7 +287,7 @@ def test_set_strategies_requires_iterable_of_str():
 
 def test_strategy_label_empty_raises_valueerror():
     game = gbt.StrategicGame([2, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     strategy = next(iter(game.get_strategies(pl1)))
     with pytest.raises(ValueError):
         game.relabel_strategies(pl1, {strategy: ""})
@@ -295,7 +295,7 @@ def test_strategy_label_empty_raises_valueerror():
 
 def test_strategy_label_duplicate_within_player_raises_valueerror():
     game = gbt.StrategicGame([2, 2])
-    pl1 = next(iter(game.players))
+    pl1 = game.get_players()[0]
     s1, s2 = game.get_strategies(pl1)
     with pytest.raises(ValueError):
         game.relabel_strategies(pl1, {s2: s1})
@@ -323,7 +323,7 @@ def test_strategy_label_duplicate_within_player_raises_valueerror():
 )
 def test_player_get_min_max_payoff(game: gbt.Game, exp_min_payoffs: list, exp_max_payoffs: list):
     for player, exp_min, exp_max in zip(
-        game.players, exp_min_payoffs, exp_max_payoffs, strict=True
+        game.get_players(), exp_min_payoffs, exp_max_payoffs, strict=True
     ):
         assert game.get_min_payoff(player) == exp_min
         assert game.get_max_payoff(player) == exp_max
@@ -345,13 +345,13 @@ def test_player_get_min_payoff_null_outcome():
     """Test whether `get_min_payoff` correctly reports minimum payoffs
     in a strategic game with a null outcome."""
     game = gbt.StrategicGame.from_arrays([[1, 1], [1, 1]], [[2, 2], [2, 2]])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     assert game.get_min_payoff(pl1) == 1
     assert game.get_min_payoff(pl2) == 2
     game.set_strategies(pl1, list(game.get_strategies(pl1)) + ["new strategy"])
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
-    for player in game.players:
+    for player in game.get_players():
         assert game.get_min_payoff(player) == 0
 
 
@@ -371,19 +371,19 @@ def test_player_get_max_payoff_null_outcome():
     """Test whether `get_max_payoff` correctly reports maximum payoffs
     in a strategic game with a null outcome."""
     game = gbt.StrategicGame.from_arrays([[-1, -1], [-1, -1]], [[-2, -2], [-2, -2]])
-    pl1, pl2 = game.players
+    pl1, pl2 = game.get_players()
     assert game.get_max_payoff(pl1) == -1
     assert game.get_max_payoff(pl2) == -2
     game.set_strategies(pl1, list(game.get_strategies(pl1)) + ["new strategy"])
     # Currently the outcomes associated with the new entries in the table
     # are null outcomes.  So now minimum payoff should be zero from those.
-    for player in game.players:
+    for player in game.get_players():
         assert game.get_max_payoff(player) == 0
 
 
 def test_set_strategies_duplicate_label_raises_and_leaves_game_unchanged():
     game = gbt.StrategicGame([2, 2])
-    pl = next(iter(game.players))
+    pl = game.get_players()[0]
     labels = list(game.get_strategies(pl))
     with pytest.raises(ValueError):
         game.set_strategies(pl, labels + [labels[0]])
@@ -392,7 +392,7 @@ def test_set_strategies_duplicate_label_raises_and_leaves_game_unchanged():
 
 def test_set_strategies_empty_label_raises_and_leaves_game_unchanged():
     game = gbt.StrategicGame([2, 2])
-    pl = next(iter(game.players))
+    pl = game.get_players()[0]
     labels = list(game.get_strategies(pl))
     with pytest.raises(ValueError):
         game.set_strategies(pl, labels + [""])
@@ -408,26 +408,26 @@ def test_set_players_empty_raises():
 def test_set_players_reorder_transposes_table():
     """Reordering the players permutes the axes of the payoff table."""
     game = gbt.StrategicGame.from_arrays([[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]])
-    a, b = game.players
+    a, b = game.get_players()
     game.set_players([b, a])
-    assert list(game.players) == [b, a]
+    assert game.get_players() == [b, a]
     assert game.to_arrays()[0].tolist() == [[7, 10], [8, 11], [9, 12]]
     assert game.to_arrays()[1].tolist() == [[1, 4], [2, 5], [3, 6]]
 
 
 def test_set_players_add_then_drop_round_trips():
     game = gbt.StrategicGame.from_arrays([[1, 2], [3, 4]], [[5, 6], [7, 8]])
-    labels = list(game.players)
+    labels = game.get_players()
     game.set_players(labels + ["X"])
     assert all(game.get_payoffs(c)["X"] == 0 for c in game.get_contingencies())
     game.set_players(labels, drop=True)
-    assert list(game.players) == labels
+    assert game.get_players() == labels
     assert game.to_arrays()[0].tolist() == [[1, 2], [3, 4]]
 
 
 def test_set_players_drop_requires_deletable_player():
     game = gbt.StrategicGame([2, 2])
-    a, _ = game.players
+    a, _ = game.get_players()
     with pytest.raises(gbt.UndefinedOperationError):
         game.set_players([a], drop=True)
     tree = games.create_stripped_down_poker_efg()
@@ -437,9 +437,9 @@ def test_set_players_drop_requires_deletable_player():
 
 def test_set_players_unconfirmed_drop_and_disabled_add_raise():
     game = gbt.StrategicGame([2, 2])
-    labels = list(game.players)
+    labels = game.get_players()
     with pytest.raises(ValueError):
         game.set_players(labels[:1])
     with pytest.raises(ValueError):
         game.set_players(labels + ["X"], add=False)
-    assert list(game.players) == labels
+    assert game.get_players() == labels

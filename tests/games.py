@@ -14,7 +14,7 @@ def all_infosets(game: gbt.Game) -> list[tuple]:
     to a personal player, across every player, in the canonical order
     `Game.infosets` used to yield before its removal (17.0.0). One History per
     information set, matching `Game.get_infosets`."""
-    return [h for p in game.players for h in game.get_infosets(p)]
+    return [h for p in game.get_players() for h in game.get_infosets(p)]
 
 
 def children_histories(game: gbt.Game, history: tuple) -> list[tuple]:
@@ -167,7 +167,7 @@ def create_efg_corresponding_to_bimatrix_game(g: gbt.Game) -> gbt.Game:
     Here we create an EFG corresponding to a bimatrix pygambit.Game.
     Player 1 moves first.
     """
-    assert len(g.players) == 2
+    assert len(g.get_players()) == 2
     A, B = g.to_arrays()
     return create_efg_corresponding_to_bimatrix_game_arrays(A, B, g.title)
 
@@ -217,7 +217,7 @@ def create_2x2_symmetric_coordination_nfg() -> gbt.Game:
     solvers.
     """
     game = gbt.StrategicGame([2, 2])
-    p1, p2 = game.players
+    p1, p2 = game.get_players()
     s1a, s1b = game.get_strategies(p1)
     s2a, s2b = game.get_strategies(p2)
     game.make_outcome({p1: s1a, p2: s2a}, {p1: 1, p2: 1}, "aA")
@@ -679,7 +679,7 @@ class EfgFamilyForReducedStrategicFormTests(ABC):
         gbt_game = game.gbt_game()
         maps = [
             [tuple(sig) if len(gbt_game.get_infosets(player)) > 0 else () for sig in sigs]
-            for player, sigs in zip(gbt_game.players, game.reduced_strategies(), strict=True)
+            for player, sigs in zip(gbt_game.get_players(), game.reduced_strategies(), strict=True)
         ]
         return (gbt_game, maps)
 

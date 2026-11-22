@@ -183,7 +183,7 @@ class BehaviorSupportProfile:
         support : BehaviorSupport
             The player's behavior support specified in the profile
         """
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield self[player]
 
     def __getitem__(self, index: typing.Any) -> BehaviorSupport | ActionSupport:

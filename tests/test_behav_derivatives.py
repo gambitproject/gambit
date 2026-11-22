@@ -24,7 +24,7 @@ def _interior_profile(game: gbt.Game, seed: int):
     rng = random.Random(seed)
     profile = game.mixed_behavior_profile(rational=False)
     infosets = []
-    for player in game.players:
+    for player in game.get_players():
         for history, mixed_action in profile[player]:
             infosets.append((gbt.H.path(*history.actions), [label for label, _ in mixed_action]))
     weights = {}

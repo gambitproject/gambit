@@ -88,8 +88,8 @@ def test_construction_is_uniform(game_path, rational):
     profile = game.mixed_behavior_profile(rational=rational)
     expected = gbt.Rational if rational else float
     assert isinstance(profile, gbt.BAGGMixedBehaviorProfile)
-    assert len(profile) == len(game.players)
-    for player in game.players:
+    assert len(profile) == len(game.get_players())
+    for player in game.get_players():
         for infoset in game.get_infosets(player):
             action = profile[player, infoset]
             assert len(action) > 0
@@ -105,7 +105,7 @@ def test_random_profiles(game_path):
     assert isinstance(double, gbt.BAGGMixedBehaviorProfileDouble)
     exact = game.random_behavior_profile(denom=7)
     assert isinstance(exact, gbt.BAGGMixedBehaviorProfileRational)
-    for player in game.players:
+    for player in game.get_players():
         for infoset in game.get_infosets(player):
             assert sum(p for _, p in double[player, infoset]) == pytest.approx(1.0)
             assert sum(p for _, p in exact[player, infoset]) == 1
@@ -331,10 +331,10 @@ def test_normalize(game):
 
 def test_coffee_game_ex_ante_payoffs():
     game = games.read_from_file("Bayesian-Coffee-3-2-2-3.bagg")
-    assert list(game.players) == ["1", "2", "3"]
+    assert game.get_players() == ["1", "2", "3"]
     exact = game.mixed_behavior_profile(rational=True)
     double = game.mixed_behavior_profile()
-    for player in game.players:
+    for player in game.get_players():
         assert double.payoffs[player] == pytest.approx(float(exact.payoffs[player]))
     assert double.max_regret() == pytest.approx(float(exact.max_regret()))
 

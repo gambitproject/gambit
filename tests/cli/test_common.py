@@ -13,16 +13,16 @@ class TestReadGame:
     def test_reads_nfg(self, nfg_matching_pennies_text):
         game = common.read_game(io.BytesIO(nfg_matching_pennies_text.encode()))
         assert not isinstance(game, gbt.ExtensiveGame)
-        assert len(game.players) == 2
+        assert len(game.get_players()) == 2
 
     def test_reads_efg(self, efg_small_tree_text):
         game = common.read_game(io.BytesIO(efg_small_tree_text.encode()))
         assert isinstance(game, gbt.ExtensiveGame)
-        assert len(game.players) == 2
+        assert len(game.get_players()) == 2
 
     def test_reads_text_stream(self, nfg_matching_pennies_text):
         game = common.read_game(io.StringIO(nfg_matching_pennies_text))
-        assert len(game.players) == 2
+        assert len(game.get_players()) == 2
 
     def test_empty_input_raises(self):
         with pytest.raises(ValueError, match="Empty file or string provided"):
@@ -165,7 +165,7 @@ class TestRenderSupportCsv:
     def test_strategy_support_partial_support(self, nfg_matching_pennies_text):
         game = gbt.read_nfg(io.BytesIO(nfg_matching_pennies_text.encode()))
         support = game.strategy_support_profile()
-        p1 = next(iter(game.players))
+        p1 = game.get_players()[0]
         first_strategy = next(iter(game.get_strategies(p1)))
         support[p1] = [first_strategy]
         assert common.render_support_csv(support, "candidate") == "candidate,10,11"

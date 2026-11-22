@@ -18,7 +18,7 @@ from . import games
 def _interior_profile(game: gbt.Game, seed: int, *, rational: bool = False):
     rng = random.Random(seed)
     data = []
-    for player in game.players:
+    for player in game.get_players():
         weights = [rng.randint(1, 9) for _ in game.get_strategies(player)]
         total = sum(weights)
         data.append([gbt.Rational(w, total) if rational else w / total for w in weights])
@@ -29,8 +29,9 @@ def _reference(profile):
     """Max regret and Liapunov value from the payoffs of the strategies one at a time."""
     payoffs = profile.payoffs
     values = profile.strategy_values
-    regrets = {p: max(v for _, v in values[p]) - payoffs[p] for p in profile.game.players}
-    liap = sum(max(v - payoffs[p], 0) ** 2 for p in profile.game.players for _, v in values[p])
+    players = profile.game.get_players()
+    regrets = {p: max(v for _, v in values[p]) - payoffs[p] for p in players}
+    liap = sum(max(v - payoffs[p], 0) ** 2 for p in players for _, v in values[p])
     return max(regrets.values()), liap, regrets
 
 

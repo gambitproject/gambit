@@ -141,7 +141,7 @@ def _contingencies(
     for profile in itertools.product(
         *[[strategy for strategy in game.get_strategies(player) if strategy in support[player]]
           if player != skip_player else [None]
-          for player in game.players]
+          for player in game.get_players()]
     ):
         yield list(profile)
 
@@ -151,7 +151,7 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: str) -> 
     totally-mixed equilibrium on `support`.
     """
     game = support.game
-    players = list(game.players)
+    players = game.get_players()
     player_index = {p: i for i, p in enumerate(players)}
     player_support = support[player]
     payoffs: dict[str, list[str]] = {
@@ -184,7 +184,7 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: str) -> 
 def _is_nash(profile: gbt.MixedStrategyProfile, maxregret: float, negtol: float) -> bool:
     """Check if the profile is an (approximate) Nash equilibrium, allowing a maximum
     regret of `maxregret` and a tolerance of (small) negative probabilities of `negtol`."""
-    for player in profile.game.players:
+    for player in profile.game.get_players():
         for strategy in profile.game.get_strategies(player):
             if profile[player][strategy] < -negtol:
                 return False
@@ -193,7 +193,7 @@ def _is_nash(profile: gbt.MixedStrategyProfile, maxregret: float, negtol: float)
 
 def _solution_to_profile(game: gbt.Game, entry: dict) -> gbt.MixedStrategyProfileDouble:
     profile = game.mixed_strategy_profile()
-    for i, player in enumerate(game.players):
+    for i, player in enumerate(game.get_players()):
         playerchar = _playerletters[i]
         distribution = {}
         for j, strategy in enumerate(game.get_strategies(player)):
@@ -209,7 +209,7 @@ def _format_support(support, label: str) -> str:
     game = support.game
     strings = [
         "".join(str(int(strategy in support[player])) for strategy in game.get_strategies(player))
-        for player in game.players
+        for player in game.get_players()
     ]
     return label + "," + ",".join(strings)
 
@@ -222,7 +222,7 @@ def _format_profile(profile: gbt.MixedStrategyProfileDouble, label: str,
     game = profile.game
     return (f"{label}," +
             ",".join(["{p:.{decimals}f}".format(p=profile[player][s], decimals=decimals)
-                      for player in game.players for s in game.get_strategies(player)]))
+                      for player in game.get_players() for s in game.get_strategies(player)]))
 
 
 def _profile_from_support(support: gbt.StrategySupportProfile) -> gbt.MixedStrategyProfileDouble:
@@ -231,7 +231,7 @@ def _profile_from_support(support: gbt.StrategySupportProfile) -> gbt.MixedStrat
     """
     game = support.game
     profile = game.mixed_strategy_profile()
-    for player in game.players:
+    for player in game.get_players():
         player_support = support[player]
         profile[player] = {
             strategy: (1.0 if strategy in player_support else 0.0)
@@ -247,11 +247,11 @@ def _solve_support(support: gbt.StrategySupportProfile,
                    onsupport=lambda x, label: None,
                    onequilibrium=lambda x, label: None) -> list[gbt.MixedStrategyProfileDouble]:
     onsupport(support, "candidate")
-    if len(support) == len(support.game.players):
+    if len(support) == len(support.game.get_players()):
         profiles = [_profile_from_support(support)]
     else:
         eqns = [eqn
-                for player in support.game.players
+                for player in support.game.get_players()
                 for eqn in _equilibrium_equations(support, player)]
         try:
             profiles = [

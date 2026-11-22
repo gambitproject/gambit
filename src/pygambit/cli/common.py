@@ -224,13 +224,13 @@ def render_profile_csv(
     if _is_behavior_profile(profile):
         values = [
             prob
-            for player in profile.game.players
+            for player in profile.game.get_players()
             for _infoset, action in profile[player]
             for _label, prob in action
         ]
     else:
         values = [
-            prob for player in profile.game.players for _label, prob in profile[player]
+            prob for player in profile.game.get_players() for _label, prob in profile[player]
         ]
     return ",".join([label, *(format_value(v, decimals, fixed, as_float) for v in values)])
 
@@ -250,7 +250,7 @@ def render_support_csv(
                 "1" if action in action_support else "0"
                 for action in support.game.get_actions(gbt.H.path(*history.actions))
             )
-            for player in support.game.players
+            for player in support.game.get_players()
             for history, action_support in zip(
                 support.game.get_infosets(player), support[player], strict=True
             )
@@ -261,7 +261,7 @@ def render_support_csv(
                 "1" if strategy in support[player] else "0"
                 for strategy in support.game.get_strategies(player)
             )
-            for player in support.game.players
+            for player in support.game.get_players()
         ]
     return ",".join([label, *fields])
 
@@ -298,7 +298,7 @@ def _render_strategy_detail(
     profile: gbt.MixedStrategyProfile, decimals: int, fixed: bool = True, as_float: bool = False
 ) -> str:
     lines = []
-    for player in profile.game.players:
+    for player in profile.game.get_players():
         lines.append(f"Strategy profile for {player}:")
         lines.append("Strategy   Prob          Value")
         lines.append("--------   -----------   -----------")
@@ -319,7 +319,7 @@ def _render_bagg_detail(
 ) -> str:
     lines = []
     action_values = profile.action_values
-    for player in profile.game.players:
+    for player in profile.game.get_players():
         lines.append(f"Behavior profile for {player}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
@@ -340,7 +340,7 @@ def _render_behavior_detail(
     action_values = profile.action_values
     beliefs = profile.beliefs
     realiz_probs = profile.realiz_probs
-    for player in profile.game.players:
+    for player in profile.game.get_players():
         lines.append(f"Behavior profile for {player}:")
         lines.append("Infoset    Action     Prob          Value")
         lines.append("-------    -------    -----------   -----------")
@@ -415,7 +415,7 @@ def read_strategy_profiles_csv(
     starting points converts the result via `~MixedStrategyProfile.as_float`.
     """
     strategies = [
-        strategy for player in game.players for strategy in game.get_strategies(player)
+        strategy for player in game.get_players() for strategy in game.get_strategies(player)
     ]
     profiles = []
     for line in pathlib.Path(path).read_text().splitlines():
@@ -428,7 +428,7 @@ def read_strategy_profiles_csv(
         except (ValueError, IndexError) as exc:
             raise ValueError(f"Error reading strategy profile from '{path}': {exc}") from None
         profile = game.mixed_strategy_profile(rational=True)
-        for player in game.players:
+        for player in game.get_players():
             profile[player] = {s: next(values) for s in game.get_strategies(player)}
         profiles.append(profile)
     return profiles
@@ -458,7 +458,7 @@ def bagg_slots(game: gbt.BayesianActionGraphGame) -> list[BAGGSlot]:
     profile = game.mixed_behavior_profile()
     return [
         BAGGSlot(player, infoset, [label for label, _prob in profile[player][infoset]])
-        for player in game.players
+        for player in game.get_players()
         for infoset in game.get_infosets(player)
     ]
 
@@ -490,7 +490,7 @@ def read_behavior_profiles_csv(
     else:
         count = sum(
             len(game.get_actions(gbt.H.path(*history.actions)))
-            for player in game.players
+            for player in game.get_players()
             for history in game.get_infosets(player)
         )
     profiles: list[gbt.MixedBehaviorProfile | gbt.BAGGMixedBehaviorProfile] = []
@@ -510,7 +510,7 @@ def read_behavior_profiles_csv(
             profiles.append(bagg_profile)
         else:
             profile = game.mixed_behavior_profile(rational=True)
-            for player in game.players:
+            for player in game.get_players():
                 for history in game.get_infosets(player):
                     selector = gbt.H.path(*history.actions)
                     profile[selector] = {a: next(values) for a in game.get_actions(selector)}

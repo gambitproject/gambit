@@ -10,6 +10,8 @@
   information sets.
 - `MixedStrategyProfile.as_behavior` now raises `UndefinedOperationError` unless each player's
   strategy probabilities sum to one; call `normalize` first.
+- `Game.players` has been replaced by `Game.get_players()`, which returns a list of the player labels
+  rather than a live collection.
 
 
 ## [17.0.0-beta.4] - 2026-11-19

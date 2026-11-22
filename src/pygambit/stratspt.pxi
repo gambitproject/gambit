@@ -132,7 +132,7 @@ class StrategySupportProfile:
         support : StrategySupport
             The player's strategy support specified in the profile
         """
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield self[player]
 
     def __getitem__(self, player: str) -> StrategySupport:

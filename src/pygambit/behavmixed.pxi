@@ -399,7 +399,7 @@ class MixedBehaviorProfile:
         raise ValueError("Cannot create a MixedBehaviorProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str({player: self[player] for player in self.game.players})
+        return str({player: self[player] for player in self.game.get_players()})
 
     def _repr_latex_(self) -> str:
         return (
@@ -407,7 +407,7 @@ class MixedBehaviorProfile:
             ",".join(
                 r"\text{" + player + "}:" +
                 self[player]._repr_latex_().replace("$", "")
-                for player in self.game.players
+                for player in self.game.get_players()
             ) +
             r"\right\}$"
         )
@@ -431,7 +431,7 @@ class MixedBehaviorProfile:
         behavior : MixedBehavior
             The player's mixed behavior specified in the profile
         """
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield self[player]
 
     def __getitem__(self, index: typing.Any) -> MixedBehavior | MixedAction:
@@ -479,7 +479,7 @@ class MixedBehaviorProfile:
         """Iterates over a representative node of every information set in the game
         belonging to a personal player, excluding the chance player's.
         """
-        for player in self.game.players:
+        for player in self.game.get_players():
             yield from cython.cast(ExtensiveGame, self.game)._get_infosets(player)
 
     def _events(self) -> typing.Iterator[Node]:
@@ -725,10 +725,10 @@ class MixedBehaviorProfile:
         the profile.
 
         The chance player is excluded, since it takes no decisions and so has no
-        well-defined payoff; ``self.game.players`` already excludes it.
+        well-defined payoff; ``self.game.get_players()`` already excludes it.
         """
         self._check_validity()
-        return PayoffVector({p: self._payoff(p) for p in self.game.players})
+        return PayoffVector({p: self._payoff(p) for p in self.game.get_players()})
 
     @property
     def history_values(self) -> HistoryValuesVector:
@@ -743,7 +743,7 @@ class MixedBehaviorProfile:
             p: HistoryValueVector({
                 history: self._node_value(p, n) for n, history in histories.items()
             })
-            for p in self.game.players
+            for p in self.game.get_players()
         })
 
     @property
@@ -1321,7 +1321,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     def _as_float(self) -> MixedBehaviorProfileDouble:
         profile: MixedBehaviorProfileDouble = self.game.mixed_behavior_profile()
-        for player in self.game.players:
+        for player in self.game.get_players():
             for node in cython.cast(ExtensiveGame, self.game)._get_infosets(player):
                 profile._setprob_infoset(
                     node,

@@ -1505,7 +1505,7 @@ def _gnm_from_first_actions(game: gbt.Game):
     """`gnm_solve` on a Bayesian game from the perturbation that plays each type's first
     action, the default perturbation for a game with strategies."""
     perturbation = game.mixed_behavior_profile()
-    for player in game.players:
+    for player in game.get_players():
         for infoset in game.get_infosets(player):
             actions = [action for action, _ in perturbation[player, infoset]]
             perturbation[player, infoset] = {a: float(a == actions[0]) for a in actions}
@@ -1605,7 +1605,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             if isinstance(game, gbt.BayesianActionGraphGame):
                 found = [
                     prob
-                    for player in game.players
+                    for player in game.get_players()
                     for infoset in game.get_infosets(player)
                     for _, prob in eq[player, infoset]
                 ]
@@ -1616,7 +1616,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
                 )
                 continue
             expected = game.mixed_strategy_profile(rational=True, data=exp)
-            for player in game.players:
+            for player in game.get_players():
                 for strategy in game.get_strategies(player):
                     eq_prob = eq[player][strategy]
                     exp_prob = expected[player][strategy]
@@ -1637,7 +1637,7 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
         one = gbt.Rational(1) if rational else 1.0
         zero = gbt.Rational(0) if rational else 0.0
         perturbation = game.mixed_strategy_profile(rational=rational)
-        for player in game.players:
+        for player in game.get_players():
             strategies = list(game.get_strategies(player))
             perturbation[player] = {
                 s: (one if s == strategies[0] else zero) for s in strategies
@@ -1656,7 +1656,7 @@ def test_nash_strategy_solver_accepts_rational_perturbation(solver, subtests) ->
         zip(rational_equilibria, double_equilibria, strict=True)
     ):
         with subtests.test(eq=i, check="strategy_profile"):
-            for player in game.players:
+            for player in game.get_players():
                 for strategy in game.get_strategies(player):
                     assert (
                         rational_eq[player][strategy]
@@ -1774,7 +1774,7 @@ def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, s
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_strategy_profile(rational=True, data=exp)
-            for player in game.players:
+            for player in game.get_players():
                 for strategy in game.get_strategies(player):
                     eq_prob = eq[player][strategy]
                     exp_prob = expected[player][strategy]
@@ -3257,7 +3257,7 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
-            for player in game.players:
+            for player in game.get_players():
                 for history in game.get_infosets(player):
                     for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
@@ -3309,7 +3309,7 @@ def test_nash_behavior_solver_unordered(test_case: EquilibriumTestCase, subtests
     """
 
     def are_the_same(game, found, candidate):
-        for p in game.players:
+        for p in game.get_players():
             for history in game.get_infosets(p):
                 for a in game.get_actions(gbt.H.path(*history.actions)):
                     if not abs(
@@ -3478,7 +3478,7 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
             assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
-            for player in game.players:
+            for player in game.get_players():
                 for history in game.get_infosets(player):
                     for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
@@ -3547,7 +3547,7 @@ def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> 
             assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
         with subtests.test(eq=i, check="strategy_profile"):
             expected = game.mixed_behavior_profile(rational=True, data=exp)
-            for player in game.players:
+            for player in game.get_players():
                 for history in game.get_infosets(player):
                     for action in game.get_actions(gbt.H.path(*history.actions)):
                         assert abs(
@@ -3650,7 +3650,7 @@ def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
             assert abs(exp["lam"] - found.lam) <= test_case.lam_tol
         with subtests.test(eq=i, check="strategy_profile"):
             exp_profile = game.mixed_strategy_profile(rational=True, data=exp["profile"])
-            for player in game.players:
+            for player in game.get_players():
                 for s in game.get_strategies(player):
                     found_prob = found.profile[player][s]
                     exp_prob = exp_profile[player][s]

@@ -90,7 +90,7 @@ def _normalize_perturbation(
     if isinstance(perturbation, libgbt.Game):
         game = perturbation
         perturbation = game.mixed_strategy_profile(rational=False)
-        for player in game.players:
+        for player in game.get_players():
             strategies = game.get_strategies(player)
             perturbation[player] = {
                 s: (1.0 if s == strategies[0] else 0.0) for s in strategies

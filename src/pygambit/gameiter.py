@@ -42,16 +42,16 @@ class Contingencies:
 
     def __len__(self):
         ncont = 1
-        for player in self.game.players:
+        for player in self.game.get_players():
             if player not in self.cont:
                 ncont *= len(self.game.get_strategies(player))
         return ncont
 
     def __iter__(self):
-        if len(self.cont) == len(self.game.players):
-            yield {player: self.cont[player] for player in self.game.players}
+        if len(self.cont) == len(self.game.get_players()):
+            yield {player: self.cont[player] for player in self.game.get_players()}
         else:
-            players = list(self.game.players)
+            players = self.game.get_players()
             nextpl = min(pl for (pl, player) in enumerate(players)
                          if player not in self.cont)
             for strategy in self.game.get_strategies(players[nextpl]):

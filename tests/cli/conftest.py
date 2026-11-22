@@ -17,7 +17,7 @@ def cli_runner() -> CliRunner:
 def _table_game(payoffs: dict, title: str) -> gbt.Game:
     game = gbt.StrategicGame([2, 2])
     game.title = title
-    p1, p2 = game.players
+    p1, p2 = game.get_players()
     s1a, s1b = game.get_strategies(p1)
     s2a, s2b = game.get_strategies(p2)
     strategies = {"a": s1a, "b": s1b, "A": s2a, "B": s2b}

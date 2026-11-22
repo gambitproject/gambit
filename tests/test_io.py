@@ -145,7 +145,7 @@ NFG 1 R "Prisoner's <Dilemma> & test" { "Alice" "Bob" }
     game = gbt.read_gbt(game_path)
 
     assert game.title == "Prisoner's <Dilemma> & test"
-    assert list(game.players) == ["Alice", "Bob"]
+    assert game.get_players() == ["Alice", "Bob"]
 
 
 def test_read_gbt_rejects_malformed_xml(tmp_path):
@@ -200,7 +200,7 @@ NFG 1 R "Centipede game. Three inning with probability of altruism.  " { "Player
 
 def test_write_html():
     game = gbt.StrategicGame([2, 2])
-    alice, bob = game.players
+    alice, bob = game.get_players()
     game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_html()
     assert isinstance(serialized_game, str)
@@ -210,7 +210,7 @@ def test_write_html():
 
 def test_write_latex():
     game = gbt.StrategicGame([2, 2], title="Game title")
-    alice, bob = game.players
+    alice, bob = game.get_players()
     game.relabel_players({alice: "Alice", bob: "Bob"})
     serialized_game = game.to_latex()
     assert "\\begin{game}" in serialized_game
@@ -369,7 +369,7 @@ def test_read_gtdraw_returns_the_game():
     game = _read_gtdraw(_poker().to_gtdraw())
     expected = _poker()
     drawing = expected.to_gtdraw()
-    assert list(game.players) == ["Fred", "Alice"]
+    assert game.get_players() == ["Fred", "Alice"]
     for player in ["Fred", "Alice"]:
         assert len(game.get_infosets(player)) == len(expected.get_infosets(player))
     # A drawing gives every terminal node its own, numbered outcome
@@ -392,7 +392,7 @@ iset l r player 1
 
 def test_read_gtdraw_hand_drawn():
     game = _read_gtdraw(_HAND_DRAWN)
-    assert list(game.players) == ["Big Bank", "2"]
+    assert game.get_players() == ["Big Bank", "2"]
     drawing = game.to_gtdraw()
     assert "move Heads~(\\frac{1}{4})" in drawing
     assert "move _1~(\\frac{3}{4})" in drawing

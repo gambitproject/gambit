@@ -688,9 +688,9 @@ class ExtensiveGame(_StrategicFormBase):
         """Utility function to fill a `MixedBehaviorProfile` with the data from a nested list."""
         if data is None:
             return profile
-        if len(data) != len(self.players):
+        if len(data) != len(self.get_players()):
             raise ValueError("Number of elements does not match number of players")
-        for (p, d) in zip(self.players, data):
+        for (p, d) in zip(self.get_players(), data):
             p_infosets = self._get_infosets(p)
             if len(p_infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
@@ -804,7 +804,7 @@ class ExtensiveGame(_StrategicFormBase):
         """
         if denom is None:
             profile = self.mixed_behavior_profile()
-            for player in self.players:
+            for player in self.get_players():
                 for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _dirichlet_distribution(node.actions, gen), sparse=True
@@ -814,7 +814,7 @@ class ExtensiveGame(_StrategicFormBase):
             raise ValueError("random_behavior_profile(): denom must be positive")
         else:
             profile = self.mixed_behavior_profile(rational=True)
-            for player in self.players:
+            for player in self.get_players():
                 for node in self._get_infosets(player):
                     profile._setprob_infoset(
                         node, _grid_distribution(node.actions, denom, gen), sparse=True
@@ -843,7 +843,7 @@ class ExtensiveGame(_StrategicFormBase):
         """
         profile = BehaviorSupportProfile.wrap(make_shared[c_BehaviorSupportProfile](self.game))
         if actions is not None:
-            for player in self.players:
+            for player in self.get_players():
                 for node in self._get_infosets(player):
                     history_view = HistoryView._wrap(node, _history_of(node))
                     infoset_handle: c_GameInfoset = cython.cast(Node, node)._infoset_handle()
@@ -2041,7 +2041,7 @@ class ExtensiveGame(_StrategicFormBase):
         """
         resolved_payoffs = _resolve_payoff_mapping(self, payoffs, "make_outcome")
         c_payoffs = stdvector[c_Number]()
-        for player in self.players:
+        for player in self.get_players():
             c_payoffs.push_back(_to_number(resolved_payoffs[player]))
         resolved_nodes = self._resolve_outcome_nodes(location, "make_outcome")
         c_nodes = stdvector[c_GameNode]()
@@ -2229,7 +2229,7 @@ class ExtensiveGame(_StrategicFormBase):
             the reserved label of the chance player.
         """
         labels = self._validate_player_labels(players, "set_players")
-        current = list(self.players)
+        current = self.get_players()
         _, missing = _reconcile_labels(
             current, labels, add, drop, "set_players",
             "game", "player", "players", "their payoffs at every outcome"

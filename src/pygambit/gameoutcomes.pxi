@@ -82,7 +82,7 @@ def _resolve_payoff_mapping(self: Game, payoffs: typing.Mapping, funcname: str) 
         if player in resolved_payoffs:
             raise ValueError(f"{funcname}(): each player may appear only once in payoffs")
         resolved_payoffs[player] = value
-    if set(resolved_payoffs) != set(self.players):
+    if set(resolved_payoffs) != set(self.get_players()):
         raise ValueError(
             f"{funcname}(): payoffs must be specified for each player of the game"
         )
@@ -125,7 +125,7 @@ def _get_outcomes(self: Game) -> list[str]:
 def _get_outcome_payoffs(self: Game, label: str) -> PayoffVector:
     resolved_outcome: c_GameOutcome = _resolve_outcome(self, label, "get_outcome_payoffs")
     values = {}
-    for player in self.players:
+    for player in self.get_players():
         resolved_player = self._resolve_player(player, "get_outcome_payoffs")
         values[player] = _number_to_py(resolved_outcome.deref().GetPayoff[string](
             resolved_player
@@ -136,7 +136,7 @@ def _get_outcome_payoffs(self: Game, label: str) -> PayoffVector:
 def _set_outcome_payoffs(self: Game, label: str, payoffs: typing.Mapping) -> None:
     resolved_outcome: c_GameOutcome = _resolve_outcome(self, label, "set_outcome_payoffs")
     resolved_payoffs = _resolve_payoff_mapping(self, payoffs, "set_outcome_payoffs")
-    for player in self.players:
+    for player in self.get_players():
         resolved_outcome.deref().SetPayoff(
             self._resolve_player(player, "set_outcome_payoffs"),
             _to_number(resolved_payoffs[player])

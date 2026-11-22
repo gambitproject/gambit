@@ -12,7 +12,7 @@ import pygambit.util as util
 
 
 def _generate_lrs_input(game: gbt.Game) -> str:
-    p1, p2 = game.players
+    p1, p2 = game.get_players()
     s1 = game.get_strategies(p1)
     s2 = game.get_strategies(p2)
     s = f"{len(s1)} {len(s2)}\n\n"
@@ -45,7 +45,7 @@ def _parse_lrs_output(game: gbt.Game, txt: str) -> list[gbt.MixedStrategyProfile
 def lrsnash_solve(game: gbt.Game,
                   lrsnash_path: pathlib.Path | str) -> list[gbt.MixedStrategyProfileRational]:
     util.reject_bayesian(game, "lrsnash_solve")
-    if len(game.players) != 2:
+    if len(game.get_players()) != 2:
         raise RuntimeError("Method only valid for two-player games.")
     with util.make_temporary(_generate_lrs_input(game)) as infn:
         result = subprocess.run([lrsnash_path, infn], encoding="utf-8",

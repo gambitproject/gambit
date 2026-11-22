@@ -367,7 +367,7 @@ def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
         for root, keys in test_case.differences.items()
         for key in keys
     }
-    for player in game.players:
+    for player in game.get_players():
         for i, history in enumerate(game.get_infosets(player)):
             key = (player, i)
             selector = gbt.H.path(*history.actions)
