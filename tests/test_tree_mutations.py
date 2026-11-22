@@ -1,3 +1,5 @@
+import io
+
 import pytest
 
 import pygambit as gbt
@@ -1000,3 +1002,18 @@ def test_set_event_actions_bad_distribution_raises_valueerror():
     with pytest.raises(ValueError):
         game.set_event_actions(gbt.H.path(), {"King": "3/4", "Queen": "3/4"})
     assert game.to_efg() == before
+
+
+def test_copy_tree_does_not_copy_node_labels():
+    """Node labels are unique within the game, so the nodes of a copy are unlabelled,
+    and the game remains readable after being written."""
+    text = (
+        'EFG 2 R "t" { "A" }\n""\np "r" 1 1 "" { "l" "r" } 0\n'
+        'p "m" 1 2 "" { "a" "b" } 0\nt "x" 1 "o1" { 1 }\nt "y" 2 "o2" { 2 }\n'
+        't "" 3 "o3" { 3 }\n'
+    )
+    game = gbt.read_efg(io.StringIO(text))
+    game.copy_tree(gbt.H.path("l"), gbt.H.path("r"))
+    written = game.to_efg()
+    assert written.count('"x"') == 1 and written.count('"y"') == 1
+    assert gbt.read_efg(io.StringIO(written)).to_efg() == written
