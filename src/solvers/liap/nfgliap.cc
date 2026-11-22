@@ -51,8 +51,6 @@ private:
 
   double Value(const Vector<double> &) const override;
   bool Gradient(const Vector<double> &, Vector<double> &) const override;
-
-  double LiapDerivValue(const MixedStrategyProfile<double> &, const GameStrategy &) const;
 };
 
 inline double sum_player_probs(const MixedStrategyProfile<double> &p_profile,
@@ -65,14 +63,8 @@ inline double sum_player_probs(const MixedStrategyProfile<double> &p_profile,
 double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 {
   m_profile = v;
-  double value = 0;
   // Liapunov function proper
-  for (const auto &player : m_profile.GetGame()->GetPlayers()) {
-    const double payoff = m_profile.GetPayoff(player);
-    value += sum_function(player->GetStrategies(), [&](const auto &strategy) -> double {
-      return sqr(std::max(m_scale * (m_profile.GetPayoff(strategy) - payoff), 0.0));
-    });
-  }
+  double value = sqr(m_scale) * m_profile.GetLiapValue();
   // Penalty for non-negativity constraint for each strategy
   value += m_penalty *
            sum_function(m_profile.GetGame()->GetStrategies(), [&](const auto &strategy) -> double {
@@ -86,36 +78,44 @@ double StrategicLyapunovFunction::Value(const Vector<double> &v) const
   return value;
 }
 
-double StrategicLyapunovFunction::LiapDerivValue(const MixedStrategyProfile<double> &p_profile,
-                                                 const GameStrategy &p_wrt_strategy) const
-{
-  double deriv = 0.0;
-  for (const auto &player : m_game->GetPlayers()) {
-    const double payoff = p_profile.GetPayoff(player);
-    for (const auto &strategy : player->GetStrategies()) {
-      const double loss = sqr(m_scale) * (p_profile.GetPayoff(strategy) - payoff);
-      if (loss <= 0.0) {
-        continue;
-      }
-      deriv -= loss * p_profile.GetPayoffDeriv(player->GetNumber(), p_wrt_strategy);
-      if (player != p_wrt_strategy->GetPlayer()) {
-        deriv += loss * p_profile.GetPayoffDeriv(player->GetNumber(), strategy, p_wrt_strategy);
-      }
-    }
-  }
-  // Penalty function for non-negativity constraint for each strategy
-  deriv += m_penalty * std::min(p_profile[p_wrt_strategy], 0.0);
-  // Penalty function for sum-to-one constraint for each player
-  deriv += m_penalty * (sum_player_probs(p_profile, p_wrt_strategy->GetPlayer()) - 1.0);
-  return 2.0 * deriv;
-}
-
 bool StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
 {
   m_profile = v;
-  std::transform(
-      m_game->GetStrategies().begin(), m_game->GetStrategies().end(), d.begin(),
-      [&](const auto &strategy) -> double { return LiapDerivValue(m_profile, strategy); });
+  d = 0.0;
+  Vector<double> values;
+  Matrix<double> derivs;
+  size_t offset = 0;
+  for (const auto &player : m_game->GetPlayers()) {
+    const auto &strategies = player->GetStrategies();
+    m_profile.GetPayoffDerivBlock(player, values, derivs);
+    const double payoff = m_profile.GetPayoff(player);
+    Vector<double> weights(strategies.size());
+    double totalLoss = 0.0;
+    for (size_t row = 1; row <= strategies.size(); row++) {
+      weights[row] = sqr(m_scale) * std::max(values[row] - payoff, 0.0);
+      totalLoss += weights[row];
+    }
+    if (totalLoss > 0.0) {
+      size_t row = 1;
+      for (const auto &strategy : strategies) {
+        weights[row++] -= totalLoss * m_profile[strategy];
+      }
+      d += weights * derivs;
+      for (row = 1; row <= strategies.size(); row++) {
+        d[offset + row] -= totalLoss * values[row];
+      }
+    }
+    offset += strategies.size();
+  }
+  size_t index = 1;
+  for (const auto &strategy : m_game->GetStrategies()) {
+    // Penalty function for non-negativity constraint for each strategy
+    d[index] += m_penalty * std::min(m_profile[strategy], 0.0);
+    // Penalty function for sum-to-one constraint for each player
+    d[index] += m_penalty * (sum_player_probs(m_profile, strategy->GetPlayer()) - 1.0);
+    index++;
+  }
+  d *= 2.0;
   Project(d, m_game->GetStrategies().shape_array());
   return true;
 }

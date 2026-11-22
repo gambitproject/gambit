@@ -914,11 +914,11 @@ public:
   void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 
 private:
-  mutable std::shared_ptr<MixedBehaviorProfile<T>> m_mixedBehavior;
-
   std::vector<std::vector<T>> GetSequenceProbs(const TreeSequenceLayout &) const;
-  void MakeBehavior() const;
-  void OnProfileChanged() const override;
+  /// The payoff to player pl, with each of p_strategies played for sure by its player
+  T GetSequencePayoff(int pl, const std::vector<GameStrategy> &p_strategies) const;
+  /// As GetSequencePayoff, for a game without perfect recall
+  T GetBehaviorPayoff(int pl, const std::vector<GameStrategy> &p_strategies) const;
 };
 
 } // namespace Gambit
