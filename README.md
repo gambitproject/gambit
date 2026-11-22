@@ -16,7 +16,7 @@ Pre-release versions (alpha/beta/rc) are also published to PyPI and can be insta
 
 - **Documentation:** for the package is hosted at [gambitproject.readthedocs.io](https://gambitproject.readthedocs.io/).
 - **The Gambit project:** Find out more about the project at [gambit-project.org](https://www.gambit-project.org/)
-- **Contributors:** Please read the [code of conduct and contribution guidelines](https://gambitproject.readthedocs.io/en/latest/developer.contributing.html) before posting on GitHub.
+- **Developers:** Please read the [code of conduct and developer guidelines](https://gambitproject.readthedocs.io/en/latest/developer.html) before posting on GitHub.
 
 Gambit provides:
 

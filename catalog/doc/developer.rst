@@ -3,9 +3,9 @@
 Updating the catalog of games
 =============================
 
-This page includes developer notes regarding the catalog module, and the process for contributing to and updating Gambit's :ref:`catalog of games <catalog>`.
+This page includes developer notes regarding the catalog module, and the process for adding to and updating Gambit's :ref:`catalog of games <catalog>`.
 To do so, you will need to have the `gambit` GitHub repo cloned and be able to submit pull request via GitHub;
-you may wish to first review the `contributor guidelines <https://gambitproject.readthedocs.io/en/latest/developer.contributing.html>`_.
+you may wish to first review the `developer docs <https://gambitproject.readthedocs.io/en/latest/developer.html>`_.
 
 You can add new games to the catalog, or edit existing ones that are saved in a valid representation `format <https://gambitproject.readthedocs.io/en/latest/formats.html>`_.
 Currently supported representations are:
@@ -32,7 +32,7 @@ Currently supported representations are:
    .. important::
 
       If no bibliography entry exists, you should add one. For instructions,
-      see `Updating the bibliography <https://gambitproject.readthedocs.io/en/latest/developer.contributing.html#updating-bibliography>`_.
+      see `Updating the bibliography <https://gambitproject.readthedocs.io/en/latest/developer.docs.html#updating-bibliography>`_.
 
 2. **Add the game(s) to the repo:**
 
@@ -151,7 +151,6 @@ Currently supported representations are:
 
 6. **Submit a pull request to GitHub with all changes.**
 
-   Submit a PR according to the `usual workflow <https://gambitproject.readthedocs.io/en/latest/developer.contributing.html#submit-contribution>`_.
    Ensure that any additions and changes to game files, ``catalog/gtdraw_settings.yaml``, ``catalog/build.py`` and ``catalog/catalog.am`` are included.
 
    .. important::

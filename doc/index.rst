@@ -5,7 +5,7 @@ Gambit: User documentation
 construction and analysis of finite extensive and strategic games.
 
 - **Users:** We recommend most newcomers install the PyGambit Python package and read the associated documentation, which includes tutorials and a complete API reference.
-- **Contributors:** Please read the :ref:`code of conduct and contribution guidelines <contributing>` before posting on GitHub.
+- **Developers:** Please read the :ref:`code of conduct and developer guidelines <developer>` before posting on GitHub.
 
 .. grid::
 
@@ -92,7 +92,7 @@ construction and analysis of finite extensive and strategic games.
    .. grid-item-card:: 📖 Developer docs
       :columns: 3
 
-      Guides for developers & contributors to the package.
+      Guides for developers of the package.
 
       .. button-ref:: developer
          :ref-type: ref

@@ -5,7 +5,7 @@ Generating games for the catalog
 
 Alongside the curated catalog of games (built and hosted separately; see the
 `catalog's developer guide <https://gambit-catalog.readthedocs.io/en/latest/developer.html>`_
-for how to contribute new games), pygambit can generate games on the fly from two
+for how to add new games), pygambit can generate games on the fly from two
 external sources: the OpenSpiel library and the GAMUT suite.
 
 .. _catalog-openspiel:
