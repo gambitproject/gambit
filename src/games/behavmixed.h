@@ -310,6 +310,8 @@ public:
   ///             log probability of action b.
   void DiffActionValues(Matrix<T> &p_derivs) const;
 
+  /// @brief Returns the mixed strategy profile equivalent to this profile
+  /// @throw UndefinedException if the game has absent-minded information sets
   MixedStrategyProfile<T> ToMixedProfile() const;
 
   /// @brief Converts the profile to one on the full support of the game

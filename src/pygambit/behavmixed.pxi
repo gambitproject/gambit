@@ -1020,8 +1020,22 @@ class MixedBehaviorProfile:
     def as_strategy(self) -> MixedStrategyProfile:
         """Returns a `MixedStrategyProfile` which is equivalent
         to the profile.
+
+        .. versionchanged:: 17.0.0
+
+           Raises `UndefinedOperationError` for games with absent-minded information sets.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game has absent-minded information sets, for which a behavior profile
+            in general has no equivalent mixed strategy profile.
         """
         self._check_validity()
+        if self.game._has_absent_minded_infoset():
+            raise UndefinedOperationError(
+                "as_strategy() is not defined for games with absent-minded information sets."
+            )
         return self._as_strategy()
 
     def as_float(self) -> MixedBehaviorProfileDouble:

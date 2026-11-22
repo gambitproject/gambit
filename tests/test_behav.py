@@ -934,6 +934,7 @@ _PERFECT_RECALL_TREES = [
 _IMPERFECT_RECALL_TREES_WITHOUT_ABSENT_MINDEDNESS = [
     "noPR-action-selten-horse.efg",
     "noPR-information-no-deflate.efg",
+    "gilboa_two_am_agents.efg",
 ]
 
 
@@ -1031,6 +1032,17 @@ def test_as_strategy_reference(
     for player, probs in expected.items():
         for strategy, prob in probs.items():
             _assert_values_equal(strategy_profile[player][strategy], convert(prob), rational_flag)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "filename",
+    ["noPR-action-AM.efg", "AM-driver-one-infoset.efg"],
+)
+def test_as_strategy_absent_minded_raises(filename: str, rational_flag: bool):
+    profile = games.read_from_file(filename).mixed_behavior_profile(rational=rational_flag)
+    with pytest.raises(gbt.UndefinedOperationError):
+        profile.as_strategy()
 
 
 @pytest.mark.parametrize("rational_flag", [False, True])
