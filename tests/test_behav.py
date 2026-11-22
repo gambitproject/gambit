@@ -879,10 +879,10 @@ def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
 )
 def test_max_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+    _assert_values_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
 
 
-def _assert_regret_equal(actual, expected, rational_flag: bool) -> None:
+def _assert_values_equal(actual, expected, rational_flag: bool) -> None:
     if rational_flag:
         assert actual == expected
     else:
@@ -904,43 +904,133 @@ def _skewed_behavior_profile(game: gbt.Game, rational_flag: bool) -> gbt.MixedBe
     return profile
 
 
+def _pure_behavior_profile(game: gbt.Game, rational_flag: bool) -> gbt.MixedBehaviorProfile:
+    """A pure profile playing the last action at every information set."""
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    for history in games.all_infosets(game):
+        selector = gbt.H.path(*history.actions)
+        labels = list(game.get_actions(selector))
+        profile[selector] = {labels[-1]: 1}
+    return profile
+
+
+_PERFECT_RECALL_TREES = [
+    games.read_from_file("mixed_behavior_game.efg"),
+    games.create_stripped_down_poker_efg(),
+    games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+    games.create_kuhn_poker_efg(),
+    games.create_kuhn_poker_efg(nonterm_outcomes=True),
+    games.read_from_file("3_player.efg"),
+    games.read_from_file("3_player_with_nonterm_outcomes.efg"),
+    games.read_from_file("2_player_chance.efg"),
+    games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
+    games.read_from_file("chance_in_middle.efg"),
+    games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+    games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
+    games.read_from_file("perfect_info_with_chance.efg"),
+    games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
+]
+
+_IMPERFECT_RECALL_TREES_WITHOUT_ABSENT_MINDEDNESS = [
+    "noPR-action-selten-horse.efg",
+    "noPR-information-no-deflate.efg",
+]
+
+
 @pytest.mark.parametrize("rational_flag", [False, True])
-@pytest.mark.parametrize(
-    "game",
-    [
-        games.read_from_file("mixed_behavior_game.efg"),
-        games.create_stripped_down_poker_efg(),
-        games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-        games.create_kuhn_poker_efg(),
-        games.create_kuhn_poker_efg(nonterm_outcomes=True),
-        games.read_from_file("3_player.efg"),
-        games.read_from_file("3_player_with_nonterm_outcomes.efg"),
-        games.read_from_file("2_player_chance.efg"),
-        games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
-        games.read_from_file("chance_in_middle.efg"),
-        games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
-        games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
-        games.read_from_file("perfect_info_with_chance.efg"),
-        games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
-    ],
-)
+@pytest.mark.parametrize("game", _PERFECT_RECALL_TREES)
 def test_max_regret_consistency_nonuniform(game: gbt.Game, rational_flag: bool):
     profile = _skewed_behavior_profile(game, rational_flag)
-    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+    _assert_values_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
 
 
 @pytest.mark.parametrize("rational_flag", [False, True])
-@pytest.mark.parametrize(
-    "filename",
-    [
-        "noPR-action-selten-horse.efg",
-        "noPR-information-no-deflate.efg",
-    ],
-)
+@pytest.mark.parametrize("filename", _IMPERFECT_RECALL_TREES_WITHOUT_ABSENT_MINDEDNESS)
 def test_max_regret_imperfect_recall_without_absent_mindedness(filename: str, rational_flag: bool):
     game = games.read_from_file(filename)
     profile = _skewed_behavior_profile(game, rational_flag)
-    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+    _assert_values_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "make_profile",
+    [
+        pytest.param(
+            lambda game, rational_flag: game.mixed_behavior_profile(rational=rational_flag),
+            id="uniform",
+        ),
+        pytest.param(_skewed_behavior_profile, id="skewed"),
+        pytest.param(_pure_behavior_profile, id="pure"),
+    ],
+)
+@pytest.mark.parametrize(
+    "game",
+    _PERFECT_RECALL_TREES
+    + [games.read_from_file(f) for f in _IMPERFECT_RECALL_TREES_WITHOUT_ABSENT_MINDEDNESS],
+)
+def test_as_strategy_payoffs_consistency(
+    game: gbt.Game, make_profile: typing.Callable, rational_flag: bool
+):
+    """The strategy profile has the same expected payoffs as the behavior profile."""
+    profile = make_profile(game, rational_flag)
+    strategy_profile = profile.as_strategy()
+    for player in game.players:
+        _assert_values_equal(
+            strategy_profile.payoffs[player], profile.payoffs[player], rational_flag
+        )
+
+
+@pytest.mark.parametrize("rational_flag", [False, True])
+@pytest.mark.parametrize(
+    "game,behavior,expected",
+    [
+        pytest.param(
+            games.read_from_file("entry_accommodation.efg"),
+            {
+                (): {"S": "1/3", "T": "2/3"},
+                ("S", "E"): {"A": "1/4", "F": "3/4"},
+                ("T", "E"): {"A": "3/5", "F": "2/5"},
+                ("S",): {"E": "1/7", "O": "6/7"},
+            },
+            {
+                # Each strategy of player 1 chooses at the root and only at the one
+                # information set its own root choice leaves reachable: SA, SF, TA, TF.
+                "1": {"1": "1/12", "2": "1/4", "3": "2/5", "4": "4/15"},
+                "2": {"1": "1/7", "2": "6/7"},
+            },
+            id="entry-accommodation-reduced-strategies",
+        ),
+        pytest.param(
+            games.read_from_file("stripped_down_poker.efg"),
+            {
+                ("King",): {"Bet": "2/3", "Fold": "1/3"},
+                ("Queen",): {"Bet": "1/4", "Fold": "3/4"},
+                ("King", "Bet"): {"Call": "3/5", "Fold": "2/5"},
+            },
+            {
+                # Alice's strategies give her action with the King, then with the Queen:
+                # BB, BF, FB, FF.
+                "Alice": {"1": "1/6", "2": "1/2", "3": "1/12", "4": "1/4"},
+                "Bob": {"1": "3/5", "2": "2/5"},
+            },
+            id="stripped-down-poker",
+        ),
+    ],
+)
+def test_as_strategy_reference(
+    game: gbt.Game, behavior: dict, expected: dict, rational_flag: bool
+):
+    """The probability of each strategy is the product of the probabilities of the actions
+    it prescribes, by Kuhn's theorem."""
+    convert = gbt.Rational if rational_flag else (lambda p: float(gbt.Rational(p)))
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    for history, probs in behavior.items():
+        profile[gbt.H.path(*history)] = {a: convert(p) for a, p in probs.items()}
+    strategy_profile = profile.as_strategy()
+    for player, probs in expected.items():
+        for strategy, prob in probs.items():
+            _assert_values_equal(strategy_profile[player][strategy], convert(prob), rational_flag)
 
 
 @pytest.mark.parametrize("rational_flag", [False, True])
@@ -2174,9 +2264,5 @@ def test_logit_solve_on_many_types_game_is_fast():
 )
 def test_max_regret_consistency_pure_profile(game: gbt.Game, rational_flag: bool):
     """Pure profiles leave many information sets unreached."""
-    profile = game.mixed_behavior_profile(rational=rational_flag)
-    for history in games.all_infosets(game):
-        selector = gbt.H.path(*history.actions)
-        labels = list(game.get_actions(selector))
-        profile[selector] = {labels[-1]: 1}
-    _assert_regret_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
+    profile = _pure_behavior_profile(game, rational_flag)
+    _assert_values_equal(profile.max_regret(), profile.as_strategy().max_regret(), rational_flag)
