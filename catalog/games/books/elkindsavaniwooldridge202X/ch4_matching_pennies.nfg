@@ -1,0 +1,14 @@
+NFG 1 R "Matching Pennies" { "1" "2" }
+
+{ { "Heads" "Tails" }
+{ "heads" "tails" }
+}
+"Matching Pennies, the classic zero-sum game without a pure equilibrium, from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`; it also opens Chapter 5, where its unique (mixed) equilibrium is computed."
+
+{
+{ "" 1, -1 }
+{ "" -1, 1 }
+{ "" -1, 1 }
+{ "" 1, -1 }
+}
+1 2 3 4

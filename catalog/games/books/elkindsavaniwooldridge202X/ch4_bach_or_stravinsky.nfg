@@ -1,0 +1,14 @@
+NFG 1 R "Bach or Stravinsky" { "1" "2" }
+
+{ { "Bach" "Stravinsky" }
+{ "bach" "stravinsky" }
+}
+"Bach or Stravinsky (Battle of the Sexes), from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X`."
+
+{
+{ "" 2, 1 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 1, 2 }
+}
+1 2 3 4

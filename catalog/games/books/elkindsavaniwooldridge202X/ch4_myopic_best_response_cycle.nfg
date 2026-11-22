@@ -1,0 +1,19 @@
+NFG 1 R "Myopic best response cycles" { "1" "2" }
+
+{ { "T" "M" "B" }
+{ "l" "c" "r" }
+}
+"An example from Chapter 4 (Strategic Form Games) of :cite:p:`ESW2X` showing that myopic best response dynamics may cycle, here around the top-left 2x2 block (Matching Pennies), even though the game has a pure Nash equilibrium (B, r)."
+
+{
+{ "" -1, 1 }
+{ "" 1, -1 }
+{ "" -2, -2 }
+{ "" 1, -1 }
+{ "" -1, 1 }
+{ "" -2, -2 }
+{ "" -2, -2 }
+{ "" -2, -2 }
+{ "" 2, 2 }
+}
+1 2 3 4 5 6 7 8 9

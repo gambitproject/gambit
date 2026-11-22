@@ -1,0 +1,14 @@
+NFG 1 R "Difference trick example" { "1" "2" }
+
+{ { "T" "B" }
+{ "l" "r" }
+}
+"The game used in Chapter 5 (Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X` to illustrate the difference trick for 2x2 games. Its unique equilibrium is x = (1/2, 1/2), y = (2/3, 1/3)."
+
+{
+{ "" 0, 3 }
+{ "" 1, 0 }
+{ "" 2, 0 }
+{ "" 0, 3 }
+}
+1 2 3 4

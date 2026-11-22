@@ -1,0 +1,14 @@
+NFG 1 R "Matching Pennies variant" { "1" "2" }
+
+{ { "Heads" "Tails" }
+{ "heads" "tails" }
+}
+"A variant of Matching Pennies from Chapter 5 (Mixed Strategy Nash Equilibria) of :cite:p:`ESW2X` in which only one of player 2's payoffs changes; in the unique equilibrium player 1 plays Heads with probability 2/3."
+
+{
+{ "" 1, 0 }
+{ "" -1, 1 }
+{ "" -1, 1 }
+{ "" 1, -1 }
+}
+1 2 3 4
