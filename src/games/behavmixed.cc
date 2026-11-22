@@ -926,6 +926,10 @@ template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(const GameInfoset &
 template <class T> MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
   CheckVersion();
+  if (!m_layout->reentries.empty()) {
+    throw UndefinedException("Converting a behavior profile to a mixed strategy profile "
+                             "is not well-defined in games with absent-mindedness");
+  }
   m_support.GetGame()->EnsureStrategies();
   return MixedStrategyProfile<T>(*this);
 }
