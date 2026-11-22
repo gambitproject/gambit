@@ -87,10 +87,10 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   // input number of types for each player
   for (int i = 0; i < N; ++i) {
     in >> numTypes[i];
-    if (!in) {
+    if (!in || numTypes[i] <= 0) {
       throw std::runtime_error(
-          "Error in game file: integer expected for the number of types for player " +
-          std::to_string(i));
+          "Error in game file: positive integer expected for the number of types for player " +
+          std::to_string(i + 1));
     }
   }
 
@@ -100,6 +100,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   vector<vector<Number>> exactTDist(N);
   for (int i = 0; i < N; ++i) {
     TDist.emplace_back(numTypes[i]);
+    Rational total(0);
     for (int j = 0; j < numTypes[i]; ++j) {
       std::string word;
       in >> word;
@@ -107,8 +108,17 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
         throw std::runtime_error("Error in game file: number expected for type distribution");
       }
       const Number num(word);
+      if (static_cast<const Rational &>(num) <= Rational(0)) {
+        throw std::runtime_error("Error in game file: type probabilities for player " +
+                                 std::to_string(i + 1) + " must be strictly positive");
+      }
+      total += static_cast<const Rational &>(num);
       TDist[i][j] = static_cast<double>(num);
       exactTDist[i].push_back(num);
+    }
+    if (total != Rational(1)) {
+      throw std::runtime_error("Error in game file: type probabilities for player " +
+                               std::to_string(i + 1) + " must sum to exactly one");
     }
   }
 

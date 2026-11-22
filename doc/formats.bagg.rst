@@ -18,9 +18,13 @@ separated by whitespaces. Lines with starting '#' are treated as comments and ar
 #. The number of action nodes, \|S\|.
 #. The number of function nodes, \|P\|.
 
-#. The number of types for each player, as a row of n integers.
+#. The number of types for each player, as a row of n positive integers.
 #. Type distribution for each player. The distributions are assumed to be independent.
-   Each distribution is represented as a row of real numbers.
+   Each distribution is represented as a row of numbers, written as decimals or fractions
+   (for example ``1/3``).  Every probability must be strictly positive, and each player's
+   probabilities must sum to exactly one; the sum is checked in exact arithmetic, so for
+   example ``1/3 2/3`` is accepted but ``0.3333 0.6666`` is not.  A file that violates either
+   condition is rejected.
    The following example block gives the type distributions for a BAGG with two players and two types for each player::
 
      0.5 0.5
