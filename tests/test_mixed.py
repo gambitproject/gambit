@@ -455,6 +455,28 @@ def test_as_behavior_roundtrip(game: gbt.Game, rational_flag: bool):
 @pytest.mark.parametrize(
     "game,rational_flag",
     [
+        (games.read_from_file("mixed_behavior_game.efg"), False),
+        (games.read_from_file("mixed_behavior_game.efg"), True),
+        (games.read_from_file("cent3.efg"), False),
+        (games.read_from_file("cent3.efg"), True),
+    ],
+)
+def test_as_behavior_requires_normalized(game: gbt.Game, rational_flag: bool):
+    """Each player's probabilities must sum to one; normalize() gives the profile to convert."""
+    player = next(iter(game.players))
+    profile = game.mixed_strategy_profile(rational=rational_flag)
+    profile[player] = {s: 1 for s in game.get_strategies(player)}
+    with pytest.raises(gbt.UndefinedOperationError, match="normalize"):
+        _ = profile.as_behavior()
+    assert (
+        profile.normalize().as_behavior()
+        == game.mixed_strategy_profile(rational=rational_flag).as_behavior()
+    )
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False),
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True),
         (games.read_from_file("coordination_4x4_payoff.nfg"), False),

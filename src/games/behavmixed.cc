@@ -363,6 +363,10 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   : m_probs(p_profile.GetGame()->BehavProfileLength()), m_support(p_profile.GetGame()),
     m_gameversion(p_profile.GetGame()->GetVersion())
 {
+  if (!p_profile.IsNormalized()) {
+    throw UndefinedException("Converting a mixed strategy profile to a behavior profile "
+                             "requires each player's probabilities to sum to one");
+  }
   m_support.GetGame()->EnsureInfosetOrdering();
   int index = 1;
   for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {

@@ -383,6 +383,7 @@ cdef extern from "games/stratmixed.h" namespace "Gambit":
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
         c_MixedStrategyProfile[T] Normalize()  # except + doesn't compile
+        bool IsNormalized() except +
         T getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         T GetPayoff(c_GamePlayer) except +
         T GetPayoff(c_GameStrategy) except +

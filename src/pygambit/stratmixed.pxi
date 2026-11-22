@@ -446,16 +446,27 @@ class MixedStrategyProfile:
         MixedBehaviorProfile
             The equivalent mixed behavior profile.
 
+        .. versionchanged:: 17.0.0
+
+           Raises `UndefinedOperationError` if the profile is not normalized.
+
         Raises
         ------
         UndefinedOperationError
-            If the game does not have a tree representation.
+            If the game does not have a tree representation, or if some player's
+            strategy probabilities do not sum to one.  Use `normalize` first
+            if required.
         """
         if not isinstance(self.game, ExtensiveGame):
             raise UndefinedOperationError(
                 "Mixed behavior profiles are not defined for strategic games"
             )
         self._check_validity()
+        if not self._is_normalized():
+            raise UndefinedOperationError(
+                "as_behavior() requires each player's strategy probabilities to sum to one; "
+                "use normalize() first."
+            )
         return self._as_behavior()
 
     def as_float(self) -> MixedStrategyProfileDouble:
@@ -576,6 +587,10 @@ class MixedStrategyProfile:
         """
         raise NotImplementedError
 
+    def _is_normalized(self) -> bool:
+        """Returns whether each player's strategy probabilities sum to one."""
+        raise NotImplementedError
+
 
 @cython.cclass
 class MixedStrategyProfileDouble(MixedStrategyProfile):
@@ -681,6 +696,9 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return MixedStrategyProfileDouble.wrap(
             make_shared[c_MixedStrategyProfile[double]](deref(self.profile).Normalize())
         )
+
+    def _is_normalized(self) -> bool:
+        return deref(self.profile).IsNormalized()
 
     @property
     def _game(self) -> Game:
@@ -789,6 +807,9 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return MixedStrategyProfileRational.wrap(
             make_shared[c_MixedStrategyProfile[c_Rational]](deref(self.profile).Normalize())
         )
+
+    def _is_normalized(self) -> bool:
+        return deref(self.profile).IsNormalized()
 
     @property
     def _game(self) -> Game:
