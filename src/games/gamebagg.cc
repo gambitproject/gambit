@@ -95,34 +95,37 @@ public:
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+  bool GetPayoffDerivs(int pl, Vector<T> &p_values) const override;
   void GetPayoffDerivBlock(int pl, Vector<T> &p_values, Matrix<T> &p_derivs) const override;
 
 private:
-  T GetPartialDeriv(int pl, const std::vector<GameStrategy> &p_strategies) const;
+  /// The BAGG strategy vector of the profile; agent k's strategies start at strategyOffset[k - 1],
+  /// and strategies not in the support have probability zero
+  std::vector<T> GetStrategyVector() const;
+  T GetPartialDeriv(int pl, const std::vector<GameStrategy> &p_strategies,
+                    const std::vector<T> &p_strategyVector) const;
 };
+
+template <class T> std::vector<T> BAGGMixedStrategyProfileRep<T>::GetStrategyVector() const
+{
+  const auto game = this->m_support.GetGame();
+  const auto &bagg = *dynamic_cast<GameBAGGRep &>(*game).baggPtr;
+  std::vector<T> s(bagg.strategyOffset[bagg.getNumTypes()]);
+  for (int k = 1, offset = 0; k <= bagg.getNumTypes(); k++) {
+    for (const auto &strategy : game->GetPlayer(k)->GetStrategies()) {
+      const int ind = this->m_profileIndex.at(strategy);
+      s[offset++] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
+    }
+  }
+  return s;
+}
 
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   const auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<T> s(g.GetStrategies().size());
-  const auto ns = g.GetStrategies().shape();
-  int bplayer = -1, btype = -1;
-  for (int i = 0, offs = 0; i < g.baggPtr->getNumPlayers(); ++i) {
-    for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
-      if (pl == g.baggPtr->typeOffset[i] + tp + 1) {
-        bplayer = i;
-        btype = tp;
-      }
-      for (size_t j = 0; j < ns[g.baggPtr->typeOffset[i] + tp]; ++j, ++offs) {
-        const GameStrategy strategy = this->m_support.GetGame()
-                                          ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
-                                          ->GetStrategy(j + 1);
-        const int ind = this->m_profileIndex.at(strategy);
-        s.at(offs) = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-      }
-    }
-  }
-  return g.baggPtr->getMixedPayoff(bplayer, btype, s);
+  const int bplayer = g.agent2baggPlayer[pl] - 1;
+  return g.baggPtr->getMixedPayoff(bplayer, pl - 1 - g.baggPtr->typeOffset[bplayer],
+                                   GetStrategyVector());
 }
 
 // The payoff to agent pl is linear in its own mixed strategy and in the mixed strategy each
@@ -134,8 +137,9 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 // if two of the strategies belong to one BAGG player, or one belongs to another type of pl's.
 template <class T>
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
-T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(
-    int pl, const std::vector<GameStrategy> &p_strategies) const
+T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(int pl,
+                                                  const std::vector<GameStrategy> &p_strategies,
+                                                  const std::vector<T> &p_strategyVector) const
 {
   const auto game = this->m_support.GetGame();
   auto &g = dynamic_cast<GameBAGGRep &>(*game);
@@ -174,23 +178,15 @@ T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(
     }
   }
 
-  std::vector<T> s(bagg.strategyOffset[bagg.getNumTypes()]);
-  for (int k = 1, offset = 0; k <= bagg.getNumTypes(); k++) {
-    for (const auto &strategy : game->GetPlayer(k)->GetStrategies()) {
-      const int ind = this->m_profileIndex.at(strategy);
-      s[offset++] = (ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind];
-    }
-  }
-
   std::vector<T> as(agg.getNumActions());
   T value(0);
   for (int action = 0; action < bagg.getNumActions(bplayer, btype); action++) {
-    const T prob = (ownAction == -1) ? s[bagg.firstAction(bplayer, btype) + action]
+    const T prob = (ownAction == -1) ? p_strategyVector[bagg.firstAction(bplayer, btype) + action]
                                      : T((action == ownAction) ? 1 : 0);
     if (prob <= T(0)) {
       continue;
     }
-    bagg.getAGGStrat(as, s, bplayer, btype, action);
+    bagg.getAGGStrat(as, p_strategyVector, bplayer, btype, action);
     for (const auto &[player, index] : fixed) {
       std::fill(as.begin() + agg.firstAction(player),
                 as.begin() + agg.firstAction(player) + agg.getNumActions(player), T(0));
@@ -204,27 +200,59 @@ T BAGGMixedStrategyProfileRep<T>::GetPartialDeriv(
 template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
-  return GetPartialDeriv(pl, {ps});
+  return GetPartialDeriv(pl, {ps}, GetStrategyVector());
 }
 
 template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
                                                  const GameStrategy &ps2) const
 {
-  return GetPartialDeriv(pl, {ps1, ps2});
+  return GetPartialDeriv(pl, {ps1, ps2}, GetStrategyVector());
+}
+
+template <class T>
+bool BAGGMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_values) const
+{
+  const auto s = GetStrategyVector();
+  size_t row = 1;
+  for (const auto &strategy :
+       this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
+    p_values[row++] = GetPartialDeriv(pl, {strategy}, s);
+  }
+  return true;
 }
 
 // See GetPartialDeriv.  The derivative with respect to an action b of type tq of another BAGG
 // player j is P(tq) times the payoff when j plays b's AGG action for sure, which is one entry of
 // a row of the AGG payoff Jacobian.  The Jacobian row is available in floating point only; exact
-// computation uses the default.
+// computation evaluates each derivative separately from one strategy vector.
 template <class T>
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_values,
                                                          Matrix<T> &p_derivs) const
 {
   if constexpr (!std::is_same_v<T, double>) {
-    MixedStrategyProfileRep<T>::GetPayoffDerivBlock(pl, p_values, p_derivs);
+    const auto game = this->m_support.GetGame();
+    const auto player = game->GetPlayer(pl);
+    const auto &strategies = this->m_support.GetStrategies(player);
+    const auto s = GetStrategyVector();
+    p_values = Vector<T>(strategies.size());
+    p_derivs = Matrix<T>(strategies.size(), this->m_probs.GetFlattened().size());
+    p_derivs = T(0);
+    size_t row = 1;
+    for (const auto &strategy : strategies) {
+      p_values[row] = GetPartialDeriv(pl, {strategy}, s);
+      for (const auto &other : game->GetPlayers()) {
+        if (other == player) {
+          continue;
+        }
+        for (const auto &otherStrategy : this->m_support.GetStrategies(other)) {
+          p_derivs(row, this->m_profileIndex.at(otherStrategy)) =
+              GetPartialDeriv(pl, {strategy, otherStrategy}, s);
+        }
+      }
+      row++;
+    }
   }
   else {
     const auto game = this->m_support.GetGame();
@@ -232,16 +260,12 @@ void BAGGMixedStrategyProfileRep<T>::GetPayoffDerivBlock(int pl, Vector<T> &p_va
     auto &agg = *bagg.aggPtr;
     const int numAgents = bagg.getNumTypes();
 
-    // The BAGG strategy vector, and the profile position of each of its entries (-1 if the
-    // strategy is not in the support); agent k's strategies start at strategyOffset[k - 1]
-    std::vector<double> s(bagg.strategyOffset[numAgents]);
+    const auto s = GetStrategyVector();
+    // The profile position of each entry of s (-1 if the strategy is not in the support)
     std::vector<int> column(s.size());
-    for (int k = 1; k <= numAgents; k++) {
-      int offset = bagg.strategyOffset[k - 1];
+    for (int k = 1, offset = 0; k <= numAgents; k++) {
       for (const auto &strategy : game->GetPlayer(k)->GetStrategies()) {
-        const int ind = this->m_profileIndex.at(strategy);
-        s[offset] = (ind == -1) ? 0.0 : this->m_probs.GetFlattened()[ind];
-        column[offset++] = ind;
+        column[offset++] = this->m_profileIndex.at(strategy);
       }
     }
 

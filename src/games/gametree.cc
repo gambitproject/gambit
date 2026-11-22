@@ -59,55 +59,6 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy
   return std::make_unique<TreeMixedStrategyProfileRep>(*this);
 }
 
-template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
-{
-  if (m_mixedBehavior == nullptr) {
-    m_mixedBehavior =
-        std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(this->Normalize()));
-  }
-}
-
-template <class T> void TreeMixedStrategyProfileRep<T>::OnProfileChanged() const
-{
-  m_mixedBehavior = nullptr;
-}
-
-// The behavior profile is realization-equivalent to the normalized profile, so its payoff is
-// scaled by each player's total probability.  This gives the payoff as the multilinear function
-// of the probabilities that the other representations compute, of which GetPayoffDeriv then
-// gives the partial derivatives.
-template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
-{
-  MakeBehavior();
-  T payoff = m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
-  for (size_t player = 1; player <= this->m_probs.GetShape().size(); player++) {
-    const auto probs = std::as_const(this->m_probs).segment(player);
-    payoff *= std::accumulate(probs.begin(), probs.end(), static_cast<T>(0));
-  }
-  return payoff;
-}
-
-template <class T>
-T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
-{
-  TreeMixedStrategyProfileRep tmp(*this);
-  tmp.SetStrategy(strategy);
-  return tmp.GetPayoff(pl);
-}
-
-template <class T>
-T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
-                                                 const GameStrategy &strategy2) const
-{
-  if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
-    return static_cast<T>(0);
-  }
-  TreeMixedStrategyProfileRep tmp(*this);
-  tmp.SetStrategy(strategy1);
-  tmp.SetStrategy(strategy2);
-  return tmp.GetPayoff(pl);
-}
-
 /// The sequence of each player at each node of a tree with perfect recall, and the sequences each
 /// reduced strategy is consistent with.  A player's sequence at a node is the player's last action
 /// on the path to it, numbered from 1 among that player's actions in the order of the
@@ -255,6 +206,73 @@ static std::vector<T> AccumulateSequenceValues(const TreeSequenceLayout &p_layou
     }
   }
   return ownValues;
+}
+
+// The payoff is multilinear in the probabilities of the sequences, and each sequence probability
+// is linear in the probabilities of the player's strategies.  The partial derivative with respect
+// to the probability of a strategy is therefore the payoff with the probabilities of that
+// player's sequences replaced by whether the strategy is consistent with each.
+template <class T>
+T TreeMixedStrategyProfileRep<T>::GetSequencePayoff(
+    int pl, const std::vector<GameStrategy> &p_strategies) const
+{
+  const auto layout =
+      static_cast<const GameTreeRep &>(*this->m_support.GetGame()).GetSequenceLayout();
+  if (!layout->perfectRecall) {
+    return GetBehaviorPayoff(pl, p_strategies);
+  }
+  auto seqProbs = GetSequenceProbs(*layout);
+  for (const auto &strategy : p_strategies) {
+    const size_t player = strategy->GetPlayer()->GetNumber() - 1;
+    seqProbs[player].assign(layout->numSequences[player], static_cast<T>(0));
+    for (const size_t sequence : layout->strategySequences[player][strategy->GetNumber() - 1]) {
+      seqProbs[player][sequence] = static_cast<T>(1);
+    }
+  }
+  const size_t self = pl - 1;
+  const auto ownValues = AccumulateSequenceValues<T>(*layout, seqProbs, self, nullptr);
+  return std::inner_product(ownValues.begin(), ownValues.end(), seqProbs[self].begin(),
+                            static_cast<T>(0));
+}
+
+// In a game without perfect recall, the payoff is computed from the realization-equivalent
+// behavior profile of the normalized profile, scaled by each player's total probability.
+template <class T>
+T TreeMixedStrategyProfileRep<T>::GetBehaviorPayoff(
+    int pl, const std::vector<GameStrategy> &p_strategies) const
+{
+  TreeMixedStrategyProfileRep tmp(*this);
+  for (const auto &strategy : p_strategies) {
+    tmp.SetStrategy(strategy);
+  }
+  const MixedBehaviorProfile<T> behavior(MixedStrategyProfile<T>(tmp.Normalize()));
+  T payoff = behavior.GetPayoff(behavior.GetGame()->GetPlayer(pl));
+  for (size_t player = 1; player <= tmp.m_probs.GetShape().size(); player++) {
+    const auto probs = std::as_const(tmp.m_probs).segment(player);
+    payoff *= std::accumulate(probs.begin(), probs.end(), static_cast<T>(0));
+  }
+  return payoff;
+}
+
+template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  return GetSequencePayoff(pl, {});
+}
+
+template <class T>
+T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
+{
+  return GetSequencePayoff(pl, {strategy});
+}
+
+template <class T>
+T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
+                                                 const GameStrategy &strategy2) const
+{
+  if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
+    return static_cast<T>(0);
+  }
+  return GetSequencePayoff(pl, {strategy1, strategy2});
 }
 
 template <class T>
