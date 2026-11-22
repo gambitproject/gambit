@@ -934,7 +934,7 @@ _PERFECT_RECALL_TREES = [
 _IMPERFECT_RECALL_TREES_WITHOUT_ABSENT_MINDEDNESS = [
     "noPR-action-selten-horse.efg",
     "noPR-information-no-deflate.efg",
-    "gilboa_two_am_agents.efg",
+    "gilboa_two_agents.efg",
 ]
 
 

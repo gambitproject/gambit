@@ -149,7 +149,7 @@ def test_report_bifurcations_flag_works_under_terminal_only(cli_runner, nfg_coor
 
 
 def test_imperfect_recall_is_rejected(cli_runner):
-    imperfect_recall_efg = pathlib.Path("tests/test_games/gilboa_two_am_agents.efg").read_text()
+    imperfect_recall_efg = pathlib.Path("tests/test_games/gilboa_two_agents.efg").read_text()
     result = cli_runner.invoke(logit.main, ["-q"], input=imperfect_recall_efg)
     assert result.exit_code == 1
     assert result.stderr == (
