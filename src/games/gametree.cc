@@ -620,6 +620,20 @@ GameNodeRep::~GameNodeRep()
                         [](const std::shared_ptr<GameNodeRep> &n) { n->Invalidate(); });
 }
 
+void GameNodeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  CheckLabel(p_label);
+  auto *game = static_cast<GameTreeRep *>(m_game);
+  // Node labels may be empty, but a non-empty label must be unique within the game.
+  if (!p_label.empty() && game->m_nodeLabels.contains(p_label)) {
+    throw ValueException("Node label must be unique within the game");
+  }
+  game->SetNodeLabel(this, p_label);
+}
+
 GameNode GameNodeRep::GetNextSibling() const
 {
   if (!m_parent || m_parent->m_children.back().get() == this) {
@@ -735,8 +749,8 @@ void GameTreeRep::DeleteTree(const GameNode &p_node)
     RemoveMember(node->m_infoset, node);
     node->m_infoset = nullptr;
   }
-  node->m_outcome = m_nullOutcome.get();
-  node->m_label = "";
+  AttachOutcome(node->m_outcome, m_nullOutcome.get());
+  SetNodeLabel(node, "");
 
   ClearComputedValues();
   InvalidateTreeOrdering();
@@ -746,7 +760,7 @@ void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *
 {
   IncrementVersion();
   if (src == stop) {
-    dest->m_outcome = src->m_outcome;
+    AttachOutcome(dest->m_outcome, src->m_outcome);
     return;
   }
 
@@ -759,7 +773,7 @@ void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *
   }
 
   dest->m_label = src->m_label;
-  dest->m_outcome = src->m_outcome;
+  AttachOutcome(dest->m_outcome, src->m_outcome);
 }
 
 void GameTreeRep::CopyTree(const GameNode &p_dest, const GameNode &p_src)
@@ -799,8 +813,8 @@ void GameTreeRep::MoveTree(const GameNode &p_dest, const GameNode &p_src)
   std::iter_swap(std::ranges::find(src->m_parent->m_children, src->shared_from_this()),
                  std::ranges::find(dest->m_parent->m_children, dest->shared_from_this()));
   std::swap(src->m_parent, dest->m_parent);
-  dest->m_label = "";
-  dest->m_outcome = m_nullOutcome.get();
+  SetNodeLabel(dest, "");
+  AttachOutcome(dest->m_outcome, m_nullOutcome.get());
 
   ClearComputedValues();
   InvalidateTreeOrdering();
@@ -2099,23 +2113,33 @@ std::vector<GameNode> GameTreeRep::GetPlays(const GameAction &action) const
   return plays;
 }
 
-std::set<const GameOutcomeRep *>
-GameTreeRep::ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
-                                     const std::set<const GameOutcomeRep *> &p_covered) const
+std::map<const GameOutcomeRep *, std::size_t>
+GameTreeRep::CountCoveredOutcomes(const std::set<GameNodeRep *> &p_selected)
 {
-  std::set<const GameOutcomeRep *> absorbed;
-  if (!p_covered.empty()) {
-    absorbed = p_covered;
-    for (const auto &node : GetNodes()) {
-      if (absorbed.empty()) {
-        break;
-      }
-      if (!p_selected.contains(node.get())) {
-        absorbed.erase(node->m_outcome);
-      }
+  std::map<const GameOutcomeRep *, std::size_t> covered;
+  for (const auto *node : p_selected) {
+    if (!node->m_outcome->IsNull()) {
+      covered[node->m_outcome]++;
     }
   }
-  return absorbed;
+  return covered;
+}
+
+void GameTreeRep::SetNodeLabel(GameNodeRep *p_node, const std::string &p_label)
+{
+  UnindexNodeLabel(p_node);
+  p_node->m_label = p_label;
+  if (!p_label.empty()) {
+    m_nodeLabels[p_label] = p_node;
+  }
+}
+
+void GameTreeRep::UnindexNodeLabel(const GameNodeRep *p_node)
+{
+  if (const auto entry = m_nodeLabels.find(p_node->m_label);
+      entry != m_nodeLabels.end() && entry->second == p_node) {
+    m_nodeLabels.erase(entry);
+  }
 }
 
 GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
@@ -2129,7 +2153,6 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
     throw ValueException("A payoff must be specified for each player");
   }
   std::set<GameNodeRep *> selected;
-  std::set<const GameOutcomeRep *> covered;
   for (const auto &node : p_nodes) {
     if (node->m_game != this) {
       throw MismatchException();
@@ -2137,11 +2160,8 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
     if (!selected.insert(node.get()).second) {
       throw ValueException("Each node may be referenced only once");
     }
-    if (!node->m_outcome->IsNull()) {
-      covered.insert(node->m_outcome);
-    }
   }
-  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+  const auto absorbed = AbsorbedOutcomes(CountCoveredOutcomes(selected));
   CheckOutcomeLabel(p_label, absorbed);
 
   IncrementVersion();
@@ -2151,7 +2171,7 @@ GameOutcome GameTreeRep::MakeOutcome(const std::vector<GameNode> &p_nodes,
     outcome->SetPayoff(player, p_payoffs[pl]);
   }
   for (auto *node : selected) {
-    node->m_outcome = outcome.get();
+    AttachOutcome(node->m_outcome, outcome.get());
   }
   if (!absorbed.empty()) {
     EraseOutcomes(absorbed);
@@ -2165,7 +2185,6 @@ void GameTreeRep::MakeOutcomeNull(const std::vector<GameNode> &p_nodes)
     throw ValueException("At least one node must be specified");
   }
   std::set<GameNodeRep *> selected;
-  std::set<const GameOutcomeRep *> covered;
   for (const auto &node : p_nodes) {
     if (node->m_game != this) {
       throw MismatchException();
@@ -2173,15 +2192,12 @@ void GameTreeRep::MakeOutcomeNull(const std::vector<GameNode> &p_nodes)
     if (!selected.insert(node.get()).second) {
       throw ValueException("Each node may be referenced only once");
     }
-    if (!node->m_outcome->IsNull()) {
-      covered.insert(node->m_outcome);
-    }
   }
-  const auto absorbed = ComputeAbsorbedOutcomes(selected, covered);
+  const auto absorbed = AbsorbedOutcomes(CountCoveredOutcomes(selected));
 
   IncrementVersion();
   for (auto *node : selected) {
-    node->m_outcome = m_nullOutcome.get();
+    AttachOutcome(node->m_outcome, m_nullOutcome.get());
   }
   if (!absorbed.empty()) {
     EraseOutcomes(absorbed);

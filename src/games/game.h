@@ -346,6 +346,7 @@ class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   int m_number;
   std::string m_label;
   std::map<GamePlayerRep *, Number> m_payoffs;
+  std::size_t m_useCount{0};
 
 public:
   /// @name Lifecycle
@@ -625,6 +626,12 @@ protected:
   void IndexOutcomeLabels();
   /// Remove the entry for p_outcome's label from the index, if it refers to p_outcome.
   void UnindexOutcomeLabel(const GameOutcomeRep *p_outcome);
+  /// Attach p_outcome at p_slot (a node's or contingency's outcome), maintaining use counts.
+  static void AttachOutcome(GameOutcomeRep *&p_slot, GameOutcomeRep *p_outcome);
+  /// Returns the outcomes in p_covered whose every use is among the counted references,
+  /// where p_covered maps each outcome to the number of references to it being replaced.
+  static std::set<const GameOutcomeRep *>
+  AbsorbedOutcomes(const std::map<const GameOutcomeRep *, std::size_t> &p_covered);
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
@@ -1150,6 +1157,27 @@ inline void GameRep::UnindexOutcomeLabel(const GameOutcomeRep *p_outcome)
       entry != m_outcomeLabels.end() && entry->second == p_outcome) {
     m_outcomeLabels.erase(entry);
   }
+}
+inline void GameRep::AttachOutcome(GameOutcomeRep *&p_slot, GameOutcomeRep *p_outcome)
+{
+  if (!p_slot->m_isNull) {
+    p_slot->m_useCount--;
+  }
+  p_slot = p_outcome;
+  if (!p_slot->m_isNull) {
+    p_slot->m_useCount++;
+  }
+}
+inline std::set<const GameOutcomeRep *>
+GameRep::AbsorbedOutcomes(const std::map<const GameOutcomeRep *, std::size_t> &p_covered)
+{
+  std::set<const GameOutcomeRep *> absorbed;
+  for (const auto &[outcome, count] : p_covered) {
+    if (count == outcome->m_useCount) {
+      absorbed.insert(outcome);
+    }
+  }
+  return absorbed;
 }
 inline void GameRep::EraseOutcomes(const std::set<const GameOutcomeRep *> &p_outcomes)
 {

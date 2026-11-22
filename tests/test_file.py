@@ -247,3 +247,16 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 """
     with pytest.raises(ValueError, match="end-of-file"):
         _parse_nfg(data)
+
+
+def test_read_efg_duplicate_node_labels_rejected():
+    with pytest.raises(ValueError, match="Node label"):
+        _parse_efg(LEGACY_EFG_HEADER + 't "x" 1 "" { 1, -1 }\nt "x" 2 "" { 2, -2 }\n')
+
+
+def test_read_efg_node_labels_survive_round_trip():
+    g = _parse_efg('EFG 2 R "t" { "A" "B" }\n""\np "root" 1 1 "" { "l" "r" } 0\n'
+                   't "x" 1 "" { 1, -1 }\nt "" 2 "" { 2, -2 }\n')
+    text = g.to_efg()
+    assert '"root"' in text and '"x"' in text
+    assert _parse_efg(text).to_efg() == text

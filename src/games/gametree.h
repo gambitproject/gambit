@@ -652,22 +652,6 @@ inline std::vector<GameSequence> GameInfosetRep::GetSequences() const
   return result;
 }
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
-inline void GameNodeRep::SetLabel(const std::string &p_label)
-{
-  if (p_label == m_label) {
-    return;
-  }
-  CheckLabel(p_label);
-  // Node labels may be empty, but a non-empty label must be unique within the game.
-  if (!p_label.empty()) {
-    for (const auto &node : GetGame()->GetNodes()) {
-      if (node.get() != this && node->GetLabel() == p_label) {
-        throw ValueException("Node label must be unique within the game");
-      }
-    }
-  }
-  m_label = p_label;
-}
 inline int GameNodeRep::GetNumber() const
 {
   m_game->EnsureNodeOrdering();
@@ -722,6 +706,8 @@ protected:
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
+  /// The labelled nodes of the game indexed by label; non-empty node labels are unique
+  std::unordered_map<std::string, GameNodeRep *> m_nodeLabels;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   mutable LazyAction m_ownPriorActions;
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
@@ -750,10 +736,13 @@ protected:
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
-  /// Returns the subset of p_covered no longer referenced by any node outside p_selected.
-  std::set<const GameOutcomeRep *>
-  ComputeAbsorbedOutcomes(const std::set<GameNodeRep *> &p_selected,
-                          const std::set<const GameOutcomeRep *> &p_covered) const;
+  /// Returns the number of nodes in p_selected to which each non-null outcome is attached.
+  static std::map<const GameOutcomeRep *, std::size_t>
+  CountCoveredOutcomes(const std::set<GameNodeRep *> &p_selected);
+  /// Set the label of p_node to p_label, maintaining the index of node labels.
+  void SetNodeLabel(GameNodeRep *p_node, const std::string &p_label);
+  /// Remove the entry for p_node's label from the index, if it refers to p_node.
+  void UnindexNodeLabel(const GameNodeRep *p_node);
   //@}
 
   /// @name Managing the representation
