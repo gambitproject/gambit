@@ -7,7 +7,7 @@ Install
 Users installing Gambit have several options depending on their needs and their operating system.
 We recommended most new users install the PyGambit package and read the :ref:`PyGambit documentation <pygambit>`.
 
-Developers & contributors should refer to the :ref:`developer docs <developer>` which contain guides for building Gambit from source and contributing to the project.
+Developers should refer to the :ref:`developer docs <developer>` which contain guides for building Gambit from source and the development workflow.
 
 Installing PyGambit
 -------------------

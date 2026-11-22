@@ -168,8 +168,7 @@ dnl the first THREE fields, and silently ignores any fourth, so the build
 dnl field is where prerelease ordering has to live.
 dnl
 dnl This matches the alpha/beta/rc nomenclature used by the rest of the
-dnl release tooling (see "Making a new release" in
-dnl doc/developer.contributing.rst).  The build field is carved into
+dnl release tooling.  The build field is carved into
 dnl bands, each with far more headroom than a release cycle needs:
 dnl   alpha.N -> 0     + N
 dnl   beta.N  -> 10000 + N

@@ -1,92 +1,136 @@
 .. _architecture-overview:
 
-Overview of Gambit architecture
-===============================
+Code organisation
+=================
 
-The core of Gambit is a library of C++ code for the representation and analysis of finite games.
-This code is organised into three directories:
+.. _repository-layout:
 
-* ``src/core``: Generic functions, structures, and utility code which is not specific to
-  game theory.
-* ``src/games``: Definition of the interface and representation data structures for game objects
-  and related concepts.
-* ``src/solvers``: Implementation of algorithms for computation on games, principally for the
-  computation of (exact or approximate) Nash equilibria.
+Repository layout
+-----------------
 
-Gambit is written to the C++20 standard.  Because Gambit is cross-platform, C++ library
-dependencies are avoided to facilitate development and packaging.
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
 
-The principal way in which code is written to use Gambit is via the Python package
-``pygambit``.  In particular, testing is done via the Python test suite and ``pytest``,
-which therefore (indirectly) tests the C++ data structures and algorithms.
-Running ``make check`` has no effect (there are no tests defined in that build system).
-The test suite makes use of a variety of games, which are drawn from examples in
-the game theory literature and textbooks, as well as examples constructed specifically
-to test edge cases.  From Gambit 17, these are all curated as part of Gambit's
-`catalog of games <https://gambit-catalog.readthedocs.io/>`_.
+   * - Location
+     - Contents
+   * - ``src/core``, ``src/games``, ``src/solvers``
+     - The C++ library: utility code, game representations, and solvers
+       (see :ref:`cpp-library`).
+   * - ``src/gambit.h``, ``src/games.h``, ``src/solvers.h``
+     - Umbrella headers for the C++ library (see :ref:`header-organization`).
+   * - ``src/pygambit``
+     - The ``pygambit`` Python package: the Cython extension module (``gambit.pyx`` and
+       ``*.pxi``) and the pure-Python modules (see :ref:`pygambit-layers`).
+   * - ``src/pygambit/cli``
+     - The ``gambit-*`` command-line tools, installed as entry points of ``pygambit``.
+   * - ``src/gui``
+     - The graphical interface, written in C++ using wxWidgets.
+   * - ``tests``
+     - The ``pytest`` test suite (see :ref:`testing`).
+   * - ``catalog``
+     - The catalog of games: the game files in ``catalog/games``, which are packaged into
+       ``pygambit`` as ``pygambit.catalog``, the scripts that index them, and the catalog's
+       own documentation in ``catalog/doc``.
+   * - ``doc``
+     - This documentation (see :ref:`editing-docs`).
+   * - ``contrib``
+     - Example game files (``contrib/games``, a few of which are used by the tests), and
+       standalone experimental programs (``contrib/src``) which are not part of either build.
+   * - ``pyproject.toml``, ``setup.py``, ``MANIFEST.in``
+     - The build of ``pygambit``, and the configuration of ``pytest``, ``ruff`` and
+       ``cython-lint``.
+   * - ``configure.ac``, ``Makefile.am``, ``acinclude.m4``
+     - The autotools build of the graphical interface.
+   * - ``build_support``
+     - ``GAMBIT_VERSION``, the single source of the version number; packaging files for
+       macOS (``osx``) and Windows (``msw``); release scripts (``releases``); and the
+       Cython size check (``cython_lines.py``).
+   * - ``.github``
+     - Continuous-integration workflows (``.github/workflows``, see :ref:`ci-workflows`),
+       and issue and pull request templates.
+   * - ``.pre-commit-config.yaml``, ``.clang-format``, ``.clang-tidy``
+     - Formatting and linting configuration (see :ref:`linting-tools`).
+   * - ``.readthedocs.yaml``
+     - The ReadTheDocs build of this documentation.
+   * - ``.devcontainer``
+     - A development container definition (Ubuntu, with Python and the autotools).
+   * - ``ChangeLog``
+     - Release notes, in `Keep a Changelog <https://keepachangelog.com>`__ format.
 
-From Gambit 17, ``pygambit`` is also responsible for providing command-line interfaces to
-equilibrium computation and other facilities; previously the command-line wrappers were
-implemented in C++.
+The C++ sources have two independent builds:
 
-Gambit's core is also incorporated into a graphical user interface, also written
-in C++ using wxWidgets (see ``src/gui``).  This is built by ``make`` if an installation
-of a suitable version of wxWidgets is detected.
+* ``setuptools`` (``pyproject.toml`` and ``setup.py``) compiles ``src/core``, ``src/games`` and
+  ``src/solvers`` into the ``pygambit`` extension module.
+* The graphical interface is built by the autotools (``configure.ac`` and ``Makefile.am``).
 
-This hybrid architecture aims to maintain some flexibility for future development as follows:
+See :ref:`building-from-source` for both.
 
-1.  Although in practice we expect ``pygambit`` will be the most common path for writing
-    code using Gambit, the C++ implementations are kept separate from the Python wrapper
-    so they can continue to be used directly in C++
-2.  Likewise, the graphical interface layer is kept cleanly separate from the core.
-    Graphical-based interfaces (different libraries, languages,
-    browser-based interfaces) can be developed without touching the core code.
+.. _cpp-library:
+
+The C++ library
+---------------
+
+Gambit's C++ library represents and analyses finite games.  It has three directories:
+
+* ``src/core``: generic utilities not specific to game theory.
+* ``src/games``: interfaces and data structures for games and related concepts.
+* ``src/solvers``: game algorithms, principally exact and approximate Nash equilibrium
+  computation.  Each algorithm has a subdirectory, such as ``src/solvers/lcp``.
+
+Gambit uses C++20 and avoids C++ library dependencies to simplify cross-platform packaging.
+
+Most clients use the ``pygambit`` Python package.  Its ``pytest`` suite also tests the underlying
+C++ data structures and algorithms; the autotools build defines no ``make check`` tests.
+
+``pygambit`` also provides the command-line tools, which were implemented in C++ before Gambit 17.
+
+The C++ wxWidgets interface in ``src/gui`` also uses the core and is built by ``make`` when a
+supported wxWidgets installation is found.
+
+The C++ implementations remain separate from the Python wrapper so they can be used directly.
+The graphical interface is likewise separate, allowing other interfaces to use the same core.
+
+.. _header-organization:
 
 Header organization
 --------------------
 
-Each of the three core directories is exposed through a top-level umbrella header:
+Three top-level umbrella headers expose the library:
 
-* ``src/games.h`` covers game representation, equilibrium profile types, and file I/O
-  (that is, all of ``src/core`` and ``src/games``).
-* ``src/solvers.h`` includes ``games.h`` plus the single public header for every solver
-  algorithm (for example ``src/solvers/lcp/lcp.h``).
-* ``src/gambit.h`` is the "everything" umbrella: ``games.h`` followed by ``solvers.h``.
+* ``src/games.h`` covers ``src/core`` and ``src/games``: game representations, equilibrium
+  profiles, and file I/O.
+* ``src/solvers.h`` includes ``games.h`` and each solver's public header, such as
+  ``src/solvers/lcp/lcp.h``.
+* ``src/gambit.h`` includes both ``games.h`` and ``solvers.h``.
 
-Solver headers depend on the representation types, never the reverse, so
-``solvers.h`` sits above ``games.h`` rather than being folded into it.
+Solver headers depend on representation types, never the reverse; ``solvers.h`` therefore sits
+above ``games.h``.
 
-Within ``src/core``, ``src/games``, and ``src/solvers``, every header should be
-self-contained: it should ``#include`` whatever it directly uses, rather than relying
-on some other header -- in particular, one of the umbrella headers -- having already
-brought a dependency into scope by the time it is reached. A header that implements
-algorithm internals (for example the linear algebra in ``src/solvers/linalg`` or the
-polynomial-system machinery in ``src/solvers/enumpoly``) should depend only on
-``src/core``, not on the game representation, unless it genuinely needs it.
+Every header in these directories should be self-contained and include its direct dependencies
+rather than rely on an umbrella header.  Algorithm internals, such as ``src/solvers/linalg`` and
+``src/solvers/enumpoly``, should depend only on ``src/core`` unless they need game
+representations.
 
-This discipline will allow ``src/core``, ``src/games``, and ``src/solvers``
-to be built and installed as a standalone C++ library, should we decide to offer
-that in future.
+This separation permits a future standalone C++ library build.
 
 .. _pygambit-layers:
 
 Layers of pygambit
 ------------------
 
-Code in ``pygambit`` belongs to one of three layers:
+``pygambit`` has three layers:
 
 * C++ (``src/core``, ``src/games``, ``src/solvers``): game semantics and algorithms.
-* Cython (``src/pygambit/*.pyx`` and ``*.pxi``): converting values and handles between Python and C++.
+* Cython (``src/pygambit/*.pyx`` and ``*.pxi``): converting values and handles between Python and
+  C++.
 * Python (``src/pygambit/**/*.py``): validation, label resolution, error messages,
   value types and presentation.
 
-Code goes in the lowest layer that can do its job: validate and resolve labels in Python,
-then pass the Cython layer values and handles it can hand to C++ without further decisions.
+Code belongs in the lowest suitable layer.  Python validates and resolves labels, then Cython
+passes values and handles to C++ without further decisions.
 
-CI enforces this by limiting the size of the Cython layer.
-``build_support/cython_lines.py`` counts the lines of code in the compiled module's sources
-(comments, blank lines and docstrings are not counted),
-and the ``cython-lines`` job in ``.github/workflows/lint.yml`` fails if the count exceeds the
-ceiling given there as ``--max``.
-When code moves out of Cython into Python, lower the ceiling to the new count.
-Raise it only to add a binding for new C++ functionality.
+CI limits the Cython layer's size.  ``build_support/cython_lines.py`` counts its source lines,
+excluding comments, blanks, and docstrings; the ``cython-lines`` job in
+``.github/workflows/lint.yml`` enforces its ``--max`` value.  Lower the limit when code moves to
+Python, and raise it only for bindings to new C++ functionality.
