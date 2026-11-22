@@ -176,27 +176,36 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================
 
+template <class T>
+void MixedStrategyProfile<T>::GetStrategyValues(const GamePlayer &p_player,
+                                                Vector<T> &p_values) const
+{
+  CheckVersion();
+  const auto &strategies = m_rep->GetSupport().GetStrategies(p_player);
+  p_values = Vector<T>(strategies.size());
+  if (m_rep->GetPayoffDerivs(p_player->GetNumber(), p_values)) {
+    return;
+  }
+  size_t row = 1;
+  for (const auto &strategy : strategies) {
+    p_values[row++] = m_rep->GetPayoff(strategy);
+  }
+}
+
 template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
 {
   if (m_cache.m_valid) {
     return;
   }
   Cache newCache;
+  Vector<T> values;
   for (const auto &player : m_rep->GetSupport().GetPlayers()) {
     newCache.m_payoffs[player] = GetPayoff(player);
-    const auto &strategies = m_rep->GetSupport().GetStrategies(player);
-    Vector<T> values(strategies.size());
-    if (m_rep->GetPayoffDerivs(player->GetNumber(), values)) {
-      auto value_it = values.begin();
-      for (const auto &strategy : strategies) {
-        newCache.m_strategyValues[player][strategy] = *value_it;
-        ++value_it;
-      }
-    }
-    else {
-      for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
-        newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
-      }
+    GetStrategyValues(player, values);
+    auto value_it = values.begin();
+    for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
+      newCache.m_strategyValues[player][strategy] = *value_it;
+      ++value_it;
     }
   }
   newCache.m_valid = true;

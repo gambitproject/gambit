@@ -51,6 +51,8 @@ private:
   std::vector<double> m_payoffs_against_prior;
   int m_star;
   mutable MixedStrategyProfile<double> m_current_sigma;
+  // Payoffs of each strategy against m_current_sigma, in profile order
+  mutable std::vector<double> m_payoffs_against_sigma;
   // Payoffs of one player's strategies and their derivatives, reused across players
   mutable Vector<double> m_blockValues;
   mutable Matrix<double> m_blockDerivs;

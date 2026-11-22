@@ -2,8 +2,9 @@
 
 Through private helpers, the derivatives computed one at a time are compared with central
 differences of the payoffs, and MixedStrategyProfile::GetPayoffDerivBlock, which computes a
-player's payoffs and derivatives together, is compared with the derivatives computed one at a
-time, on the full support and on supports with strategies removed.
+player's payoffs and derivatives together, and MixedStrategyProfile::GetStrategyValues, which
+computes a player's payoffs together, are compared with the quantities computed one at a time,
+on the full support and on supports with strategies removed.
 """
 import random
 
