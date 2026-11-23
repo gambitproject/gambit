@@ -118,8 +118,6 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void OnReassignPlayerMenu(wxCommandEvent &);
   void OnHoverTimer(wxTimerEvent &);
 
-  // Node menu command handlers -- operate on m_contextNode (the node the menu was shown
-  // for), formerly on GameDocument's now-removed persistent selection.
   void OnEditDeleteTree(wxCommandEvent &);
   void OnEditDeleteParent(wxCommandEvent &);
   void OnEditRemoveOutcome(wxCommandEvent &);

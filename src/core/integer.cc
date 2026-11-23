@@ -107,15 +107,11 @@ constexpr unsigned int MALLOC_MIN_OVERHEAD = 4;
 
 static IntegerRep ZeroRep = {.len = 0, .sz = 0, .sgn = I_POSITIVE, .s = {0}};
 
-// utilities to extract and transfer bits
-
-// get low bits
 static unsigned short extract(unsigned long x)
 {
   return static_cast<unsigned short>(x & I_MAXNUM);
 }
 
-// transfer high bits to low
 static unsigned long down(unsigned long x) { return (x >> I_SHIFT) & I_MAXNUM; }
 
 // transfer low bits to high
@@ -405,15 +401,6 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 
   return old;
 }
-
-// convert to a legal two's complement long if possible
-// if too big, return most negative/positive value
-
-// test whether op long() will work.
-// careful about asymmetry between std::numeric_limits<long>::max() &
-// std::numeric_limits<long>::min()
-
-// convert to a double
 
 double Itodouble(const IntegerRep *rep)
 {
@@ -1476,7 +1463,6 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
     // first divide by biggest power of base that fits in an unsigned short,
     // then use straight signed div/mods from there.
 
-    // find power
     int bpower = 1;
     unsigned short b = base;
     const auto maxb = static_cast<unsigned short>(I_MAXNUM / base);

@@ -550,8 +550,7 @@ class TreeData {
 public:
   std::map<int, OutcomeRecord> m_outcomeRecords;
   /// Outcome ids in order of first occurrence in the file; determines the
-  /// creation order (and hence numbering) of the outcomes, matching the
-  /// order in which the previous implementation created them.
+  /// creation order (and hence numbering) of the outcomes
   std::vector<int> m_outcomeOrder;
   /// Deferred node-to-outcome attachments, replayed after outcomes are created.
   std::vector<std::pair<GameNode, int>> m_nodeOutcomes;
@@ -650,9 +649,7 @@ void ParseOutcome(GameFileLexer &p_state, const Game &p_game, TreeData &p_treeDa
 /// Create the game's outcomes from the definitions buffered during the parse.
 /// Labels are normalized in first-occurrence order before creation, so that
 /// the label requirements enforced by MakeOutcome (nonempty, unique) are
-/// satisfied; this matches the treatment of outcome labels read from .nfg
-/// files, and produces the same labels the previous post-parse normalization
-/// pass produced.
+/// satisfied.
 void CreateOutcomes(const Game &p_game, const TreeData &p_treeData)
 {
   std::vector<std::string> labels;

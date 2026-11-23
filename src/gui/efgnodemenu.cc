@@ -244,8 +244,6 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   const bool belowClickable = hit.region == BranchBelow &&
                               m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL;
   if (aboveClickable || belowClickable) {
-    // hit.node is the child whose incoming branch was hit; the old behavior
-    // was to target the parent (the node whose move is being edited).
     m_contextNode = hit.node->GetParent();
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_MOVE);
     wxPostEvent(this, event);
@@ -271,8 +269,6 @@ void EfgDisplay::OnRightClick(wxMouseEvent &p_event)
 //              EfgDisplay: Node menu command handlers
 //---------------------------------------------------------------------
 
-// Forward declaration only: defined in dlefgreveal.cc, with no header of its own -- this
-// mirrors how it was previously forward-declared in gameframe.cc.
 std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
 
 void EfgDisplay::OnEditDeleteTree(wxCommandEvent &)

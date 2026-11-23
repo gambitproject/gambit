@@ -95,7 +95,6 @@ public:
   // builtin Integer functions that must be friends
 
   friend double ratio(const Integer &x, const Integer &y);
-  // return x/y as a double
 
   friend Integer gcd(const Integer &, const Integer &);
   friend int sign(const Integer &); // returns -1, 0, +1

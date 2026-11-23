@@ -277,12 +277,6 @@ bool HasStrategyInfo(const std::shared_ptr<GameDocument> &p_doc, const GameStrat
          p_doc->GetWorkspace().GetCurrentProfile() > 0;
 }
 
-// A hover tooltip for a row/col header's strategy cell: the strategy's tree-derived
-// description (if the nfg is derived from a tree), and -- when a profile is selected --
-// its probability and expected payoff under the current profile (the classic "value of
-// this pure strategy against the others' current play" readout used to check best
-// responses), plus its player's own overall current-profile payoff for context. Built
-// once and re-populated on each hover, mirroring NodeInfoPopup in efgtooltip.cc.
 class StrategyInfoPopup final : public wxPopupTransientWindow {
 public:
   explicit StrategyInfoPopup(wxWindow *p_parent) : wxPopupTransientWindow(p_parent, wxBORDER_NONE)
@@ -497,11 +491,6 @@ void RowPlayerGrid::OnHoverTimer(wxTimerEvent &)
   m_infoPopup->ShowForStrategy(doc, gameStrategy, anchor);
 }
 
-// Right-clicking a row-header cell offers to place any player at this position (before
-// or after the player currently occupying it), replacing what used to be a drag of a
-// player icon from the (now-removed) left-hand player panel -- that never worked very
-// well, and didn't survive the panel's removal anyway. When there are no row players yet,
-// the only choice is which player to use as the (single) row player.
 void RowPlayerGrid::ShowPlacementMenu(int p_col, const wxPoint &p_pos)
 {
   const bool hasRowPlayers = m_table->GetRowHeaderColCount() > 0;

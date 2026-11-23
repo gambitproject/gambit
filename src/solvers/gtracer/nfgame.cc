@@ -79,7 +79,6 @@ void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
         }
       }
       else {
-        // set m to be the payoffs for player rown
         memcpy(m.data(), payoffs.values() + Offset(rown, blockSize[numPlayers]),
                blockSize[numPlayers] * sizeof(double));
         localPayoffMatrix(local.data(), rown, coln, s, m.data(), numPlayers - 1);

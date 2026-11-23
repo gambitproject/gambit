@@ -158,9 +158,9 @@ public:
   // player j and every one of their actions, the payoff to player1 of playing action1 while j
   // deviates to that action and everyone else plays according to s -- i.e. getJ(player1,
   // action1, j, ., s) for every j and every one of j's actions, but computed for the whole row
-  // via a single leave-one-out convolution. double-only: its only caller (gametracer, for
-  // GNM/IPA) never needs Rational, and the implementation looks up PayoffTable directly rather
-  // than dispatching through payoffInnerProd<V>, so it has no Rational specialization to offer.
+  // via a single leave-one-out convolution. double-only: the implementation looks up PayoffTable
+  // directly rather than dispatching through payoffInnerProd<V>, so it has no Rational
+  // specialization to offer.
   void getPayoffJacobianRow(int player1, int action1, const StrategyProfile<double> &s,
                             StrategyProfile<double> &dest);
 
