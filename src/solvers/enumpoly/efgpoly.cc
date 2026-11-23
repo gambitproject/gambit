@@ -195,7 +195,6 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   IndifferenceEquations(data, equations);
   LastActionProbPositiveInequalities(data, equations);
 
-  // set up the rectangle of search
   Vector<double> bottoms(data.space->GetDimension()), tops(data.space->GetDimension());
   bottoms = 1e-12;
   tops = 1 - 1e-12;

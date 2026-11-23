@@ -95,7 +95,6 @@ AGG::AGG(int _numPlayers, std::vector<int> &_actions, int numANodes, int _numPNo
     player2Class[p->second] = playerClasses.size() - 1;
   }
 
-  // set isPure
   for (int i = 0; i < numANodes; i++) {
     if (neighb.at(i).size() > 0) {
       const int maxNode = *(max_element(neighb.at(i).begin(), neighb.at(i).end()));
@@ -103,7 +102,6 @@ AGG::AGG(int _numPlayers, std::vector<int> &_actions, int numANodes, int _numPNo
     }
   }
 
-  // set node2Action
   for (int i = 0; i < numANodes; i++) {
     for (int j = 0; j < numPlayers; j++) {
       node2Action[i][j] = -1;
@@ -352,12 +350,10 @@ void AGG::setProjections(vector<vector<ConfigDistribution<double>>> &projS,
 void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtype> &projTypes,
                 int S, int Node, vector<int> &path)
 {
-  // get ancestors
   if (Node < S) {
     dest.insert(Node);
     return;
   }
-  // cycle check
   for (const int &p : path) {
     if (Node == p) {
       throw std::runtime_error("ERROR: cycle of projected nodes at " + std::to_string(Node));
@@ -367,7 +363,6 @@ void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtyp
   const int numNei = neighb[Node].size();
   path.push_back(Node);
   for (int i = 0; i < numNei; ++i) {
-    // check consistency of proj. signatures
     if (neighb[Node][i] >= S && *(projTypes[neighb[Node][i] - S]) != *(projTypes[Node - S])) {
       throw std::runtime_error("ERROR: projection type mismatch: Node " + std::to_string(Node) +
                                " and its neighbor " + std::to_string(neighb[Node][i]));
@@ -401,7 +396,6 @@ void AGG::initPorder(vector<int> &Po, int i, int N, vector<ConfigDistribution<do
 template <class V> void AGG::computeP(int player, int act, int player2, int act2)
 {
   auto &s = state<V>();
-  // apply player's strat
   s.Pr[0].reset();
   s.Pr[0].insert(make_pair(projection[actionSets[player][act]][player][act], V(1)));
 
@@ -750,18 +744,15 @@ double AGG::getSymMixedPayoff(int node, StrategyProfile<double> &s)
         c[support[j]] = comp[j];
       }
     }
-    // add current player's action
     if (self != -1) {
       c[self]++;
     }
     V += prob * payoffs[node].find(c)->second;
 
-    // get next composition
     gc.incr();
     if (gc.eof()) {
       break;
     }
-    // update prob
     const double i_prob = (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
     const double d_prob = (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
     if (i_prob <= 0 || d_prob <= 0) {
@@ -874,7 +865,6 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
         c[support[j]] = comp[j];
       }
     }
-    // add current player's action
     if (plClass == ownPlClass && self != -1) {
       c[self]++;
     }
@@ -886,12 +876,10 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile<double> &s, int ownPlCla
     // V+= prob *  payoffs[node].find(c)->second ;
     dest.insert(make_pair(c, prob));
 
-    // get next composition
     gc.incr();
     if (gc.eof()) {
       break;
     }
-    // update prob
     const double i_prob =
         (support.at(gc.i) != -1) ? s[node2Action[neighbors[node][support[gc.i]]][p]] : null_prob;
     const double d_prob =
@@ -1052,7 +1040,6 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
     const Number exactValue(word);
     const auto u = static_cast<double>(exactValue);
 
-    // insert
     const pair<trie_map<double>::iterator, bool> r = pay.insert(make_pair(key, u));
     if (!r.second) {
       std::stringstream str;
@@ -1069,7 +1056,6 @@ void AGG::makeMAPPINGpayoff(std::istream &in, PayoffTable &pay, ExactPayoffTable
       throw std::runtime_error(str.str());
     }
   }
-  // check
   for (auto &it : temp) {
     if (pay.count(it.first) == 0) {
       std::stringstream str;

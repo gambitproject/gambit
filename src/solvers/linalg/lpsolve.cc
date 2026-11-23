@@ -175,7 +175,6 @@ template <class T> void Solve(LPSolveState<T> &state, int phase)
         else {
           outlab = state.tab.GetLabel(out);
         }
-        // update xx
         for (size_t i = 1; i <= state.x.size(); i++) {
           xlab = state.tab.GetLabel(i);
           if (xlab < 0) {
@@ -236,14 +235,12 @@ LPSolveResult<T> SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T>
       .cancel = p_cancel,
   };
 
-  // Check dimensions
   if (A.NumRows() != b.size() || A.NumColumns() != c.size()) {
     state.wellFormed = false;
     return {state.wellFormed,    state.feasible,          state.bounded,       state.totalCost,
             std::move(state.xx), std::move(state.optBfs), std::move(state.tab)};
   }
 
-  // initialize data
   int xlab;
   const int num_inequals = A.NumRows() - nequals;
 
@@ -280,7 +277,6 @@ LPSolveResult<T> SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T>
   // Initialize the tableau
   state.tab.SetCost(state.cost);
 
-  // set xx to be initial feasible solution to phase II
   for (size_t i = 1; i <= state.xx.size(); i++) {
     if (state.LB[i]) {
       state.xx[i] = state.lb[i];

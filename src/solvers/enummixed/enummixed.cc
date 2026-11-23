@@ -138,7 +138,6 @@ EnumMixedStrategySolveDetailed(const Game &p_game, const StrategyCallbackType<T>
       p_cancel.Check();
       const BFS<T> &bfs2 = verts1[i1];
 
-      // check if solution is nash
       // need only check complementarity, since it is feasible
       bool nash = true;
       for (size_t k = 1; nash && k <= p_game->GetPlayer(1)->GetStrategies().size(); k++) {

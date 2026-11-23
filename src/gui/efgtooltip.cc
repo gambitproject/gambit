@@ -1392,11 +1392,6 @@ void AppendMovePopup::RestoreAfterFailedCommit(wxTextCtrl *p_invalidCtrl)
 //                        class NodeInfoPopup
 //--------------------------------------------------------------------------
 
-// A read-only tooltip-like popup showing, for a hovered node, each player's
-// expected continuation value from that node, plus -- for a nonterminal node
-// -- the mover's realization/belief probabilities and infoset value. Replaces
-// the always-visible per-player equilibrium readout that used to live in the
-// left-hand player panel.
 class NodeInfoPopup : public wxPopupTransientWindow {
 public:
   NodeInfoPopup(EfgDisplay *p_owner, const std::shared_ptr<GameDocument> &p_doc);

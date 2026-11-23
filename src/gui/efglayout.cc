@@ -231,14 +231,6 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
   }
 }
 
-//
-// Computes (without painting) the regions occupied by the incoming branch's
-// above/below labels -- the same geometry DrawIncomingBranch used to compute
-// as a side effect of painting. Rotated-orientation labels are intentionally
-// left as empty rects: they aren't independently hit-testable, and their
-// paint-time position is derived by a formula that doesn't reduce to a rect
-// (see DrawIncomingBranch).
-//
 void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
 {
   if (!p_entry->m_node->GetParent()) {
@@ -375,16 +367,7 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
   }
 }
 
-//
-// Computes (without painting) the outcome/payoff regions for a node -- the
-// same geometry DrawOutcome used to compute as a side effect of painting --
-// and grows m_maxX to account for the outcome label's width.  Unlike
-// DrawOutcome, this always measures as if hints were shown (i.e. as if
-// p_noHints were false): the "no outcome" hint's width is a safe upper bound
-// on what any render mode could need, so using it uniformly for sizing/
-// hit-testing purposes avoids under-sizing bitmap/SVG export (which renders
-// with hints suppressed) relative to on-screen display (which shows them).
-//
+// Computes (without painting) the outcome/payoff regions for a node
 void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
                                         const std::shared_ptr<NodeEntry> &p_entry) const
 {
@@ -466,23 +449,6 @@ GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-//
-// Answers "what, if anything, is at (p_x, p_y)" as a single discriminated
-// result, replacing what used to be four independent hit-test entry points
-// (NodeHitTest/OutcomeHitTest/BranchAboveHitTest/BranchBelowHitTest) that
-// callers had to try in sequence -- and a fifth, manual per-player Contains()
-// loop at the one call site that needed to know which payoff was hit.
-//
-// Region priority (Node, then Outcome/Payoff, then BranchAbove, then
-// BranchBelow) matches the order those separate calls used to be tried in at
-// the one call site that used all of them (EfgDisplay::OnLeftDoubleClick), so
-// behavior is unchanged even though this is now one query: each region is
-// still checked tree-wide before falling through to the next, rather than
-// checking all regions for one node before moving to the next node (the
-// latter would let one node's outcome-label rect -- which can extend
-// arbitrarily far right -- pre-empt a Node hit on a different, further-right
-// node, which the old code never did).
-//
 HitResult TreeLayout::HitTest(int p_x, int p_y) const
 {
   using enum HitRegion;

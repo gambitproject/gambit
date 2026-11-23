@@ -31,9 +31,10 @@ namespace Gambit {
 
 /// @brief A lazily-computed value, rebuilt on demand after invalidation.
 ///
-/// Get() runs `p_builder` at most once since construction or the last
-/// Invalidate() (std::call_once semantics), then returns the cached value on
-/// every subsequent call without re-running the builder.
+/// Get() caches the first successful invocation of `p_builder` since
+/// construction or the last Invalidate() (std::call_once semantics). If the
+/// builder throws, a later Get() retries it; after success, every Get() returns
+/// the cached value without re-running the builder.
 ///
 /// Concurrent Get() calls race safely: the standard guarantees exactly one
 /// builder call completes before any Get() call returns, so multiple reader
@@ -112,10 +113,11 @@ private:
 ///
 /// Some caches are populated by a routine that mutates several existing
 /// members as a side effect (e.g. numbering nodes in place) rather than
-/// producing one value to store. LazyAction captures the same "run once
-/// since the last invalidation" semantics for that shape, sharing Lazy<T>'s
-/// concurrency guarantees and its restriction against invalidating
-/// concurrently with a call to Ensure().
+/// producing one value to store. LazyAction captures Lazy<T>'s "run until
+/// successful since the last invalidation" semantics for that shape: if the
+/// action throws, a later Ensure() retries it. It shares Lazy<T>'s concurrency
+/// guarantees and its restriction against invalidating concurrently with a
+/// call to Ensure().
 ///
 /// Copyable, with the same "a copy always starts un-built" semantics as
 /// Lazy<T> and for the same reason (see above).

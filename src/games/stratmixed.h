@@ -150,7 +150,7 @@ template <class T> class MixedStrategyProfile {
       throw GameStructureChangedException();
     }
   }
-  /// Used to read payoffs from cache or compute them and cache them if needed
+  /// Read payoffs from cache or compute them and cache them if needed
   void ComputePayoffs() const;
 
   /// Reset cache for payoffs and strategy values

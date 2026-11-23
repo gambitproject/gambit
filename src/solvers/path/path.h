@@ -31,7 +31,7 @@ namespace Gambit {
 // Function type used for determining whether to terminate the numerical continuation
 using TerminationFunctionType = std::function<bool(const Vector<double> &)>;
 
-// Never terminates; tracing then ends only on failure or cancellation
+// Always returns false; tracing may still report criterion-based success at minimum step size.
 inline bool NullTerminationFunction(const Vector<double> &) { return false; }
 
 inline bool LambdaPositiveTerminationFunction(const Vector<double> &p_point)

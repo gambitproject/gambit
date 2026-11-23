@@ -173,7 +173,6 @@ void trie_map<V>::multiply(const trie_map<V> &other, size_t keylen, std::vector<
             ptr->val->second += v.second;
           }
           else {
-            // insert the item
             leaves.push_back(ptr);
             ptr->val = data.insert(data.begin(), v);
           }
@@ -326,7 +325,6 @@ template <class V> trie_map<V> &trie_map<V>::operator/=(const std::vector<V> &de
     return *this;
   }
 
-  // get rid of 0th order terms at the pivot level
   std::list<typename trie_map<V>::value_type> data2;
   // data.swap(data2);
   data2 = data;

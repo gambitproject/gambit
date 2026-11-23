@@ -53,7 +53,6 @@ void CliqueEnumerator::candtry1(int stk[], // stack
   int i, j, snnew, scnew, ecnew;
 
   clique1[cliqsize1++] = cand;
-  // remove  cand  from CAND1 by replacing it with the last element of CAND1
   for (i = *sc1; i < ec1; i++) {
     if (cand == stk[i]) {
       stk[i] = stk[--ec1];
@@ -113,7 +112,6 @@ void CliqueEnumerator::candtry2(int stk[], // stack
   int i, j, snnew, scnew, ecnew;
 
   clique2[cliqsize2++] = cand;
-  // remove  cand  from CAND2 by replacing it with the last element of CAND2
   for (j = *sc2; j < ec2; j++) {
     if (cand == stk[j]) {
       stk[j] = stk[--ec2];
@@ -422,7 +420,6 @@ int CliqueEnumerator::getconnco(Array<int> &p_firstedge, Array<Edge> &edgelist)
   Array<int> co1(0, maxinp1 - 1), co2(0, maxinp2 - 1); // components of node1,2
   int i, j;                                            // indices to left and right nodes
 
-  // initialize  component indices of left and right nodes
   for (i = 0; i < maxinp1; i++) {
     co1[i] = 0;
   }
@@ -490,7 +487,6 @@ int CliqueEnumerator::getconnco(Array<int> &p_firstedge, Array<Edge> &edgelist)
               newco = jco;
               oldco = ico;
             }
-            // insert the current edge
             edgelist[newedge].nextedge = p_firstedge[oldco];
             e = newedge;
             while (true) {

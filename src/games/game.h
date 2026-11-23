@@ -218,12 +218,6 @@ inline bool IsWellFormedUtf8(const std::string &p_text)
 }
 
 /// @brief Returns whether c is a Unicode space separator (category Zs).
-///
-/// This is the complete, fixed set of "blank" characters that a label treats as
-/// whitespace for the no-leading/trailing, single-whitespace-between-printables
-/// rule -- the same treatment historically given only to the literal ASCII space.
-/// The set has been stable across Unicode versions for a long time, so it is
-/// hardcoded here rather than obtained from a full Unicode character database.
 inline bool IsUnicodeSpaceSeparator(char32_t c)
 {
   switch (c) {

@@ -110,7 +110,6 @@ public:
   const_iterator begin() const { return data.begin(); }
   const_iterator end() const { return data.end(); }
 
-  // insert: same interface as in STL map
   std::pair<iterator, bool> insert(const value_type &x);
 
   template <class InputIterator> void insert(InputIterator f, InputIterator l)
@@ -120,7 +119,6 @@ public:
     }
   }
 
-  // insert or add
   trie_map<V> &operator+=(const value_type &x)
   {
     const std::pair<typename trie_map<V>::iterator, bool> r = insert(x);
@@ -131,13 +129,10 @@ public:
   }
 
   // prefix matching
-  // return a reference to iterator
   iterator &find(const key_type &k) const;
 
-  // exact matching
   iterator findExact(const key_type &k);
 
-  // clear the tree structure as well as data
   void clear()
   {
     deleteNodes(root);
@@ -146,7 +141,6 @@ public:
     leaves.clear();
   }
 
-  // clear data, but keep the tree structure
   void reset()
   {
     while (!leaves.empty()) {
@@ -156,8 +150,6 @@ public:
     data.clear();
   }
 
-  // number of elements with key exactly k.
-  //  returns 1 or 0
   size_type count(const key_type &k)
   {
     size_t i = 0;
