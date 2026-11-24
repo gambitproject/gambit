@@ -20,6 +20,7 @@
 #include "welcome.h"
 #include "dialogstyle.h"
 #include "app.h"
+#include "dlcatalog.h"
 #include "dlnewtable.h"
 #include "gamedoc.h"
 #include "gameframe.h"
@@ -29,6 +30,7 @@ using namespace Gambit::GUI;
 
 wxDEFINE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_WELCOME_CATALOG, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_WELCOME_OPEN_RECENT, wxCommandEvent);
 
 namespace {
@@ -36,6 +38,7 @@ constexpr int ID_WELCOME_OPEN = wxID_HIGHEST + 100;
 constexpr int ID_WELCOME_NEW_NORMAL_FORM = wxID_HIGHEST + 101;
 constexpr int ID_WELCOME_NEW_EXTENSIVE_FORM = wxID_HIGHEST + 102;
 constexpr int ID_WELCOME_RECENT = wxID_HIGHEST + 103;
+constexpr int ID_WELCOME_CATALOG = wxID_HIGHEST + 104;
 
 /// Size of the large buttons, in device-independent pixels
 constexpr int c_buttonWidth = 340;
@@ -93,6 +96,7 @@ WelcomePanel::WelcomePanel(wxWindow *parent) : wxPanel(parent)
   LayoutControls();
 }
 
+#include "bitmaps/catalog.h"
 #include "bitmaps/newtable.h"
 #include "bitmaps/newtree.h"
 #include "bitmaps/open.h"
@@ -353,6 +357,9 @@ void WelcomePanel::CreateControls()
       new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive form game",
                               "Create a game with a tree representation");
 
+  m_catalogButton = new wxCommandLinkButton(this, ID_WELCOME_CATALOG, "Open from catalog",
+                                            "Choose a game from textbooks and research articles");
+
   m_openButton->SetBitmap(wxBitmapBundle::FromSVG(open_svg, wxSize(24, 24)));
   m_openButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
 
@@ -362,10 +369,14 @@ void WelcomePanel::CreateControls()
   m_newExtensiveFormButton->SetBitmap(wxBitmapBundle::FromSVG(newtree_svg, wxSize(24, 24)));
   m_newExtensiveFormButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
 
+  m_catalogButton->SetBitmap(wxBitmapBundle::FromSVG(catalog_svg, wxSize(24, 24)));
+  m_catalogButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
+
   // The "Open" button is a split button: the dropdown to its right lists recent files.
   m_openButton->SetMinSize(FromDIP(wxSize(c_buttonWidth - c_recentButtonWidth, c_buttonHeight)));
   m_newNormalFormButton->SetMinSize(FromDIP(wxSize(c_buttonWidth, c_buttonHeight)));
   m_newExtensiveFormButton->SetMinSize(FromDIP(wxSize(c_buttonWidth, c_buttonHeight)));
+  m_catalogButton->SetMinSize(FromDIP(wxSize(c_buttonWidth, c_buttonHeight)));
 
   m_recentButton = new wxButton(this, ID_WELCOME_RECENT, wxEmptyString, wxDefaultPosition,
                                 wxDefaultSize, wxBU_EXACTFIT);
@@ -376,6 +387,7 @@ void WelcomePanel::CreateControls()
   Bind(wxEVT_BUTTON, &WelcomePanel::OnOpen, this, ID_WELCOME_OPEN);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewNormalForm, this, ID_WELCOME_NEW_NORMAL_FORM);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewExtensiveForm, this, ID_WELCOME_NEW_EXTENSIVE_FORM);
+  Bind(wxEVT_BUTTON, &WelcomePanel::OnCatalog, this, ID_WELCOME_CATALOG);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnShowRecent, this, ID_WELCOME_RECENT);
 }
 
@@ -400,6 +412,7 @@ void WelcomePanel::LayoutControls()
   openRow->Add(m_recentButton, 0, wxEXPAND);
 
   content->Add(openRow, 0, wxEXPAND | wxBOTTOM, FromDIP(16));
+  content->Add(m_catalogButton, 0, wxEXPAND | wxBOTTOM, FromDIP(16));
   content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, FromDIP(16));
   content->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
 
@@ -426,6 +439,7 @@ void WelcomePanel::OnNewExtensiveForm(wxCommandEvent &)
   SendNewEvent(WelcomeNewProblemKind::ExtensiveForm);
 }
 
+void WelcomePanel::OnCatalog(wxCommandEvent &) { SendCatalogEvent(); }
 void WelcomePanel::OnShowRecent(wxCommandEvent &)
 {
   if (!m_recentPopup) {
@@ -464,6 +478,13 @@ void WelcomePanel::SendNewEvent(WelcomeNewProblemKind p_kind)
   GetParent()->ProcessWindowEvent(event);
 }
 
+void WelcomePanel::SendCatalogEvent()
+{
+  wxCommandEvent event(wxEVT_WELCOME_CATALOG);
+  event.SetEventObject(this);
+  GetParent()->ProcessWindowEvent(event);
+}
+
 // --------------------
 // WelcomeFrame
 // --------------------
@@ -472,12 +493,13 @@ WelcomeFrame::WelcomeFrame(wxWindow *parent)
   : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 500),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
-  SetSize(FromDIP(wxSize(600, 500)));
+  SetSize(FromDIP(wxSize(600, 620)));
   CreateControls();
   LayoutControls();
 
   Bind(wxEVT_WELCOME_OPEN, &WelcomeFrame::OnWelcomeOpen, this);
   Bind(wxEVT_WELCOME_NEW, &WelcomeFrame::OnWelcomeNew, this);
+  Bind(wxEVT_WELCOME_CATALOG, &WelcomeFrame::OnWelcomeCatalog, this);
   Bind(wxEVT_WELCOME_OPEN_RECENT, &WelcomeFrame::OnWelcomeOpenRecent, this);
   Bind(wxEVT_CLOSE_WINDOW, &WelcomeFrame::OnClose, this);
 
@@ -505,6 +527,13 @@ void WelcomeFrame::OnWelcomeNew(wxCommandEvent &p_event)
   const auto kind = static_cast<WelcomeNewProblemKind>(p_event.GetInt());
 
   if (DoCreateNew(kind)) {
+    Destroy();
+  }
+}
+
+void WelcomeFrame::OnWelcomeCatalog(wxCommandEvent &)
+{
+  if (DoCatalog()) {
     Destroy();
   }
 }
@@ -546,4 +575,11 @@ bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
   }
 
   return true;
+}
+
+bool WelcomeFrame::DoCatalog()
+{
+  const auto choice = ChooseCatalogGame(this);
+  return choice && wxGetApp().LoadCatalogGame(choice->path, choice->slug, choice->version, this) ==
+                       AppLoadResult::Success;
 }

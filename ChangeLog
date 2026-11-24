@@ -2,6 +2,7 @@
 
 ### Added
 - `pygambit.catalog.version` returns the version of the catalog of games in use.
+- Games from the catalog of games can now be browsed and opened in the GUI.
 - `NashComponent` and `NashPolytope`, describing the connected components of the equilibrium set of a
   two-player game, returned by `enummixed_solve(..., components=True)`.
 

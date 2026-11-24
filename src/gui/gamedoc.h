@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <map>
+#include <optional>
 
 #include "games/behavspt.h"
 #include "games/stratspt.h"
@@ -37,7 +38,7 @@ namespace Gambit::GUI {
 class GameView;
 class GameDocument;
 
-class GameDocument {
+class GameDocument : WorkspaceObserver {
   friend class GameView;
 
   std::list<GameView *> m_views;
@@ -50,11 +51,23 @@ class GameDocument {
 
   NashChoice m_nashChoice;
 
+  /// The catalog game this document was opened from, as it was when opened.
+  struct CatalogOrigin {
+    wxString slug, version;
+    std::string game, title, description;
+  };
+  std::optional<CatalogOrigin> m_catalogOrigin;
+  bool m_isCatalogGame{false};
+
+  std::string WriteGame() const;
+  /// Keeps the document's catalog identity in step with its game; see `SetCatalogOrigin`
+  void OnWorkspaceChanged(GameModificationType p_modifications) override;
+
 public:
   explicit GameDocument(Game p_game);
   GameDocument(const GameDocument &) = delete;
   GameDocument &operator=(const GameDocument &) = delete;
-  ~GameDocument();
+  ~GameDocument() override;
 
   //!
   //! @name Reading and writing savefiles
@@ -77,6 +90,19 @@ public:
 
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
+
+  /// Marks this document as the catalog game p_slug of catalog version p_version, with
+  /// no filename. The first edit to the game ends this, and undoing it restores it;
+  /// saving ends it for good.
+  void SetCatalogOrigin(const wxString &p_slug, const wxString &p_version);
+  /// Whether the document is, unchanged, the catalog game it was opened as.
+  bool IsCatalogGame() const { return m_isCatalogGame; }
+  /// The slug of the catalog game the document was opened as, if any, even if edited since.
+  wxString GetCatalogSlug() const { return m_catalogOrigin ? m_catalogOrigin->slug : wxString(); }
+  wxString GetCatalogVersion() const
+  {
+    return m_catalogOrigin ? m_catalogOrigin->version : wxString();
+  }
 
   bool IsModified() const { return IsGameModified() || IsWorkspaceModified(); }
   bool IsGameModified() const { return m_gameWorkspace.IsGameModified(); }

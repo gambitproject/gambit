@@ -24,6 +24,8 @@
 #define GAMBIT_GUI_APP_H
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include <wx/wx.h>
@@ -57,6 +59,9 @@ class Application final : public wxApp {
   bool OnExceptionInMainLoop() override;
   void DismissSplash();
   void OnSplashDismissTimer(wxTimerEvent &) { DismissSplash(); }
+  //! Reads `p_filename` into a document, telling the user if it cannot be read.
+  std::pair<AppLoadResult, std::shared_ptr<GameDocument>> ReadDocument(const wxString &p_filename,
+                                                                       wxWindow *p_parent);
   //! Drop `p_filename` from the recently-used list; returns whether it was there.
   bool ForgetRecentFile(const wxString &p_filename);
 
@@ -83,6 +88,10 @@ public:
   void RemoveMenu(wxMenu *p_menu) { m_fileHistory.RemoveMenu(p_menu); }
 
   AppLoadResult LoadFile(const wxString &, wxWindow *);
+  //! Opens the catalog game `p_slug` of catalog version `p_version`, read from
+  //! `p_filename`, as a document with no filename; it is not added to recent files.
+  AppLoadResult LoadCatalogGame(const wxString &p_filename, const wxString &p_slug,
+                                const wxString &p_version, wxWindow *p_parent);
 #ifdef __WXMAC__
   void MacOpenFile(const wxString &filename) override { LoadFile(filename, nullptr); }
 #endif // __WXMAC__

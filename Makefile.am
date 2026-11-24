@@ -23,6 +23,7 @@
 
 EXTRA_DIST = \
     build_support/GAMBIT_VERSION \
+    build_support/catalog.toml \
     build_support/msw/gambit.wxs.in \
 	build_support/msw/banner.bmp \
 	build_support/msw/dialog.bmp \
@@ -31,6 +32,7 @@ EXTRA_DIST = \
 	build_support/osx/dmg_background.tiff \
 	build_support/osx/make-dmg.sh \
 	src/gui/bitmaps/calc.h \
+	src/gui/bitmaps/catalog.h \
 	src/gui/bitmaps/gambitbig.xpm \
 	src/gui/bitmaps/gambit.ico \
 	src/gui/bitmaps/gambit.xpm \
@@ -361,6 +363,69 @@ if WITH_GUI
 bin_PROGRAMS = gambit
 endif
 
+# The games catalog release pinned in build_support/catalog.toml, unpacked into
+# the build tree's .catalog/, so that the source tree is never written to.  The
+# archive is taken from the source tree's .catalog/ (where source tarballs and
+# pygambit's fetch helper keep it) if its SHA-256 matches, and downloaded
+# otherwise.
+CATALOG_CACHE = .catalog/$(CATALOG_VERSION)
+CATALOG_STEM = gambit-catalog-$(CATALOG_VERSION)
+CATALOG_ARCHIVE = $(CATALOG_CACHE)/$(CATALOG_STEM).zip
+# Absolute, so that make's VPATH search cannot find a copy unpacked in the source tree.
+CATALOG_RELEASE = $(abs_top_builddir)/$(CATALOG_CACHE)/$(CATALOG_STEM)
+CATALOG_MANIFEST = $(CATALOG_RELEASE)/games/manifest.json
+CATALOG_URL = https://github.com/gambitproject/gambit-catalog/releases/download/v$(CATALOG_VERSION)/$(CATALOG_STEM).zip
+
+catalog_sha256 = `$(SHA256SUM) $(CATALOG_STEM).zip | cut -d' ' -f1`
+
+$(CATALOG_MANIFEST): $(top_srcdir)/build_support/catalog.toml
+	@echo "Unpacking games catalog $(CATALOG_VERSION) into $(top_builddir)/$(CATALOG_CACHE)"
+	@$(MKDIR_P) $(top_builddir)/$(CATALOG_CACHE)
+	@cd $(top_builddir)/$(CATALOG_CACHE) && \
+	if test -f $(CATALOG_STEM).zip && test "$(catalog_sha256)" != "$(CATALOG_SHA256)"; then \
+	  rm -f $(CATALOG_STEM).zip; \
+	fi && \
+	if test ! -f $(CATALOG_STEM).zip && test -f $(abs_top_srcdir)/$(CATALOG_ARCHIVE); then \
+	  cp $(abs_top_srcdir)/$(CATALOG_ARCHIVE) $(CATALOG_STEM).zip; \
+	  if test "$(catalog_sha256)" != "$(CATALOG_SHA256)"; then rm -f $(CATALOG_STEM).zip; fi; \
+	fi && \
+	if test ! -f $(CATALOG_STEM).zip; then \
+	  if test -z "$(CATALOG_DOWNLOAD)"; then \
+	    echo "error: need curl or wget to download $(CATALOG_URL)" >&2; exit 1; \
+	  fi; \
+	  $(CATALOG_DOWNLOAD) $(CATALOG_STEM).zip.part "$(CATALOG_URL)" || \
+	    { rm -f $(CATALOG_STEM).zip.part; exit 1; }; \
+	  mv $(CATALOG_STEM).zip.part $(CATALOG_STEM).zip; \
+	fi && \
+	if test "$(catalog_sha256)" != "$(CATALOG_SHA256)"; then \
+	  echo "error: $(CATALOG_STEM).zip does not match the SHA-256 in build_support/catalog.toml" >&2; \
+	  rm -f $(CATALOG_STEM).zip; exit 1; \
+	fi && \
+	rm -rf $(CATALOG_STEM) && $(UNZIP) -q $(CATALOG_STEM).zip
+	@touch $@
+
+if WITH_GUI
+all-local: $(CATALOG_MANIFEST)
+
+# The GUI finds the installed catalog through wxStandardPaths::GetDataDir().
+install-data-local: $(CATALOG_MANIFEST)
+	$(MKDIR_P) $(DESTDIR)$(pkgdatadir)/catalog
+	cp -R $(CATALOG_RELEASE)/. $(DESTDIR)$(pkgdatadir)/catalog/
+
+uninstall-local:
+	rm -rf $(DESTDIR)$(pkgdatadir)/catalog
+endif
+
+# In a build tree apart from the source tree, the unpacked catalog is a build product.  In
+# the source tree it is also pygambit's cache, so it is kept.
+distclean-local:
+	if test "$(abs_top_builddir)" != "$(abs_top_srcdir)"; then rm -rf $(top_builddir)/.catalog; fi
+
+# Every source tarball carries the pinned release, so that it builds offline.
+dist-hook: $(CATALOG_MANIFEST)
+	$(MKDIR_P) $(distdir)/$(CATALOG_CACHE)
+	cp -p $(top_builddir)/$(CATALOG_ARCHIVE) $(distdir)/$(CATALOG_CACHE)/
+
 # Define VERSION for all C++ compilations and set include paths
 AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(VERSION)\"
 
@@ -403,6 +468,8 @@ libguiworkspace_a_SOURCES = \
 gambit_SOURCES = \
 	src/gui/app.cc \
 	src/gui/app.h \
+	src/gui/catalogdata.cc \
+	src/gui/catalogdata.h \
 	src/gui/editlabel.cc \
 	src/gui/editlabel.h \
 	src/gui/edittext.cc \
@@ -411,6 +478,8 @@ gambit_SOURCES = \
 	src/gui/dialogstyle.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
+	src/gui/dlcatalog.cc \
+	src/gui/dlcatalog.h \
 	src/gui/dleditmove.cc \
 	src/gui/dleditmove.h \
 	src/gui/dleditnode.cc \
@@ -473,7 +542,8 @@ gambit_SOURCES = \
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
-gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) \
+	-DGAMBIT_CATALOG_RELEASE_DIR=\"$(CATALOG_RELEASE)\"
 
 gambit_LDADD_LIBS = libguiworkspace.a libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
@@ -501,15 +571,23 @@ osx-bundle:
 	cp ${top_srcdir}/build_support/osx/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
+	cp -R $(CATALOG_RELEASE) Gambit.app/Contents/Resources/catalog
 
 osx-dmg:  osx-bundle
 	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg
 
-msw-msi:
-	-mkdir installer
+# Stages the catalog in installer/catalog, for WiX to harvest.
+installer-catalog: $(CATALOG_MANIFEST)
+	rm -rf installer/catalog
+	$(MKDIR_P) installer
+	cp -R $(CATALOG_RELEASE) installer/catalog
+
+msw-msi: installer-catalog
 	cp gambit* installer
-	candle build_support/msw/gambit.wxs
-	light -ext WixUIExtension gambit.wixobj
+	heat dir installer/catalog -cg CatalogFiles -gg -scom -sreg -sfrag -srd \
+	  -dr CATALOGFOLDER -var var.CatalogSourceDir -out catalog.wxs
+	candle -arch x64 -dCatalogSourceDir=installer/catalog build_support/msw/gambit.wxs catalog.wxs
+	light -ext WixUIExtension -out gambit.msi gambit.wixobj catalog.wixobj
 
 CLANG_TIDY = clang-tidy
 CLANG_TIDY_DIFF = clang-tidy-diff.py

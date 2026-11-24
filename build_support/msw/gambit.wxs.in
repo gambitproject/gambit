@@ -68,7 +68,9 @@
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder">
-                <Directory Id="ApplicationRootDirectory" Name="Gambit"/>
+                <Directory Id="ApplicationRootDirectory" Name="Gambit">
+                    <Directory Id="CATALOGFOLDER" Name="catalog"/>
+                </Directory>
             </Directory>
             <Directory Id="ProgramMenuFolder">
                 <Directory Id="ApplicationProgramsFolder" Name="Gambit"/>
@@ -105,6 +107,7 @@
             <ComponentRef Id="Gambit.exe"/>
             <ComponentRef Id="Gambit.copying"/>
             <ComponentRef Id="ApplicationShortcut"/>
+            <ComponentGroupRef Id="CatalogFiles"/>
         </Feature>
     </Product>
 </Wix>

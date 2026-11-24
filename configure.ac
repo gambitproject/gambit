@@ -157,6 +157,37 @@ AC_SUBST(WX_CXXFLAGS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
+dnl The GUI installs the games catalog release pinned in
+dnl build_support/catalog.toml.  make downloads it (unless a source tarball
+dnl already carries it), checks its SHA-256 and unpacks it.
+CATALOG_VERSION=`sed -n 's/^version *= *"\(.*\)"/\1/p' $srcdir/build_support/catalog.toml`
+CATALOG_SHA256=`sed -n 's/^sha256 *= *"\(.*\)"/\1/p' $srcdir/build_support/catalog.toml`
+AC_SUBST(CATALOG_VERSION)
+AC_SUBST(CATALOG_SHA256)
+AC_PATH_PROG([CURL], [curl])
+AC_PATH_PROG([WGET], [wget])
+if test -n "$CURL"; then
+  CATALOG_DOWNLOAD="$CURL -fsSL -o"
+elif test -n "$WGET"; then
+  CATALOG_DOWNLOAD="$WGET -q -O"
+fi
+AC_SUBST(CATALOG_DOWNLOAD)
+AC_PATH_PROG([SHA256SUM], [sha256sum])
+if test -z "$SHA256SUM"; then
+  AC_PATH_PROG([SHASUM], [shasum])
+  test -n "$SHASUM" && SHA256SUM="$SHASUM -a 256"
+fi
+AC_PATH_PROG([UNZIP], [unzip])
+if test -z "$WITH_GUI_TRUE" && { test -z "$SHA256SUM" || test -z "$UNZIP"; }; then
+  AC_MSG_ERROR([
+            The graphical interface needs sha256sum (or shasum) and unzip to
+            install the games catalog.  Install them, or configure with
+            --disable-gui.
+  ])
+fi
+dnl Changing the pin re-runs configure.
+AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ['$(top_srcdir)/build_support/catalog.toml'])
+
 GAMBIT_VERSION=$VERSION
 AC_SUBST(GAMBIT_VERSION)
 
