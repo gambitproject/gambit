@@ -38,12 +38,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -v ".[test]"
       - name: Run tests
-        # The interpreter is not instrumented, so the ASan runtime is preloaded.
+        # The interpreter is not instrumented, so the ASan runtime is preloaded.  libstdc++ is
+        # preloaded with it because the interpreter does not link it, and ASan's __cxa_throw
+        # interceptor must find the real __cxa_throw at startup or abort on the first C++ throw.
         # --capture=sys lets ASan's report, written to file descriptor 2, reach the log.
         env:
           ASAN_OPTIONS: detect_leaks=0:detect_stack_use_after_return=1
           UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
           PYTHONMALLOC: malloc
         run: |
-          export LD_PRELOAD=$(gcc -print-file-name=libasan.so)
+          export LD_PRELOAD="$(gcc -print-file-name=libasan.so) $(gcc -print-file-name=libstdc++.so)"
           pytest --capture=sys
