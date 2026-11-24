@@ -5,9 +5,6 @@ Developer docs
 ==============
 
 These pages describe the Gambit source tree, its build systems, tests, and documentation.
-For instructions on adding new games to the catalog, see the `catalog's own developer guide
-<https://gambit-catalog.readthedocs.io/en/latest/developer.html>`_ (built and versioned separately
-from these docs).
 
 .. toctree::
    :maxdepth: 2

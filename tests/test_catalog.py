@@ -1,4 +1,8 @@
+import json
+import shutil
 import sys
+import tomllib
+import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -15,14 +19,8 @@ def all_games():
 
 @pytest.fixture
 def game_slugs():
-    """Fixture providing a set of all game slugs in the catalog."""
-    game_slugs = set()
-    for resource_path in gbt.catalog._CATALOG_RESOURCE.rglob("*"):
-        if resource_path.is_file() and resource_path.suffix in gbt.catalog.READERS:
-            rel_path = resource_path.relative_to(gbt.catalog._CATALOG_RESOURCE)
-            slug = rel_path.with_suffix("").as_posix()
-            game_slugs.add(slug)
-    return game_slugs
+    """Fixture providing a set of all game slugs in the catalog's manifest."""
+    return {entry["slug"] for entry in gbt.catalog._manifest()[1]["games"]}
 
 
 def test_catalog_load_all_game_slugs(game_slugs):
@@ -182,6 +180,53 @@ def test_catalog_games_include_descriptions():
     games_with_desc = gbt.catalog.games(include_descriptions=True)
     assert "Description" in games_with_desc.columns
     assert "Download" in games_with_desc.columns
+
+
+def test_catalog_version_is_pinned_release():
+    """The catalog in use is the release pinned in build_support/catalog.toml."""
+    pin = Path(__file__).resolve().parent.parent / "build_support" / "catalog.toml"
+    with open(pin, "rb") as f:
+        pinned = tomllib.load(f)["version"]
+    assert gbt.catalog.version() == pinned
+
+
+def test_catalog_dir_from_environment(tmp_path, monkeypatch):
+    """GAMBIT_CATALOG_DIR names the catalog's games directory to use."""
+    root = tmp_path / "games"
+    shutil.copytree(gbt.catalog._catalog_root(), root)
+    manifest = json.loads((root / "manifest.json").read_text())
+    manifest["catalog_version"] = "9.9.9"
+    (root / "manifest.json").write_text(json.dumps(manifest))
+    monkeypatch.setenv("GAMBIT_CATALOG_DIR", str(root))
+    assert gbt.catalog.version() == "9.9.9"
+
+
+def test_catalog_not_fetched_names_fetch_command(tmp_path, monkeypatch):
+    """A source checkout without the pinned release fetched says how to fetch it."""
+    (tmp_path / "build_support").mkdir()
+    (tmp_path / "build_support" / "catalog.toml").write_text('version = "9.9.9"\nsha256 = ""\n')
+    monkeypatch.delenv("GAMBIT_CATALOG_DIR", raising=False)
+    monkeypatch.setattr(gbt.catalog, "files", lambda package: tmp_path)
+    monkeypatch.setattr(gbt.catalog, "_REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gbt.catalog, "_REPO_PIN", tmp_path / "build_support" / "catalog.toml")
+    with pytest.raises(FileNotFoundError, match="catalog_release.py fetch"):
+        gbt.catalog.load("journals/geb/bagwell1995")
+
+
+def test_catalog_read_from_zip(tmp_path, monkeypatch):
+    """Listing and loading work on a catalog that is not on the filesystem (a zipped install)."""
+    root = Path(gbt.catalog._catalog_root())
+    archive = tmp_path / "catalog.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in root.rglob("*"):
+            if path.is_file():
+                zf.write(path, "games/" + path.relative_to(root).as_posix())
+    expected = gbt.catalog.games()
+    monkeypatch.setattr(gbt.catalog, "_catalog_root", lambda: zipfile.Path(archive, "games/"))
+    pd.testing.assert_frame_equal(gbt.catalog.games(), expected)
+    assert gbt.catalog.load("journals/geb/bagwell1995").title == (
+        "Bagwell (GEB 1995) commitment and (un)observability"
+    )
 
 
 # ---------------------------------------------------------------------------

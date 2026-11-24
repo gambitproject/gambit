@@ -104,27 +104,3 @@ jobs:
           python-version: "3.14"
       - name: Count Cython lines in pygambit
         run: python build_support/cython_lines.py --max 4811
-
-  catalog-am-sync:
-    name: catalog.am is up to date
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    steps:
-      - uses: actions/checkout@v7
-      - name: Setup Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      - name: Install pygambit (editable, picks up catalog/games directly)
-        run: |
-          python -m pip install -v -e ".[doc]"
-      - name: Regenerate catalog/catalog.am
-        run: python catalog/build.py --build --skip-table
-      - name: Fail if catalog.am is out of sync with catalog/games
-        run: |
-          if ! git diff --exit-code -- catalog/catalog.am; then
-            echo "::error::catalog/catalog.am is out of sync with catalog/games. Run 'python catalog/build.py --build' and commit the result."
-            exit 1
-          fi

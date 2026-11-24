@@ -1,29 +1,75 @@
 import io
+import json
 import os
 import shutil
 import subprocess
 import tempfile
+import tomllib
 from importlib.resources import as_file, files
+from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
 
 import pygambit as gbt
 
-# Prefer a co-located repo checkout's catalog (editable/dev installs) over any packaged
-# catalog_data. A prior non-editable install in the same environment can leave a stale
-# catalog_data directory in site-packages that nothing else would clean up; checking the repo
-# path first means it's never even consulted when a checkout is present (gambit#920).
-_repo_catalog = Path(__file__).parent.parent.parent / "catalog" / "games"
-_CATALOG_RESOURCE = (
-    _repo_catalog if _repo_catalog.is_dir() else cast(Path, files("pygambit") / "catalog_data")
-)
-
 READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+_REPO_PIN = _REPO_ROOT / "build_support" / "catalog.toml"
+
+
+def _catalog_root() -> Traversable:
+    """Return the games directory of the catalog in use.
+
+    In order: the directory named by the environment variable ``GAMBIT_CATALOG_DIR``;
+    the catalog bundled with pygambit; the pinned release fetched into a source checkout.
+    """
+    env = os.environ.get("GAMBIT_CATALOG_DIR")
+    if env:
+        return Path(env)
+    bundled = files("pygambit") / "catalog_data"
+    if bundled.joinpath("manifest.json").is_file():
+        return bundled
+    if _REPO_PIN.is_file():
+        with open(_REPO_PIN, "rb") as f:
+            version = tomllib.load(f)["version"]
+        fetched = _REPO_ROOT / ".catalog" / version / f"gambit-catalog-{version}" / "games"
+        if (fetched / "manifest.json").is_file():
+            return fetched
+        raise FileNotFoundError(
+            f"The games catalog {version} has not been fetched into this source checkout; "
+            "run 'python build_support/catalog_release.py fetch'"
+        )
+    raise FileNotFoundError("No games catalog is installed with pygambit")
+
+
+def _manifest() -> tuple[Traversable, dict]:
+    """Return the games directory of the catalog in use and its manifest."""
+    root = _catalog_root()
+    return root, json.loads(root.joinpath("manifest.json").read_text(encoding="utf-8"))
+
+
+def version() -> str:
+    """Return the version of the games catalog in use.
+
+    Returns
+    -------
+    str
+        The catalog's version, e.g. ``"0.2.0"``.
+    """
+    return _manifest()[1]["catalog_version"]
+
+
+def _read(root: Traversable, entry: dict) -> gbt.Game:
+    """Read the game file of the manifest *entry*."""
+    resource = root.joinpath(*entry["game"].split("/"))
+    with as_file(resource) as path:
+        return READERS[path.suffix](str(path))
 
 
 def generate_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
@@ -346,15 +392,10 @@ def load(slug: str) -> gbt.Game:
         If the game does not exist in the catalog.
     """
     slug = str(Path(slug)).replace("\\", "/")
-
-    # Try to load from file
-    for suffix, reader in READERS.items():
-        resource_path = _CATALOG_RESOURCE / f"{slug}{suffix}"
-        if resource_path.is_file():
-            with as_file(resource_path) as path:
-                return reader(str(path))
-
-    # Raise error if game does not exist
+    root, manifest = _manifest()
+    for entry in manifest["games"]:
+        if entry["slug"] == slug:
+            return _read(root, entry)
     raise FileNotFoundError(f"No catalog entry called {slug}")
 
 
@@ -464,6 +505,7 @@ def games(
     def append_record(
         slug: str,
         game: gbt.Game,
+        entry: dict,
     ) -> None:
         record = {
             "Game": slug,
@@ -471,28 +513,15 @@ def games(
         }
         if include_descriptions:
             record["Description"] = game.description
-            ext = "efg" if isinstance(game, gbt.ExtensiveGame) else "nfg"
-            record["Download"] = f":download:`{slug}.{ext} <../games/{slug}.{ext}>`"
-            record["Format"] = ext
+            record["Download"] = f":download:`{slug}.{entry['format']} <../games/{entry['game']}>`"
+            record["Format"] = entry["format"]
         records.append(record)
 
-    # Add all the games stored as EFG/NFG files.
-    # Collect paths matching each supported extension, sort together to preserve
-    # a consistent alphabetical order, then load using the known reader.
-    for resource_path in sorted(
-        path
-        for suffix in READERS
-        for path in _CATALOG_RESOURCE.rglob(f"*{suffix}")
-        if path.is_file()
-    ):
-        reader = READERS[resource_path.suffix]
-        rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-        slug = rel_path.with_suffix("").as_posix()
-
-        with as_file(resource_path) as path:
-            game = reader(str(path))
-            if check_filters(game):
-                append_record(slug, game)
+    root, manifest = _manifest()
+    for entry in sorted(manifest["games"], key=lambda e: e["slug"]):
+        game = _read(root, entry)
+        if check_filters(game):
+            append_record(entry["slug"], game, entry)
 
     if include_descriptions:
         return pd.DataFrame.from_records(

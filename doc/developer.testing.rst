@@ -15,8 +15,8 @@ no separate C++ tests, so ``make check`` is a no-op.
   tests also use the :ref:`catalog <repository-layout>`.
 * ``tests/cli``: tests of the ``gambit-*`` command-line tools.
 * ``tests/test_tutorials.py``: runs the tutorial notebooks in ``doc/tutorials``.
-* ``catalog/test_build.py`` and ``build_support/releases/test_extract_changelog.py``: catalog
-  script and ``ChangeLog`` format tests.
+* ``build_support/releases/test_extract_changelog.py``: ``ChangeLog`` format tests.
+* ``tests/test_catalog_release.py``: fetching the pinned games catalog release.
 
 ``pyproject.toml``'s ``[tool.pytest.ini_options]`` configures pytest, including solver and
 ``slow`` markers.
@@ -113,9 +113,8 @@ The GitHub Actions workflows are in ``.github/workflows``:
      - Builds the graphical interface with the autotools on Linux, macOS and Windows.
        Runs on every push and pull request.
    * - ``lint.yml``
-     - ``clang-format``, ``clang-tidy``, ``ruff``, ``cython-lint`` and ``mypy``; the size
-       limit on the Cython layer (see :ref:`pygambit-layers`); and a check that
-       ``catalog/catalog.am`` lists the catalog's game files.
+     - ``clang-format``, ``clang-tidy``, ``ruff``, ``cython-lint``, ``mypy``, and the size
+       limit on the Cython layer (see :ref:`pygambit-layers`).
        Runs on every push and pull request.
    * - ``wheel-smoke.yml``
      - Builds a ``pygambit`` wheel and checks that it installs and imports.
