@@ -4,8 +4,7 @@ Documentation
 =============
 
 `Sphinx <https://www.sphinx-doc.org>`__ builds this documentation from ``doc``.  ReadTheDocs
-builds every pull request and ``master`` according to ``.readthedocs.yaml``.  The catalog's
-documentation in ``catalog/doc`` is built and hosted separately.
+builds every pull request and ``master`` according to ``.readthedocs.yaml``.
 
 Layout
 ------

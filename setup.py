@@ -24,9 +24,14 @@ import glob
 import pathlib
 import platform
 import shutil
+import sys
 
 import Cython.Build
 import setuptools.command.build_py
+import setuptools.command.sdist
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "build_support"))
+import catalog_release  # noqa: E402
 
 cppgambit_include_dirs = ["src"]
 cppgambit_cflags = (
@@ -80,16 +85,30 @@ def solver_library_config(library_name: str, paths: list) -> tuple:
 
 
 class GambitBuildPy(setuptools.command.build_py.build_py):
-    """Extend `build_py` to copy the catalog games data into the build library."""
+    """Extend `build_py` to bundle the games of the pinned catalog release."""
     def run(self) -> None:
         super().run()
 
-        catalog_source = pathlib.Path("catalog") / "games"
+        catalog_source = catalog_release.fetch()
         catalog_target = pathlib.Path(self.build_lib) / "pygambit/catalog_data"
         if catalog_target.exists():
             shutil.rmtree(catalog_target)
-        catalog_target.mkdir(exist_ok=True, parents=True)
-        shutil.copytree(catalog_source, catalog_target, dirs_exist_ok=True)
+        shutil.copytree(catalog_source, catalog_target)
+
+
+class GambitSdist(setuptools.command.sdist.sdist):
+    """Extend `sdist` to include the archive of the pinned catalog release.
+
+    A wheel can then be built from the sdist without downloading the catalog.
+    """
+    def make_release_tree(self, base_dir, files) -> None:
+        super().make_release_tree(base_dir, files)
+        pin = catalog_release.read_pin()
+        catalog_release.fetch(pin)
+        archive = catalog_release.archive_path(pin)
+        target = pathlib.Path(base_dir) / archive.relative_to(catalog_release.REPO_ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(archive, target)
 
 
 cppgambit_bimatrix = solver_library_config("cppgambit_bimatrix",
@@ -120,7 +139,7 @@ libgambit = setuptools.Extension(
 )
 
 setuptools.setup(
-    cmdclass={"build_py": GambitBuildPy},
+    cmdclass={"build_py": GambitBuildPy, "sdist": GambitSdist},
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_homotopy, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core],

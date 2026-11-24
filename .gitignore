@@ -45,14 +45,6 @@ Gambit.app/*
 Gambit.app/*
 *.ipynb_checkpoints
 doc/**/*.ef
-catalog/doc/**/*.ef
 build_support/msw/gambit.wxs
 build_support/osx/Info.plist
-src/pygambit/catalog
-catalog/doc/_table.rst
-catalog/doc/_build
-catalog/games/img/**/*.pdf
-catalog/games/img/**/*.png
-catalog/games/img/**/*.tex
-catalog/games/img/**/*.ef
-catalog/games/img/**/*.svg
+.catalog/

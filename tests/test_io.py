@@ -343,7 +343,11 @@ def test_read_write_gtdraw_detects_a_change():
     assert rewritten == changed
 
 
-_CURATED_DRAWINGS = sorted(glob(os.path.join("catalog", "games", "**", "*.ef"), recursive=True))
+_CURATED_DRAWINGS = sorted(
+    str(gbt.catalog._catalog_root().joinpath(*drawing["path"].split("/")))
+    for entry in gbt.catalog._manifest()[1]["games"]
+    for drawing in entry["drawings"]
+)
 
 
 def test_curated_drawings_are_found():

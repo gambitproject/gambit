@@ -28,10 +28,8 @@ Repository layout
      - The graphical interface, written in C++ using wxWidgets.
    * - ``tests``
      - The ``pytest`` test suite (see :ref:`testing`).
-   * - ``catalog``
-     - The catalog of games: the game files in ``catalog/games``, which are packaged into
-       ``pygambit`` as ``pygambit.catalog``, the scripts that index them, and the catalog's
-       own documentation in ``catalog/doc``.
+   * - ``build_support/catalog.toml``
+     - The release of the games catalog that Gambit builds with.
    * - ``doc``
      - This documentation (see :ref:`editing-docs`).
    * - ``contrib``

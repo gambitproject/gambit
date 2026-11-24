@@ -1,6 +1,7 @@
 """Shared pybtex citation style, registered as the "keystyle" plugin.
 
-Imported by both this project's ``conf.py`` and ``catalog/doc/conf.py`` so the two
+Imported by this project's ``conf.py``. The games catalog's documentation, in the gambit-catalog
+repository, has its own copy, so the two
 independent Sphinx projects render ``:cite:p:`` citations identically without
 duplicating the style definition.
 """

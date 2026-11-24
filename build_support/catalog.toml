@@ -1,0 +1,4 @@
+# The release of the Gambit games catalog (https://github.com/gambitproject/gambit-catalog)
+# that Gambit builds with. To change it, set both fields from the release's .sha256 asset.
+version = "0.2.0"
+sha256 = "fe1236b3533ef7039505af848a7563f267d746a3ebba709cac235c6e6ded4e74"

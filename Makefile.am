@@ -20,7 +20,6 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-include catalog/catalog.am
 
 EXTRA_DIST = \
     build_support/GAMBIT_VERSION \
@@ -179,8 +178,7 @@ EXTRA_DIST = \
 	contrib/games/wink3.nfg \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
-	contrib/games/zero.nfg \
-	$(CATALOG_FILES)
+	contrib/games/zero.nfg
 
 core_SOURCES = \
     src/core/core.h \

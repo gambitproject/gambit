@@ -1,10 +1,12 @@
 ## [17.0.0-beta.5] - unreleased
 
 ### Added
+- `pygambit.catalog.version` returns the version of the catalog of games in use.
 - `NashComponent` and `NashPolytope`, describing the connected components of the equilibrium set of a
   two-player game, returned by `enummixed_solve(..., components=True)`.
 
 ### Changed
+- The catalog of games is developed, versioned and released separately.
 - `ExtensiveGame.copy_tree` (and copying a subtree in the GUI) no longer copies node labels.
 - `MixedBehaviorProfile.as_strategy` now raises `UndefinedOperationError` on a game with absent-minded
   information sets.
