@@ -24,7 +24,6 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/artprov.h>
 #include <wx/display.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
@@ -70,6 +69,9 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
         bool Application::OnInit()
 {
+  // wxStandardPaths::GetDataDir(), where Linux installs the catalog, derives from this.
+  SetAppName("gambit");
+
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
   m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at
@@ -123,7 +125,8 @@ void Application::DismissSplash()
   m_splash = nullptr;
 }
 
-AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
+std::pair<AppLoadResult, std::shared_ptr<GameDocument>>
+Application::ReadDocument(const wxString &p_filename, wxWindow *p_parent)
 {
   const auto [result, doc] = GameDocument::Load(p_filename);
 
@@ -138,28 +141,47 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
       ShowOperationError(p_parent, _("Unable to open file"),
                          _("Gambit could not open this file for reading."), p_filename);
     }
-    return AppLoadResult::OpenFailed;
+    return {AppLoadResult::OpenFailed, nullptr};
 
   case GameDocument::LoadResult::ParseFailed:
     ShowOperationError(p_parent, _("Unable to read file"),
                        _("File is not in a format Gambit recognizes."), p_filename);
-    return AppLoadResult::ParseFailed;
+    return {AppLoadResult::ParseFailed, nullptr};
 
   case GameDocument::LoadResult::UnsupportedRepresentation:
     ShowOperationError(p_parent, _("Unsupported game representation"),
                        _("Action graph games are not currently supported by the "
                          "graphical interface."),
                        p_filename);
-    return AppLoadResult::UnsupportedRepresentation;
+    return {AppLoadResult::UnsupportedRepresentation, nullptr};
 
   case GameDocument::LoadResult::Success:
+    return {AppLoadResult::Success, doc};
+  }
+  // Every LoadResult is handled above.
+  return {AppLoadResult::OpenFailed, nullptr};
+}
+
+AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
+{
+  const auto [result, doc] = ReadDocument(p_filename, p_parent);
+  if (doc) {
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
     (void)new GameFrame(nullptr, doc);
-    return AppLoadResult::Success;
   }
-  // Every LoadResult is handled above.
-  return AppLoadResult::OpenFailed;
+  return result;
+}
+
+AppLoadResult Application::LoadCatalogGame(const wxString &p_filename, const wxString &p_slug,
+                                           const wxString &p_version, wxWindow *p_parent)
+{
+  const auto [result, doc] = ReadDocument(p_filename, p_parent);
+  if (doc) {
+    doc->SetCatalogOrigin(p_slug, p_version);
+    (void)new GameFrame(nullptr, doc);
+  }
+  return result;
 }
 
 bool Application::ChooseAndLoadFile(wxWindow *p_parent)

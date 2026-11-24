@@ -28,6 +28,8 @@ ltmain.sh
 gambit.exe
 gambit.msi
 gambit.wixobj
+catalog.wxs
+catalog.wixobj
 gambit.wixpdb
 installer
 compile

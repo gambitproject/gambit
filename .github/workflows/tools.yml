@@ -65,7 +65,7 @@ jobs:
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
         with:
           msystem: UCRT64
-          install: mingw-w64-ucrt-x86_64-toolchain make automake autoconf
+          install: mingw-w64-ucrt-x86_64-toolchain make automake autoconf curl unzip
       - run: pacman -S --noconfirm mingw-w64-ucrt-x86_64-wxwidgets3.2
       - run: aclocal
       - run: automake --add-missing
@@ -74,10 +74,13 @@ jobs:
       - run: make -j 4
       - name: Build .msi installer
         run: |
-          mkdir installer
+          make installer-catalog
           cp gambit* installer
-          "${WIX}bin/candle" -arch x64 build_support/msw/gambit.wxs
-          "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
+          "${WIX}bin/heat" dir installer/catalog -cg CatalogFiles -gg -scom -sreg -sfrag -srd \
+            -dr CATALOGFOLDER -var var.CatalogSourceDir -out catalog.wxs
+          "${WIX}bin/candle" -arch x64 -dCatalogSourceDir=installer/catalog \
+            build_support/msw/gambit.wxs catalog.wxs
+          "${WIX}bin/light" -ext WixUIExtension -out gambit.msi gambit.wixobj catalog.wixobj
       - uses: actions/upload-artifact@v7
         with:
           name: artifact-msw

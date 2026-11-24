@@ -43,9 +43,10 @@ To build a branch other than ``master``, check it out before building ::
 Build tools and dependencies
 ----------------------------
 
-The packages below provide a C++ compiler and autotools, plus wxWidgets for the graphical
-interface.  Only the compiler is needed for ``pygambit``.  On macOS, install it with
-``xcode-select --install``.
+The packages below provide a C++ compiler and autotools, plus wxWidgets and the tools that fetch
+the catalog of games (``curl`` or ``wget``, ``sha256sum`` or ``shasum``, and ``unzip``) for the
+graphical interface; macOS has the latter already.  Only the compiler is needed for ``pygambit``.
+On macOS, install it with ``xcode-select --install``.
 
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
@@ -84,7 +85,7 @@ interface.  Only the compiler is needed for ``pygambit``.  On macOS, install it 
 
       .. code-block:: bash
 
-         sudo apt install libwxgtk3.2-dev
+         sudo apt install libwxgtk3.2-dev curl unzip
 
 .. dropdown:: Install on Windows
    :class-container: sd-border-0
@@ -109,7 +110,7 @@ interface.  Only the compiler is needed for ``pygambit``.  On macOS, install it 
 
       .. code-block:: bash
 
-         pacman -S --needed mingw-w64-ucrt-x86_64-wxwidgets3.2
+         pacman -S --needed mingw-w64-ucrt-x86_64-wxwidgets3.2 curl unzip
 
 
 
@@ -159,6 +160,11 @@ From the repository root (in the "MSYS2 UCRT64" terminal on Windows), run:
 
 For an out-of-tree build, create a build directory and invoke ``configure`` by its relative path,
 such as ``../configure``.
+
+The graphical interface is installed with the catalog of games release pinned in
+``build_support/catalog.toml``.  ``make`` downloads it into ``.catalog/`` in the source tree,
+checks its SHA-256 and unpacks it; this needs the network once per release.  Source tarballs made
+by ``make dist`` include the release, so building from one needs no network.
 
 ``configure`` accepts the following options, among others (see ``./configure --help``):
 

@@ -36,6 +36,28 @@ in :ref:`computing-equilibria`.
 
 
 
+.. _gui-catalog:
+
+Opening a game from the catalog of games
+----------------------------------------
+
+Gambit comes with a catalog of games from textbooks and research articles.
+To open one, click :guilabel:`Open from catalog` on the welcome screen, or
+select :menuselection:`File --> Open from catalog`. The dialog lists each
+game with its title, its number of players and its form, grouped under the
+book or article it comes from. Typing in the search box narrows the list to
+the games whose title, source or description contain every word typed; the
+menus beneath it narrow it by source, form and number of players, and
+:guilabel:`Sort by` lists the games by source or by title. Clicking a
+source's heading hides or shows its games; holding :kbd:`Option` (:kbd:`Alt`
+on Windows and Linux) while clicking hides or shows the games of every
+source. The up and down arrow keys move through the list while typing.
+Selecting a game shows a picture of it, with its full source and description.
+
+A game opened from the catalog is not tied to a file. The title bar shows
+its label in the catalog.  Editing the game clears the title and long description.
+
+
 .. _payoffs-and-probabilities:
 
 Payoffs and probabilities in Gambit

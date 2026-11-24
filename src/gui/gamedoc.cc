@@ -25,6 +25,9 @@
 #include <fstream>
 #include <utility>
 
+#include <wx/file.h>
+#include <wx/log.h>
+
 #include "games.h"
 #include "games/gametree.h"
 #include "games/gameagg.h"
@@ -36,16 +39,38 @@
 
 namespace Gambit::GUI {
 
+namespace {
+
+/// Replaces the contents of the file p_filename with p_text. If writing fails, any existing file
+/// is left as it was.
+void ReplaceFile(const wxString &p_filename, const std::string &p_text)
+{
+  // A failure is reported by the exception, not by wxWidgets' log window.
+  const wxLogNull noLog;
+  wxTempFile file;
+  if (!file.Open(p_filename) || !file.Write(p_text.data(), p_text.size()) || !file.Commit()) {
+    throw std::runtime_error("Check that the folder exists and that you can write to it.");
+  }
+}
+
+} // namespace
+
 //=========================================================================
 //                          class GameDocument
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game) : m_gameWorkspace(std::move(p_game))
 {
+  // Observing first, the document's catalog identity is current before any view is notified.
+  m_gameWorkspace.AddObserver(this);
   wxGetApp().AddDocument(this);
 }
 
-GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
+GameDocument::~GameDocument()
+{
+  m_gameWorkspace.RemoveObserver(this);
+  wxGetApp().RemoveDocument(this);
+}
 
 void GameDocument::AddView(GameView *p_view)
 {
@@ -98,6 +123,45 @@ GameDocument::LoadOutcome GameDocument::Load(const wxString &p_filename)
   }
 }
 
+std::string GameDocument::WriteGame() const
+{
+  std::ostringstream text;
+  GetGame()->Write(text, As<GameTreeRep>(GetGame()) ? "efg" : "nfg");
+  return text.str();
+}
+
+void GameDocument::SetCatalogOrigin(const wxString &p_slug, const wxString &p_version)
+{
+  m_filename.clear();
+  m_catalogOrigin = CatalogOrigin{.slug = p_slug,
+                                  .version = p_version,
+                                  .game = WriteGame(),
+                                  .title = GetGame()->GetTitle(),
+                                  .description = GetGame()->GetDescription()};
+  m_isCatalogGame = true;
+  m_gameWorkspace.NotifyChanged(GameModificationType::None);
+}
+
+void GameDocument::OnWorkspaceChanged(GameModificationType)
+{
+  if (!m_catalogOrigin) {
+    return;
+  }
+  const bool isCatalogGame = WriteGame() == m_catalogOrigin->game;
+  if (m_isCatalogGame && !isCatalogGame) {
+    // An edited catalog game is no longer the game its catalog title and description describe.
+    // This joins the edit's undoable step: undo restores the snapshot taken before the edit.
+    const Game game = GetGame();
+    if (game->GetTitle() == m_catalogOrigin->title) {
+      game->SetTitle("");
+    }
+    if (game->GetDescription() == m_catalogOrigin->description) {
+      game->SetDescription("");
+    }
+  }
+  m_isCatalogGame = isCatalogGame;
+}
+
 void GameDocument::PostPendingChanges()
 {
   std::ranges::for_each(m_views, std::mem_fn(&GameView::PostPendingChanges));
@@ -105,29 +169,27 @@ void GameDocument::PostPendingChanges()
 
 void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
 {
-  std::ofstream file(p_filename.mb_str());
-  if (!file) {
-    throw std::runtime_error(std::string("Unable to open file for writing: ") +
-                             static_cast<const char *>(p_filename.mb_str()));
-  }
+  std::ostringstream text;
   switch (p_format) {
   case GameSaveFormat::Workspace:
-    m_gameWorkspace.Save(file);
-    m_filename = p_filename;
-    m_gameWorkspace.MarkSaved(true);
+    m_gameWorkspace.Save(text);
     break;
-
   case GameSaveFormat::Efg:
-    GetGame()->Write(file, "efg");
-    m_gameWorkspace.MarkSaved(false);
+    GetGame()->Write(text, "efg");
     break;
-
   case GameSaveFormat::Nfg:
     BuildNfg();
-    GetGame()->Write(file, "nfg");
-    m_gameWorkspace.MarkSaved(false);
+    GetGame()->Write(text, "nfg");
     break;
   }
+  ReplaceFile(p_filename, text.str());
+
+  // The document is now the saved file, whatever its format; a game file holds no results or
+  // drawing settings, so those stay unsaved.
+  m_filename = p_filename;
+  m_catalogOrigin.reset();
+  m_isCatalogGame = false;
+  m_gameWorkspace.MarkSaved(p_format == GameSaveFormat::Workspace);
   m_gameWorkspace.NotifyChanged(GameModificationType::None);
 }
 

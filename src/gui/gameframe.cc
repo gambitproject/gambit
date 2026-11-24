@@ -52,6 +52,7 @@
 #include "nfgprofile.h"
 
 #include "dialogstyle.h"
+#include "dlcatalog.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
 #include "dllogit.h"
@@ -213,6 +214,7 @@ BEGIN_EVENT_TABLE(GameFrame, wxFrame)
 EVT_MENU(GBT_MENU_FILE_NEW_EFG, GameFrame::OnFileNewEfg)
 EVT_MENU(GBT_MENU_FILE_NEW_NFG, GameFrame::OnFileNewNfg)
 EVT_MENU(wxID_OPEN, GameFrame::OnFileOpen)
+EVT_MENU(GBT_MENU_FILE_OPEN_CATALOG, GameFrame::OnFileOpenCatalog)
 EVT_MENU(wxID_CLOSE, GameFrame::OnFileClose)
 EVT_MENU(wxID_SAVE, GameFrame::OnFileSave)
 EVT_MENU(wxID_SAVEAS, GameFrame::OnFileSave)
@@ -330,7 +332,11 @@ void GameFrame::OnUpdate()
   std::string gameTitle;
   gameTitle = m_doc->GetGame()->GetTitle();
 
-  if (!m_doc->GetFilename().empty()) {
+  if (m_doc->IsCatalogGame()) {
+    SetTitle(wxT("Gambit - [") + wxString::Format(_("catalog: %s"), m_doc->GetCatalogSlug()) +
+             wxT("] ") + wxString::FromUTF8(gameTitle));
+  }
+  else if (!m_doc->GetFilename().empty()) {
     SetTitle(wxT("Gambit - [") + m_doc->GetFilename() + wxT("] ") + wxString::FromUTF8(gameTitle));
   }
   else {
@@ -398,6 +404,8 @@ void GameFrame::MakeMenus()
   fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu, _("Create a new game"));
 
   fileMenu->Append(wxID_OPEN, _("&Open...\tCtrl-O"), _("Open a saved game"));
+  fileMenu->Append(GBT_MENU_FILE_OPEN_CATALOG, _("Open from &catalog..."),
+                   _("Browse and open a game from Gambit's catalog of games"));
   fileMenu->AppendSeparator();
 
   fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
@@ -558,6 +566,13 @@ void GameFrame::OnFileNewNfg(wxCommandEvent &)
 
 void GameFrame::OnFileOpen(wxCommandEvent &) { wxGetApp().ChooseAndLoadFile(this); }
 
+void GameFrame::OnFileOpenCatalog(wxCommandEvent &)
+{
+  if (const auto choice = ChooseCatalogGame(this)) {
+    wxGetApp().LoadCatalogGame(choice->path, choice->slug, choice->version, this);
+  }
+}
+
 void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
 void GameFrame::OnFileSave(wxCommandEvent &p_event)
@@ -596,10 +611,14 @@ bool GameFrame::SaveDocument(bool p_saveAs)
                                                   : _("Gambit strategic games (*.nfg)|*.nfg|");
 
   const wxString &currentFilename = m_doc->GetFilename();
+  const wxString catalogSlug = m_doc->GetCatalogSlug();
+  const wxString proposedName = !catalogSlug.empty()
+                                    ? catalogSlug.AfterLast('/') + wxT(".") + nativeExt
+                                    : wxFileNameFromPath(currentFilename);
 
-  wxFileDialog dialog(
-      this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      nativeWildcard + _("Gambit workspaces (*.gbt)|*.gbt"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  wxFileDialog dialog(this, _("Save game as"), wxPathOnly(currentFilename), proposedName,
+                      nativeWildcard + _("Gambit workspaces (*.gbt)|*.gbt"),
+                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() != wxID_OK) {
     return false;

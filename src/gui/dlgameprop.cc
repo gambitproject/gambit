@@ -461,7 +461,10 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
     boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, p_text), 0, wxALL, gap);
   };
 
-  addFact(wxString(_("Filename: ")) + m_doc->GetFilename());
+  addFact(m_doc->IsCatalogGame()
+              ? wxString::Format(_("Catalog game: %s (catalog %s)"), m_doc->GetCatalogSlug(),
+                                 m_doc->GetCatalogVersion())
+              : wxString(_("Filename: ")) + m_doc->GetFilename());
   const Game game = m_doc->GetGame();
   addFact(game->IsConstSum() ? _("This is a constant-sum game")
                              : _("This is not a constant-sum game"));
