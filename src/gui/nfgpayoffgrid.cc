@@ -32,7 +32,7 @@
 
 #include "renratio.h" // special renderer/editor for rational numbers
 
-#include "dlexcept.h"
+#include "dialogstyle.h"
 #include "editlabel.h"
 #include "gamedoc.h"
 #include "nfgtable.h"
@@ -255,10 +255,6 @@ void PayoffTable::OnUpdate()
 //                       class SetOutcomeDialog
 //=========================================================================
 
-namespace {
-const wxColour kInvalidFieldBg(255, 220, 220);
-} // namespace
-
 //!
 //! Prompts for a label and one payoff per player, to create the outcome attached to a
 //! set of contingencies -- whether that's merging several into one (a multi-contingency
@@ -298,7 +294,7 @@ class SetOutcomeDialog final : public wxDialog {
         }
       }
     }
-    m_labelCtrl->SetBackgroundColour((labelEmpty || labelDuplicate) ? kInvalidFieldBg
+    m_labelCtrl->SetBackgroundColour((labelEmpty || labelDuplicate) ? InvalidFieldBackground()
                                                                     : m_defaultBg);
     m_labelCtrl->Refresh();
 
@@ -318,7 +314,7 @@ class SetOutcomeDialog final : public wxDialog {
       catch (const std::exception &) {
         invalid = true;
       }
-      row.payoffCtrl->SetBackgroundColour(invalid ? kInvalidFieldBg : m_defaultBg);
+      row.payoffCtrl->SetBackgroundColour(invalid ? InvalidFieldBackground() : m_defaultBg);
       row.payoffCtrl->Refresh();
       if (invalid && message.empty()) {
         message = wxString::Format(_("Payoff for %s is not a valid number."),
@@ -334,8 +330,7 @@ class SetOutcomeDialog final : public wxDialog {
     m_errorText->SetLabel(message);
     m_errorText->Show(!message.empty());
     m_okButton->Enable(message.empty());
-    Layout();
-    Fit();
+    RefreshDialogMinSize(this);
   }
 
   void OnOK(wxCommandEvent &p_event)
@@ -352,21 +347,18 @@ public:
   SetOutcomeDialog(wxWindow *p_parent, const Game &p_game, const wxString &p_title,
                    const wxString &p_label, const std::vector<wxString> &p_payoffValues,
                    const std::set<const GameOutcomeRep *> &p_ignoreForLabel)
-    : wxDialog(p_parent, wxID_ANY, p_title), m_game(p_game), m_ignoreForLabel(p_ignoreForLabel)
+    : wxDialog(p_parent, wxID_ANY, p_title, wxDefaultPosition, wxDefaultSize,
+               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+      m_game(p_game), m_ignoreForLabel(p_ignoreForLabel)
   {
-    auto *topSizer = new wxBoxSizer(wxVERTICAL);
+    auto *formSizer = NewFormSizer(this);
 
-    auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-    labelSizer->Add(new wxStaticText(this, wxID_ANY, _("Label")), 0,
-                    wxALL | wxALIGN_CENTRE_VERTICAL, 5);
+    formSizer->Add(new wxStaticText(this, wxID_ANY, _("Label")), 0, wxALIGN_CENTRE_VERTICAL);
     // Child windows are created in order, which sets the tab order, so these stay in the body
     m_labelCtrl = // NOLINT(cppcoreguidelines-prefer-member-initializer)
         new LabelTextCtrl(this, wxID_ANY, p_label);
-    labelSizer->Add(m_labelCtrl, 1, wxALL | wxEXPAND, 5);
-    topSizer->Add(labelSizer, 0, wxEXPAND | wxALL, 5);
+    formSizer->Add(m_labelCtrl, 1, wxEXPAND);
 
-    auto *payoffSizer = new wxFlexGridSizer(2, FromDIP(5), FromDIP(10));
-    payoffSizer->AddGrowableCol(1, 1);
     const auto players = p_game->GetPlayers();
     size_t index = 0;
     for (const auto &player : players) {
@@ -374,32 +366,28 @@ public:
       if (playerLabel.empty()) {
         playerLabel = wxString::Format(_("Player %d"), player->GetNumber());
       }
-      payoffSizer->Add(new wxStaticText(this, wxID_ANY, playerLabel), 0, wxALIGN_CENTRE_VERTICAL);
+      formSizer->Add(new wxStaticText(this, wxID_ANY, playerLabel), 0, wxALIGN_CENTRE_VERTICAL);
       auto *ctrl = new wxTextCtrl(this, wxID_ANY, p_payoffValues.at(index));
       ctrl->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_textEvent) {
         UpdateValidation();
         p_textEvent.Skip();
       });
-      payoffSizer->Add(ctrl, 1, wxEXPAND);
+      formSizer->Add(ctrl, 1, wxEXPAND);
       m_payoffRows.push_back({.player = player, .payoffCtrl = ctrl});
       ++index;
     }
-    topSizer->Add(payoffSizer, 0, wxEXPAND | wxALL, 5);
 
     m_defaultBg = m_labelCtrl->GetBackgroundColour();
 
-    m_errorText = new wxStaticText(this, wxID_ANY, wxEmptyString);
-    m_errorText->SetForegroundColour(*wxRED);
+    m_errorText = NewErrorText(this); // NOLINT(cppcoreguidelines-prefer-member-initializer)
     m_errorText->Wrap(FromDIP(260));
     m_errorText->Hide();
-    topSizer->Add(m_errorText, 0, wxEXPAND | wxALL, 5);
 
-    auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
-    topSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
+    auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+    contentSizer->Add(formSizer, 0, wxEXPAND);
+    contentSizer->Add(m_errorText, 0, wxEXPAND | wxTOP, FromDIP(c_spaceRelated));
 
-    SetSizer(topSizer);
-    Fit();
-    CentreOnParent();
+    SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
 
     m_labelCtrl->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_textEvent) {
       UpdateValidation();
@@ -619,8 +607,10 @@ void PayoffGrid::ShowSetOutcomeDialog(const std::vector<PureStrategyProfile> &p_
   if (dialog.ShowModal() != wxID_OK) {
     return;
   }
-  m_table->GetDocument()->DoMakeOutcome(p_profiles, dialog.GetPayoffs(),
-                                        dialog.GetOutcomeLabel().ToStdString());
+  m_table->GetDocument()->Apply(
+      SetContingencyOutcome{.profiles = p_profiles,
+                            .label = dialog.GetOutcomeLabel().ToStdString(wxConvUTF8),
+                            .payoffs = dialog.GetPayoffs()});
   ClearSelection();
 }
 
@@ -636,11 +626,10 @@ void PayoffGrid::ShowEditOutcomeDialog(const GameOutcome &p_outcome)
   if (dialog.ShowModal() != wxID_OK) {
     return;
   }
-  std::vector<wxString> payoffs;
-  for (const auto &value : dialog.GetPayoffs()) {
-    payoffs.push_back(wxString::FromUTF8(lexical_cast<std::string>(value)));
-  }
-  m_table->GetDocument()->DoSetOutcomeData(p_outcome, dialog.GetOutcomeLabel(), payoffs);
+  m_table->GetDocument()->Apply(
+      SetOutcomeData{.outcome = p_outcome,
+                     .label = dialog.GetOutcomeLabel().ToStdString(wxConvUTF8),
+                     .payoffs = dialog.GetPayoffs()});
   ClearSelection();
 }
 
@@ -652,10 +641,6 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
   const std::vector<PureStrategyProfile> profiles =
       GetSelectedContingencies(p_event.GetRow(), p_event.GetCol());
 
-  const bool anyHasOutcome =
-      std::ranges::any_of(profiles, [](const PureStrategyProfile &p_profile) {
-        return !p_profile->GetOutcome()->IsNull();
-      });
   const GameOutcome shared = GetSharedOutcome(profiles);
 
   const int setOutcomeId = wxWindow::NewControlId();
@@ -668,7 +653,8 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
   menu.Append(editOutcomeId, _("Edit outcome..."));
   menu.Enable(editOutcomeId, static_cast<bool>(shared));
   menu.Append(removeOutcomeId, _("Remove outcome"));
-  menu.Enable(removeOutcomeId, anyHasOutcome);
+  menu.Enable(removeOutcomeId,
+              m_table->GetDocument()->CanApply(RemoveContingencyOutcome{.profiles = profiles}));
 
   const int selection = GetPopupMenuSelectionFromUser(menu, p_event.GetPosition());
 
@@ -680,14 +666,12 @@ void PayoffGrid::OnCellRightClick(wxGridEvent &p_event)
       ShowEditOutcomeDialog(shared);
     }
     else if (selection == removeOutcomeId) {
-      for (const auto &profile : profiles) {
-        m_table->GetDocument()->DoRemoveOutcome(profile);
-      }
+      m_table->GetDocument()->Apply(RemoveContingencyOutcome{.profiles = profiles});
       ClearSelection();
     }
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 

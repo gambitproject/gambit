@@ -41,6 +41,7 @@
 #include "games/gametree.h"
 #include "gamedoc.h"
 #include "dlgameprop.h"
+#include "dialogstyle.h"
 #include "editlabel.h"
 #include "labellist.h"
 
@@ -145,7 +146,7 @@ PlayerPanel::PlayerPanel(wxWindow *p_parent, const std::shared_ptr<GameDocument>
 {
   for (const auto &player : m_doc->GetGame()->GetPlayers()) {
     m_list.AddExisting(player->GetLabel(),
-                       {.player = player, .color = m_doc->GetStyle().GetPlayerColor(player)});
+                       {.player = player, .color = m_doc->GetPlayerColor(player)});
   }
 
   SetSizer(m_topSizer);
@@ -196,7 +197,7 @@ void PlayerPanel::Rebuild()
   m_labelCtrls.clear();
   m_colorButtons.clear();
 
-  auto *gridSizer = new wxFlexGridSizer(4, FromDIP(5), FromDIP(10));
+  auto *gridSizer = new wxFlexGridSizer(4, FromDIP(c_spaceTight), FromDIP(c_spaceRelated));
   gridSizer->AddGrowableCol(2, 1);
 
   gridSizer->AddSpacer(1);
@@ -205,14 +206,14 @@ void PlayerPanel::Rebuild()
   gridSizer->AddSpacer(1);
 
   const size_t activeCount = m_list.ActiveCount();
-  const wxSize buttonSize(FromDIP(28), -1);
-  const int buttonGap = FromDIP(2);
+  const wxSize buttonSize(FromDIP(c_rowButtonWidth), -1);
+  const int buttonGap = FromDIP(c_spaceTight);
 
   for (size_t i = 0; i < m_list.Size(); i++) {
     const auto &row = m_list.GetRow(i);
 
     m_colorButtons.push_back(MakeColorButton(static_cast<int>(i)));
-    gridSizer->Add(m_colorButtons.back(), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(5));
+    gridSizer->Add(m_colorButtons.back(), 0, wxALIGN_CENTER_VERTICAL);
 
     wxString number;
     number << (i + 1);
@@ -313,7 +314,7 @@ void PlayerPanel::Rebuild()
   addSizer->Add(addButton, 0, wxLEFT, buttonGap);
   gridSizer->Add(addSizer, 0, wxALIGN_CENTER_VERTICAL);
 
-  m_topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, FromDIP(5));
+  m_topSizer->Add(gridSizer, 1, wxEXPAND);
   FitInside();
   Layout();
   m_rebuilding = false;
@@ -430,103 +431,80 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_doc(p_doc)
 {
-  const int S = FromDIP(5);
-
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
+  const int margin = FromDIP(c_spaceMargin);
+  const int gap = FromDIP(c_spaceRelated);
 
   auto *notebook = new wxNotebook(this, wxID_ANY);
 
   auto *generalPanel = new wxPanel(notebook);
   auto *generalSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
-  titleSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Title")), 0,
-                  wxALL | wxALIGN_CENTER, S);
+  auto *formSizer = NewFormSizer(generalPanel);
+  formSizer->AddGrowableRow(1, 1);
+  formSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Title")), 0,
+                 wxALIGN_CENTER_VERTICAL);
   m_title =
       new wxTextCtrl(generalPanel, wxID_ANY, wxString::FromUTF8(m_doc->GetGame()->GetTitle()),
                      wxDefaultPosition, wxSize(FromDIP(400), -1));
-  titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, S);
-  generalSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
+  formSizer->Add(m_title, 1, wxEXPAND);
 
-  auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
-  commentSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Comment")), 0,
-                    wxALL | wxALIGN_CENTER, S);
+  formSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("Comment")), 0, wxALIGN_TOP);
   m_comment = new wxTextCtrl(generalPanel, wxID_ANY,
                              wxString::FromUTF8(m_doc->GetGame()->GetDescription()),
                              wxDefaultPosition, wxSize(FromDIP(400), -1), wxTE_MULTILINE);
-  commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, S);
-  generalSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
+  formSizer->Add(m_comment, 1, wxEXPAND);
+  generalSizer->Add(formSizer, 1, wxEXPAND | wxBOTTOM, margin);
 
   auto *boxSizer =
       new wxStaticBoxSizer(wxVERTICAL, generalPanel, _("Information about this game"));
+  const auto addFact = [&](const wxString &p_text) {
+    boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, p_text), 0, wxALL, gap);
+  };
 
-  boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC,
-                                 wxString(_("Filename: ")) + m_doc->GetFilename()),
-                0, wxALL, S);
-
+  addFact(wxString(_("Filename: ")) + m_doc->GetFilename());
   const Game game = m_doc->GetGame();
-  if (game->IsConstSum()) {
-    boxSizer->Add(new wxStaticText(generalPanel, wxID_STATIC, _("This is a constant-sum game")), 0,
-                  wxALL, S);
-  }
-  else {
-    boxSizer->Add(
-        new wxStaticText(generalPanel, wxID_STATIC, _("This is not a constant-sum game")), 0,
-        wxALL, S);
-  }
-
+  addFact(game->IsConstSum() ? _("This is a constant-sum game")
+                             : _("This is not a constant-sum game"));
   if (As<GameTreeRep>(game)) {
-    if (game->IsPerfectRecall()) {
-      boxSizer->Add(
-          new wxStaticText(generalPanel, wxID_STATIC, _("This is a game of perfect recall")), 0,
-          wxALL, S);
-    }
-    else {
-      boxSizer->Add(
-          new wxStaticText(generalPanel, wxID_STATIC, _("This is not a game of perfect recall")),
-          0, wxALL, S);
-    }
+    addFact(game->IsPerfectRecall() ? _("This is a game of perfect recall")
+                                    : _("This is not a game of perfect recall"));
   }
 
-  generalSizer->Add(boxSizer, 0, wxALL | wxEXPAND, S);
-  generalPanel->SetSizer(generalSizer);
+  generalSizer->Add(boxSizer, 0, wxEXPAND);
+  auto *generalMargin = new wxBoxSizer(wxVERTICAL);
+  generalMargin->Add(generalSizer, 1, wxEXPAND | wxALL, margin);
+  generalPanel->SetSizer(generalMargin);
   notebook->AddPage(generalPanel, _("General"));
 
   auto *playersPanel = new wxPanel(notebook);
   auto *playersSizer = new wxBoxSizer(wxVERTICAL);
 
   if (As<GameTreeRep>(game)) {
-    m_chanceColor = m_doc->GetStyle().ChanceColor();
+    m_chanceColor = ToWxColour(m_doc->GetStyle().ChanceColor());
     auto *chanceSizer = new wxBoxSizer(wxHORIZONTAL);
     m_chanceColorButton = MakeChanceColorButton(playersPanel);
-    chanceSizer->Add(m_chanceColorButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+    chanceSizer->Add(m_chanceColorButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
     chanceSizer->Add(new wxStaticText(playersPanel, wxID_STATIC,
                                       wxString::FromUTF8(game->GetChance()->GetLabel())),
                      0, wxALIGN_CENTER_VERTICAL);
-    playersSizer->Add(chanceSizer, 0, wxALL, FromDIP(5));
+    playersSizer->Add(chanceSizer, 0, wxBOTTOM, gap);
   }
 
   m_playerPanel = new PlayerPanel(playersPanel, m_doc, [this]() { UpdateValidation(); });
-  playersSizer->Add(m_playerPanel, 1, wxALL | wxEXPAND, FromDIP(5));
+  playersSizer->Add(m_playerPanel, 1, wxEXPAND);
 
-  playersPanel->SetSizer(playersSizer);
+  auto *playersMargin = new wxBoxSizer(wxVERTICAL);
+  playersMargin->Add(playersSizer, 1, wxEXPAND | wxALL, margin);
+  playersPanel->SetSizer(playersMargin);
   notebook->AddPage(playersPanel, _("Players"));
 
-  topSizer->Add(notebook, 1, wxALL | wxEXPAND, S);
+  auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+  contentSizer->Add(notebook, 1, wxEXPAND);
 
-  m_errorText = new wxStaticText(this, wxID_STATIC, wxEmptyString);
-  m_errorText->SetForegroundColour(*wxRED);
-  topSizer->Add(m_errorText, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, S);
+  m_errorText = NewErrorText(this);
+  contentSizer->Add(m_errorText, 0, wxEXPAND | wxTOP, gap);
 
-  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
-    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
-  }
-
-  SetSizer(topSizer);
-  topSizer->SetSizeHints(this);
-  SetSize(GetBestSize());
-  SetMinSize(GetSize());
-  CenterOnParent();
+  SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
 
   UpdateValidation();
 }
@@ -538,20 +516,21 @@ void GamePropertiesDialog::UpdateValidation()
   if (auto *ok = FindWindow(wxID_OK)) {
     ok->Enable(message.empty());
   }
+  RefreshDialogMinSize(this);
 }
 
-GamePropertiesEdit GamePropertiesDialog::GetEdit() const
+EditGameProperties GamePropertiesDialog::GetEdit() const
 {
   const auto &players = m_playerPanel->GetEdit();
-  GamePropertiesEdit edit{.title = m_title->GetValue().ToStdString(wxConvUTF8),
+  EditGameProperties edit{.title = m_title->GetValue().ToStdString(wxConvUTF8),
                           .description = m_comment->GetValue().ToStdString(wxConvUTF8),
                           .stableLabels = players.GetStableLabels(),
                           .labels = players.GetLabels(),
                           .playerColors = {},
-                          .chanceColor = m_chanceColor};
+                          .chanceColor = ToRgb(m_chanceColor)};
   for (size_t i = 0; i < players.Size(); i++) {
     if (!players.GetRow(i).isDeleted) {
-      edit.playerColors.push_back(players.GetRow(i).payload.color);
+      edit.playerColors.push_back(ToRgb(players.GetRow(i).payload.color));
     }
   }
   return edit;

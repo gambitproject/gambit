@@ -38,6 +38,7 @@
 #include "games.h"
 #include "games/gametree.h"
 
+#include "dialogstyle.h"
 #include "editlabel.h"
 #include "efgdisplay.h"
 #include "valnumber.h"
@@ -45,7 +46,6 @@
 namespace Gambit::GUI {
 
 namespace {
-const wxColour kInvalidLabelBg(255, 220, 220);
 // Logical (pre-FromDIP) cap on a scrollable row grid's height, past which it scrolls instead of
 // growing the dialog further -- roughly six rows at the row height these grids use. Shared by
 // OutcomeEditorPopup's payoff grid and AppendMovePopup's action grid.
@@ -173,7 +173,7 @@ void OutcomeEditorPopup::BuildControls()
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(m_headerPanel, wxID_STATIC, _("Outcome label")), 0,
-                  wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(7));
+                  wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceRelated));
   m_labelCtrl = new LabelTextCtrl(m_headerPanel, wxID_ANY, wxEmptyString);
   m_labelCtrl->SetMinSize(wxSize(FromDIP(180), -1));
   m_labelDefaultBg = m_labelCtrl->GetBackgroundColour();
@@ -188,7 +188,7 @@ void OutcomeEditorPopup::BuildControls()
   labelSizer->Add(m_labelCtrl, 1, wxEXPAND);
 
   auto *headerBorderSizer = new wxBoxSizer(wxVERTICAL);
-  headerBorderSizer->Add(labelSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+  headerBorderSizer->Add(labelSizer, 0, wxEXPAND | wxALL, FromDIP(c_spaceMargin));
   m_headerPanel->SetSizer(headerBorderSizer);
   outerSizer->Add(m_headerPanel, 0, wxEXPAND);
 
@@ -203,7 +203,7 @@ void OutcomeEditorPopup::BuildControls()
   // EditMoveDialog's player combo box and AppendMovePopup's header sentence use, ahead of the
   // name -- rather than tinting the name text itself, which is a different window's convention
   // (NodeInfoPopup's read-only hover tooltip), not a data-entry dialog's.
-  auto *gridSizer = new wxFlexGridSizer(3, FromDIP(5), FromDIP(10));
+  auto *gridSizer = new wxFlexGridSizer(3, FromDIP(c_spaceTight), FromDIP(c_spaceRelated));
   gridSizer->AddGrowableCol(2, 1);
 
   const Game game = m_doc->GetGame();
@@ -213,7 +213,7 @@ void OutcomeEditorPopup::BuildControls()
 
     Row row;
     row.swatch = new wxStaticBitmap(m_gridScroller, wxID_ANY,
-                                    MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(gamePlayer)));
+                                    MakeColorSwatch(m_doc->GetPlayerColor(gamePlayer)));
     gridSizer->Add(row.swatch, 0, wxALIGN_CENTER_VERTICAL);
 
     row.nameText =
@@ -250,7 +250,7 @@ void OutcomeEditorPopup::BuildControls()
   m_gridScroller->SetMinSize(wxSize(-1, std::min(naturalHeight, FromDIP(kMaxGridHeightDIP))));
   m_gridScroller->FitInside();
 
-  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(12));
+  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(c_spaceMargin));
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
@@ -261,13 +261,13 @@ void OutcomeEditorPopup::BuildControls()
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
   hintText->SetFont(hintFont);
   hintText->Wrap(FromDIP(260));
-  outerSizer->Add(hintText, 0, wxALL, FromDIP(10));
+  outerSizer->Add(hintText, 0, wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(c_spaceMargin));
 
   m_errorText = new wxStaticText(m_contentPanel, wxID_STATIC, wxEmptyString);
-  m_errorText->SetForegroundColour(*wxRED);
+  m_errorText->SetForegroundColour(ErrorTextColour());
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
-  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(c_spaceMargin));
 
   m_contentPanel->SetSizer(outerSizer);
 
@@ -284,9 +284,9 @@ void OutcomeEditorPopup::LoadValues()
   const GameOutcome outcome = m_node ? m_node->GetOutcome() : nullptr;
 
   if (!outcome || outcome->IsNull()) {
-    // GameRep::MakeOutcome() (called from Commit(), via DoSetOutcomeData) rejects an empty
-    // or duplicate label outright -- pre-filling a fresh, unique one here means the dialog never
-    // opens already showing that as an error the user has to notice and fix before they can
+    // GameRep::MakeOutcome() (called from Commit(), via the SetNodeOutcomeData edit) rejects an
+    // empty or duplicate label outright -- pre-filling a fresh, unique one here means the dialog
+    // never opens already showing that as an error the user has to notice and fix before they can
     // accept anything else.
     m_labelCtrl->ChangeValue(wxString::FromUTF8(GenerateOutcomeLabel(m_doc->GetGame())));
     for (auto &row : m_payoffRows) {
@@ -447,7 +447,7 @@ wxString OutcomeEditorPopup::ValidateLabel()
     }
   }
 
-  m_labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_labelDefaultBg);
+  m_labelCtrl->SetBackgroundColour(invalid ? InvalidFieldBackground() : m_labelDefaultBg);
   m_labelCtrl->Refresh();
 
   if (!invalid) {
@@ -478,7 +478,7 @@ wxString OutcomeEditorPopup::ValidatePayoffs()
       invalid = true;
     }
 
-    ctrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultPayoffBg);
+    ctrl->SetBackgroundColour(invalid ? InvalidFieldBackground() : m_defaultPayoffBg);
     ctrl->Refresh();
 
     if (invalid && message.empty()) {
@@ -530,7 +530,7 @@ bool OutcomeEditorPopup::Commit()
     wxBell();
     // UpdateValidation() just recoloured every field; m_labelCtrl's own background reflects
     // whether it was the invalid one, without re-running ValidateLabel() a second time here.
-    wxTextCtrl *ctrl = (m_labelCtrl->GetBackgroundColour() == kInvalidLabelBg)
+    wxTextCtrl *ctrl = (m_labelCtrl->GetBackgroundColour() == InvalidFieldBackground())
                            ? m_labelCtrl
                            : (m_payoffRows.empty() ? nullptr : m_payoffRows.front().payoffCtrl);
     RestoreAfterFailedCommit(ctrl);
@@ -538,14 +538,16 @@ bool OutcomeEditorPopup::Commit()
     return false;
   }
 
-  std::vector<wxString> payoffs;
-  payoffs.reserve(m_payoffRows.size());
-  for (const auto &row : m_payoffRows) {
-    payoffs.push_back(row.payoffCtrl->GetValue());
-  }
-
   try {
-    m_doc->DoSetOutcomeData(m_node, m_labelCtrl->GetNormalizedValue(), payoffs);
+    std::vector<Number> payoffs;
+    payoffs.reserve(m_payoffRows.size());
+    for (const auto &row : m_payoffRows) {
+      payoffs.emplace_back(row.payoffCtrl->GetValue().ToStdString(wxConvUTF8));
+    }
+    m_doc->Apply(
+        SetNodeOutcomeData{.node = m_node,
+                           .label = m_labelCtrl->GetNormalizedValue().ToStdString(wxConvUTF8),
+                           .payoffs = payoffs});
   }
   catch (const std::exception &ex) {
     wxTextCtrl *ctrl = m_payoffRows.empty() ? nullptr : m_payoffRows.front().payoffCtrl;
@@ -735,7 +737,8 @@ private:
   bool m_isChance{false};
   // True for an insert (m_node and everything below it becomes the new move's first action),
   // false for an append (m_node is an empty terminal node). Set by Begin(); read by Commit()
-  // to decide between DoInsertMove/DoAppendMove, and by RebuildGrid() for the header sentence.
+  // to decide between the InsertMove/AppendMove edits, and by RebuildGrid() for the header
+  // sentence.
   bool m_isInsert{false};
 
   wxPanel *m_contentPanel{nullptr};
@@ -798,23 +801,24 @@ void AppendMovePopup::BuildControls()
   // Fit() below sizes the whole dialog to comfortably fit the sentence on one line every time.
   auto *sentenceSizer = new wxBoxSizer(wxHORIZONTAL);
   m_verbText = new wxStaticText(m_headerPanel, wxID_ANY, _("Append move for"));
-  sentenceSizer->Add(m_verbText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+  sentenceSizer->Add(m_verbText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceTight));
 
   m_playerSwatch = new wxStaticBitmap(m_headerPanel, wxID_ANY, wxNullBitmap);
-  sentenceSizer->Add(m_playerSwatch, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+  sentenceSizer->Add(m_playerSwatch, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceTight));
 
   m_playerNameText = new wxStaticText(m_headerPanel, wxID_ANY, wxEmptyString);
   wxFont nameFont = m_playerNameText->GetFont();
   nameFont.SetWeight(wxFONTWEIGHT_BOLD);
   m_playerNameText->SetFont(nameFont);
-  sentenceSizer->Add(m_playerNameText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+  sentenceSizer->Add(m_playerNameText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT,
+                     FromDIP(c_spaceTight));
 
   sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("with")), 0,
-                     wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+                     wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceTight));
 
   m_countCtrl = new wxSpinCtrl(m_headerPanel, wxID_ANY, wxT("2"), wxDefaultPosition,
                                wxSize(FromDIP(55), -1), wxSP_ARROW_KEYS, 1, 10000, 2);
-  sentenceSizer->Add(m_countCtrl, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(5));
+  sentenceSizer->Add(m_countCtrl, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceTight));
 
   sentenceSizer->Add(new wxStaticText(m_headerPanel, wxID_ANY, _("actions")), 0,
                      wxALIGN_CENTER_VERTICAL);
@@ -827,7 +831,7 @@ void AppendMovePopup::BuildControls()
   });
 
   auto *headerBorderSizer = new wxBoxSizer(wxVERTICAL);
-  headerBorderSizer->Add(sentenceSizer, 0, wxEXPAND | wxALL, FromDIP(12));
+  headerBorderSizer->Add(sentenceSizer, 0, wxEXPAND | wxALL, FromDIP(c_spaceMargin));
   m_headerPanel->SetSizer(headerBorderSizer);
   outerSizer->Add(m_headerPanel, 0, wxEXPAND);
 
@@ -839,7 +843,7 @@ void AppendMovePopup::BuildControls()
   m_gridScroller->SetScrollRate(0, FromDIP(10));
   m_gridContainer = new wxBoxSizer(wxVERTICAL);
   m_gridScroller->SetSizer(m_gridContainer);
-  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(12));
+  outerSizer->Add(m_gridScroller, 1, wxEXPAND | wxALL, FromDIP(c_spaceMargin));
 
   outerSizer->Add(new wxStaticLine(m_contentPanel), 0, wxEXPAND);
 
@@ -851,13 +855,13 @@ void AppendMovePopup::BuildControls()
   wxFont hintFont = m_hintText->GetFont();
   hintFont.SetPointSize(hintFont.GetPointSize() - 1);
   m_hintText->SetFont(hintFont);
-  outerSizer->Add(m_hintText, 0, wxALL, FromDIP(10));
+  outerSizer->Add(m_hintText, 0, wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(c_spaceMargin));
 
   m_errorText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
-  m_errorText->SetForegroundColour(*wxRED);
+  m_errorText->SetForegroundColour(ErrorTextColour());
   m_errorText->Wrap(FromDIP(260));
   m_errorText->Hide();
-  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+  outerSizer->Add(m_errorText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(c_spaceMargin));
 
   m_contentPanel->SetSizer(outerSizer);
 
@@ -871,7 +875,8 @@ void AppendMovePopup::RebuildGrid()
   m_gridContainer->Clear(true); // destroys the previous row controls
 
   const int numColumns = m_isChance ? 2 : 1;
-  auto *gridSizer = new wxFlexGridSizer(numColumns, FromDIP(5), FromDIP(10));
+  auto *gridSizer =
+      new wxFlexGridSizer(numColumns, FromDIP(c_spaceTight), FromDIP(c_spaceRelated));
   gridSizer->AddGrowableCol(0, 1);
 
   gridSizer->Add(new wxStaticText(m_gridScroller, wxID_STATIC, _("Label")), 0,
@@ -1086,7 +1091,7 @@ void AppendMovePopup::Begin(const GameNode &p_node, const GamePlayer &p_player, 
                        : wxString::Format(_("Player %d"), p_player->GetNumber());
   }
   m_playerNameText->SetLabel(label);
-  m_playerSwatch->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(p_player)));
+  m_playerSwatch->SetBitmap(MakeColorSwatch(m_doc->GetPlayerColor(p_player)));
   m_headerPanel->Layout();
 
   m_rows.clear();
@@ -1177,7 +1182,8 @@ wxString AppendMovePopup::ValidateLabels()
       }
     }
 
-    m_rows[i].labelCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultLabelBg);
+    m_rows[i].labelCtrl->SetBackgroundColour(invalid ? InvalidFieldBackground()
+                                                     : m_defaultLabelBg);
     m_rows[i].labelCtrl->Refresh();
 
     if (invalid && message.empty()) {
@@ -1204,7 +1210,7 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
       invalid = true;
       allParsed = false;
     }
-    row.probCtrl->SetBackgroundColour(invalid ? kInvalidLabelBg : m_defaultLabelBg);
+    row.probCtrl->SetBackgroundColour(invalid ? InvalidFieldBackground() : m_defaultLabelBg);
     row.probCtrl->Refresh();
     if (invalid && message.empty()) {
       message = _("Probabilities must be valid numbers.");
@@ -1221,7 +1227,7 @@ wxString AppendMovePopup::ValidateProbabilities(std::vector<Number> &p_probs)
   }
   catch (const std::exception &) {
     for (const auto &row : m_rows) {
-      row.probCtrl->SetBackgroundColour(kInvalidLabelBg);
+      row.probCtrl->SetBackgroundColour(InvalidFieldBackground());
       row.probCtrl->Refresh();
     }
     p_probs.clear();
@@ -1286,7 +1292,7 @@ bool AppendMovePopup::Commit()
   if (m_isChance) {
     // UpdateValidation() above already ran this and found nothing wrong, but re-run it rather
     // than trust that nothing changed in between -- this is also what actually produces the
-    // parsed probs DoAppendMove needs, which UpdateValidation() itself discards.
+    // parsed probs the edit needs, which UpdateValidation() itself discards.
     const wxString probError = ValidateProbabilities(probs);
     if (!probError.empty()) {
       wxBell();
@@ -1298,10 +1304,12 @@ bool AppendMovePopup::Commit()
 
   try {
     if (m_isInsert) {
-      m_doc->DoInsertMove(m_node, m_player, labels, probs);
+      m_doc->Apply(
+          InsertMove{.node = m_node, .player = m_player, .labels = labels, .probs = probs});
     }
     else {
-      m_doc->DoAppendMove(m_node, m_player, labels, probs);
+      m_doc->Apply(
+          AppendMove{.node = m_node, .player = m_player, .labels = labels, .probs = probs});
     }
   }
   catch (const std::exception &ex) {
@@ -1442,7 +1450,7 @@ void NodeInfoPopup::BuildControls()
 
   auto *outerSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *playerGridSizer = new wxFlexGridSizer(2, FromDIP(4), FromDIP(12));
+  auto *playerGridSizer = new wxFlexGridSizer(2, FromDIP(c_spaceTight), FromDIP(c_spaceMargin));
 
   const Game game = m_doc->GetGame();
   for (size_t pl = 1; pl <= game->NumPlayers(); pl++) {
@@ -1461,7 +1469,7 @@ void NodeInfoPopup::BuildControls()
     m_playerRows.push_back(row);
   }
 
-  outerSizer->Add(playerGridSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+  outerSizer->Add(playerGridSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(c_spaceMargin));
 
   m_moveSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -1469,18 +1477,18 @@ void NodeInfoPopup::BuildControls()
   wxFont headingFont = m_moveHeading->GetFont();
   headingFont.SetWeight(wxFONTWEIGHT_BOLD);
   m_moveHeading->SetFont(headingFont);
-  m_moveSizer->Add(m_moveHeading, 0, wxTOP, FromDIP(8));
+  m_moveSizer->Add(m_moveHeading, 0, wxTOP, FromDIP(c_spaceRelated));
 
   m_nodeProbText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
-  m_moveSizer->Add(m_nodeProbText, 0, wxTOP, FromDIP(2));
+  m_moveSizer->Add(m_nodeProbText, 0, wxTOP, FromDIP(c_spaceTight));
   m_infosetProbText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
-  m_moveSizer->Add(m_infosetProbText, 0, wxTOP, FromDIP(2));
+  m_moveSizer->Add(m_infosetProbText, 0, wxTOP, FromDIP(c_spaceTight));
   m_beliefText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
-  m_moveSizer->Add(m_beliefText, 0, wxTOP, FromDIP(2));
+  m_moveSizer->Add(m_beliefText, 0, wxTOP, FromDIP(c_spaceTight));
   m_infosetValueText = new wxStaticText(m_contentPanel, wxID_ANY, wxEmptyString);
-  m_moveSizer->Add(m_infosetValueText, 0, wxTOP, FromDIP(2));
+  m_moveSizer->Add(m_infosetValueText, 0, wxTOP, FromDIP(c_spaceTight));
 
-  outerSizer->Add(m_moveSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
+  outerSizer->Add(m_moveSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(c_spaceMargin));
 
   m_contentPanel->SetSizer(outerSizer);
   popupSizer->Add(m_contentPanel, 1, wxEXPAND | wxALL, FromDIP(1));
@@ -1512,7 +1520,7 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
 
   for (size_t pl = 1; pl <= m_playerRows.size(); pl++) {
     const GamePlayer player = game->GetPlayer(pl);
-    const wxColour color = m_doc->GetStyle().GetPlayerColor(player);
+    const wxColour color = m_doc->GetPlayerColor(player);
     const PlayerRow &row = m_playerRows[pl - 1];
 
     row.nameText->SetForegroundColour(color);
@@ -1524,7 +1532,7 @@ void NodeInfoPopup::ShowForNode(const GameNode &p_node)
   const bool showMove = !p_node->IsTerminal();
   if (showMove) {
     const GamePlayer mover = p_node->GetPlayer();
-    const wxColour moverColor = m_doc->GetStyle().GetPlayerColor(mover);
+    const wxColour moverColor = m_doc->GetPlayerColor(mover);
 
     m_moveHeading->SetForegroundColour(moverColor);
     m_moveHeading->SetLabel(wxString::FromUTF8(mover->GetLabel()) + _(" to move"));

@@ -34,7 +34,7 @@
 #include "games.h"
 
 #include "app.h"
-#include "dlexcept.h"
+#include "dialogstyle.h"
 #include "gameframe.h"
 #include "welcome.h"
 
@@ -123,64 +123,6 @@ void Application::DismissSplash()
   m_splash = nullptr;
 }
 
-namespace {
-
-/// A simple single-button error notice, styled like GameFrame's CloseWarningDialog:
-/// an icon beside a bold headline, with supporting detail underneath.
-class FileErrorDialog final : public wxDialog {
-public:
-  FileErrorDialog(wxWindow *parent, const wxString &title, const wxString &headline,
-                  const wxString &detail)
-    : wxDialog(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
-               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
-  {
-    auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto *contentSizer = new wxBoxSizer(wxHORIZONTAL);
-    contentSizer->Add(new wxStaticBitmap(this, wxID_ANY,
-                                         wxArtProvider::GetBitmap(wxART_ERROR, wxART_MESSAGE_BOX,
-                                                                  wxSize(32, 32))),
-                      0, wxALIGN_TOP | wxRIGHT, FromDIP(16));
-
-    auto *textSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto *headlineText = new wxStaticText(this, wxID_ANY, headline);
-    auto font = headlineText->GetFont();
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    headlineText->SetFont(font);
-    headlineText->Wrap(FromDIP(400));
-
-    auto *detailText = new wxStaticText(this, wxID_ANY, detail);
-    detailText->Wrap(FromDIP(400));
-
-    textSizer->Add(headlineText, 0, wxBOTTOM, FromDIP(8));
-    textSizer->Add(detailText, 0);
-
-    contentSizer->Add(textSizer, 1, wxEXPAND);
-
-    topSizer->Add(contentSizer, 1, wxEXPAND | wxALL, FromDIP(20));
-
-    auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-    buttonSizer->AddStretchSpacer();
-    buttonSizer->Add(okButton, 0);
-
-    topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(20));
-
-    SetSizerAndFit(topSizer);
-    SetMinSize(wxSize(FromDIP(420), -1));
-
-    SetEscapeId(wxID_OK);
-    SetAffirmativeId(wxID_OK);
-    okButton->SetDefault();
-    okButton->SetFocus();
-
-    CentreOnParent();
-  }
-};
-
-} // namespace
-
 AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
 {
   const auto [result, doc] = GameDocument::Load(p_filename);
@@ -188,30 +130,26 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
   switch (result) {
   case GameDocument::LoadResult::OpenFailed:
     if (!wxFileName::FileExists(p_filename) && ForgetRecentFile(p_filename)) {
-      FileErrorDialog(p_parent, _("File not found"), _("This file no longer exists."),
-                      p_filename + "\n\n" +
-                          _("It has been removed from the list of recent games."))
-          .ShowModal();
+      ShowOperationError(p_parent, _("File not found"), _("This file no longer exists."),
+                         p_filename + "\n\n" +
+                             _("It has been removed from the list of recent games."));
     }
     else {
-      FileErrorDialog(p_parent, _("Unable to open file"),
-                      _("Gambit could not open this file for reading."), p_filename)
-          .ShowModal();
+      ShowOperationError(p_parent, _("Unable to open file"),
+                         _("Gambit could not open this file for reading."), p_filename);
     }
     return AppLoadResult::OpenFailed;
 
   case GameDocument::LoadResult::ParseFailed:
-    FileErrorDialog(p_parent, _("Unable to read file"),
-                    _("File is not in a format Gambit recognizes."), p_filename)
-        .ShowModal();
+    ShowOperationError(p_parent, _("Unable to read file"),
+                       _("File is not in a format Gambit recognizes."), p_filename);
     return AppLoadResult::ParseFailed;
 
   case GameDocument::LoadResult::UnsupportedRepresentation:
-    FileErrorDialog(p_parent, _("Unsupported game representation"),
-                    _("Action graph games are not currently supported by the "
-                      "graphical interface."),
-                    p_filename)
-        .ShowModal();
+    ShowOperationError(p_parent, _("Unsupported game representation"),
+                       _("Action graph games are not currently supported by the "
+                         "graphical interface."),
+                       p_filename);
     return AppLoadResult::UnsupportedRepresentation;
 
   case GameDocument::LoadResult::Success:
@@ -226,10 +164,9 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
 
 bool Application::ChooseAndLoadFile(wxWindow *p_parent)
 {
-  wxFileDialog dialog(
-      p_parent, _("Choose file to open"), GetCurrentDir(), _T(""),
-      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
+  wxFileDialog dialog(p_parent, _("Choose file to open"), GetCurrentDir(), _T(""),
+                      _("Gambit workspaces (*.gbt)|*.gbt|Gambit extensive games (*.efg)|*.efg|"
+                        "Gambit strategic games (*.nfg)|*.nfg|All files (*.*)|*.*"));
 
   if (dialog.ShowModal() != wxID_OK) {
     return false;
@@ -265,7 +202,7 @@ std::string DescribeCurrentException()
 }
 
 // How long after a report is dismissed that the same message is treated as a repeat of it.
-constexpr long kRepeatSuppressionMs = 2000;
+constexpr long c_repeatSuppressionMs = 2000;
 } // namespace
 
 // Reached when an exception escapes an event handler. The wx default is a bare Abort/Retry/Ignore
@@ -283,16 +220,14 @@ bool Application::OnExceptionInMainLoop()
 
   if (m_reportingException ||
       (message == m_lastExceptionMessage &&
-       (wxGetLocalTimeMillis() - m_lastExceptionReportEnd).ToLong() < kRepeatSuppressionMs)) {
+       (wxGetLocalTimeMillis() - m_lastExceptionReportEnd).ToLong() < c_repeatSuppressionMs)) {
     return true;
   }
 
   m_reportingException = true;
   {
     wxON_BLOCK_EXIT_SET(m_reportingException, false);
-    ExceptionDialog dialog(GetTopWindow(), message);
-    dialog.SetExtendedMessage(_("The operation was abandoned. Gambit will continue running."));
-    dialog.ShowModal();
+    ShowInternalError(GetTopWindow(), message);
   }
   m_lastExceptionMessage = message;
   m_lastExceptionReportEnd = wxGetLocalTimeMillis();

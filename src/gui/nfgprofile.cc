@@ -134,7 +134,7 @@ static wxColour GetPlayerColor(const std::shared_ptr<GameDocument> &p_doc, int p
   for (const auto &player : p_doc->GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(player);
+        return p_doc->GetPlayerColor(player);
       }
     }
   }
@@ -213,8 +213,20 @@ void MixedStrategyProfileList::UpdateHighlights()
   m_labels->SetSelectedRow(m_sortOrder.GetRow(m_doc->GetWorkspace().GetCurrentProfile()));
 }
 
+bool MixedStrategyProfileList::Show(bool p_show)
+{
+  const bool changed = wxGrid::Show(p_show);
+  if (changed && p_show) {
+    OnUpdate();
+  }
+  return changed;
+}
+
 void MixedStrategyProfileList::OnUpdate()
 {
+  if (!IsShown()) {
+    return;
+  }
   if (m_doc->GetWorkspace().NumProfileLists() == 0) {
     if (GetNumberRows() > 0) {
       DeleteRows(0, GetNumberRows());

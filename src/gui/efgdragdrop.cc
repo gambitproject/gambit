@@ -30,7 +30,7 @@
 #include "games/gametree.h"
 
 #include "efgdisplay.h"
-#include "dlexcept.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 
@@ -134,7 +134,7 @@ bool TreeDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_text
     }
   }
   catch (std::exception &ex) {
-    ExceptionDialog(m_owner, ex.what()).ShowModal();
+    ShowInternalError(m_owner, ex.what());
     return false;
   }
 }
@@ -274,25 +274,26 @@ bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &
 
   try {
     if (selection == copyTreeId) {
-      m_doc->DoCopyTree(p_targetNode, p_sourceNode);
+      m_doc->Apply(CopyTree{.target = p_targetNode, .source = p_sourceNode});
       return true;
     }
     if (selection == moveTreeId) {
-      m_doc->DoMoveTree(p_targetNode, p_sourceNode);
+      m_doc->Apply(MoveTree{.target = p_targetNode, .source = p_sourceNode});
       return true;
     }
     if (selection == infosetId) {
       if (!p_targetNode->IsTerminal()) {
-        m_doc->DoSetInfoset(p_targetNode, p_sourceNode->GetInfoset());
+        m_doc->Apply(JoinInfoset{.node = p_targetNode, .infoset = p_sourceNode->GetInfoset()});
       }
       else {
-        m_doc->DoAppendMove(p_targetNode, p_sourceNode->GetInfoset());
+        m_doc->Apply(
+            AppendMoveInInfoset{.node = p_targetNode, .infoset = p_sourceNode->GetInfoset()});
       }
       return true;
     }
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 
   return false;
@@ -321,17 +322,16 @@ bool EfgDisplay::ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNod
 
   try {
     if (selection == useSameOutcomeId) {
-      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      m_doc->Apply(SetNodeOutcome{.node = p_targetNode, .outcome = p_sourceNode->GetOutcome()});
       return true;
     }
     if (selection == moveOutcomeId) {
-      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
-      m_doc->DoSetOutcome(p_sourceNode, nullptr);
+      m_doc->Apply(MoveOutcome{.target = p_targetNode, .source = p_sourceNode});
       return true;
     }
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 
   return false;

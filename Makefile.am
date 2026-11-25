@@ -376,7 +376,7 @@ AM_CXXFLAGS = ${LLVM_CXXFLAGS} $(GAMBIT_WARNING_FLAGS) $(WERROR_FLAGS)
 ## recompiling the same core/games/solver sources from scratch.
 
 noinst_LIBRARIES = libcore.a libgames.a libbimatrix.a libgtracer.a \
-	libliap.a libhomotopy.a libsimpdiv.a libenumpoly.a
+	libliap.a libhomotopy.a libsimpdiv.a libenumpoly.a libguiworkspace.a
 
 libcore_a_SOURCES = ${core_SOURCES}
 libgames_a_SOURCES = ${game_SOURCES}
@@ -387,15 +387,28 @@ libhomotopy_a_SOURCES = ${homotopy_SOURCES}
 libsimpdiv_a_SOURCES = ${simpdiv_SOURCES}
 libenumpoly_a_SOURCES = ${enumpoly_SOURCES}
 
+# The GUI's workspace: built without the wxWidgets flags, so it cannot depend on wxWidgets
+libguiworkspace_a_SOURCES = \
+	src/gui/workspace/analysis.cc \
+	src/gui/workspace/analysis.h \
+	src/gui/workspace/gameedit.cc \
+	src/gui/workspace/gameedit.h \
+	src/gui/workspace/gameworkspace.cc \
+	src/gui/workspace/gameworkspace.h \
+	src/gui/workspace/nashspec.cc \
+	src/gui/workspace/nashspec.h \
+	src/gui/workspace/treestyle.cc \
+	src/gui/workspace/treestyle.h
+
 gambit_SOURCES = \
-	src/gui/analysis.cc \
-	src/gui/analysis.h \
 	src/gui/app.cc \
 	src/gui/app.h \
 	src/gui/editlabel.cc \
 	src/gui/editlabel.h \
 	src/gui/edittext.cc \
 	src/gui/edittext.h \
+	src/gui/dialogstyle.cc \
+	src/gui/dialogstyle.h \
 	src/gui/dlabout.cc \
 	src/gui/dlabout.h \
 	src/gui/dleditmove.cc \
@@ -408,15 +421,12 @@ gambit_SOURCES = \
 	src/gui/dlefglayout.h \
 	src/gui/dlefglegend.cc \
 	src/gui/dlefglegend.h \
-	src/gui/dlefgreveal.cc \
-	src/gui/dlexcept.h \
+	src/gui/dlefgrefine.cc \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
 	src/gui/dlnash.cc \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
-	src/gui/nashspec.cc \
-	src/gui/nashspec.h \
 	src/gui/nashvariants.cc \
 	src/gui/nashvariants.h \
 	src/gui/dlnewtable.cc \
@@ -465,7 +475,7 @@ gambit_SOURCES = \
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
 gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS)
 
-gambit_LDADD_LIBS = libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
+gambit_LDADD_LIBS = libguiworkspace.a libbimatrix.a libliap.a libhomotopy.a libgtracer.a \
 	libsimpdiv.a libenumpoly.a libgames.a libcore.a
 
 gambit_DEPENDENCIES = $(RC_OBJECT_PATH) $(gambit_LDADD_LIBS)
@@ -491,7 +501,6 @@ osx-bundle:
 	cp ${top_srcdir}/build_support/osx/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
-	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
 
 osx-dmg:  osx-bundle
 	${top_srcdir}/build_support/osx/make-dmg.sh Gambit.app Gambit.dmg

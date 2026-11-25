@@ -26,20 +26,33 @@
 #endif // WX_PRECOMP
 
 #include "dlefglegend.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 //==========================================================================
 //                 class LegendDialog: Implementation
 //==========================================================================
 
-LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options)
+LegendDialog::LegendDialog(wxWindow *p_parent, const TreeStyle &p_options)
   : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-  const int S = FromDIP(5);
+  const int gap = FromDIP(c_spaceRelated);
 
-  auto *nodeGroup =
-      new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")), wxVERTICAL);
+  // A sentence per row: "Display <choice> above each node"
+  const auto addRow = [this](wxFlexGridSizer *p_grid, wxChoice *p_choice,
+                             const wxString &p_where) {
+    p_grid->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALIGN_CENTER_VERTICAL);
+    p_grid->Add(p_choice, 1, wxEXPAND);
+    p_grid->Add(new wxStaticText(this, wxID_STATIC, p_where), 0, wxALIGN_CENTER_VERTICAL);
+  };
+  const auto newGroup = [this, gap](const wxString &p_title, wxFlexGridSizer *&p_grid) {
+    auto *group = new wxStaticBoxSizer(wxVERTICAL, this, p_title);
+    p_grid = new wxFlexGridSizer(3, gap, gap);
+    p_grid->AddGrowableCol(1, 1);
+    group->Add(p_grid, 0, wxEXPAND | wxALL, gap);
+    return group;
+  };
 
   const wxString nodeLabelList[] = {_("no label"),
                                     _("the node's label"),
@@ -50,67 +63,34 @@ LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options
                                     _("the belief probability"),
                                     _("the payoff of reaching the node")};
 
-  auto *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
-  nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
-                      S);
+  wxFlexGridSizer *nodeGrid;
+  auto *nodeGroup = newGroup(_("Node labeling"), nodeGrid);
   m_nodeAbove = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
   m_nodeAbove->SetSelection(p_options.GetNodeAboveLabel());
-  nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, S);
-  nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each node")), 0,
-                      wxALL | wxALIGN_CENTER, S);
-  nodeGroup->Add(nodeAboveSizer, 0, wxALL | wxEXPAND, S);
-
-  auto *nodeBelowSizer = new wxBoxSizer(wxHORIZONTAL);
-  nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
-                      S);
+  addRow(nodeGrid, m_nodeAbove, _("above each node"));
   m_nodeBelow = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
   m_nodeBelow->SetSelection(p_options.GetNodeBelowLabel());
-  nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, S);
-  nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each node")), 0,
-                      wxALL | wxALIGN_CENTER, S);
-  nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, S);
-
-  auto *actionGroup =
-      new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")), wxVERTICAL);
+  addRow(nodeGrid, m_nodeBelow, _("below each node"));
 
   const wxString actionLabelList[] = {_("no label"), _("the name of the action"),
                                       _("the probability the action is played"),
                                       _("the value of the action")};
 
-  auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
-  actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
-                        wxALL | wxALIGN_CENTER, S);
+  wxFlexGridSizer *actionGrid;
+  auto *actionGroup = newGroup(_("Action labeling"), actionGrid);
   m_actionAbove =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
   m_actionAbove->SetSelection(p_options.GetBranchAboveLabel());
-  actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, S);
-  actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each action")), 0,
-                        wxALL | wxALIGN_CENTER, S);
-  actionGroup->Add(actionAboveSizer, 0, wxALL | wxEXPAND, S);
-
-  auto *actionBelowSizer = new wxBoxSizer(wxHORIZONTAL);
-  actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
-                        wxALL | wxALIGN_CENTER, S);
+  addRow(actionGrid, m_actionAbove, _("above each action"));
   m_actionBelow =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
   m_actionBelow->SetSelection(p_options.GetBranchBelowLabel());
-  actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, S);
-  actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each action")), 0,
-                        wxALL | wxALIGN_CENTER, S);
-  actionGroup->Add(actionBelowSizer, 0, wxALL | wxEXPAND, S);
+  addRow(actionGrid, m_actionBelow, _("below each action"));
 
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(nodeGroup, 0, wxEXPAND | wxALL, S);
-  topSizer->Add(actionGroup, 0, wxEXPAND | wxALL, S);
+  auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+  contentSizer->Add(nodeGroup, 0, wxEXPAND | wxBOTTOM, FromDIP(c_spaceMargin));
+  contentSizer->Add(actionGroup, 0, wxEXPAND);
 
-  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
-    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
-  }
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
-  CenterOnParent();
+  SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
 }
 } // namespace Gambit::GUI

@@ -121,7 +121,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   void OnEditDeleteTree(wxCommandEvent &);
   void OnEditDeleteParent(wxCommandEvent &);
   void OnEditRemoveOutcome(wxCommandEvent &);
-  void OnEditReveal(wxCommandEvent &);
+  void OnEditRefineInfosets(wxCommandEvent &);
   void OnEditNode(wxCommandEvent &);
   void OnEditMove(wxCommandEvent &);
   //@}

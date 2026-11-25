@@ -9,6 +9,8 @@
 #include <wx/stattext.h>
 #include <wx/button.h>
 
+#include "dialogstyle.h"
+
 namespace Gambit::GUI {
 
 namespace {
@@ -17,14 +19,12 @@ constexpr int ID_FIRST_STRATEGY_COUNT = wxID_HIGHEST + 500;
 } // namespace
 
 NewTableDialog::NewTableDialog(wxWindow *parent)
-  : wxDialog(parent, wxID_ANY, wxT("New strategic-form game"), wxDefaultPosition, wxDefaultSize,
+  : wxDialog(parent, wxID_ANY, _("New strategic-form game"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   CreateControls();
   LayoutControls();
   RebuildStrategyControls();
-  Fit();
-  CentreOnParent();
 }
 
 std::vector<int> NewTableDialog::GetDimensions() const
@@ -41,7 +41,7 @@ std::vector<int> NewTableDialog::GetDimensions() const
 
 void NewTableDialog::CreateControls()
 {
-  auto *playerCountLabel = new wxStaticText(this, wxID_ANY, wxT("Number of players:"));
+  auto *playerCountLabel = new wxStaticText(this, wxID_ANY, _("Number of players:"));
   m_playerCountCtrl = new wxSpinCtrl(this, ID_PLAYER_COUNT);
   m_playerCountCtrl->SetRange(2, 16);
   m_playerCountCtrl->SetValue(2);
@@ -58,23 +58,19 @@ void NewTableDialog::LayoutControls()
 {
   m_topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *formSizer = new wxFlexGridSizer(2, 2, FromDIP(8), FromDIP(12));
-  formSizer->AddGrowableCol(1, 1);
+  auto *formSizer = NewFormSizer(this);
 
   auto *playerCountLabel = FindWindowByName("playerCountLabel", this);
   formSizer->Add(playerCountLabel, 0, wxALIGN_CENTER_VERTICAL);
   formSizer->Add(m_playerCountCtrl, 0);
 
-  auto *strategyBox = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Strategies per player"));
-  strategyBox->Add(m_strategyRowsSizer, 0, wxEXPAND | wxALL, FromDIP(8));
+  auto *strategyBox = new wxStaticBoxSizer(wxVERTICAL, this, _("Strategies per player"));
+  strategyBox->Add(m_strategyRowsSizer, 0, wxEXPAND | wxALL, FromDIP(c_spaceRelated));
 
-  auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+  m_topSizer->Add(formSizer, 0, wxEXPAND | wxBOTTOM, FromDIP(c_spaceMargin));
+  m_topSizer->Add(strategyBox, 0, wxEXPAND);
 
-  m_topSizer->Add(formSizer, 0, wxEXPAND | wxALL, FromDIP(12));
-  m_topSizer->Add(strategyBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
-  m_topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(12));
-
-  SetSizer(m_topSizer);
+  SetDialogLayout(this, m_topSizer, wxOK | wxCANCEL);
 }
 
 void NewTableDialog::RebuildStrategyControls()
@@ -93,11 +89,10 @@ void NewTableDialog::RebuildStrategyControls()
 
   const int playerCount = m_playerCountCtrl->GetValue();
 
-  auto *grid = new wxFlexGridSizer(playerCount, 2, FromDIP(8), FromDIP(12));
-  grid->AddGrowableCol(1, 1);
+  auto *grid = NewFormSizer(this);
 
   for (int i = 0; i < playerCount; ++i) {
-    auto *label = new wxStaticText(this, wxID_ANY, wxString::Format(wxT("Player %d:"), i + 1));
+    auto *label = new wxStaticText(this, wxID_ANY, wxString::Format(_("Player %d:"), i + 1));
     auto *ctrl = new wxSpinCtrl(this, ID_FIRST_STRATEGY_COUNT + i);
 
     ctrl->SetRange(1, 99);
@@ -111,8 +106,7 @@ void NewTableDialog::RebuildStrategyControls()
   }
 
   m_strategyRowsSizer->Add(grid, 0, wxEXPAND);
-  Layout();
-  Fit();
+  GetSizer()->SetSizeHints(this);
 }
 
 void NewTableDialog::OnPlayerCountChanged(wxSpinEvent &p_event)

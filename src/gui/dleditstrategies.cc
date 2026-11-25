@@ -31,6 +31,7 @@
 
 #include "gambit.h"
 #include "dleditstrategies.h"
+#include "dialogstyle.h"
 #include "editlabel.h"
 
 namespace Gambit::GUI {
@@ -126,7 +127,7 @@ void StrategyPanel::Rebuild()
                            // m_list, which they don't own
   m_labelCtrls.clear();
 
-  auto *gridSizer = new wxFlexGridSizer(3, 5, 10);
+  auto *gridSizer = new wxFlexGridSizer(3, FromDIP(c_spaceTight), FromDIP(c_spaceRelated));
   gridSizer->AddGrowableCol(1, 1);
 
   gridSizer->AddSpacer(1);
@@ -134,7 +135,8 @@ void StrategyPanel::Rebuild()
   gridSizer->AddSpacer(1);
 
   const size_t activeCount = m_list.ActiveCount();
-  const wxSize buttonSize(FromDIP(28), -1);
+  const wxSize buttonSize(FromDIP(c_rowButtonWidth), -1);
+  const int buttonGap = FromDIP(c_spaceTight);
 
   for (size_t i = 0; i < m_list.Size(); i++) {
     const auto &row = m_list.GetRow(i);
@@ -183,20 +185,20 @@ void StrategyPanel::Rebuild()
       upButton->Enable(i > 0);
       upButton->Bind(wxEVT_BUTTON,
                      [this, i](wxCommandEvent &) { MoveStrategyUp(static_cast<int>(i)); });
-      buttonSizer->Add(upButton, 0, wxLEFT, 2);
+      buttonSizer->Add(upButton, 0, wxLEFT, buttonGap);
 
       auto *downButton =
           new wxButton(this, wxID_ANY, wxUniChar(0x2193), wxDefaultPosition, buttonSize);
       downButton->Enable(i + 1 < m_list.Size());
       downButton->Bind(wxEVT_BUTTON,
                        [this, i](wxCommandEvent &) { MoveStrategyDown(static_cast<int>(i)); });
-      buttonSizer->Add(downButton, 0, wxLEFT, 2);
+      buttonSizer->Add(downButton, 0, wxLEFT, buttonGap);
     }
     else {
       // Keep the delete/restore button aligned under its counterpart in other rows, in
       // place of the Up/Down buttons a deleted row no longer has.
-      buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
-      buttonSizer->AddSpacer(buttonSize.GetWidth() + 2);
+      buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
+      buttonSizer->AddSpacer(buttonSize.GetWidth() + buttonGap);
     }
 
     auto *deleteButton =
@@ -206,7 +208,7 @@ void StrategyPanel::Rebuild()
     deleteButton->Enable(row.isDeleted || activeCount > 1);
     deleteButton->Bind(wxEVT_BUTTON,
                        [this, i](wxCommandEvent &) { ToggleDeleted(static_cast<int>(i)); });
-    buttonSizer->Add(deleteButton, 0, wxLEFT, 2);
+    buttonSizer->Add(deleteButton, 0, wxLEFT, buttonGap);
 
     gridSizer->Add(buttonSizer, 0, wxALIGN_CENTER_VERTICAL);
   }
@@ -220,7 +222,7 @@ void StrategyPanel::Rebuild()
   addButton->SetToolTip(_("Add strategy"));
   addButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { AddStrategy(); });
   auto *addSizer = new wxBoxSizer(wxHORIZONTAL);
-  addSizer->Add(addButton, 0, wxLEFT, 2);
+  addSizer->Add(addButton, 0, wxLEFT, buttonGap);
   gridSizer->Add(addSizer, 0, wxALIGN_CENTER_VERTICAL);
 
   m_topSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
@@ -288,31 +290,21 @@ EditStrategiesDialog::EditStrategiesDialog(wxWindow *p_parent, const GamePlayer 
         wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_player(p_player)
 {
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
   auto *strategyBoxSizer =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Strategies")), wxVERTICAL);
   // StrategyPanel sizes itself to fit its own content (see its constructor); don't override
   // that with a fixed estimate here, which would go stale as soon as the row count changes.
   m_strategyPanel = new StrategyPanel(this, p_player, [this]() { UpdateValidation(); });
+  strategyBoxSizer->Add(m_strategyPanel, 1, wxALL | wxEXPAND, FromDIP(c_spaceRelated));
 
-  strategyBoxSizer->Add(m_strategyPanel, 1, wxALL | wxEXPAND, 5);
+  auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+  contentSizer->Add(strategyBoxSizer, 1, wxEXPAND);
 
-  topSizer->Add(strategyBoxSizer, 1, wxALL | wxEXPAND, 5);
+  // Created here, after the strategy list, so that it follows the list in tab order
+  m_errorText = NewErrorText(this); // NOLINT(cppcoreguidelines-prefer-member-initializer)
+  contentSizer->Add(m_errorText, 0, wxEXPAND | wxTOP, FromDIP(c_spaceRelated));
 
-  m_errorText = new wxStaticText(this, wxID_STATIC, wxEmptyString);
-  m_errorText->SetForegroundColour(*wxRED);
-  topSizer->Add(m_errorText, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 5);
-
-  if (auto *buttons = CreateSeparatedButtonSizer(wxOK | wxCANCEL)) {
-    topSizer->Add(buttons, 0, wxALL | wxEXPAND, 5);
-  }
-
-  SetSizer(topSizer);
-  topSizer->SetSizeHints(this);
-  SetSize(GetBestSize());
-  SetMinSize(GetSize());
-  CenterOnParent();
+  SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
 
   UpdateValidation();
 }
@@ -324,6 +316,7 @@ void EditStrategiesDialog::UpdateValidation()
   if (auto *ok = FindWindow(wxID_OK)) {
     ok->Enable(message.empty());
   }
+  RefreshDialogMinSize(this);
 }
 
 const LabelListEdit<> &EditStrategiesDialog::GetStrategies() const

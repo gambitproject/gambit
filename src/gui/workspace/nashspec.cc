@@ -36,8 +36,7 @@
 
 namespace Gambit::GUI {
 
-std::optional<SolverFunction>
-EnumPureNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction EnumPureNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   if (p_representation == NashRepresentation::Behavior) {
     return [](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -59,7 +58,7 @@ EnumPureNashSpec::MakeSolver(NashRepresentation p_representation) const
   };
 }
 
-std::optional<SolverFunction> EnumMixedNashSpec::MakeSolver(NashRepresentation) const
+SolverFunction EnumMixedNashSpec::MakeSolver(NashRepresentation) const
 {
   return [](const Game &p_game, const ProfileFoundCallback &p_callback,
             const CancelToken &p_cancel) {
@@ -70,8 +69,7 @@ std::optional<SolverFunction> EnumMixedNashSpec::MakeSolver(NashRepresentation) 
   };
 }
 
-std::optional<SolverFunction>
-EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   const EnumPolyNashSpec spec = *this;
   if (p_representation == NashRepresentation::Behavior) {
@@ -92,7 +90,7 @@ EnumPolyNashSpec::MakeSolver(NashRepresentation p_representation) const
   };
 }
 
-std::optional<SolverFunction> GNMNashSpec::MakeSolver(NashRepresentation) const
+SolverFunction GNMNashSpec::MakeSolver(NashRepresentation) const
 {
   const GNMNashSpec spec = *this;
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -108,7 +106,7 @@ std::optional<SolverFunction> GNMNashSpec::MakeSolver(NashRepresentation) const
   };
 }
 
-std::optional<SolverFunction> HPNashSpec::MakeSolver(NashRepresentation) const
+SolverFunction HPNashSpec::MakeSolver(NashRepresentation) const
 {
   const HPNashSpec spec = *this;
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -123,7 +121,7 @@ std::optional<SolverFunction> HPNashSpec::MakeSolver(NashRepresentation) const
   };
 }
 
-std::optional<SolverFunction> IPANashSpec::MakeSolver(NashRepresentation) const
+SolverFunction IPANashSpec::MakeSolver(NashRepresentation) const
 {
   const IPANashSpec spec = *this;
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -138,7 +136,7 @@ std::optional<SolverFunction> IPANashSpec::MakeSolver(NashRepresentation) const
   };
 }
 
-std::optional<SolverFunction> LPNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction LPNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   if (p_representation == NashRepresentation::Behavior) {
     return [](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -160,7 +158,7 @@ std::optional<SolverFunction> LPNashSpec::MakeSolver(NashRepresentation p_repres
   };
 }
 
-std::optional<SolverFunction> LCPNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction LCPNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   if (p_representation == NashRepresentation::Behavior) {
     return [](const Game &p_game, const ProfileFoundCallback &p_callback,
@@ -183,7 +181,7 @@ std::optional<SolverFunction> LCPNashSpec::MakeSolver(NashRepresentation p_repre
   };
 }
 
-std::optional<SolverFunction> LiapNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction LiapNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   const LiapNashSpec spec = *this;
   if (p_representation == NashRepresentation::Behavior) {
@@ -212,7 +210,7 @@ std::optional<SolverFunction> LiapNashSpec::MakeSolver(NashRepresentation p_repr
   };
 }
 
-std::optional<SolverFunction> LogitNashSpec::MakeSolver(NashRepresentation p_representation) const
+SolverFunction LogitNashSpec::MakeSolver(NashRepresentation p_representation) const
 {
   const LogitNashSpec spec = *this;
   if (p_representation == NashRepresentation::Behavior) {
@@ -235,7 +233,7 @@ std::optional<SolverFunction> LogitNashSpec::MakeSolver(NashRepresentation p_rep
   };
 }
 
-std::optional<SolverFunction> SimpdivNashSpec::MakeSolver(NashRepresentation) const
+SolverFunction SimpdivNashSpec::MakeSolver(NashRepresentation) const
 {
   const SimpdivNashSpec spec = *this;
   return [spec](const Game &p_game, const ProfileFoundCallback &p_callback,

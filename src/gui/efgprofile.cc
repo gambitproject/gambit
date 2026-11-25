@@ -140,7 +140,7 @@ void MixedBehaviorProfileList::UpdateLabels()
   }
 
   for (int col = 0; col < GetNumberCols(); ++col) {
-    const GameAction action = m_doc->GetAction(col + 1);
+    const GameAction &action = m_columns.at(col);
 
     wxString label;
     label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel()
@@ -160,32 +160,19 @@ void MixedBehaviorProfileList::UpdateCells()
     const int profile = m_sortOrder.GetProfile(row);
 
     for (int col = 0; col < GetNumberCols(); ++col) {
+      const GameAction &action = m_columns.at(col);
       SetCellValue(
           row, col,
-          wxString(m_doc->GetWorkspace().GetProfiles().GetActionProb(col + 1, profile).c_str(),
-                   *wxConvCurrent));
+          wxString::FromUTF8(m_doc->GetWorkspace().GetProfiles().GetActionProb(action, profile)));
 
       auto *attr = new wxGridCellAttr;
       attr->SetFont(profile == currentProfile ? boldFont : normalFont);
       attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
       attr->SetReadOnly(true);
-
-      try {
-        const GameAction action = m_doc->GetAction(col + 1);
-        attr->SetTextColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()));
-
-        if (action->GetInfoset()->GetNumber() % 2 == 0) {
-          attr->SetBackgroundColour(wxColour(250, 250, 250));
-        }
-        else {
-          attr->SetBackgroundColour(wxColour(225, 225, 225));
-        }
-      }
-      // NOLINTNEXTLINE(bugprone-empty-catch)
-      catch (std::out_of_range &) {
-        // If GetAction() throws this, just handle it silently; can occur
-        // when solving a trivial game via the strategic form
-      }
+      attr->SetTextColour(m_doc->GetPlayerColor(action->GetInfoset()->GetPlayer()));
+      attr->SetBackgroundColour(action->GetInfoset()->GetNumber() % 2 == 0
+                                    ? wxColour(250, 250, 250)
+                                    : wxColour(225, 225, 225));
 
       SetAttr(row, col, attr);
     }
@@ -199,8 +186,20 @@ void MixedBehaviorProfileList::UpdateHighlights()
   m_labels->SetSelectedRow(m_sortOrder.GetRow(m_doc->GetWorkspace().GetCurrentProfile()));
 }
 
+bool MixedBehaviorProfileList::Show(bool p_show)
+{
+  const bool changed = wxGrid::Show(p_show);
+  if (changed && p_show) {
+    OnUpdate();
+  }
+  return changed;
+}
+
 void MixedBehaviorProfileList::OnUpdate()
 {
+  if (!IsShown()) {
+    return;
+  }
   if (!m_doc->GetGame() || m_doc->GetWorkspace().NumProfileLists() == 0) {
     if (GetNumberRows() > 0) {
       DeleteRows(0, GetNumberRows());
@@ -213,6 +212,14 @@ void MixedBehaviorProfileList::OnUpdate()
 
   const AnalysisOutput &profiles = m_doc->GetWorkspace().GetProfiles();
   const int profileLength = m_doc->GetGame()->BehavProfileLength();
+  m_columns.clear();
+  for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        m_columns.push_back(action);
+      }
+    }
+  }
 
   BeginBatch();
 

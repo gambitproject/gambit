@@ -36,7 +36,7 @@
 namespace Gambit::GUI {
 namespace {
 
-NodeTokenStyle GetTokenForNode(const TreeRenderConfig &p_style, const GameNode &p_node)
+NodeTokenStyle GetTokenForNode(const TreeStyle &p_style, const GameNode &p_node)
 {
   if (p_node->IsTerminal()) {
     return p_style.GetTerminalToken();
@@ -103,7 +103,7 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     DrawIncomingBranch(p_dc, p_entry);
   }
 
-  const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
+  const auto color = m_doc->GetPlayerColor(p_entry->m_node->GetPlayer());
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
@@ -130,8 +130,8 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
     p_dc.DrawPolygon(4, points);
   }
   else if (tokenStyle == GBT_NODE_TOKEN_DOT) {
-    p_dc.SetBrush(wxBrush(m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer()),
-                          wxBRUSHSTYLE_SOLID));
+    p_dc.SetBrush(
+        wxBrush(m_doc->GetPlayerColor(p_entry->m_node->GetPlayer()), wxBRUSHSTYLE_SOLID));
     p_dc.DrawEllipse(token);
   }
   else {
@@ -141,16 +141,16 @@ void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
   }
 
   int textWidth, textHeight;
-  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.SetFont(m_labelFont);
   p_dc.GetTextExtent(p_entry->m_nodeAboveLabel, &textWidth, &textHeight);
   p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->GetX() + (nodeSize - textWidth) / 2,
                 p_entry->GetY() - textHeight - 9);
-  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.SetFont(m_labelFont);
   p_dc.GetTextExtent(p_entry->m_nodeBelowLabel, &textWidth, &textHeight);
   p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->GetX() + (nodeSize - textWidth) / 2,
                 p_entry->GetY() + 9);
 
-  p_dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+  p_dc.SetFont(m_outcomeFont);
   DrawOutcome(p_dc, p_entry, p_noHints);
 }
 
@@ -161,7 +161,7 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
   const int yStart = p_entry->m_parent->GetY();
   const int yEnd = p_entry->GetY();
 
-  const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetParent()->GetPlayer());
+  const auto color = m_doc->GetPlayerColor(p_entry->m_node->GetParent()->GetPlayer());
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 4, wxPENSTYLE_SOLID));
   p_dc.SetTextForeground(color);
 
@@ -175,7 +175,7 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
                     yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
-    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.SetFont(m_labelFont);
 
     if (m_doc->GetStyle().GetBranchLabels() == GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
       // Position/size were already computed by ComputeBranchGeometry.
@@ -223,7 +223,7 @@ void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry>
                     yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
-    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.SetFont(m_labelFont);
     p_dc.DrawText(p_entry->m_branchAboveLabel, p_entry->m_geometry.branchAbove.GetX(),
                   p_entry->m_geometry.branchAbove.GetY());
     p_dc.DrawText(p_entry->m_branchBelowLabel, p_entry->m_geometry.branchBelow.GetX(),
@@ -248,7 +248,7 @@ void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEnt
     // Old style fork-tine
     const int branchLength = m_doc->GetStyle().GetBranchLength();
     int textWidth, textHeight;
-    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.SetFont(m_labelFont);
     p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
     p_entry->m_geometry.branchAbove =
         wxRect(xStart + branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
@@ -266,7 +266,7 @@ void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEnt
   }
 
   int textWidth, textHeight;
-  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.SetFont(m_labelFont);
   p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
 
   const int xbar = (xStart + xEnd) / 2;
@@ -303,10 +303,10 @@ void TreeLayout::ComputeBranchGeometry(wxDC &p_dc, const std::shared_ptr<NodeEnt
 // Always returns the point advanced past the fraction's width, so that both
 // painting (DrawOutcome) and geometry computation (ComputeOutcomeGeometry) can
 // share this single measurement, rather than keeping two copies in sync.
-static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value,
-                            bool p_paint = true)
+static wxPoint DrawFraction(wxDC &p_dc, const wxFont &p_font, wxPoint p_point,
+                            const Rational &p_value, bool p_paint = true)
 {
-  p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+  p_dc.SetFont(p_font);
 
   int numWidth, numHeight;
   const wxString num =
@@ -339,7 +339,7 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
       return;
     }
     // Position/size were already computed by ComputeOutcomeGeometry.
-    p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
+    p_dc.SetFont(m_noOutcomeFont);
     p_dc.SetTextForeground(*wxLIGHT_GREY);
     p_dc.DrawText(wxT("(u)"), p_entry->m_geometry.outcome.GetX(),
                   p_entry->m_geometry.outcome.GetY());
@@ -348,19 +348,19 @@ void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_ent
 
   int playerIndex = 1;
   for (const auto &player : p_entry->m_node->GetGame()->GetPlayers()) {
-    p_dc.SetTextForeground(m_doc->GetStyle().GetPlayerColor(player));
+    p_dc.SetTextForeground(m_doc->GetPlayerColor(player));
 
     const auto &payoff = outcome->GetPayoff<std::string>(player);
     const wxRect &cell = p_entry->m_geometry.payoffs[playerIndex];
 
     if (payoff.find('/') != std::string::npos) {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
-      DrawFraction(p_dc, wxPoint(cell.GetX() + 5, p_entry->GetY()),
+      p_dc.SetPen(wxPen(m_doc->GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
+      DrawFraction(p_dc, m_fractionFont, wxPoint(cell.GetX() + 5, p_entry->GetY()),
                    outcome->GetPayoff<Rational>(player));
     }
     else {
       const wxString label = wxString(payoff.c_str(), *wxConvCurrent);
-      p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+      p_dc.SetFont(m_payoffFont);
       p_dc.DrawText(label, cell.GetX() + 5, cell.GetY());
     }
     ++playerIndex;
@@ -377,7 +377,7 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
   const GameOutcome outcome = p_entry->m_node->GetOutcome();
   if (outcome->IsNull()) {
     int width, height;
-    p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD));
+    p_dc.SetFont(m_noOutcomeFont);
     p_dc.GetTextExtent(wxT("(u)"), &width, &height);
     p_entry->m_geometry.outcome = wxRect(point.x, point.y - height / 2, width, height);
     p_entry->m_geometry.payoffs = Array<wxRect>();
@@ -392,13 +392,14 @@ void TreeLayout::ComputeOutcomeGeometry(wxDC &p_dc,
 
     if (payoff.find('/') != std::string::npos) {
       const int oldX = point.x;
-      point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player), false);
+      point =
+          DrawFraction(p_dc, m_fractionFont, point, outcome->GetPayoff<Rational>(player), false);
       p_entry->m_geometry.payoffs.push_back(
           wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
     }
     else {
       const wxString label = wxString(payoff.c_str(), *wxConvCurrent);
-      p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+      p_dc.SetFont(m_payoffFont);
       p_dc.GetTextExtent(label, &width, &height);
       p_entry->m_geometry.payoffs.push_back(
           wxRect(point.x - 5, point.y - height / 2, width + 10, height));
@@ -505,6 +506,7 @@ void TreeLayout::ComputeGeometry() const
   wxMemoryDC measureDC;
   wxBitmap measureBitmap(1, 1);
   measureDC.SelectObject(measureBitmap);
+  m_labelFont = m_doc->GetLabelFont();
 
   for (const auto &entry : m_nodeList) {
     ComputeTokenGeometry(entry);
@@ -570,18 +572,16 @@ void TreeLayout::Layout(const Game &p_game)
 
 void TreeLayout::GenerateLabels() const
 {
-  const TreeRenderConfig &settings = m_doc->GetStyle();
+  const TreeStyle &settings = m_doc->GetStyle();
   const auto &workspace = m_doc->GetWorkspace();
   // The style resolves each label choice into a function once here, rather
   // than TreeLayout re-interpreting the style enum for every node.
-  const LabelGenerator nodeAbove =
-      settings.GetNodeLabelGenerator(settings.GetNodeAboveLabel(), workspace);
-  const LabelGenerator nodeBelow =
-      settings.GetNodeLabelGenerator(settings.GetNodeBelowLabel(), workspace);
+  const LabelGenerator nodeAbove = GetNodeLabelGenerator(settings.GetNodeAboveLabel(), workspace);
+  const LabelGenerator nodeBelow = GetNodeLabelGenerator(settings.GetNodeBelowLabel(), workspace);
   const LabelGenerator branchAbove =
-      settings.GetBranchLabelGenerator(settings.GetBranchAboveLabel(), workspace);
+      GetBranchLabelGenerator(settings.GetBranchAboveLabel(), workspace);
   const LabelGenerator branchBelow =
-      settings.GetBranchLabelGenerator(settings.GetBranchBelowLabel(), workspace);
+      GetBranchLabelGenerator(settings.GetBranchBelowLabel(), workspace);
 
   for (const auto &entry : m_nodeList) {
     entry->SetNodeAboveLabel(SafeGenerate(nodeAbove, entry->GetNode()));
@@ -616,7 +616,8 @@ void TreeLayout::GenerateLabels() const
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
-  const TreeRenderConfig &settings = m_doc->GetStyle();
+  m_labelFont = m_doc->GetLabelFont();
+  const TreeStyle &settings = m_doc->GetStyle();
 
   for (const auto &entry : m_nodeList) {
     const auto parentEntry = entry->GetParent();
@@ -626,8 +627,8 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 
       if (const auto nextMember = ComputeNextInInfoset(parentEntry)) {
         const int nextY = nextMember->GetY();
-        p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
-                          wxPENSTYLE_DOT));
+        p_dc.SetPen(
+            wxPen(m_doc->GetPlayerColor(parentEntry->m_node->GetPlayer()), 1, wxPENSTYLE_DOT));
         p_dc.DrawLine(parentEntry->GetX(), parentEntry->GetY(), parentEntry->GetX(), nextY);
         if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
           p_dc.DrawLine(parentEntry->GetX() + settings.GetNodeSize(), parentEntry->GetY(),

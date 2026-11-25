@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/dlefgreveal.cc
-// Dialog for revealing actions to players
+// FILE: src/gui/dlefgrefine.cc
+// Dialog for refining information sets by the action taken at a move
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,13 +30,14 @@
 
 #include "games.h"
 #include "gamedoc.h"
+#include "dialogstyle.h"
 
 namespace {
 
 using namespace Gambit;
 using namespace Gambit::GUI;
 
-class RevealMoveDialog final : public wxDialog {
+class RefineInfosetsDialog final : public wxDialog {
   struct PlayerEntry {
     GamePlayer player;
     wxCheckBox *checkbox;
@@ -47,62 +48,65 @@ class RevealMoveDialog final : public wxDialog {
   void UpdateButtonState();
 
 public:
-  RevealMoveDialog(wxWindow *p_parent, const Game &p_game);
+  RefineInfosetsDialog(wxWindow *p_parent, const GameDocument &p_doc);
   std::vector<GamePlayer> GetPlayers() const;
 };
 
-RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
-  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition,
+RefineInfosetsDialog::RefineInfosetsDialog(wxWindow *p_parent, const GameDocument &p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Refine information sets by this move"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
+  auto *contentSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *groupLabel = new wxStaticText(this, wxID_ANY, _("Reveal this move to players"));
-  auto f = groupLabel->GetFont();
-  f.SetWeight(wxFONTWEIGHT_BOLD);
-  groupLabel->SetFont(f);
-  topSizer->Add(groupLabel, wxSizerFlags().Border(wxLEFT | wxTOP | wxRIGHT, FromDIP(10)));
+  auto *groupLabel =
+      new wxStaticText(this, wxID_ANY, _("Players who observe the action taken at this move"));
+  groupLabel->SetFont(groupLabel->GetFont().Bold());
+  contentSizer->Add(groupLabel);
 
-  auto *playerBox = new wxBoxSizer(wxVERTICAL);
-  playerBox->AddSpacer(FromDIP(3));
-
-  const auto &players = p_game->GetPlayers();
+  const auto &players = p_doc.GetGame()->GetPlayers();
   m_entries.reserve(players.size());
 
   for (const auto &player : players) {
     wxString label;
     if (!player->GetLabel().empty()) {
-      label << player->GetLabel();
+      label << wxString::FromUTF8(player->GetLabel());
     }
     else {
-      label << "Player " << player->GetNumber();
+      label << _("Player ") << player->GetNumber();
     }
     auto *cb = new wxCheckBox(this, wxID_ANY, label);
     cb->SetValue(true);
-    cb->Bind(wxEVT_CHECKBOX, &RevealMoveDialog::OnCheckbox, this);
+    cb->Bind(wxEVT_CHECKBOX, &RefineInfosetsDialog::OnCheckbox, this);
     m_entries.push_back({.player = player, .checkbox = cb});
-    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, FromDIP(4)));
+
+    auto *row = new wxBoxSizer(wxHORIZONTAL);
+    row->Add(new wxStaticBitmap(this, wxID_ANY, MakeColorSwatch(p_doc.GetPlayerColor(player))), 0,
+             wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(c_spaceTight));
+    row->Add(cb, 1, wxALIGN_CENTER_VERTICAL);
+    contentSizer->Add(row, 0, wxEXPAND | wxTOP, FromDIP(c_spaceRelated));
   }
 
-  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border(wxALL, FromDIP(5)));
+  auto *note = new wxStaticText(
+      this, wxID_ANY,
+      _("Information sets below this node are refined now; does not affect subsequent edits."));
+  contentSizer->Add(note, 0, wxTOP, FromDIP(c_spaceMargin));
 
-  auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
-  buttonSizer->Realize();
-  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border(wxALL, FromDIP(10)));
-
-  SetSizerAndFit(topSizer);
-  CenterOnParent();
+  SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
+  if (auto *ok = dynamic_cast<wxButton *>(FindWindow(wxID_OK))) {
+    ok->SetLabel(_("Refine"));
+  }
+  RefreshDialogMinSize(this);
   UpdateButtonState();
 }
 
-void RevealMoveDialog::UpdateButtonState()
+void RefineInfosetsDialog::UpdateButtonState()
 {
   const bool anyChecked = std::ranges::any_of(
       m_entries, [](const PlayerEntry &entry) { return entry.checkbox->IsChecked(); });
   FindWindow(wxID_OK)->Enable(anyChecked);
 }
 
-std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
+std::vector<GamePlayer> RefineInfosetsDialog::GetPlayers() const
 {
   std::vector<GamePlayer> result;
   result.reserve(m_entries.size());
@@ -117,9 +121,10 @@ std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
 
 namespace Gambit::GUI {
 
-std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game)
+std::optional<std::vector<GamePlayer>> ChooseRefiningPlayers(wxWindow *p_parent,
+                                                             const GameDocument &p_doc)
 {
-  if (RevealMoveDialog dialog(p_parent, p_game); dialog.ShowModal() == wxID_OK) {
+  if (RefineInfosetsDialog dialog(p_parent, p_doc); dialog.ShowModal() == wxID_OK) {
     return dialog.GetPlayers();
   }
   return std::nullopt;

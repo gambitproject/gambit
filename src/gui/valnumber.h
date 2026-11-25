@@ -49,6 +49,8 @@ public:
   wxObject *Clone() const override { return new NumberValidator(*this); }
   bool Copy(const NumberValidator &);
 
+  /// @brief Reports whether the control holds a number within the allowed range
+  /// @note Silent: the dialog hosting the control reports any problem inline
   bool Validate(wxWindow *parent) override;
   bool TransferToWindow() override;
   bool TransferFromWindow() override;

@@ -31,7 +31,7 @@ class LegendDialog final : public wxDialog {
 
 public:
   // Lifecycle
-  LegendDialog(wxWindow *, const TreeRenderConfig &);
+  LegendDialog(wxWindow *, const TreeStyle &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   NodeLabelStyle GetNodeAbove() const

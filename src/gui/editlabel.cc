@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include "editlabel.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 
@@ -161,12 +162,6 @@ wxString LabelTextCtrl::GetNormalizedValue()
   return GetValue();
 }
 
-namespace {
-const wxColour kInvalidLabelBg(255, 220, 220);
-const wxColour kNewLabelColour(0, 102, 0);
-const wxColour kRenamedLabelColour(0, 51, 204);
-} // namespace
-
 void StyleLabelRow(LabelTextCtrl *p_ctrl, bool p_isNew, const std::string &p_stableLabel,
                    const std::string &p_label)
 {
@@ -178,12 +173,12 @@ void StyleLabelRow(LabelTextCtrl *p_ctrl, bool p_isNew, const std::string &p_sta
 
   if (p_isNew) {
     font.SetWeight(wxFONTWEIGHT_BOLD);
-    p_ctrl->SetForegroundColour(kNewLabelColour);
+    p_ctrl->SetForegroundColour(NewLabelColour());
     p_ctrl->UnsetToolTip();
   }
   else if (p_label != p_stableLabel) {
     font.SetStyle(wxFONTSTYLE_ITALIC);
-    p_ctrl->SetForegroundColour(kRenamedLabelColour);
+    p_ctrl->SetForegroundColour(RenamedLabelColour());
     p_ctrl->SetToolTip(
         wxString::Format(_("Renamed from \"%s\""), wxString::FromUTF8(p_stableLabel)));
   }
@@ -201,7 +196,8 @@ wxString ValidateLabels(const LabelValidation &p_validation,
                         const wxString &p_duplicateMessage)
 {
   for (size_t i = 0; i < p_controls.size(); i++) {
-    p_controls[i]->SetBackgroundColour(p_validation.invalid.at(i) ? kInvalidLabelBg : p_defaultBg);
+    p_controls[i]->SetBackgroundColour(p_validation.invalid.at(i) ? InvalidFieldBackground()
+                                                                  : p_defaultBg);
     p_controls[i]->Refresh();
   }
   switch (p_validation.first) {

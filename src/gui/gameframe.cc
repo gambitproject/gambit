@@ -51,7 +51,7 @@
 #include "nfgpanel.h"
 #include "nfgprofile.h"
 
-#include "dlexcept.h"
+#include "dialogstyle.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
 #include "dllogit.h"
@@ -138,7 +138,7 @@ AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, const std::shared_ptr<Gam
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_profiles(new ProfileListPanel(this, p_doc))
 {
   m_choices = new wxChoice(this, wxID_ANY);
-  m_choices->Append(wxT("Profiles"));
+  m_choices->Append(_("Profiles"));
   m_choices->SetSelection(0);
 
   Connect(m_choices->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
@@ -176,9 +176,9 @@ void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
 
 void AnalysisNotebook::OnDecimals(wxSpinEvent &p_event)
 {
-  TreeRenderConfig style = m_doc->GetStyle();
+  TreeStyle style = m_doc->GetStyle();
   style.SetNumDecimals(p_event.GetPosition());
-  m_doc->SetStyle(style);
+  m_doc->Apply(SetTreeStyle{.style = style});
 }
 
 void AnalysisNotebook::OnUpdate()
@@ -186,14 +186,15 @@ void AnalysisNotebook::OnUpdate()
   m_choices->Clear();
   for (int i = 1; i <= m_doc->GetWorkspace().NumProfileLists(); i++) {
     wxString label;
-    label << wxT("Profiles ") << i;
+    label << _("Profiles ") << i;
     m_choices->Append(label);
   }
   m_choices->SetSelection(m_doc->GetWorkspace().GetCurrentProfileList() - 1);
 
   const bool haveProfiles = m_doc->GetWorkspace().GetCurrentProfileList() > 0;
   if (haveProfiles) {
-    m_description->SetLabel(m_doc->GetWorkspace().GetProfiles().GetDescription());
+    m_description->SetLabel(
+        wxString::FromUTF8(m_doc->GetWorkspace().GetProfiles().GetDescription()));
   }
 
   const bool showDecimals = haveProfiles && m_doc->GetWorkspace().GetProfiles().IsFloatingPoint();
@@ -337,7 +338,7 @@ void GameFrame::OnUpdate()
   }
 
   if (m_doc->IsModified()) {
-    SetTitle(GetTitle() + wxT(" (unsaved changes)"));
+    SetTitle(GetTitle() + _(" (unsaved changes)"));
   }
 
   wxMenuBar *menuBar = GetMenuBar();
@@ -356,11 +357,15 @@ void GameFrame::OnUpdate()
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());
 
-  const bool canZoomTree = m_efgPanel && m_efgPanel->IsShown();
-  menuBar->Enable(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
-  menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
-  menuBar->Enable(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
-  menuBar->Enable(GBT_MENU_VIEW_ZOOM100, canZoomTree);
+  const bool treeShown = m_efgPanel && m_efgPanel->IsShown();
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMIN, treeShown);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMOUT, treeShown);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOMFIT, treeShown);
+  menuBar->Enable(GBT_MENU_VIEW_ZOOM100, treeShown);
+  // The Format menu sets how the tree is drawn; the strategic view's table is not affected by it
+  if (const int formatMenu = menuBar->FindMenu(_("&Format")); formatMenu != wxNOT_FOUND) {
+    menuBar->EnableTop(formatMenu, treeShown);
+  }
 }
 
 //--------------------------------------------------------------------
@@ -388,35 +393,36 @@ void GameFrame::MakeMenus()
   auto *fileNewMenu = new wxMenu;
   fileNewMenu->Append(GBT_MENU_FILE_NEW_EFG, _("&Extensive game"),
                       _("Create a new extensive (tree) game"));
-  fileNewMenu->Append(GBT_MENU_FILE_NEW_NFG, _("&Strategic game"),
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_NFG, _("&Strategic game..."),
                       _("Create a new strategic (table) game"));
   fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu, _("Create a new game"));
 
-  fileMenu->Append(wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"));
+  fileMenu->Append(wxID_OPEN, _("&Open...\tCtrl-O"), _("Open a saved game"));
   fileMenu->AppendSeparator();
 
   fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
-  fileMenu->Append(wxID_SAVEAS, _("Save &as\tShift-Ctrl-S"), _("Save game to a different file"));
+  fileMenu->Append(wxID_SAVEAS, _("Save &as...\tShift-Ctrl-S"),
+                   _("Save game to a different file"));
 
   fileMenu->AppendSeparator();
   auto *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, _("&BMP"),
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, _("&BMP..."),
                          _("Save a rendering of the game as a Windows bitmap"));
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPEG, _("&JPEG"),
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPEG, _("&JPEG..."),
                          _("Save a rendering of the game as a JPEG image"));
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_PNG, _("&PNG"),
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_PNG, _("&PNG..."),
                          _("Save a rendering of the game as a PNG image"));
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_POSTSCRIPT, _("Post&Script"),
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_POSTSCRIPT, _("Post&Script..."),
                          _("Save a printout of the game in PostScript format"));
   fileExportMenu->Enable(GBT_MENU_FILE_EXPORT_POSTSCRIPT, wxUSE_POSTSCRIPT);
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_SVG, _("S&VG"),
+  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_SVG, _("S&VG..."),
                          _("Save a rendering of the game in SVG format"));
   fileMenu->Append(GBT_MENU_FILE_EXPORT, _("&Export"), fileExportMenu,
                    _("Export the game in various formats"));
   fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"), _("Set up preferences for printing"));
-  fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"), _("View a preview of the game printout"));
-  fileMenu->Append(wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"));
+  fileMenu->Append(wxID_PRINT_SETUP, _("Page se&tup..."), _("Set up preferences for printing"));
+  fileMenu->Append(wxID_PREVIEW, _("Print pre&view"), _("View a preview of the game printout"));
+  fileMenu->Append(wxID_PRINT, _("&Print...\tCtrl-P"), _("Print this game"));
 
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_CLOSE, _("&Close\tCtrl-W"), _("Close this window"));
@@ -426,7 +432,7 @@ void GameFrame::MakeMenus()
   editMenu->Append(wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"));
   editMenu->Append(wxID_REDO, _("&Redo\tShift-Ctrl-Z"), _("Redo the last undone change"));
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit properties of the game"));
+  editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game..."), _("Edit properties of the game"));
 
   auto *viewMenu = new wxMenu;
   viewMenu->Append(GBT_MENU_VIEW_PROFILES, _("&Profiles"), _("Display/hide profiles window"),
@@ -434,39 +440,39 @@ void GameFrame::MakeMenus()
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
 
-  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &In\tCtrl-+"),
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &in\tCtrl-+"),
                    _("Increase display magnification"));
-  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &Out\tCtrl--"),
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out\tCtrl--"),
                    _("Decrease display magnification"));
-  viewMenu->Append(GBT_MENU_VIEW_ZOOM100, _("&Actual Size\tCtrl-0"),
+  viewMenu->Append(GBT_MENU_VIEW_ZOOM100, _("&Actual size\tCtrl-0"),
                    _("Set magnification to 1:1"));
-  viewMenu->Append(GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &Fit"),
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMFIT, _("Zoom to &fit"),
                    _("Rescale to show entire tree in window"));
 
   viewMenu->AppendSeparator();
 
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
-                   wxT("Display the reduced strategic representation ") wxT("of the game"), true);
+                   _("Display the reduced strategic representation of the game"), true);
   if (!As<GameTreeRep>(m_doc->GetGame())) {
     viewMenu->Check(GBT_MENU_VIEW_STRATEGIC, true);
     viewMenu->Enable(GBT_MENU_VIEW_STRATEGIC, false);
   }
 
   auto *formatMenu = new wxMenu;
-  formatMenu->Append(GBT_MENU_FORMAT_LAYOUT, _("&Layout"), _("Set tree layout parameters"));
-  formatMenu->Append(GBT_MENU_FORMAT_LABELS, _("La&bels"), _("Set labels for parts of trees"));
-  formatMenu->Append(GBT_MENU_FORMAT_FONTS, _("&Font"), _("Set the font for tree labels"));
+  formatMenu->Append(GBT_MENU_FORMAT_LAYOUT, _("&Layout..."), _("Set tree layout parameters"));
+  formatMenu->Append(GBT_MENU_FORMAT_LABELS, _("La&bels..."), _("Set labels for parts of trees"));
+  formatMenu->Append(GBT_MENU_FORMAT_FONTS, _("&Font..."), _("Set the font for tree labels"));
 
   auto *toolsMenu = new wxMenu;
-  toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
-                    true);
+  toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"),
+                    _("Show and eliminate dominated strategies"), true);
   if (As<GameTreeRep>(m_doc->GetGame())) {
     toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
   }
-  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
+  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium..."),
                     _("Compute Nash equilibria and refinements"));
 
-  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE"), _("Compute quantal response equilibria"));
+  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&QRE..."), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, _("&About Gambit"), _("About Gambit"));
@@ -556,22 +562,29 @@ void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
 void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
-  const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
+  SaveDocument(p_event.GetId() == wxID_SAVEAS);
+}
+
+bool GameFrame::SaveDocument(bool p_saveAs)
+{
+  const bool saveAs = p_saveAs || m_doc->GetFilename().empty();
 
   const bool isExtensiveGame = As<GameTreeRep>(m_doc->GetGame()) != nullptr;
 
   const auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
       m_doc->DoSave(path, format);
+      return true;
     }
     catch (const std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
+      ShowOperationError(this, _("Unable to save file"), _("Gambit could not write this file."),
+                         path + "\n\n" + wxString::FromUTF8(ex.what()));
+      return false;
     }
   };
 
   if (!saveAs) {
-    doSave(wxString::FromUTF8(m_doc->GetFilename()), m_doc->GetCurrentSaveFormat());
-    return;
+    return doSave(m_doc->GetFilename(), m_doc->GetCurrentSaveFormat());
   }
 
   const auto nativeFormat =
@@ -579,17 +592,17 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   const wxString nativeExt = isExtensiveGame ? wxT("efg") : wxT("nfg");
 
-  const wxString nativeWildcard = isExtensiveGame ? wxT("Gambit extensive games (*.efg)|*.efg|")
-                                                  : wxT("Gambit strategic games (*.nfg)|*.nfg|");
+  const wxString nativeWildcard = isExtensiveGame ? _("Gambit extensive games (*.efg)|*.efg|")
+                                                  : _("Gambit strategic games (*.nfg)|*.nfg|");
 
-  const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
+  const wxString &currentFilename = m_doc->GetFilename();
 
   wxFileDialog dialog(
       this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      nativeWildcard + wxT("Gambit workspaces (*.gbt)|*.gbt"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+      nativeWildcard + _("Gambit workspaces (*.gbt)|*.gbt"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() != wxID_OK) {
-    return;
+    return false;
   }
 
   wxFileName filename(dialog.GetPath());
@@ -622,14 +635,14 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
       format = nativeFormat;
     }
     else {
-      wxMessageBox(
-          _("The selected filename does not use a supported extension for this game type."),
-          _("Unsupported file type"), wxOK | wxICON_ERROR, this);
-      return;
+      ShowOperationError(this, _("Unsupported file type"),
+                         _("This game cannot be saved with that file extension."),
+                         wxString::Format(_("Use .%s or .gbt."), nativeExt));
+      return false;
     }
   }
 
-  doSave(filename.GetFullPath(), format);
+  return doSave(filename.GetFullPath(), format);
 }
 
 void GameFrame::OnFilePageSetup(wxCommandEvent &)
@@ -660,7 +673,7 @@ void GameFrame::OnFilePrintPreview(wxCommandEvent &)
   }
 
   auto *frame =
-      new wxPreviewFrame(preview, this, _("Print Preview"), wxPoint(100, 100), wxSize(600, 650));
+      new wxPreviewFrame(preview, this, _("Print preview"), wxPoint(100, 100), wxSize(600, 650));
   frame->Initialize();
   frame->Show(true);
 }
@@ -680,7 +693,8 @@ void GameFrame::OnFilePrint(wxCommandEvent &)
 
   if (!printer.Print(this, printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
-      wxMessageBox(_("There was an error in printing"), _("Error"), wxOK);
+      ShowOperationError(this, _("Unable to print"), _("The game could not be printed."),
+                         _("The printer reported an error."));
     }
     // Otherwise, user hit "cancel"; just be quiet and return.
     return;
@@ -703,20 +717,22 @@ void GameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
   }
 
   if (!bitmapOK) {
-    wxMessageBox(_("Game image too large to export to graphics file"), _("Error"), wxOK, this);
+    ShowOperationError(this, _("Unable to export image"),
+                       _("The game is too large to export as an image."),
+                       _("Export it as SVG or PostScript instead."));
     return;
   }
 
-  wxString filter = wxT("|All files (*.*)|*.*");
+  wxString filter = _("|All files (*.*)|*.*");
   switch (p_event.GetId()) {
   case GBT_MENU_FILE_EXPORT_BMP:
-    filter = wxT("Windows bitmap files (*.bmp)|*.bmp") + filter;
+    filter = _("Windows bitmap files (*.bmp)|*.bmp") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_JPEG:
-    filter = wxT("JPEG files (*.jpeg)|*.jpeg|") wxT("JPG files (*.jpg)|*.jpg") + filter;
+    filter = _("JPEG files (*.jpeg)|*.jpeg|JPG files (*.jpg)|*.jpg") + filter;
     break;
   case GBT_MENU_FILE_EXPORT_PNG:
-    filter = wxT("PNG files (*.png)|*.png") + filter;
+    filter = _("PNG files (*.png)|*.png") + filter;
     break;
   default:
     break;
@@ -742,8 +758,8 @@ void GameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
     }
 
     if (!bitmap.SaveFile(dialog.GetPath(), code)) {
-      wxMessageBox(_("An error occurred in writing ") + dialog.GetPath() + wxT("."), _("Error"),
-                   wxOK, this);
+      ShowOperationError(this, _("Unable to export image"), _("Gambit could not write this file."),
+                         dialog.GetPath());
     }
   }
 }
@@ -754,7 +770,7 @@ void GameFrame::OnFileExportPS(wxCommandEvent &)
   wxPrintData printData(m_printData);
 
   wxFileDialog dialog(this, _("Choose output file"), wxGetApp().GetCurrentDir(), _T(""),
-                      _T("PostScript files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                      _("PostScript files (*.ps)|*.ps"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
     printData.SetFilename(dialog.GetPath());
@@ -787,7 +803,7 @@ void GameFrame::OnFileExportPS(wxCommandEvent &)
 void GameFrame::OnFileExportSVG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"), wxGetApp().GetCurrentDir(), _T(""),
-                      wxT("SVG files (*.svg)|*.svg|") wxT("All files (*.*)|*.*"),
+                      _("SVG files (*.svg)|*.svg|All files (*.*)|*.*"),
                       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -834,10 +850,10 @@ void GameFrame::OnEditGame(wxCommandEvent &)
   GamePropertiesDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoEditGame(dialog.GetEdit());
+      m_doc->Apply(dialog.GetEdit());
     }
     catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
+      ShowInternalError(this, ex.what());
     }
   }
 }
@@ -911,23 +927,21 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
   if (m_efgPanel->IsShown()) {
     // We are switching to strategic view
     if (!m_doc->GetGame()->IsPerfectRecall()) {
-      wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                       wxT("Computing the reduced strategic representation ")
-                           wxT("of this game is not supported."),
-                   wxT("Show strategic game"), wxOK);
+      ShowOperationError(this, _("Unable to show strategic game"),
+                         _("This game does not have perfect recall."),
+                         _("The reduced strategic form can be computed only for games of "
+                           "perfect recall."));
       return;
     }
 
     if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
         !m_nfgPanel && contingencies >= 50000) {
-      wxString msg;
-      msg << "This game has " << contingencies << " contingencies in strategic form.\n"
-          << "Performance in browsing strategic form will be poor,\n"
-          << "and may render the program nonresponsive.\n"
-          << "Do you wish to continue?";
-
-      if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxICON_WARNING,
-                       this) != wxOK) {
+      if (!ConfirmOperation(
+              this, _("Large strategic game"),
+              wxString::Format(_("This game has %zu contingencies in strategic form."),
+                               contingencies),
+              _("Browsing the strategic form will be slow, and Gambit may stop responding."),
+              _("Show anyway"))) {
         return;
       }
     }
@@ -971,12 +985,12 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
 
 void GameFrame::OnFormatLayout(wxCommandEvent &)
 {
-  TreeRenderConfig style = m_doc->GetStyle();
+  TreeStyle style = m_doc->GetStyle();
   LayoutDialog dialog(this, style);
 
   if (dialog.ShowModal() == wxID_OK) {
     dialog.GetSettings(style);
-    m_doc->SetStyle(style);
+    m_doc->Apply(SetTreeStyle{.style = style});
   }
 }
 
@@ -985,25 +999,25 @@ void GameFrame::OnFormatLabels(wxCommandEvent &)
   LegendDialog dialog(this, m_doc->GetStyle());
 
   if (dialog.ShowModal() == wxID_OK) {
-    TreeRenderConfig style = m_doc->GetStyle();
+    TreeStyle style = m_doc->GetStyle();
     style.SetNodeAboveLabel(dialog.GetNodeAbove());
     style.SetNodeBelowLabel(dialog.GetNodeBelow());
     style.SetBranchAboveLabel(dialog.GetBranchAbove());
     style.SetBranchBelowLabel(dialog.GetBranchBelow());
-    m_doc->SetStyle(style);
+    m_doc->Apply(SetTreeStyle{.style = style});
   }
 }
 
 void GameFrame::OnFormatFonts(wxCommandEvent &)
 {
   wxFontData data;
-  data.SetInitialFont(m_doc->GetStyle().GetFont());
+  data.SetInitialFont(m_doc->GetLabelFont());
   wxFontDialog dialog(this, data);
 
   if (dialog.ShowModal() == wxID_OK) {
-    TreeRenderConfig style = m_doc->GetStyle();
-    style.SetFont(dialog.GetFontData().GetChosenFont());
-    m_doc->SetStyle(style);
+    TreeStyle style = m_doc->GetStyle();
+    style.SetFont(ToTreeFont(dialog.GetFontData().GetChosenFont()));
+    m_doc->Apply(SetTreeStyle{.style = style});
   }
 }
 
@@ -1027,9 +1041,9 @@ extern void ShowNashMonitorDialog(wxWindow *p_parent, const std::shared_ptr<Game
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
-    wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                     wxT("Computing Nash equilibria of this game ") wxT("is not supported."),
-                 wxT("Show strategic game"), wxOK);
+    ShowOperationError(this, _("Unable to compute equilibria"),
+                       _("This game does not have perfect recall."),
+                       _("Nash equilibria can be computed only for games of perfect recall."));
     return;
   }
 
@@ -1037,23 +1051,21 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
-      if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+      if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
           contingencies >= 50000) {
-        wxString msg;
-        msg << "This game has " << contingencies << " contingencies in strategic form.\n"
-            << "Performance in solving strategic form will be poor,\n"
-            << "and may render the program nonresponsive.\n"
-            << "Do you wish to continue?";
-
-        if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                         this) != wxOK) {
+        if (!ConfirmOperation(
+                this, _("Large strategic game"),
+                wxString::Format(_("This game has %zu contingencies in strategic form."),
+                                 contingencies),
+                _("Solving the strategic form will be slow, and Gambit may stop responding."),
+                _("Compute anyway"))) {
           return;
         }
       }
     }
 
     m_doc->SetNashChoice(dialog.GetChoice());
-    ShowNashMonitorDialog(this, m_doc, dialog.GetCommand());
+    ShowNashMonitorDialog(this, m_doc, dialog.CreateOutput());
 
     if (!m_splitter->IsSplit()) {
       if (m_efgPanel && m_efgPanel->IsShown()) {
@@ -1071,10 +1083,10 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 void GameFrame::OnToolsQre(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
-    wxMessageBox(wxT("This is not a game of perfect recall.\n")
-                     wxT("Computing quantal response equilibria of this game ")
-                         wxT("is not supported."),
-                 wxT("Show strategic game"), wxOK);
+    ShowOperationError(this, _("Unable to compute quantal response equilibria"),
+                       _("This game does not have perfect recall."),
+                       _("Quantal response equilibria can be computed only for games of "
+                         "perfect recall."));
     return;
   }
 
@@ -1115,83 +1127,25 @@ CloseWarningText CloseWarningMessage(const std::shared_ptr<GameDocument> &p_doc)
   const bool workspaceModified = p_doc->IsWorkspaceModified();
 
   if (gameModified && !workspaceModified) {
-    return {.primary = _("This game has unsaved changes."),
-            .secondary = _("If you close this window now, changes to the game will be lost.")};
+    return {.primary = _("Do you want to save the changes to this game?"),
+            .secondary = _("Your changes will be lost if you don't save them.")};
   }
 
   if (!gameModified && workspaceModified) {
-    return {.primary = _("There are unsaved computational results."),
-            .secondary = _("These results can be saved in a Gambit workspace file. "
-                           "If you close this window now, the unsaved results will be lost.")};
+    return {.primary = _("Do you want to save the computed results and drawing settings?"),
+            .secondary = _("These are kept only in a Gambit workspace file (.gbt). They will be "
+                           "lost if you don't save them.")};
   }
 
   if (gameModified && workspaceModified) {
-    return {.primary = _("This game and its computational results have unsaved changes."),
-            .secondary = _("If you close this window now, changes to the game and unsaved "
-                           "computational results will be lost.")};
+    return {.primary = _("Do you want to save the changes to this game and its workspace?"),
+            .secondary = _("Computed results and drawing settings are kept only in a Gambit "
+                           "workspace file (.gbt). Your changes will be lost if you don't save "
+                           "them.")};
   }
 
   return {.primary = wxEmptyString, .secondary = wxEmptyString};
 }
-
-class CloseWarningDialog final : public wxDialog {
-public:
-  CloseWarningDialog(wxWindow *parent, const CloseWarningText &text)
-    : wxDialog(parent, wxID_ANY, _("Unsaved Changes"), wxDefaultPosition, wxDefaultSize,
-               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
-  {
-    auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto *contentSizer = new wxBoxSizer(wxHORIZONTAL);
-    contentSizer->Add(new wxStaticBitmap(this, wxID_ANY,
-                                         wxArtProvider::GetBitmap(wxART_WARNING, wxART_MESSAGE_BOX,
-                                                                  wxSize(32, 32))),
-                      0, wxALIGN_TOP | wxRIGHT, FromDIP(16));
-
-    auto *textSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto *primary = new wxStaticText(this, wxID_ANY, text.primary);
-    auto font = primary->GetFont();
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    primary->SetFont(font);
-
-    auto *secondary = new wxStaticText(this, wxID_ANY, text.secondary);
-    secondary->Wrap(FromDIP(460));
-
-    auto *question = new wxStaticText(this, wxID_ANY, _("Close without saving?"));
-    question->Wrap(FromDIP(460));
-
-    textSizer->Add(primary, 0, wxBOTTOM, FromDIP(8));
-    textSizer->Add(secondary, 0, wxBOTTOM, FromDIP(12));
-    textSizer->Add(question, 0);
-
-    contentSizer->Add(textSizer, 1, wxEXPAND);
-
-    topSizer->Add(contentSizer, 1, wxEXPAND | wxALL, FromDIP(20));
-
-    auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-
-    auto *cancelButton = new wxButton(this, wxID_CANCEL, _("Cancel"));
-    auto *closeButton = new wxButton(this, wxID_YES, _("Close Without Saving"));
-
-    buttonSizer->AddStretchSpacer();
-    buttonSizer->Add(cancelButton, 0, wxRIGHT, FromDIP(8));
-    buttonSizer->Add(closeButton, 0);
-
-    topSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, FromDIP(20));
-
-    SetSizerAndFit(topSizer);
-    SetMinSize(wxSize(FromDIP(540), -1));
-
-    SetEscapeId(wxID_CANCEL);
-    SetAffirmativeId(wxID_YES);
-
-    cancelButton->SetDefault();
-    cancelButton->SetFocus();
-
-    CentreOnParent();
-  }
-};
 
 } // namespace
 
@@ -1205,8 +1159,18 @@ void GameFrame::OnCloseWindow(wxCloseEvent &p_event)
   if (m_doc->IsModified()) {
     const auto warning = CloseWarningMessage(m_doc);
 
-    CloseWarningDialog dialog(this, warning);
-    if (dialog.ShowModal() != wxID_YES) {
+    AlertDialog dialog(this, _("Unsaved changes"), wxART_WARNING, warning.primary,
+                       warning.secondary, wxYES | wxNO | wxCANCEL);
+    dialog.SetButtonLabel(wxID_YES, _("Save"));
+    dialog.SetButtonLabel(wxID_NO, _("Don't save"));
+    dialog.SetDefaultButton(wxID_YES);
+    const int answer = dialog.ShowModal();
+    // Results and drawing settings survive only in a workspace file, so saving them from a game
+    // file asks where to save
+    const bool needsWorkspace =
+        m_doc->IsWorkspaceModified() &&
+        m_doc->GetCurrentSaveFormat() != GameDocument::GameSaveFormat::Workspace;
+    if (answer == wxID_CANCEL || (answer == wxID_YES && !SaveDocument(needsWorkspace))) {
       p_event.Veto();
       return;
     }
