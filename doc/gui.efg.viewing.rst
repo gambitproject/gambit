@@ -2,6 +2,8 @@ Formatting and labeling the tree
 =================================
 
 Gambit offers some options for customizing the display of game trees.
+These are on the :guilabel:`Format` menu, which is available only while
+the tree is shown.
 
 
 Labels on nodes and branches
@@ -9,41 +11,41 @@ Labels on nodes and branches
 
 The information displayed at the nodes and on the branches of the tree
 can be configured by selecting :menuselection:`Format --> Labels`,
-which displays the :guilabel:`tree labels` dialog.
+which displays the :guilabel:`Labels` dialog.
 
 Above and below each node, the following information can be displayed:
 
 
-:guilabel:`No label`
+:guilabel:`no label`
   The space is left blank.
 
-:guilabel:`The node's label`
+:guilabel:`the node's label`
   The text label assigned to the node. (This is the
   default labeling above each node.)
 
-:guilabel:`The player's name`
+:guilabel:`the player's name`
   The name of the player making the move at the node.
 
-:guilabel:`The information set's label`
+:guilabel:`the information set's label`
   The name of the information set to
   which the node belongs.
 
-:guilabel:`The information set's number`
+:guilabel:`the information set's number`
   A unique identifier of the information
   set, in the form player number:information set number. (This is the
   default labeling below each node.)
 
-:guilabel:`The realization probability`
+:guilabel:`the realization probability`
   The probability the node is reached.
   (Only displayed when a behavior strategy is selected to be displayed
   on the tree.)
 
-:guilabel:`The belief probability`
+:guilabel:`the belief probability`
   The probability a player assigns to being at
   the node, conditional on reaching the information set. (Only displayed
   when a behavior strategy is selected to be displayed on the tree.)
 
-:guilabel:`The payoff of reaching the node`
+:guilabel:`the payoff of reaching the node`
   The expected payoff to the player
   making the choice at the node, conditional on reaching the node. (Only
   displayed when a behavior strategy is selected to be displayed on the
@@ -54,14 +56,14 @@ Above and below each branch, the following information can be
 displayed:
 
 
-:guilabel:`No label`
+:guilabel:`no label`
   The space is left blank.
 
-:guilabel:`The name of the action`
+:guilabel:`the name of the action`
   The name of the action taken on the branch.
   (This it the default labeling above the branch.)
 
-:guilabel:`The probability the action is played`
+:guilabel:`the probability the action is played`
   For chance actions, the
   probability the branch is taken; this is always displayed. For player
   actions, the probability the action is taken in the selected profile
@@ -71,7 +73,7 @@ displayed:
   asterisk is shown for such action probabilities. (This is the default
   labeling below each branch.)
 
-:guilabel:`The value of the action`
+:guilabel:`the value of the action`
   The expected payoff to the player of taking
   the action, conditional on reaching the information set. (Only
   displayed when a behavior strategy is selected to be displayed on the
@@ -88,6 +90,9 @@ Gambit implements an automatic system for layout out game trees, which
 provides generally good results for most games. These can be adjusted
 by selecting :menuselection:`Format --> Layout`.
 The layout parameters are organized on three tabs.
+:guilabel:`Set to defaults` restores the default settings on all three
+tabs; as with any other change in the dialog, it takes effect when
+:guilabel:`OK` is clicked.
 
 The first tab,
 labeled :guilabel:`Nodes`, controls the size, location, and

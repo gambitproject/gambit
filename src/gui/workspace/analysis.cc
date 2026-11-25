@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/analysis.cc
+// FILE: src/gui/workspace/analysis.cc
 // Declaration of analysis storage classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,19 +20,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif // WX_PRECOMP
-#include <wx/tokenzr.h>
+#include <sstream>
+
 #include "games.h"
 #include "games/gametree.h"
 #include "games/workspace.h"
 
 #include "analysis.h"
-#include "gamedoc.h"
+#include "gameworkspace.h"
 
 namespace Gambit::GUI {
+GameAction ActionAt(const Game &p_game, int p_index)
+{
+  int index = 1;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        if (index++ == p_index) {
+          return action;
+        }
+      }
+    }
+  }
+  throw std::out_of_range("Action index out of range");
+}
+
 //=========================================================================
 //                     class AnalysisProfileList
 //=========================================================================
@@ -41,7 +53,7 @@ template <class T>
 void AnalysisProfileList<T>::AddProfile(const MixedStrategyProfile<T> &p_profile)
 {
   m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile));
-  if (As<GameTreeRep>(m_doc->GetGame())) {
+  if (As<GameTreeRep>(m_workspace->GetGame())) {
     m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
   }
   m_current = m_mixedProfiles.size();
@@ -51,21 +63,23 @@ template <class T>
 void AnalysisProfileList<T>::AddProfile(const MixedBehaviorProfile<T> &p_profile)
 {
   m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(p_profile));
-  m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(p_profile.ToMixedProfile()));
   m_current = m_behavProfiles.size();
 }
 
-template <class T> void AnalysisProfileList<T>::BuildNfg()
+template <class T>
+const MixedStrategyProfile<T> &AnalysisProfileList<T>::GetMixedProfile(int p_index) const
 {
-  for (const auto &profile : m_behavProfiles) {
-    m_mixedProfiles.push_back(
-        std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
+  while (static_cast<int>(m_mixedProfiles.size()) < p_index &&
+         m_mixedProfiles.size() < m_behavProfiles.size()) {
+    m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(
+        m_behavProfiles[m_mixedProfiles.size() + 1]->ToMixedProfile()));
   }
+  return *m_mixedProfiles[p_index];
 }
 
 template <class T> int AnalysisProfileList<T>::NumProfiles() const
 {
-  return As<GameTreeRep>(m_doc->GetGame()) ? m_behavProfiles.size() : m_mixedProfiles.size();
+  return As<GameTreeRep>(m_workspace->GetGame()) ? m_behavProfiles.size() : m_mixedProfiles.size();
 }
 
 template <class T> void AnalysisProfileList<T>::Clear()
@@ -82,30 +96,33 @@ template <class T> void AnalysisProfileList<T>::Clear()
 // Use anonymous namespace to make these helpers private
 namespace {
 
-template <class T>
-MixedStrategyProfile<T> TextToMixedProfile(GameDocument *p_doc, const wxString &p_text)
+// The next comma-separated entry of p_text, as a value of type T
+template <class T> T NextEntry(std::istringstream &p_text)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile(static_cast<T>(0)));
+  std::string entry;
+  std::getline(p_text, entry, ',');
+  return static_cast<T>(lexical_cast<Rational>(entry));
+}
 
-  wxStringTokenizer tok(p_text, wxT(","));
-
+template <class T>
+MixedStrategyProfile<T> TextToMixedProfile(const Game &p_game, const std::string &p_text)
+{
+  MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
+  std::istringstream text(p_text);
   for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-    profile[i] = static_cast<T>(lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str())));
+    profile[i] = NextEntry<T>(text);
   }
-
   return profile;
 }
 
 template <class T>
-MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &p_text)
+MixedBehaviorProfile<T> TextToBehavProfile(const Game &p_game, const std::string &p_text)
 {
-  MixedBehaviorProfile<T> profile(p_doc->GetGame());
-
-  wxStringTokenizer tok(p_text, wxT(","));
+  MixedBehaviorProfile<T> profile(p_game);
+  std::istringstream text(p_text);
   for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-    profile[i] = static_cast<T>(lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str())));
+    profile[i] = NextEntry<T>(text);
   }
-
   return profile;
 }
 
@@ -115,18 +132,18 @@ MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &
 template <class T> void AnalysisProfileList<T>::Load(const WorkspaceFile::Analysis &p_analysis)
 {
   Clear();
-  m_description = wxString(p_analysis.description.c_str(), *wxConvCurrent);
+  m_description = p_analysis.description;
   for (const auto &saved_profile : p_analysis.profiles) {
     if (saved_profile.type == "behav") {
-      const MixedBehaviorProfile<T> profile = TextToBehavProfile<T>(
-          m_doc, wxString(saved_profile.probabilities.c_str(), *wxConvCurrent));
+      const MixedBehaviorProfile<T> profile =
+          TextToBehavProfile<T>(m_workspace->GetGame(), saved_profile.probabilities);
       m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
       m_isBehav = true;
       m_current = m_behavProfiles.size();
     }
     else {
-      const MixedStrategyProfile<T> profile = TextToMixedProfile<T>(
-          m_doc, wxString(saved_profile.probabilities.c_str(), *wxConvCurrent));
+      const MixedStrategyProfile<T> profile =
+          TextToMixedProfile<T>(m_workspace->GetGame(), saved_profile.probabilities);
       m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile));
       m_isBehav = false;
       m_current = m_mixedProfiles.size();
@@ -139,14 +156,14 @@ template <class T> std::string AnalysisProfileList<T>::GetPayoff(int pl, int p_i
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    if (As<GameTreeRep>(m_doc->GetGame())) {
+    if (As<GameTreeRep>(m_workspace->GetGame())) {
       return lexical_cast<std::string>(
-          m_behavProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
-          m_doc->GetStyle().NumDecimals());
+          m_behavProfiles[index]->GetPayoff(m_workspace->GetGame()->GetPlayer(pl)),
+          m_workspace->GetStyle().NumDecimals());
     }
     return lexical_cast<std::string>(
-        m_mixedProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
-        m_doc->GetStyle().NumDecimals());
+        GetMixedProfile(index).GetPayoff(m_workspace->GetGame()->GetPlayer(pl)),
+        m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -160,7 +177,7 @@ std::string AnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int p_
 
   try {
     return lexical_cast<std::string>(m_behavProfiles[index]->GetRealizProb(p_node),
-                                     m_doc->GetStyle().NumDecimals());
+                                     m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -179,7 +196,7 @@ std::string AnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int p_
   try {
     auto belief = m_behavProfiles[index]->GetBeliefProb(p_node);
     if (belief.has_value()) {
-      return lexical_cast<std::string>(belief.value(), m_doc->GetStyle().NumDecimals());
+      return lexical_cast<std::string>(belief.value(), m_workspace->GetStyle().NumDecimals());
     }
     // We don't compute assessments yet!
     return "*";
@@ -197,7 +214,7 @@ std::string AnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int p_p
 
   try {
     return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node)[p_player],
-                                     m_doc->GetStyle().NumDecimals());
+                                     m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -215,7 +232,7 @@ std::string AnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, int p
 
   try {
     return lexical_cast<std::string>(m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()),
-                                     m_doc->GetStyle().NumDecimals());
+                                     m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -234,7 +251,7 @@ std::string AnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, int 
   try {
     auto payoff = m_behavProfiles[index]->GetPayoff(p_node->GetInfoset());
     if (payoff.has_value()) {
-      return lexical_cast<std::string>(payoff.value(), m_doc->GetStyle().NumDecimals());
+      return lexical_cast<std::string>(payoff.value(), m_workspace->GetStyle().NumDecimals());
     }
     // In the absence of beliefs, this is not well-defined in general
     return "*";
@@ -267,7 +284,7 @@ std::string AnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_
     }
 
     return lexical_cast<std::string>(profile.GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
-                                     m_doc->GetStyle().NumDecimals());
+                                     m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -277,16 +294,27 @@ std::string AnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_
 template <class T>
 std::string AnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
 {
+  try {
+    return GetActionProb(ActionAt(m_workspace->GetGame(), p_action), p_index);
+  }
+  catch (std::out_of_range &) {
+    return "";
+  }
+}
+
+template <class T>
+std::string AnalysisProfileList<T>::GetActionProb(const GameAction &p_action, int p_index) const
+{
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
 
-    if (!profile.IsDefinedAt(m_doc->GetAction(p_action)->GetInfoset())) {
+    if (!profile.IsDefinedAt(p_action->GetInfoset())) {
       return "*";
     }
 
-    return lexical_cast<std::string>(profile[p_action], m_doc->GetStyle().NumDecimals());
+    return lexical_cast<std::string>(profile[p_action], m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -307,7 +335,7 @@ std::string AnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p
     std::optional<T> actionValue =
         m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act));
     if (actionValue.has_value()) {
-      return lexical_cast<std::string>(actionValue.value(), m_doc->GetStyle().NumDecimals());
+      return lexical_cast<std::string>(actionValue.value(), m_workspace->GetStyle().NumDecimals());
     }
     // In the absence of beliefs, this is not well-defined
     return "*";
@@ -323,8 +351,8 @@ std::string AnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_index)
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
-    return lexical_cast<std::string>(profile[p_strategy], m_doc->GetStyle().NumDecimals());
+    const MixedStrategyProfile<T> &profile = GetMixedProfile(index);
+    return lexical_cast<std::string>(profile[p_strategy], m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -337,9 +365,10 @@ std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index
   const int index = (p_index == -1) ? m_current : p_index;
 
   try {
-    const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
+    const MixedStrategyProfile<T> &profile = GetMixedProfile(index);
     const GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
-    return lexical_cast<std::string>(profile.GetPayoff(strategy), m_doc->GetStyle().NumDecimals());
+    return lexical_cast<std::string>(profile.GetPayoff(strategy),
+                                     m_workspace->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -377,7 +406,7 @@ std::optional<T> AnalysisProfileList<T>::GetActionProbEntry(int p_action, int p_
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[p_index];
 
-    if (!profile.IsDefinedAt(m_doc->GetAction(p_action)->GetInfoset())) {
+    if (!profile.IsDefinedAt(ActionAt(m_workspace->GetGame(), p_action)->GetInfoset())) {
       return {};
     }
 
@@ -392,7 +421,7 @@ template <class T>
 std::optional<T> AnalysisProfileList<T>::GetStrategyProbEntry(int p_strategy, int p_index) const
 {
   try {
-    return (*m_mixedProfiles[p_index])[p_strategy];
+    return GetMixedProfile(p_index)[p_strategy];
   }
   catch (std::out_of_range &) {
     return {};
@@ -416,8 +445,8 @@ int AnalysisProfileList<T>::CompareStrategyProb(int p_strategy, int p_left, int 
 template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 {
   WorkspaceFile::Analysis result;
-  result.description = m_description.ToStdString();
-  if (As<GameTreeRep>(m_doc->GetGame())) {
+  result.description = m_description;
+  if (As<GameTreeRep>(m_workspace->GetGame())) {
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
       std::ostringstream probabilities;
@@ -432,7 +461,7 @@ template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
   }
   else {
     for (int j = 1; j <= NumProfiles(); j++) {
-      const MixedStrategyProfile<T> &mixed = *m_mixedProfiles[j];
+      const MixedStrategyProfile<T> &mixed = GetMixedProfile(j);
       std::ostringstream probabilities;
       for (size_t k = 1; k <= mixed.MixedProfileLength(); k++) {
         if (k > 1) {
@@ -449,5 +478,168 @@ template <class T> WorkspaceFile::Analysis AnalysisProfileList<T>::Save() const
 // Explicit instantiations
 template class AnalysisProfileList<double>;
 template class AnalysisProfileList<Rational>;
+
+//=========================================================================
+//                   class StrategyDominanceStack
+//=========================================================================
+
+StrategyDominanceStack::StrategyDominanceStack(const GameWorkspace *p_workspace, bool p_strict)
+  : m_workspace(p_workspace), m_strict(p_strict)
+{
+  Reset();
+}
+
+void StrategyDominanceStack::SetStrict(bool p_strict)
+{
+  if (m_strict != p_strict) {
+    Reset();
+  }
+  m_strict = p_strict;
+}
+
+void StrategyDominanceStack::Reset()
+{
+  m_supports.clear();
+  m_current = 1;
+  m_noFurther = false;
+}
+
+void StrategyDominanceStack::EnsureFullSupport() const
+{
+  if (m_supports.empty()) {
+    m_supports.push_back(std::make_shared<StrategySupportProfile>(m_workspace->GetGame()));
+  }
+}
+
+bool StrategyDominanceStack::NextLevel()
+{
+  EnsureFullSupport();
+  if (m_current < m_supports.size()) {
+    m_current++;
+    return true;
+  }
+
+  if (m_noFurther) {
+    return false;
+  }
+
+  const StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+
+  if (newSupport != *m_supports[m_current]) {
+    m_supports.push_back(std::make_shared<StrategySupportProfile>(newSupport));
+    m_current++;
+    return true;
+  }
+  else {
+    m_noFurther = true;
+    return false;
+  }
+}
+
+bool StrategyDominanceStack::PreviousLevel()
+{
+  if (m_current > 1) {
+    m_current--;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+//=========================================================================
+//                          class AnalysisWorkspace
+//=========================================================================
+
+AnalysisWorkspace::AnalysisWorkspace(const GameWorkspace *p_workspace)
+  : m_workspace(p_workspace), m_stratSupports(p_workspace, true)
+{
+}
+
+void AnalysisWorkspace::ResetForGameChange()
+{
+  m_stratSupports.Reset();
+
+  // Even though modifications only to payoffs doesn't make the
+  // computed profiles invalid for the edited game, it does mean
+  // that, in general, they won't be Nash.  For now, to avoid confusion,
+  // we will wipe them out.
+  m_profiles.clear();
+  m_currentProfileList = 0;
+}
+
+void AnalysisWorkspace::BuildNfg() { m_stratSupports.Reset(); }
+
+void AnalysisWorkspace::AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
+{
+  m_profiles.push_back(p_profs);
+  m_currentProfileList = m_profiles.size();
+}
+
+void AnalysisWorkspace::SelectEquilibriumOutput(int p_index) { m_currentProfileList = p_index; }
+
+void AnalysisWorkspace::SelectProfile(int p_profile)
+{
+  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
+}
+
+void AnalysisWorkspace::SetDominanceStrictness(bool p_strict)
+{
+  m_stratSupports.SetStrict(p_strict);
+}
+
+bool AnalysisWorkspace::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
+
+bool AnalysisWorkspace::NextDominanceLevel() { return m_stratSupports.NextLevel(); }
+
+void AnalysisWorkspace::PreviousDominanceLevel() { m_stratSupports.PreviousLevel(); }
+
+void AnalysisWorkspace::TopDominanceLevel() { m_stratSupports.TopLevel(); }
+
+bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
+
+int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
+
+std::vector<WorkspaceFile::Analysis> AnalysisWorkspace::Save() const
+{
+  std::vector<WorkspaceFile::Analysis> result;
+  for (const auto &analysis : m_profiles) {
+    result.push_back(analysis->Save());
+  }
+  return result;
+}
+
+bool AnalysisWorkspace::Load(const std::vector<WorkspaceFile::Analysis> &p_analyses)
+{
+  m_stratSupports.Reset();
+
+  m_profiles.clear();
+
+  for (const auto &analysis : p_analyses) {
+    // We need to try to guess whether the profiles are float or rational
+    bool isFloat = false;
+    for (const auto &profile : analysis.profiles) {
+      if (profile.probabilities.find('.') != std::string::npos ||
+          profile.probabilities.find('e') != std::string::npos) {
+        isFloat = true;
+        break;
+      }
+    }
+    if (isFloat) {
+      const auto plist = std::make_shared<AnalysisProfileList<double>>(m_workspace, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
+    }
+    else {
+      const auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_workspace, false);
+      plist->Load(analysis);
+      m_profiles.push_back(plist);
+    }
+  }
+
+  m_currentProfileList = m_profiles.size();
+
+  return true;
+}
 
 } // namespace Gambit::GUI

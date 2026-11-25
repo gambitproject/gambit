@@ -18,6 +18,7 @@
 #include "games.h"
 
 #include "welcome.h"
+#include "dialogstyle.h"
 #include "app.h"
 #include "dlnewtable.h"
 #include "gamedoc.h"
@@ -36,10 +37,11 @@ constexpr int ID_WELCOME_NEW_NORMAL_FORM = wxID_HIGHEST + 101;
 constexpr int ID_WELCOME_NEW_EXTENSIVE_FORM = wxID_HIGHEST + 102;
 constexpr int ID_WELCOME_RECENT = wxID_HIGHEST + 103;
 
-constexpr int BUTTON_WIDTH = 340;
-constexpr int BUTTON_HEIGHT = 72;
+/// Size of the large buttons, in device-independent pixels
+constexpr int c_buttonWidth = 340;
+constexpr int c_buttonHeight = 72;
 /// The width of the dropdown part of the "Open existing game" split button.
-constexpr int RECENT_BUTTON_WIDTH = 36;
+constexpr int c_recentButtonWidth = 36;
 
 /// Write the user's home directory as "~".
 wxString AbbreviateHomeDirectory(const wxString &p_path)
@@ -291,8 +293,8 @@ RecentFilesPopup::RecentFilesPopup(WelcomePanel *p_panel, int p_width)
   heading->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 
   auto *sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, 12);
-  sizer->Add(m_list, 0, wxEXPAND | wxTOP | wxBOTTOM, 6);
+  sizer->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, FromDIP(c_spaceMargin));
+  sizer->Add(m_list, 0, wxEXPAND | wxTOP | wxBOTTOM, FromDIP(c_spaceTight));
   SetSizer(sizer);
 }
 
@@ -352,23 +354,23 @@ void WelcomePanel::CreateControls()
                               "Create a game with a tree representation");
 
   m_openButton->SetBitmap(wxBitmapBundle::FromSVG(open_svg, wxSize(24, 24)));
-  m_openButton->SetBitmapMargins(24, 12);
+  m_openButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
 
   m_newNormalFormButton->SetBitmap(wxBitmapBundle::FromSVG(newtable_svg, wxSize(24, 24)));
-  m_newNormalFormButton->SetBitmapMargins(24, 12);
+  m_newNormalFormButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
 
   m_newExtensiveFormButton->SetBitmap(wxBitmapBundle::FromSVG(newtree_svg, wxSize(24, 24)));
-  m_newExtensiveFormButton->SetBitmapMargins(24, 12);
+  m_newExtensiveFormButton->SetBitmapMargins(FromDIP(wxSize(24, 12)));
 
   // The "Open" button is a split button: the dropdown to its right lists recent files.
-  m_openButton->SetMinSize(wxSize(BUTTON_WIDTH - RECENT_BUTTON_WIDTH, BUTTON_HEIGHT));
-  m_newNormalFormButton->SetMinSize(wxSize(BUTTON_WIDTH, BUTTON_HEIGHT));
-  m_newExtensiveFormButton->SetMinSize(wxSize(BUTTON_WIDTH, BUTTON_HEIGHT));
+  m_openButton->SetMinSize(FromDIP(wxSize(c_buttonWidth - c_recentButtonWidth, c_buttonHeight)));
+  m_newNormalFormButton->SetMinSize(FromDIP(wxSize(c_buttonWidth, c_buttonHeight)));
+  m_newExtensiveFormButton->SetMinSize(FromDIP(wxSize(c_buttonWidth, c_buttonHeight)));
 
   m_recentButton = new wxButton(this, ID_WELCOME_RECENT, wxEmptyString, wxDefaultPosition,
                                 wxDefaultSize, wxBU_EXACTFIT);
   m_recentButton->SetBitmap(MakeDropArrowBitmap());
-  m_recentButton->SetMinSize(wxSize(RECENT_BUTTON_WIDTH, BUTTON_HEIGHT));
+  m_recentButton->SetMinSize(FromDIP(wxSize(c_recentButtonWidth, c_buttonHeight)));
   RefreshRecentFiles();
 
   Bind(wxEVT_BUTTON, &WelcomePanel::OnOpen, this, ID_WELCOME_OPEN);
@@ -390,19 +392,19 @@ void WelcomePanel::LayoutControls()
   auto *row = new wxBoxSizer(wxHORIZONTAL);
   auto *content = new wxBoxSizer(wxVERTICAL);
 
-  content->Add(m_logoBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 16);
-  content->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 20);
+  content->Add(m_logoBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, FromDIP(16));
+  content->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, FromDIP(20));
 
   auto *openRow = new wxBoxSizer(wxHORIZONTAL);
   openRow->Add(m_openButton, 1, wxEXPAND);
   openRow->Add(m_recentButton, 0, wxEXPAND);
 
-  content->Add(openRow, 0, wxEXPAND | wxBOTTOM, 16);
-  content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, 16);
+  content->Add(openRow, 0, wxEXPAND | wxBOTTOM, FromDIP(16));
+  content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, FromDIP(16));
   content->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
 
   row->AddStretchSpacer(1);
-  row->Add(content, 0, wxEXPAND | wxLEFT | wxRIGHT, 24);
+  row->Add(content, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(24));
   row->AddStretchSpacer(1);
 
   outer->AddStretchSpacer(1);
@@ -427,7 +429,7 @@ void WelcomePanel::OnNewExtensiveForm(wxCommandEvent &)
 void WelcomePanel::OnShowRecent(wxCommandEvent &)
 {
   if (!m_recentPopup) {
-    m_recentPopup = new RecentFilesPopup(this, BUTTON_WIDTH);
+    m_recentPopup = new RecentFilesPopup(this, FromDIP(c_buttonWidth));
   }
   if (m_recentPopup->WasJustDismissed()) {
     return;
@@ -470,6 +472,7 @@ WelcomeFrame::WelcomeFrame(wxWindow *parent)
   : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 500),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
+  SetSize(FromDIP(wxSize(600, 500)));
   CreateControls();
   LayoutControls();
 

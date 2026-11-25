@@ -30,7 +30,7 @@
 
 #include "efgdisplay.h"
 #include "menuconst.h"
-#include "dlexcept.h"
+#include "dialogstyle.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
 
@@ -54,10 +54,13 @@ void EfgDisplay::MakeMenus()
   m_nodeMenu->AppendSeparator();
 
   // Properties dialogs for the node and the move at it, plus the one quick action that also
-  // operates on the move's infoset (revealing it to other players).
-  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties"), _("Edit properties of the node"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move properties"), _("Edit properties of the move"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), _("Reveal choice at node"));
+  // operates on the move's infoset (refining the information sets below it by its action).
+  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties..."),
+                     _("Edit properties of the node"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move properties..."),
+                     _("Edit properties of the move"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_REFINE_INFOSETS, _("&Refine information sets by this move..."),
+                     _("Refine the information sets below this node by the action taken here"));
   m_nodeMenu->AppendSeparator();
 
   m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_TREE, _("&Delete subtree"),
@@ -68,7 +71,8 @@ void EfgDisplay::MakeMenus()
                      _("Remove the outcome from the selected node"));
   m_nodeMenu->AppendSeparator();
 
-  m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties"), _("Edit properties of the game"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("&Game properties..."),
+                     _("Edit properties of the game"));
 }
 
 void EfgDisplay::UpdateNewMoveMenu()
@@ -102,7 +106,7 @@ void EfgDisplay::UpdateNewMoveMenu()
     }
 
     auto *item = new wxMenuItem(m_newMoveMenu, id, label);
-    item->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(player)));
+    item->SetBitmap(MakeColorSwatch(m_doc->GetPlayerColor(player)));
     m_newMoveMenu->Append(item);
   }
 }
@@ -142,7 +146,7 @@ void EfgDisplay::UpdateReassignPlayerMenu()
     }
 
     auto *item = new wxMenuItem(m_reassignPlayerMenu, id, label);
-    item->SetBitmap(MakeColorSwatch(m_doc->GetStyle().GetPlayerColor(player)));
+    item->SetBitmap(MakeColorSwatch(m_doc->GetPlayerColor(player)));
     m_reassignPlayerMenu->Append(item);
 
     if (m_contextNode->GetPlayer() == player) {
@@ -172,7 +176,7 @@ void EfgDisplay::OnNewMoveMenu(wxCommandEvent &p_event)
     }
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
@@ -189,10 +193,10 @@ void EfgDisplay::OnReassignPlayerMenu(wxCommandEvent &p_event)
   const GamePlayer player = m_reassignPlayerList[index];
 
   try {
-    m_doc->DoSetPlayer(m_contextNode, player);
+    m_doc->Apply(SetMovePlayer{.node = m_contextNode, .player = player});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
@@ -200,12 +204,13 @@ void EfgDisplay::UpdateNodeMenu(const GameNode &p_node)
 {
   m_contextNode = p_node;
 
-  m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL,
-                     p_node && p_node->GetInfoset() &&
-                         !m_doc->GetGame()->IsAbsentMinded(p_node->GetInfoset()));
-  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, p_node && !p_node->IsTerminal());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, p_node && p_node->GetParent());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, p_node && !p_node->GetOutcome()->IsNull());
+  m_nodeMenu->Enable(
+      GBT_MENU_EDIT_REFINE_INFOSETS,
+      p_node && m_doc->CanApply(RefineInfosets{.infoset = p_node->GetInfoset(), .players = {}}));
+  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, m_doc->CanApply(DeleteTree{.node = p_node}));
+  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, m_doc->CanApply(DeleteParent{.node = p_node}));
+  m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME,
+                     m_doc->CanApply(RemoveNodeOutcome{.node = p_node}));
   m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, static_cast<bool>(p_node));
   m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, p_node && p_node->GetInfoset());
 
@@ -269,49 +274,47 @@ void EfgDisplay::OnRightClick(wxMouseEvent &p_event)
 //              EfgDisplay: Node menu command handlers
 //---------------------------------------------------------------------
 
-std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
+std::optional<std::vector<GamePlayer>> ChooseRefiningPlayers(wxWindow *p_parent,
+                                                             const GameDocument &p_doc);
 
 void EfgDisplay::OnEditDeleteTree(wxCommandEvent &)
 {
   try {
-    m_doc->DoDeleteTree(m_contextNode);
+    m_doc->Apply(DeleteTree{.node = m_contextNode});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
 void EfgDisplay::OnEditDeleteParent(wxCommandEvent &)
 {
   try {
-    m_doc->DoDeleteParent(m_contextNode);
+    m_doc->Apply(DeleteParent{.node = m_contextNode});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
 void EfgDisplay::OnEditRemoveOutcome(wxCommandEvent &)
 {
   try {
-    m_doc->DoRemoveOutcome(m_contextNode);
+    m_doc->Apply(RemoveNodeOutcome{.node = m_contextNode});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
-void EfgDisplay::OnEditReveal(wxCommandEvent &)
+void EfgDisplay::OnEditRefineInfosets(wxCommandEvent &)
 {
-  if (const auto players = RevealMove(this, m_doc->GetGame()); players) {
+  if (const auto players = ChooseRefiningPlayers(this, *m_doc); players) {
     try {
-      const auto &infoset = m_contextNode->GetInfoset();
-      for (const auto &player : *players) {
-        m_doc->DoRevealAction(infoset, player);
-      }
+      m_doc->Apply(RefineInfosets{.infoset = m_contextNode->GetInfoset(), .players = *players});
     }
     catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
+      ShowInternalError(this, ex.what());
     }
   }
 }
@@ -321,25 +324,15 @@ void EfgDisplay::OnEditNode(wxCommandEvent &)
   EditNodeDialog dialog(this, m_contextNode);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoSetNodeLabel(m_contextNode, dialog.GetNodeLabel());
-      if (dialog.GetOutcome() > 0) {
-        m_doc->DoSetOutcome(m_contextNode, m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
-      }
-      else {
-        m_doc->DoSetOutcome(m_contextNode, nullptr);
-      }
-
-      if (!m_contextNode->IsTerminal() && dialog.GetInfoset() != m_contextNode->GetInfoset()) {
-        if (dialog.GetInfoset() == nullptr) {
-          m_doc->DoLeaveInfoset(m_contextNode);
-        }
-        else {
-          m_doc->DoSetInfoset(m_contextNode, dialog.GetInfoset());
-        }
-      }
+      m_doc->Apply(EditNode{.node = m_contextNode,
+                            .label = dialog.GetNodeLabel().ToStdString(wxConvUTF8),
+                            .outcome = (dialog.GetOutcome() > 0)
+                                           ? m_doc->GetGame()->GetOutcome(dialog.GetOutcome())
+                                           : GameOutcome(nullptr),
+                            .infoset = dialog.GetInfoset()});
     }
     catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
+      ShowInternalError(this, ex.what());
     }
   }
 }
@@ -354,10 +347,10 @@ void EfgDisplay::OnEditMove(wxCommandEvent &)
   EditMoveDialog dialog(this, m_doc, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      m_doc->DoEditMove(infoset, dialog.GetEdit());
+      m_doc->Apply(dialog.GetEdit());
     }
     catch (std::exception &ex) {
-      ExceptionDialog(this, ex.what()).ShowModal();
+      ShowInternalError(this, ex.what());
     }
   }
 }

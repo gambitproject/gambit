@@ -137,6 +137,13 @@ class TreeLayout final : public GameView {
   std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
 
   mutable int m_maxX{0}, m_maxY{0};
+  // Fonts are built once (the label font once per pass over the nodes) rather than for each
+  // node, as building a font is slow on some platforms
+  mutable wxFont m_labelFont;
+  const wxFont m_outcomeFont{10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
+  const wxFont m_payoffFont{9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
+  const wxFont m_noOutcomeFont{9, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD};
+  const wxFont m_fractionFont{7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD};
   int m_infosetSpacing{40};
 
   const int c_leftMargin{20}, c_topMargin{40}, c_bottomMargin{25};
@@ -180,6 +187,7 @@ public:
   explicit TreeLayout(const std::shared_ptr<GameDocument> &p_doc) : GameView(p_doc) {}
   ~TreeLayout() override = default;
 
+  /// Positions every node and computes its labels and their geometry
   void Layout(const Game &);
   void GenerateLabels() const;
 

@@ -54,31 +54,28 @@ using SolverFunction =
 
 //
 // Each method spec below provides its own MakeSolver(), returning a
-// SolverFunction that runs it in-process, or std::nullopt if its solver
-// hasn't been instrumented with a CancelToken yet (the default for
-// everything not yet touched). This is the only thing NashComputationSpec
-// needs from whichever alternative its `method` variant holds -- adding or
-// instrumenting a method never requires touching any other method's spec,
+// SolverFunction that runs it in-process. This is the only thing
+// NashComputationSpec needs from whichever alternative its `method` variant
+// holds -- adding a method never requires touching any other method's spec,
 // NashComputationSpec itself, or any of its callers.
 //
-// The non-trivial ones (those returning more than std::nullopt) are
-// implemented out of line, in nashspec.cc, which is the only place that
-// needs to depend on the solvers' own headers.
+// They are implemented out of line, in nashspec.cc, which is the only place
+// that needs to depend on the solvers' own headers.
 //
 
 struct EnumPureNashSpec {
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct EnumMixedNashSpec {
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct EnumPolyNashSpec {
   std::optional<size_t> stopAfter{std::nullopt};
   double maxRegret{1.0e-4};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct GNMNashSpec {
@@ -88,13 +85,13 @@ struct GNMNashSpec {
   int localNewtonInterval{3};
   int localNewtonMaxIterations{10};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+  SolverFunction MakeSolver(NashRepresentation) const;
 };
 
 struct IPANashSpec {
   int perturbations{1};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+  SolverFunction MakeSolver(NashRepresentation) const;
 };
 
 struct HPNashSpec {
@@ -104,18 +101,18 @@ struct HPNashSpec {
   int priors{10};
   double maxRegret{1.0e-8};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+  SolverFunction MakeSolver(NashRepresentation) const;
 };
 
 struct LPNashSpec {
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct LCPNashSpec {
   std::optional<size_t> stopAfter{std::nullopt};
   int maxDepth{0};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct LiapNashSpec {
@@ -123,7 +120,7 @@ struct LiapNashSpec {
   double maxRegret{1.0e-4};
   int maxIterations{1000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+  SolverFunction MakeSolver(NashRepresentation) const;
 };
 
 struct LogitNashSpec {
@@ -132,7 +129,7 @@ struct LogitNashSpec {
   double firstStep{0.03};
   double maxAcceleration{1.1};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation p_representation) const;
+  SolverFunction MakeSolver(NashRepresentation p_representation) const;
 };
 
 struct SimpdivNashSpec {
@@ -142,7 +139,7 @@ struct SimpdivNashSpec {
   int leashLength{0};
   Rational maxRegret{1, 10000000};
 
-  std::optional<SolverFunction> MakeSolver(NashRepresentation) const;
+  SolverFunction MakeSolver(NashRepresentation) const;
 };
 
 using NashMethodSpec = std::variant<EnumPureNashSpec, EnumMixedNashSpec, EnumPolyNashSpec,
@@ -157,12 +154,8 @@ struct NashComputationSpec {
   /// Whether the computation solves for agent Nash rather than Nash equilibria.
   bool agentNash{false};
 
-  /// Build a function that runs this computation in-process on a worker
-  /// thread, or std::nullopt if this method/representation combination
-  /// has not been instrumented with cooperative cancellation -- callers
-  /// should fall back to running the external gambit-<method> process in
-  /// that case. Just forwards to whichever method's own MakeSolver().
-  std::optional<SolverFunction> MakeSolver() const
+  /// Build a function that runs this computation in-process on a worker thread
+  SolverFunction MakeSolver() const
   {
     return std::visit([this](const auto &m) { return m.MakeSolver(representation); }, method);
   }

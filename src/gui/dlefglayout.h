@@ -28,18 +28,20 @@
 
 namespace Gambit::GUI {
 class LayoutDialog final : public wxDialog {
-  bool m_toDefaults{false};
   wxNotebook *m_notebook;
+
+  void AddPages(const TreeStyle &p_settings);
 
   // Event handlers
   void OnSetDefaults(wxCommandEvent &);
 
 public:
   // Lifecycle
-  LayoutDialog(wxWindow *p_parent, const TreeRenderConfig &);
+  LayoutDialog(wxWindow *p_parent, const TreeStyle &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  void GetSettings(TreeRenderConfig &) const;
+  /// Writes the layout settings into a style, leaving its other settings as they are
+  void GetSettings(TreeStyle &) const;
 };
 } // namespace Gambit::GUI
 

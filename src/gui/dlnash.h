@@ -68,7 +68,7 @@ class NashChoiceDialog final : public wxDialog {
 public:
   NashChoiceDialog(wxWindow *, const std::shared_ptr<GameDocument> &);
 
-  std::shared_ptr<AnalysisOutput> GetCommand() const;
+  std::shared_ptr<AnalysisOutput> CreateOutput() const;
 
   bool UseStrategic() const;
 

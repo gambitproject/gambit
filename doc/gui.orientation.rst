@@ -23,8 +23,8 @@ disabled, with a tooltip explaining why.
 Two additional panels are available. Selecting
 :menuselection:`Tools --> Dominance` toggles
 the display of an additional toolbar across the top of the window.
-This toolbar controls the indication and elimination of actions or
-strategies that are dominated. The use of this toolbar is discussed in
+This toolbar controls the indication and elimination of strategies
+that are dominated. The use of this toolbar is discussed in
 :ref:`dominated-strategies`.
 
 Selecting :menuselection:`View --> Profiles`,

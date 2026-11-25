@@ -38,6 +38,9 @@ END_EVENT_TABLE()
 
 static bool IsNumeric(const wxString &p_value)
 {
+  if (p_value.empty()) {
+    return false;
+  }
   bool seenDigit = false, seenSeparator = false;
 
   for (int i = 0; std::cmp_less(i, p_value.Length()); i++) {
@@ -100,7 +103,7 @@ bool NumberValidator::Copy(const NumberValidator &p_validator)
   return true;
 }
 
-bool NumberValidator::Validate(wxWindow *p_parent)
+bool NumberValidator::Validate(wxWindow *)
 {
   if (!m_stringValue) {
     return false;
@@ -113,28 +116,11 @@ bool NumberValidator::Validate(wxWindow *p_parent)
   }
 
   const wxString value(control->GetValue());
-
   if (!IsNumeric(value)) {
-    wxMessageBox(_T("The value ") + value + _T(" in ") + m_validatorWindow->GetName() +
-                     _T(" is not a valid number."),
-                 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
-    m_validatorWindow->SetFocus();
     return false;
   }
-
-  if ((m_hasMin && lexical_cast<Rational>(std::string(value.mb_str())) < m_minValue) ||
-      (m_hasMax && lexical_cast<Rational>(std::string(value.mb_str())) > m_maxValue)) {
-    wxMessageBox(
-        _T("The value ") + value + _T(" in ") + m_validatorWindow->GetName() +
-            _T(" is out of the range [") +
-            wxString(lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent) + _T(", ") +
-            wxString(lexical_cast<std::string>(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
-        _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
-    m_validatorWindow->SetFocus();
-    return false;
-  }
-
-  return true;
+  const auto number = lexical_cast<Rational>(std::string(value.mb_str()));
+  return !((m_hasMin && number < m_minValue) || (m_hasMax && number > m_maxValue));
 }
 
 bool NumberValidator::TransferToWindow()

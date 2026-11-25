@@ -30,8 +30,11 @@ class EditNodeDialog final : public wxDialog {
   GameNode m_node;
   LabelTextCtrl *m_nodeLabel;
   wxChoice *m_outcome, *m_infoset;
+  wxStaticText *m_errorText;
+  wxColour m_defaultLabelBg;
   Array<GameInfoset> m_infosetList;
 
+  void UpdateValidation();
   void OnOK(wxCommandEvent &);
 
 public:

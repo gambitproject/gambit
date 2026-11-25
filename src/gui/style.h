@@ -26,183 +26,36 @@
 #include <functional>
 
 #include "games/game.h"
-#include "games/workspace.h"
-
-class wxFont;
+#include "workspace/treestyle.h"
 
 namespace Gambit::GUI {
 
-// Forward-declared rather than included: gamedoc.h includes this header, so
-// including gamedoc.h here would be circular. Only a reference is needed at
-// this point; the label-generator methods that use it are implemented in
-// style.cc, which can include gamedoc.h freely.
 class AnalysisWorkspace;
 
-/// A function that computes a node's (or a branch's) label text. Callers
-/// (TreeLayout) don't need to know how many label styles exist or what each
-/// one means -- see TreeRenderConfig::GetNodeLabelGenerator/
-/// GetBranchLabelGenerator, which translate a style enum into one of these.
+/// A function that computes the label text of a node, or of the branch leading to it
 using LabelGenerator = std::function<wxString(const GameNode &)>;
 
-enum NodeTokenStyle {
-  GBT_NODE_TOKEN_LINE,
-  GBT_NODE_TOKEN_BOX,
-  GBT_NODE_TOKEN_CIRCLE,
-  GBT_NODE_TOKEN_DIAMOND,
-  GBT_NODE_TOKEN_DOT
-};
+/// The generator of node labels of the given kind
+LabelGenerator GetNodeLabelGenerator(NodeLabelStyle p_which, const AnalysisWorkspace &p_workspace);
+/// The generator of branch labels of the given kind
+LabelGenerator GetBranchLabelGenerator(BranchLabelStyle p_which,
+                                       const AnalysisWorkspace &p_workspace);
 
-enum BranchLineStyle { GBT_BRANCH_STYLE_LINE, GBT_BRANCH_STYLE_FORKTINE };
+/// Converts a colour to wxWidgets' representation
+inline wxColour ToWxColour(const Rgb &p_color)
+{
+  return {p_color.red, p_color.green, p_color.blue};
+}
+/// Converts a colour from wxWidgets' representation
+inline Rgb ToRgb(const wxColour &p_color)
+{
+  return {p_color.Red(), p_color.Green(), p_color.Blue()};
+}
 
-enum BranchLabelOrientationStyle {
-  GBT_BRANCH_LABEL_ORIENT_HORIZONTAL,
-  GBT_BRANCH_LABEL_ORIENT_ROTATED
-};
-
-enum InfosetJoinStyle { GBT_INFOSET_JOIN_LINES, GBT_INFOSET_JOIN_CIRCLES };
-
-enum InfosetConnectStyle {
-  GBT_INFOSET_CONNECT_NONE,
-  GBT_INFOSET_CONNECT_SAMELEVEL,
-  GBT_INFOSET_CONNECT_ALL
-};
-
-enum NodeLabelStyle {
-  GBT_NODE_LABEL_NOTHING,
-  GBT_NODE_LABEL_LABEL,
-  GBT_NODE_LABEL_PLAYER,
-  GBT_NODE_LABEL_ISETLABEL,
-  GBT_NODE_LABEL_ISETID,
-  GBT_NODE_LABEL_REALIZPROB,
-  GBT_NODE_LABEL_BELIEFPROB,
-  GBT_NODE_LABEL_VALUE
-};
-
-enum BranchLabelStyle {
-  GBT_BRANCH_LABEL_NOTHING,
-  GBT_BRANCH_LABEL_LABEL,
-  GBT_BRANCH_LABEL_PROBS,
-  GBT_BRANCH_LABEL_VALUE
-};
-
-/// Options for automatic rendering of game trees
-class TreeRenderConfig {
-  // Node styling
-  int m_nodeSize{10}, m_terminalSpacing{50};
-  NodeTokenStyle m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
-      m_terminalToken{GBT_NODE_TOKEN_DOT};
-
-  // Branch styling
-  int m_branchLength{60}, m_tineLength{20};
-  BranchLineStyle m_branchStyle{GBT_BRANCH_STYLE_FORKTINE};
-  BranchLabelOrientationStyle m_branchLabels{GBT_BRANCH_LABEL_ORIENT_HORIZONTAL};
-
-  // Information set styling
-  InfosetJoinStyle m_infosetJoin{GBT_INFOSET_JOIN_CIRCLES};
-
-  // Legend styling
-  NodeLabelStyle m_nodeAboveLabel{GBT_NODE_LABEL_LABEL}, m_nodeBelowLabel{GBT_NODE_LABEL_ISETID};
-  BranchLabelStyle m_branchAboveLabel{GBT_BRANCH_LABEL_LABEL},
-      m_branchBelowLabel{GBT_BRANCH_LABEL_PROBS};
-
-  // Fonts for legends
-  wxFont m_font;
-
-  // Colors for nodes
-  wxColour m_chanceColor, m_terminalColor;
-  mutable Array<wxColour> m_playerColors;
-
-  // Decimal places to display
-  int m_numDecimals{4};
-
-public:
-  // Lifecycle
-  TreeRenderConfig();
-
-  // Node styling
-  int GetNodeSize() const { return m_nodeSize; }
-  void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
-
-  int GetTerminalSpacing() const { return m_terminalSpacing; }
-  void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
-
-  NodeTokenStyle GetChanceToken() const { return m_chanceToken; }
-  void SetChanceToken(NodeTokenStyle p_token) { m_chanceToken = p_token; }
-
-  NodeTokenStyle GetPlayerToken() const { return m_playerToken; }
-  void SetPlayerToken(NodeTokenStyle p_token) { m_playerToken = p_token; }
-
-  NodeTokenStyle GetTerminalToken() const { return m_terminalToken; }
-  void SetTerminalToken(NodeTokenStyle p_token) { m_terminalToken = p_token; }
-
-  // Branch styling
-  int GetBranchLength() const { return m_branchLength; }
-  void SetBranchLength(int p_length) { m_branchLength = p_length; }
-
-  int GetTineLength() const { return m_tineLength; }
-  void SetTineLength(int p_length) { m_tineLength = p_length; }
-
-  BranchLineStyle GetBranchStyle() const { return m_branchStyle; }
-  void SetBranchStyle(BranchLineStyle p_style) { m_branchStyle = p_style; }
-
-  int GetNodeLevelLength() const
-  {
-    if (m_branchStyle == GBT_BRANCH_STYLE_LINE) {
-      return m_nodeSize + m_branchLength;
-    }
-    return m_nodeSize + m_branchLength + m_tineLength;
-  }
-
-  BranchLabelOrientationStyle GetBranchLabels() const { return m_branchLabels; }
-  void SetBranchLabels(BranchLabelOrientationStyle p_labels) { m_branchLabels = p_labels; }
-
-  InfosetJoinStyle GetInfosetJoin() const { return m_infosetJoin; }
-  void SetInfosetJoin(InfosetJoinStyle p_join) { m_infosetJoin = p_join; }
-
-  // Legends
-  NodeLabelStyle GetNodeAboveLabel() const { return m_nodeAboveLabel; }
-  void SetNodeAboveLabel(NodeLabelStyle p_label) { m_nodeAboveLabel = p_label; }
-
-  NodeLabelStyle GetNodeBelowLabel() const { return m_nodeBelowLabel; }
-  void SetNodeBelowLabel(NodeLabelStyle p_label) { m_nodeBelowLabel = p_label; }
-
-  BranchLabelStyle GetBranchAboveLabel() const { return m_branchAboveLabel; }
-  void SetBranchAboveLabel(BranchLabelStyle p_label) { m_branchAboveLabel = p_label; }
-
-  BranchLabelStyle GetBranchBelowLabel() const { return m_branchBelowLabel; }
-  void SetBranchBelowLabel(BranchLabelStyle p_label) { m_branchBelowLabel = p_label; }
-
-  LabelGenerator GetNodeLabelGenerator(NodeLabelStyle p_which,
-                                       const AnalysisWorkspace &p_workspace) const;
-  LabelGenerator GetBranchLabelGenerator(BranchLabelStyle p_which,
-                                         const AnalysisWorkspace &p_workspace) const;
-
-  // Fonts
-  const wxFont &GetFont() const { return m_font; }
-  void SetFont(const wxFont &p_font) { m_font = p_font; }
-
-  // Colors
-  const wxColour &ChanceColor() const { return m_chanceColor; }
-  void SetChanceColor(const wxColour &p_color) { m_chanceColor = p_color; }
-
-  const wxColour &TerminalColor() const { return m_terminalColor; }
-  void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
-
-  const wxColour &GetPlayerColor(int pl) const;
-  const wxColour &GetPlayerColor(const GamePlayer &) const;
-  void SetPlayerColor(int pl, const wxColour &p_color) { m_playerColors[pl] = p_color; }
-
-  // Decimals
-  int NumDecimals() const { return m_numDecimals; }
-  void SetNumDecimals(int p_decimals) { m_numDecimals = p_decimals; }
-
-  // Reset to the "factory" defaults
-  void SetDefaults();
-
-  /// Copy GUI presentation values to and from the neutral workspace representation.
-  void Save(WorkspaceFile &p_workspace) const;
-  void Load(const WorkspaceFile &p_workspace);
-};
+/// The font for labels drawn in the given style
+wxFont GetLabelFont(const TreeStyle &p_style);
+/// Describes a font for storing in a style
+TreeFont ToTreeFont(const wxFont &p_font);
 
 /// Builds a small solid-color square bitmap, e.g. for use as a player-color swatch
 /// on a menu item or button.

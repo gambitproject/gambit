@@ -36,7 +36,7 @@
 #include "nfgpanel.h"
 #include "nfgtable.h"
 #include "dleditstrategies.h"
-#include "dlexcept.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 
@@ -75,10 +75,7 @@ static void DrawGridToDC(wxGrid *p_grid, wxDC &p_dc)
 
 bool TableWidget::IsReadOnly() const { return As<GameTreeRep>(m_doc->GetGame()) != nullptr; }
 
-wxColour TableWidget::GetPlayerColor(int player) const
-{
-  return m_doc->GetStyle().GetPlayerColor(player);
-}
+wxColour TableWidget::GetPlayerColor(int player) const { return m_doc->GetPlayerColor(player); }
 
 bool TableWidget::IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const
 {
@@ -495,30 +492,24 @@ void TableWidget::EditStrategies(int player)
 
   try {
     const auto &strategies = dialog.GetStrategies();
-    m_doc->DoSetStrategies(gamePlayer, strategies.GetStableLabels(), strategies.GetLabels());
+    m_doc->Apply(SetStrategies{.player = gamePlayer,
+                               .stableLabels = strategies.GetStableLabels(),
+                               .labels = strategies.GetLabels()});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
 void TableWidget::SetPayoffCellValue(int row, int col, const wxString &value)
 {
-  PureStrategyProfile profile = GetPayoffProfile(row, col);
-  GameOutcome outcome = profile->GetOutcome();
-  if (outcome->IsNull()) {
-    m_doc->DoNewOutcome(profile);
-    profile = GetPayoffProfile(row, col);
-    outcome = profile->GetOutcome();
-  }
-
-  const int player = GetPayoffPlayerForColumn(col);
-
   try {
-    m_doc->DoSetPayoff(outcome, player, value);
+    m_doc->Apply(SetContingencyPayoff{.profile = GetPayoffProfile(row, col),
+                                      .player = GetPayoffPlayer(col),
+                                      .value = Number(value.ToStdString(wxConvUTF8))});
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 

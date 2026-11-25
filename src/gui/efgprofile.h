@@ -37,6 +37,9 @@ class MixedBehaviorProfileList final : public wxGrid, public GameView {
   /// the grid's table, which deletes it
   ProfileLabelProvider *m_labels{nullptr};
 
+  // The action shown in each column, in the order of behavior profiles
+  std::vector<GameAction> m_columns;
+
   // Event handlers
   void OnLabelClick(wxGridEvent &);
   void OnCellClick(wxGridEvent &);
@@ -53,6 +56,9 @@ class MixedBehaviorProfileList final : public wxGrid, public GameView {
 public:
   MixedBehaviorProfileList(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~MixedBehaviorProfileList() override;
+
+  /// Shows or hides the list; a hidden list is not kept up to date, and catches up when shown
+  bool Show(bool p_show = true) override;
 };
 } // namespace Gambit::GUI
 

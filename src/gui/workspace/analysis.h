@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/analysis.h
+// FILE: src/gui/workspace/analysis.h
 // Declaration of analysis storage classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -23,9 +23,12 @@
 #ifndef GAMBIT_GUI_ANALYSIS_H
 #define GAMBIT_GUI_ANALYSIS_H
 
+#include <memory>
 #include <optional>
+#include <string>
 #include <type_traits>
 
+#include "games/stratspt.h"
 #include "games/workspace.h"
 #include "nashspec.h"
 
@@ -39,42 +42,34 @@
 
 namespace Gambit::GUI {
 
-class GameDocument;
+class GameWorkspace;
+
+/// The action at position `p_index` (from 1) in the order of players, information sets and
+/// actions; the column order of behavior profiles
+GameAction ActionAt(const Game &p_game, int p_index);
 
 class AnalysisOutput {
 protected:
-  GameDocument *m_doc;
-  wxString m_label, m_description, m_command;
+  const GameWorkspace *m_workspace;
+  std::string m_description;
   std::optional<NashComputationSpec> m_computation;
 
 public:
   /// @name Lifecycle
   //@{
-  /// Construct a new output group
-  explicit AnalysisOutput(GameDocument *p_doc) : m_doc(p_doc) {}
+  /// Construct a new output group for the game of a workspace
+  explicit AnalysisOutput(const GameWorkspace *p_workspace) : m_workspace(p_workspace) {}
   /// Clean up an output group
   virtual ~AnalysisOutput() = default;
   //@}
 
   /// @name General data access
   //@{
-  /// Get the label (short description) of the list
-  const wxString &GetLabel() const { return m_label; }
+  /// Get the description of the list, in UTF-8
+  const std::string &GetDescription() const { return m_description; }
 
-  /// Set the label (short description) of the list
-  void SetLabel(const wxString &p_label) { m_label = p_label; }
-
-  /// Get the description of the list
-  const wxString &GetDescription() const { return m_description; }
-
-  /// Set the description of the list
-  void SetDescription(const wxString &p_desc) { m_description = p_desc; }
-
-  /// Get the command used to generate the list
-  const wxString &GetCommand() const { return m_command; }
-
-  /// Set the command used to generate the list
-  void SetCommand(const wxString &p_command) { m_command = p_command; }
+  /// Set the description of the list, in UTF-8
+  void SetDescription(const std::string &p_desc) { m_description = p_desc; }
 
   /// Get the typed specification used to generate the list, if available
   const std::optional<NashComputationSpec> &GetComputationSpec() const { return m_computation; }
@@ -112,6 +107,7 @@ public:
   virtual std::string GetActionValue(const GameNode &, int act, int p_index = -1) const = 0;
   virtual std::string GetActionProb(const GameNode &, int act, int p_index = -1) const = 0;
   virtual std::string GetActionProb(int p_action, int p_index = -1) const = 0;
+  virtual std::string GetActionProb(const GameAction &p_action, int p_index = -1) const = 0;
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
@@ -124,9 +120,6 @@ public:
   virtual int CompareActionProb(int p_action, int p_left, int p_right) const = 0;
   /// Compare the probability of a strategy in two profiles, as above
   virtual int CompareStrategyProb(int p_strategy, int p_left, int p_right) const = 0;
-
-  /// Map all behavior profiles to corresponding mixed profiles
-  virtual void BuildNfg() = 0;
 
   virtual WorkspaceFile::Analysis Save() const = 0;
 };
@@ -141,16 +134,19 @@ template <class T> class AnalysisProfileList final : public AnalysisOutput {
   bool m_isBehav;
   int m_current{0};
   Array<std::shared_ptr<MixedBehaviorProfile<T>>> m_behavProfiles;
-  Array<std::shared_ptr<MixedStrategyProfile<T>>> m_mixedProfiles;
+  // For an extensive game, the mixed profile of each behavior profile, derived only when first
+  // needed: deriving it requires the reduced strategic form, which grows exponentially with the
+  // tree
+  mutable Array<std::shared_ptr<MixedStrategyProfile<T>>> m_mixedProfiles;
 
 public:
   //!
   //! @name Lifecycle
   //!
   //@{
-  /// Construct a new profile list for the specified document
-  AnalysisProfileList(GameDocument *p_doc, bool p_isBehav)
-    : AnalysisOutput(p_doc), m_isBehav(p_isBehav)
+  /// Construct a new profile list for the game of a workspace
+  AnalysisProfileList(const GameWorkspace *p_workspace, bool p_isBehav)
+    : AnalysisOutput(p_workspace), m_isBehav(p_isBehav)
   {
   }
   /// Cleanup the profile list
@@ -181,6 +177,7 @@ public:
   std::string GetActionValue(const GameNode &, int act, int p_index = -1) const override;
   std::string GetActionProb(const GameNode &, int act, int p_index = -1) const override;
   std::string GetActionProb(int p_action, int p_index = -1) const override;
+  std::string GetActionProb(const GameAction &p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
   int CompareActionProb(int p_action, int p_left, int p_right) const override;
@@ -200,8 +197,6 @@ public:
   //@{
   void AddProfile(const MixedStrategyProfile<T> &);
   void AddProfile(const MixedBehaviorProfile<T> &);
-  /// Map all behavior profiles to corresponding mixed profiles
-  void BuildNfg() override;
 
   /// Remove all profiles from the list
   void Clear();
@@ -216,11 +211,147 @@ public:
   //@}
 
 private:
+  /// The mixed profile at position `p_index`, derived from its behavior profile if need be
+  const MixedStrategyProfile<T> &GetMixedProfile(int p_index) const;
   /// The probability of an action in a profile, empty if the profile does
   /// not define behavior at the action's information set
   std::optional<T> GetActionProbEntry(int p_action, int p_index) const;
   /// The probability of a strategy in a profile
   std::optional<T> GetStrategyProbEntry(int p_strategy, int p_index) const;
+};
+
+//!
+//! This class manages the "stack" of supports obtained by eliminating
+//! dominated strategies from consideration.
+//!
+class StrategyDominanceStack {
+  const GameWorkspace *m_workspace;
+  bool m_strict;
+  // Built only when first needed: the full support requires the reduced strategic form, which
+  // grows exponentially with the tree of an extensive game
+  mutable Array<std::shared_ptr<StrategySupportProfile>> m_supports;
+  size_t m_current{0};
+  bool m_noFurther{false};
+
+  /// Builds the full support, at level 1, if it has not been built
+  void EnsureFullSupport() const;
+
+public:
+  StrategyDominanceStack(const GameWorkspace *p_workspace, bool p_strict);
+  ~StrategyDominanceStack() = default;
+
+  //!
+  //! Returns the number of supports in the stack
+  //!
+  int NumSupports() const
+  {
+    EnsureFullSupport();
+    return m_supports.size();
+  }
+
+  //!
+  //! Get the i'th support in the stack
+  //! (where i=1 is always the "full" support)
+  //!
+  const StrategySupportProfile &GetSupport(int i) const
+  {
+    EnsureFullSupport();
+    return *m_supports[i];
+  }
+
+  //!
+  //! Get the current support
+  //!
+  const StrategySupportProfile &GetCurrent() const
+  {
+    EnsureFullSupport();
+    return *m_supports[m_current];
+  }
+
+  //!
+  //! Get the level of iteration (1 = no iteration)
+  //!
+  int GetLevel() const { return m_current; }
+
+  //!
+  //! Sets whether elimination is strict or weak.  If this changes the
+  //! internal setting, a Reset() is done
+  //!
+  void SetStrict(bool p_strict);
+
+  //!
+  //! Gets whether elimination is strict or weak.
+  //!
+  bool GetStrict() const { return m_strict; }
+
+  //!
+  //! Reset the stack by clearing out all supports
+  //!
+  void Reset();
+
+  //!
+  //! Go to the next level of iteration.  Returns 'true' if successful,
+  //! 'false' if no effect (i.e., no further actions could be eliminated)
+  //!
+  bool NextLevel();
+
+  //!
+  //! Go to the previous level of iteration.  Returns 'true' if successful,
+  //! 'false' if no effect (i.e., already at the full support)
+  //!
+  bool PreviousLevel();
+
+  //!
+  //! Go to the top level (the full support)
+  //!
+  void TopLevel() { m_current = 1; }
+
+  //!
+  //! Returns 'false' if it is known that no further eliminations can be done
+  //!
+  bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
+};
+
+/// The analyses of a game: lists of computed profiles, and the iterated elimination of dominated
+/// strategies
+class AnalysisWorkspace {
+  const GameWorkspace *m_workspace;
+
+  StrategyDominanceStack m_stratSupports;
+
+  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
+  int m_currentProfileList{0};
+
+public:
+  explicit AnalysisWorkspace(const GameWorkspace *p_workspace);
+
+  void ResetForGameChange();
+  void BuildNfg();
+
+  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
+  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
+  void AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs);
+  void SelectEquilibriumOutput(int p_index);
+  int NumProfileLists() const { return m_profiles.size(); }
+  int GetCurrentProfileList() const { return m_currentProfileList; }
+
+  int GetCurrentProfile() const
+  {
+    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
+  }
+  void SelectProfile(int p_profile);
+
+  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
+  void SetDominanceStrictness(bool p_strict);
+  bool GetStrategyElimStrength() const;
+  bool NextDominanceLevel();
+  void PreviousDominanceLevel();
+  void TopDominanceLevel();
+  bool CanStrategyElim() const;
+  int GetStrategyElimLevel() const;
+
+  std::vector<WorkspaceFile::Analysis> Save() const;
+  bool Load(const std::vector<WorkspaceFile::Analysis> &p_analyses);
 };
 
 } // namespace Gambit::GUI

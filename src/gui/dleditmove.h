@@ -51,7 +51,7 @@ public:
   // Data access (only valid when ShowModal() returns with wxID_OK)
   // The information set label, player, and actions (added, deleted, reordered, relabelled,
   // and their probabilities at a chance move) as edited
-  MoveEdit GetEdit() const;
+  EditMove GetEdit() const;
 };
 } // namespace Gambit::GUI
 

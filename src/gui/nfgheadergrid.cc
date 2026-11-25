@@ -35,7 +35,7 @@
 
 #include "gamedoc.h"
 #include "nfgtable.h"
-#include "dlexcept.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 
@@ -112,7 +112,7 @@ public:
 wxString RowPlayerTable::GetValue(int row, int col)
 {
   if (m_table->GetRowHeaderColCount() == 0) {
-    return wxT("Payoffs");
+    return _("Payoffs");
   }
 
   const int player = m_table->GetRowHeaderPlayer(col);
@@ -300,7 +300,7 @@ public:
       const AnalysisOutput &profiles = p_doc->GetWorkspace().GetProfiles();
       const int index = GetGlobalStrategyIndex(p_strategy);
       const GamePlayer player = p_strategy->GetPlayer();
-      const wxColour color = p_doc->GetStyle().GetPlayerColor(player);
+      const wxColour color = p_doc->GetPlayerColor(player);
 
       wxString playerLabel = wxString::FromUTF8(player->GetLabel());
       if (playerLabel.empty()) {
@@ -567,7 +567,7 @@ void RowPlayerGrid::ShowPlacementMenu(int p_col, const wxPoint &p_pos)
     m_table->SetRowPlayer(it->second.first, it->second.second);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 
@@ -643,7 +643,7 @@ public:
 wxString ColPlayerTable::GetValue(int row, int col)
 {
   if (m_table->GetColHeaderRowCount() == 0) {
-    return wxT("Payoffs");
+    return _("Payoffs");
   }
 
   const int player = m_table->GetColHeaderPlayer(row);
@@ -942,7 +942,7 @@ void ColPlayerGrid::ShowPlacementMenu(int p_row, const wxPoint &p_pos)
     m_table->SetColPlayer(it->second.first, it->second.second);
   }
   catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
+    ShowInternalError(this, ex.what());
   }
 }
 

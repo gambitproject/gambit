@@ -24,264 +24,31 @@
 #define GAMBIT_GUI_GAMEDOC_H
 
 #include <algorithm>
-#include <functional>
 #include <map>
 
 #include "games/behavspt.h"
 #include "games/stratspt.h"
 #include "style.h"
-#include "analysis.h"
 #include "nashvariants.h"
+#include "workspace/gameworkspace.h"
 
 namespace Gambit::GUI {
 
 class GameView;
 class GameDocument;
 
-//!
-//! This class manages the "stack" of supports obtained by eliminating
-//! dominated strategies from consideration.
-//!
-class StrategyDominanceStack {
-  GameDocument *m_doc;
-  bool m_strict;
-  Array<std::shared_ptr<StrategySupportProfile>> m_supports;
-  size_t m_current{0};
-  bool m_noFurther{false};
-
-public:
-  StrategyDominanceStack(GameDocument *p_doc, bool p_strict);
-  ~StrategyDominanceStack() = default;
-
-  //!
-  //! Returns the number of supports in the stack
-  //!
-  int NumSupports() const { return m_supports.size(); }
-
-  //!
-  //! Get the i'th support in the stack
-  //! (where i=1 is always the "full" support)
-  //!
-  const StrategySupportProfile &GetSupport(int i) const { return *m_supports[i]; }
-
-  //!
-  //! Get the current support
-  //!
-  const StrategySupportProfile &GetCurrent() const { return *m_supports[m_current]; }
-
-  //!
-  //! Get the level of iteration (1 = no iteration)
-  //!
-  int GetLevel() const { return m_current; }
-
-  //!
-  //! Sets whether elimination is strict or weak.  If this changes the
-  //! internal setting, a Reset() is done
-  //!
-  void SetStrict(bool p_strict);
-
-  //!
-  //! Gets whether elimination is strict or weak.
-  //!
-  bool GetStrict() const { return m_strict; }
-
-  //!
-  //! Reset the stack by clearing out all supports
-  //!
-  void Reset();
-
-  //!
-  //! Go to the next level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., no further actions could be eliminated)
-  //!
-  bool NextLevel();
-
-  //!
-  //! Go to the previous level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., already at the full support)
-  //!
-  bool PreviousLevel();
-
-  //!
-  //! Go to the top level (the full support)
-  //!
-  void TopLevel() { m_current = 1; }
-
-  //!
-  //! Returns 'false' if it is known that no further eliminations can be done
-  //!
-  bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
-};
-
-//
-// These are passed to GameDocument::UpdateViews() to indicate which
-// types of modifications have occurred.
-//
-// GBT_DOC_MODIFIED_GAME: The game itself has been modified; that is, the
-// physical structure (number of players, number of strategies, game tree)
-// has changed.  This requires all computed data to be deleted.
-//
-// GBT_DOC_MODIFIED_PAYOFFS: The payoffs of the game have changed, but not
-// the physical structure.  This means that strategy profiles can, in
-// principle, be kept -- but they may no longer be Nash, etc.
-//
-// GBT_DOC_MODIFIED_LABELS: Labeling of players, strategies, etc. has
-// changed.
-//
-// GBT_DOC_MODIFIED_WORKSPACE: Stored analysis workspace data has changed.
-// This affects workbook/workspace persistence, but does not modify the
-// underlying game model.
-//
-// GBT_DOC_MODIFIED_PRESENTATION: Settings on how information is rendered
-// (for example, colors) have changed.
-//
-enum class GameModificationType : unsigned int {
-  None = 0x00,
-  GameForm = 0x01,
-  GamePayoffs = 0x02,
-  GameLabels = 0x04,
-  Workspace = 0x08,
-  Presentation = 0x10
-};
-
-inline GameModificationType operator|(GameModificationType p_left, GameModificationType p_right)
-{
-  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) |
-                                           static_cast<unsigned int>(p_right));
-}
-
-inline GameModificationType operator&(GameModificationType p_left, GameModificationType p_right)
-{
-  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) &
-                                           static_cast<unsigned int>(p_right));
-}
-
-inline GameModificationType &operator|=(GameModificationType &p_left, GameModificationType p_right)
-{
-  p_left = p_left | p_right;
-  return p_left;
-}
-
-inline bool HasModification(GameModificationType p_modifications, GameModificationType p_test)
-{
-  return static_cast<unsigned int>(p_modifications & p_test) != 0;
-}
-
-class AnalysisWorkspace {
-  GameDocument *m_doc;
-
-  StrategyDominanceStack m_stratSupports;
-
-  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
-  int m_currentProfileList{0};
-
-public:
-  explicit AnalysisWorkspace(GameDocument *p_doc);
-
-  void Clear();
-  void ResetForGameChange();
-  void BuildNfg();
-
-  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
-  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs);
-  void SelectEquilibriumOutput(int p_index);
-  int NumProfileLists() const { return m_profiles.size(); }
-  int GetCurrentProfileList() const { return m_currentProfileList; }
-
-  int GetCurrentProfile() const
-  {
-    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
-  }
-  void SelectProfile(int p_profile);
-
-  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
-  void SetDominanceStrictness(bool p_strict);
-  bool GetStrategyElimStrength() const;
-  bool NextDominanceLevel();
-  void PreviousDominanceLevel();
-  void TopDominanceLevel();
-  bool CanStrategyElim() const;
-  int GetStrategyElimLevel() const;
-
-  std::vector<WorkspaceFile::Analysis> Save() const;
-  bool Load(const std::vector<WorkspaceFile::Analysis> &p_analyses);
-};
-
-// Generates a label guaranteed not to collide with any of p_game's current outcome labels, of
-// the form "Outcome N" -- GameRep::MakeOutcome() itself rejects an empty or duplicate label,
-// so callers that need to pre-fill a fresh outcome's label (rather than make the user type one
-// first) use this.
-std::string GenerateOutcomeLabel(const Game &p_game);
-
-/// The edits collected by the game properties dialog, applied by `GameDocument::DoEditGame`
-struct GamePropertiesEdit {
-  std::string title;
-  std::string description;
-  /// The players (excluding chance) after the edit, identified as for `DoEditGame`
-  std::vector<std::string> stableLabels;
-  std::vector<std::string> labels;
-  /// The colour of each player, by position in `labels`
-  std::vector<wxColour> playerColors;
-  /// The colour of the chance player; used only for an extensive game
-  wxColour chanceColor;
-};
-
-/// The edits collected by the move dialog, applied by `GameDocument::DoEditMove`
-struct MoveEdit {
-  std::string infosetLabel;
-  /// The player to make the move; ignored for a chance move
-  GamePlayer player;
-  /// The actions after the edit, identified as for `DoEditMove`
-  std::vector<std::string> stableLabels;
-  std::vector<std::string> labels;
-  /// The probability of each action; used only for a chance move
-  std::vector<Number> probs;
-};
-
 class GameDocument {
   friend class GameView;
 
   std::list<GameView *> m_views;
 
-  void AddView(GameView *p_view) { m_views.push_back(p_view); }
-  void RemoveView(GameView *p_view) { m_views.erase(std::ranges::find(m_views, p_view)); }
+  void AddView(GameView *p_view);
+  void RemoveView(GameView *p_view);
 
-  Game m_game;
+  GameWorkspace m_gameWorkspace;
   wxString m_filename;
 
-  TreeRenderConfig m_style;
-  bool m_gameModified{false}, m_workspaceModified{false};
-
-  AnalysisWorkspace m_workspace;
   NashChoice m_nashChoice;
-
-  std::list<std::string> m_undoList, m_redoList;
-
-  void NotifyChanged(GameModificationType p_modifications);
-  void UpdateViews();
-
-  /// Discard all undo/redo history, taking the current state as the new baseline
-  void ResetUndoHistory();
-  /// Replace the game, workspace, and style with those saved in a snapshot
-  /// previously produced by `SaveWorkspace`
-  void RestoreSnapshot(const std::string &p_snapshot);
-
-  // Runs p_edit, which changes the game and style and returns the kinds of change it made, as
-  // one undoable change: one undo entry if anything changed, none otherwise. If p_edit throws,
-  // the state before the edit is restored and the exception is rethrown.
-  void ApplyEdit(const std::function<GameModificationType()> &p_edit);
-  // Each makes the change of the corresponding part of a dialog's edit, if there is one, and
-  // returns the kind of change made; they do not notify.
-  GameModificationType EditPlayers(const std::vector<std::string> &p_stableLabels,
-                                   const std::vector<std::string> &p_labels);
-  GameModificationType EditStrategies(const GamePlayer &p_player,
-                                      const std::vector<std::string> &p_stableLabels,
-                                      const std::vector<std::string> &p_labels);
-  GameModificationType EditActions(const GameInfoset &p_infoset,
-                                   const std::vector<std::string> &p_stableLabels,
-                                   const std::vector<std::string> &p_labels,
-                                   const std::vector<Number> &p_probs);
 
 public:
   explicit GameDocument(Game p_game);
@@ -301,60 +68,77 @@ public:
   /// Attempt to construct a document by reading `p_filename`, trying it first as a
   /// Gambit workspace (.gbt) and then as a bare game (.efg/.nfg) file.
   static LoadOutcome Load(const wxString &p_filename);
-
-  void SaveWorkspace(std::ostream &) const;
   //@}
 
-  Game GetGame() const { return m_game; }
-  void BuildNfg();
+  Game GetGame() const { return m_gameWorkspace.GetGame(); }
+  /// The wx-free workspace behind this document
+  const GameWorkspace &GetGameWorkspace() const { return m_gameWorkspace; }
+  void BuildNfg() { m_gameWorkspace.BuildNfg(); }
 
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified() const { return m_gameModified || m_workspaceModified; }
-  bool IsGameModified() const { return m_gameModified; }
-  bool IsWorkspaceModified() const { return m_workspaceModified; }
-  void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
-  void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
+  bool IsModified() const { return IsGameModified() || IsWorkspaceModified(); }
+  bool IsGameModified() const { return m_gameWorkspace.IsGameModified(); }
+  bool IsWorkspaceModified() const { return m_gameWorkspace.IsWorkspaceModified(); }
 
-  const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
+  const AnalysisWorkspace &GetWorkspace() const { return m_gameWorkspace.GetAnalyses(); }
 
   /// The last choices made in the equilibrium dialog; held for the session only.
   const NashChoice &GetNashChoice() const { return m_nashChoice; }
   void SetNashChoice(const NashChoice &p_choice) { m_nashChoice = p_choice; }
 
   //!
-  //! @name Undo/redo
+  //! @name Edits and undo
   //!
   //@{
-  bool CanUndo() const { return m_undoList.size() > 1; }
-  void Undo();
+  /// Returns whether `p_edit` can be made
+  bool CanApply(const GameEdit &p_edit) const { return m_gameWorkspace.CanApply(p_edit); }
+  /// Makes `p_edit` as one undoable step; see `GameWorkspace::Apply`
+  void Apply(const GameEdit &p_edit) { m_gameWorkspace.Apply(p_edit); }
 
-  bool CanRedo() const { return !m_redoList.empty(); }
-  void Redo();
+  bool CanUndo() const { return m_gameWorkspace.CanUndo(); }
+  void Undo() { m_gameWorkspace.Undo(); }
+  bool CanRedo() const { return m_gameWorkspace.CanRedo(); }
+  void Redo() { m_gameWorkspace.Redo(); }
   //@}
 
-  const TreeRenderConfig &GetStyle() const { return m_style; }
-  void SetStyle(const TreeRenderConfig &p_style);
+  const TreeStyle &GetStyle() const { return m_gameWorkspace.GetStyle(); }
+  /// The colour in which a player is drawn; see `TreeStyle::GetPlayerColor`
+  wxColour GetPlayerColor(const GamePlayer &p_player) const
+  {
+    return ToWxColour(GetStyle().GetPlayerColor(p_player));
+  }
+  /// The colour in which the player numbered `p_player` (from 1) is drawn
+  wxColour GetPlayerColor(int p_player) const
+  {
+    return ToWxColour(GetStyle().GetPlayerColor(p_player));
+  }
+  /// The font in which labels are drawn
+  wxFont GetLabelFont() const { return Gambit::GUI::GetLabelFont(GetStyle()); }
 
-  GameAction GetAction(int p_index) const;
+  void DoAddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs)
+  {
+    m_gameWorkspace.AddAnalysis(p_profs);
+  }
+  void DoAnalysisOutputChanged() { m_gameWorkspace.AnalysisChanged(); }
+  void DoSelectEquilibriumOutput(int p_index) { m_gameWorkspace.SelectAnalysis(p_index); }
+  void DoSelectProfile(int p_profile) { m_gameWorkspace.SelectProfile(p_profile); }
 
-  void DoAddEquilibriumOutput(const std::shared_ptr<AnalysisOutput> &p_profs);
-  void DoSelectEquilibriumOutput(int p_index);
-  void DoSelectProfile(int p_profile);
+  BehaviorSupportProfile GetEfgSupport() const { return BehaviorSupportProfile(GetGame()); }
+  const StrategySupportProfile &GetNfgSupport() const { return GetWorkspace().GetNfgSupport(); }
 
-  BehaviorSupportProfile GetEfgSupport() const { return BehaviorSupportProfile(m_game); }
-  const StrategySupportProfile &GetNfgSupport() const { return m_workspace.GetNfgSupport(); }
-
-  void DoSetDominanceStrictness(bool p_strict);
-  bool DoNextDominanceLevel();
-  void DoPreviousDominanceLevel();
-  void DoTopDominanceLevel();
+  void DoSetDominanceStrictness(bool p_strict)
+  {
+    m_gameWorkspace.SetDominanceStrictness(p_strict);
+  }
+  bool DoNextDominanceLevel() { return m_gameWorkspace.NextDominanceLevel(); }
+  void DoPreviousDominanceLevel() { m_gameWorkspace.PreviousDominanceLevel(); }
+  void DoTopDominanceLevel() { m_gameWorkspace.TopDominanceLevel(); }
 
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges();
 
-  /// Operations on game model
   enum class GameSaveFormat { Efg, Nfg, Workspace };
   GameSaveFormat GetCurrentSaveFormat() const
   {
@@ -367,78 +151,6 @@ public:
     return GameSaveFormat::Workspace;
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
-  /// Applies the edits of the game properties dialog (title, description, players and their
-  /// colours) as one undoable change; does nothing if no part changed. If any part fails,
-  /// none is applied, and the exception is rethrown.
-  ///
-  /// The players (chance excluded) may be added, deleted, reordered and relabelled together.
-  /// `stableLabels` identifies each player as it was before the edit (an existing player's
-  /// label, or a placeholder for a new one); `labels` is that player's label after the edit.
-  /// Structure is resolved first, from `stableLabels` alone; labels are then reassigned, so a
-  /// rename that reuses the label of a deleted player does not collide with it. An edit that
-  /// only relabels does not restructure the game, so it works on games whose players cannot
-  /// be changed (e.g. action graph games) and can swap two players' labels.
-  void DoEditGame(const GamePropertiesEdit &p_edit);
-  /// Adds one player to the game, via `Game::SetPlayers`, labeled with the first unused
-  /// "Player N".
-  GamePlayer DoAddPlayer();
-  /// Declare the strategies of `p_player` in a single operation, covering any combination
-  /// of adding, deleting, reordering, and relabeling strategies; does nothing if the
-  /// strategies and their labels are unchanged.
-  ///
-  /// `p_stableLabels` identifies each strategy as it was before this edit (an existing
-  /// strategy's current label, or a placeholder for one newly created); `p_labels` is what
-  /// that same strategy, by position, is to be labeled after the edit.  Structure (which
-  /// strategies exist, and in what order) is resolved first, purely from `p_stableLabels`;
-  /// labels are then reassigned from `p_stableLabels` to `p_labels`.  Doing so in this order
-  /// means a rename that reuses a label freed up by a simultaneous deletion never collides
-  /// with the not-yet-renamed original.
-  void DoSetStrategies(const GamePlayer &p_player, const std::vector<std::string> &p_stableLabels,
-                       const std::vector<std::string> &p_labels);
-  /// Applies the edits of the move dialog (information set label, player, actions and their
-  /// probabilities) to `p_infoset` as one undoable change; does nothing if no part changed.
-  /// If any part fails, none is applied, and the exception is rethrown.
-  ///
-  /// Actions are identified as players are in `DoEditGame`. A change of player is made only
-  /// for a personal move.
-  void DoEditMove(const GameInfoset &p_infoset, const MoveEdit &p_edit);
-  void DoRelabelActions(const GameInfoset &p_infoset,
-                        const std::map<std::string, std::string> &p_labels);
-  void DoSetInfoset(const GameNode &p_node, const GameInfoset &p_infoset);
-  void DoLeaveInfoset(const GameNode &p_node);
-  void DoRevealAction(const GameInfoset &p_infoset, const GamePlayer &p_player);
-  void DoSetNodeLabel(const GameNode &p_node, const wxString &p_label);
-  void DoAppendMove(const GameNode &p_node, const GameInfoset &p_infoset);
-  // Appends a fresh move for p_player at the terminal node p_node, with actions labeled per
-  // p_labels. p_probs gives the chance distribution when p_player is the chance player, and
-  // is ignored otherwise.
-  void DoAppendMove(const GameNode &p_node, const GamePlayer &p_player,
-                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
-  // Inserts a move for p_player prior to p_node, with actions labeled per p_labels -- p_node
-  // and everything below it becomes the first action's subtree. p_probs gives the chance
-  // distribution when p_player is the chance player, and is ignored otherwise.
-  void DoInsertMove(const GameNode &p_node, const GamePlayer &p_player,
-                    const std::vector<std::string> &p_labels, const std::vector<Number> &p_probs);
-  void DoCopyTree(const GameNode &p_destNode, const GameNode &p_srcNode);
-  void DoMoveTree(const GameNode &p_destNode, const GameNode &p_srcNode);
-  void DoDeleteParent(const GameNode &p_node);
-  void DoDeleteTree(const GameNode &p_node);
-  void DoSetPlayer(const GameInfoset &p_infoset, const GamePlayer &p_player);
-  void DoSetPlayer(const GameNode &p_node, const GamePlayer &p_player);
-  void DoNewOutcome(GameNode p_node);
-  void DoNewOutcome(const PureStrategyProfile &p_profile);
-  void DoSetOutcome(const GameNode &p_node, const GameOutcome &p_outcome);
-  void DoSetOutcomeData(const GameNode &p_node, const wxString &p_label,
-                        const std::vector<wxString> &p_payoffs);
-  void DoSetOutcomeData(const GameOutcome &p_outcome, const wxString &p_label,
-                        const std::vector<wxString> &p_payoffs);
-  void DoRemoveOutcome(const GameNode &p_node);
-  void DoRemoveOutcome(const PureStrategyProfile &p_profile);
-  void DoMakeOutcome(const std::vector<PureStrategyProfile> &p_profiles,
-                     const std::vector<Number> &p_payoffs, const std::string &p_label);
-  void DoSetPayoff(const GameOutcome &p_outcome, int p_player, const wxString &p_value);
-
-  void DoAnalysisOutputChanged();
 };
 
 inline std::shared_ptr<GameDocument> NewTreeDocument()
@@ -461,7 +173,7 @@ inline std::shared_ptr<GameDocument> NewTableDocument(const std::vector<int> &p_
   return std::make_shared<GameDocument>(nfg);
 }
 
-class GameView {
+class GameView : public WorkspaceObserver {
 protected:
   std::shared_ptr<GameDocument> m_doc;
 
@@ -472,7 +184,9 @@ public:
   }
   GameView(const GameView &) = delete;
   GameView &operator=(const GameView &) = delete;
-  virtual ~GameView() { m_doc->RemoveView(this); }
+  ~GameView() override { m_doc->RemoveView(this); }
+
+  void OnWorkspaceChanged(GameModificationType) override { OnUpdate(); }
 
   virtual void OnUpdate() = 0;
 

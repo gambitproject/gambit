@@ -4,19 +4,18 @@
 GUI
 ***
 
-See installation instructions in the :ref:`install-cli-gui` section.
+See the :ref:`installation instructions <install-cli-gui>`.
 
 Gambit's graphical user interface provides an
 "integrated development environment" to help visually construct
 games and to investigate their main strategic features.
 
-The graphical interface is largely intended for the interactive
-construction and analysis of small to medium games. Repeating the
-caution from the introduction of this manual, the computation time
-required for the equilibrium analysis of games increases rapidly in
-the size of the game. The graphical interface is ideal for students
-learning about the fundamentals of game theory, or for practitioners
-prototyping games of interest.
+The graphical interface is intended for the interactive construction
+and analysis of games. It handles building and viewing games with
+thousands of nodes or contingencies, but the computation time required for
+the equilibrium analysis of games can increase rapidly in the size of the
+game.  Showing the strategic form of a large tree can likewise take a
+long time.
 
 In graduating to larger applications,
 users are encouraged to make use of the underlying Gambit libraries

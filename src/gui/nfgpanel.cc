@@ -27,8 +27,8 @@
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
+#include "dialogstyle.h"
 
-#include "dlexcept.h"
 #include "nfgtable.h"
 #include "menuconst.h"
 
@@ -68,50 +68,50 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent,
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Hide strategies which are ")), 0,
-                wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, wxID_STATIC, _("Hide strategies which are ")), 0,
+                wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
-  wxString domChoices[] = {wxT("strictly"), wxT("strictly or weakly")};
+  wxString domChoices[] = {_("strictly"), _("strictly or weakly")};
   auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnStrength));
-  topSizer->Add(choice, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(choice, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("dominated:")), 0, wxALL | wxALIGN_CENTER,
-                5);
+  topSizer->Add(new wxStaticText(this, wxID_STATIC, _("dominated:")), 0, wxALL | wxALIGN_CENTER,
+                FromDIP(c_spaceTight));
 
   m_topButton =
       new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(tobegin_svg, wxSize(24, 24)));
   m_topButton->SetToolTip(_("Show all strategies"));
   Connect(m_topButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnTopLevel));
-  topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
   m_prevButton =
       new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(prev_svg, wxSize(24, 24)));
   m_prevButton->SetToolTip(_("Previous round of elimination"));
   Connect(m_prevButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnPreviousLevel));
-  topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
-  m_level = new wxStaticText(this, wxID_STATIC, wxT("All strategies shown"), wxDefaultPosition,
+  m_level = new wxStaticText(this, wxID_STATIC, _("All strategies shown"), wxDefaultPosition,
                              wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
   m_nextButton =
       new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(next_svg, wxSize(24, 24)));
   m_nextButton->SetToolTip(_("Next round of elimination"));
   Connect(m_nextButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnNextLevel));
-  topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
   m_allButton =
       new wxBitmapButton(this, wxID_ANY, wxBitmapBundle::FromSVG(toend_svg, wxSize(24, 24)));
   m_allButton->SetToolTip(_("Eliminate iteratively"));
   Connect(m_allButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(StrategyDominanceToolbar::OnLastLevel));
-  topSizer->Add(m_allButton, 0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(m_allButton, 0, wxALL | wxALIGN_CENTER, FromDIP(c_spaceTight));
 
   SetSizer(topSizer);
   wxWindowBase::Layout();
@@ -144,10 +144,10 @@ void StrategyDominanceToolbar::OnUpdate()
   m_nextButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
   m_allButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
   if (m_doc->GetWorkspace().GetStrategyElimLevel() == 1) {
-    m_level->SetLabel(wxT("All strategies shown"));
+    m_level->SetLabel(_("All strategies shown"));
   }
   else if (m_doc->GetWorkspace().GetStrategyElimLevel() == 2) {
-    m_level->SetLabel(wxT("Eliminated 1 level"));
+    m_level->SetLabel(_("Eliminated 1 level"));
   }
   else {
     wxString label;

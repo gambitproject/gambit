@@ -35,6 +35,7 @@
 
 #include "games/gametree.h"
 #include "gamedoc.h"
+#include "dialogstyle.h"
 #include "solvers/logit/logit.h"
 
 namespace Gambit::GUI {
@@ -61,18 +62,18 @@ struct BehavLogitTraits {
 
   static wxString ColumnLabel(const std::shared_ptr<GameDocument> &p_doc, int p_col)
   {
-    const GameAction action = p_doc->GetAction(p_col);
+    const GameAction action = ActionAt(p_doc->GetGame(), p_col);
     wxString label;
     label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
     return label;
   }
   static GamePlayer ColumnPlayer(const std::shared_ptr<GameDocument> &p_doc, int p_col)
   {
-    return p_doc->GetAction(p_col)->GetInfoset()->GetPlayer();
+    return ActionAt(p_doc->GetGame(), p_col)->GetInfoset()->GetPlayer();
   }
   static int ColumnGroup(const std::shared_ptr<GameDocument> &p_doc, int p_col)
   {
-    return p_doc->GetAction(p_col)->GetInfoset()->GetNumber();
+    return ActionAt(p_doc->GetGame(), p_col)->GetInfoset()->GetNumber();
   }
   // GameRep's lazy caches are not synchronized against concurrent first touch from two
   // threads, so force the sequence-form derivation the worker will need on this (the main)
@@ -175,7 +176,7 @@ public:
     attr->SetReadOnly(true);
 
     if (col > 0) {
-      attr->SetTextColour(m_doc->GetStyle().GetPlayerColor(Traits::ColumnPlayer(m_doc, col)));
+      attr->SetTextColour(m_doc->GetPlayerColor(Traits::ColumnPlayer(m_doc, col)));
       attr->SetBackgroundColour(Traits::ColumnGroup(m_doc, col) % 2 == 0
                                     ? wxColour(250, 250, 250)
                                     : wxColour(225, 225, 225));
@@ -196,7 +197,7 @@ public:
   wxString GetColLabelValue(int col) override
   {
     if (col == 0) {
-      return wxT("Lambda");
+      return _("Lambda");
     }
     return Traits::ColumnLabel(m_doc, col);
   }
@@ -352,8 +353,8 @@ template <class Traits> class LogitDialog final : public wxDialog {
     m_runner = std::make_unique<LogitThreadRunner<Traits>>(this, m_doc->GetGame());
     if (m_runner->Run() != wxTHREAD_NO_ERROR) {
       m_runner.reset();
-      m_statusText->SetLabel(wxT("Failed to launch computation."));
-      m_statusText->SetForegroundColour(*wxRED);
+      m_statusText->SetLabel(_("Failed to launch computation."));
+      m_statusText->SetForegroundColour(ErrorTextColour());
       m_okButton->Enable(true);
     }
   }
@@ -385,16 +386,16 @@ template <class Traits> class LogitDialog final : public wxDialog {
     }
 
     if (m_stopRequested) {
-      m_statusText->SetLabel(wxT("The computation has been stopped."));
+      m_statusText->SetLabel(_("The computation has been stopped."));
       m_statusText->SetForegroundColour(wxColour(196, 128, 0));
     }
     else if (p_event.GetInt() == 0) {
-      m_statusText->SetLabel(wxT("The computation has completed."));
+      m_statusText->SetLabel(_("The computation has completed."));
       m_statusText->SetForegroundColour(wxColour(0, 192, 0));
     }
     else {
-      m_statusText->SetLabel(wxT("The computation ended abnormally."));
-      m_statusText->SetForegroundColour(*wxRED);
+      m_statusText->SetLabel(_("The computation ended abnormally."));
+      m_statusText->SetForegroundColour(ErrorTextColour());
     }
 
     m_okButton->Enable(true);
@@ -432,7 +433,7 @@ template <class Traits> class LogitDialog final : public wxDialog {
   void OnSave(wxCommandEvent &)
   {
     wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""),
-                        wxT("CSV files (*.csv)|*.csv|") wxT("All files (*.*)|*.*"),
+                        _("CSV files (*.csv)|*.csv|All files (*.*)|*.*"),
                         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK) {
@@ -443,11 +444,11 @@ template <class Traits> class LogitDialog final : public wxDialog {
 
 public:
   LogitDialog(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc)
-    : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition,
+    : wxDialog(p_parent, wxID_ANY, _("Compute quantal response equilibria"), wxDefaultPosition,
                wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
       m_doc(p_doc), m_list(new LogitGrid<Traits>(this, m_doc))
   {
-    const int S = FromDIP(5);
+    const int gap = FromDIP(c_spaceRelated);
 
     auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -455,42 +456,32 @@ public:
 
     // Child windows are created in order, which sets the tab order, so these stay in the body
     m_statusText = // NOLINT(cppcoreguidelines-prefer-member-initializer)
-        new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
-    m_statusText->SetForegroundColour(*wxBLUE);
-    startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, S);
+        new wxStaticText(this, wxID_STATIC, _("The computation is currently in progress."));
+    startSizer->Add(m_statusText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
 
     m_stopButton =
         new wxBitmapButton(this, wxID_CANCEL, wxBitmapBundle::FromSVG(stop_svg, wxSize(24, 24)));
     m_stopButton->SetToolTip(_("Stop the computation"));
-    startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, S);
+    startSizer->Add(m_stopButton, 0, wxALIGN_CENTER_VERTICAL);
     m_stopButton->Bind(wxEVT_BUTTON, &LogitDialog::OnStop, this);
 
-    sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, S);
+    sizer->Add(startSizer, 0, wxALIGN_CENTER | wxBOTTOM, gap);
 
     m_list->SetSizeHints(wxSize(FromDIP(600), FromDIP(400)));
-    sizer->Add(m_list, 1, wxALL | wxEXPAND, S);
+    sizer->Add(m_list, 1, wxEXPAND);
 
-    auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto *extraSizer = new wxBoxSizer(wxHORIZONTAL);
     m_saveButton = // NOLINT(cppcoreguidelines-prefer-member-initializer)
-        new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
+        new wxButton(this, wxID_SAVE, _("Save correspondence to .csv file..."));
     m_saveButton->Enable(false);
-    buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, S);
+    extraSizer->Add(m_saveButton);
     m_saveButton->Bind(wxEVT_BUTTON, &LogitDialog::OnSave, this);
 
-    buttonSizer->AddStretchSpacer();
-    buttonSizer->Add(CreateStdDialogButtonSizer(wxOK), 0, wxALL | wxALIGN_CENTER, S);
-    // The OK button exists only once the sizer has been created
+    SetDialogLayout(this, sizer, wxOK, extraSizer);
+    // The OK button exists only once the button row has been created
     m_okButton = // NOLINT(cppcoreguidelines-prefer-member-initializer)
         dynamic_cast<wxButton *>(FindWindow(wxID_OK));
     m_okButton->Enable(false);
-
-    sizer->Add(buttonSizer, 0, wxEXPAND | wxALL, S);
-
-    SetSizer(sizer);
-    sizer->SetSizeHints(this);
-    SetSize(GetBestSize());
-    SetMinSize(GetSize());
-    CenterOnParent();
 
     Bind(wxEVT_LOGIT_POINT, &LogitDialog::OnRunnerPoint, this);
     Bind(wxEVT_LOGIT_FINISHED, &LogitDialog::OnRunnerFinished, this);

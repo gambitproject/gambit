@@ -56,6 +56,9 @@ class GameFrame final : public wxFrame, public GameView {
   void OnFileOpen(wxCommandEvent &);
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
+  /// Saves the document, asking for a file name if `p_saveAs` or it has none; returns whether
+  /// it was saved
+  bool SaveDocument(bool p_saveAs);
   void OnFileExportGraphic(wxCommandEvent &);
   void OnFileExportPS(wxCommandEvent &);
   void OnFileExportSVG(wxCommandEvent &);

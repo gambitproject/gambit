@@ -242,20 +242,22 @@ the copy of the subtree remain in the same information set as the
 corresponding nodes in the original subtree. In many cases, though,
 these trees differ in the information available to some or all of the
 players. To help speed the process of adjusting information sets in
-bulk, Gambit offers a "reveal" operation, which breaks information
-sets based on the action taken at a particular node. Right-click the
-node at which the action taken is to be made known subsequently to
-other players, and choose :guilabel:`Reveal`.  This displays a
+bulk, Gambit can refine information sets based on the action taken at
+a particular node. Right-click the node at which the action taken is
+to be made known subsequently to other players, and choose
+:guilabel:`Refine information sets by this move`.  This displays a
 dialog listing the players in the game. Check the boxes next to the
-players who observe the outcome of the move at the node, and click
-:guilabel:`OK`.  The information sets at nodes below the clicked one
-are adjusted based on the action selected at this node.
+players who observe the action taken at the move, and click
+:guilabel:`Refine`.  The information sets at nodes below the clicked
+one are refined based on the action selected at this node: members
+reached by different actions are no longer in the same information set
+for those players.
 
 .. note::
 
-   The reveal operation only has an effect at the time it is done. In
-   particular, it does not enforce the separation of information sets
-   based on this information during subsequent editing of the game.
+   The refinement is made once, at the time it is done. It does not enforce
+   the separation of information sets based on this information during
+   subsequent editing of the game.
 
 
 .. _outcomes-and-payoffs:

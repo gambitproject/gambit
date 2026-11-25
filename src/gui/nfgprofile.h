@@ -53,6 +53,9 @@ class MixedStrategyProfileList final : public wxGrid, public GameView {
 public:
   MixedStrategyProfileList(wxWindow *p_parent, const std::shared_ptr<GameDocument> &p_doc);
   ~MixedStrategyProfileList() override;
+
+  /// Shows or hides the list; a hidden list is not kept up to date, and catches up when shown
+  bool Show(bool p_show = true) override;
 };
 } // namespace Gambit::GUI
 

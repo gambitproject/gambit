@@ -51,7 +51,7 @@ public:
   // The title, description, and the players (excluding chance) as edited on the Players
   // page: adding, deleting, reordering, relabeling and recoloring are all staged in the
   // dialog, and applied to the document only when the caller commits this.
-  GamePropertiesEdit GetEdit() const;
+  EditGameProperties GetEdit() const;
 };
 
 } // namespace Gambit::GUI

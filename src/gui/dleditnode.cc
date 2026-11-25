@@ -24,10 +24,10 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/richmsgdlg.h>
 #include "games.h"
 #include "games/gametree.h"
 #include "dleditnode.h"
+#include "dialogstyle.h"
 
 namespace Gambit::GUI {
 //======================================================================
@@ -40,23 +40,18 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_node(p_node)
 {
-  const int S = FromDIP(5);
+  auto *formSizer = NewFormSizer(this);
 
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-
-  auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALL | wxCENTER, S);
+  formSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")), 0, wxALIGN_CENTER_VERTICAL);
   m_nodeLabel = new LabelTextCtrl(this, wxID_ANY, wxString::FromUTF8(m_node->GetLabel()));
-  labelSizer->Add(m_nodeLabel, 1, wxALL | wxCENTER | wxEXPAND, S);
-  topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, S);
+  formSizer->Add(m_nodeLabel, 1, wxEXPAND);
 
   const bool isChance = !p_node->IsTerminal() && p_node->GetInfoset()->IsChanceInfoset();
-  auto *infosetSizer = new wxBoxSizer(wxHORIZONTAL);
-  infosetSizer->Add(new wxStaticText(this, wxID_STATIC, isChance ? _("Event") : _("Infoset")), 0,
-                    wxALL | wxCENTER, S);
+  formSizer->Add(new wxStaticText(this, wxID_STATIC, isChance ? _("Event") : _("Information set")),
+                 0, wxALIGN_CENTER_VERTICAL);
   m_infoset = new wxChoice(this, wxID_ANY);
   if (!p_node->IsTerminal()) {
-    m_infoset->Append(isChance ? _("New event") : _("New infoset"));
+    m_infoset->Append(isChance ? _("New event") : _("New information set"));
     if (isChance) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
@@ -79,7 +74,7 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
           if (infoset->GetActions().size() == p_node->GetChildren().size()) {
             m_infosetList.push_back(infoset);
             wxString label;
-            label << _("Player ") << player->GetNumber() << _(", Infoset ")
+            label << _("Player ") << player->GetNumber() << _(", information set ")
                   << infoset->GetNumber();
             m_infoset->Append(label);
             if (infoset == p_node->GetInfoset()) {
@@ -96,23 +91,9 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
     m_infoset->SetSelection(0);
     m_infoset->Enable(false);
   }
-  infosetSizer->Add(m_infoset, 1, wxALL | wxEXPAND, S);
-  topSizer->Add(infosetSizer, 0, wxALL | wxEXPAND, S);
+  formSizer->Add(m_infoset, 1, wxEXPAND);
 
-  auto *subgameSizer = new wxBoxSizer(wxVERTICAL);
-  if (!p_node->GetParent()) {
-    subgameSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is the root node of the tree")),
-                      0, wxALL | wxCENTER, S);
-  }
-  else if (p_node->IsSubgameRoot()) {
-    subgameSizer->Add(
-        new wxStaticText(this, wxID_STATIC, _("This is the root of a proper subgame")), 0,
-        wxALL | wxCENTER, S);
-  }
-  topSizer->Add(subgameSizer, 0, wxALL | wxCENTER, S);
-
-  auto *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
-  outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")), 0, wxALL | wxCENTER, S);
+  formSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")), 0, wxALIGN_CENTER_VERTICAL);
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
@@ -144,36 +125,64 @@ EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
       m_outcome->SetSelection(outcome->GetNumber());
     }
   }
-  outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, S);
-  topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, S);
+  formSizer->Add(m_outcome, 1, wxEXPAND);
 
-  if (auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL)) {
-    topSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, S);
+  auto *contentSizer = new wxBoxSizer(wxVERTICAL);
+  contentSizer->Add(formSizer, 0, wxEXPAND);
+  if (!p_node->GetParent()) {
+    contentSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is the root node of the tree")),
+                      0, wxTOP, FromDIP(c_spaceMargin));
+  }
+  else if (p_node->IsSubgameRoot()) {
+    contentSizer->Add(
+        new wxStaticText(this, wxID_STATIC, _("This is the root of a proper subgame")), 0, wxTOP,
+        FromDIP(c_spaceMargin));
   }
 
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
+  m_errorText = NewErrorText(this);
+  contentSizer->Add(m_errorText, 0, wxEXPAND | wxTOP, FromDIP(c_spaceRelated));
 
-  wxTopLevelWindowBase::Layout();
-  CenterOnParent();
+  SetDialogLayout(this, contentSizer, wxOK | wxCANCEL);
+
+  m_defaultLabelBg = m_nodeLabel->GetBackgroundColour();
+  m_nodeLabel->Bind(wxEVT_TEXT, [this](wxCommandEvent &p_event) {
+    UpdateValidation();
+    p_event.Skip();
+  });
+  UpdateValidation();
 
   Bind(wxEVT_BUTTON, &EditNodeDialog::OnOK, this, wxID_OK);
 }
 
-void EditNodeDialog::OnOK(wxCommandEvent &p_event)
+void EditNodeDialog::UpdateValidation()
 {
-  const wxString nodeLabel = m_nodeLabel->GetNormalizedValue();
+  const wxString nodeLabel = m_nodeLabel->GetValue().Strip(wxString::trailing);
+  bool duplicate = false;
   if (!nodeLabel.empty()) {
     for (const auto &node : m_node->GetGame()->GetNodes()) {
-      if (node != m_node && node->GetLabel() == nodeLabel) {
-        wxRichMessageDialog(this, _("Node label must be unique in the game."), _("Error"),
-                            wxOK | wxCENTRE | wxICON_ERROR)
-            .ShowModal();
-        m_nodeLabel->SetFocus();
-        return;
+      if (node != m_node && wxString::FromUTF8(node->GetLabel()) == nodeLabel) {
+        duplicate = true;
+        break;
       }
     }
+  }
+  m_nodeLabel->SetBackgroundColour(duplicate ? InvalidFieldBackground() : m_defaultLabelBg);
+  m_nodeLabel->Refresh();
+  m_errorText->SetLabel(duplicate ? _("Node label must be unique in the game.") : wxString());
+  m_errorText->Show(duplicate);
+  if (auto *ok = FindWindow(wxID_OK)) {
+    ok->Enable(!duplicate);
+  }
+  RefreshDialogMinSize(this);
+}
+
+void EditNodeDialog::OnOK(wxCommandEvent &p_event)
+{
+  m_nodeLabel->GetNormalizedValue();
+  UpdateValidation();
+  if (m_errorText->IsShown()) {
+    wxBell();
+    return;
   }
   p_event.Skip();
 }

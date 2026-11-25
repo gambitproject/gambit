@@ -34,6 +34,7 @@
 
 #include "games.h"
 #include "dlabout.h"
+#include "dialogstyle.h"
 #include "bitmaps/gambitbig.xpm"
 
 namespace Gambit::GUI {
@@ -67,11 +68,10 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
   : wxDialog(p_parent, wxID_ANY, _("About Gambit"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-  const int M = FromDIP(20);
-  const int S = FromDIP(10);
+  const int M = FromDIP(c_spaceAlertMargin);
+  const int S = FromDIP(c_spaceRelated);
 
-  // Brand colour sampled earlier (adjust if desired)
-  const wxColour kBrandGreen(54, 100, 96);
+  const wxColour c_brandGreen(54, 100, 96);
 
   auto *panel = new wxPanel(this);
 
@@ -79,7 +79,7 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
 
   // --- Left brand rail (fixed width, centered logo) ---
   auto *left = new wxPanel(panel);
-  left->SetBackgroundColour(kBrandGreen);
+  left->SetBackgroundColour(c_brandGreen);
 
   const int railW = FromDIP(120);
   left->SetMinSize(wxSize(railW, -1));
