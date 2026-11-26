@@ -154,6 +154,9 @@ AlertDialog::AlertDialog(wxWindow *p_parent, const wxString &p_title, const wxAr
   topSizer->Add(contentSizer, 1, wxEXPAND | wxALL, margin);
   topSizer->Add(CreateStdDialogButtonSizer(p_buttons), 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM,
                 margin);
+  if (p_buttons & wxNO) {
+    Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { EndModal(wxID_NO); }, wxID_NO);
+  }
 
   SetSizerAndFit(topSizer);
   CentreOnParent();
