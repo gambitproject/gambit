@@ -16,7 +16,7 @@ no separate C++ tests, so ``make check`` is a no-op.
 * ``tests/cli``: tests of the ``gambit-*`` command-line tools.
 * ``tests/test_tutorials.py``: runs the tutorial notebooks in ``doc/tutorials``.
 * ``build_support/releases/test_extract_changelog.py``: ``ChangeLog`` format tests.
-* ``tests/test_catalog_release.py``: fetching the pinned games catalog release.
+* ``tests/test_catalog_*.py``: fetching catalog releases and commits.
 
 ``pyproject.toml``'s ``[tool.pytest.ini_options]`` configures pytest, including solver and
 ``slow`` markers.

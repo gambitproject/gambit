@@ -466,6 +466,8 @@ Catalog of games
 .. autosummary::
    :toctree: api/
 
+   Catalog
+   CatalogError
    load
    games
    version

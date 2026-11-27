@@ -26,7 +26,10 @@ def test_read_pin_of_repository():
     pin = catalog_release.read_pin()
     assert pin.version.count(".") == 2
     assert len(pin.sha256) == 64
-    assert pin.url.endswith(f"/v{pin.version}/gambit-catalog-{pin.version}.zip")
+    assert catalog_release.archive_path(pin).relative_to(catalog_release.CACHE_DIR).parts == (
+        pin.version,
+        f"gambit-catalog-{pin.version}.zip",
+    )
 
 
 def test_fetch_unpacks_release(tmp_path):
@@ -47,18 +50,18 @@ def test_fetch_reuses_verified_archive(tmp_path):
 def test_fetch_rejects_wrong_sha256(tmp_path):
     pin, url = _make_release(tmp_path)
     bad = catalog_release.Pin(version=pin.version, sha256="0" * 64)
-    with pytest.raises(catalog_release.CatalogReleaseError, match="SHA-256"):
+    with pytest.raises(catalog_release.CatalogError, match="SHA-256"):
         catalog_release.fetch(bad, cache_dir=tmp_path / "cache", url=url)
     assert not catalog_release.archive_path(bad, tmp_path / "cache").exists()
 
 
 def test_fetch_rejects_manifest_of_another_version(tmp_path):
     pin, url = _make_release(tmp_path, manifest_version="1.0.0")
-    with pytest.raises(catalog_release.CatalogReleaseError, match="contains version 1.0.0"):
+    with pytest.raises(catalog_release.CatalogError, match="contains version 1.0.0"):
         catalog_release.fetch(pin, cache_dir=tmp_path / "cache", url=url)
 
 
 def test_fetch_fails_clearly_without_download(tmp_path):
     pin, _ = _make_release(tmp_path)
-    with pytest.raises(catalog_release.CatalogReleaseError, match="could not download"):
+    with pytest.raises(catalog_release.CatalogError, match="could not download"):
         catalog_release.fetch(pin, cache_dir=tmp_path / "cache", url="file:///nonexistent.zip")
