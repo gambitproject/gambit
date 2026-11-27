@@ -1,3 +1,4 @@
+import hashlib
 import json
 import shutil
 import sys
@@ -227,6 +228,154 @@ def test_catalog_read_from_zip(tmp_path, monkeypatch):
     assert gbt.catalog.load("journals/geb/bagwell1995").title == (
         "Bagwell (GEB 1995) commitment and (un)observability"
     )
+
+
+# ---------------------------------------------------------------------------
+# Choosing a catalog version (no network: refs are served from file:// fixtures)
+# ---------------------------------------------------------------------------
+
+_SLUG = "journals/geb/bagwell1995"
+_SHA = "b" * 40
+
+
+def _manifest_of(version, schema=0):
+    """A manifest holding one game of the installed catalog, as a catalog *version*."""
+    entry = next(e for e in gbt.catalog._manifest()[1]["games"] if e["slug"] == _SLUG)
+    return {"schema_version": schema, "catalog_version": version, "games": [entry]}
+
+
+def _write_catalog(root, manifest):
+    """Write a catalog tree (``games/`` with its manifest and game) at *root*."""
+    entry = manifest["games"][0]
+    game = root / "games" / entry["game"]
+    game.parent.mkdir(parents=True)
+    source = gbt.catalog._catalog_root().joinpath(*entry["game"].split("/"))
+    game.write_bytes(source.read_bytes())
+    (root / "games" / "manifest.json").write_text(json.dumps(manifest))
+    return root
+
+
+def _zip_catalog(archive, top, manifest, tmp_path):
+    tree = _write_catalog(tmp_path / "trees" / top, manifest)
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in tree.rglob("*"):
+            if path.is_file():
+                zf.write(path, f"{top}/{path.relative_to(tree).as_posix()}")
+
+
+@pytest.fixture
+def upstream(tmp_path, monkeypatch):
+    """Serve release 9.9.9, commit _SHA and branch 'main' from file:// URLs."""
+    root = tmp_path / "upstream"
+    root.mkdir()
+    release = root / "gambit-catalog-9.9.9.zip"
+    _zip_catalog(release, "gambit-catalog-9.9.9", _manifest_of("9.9.9"), tmp_path)
+    digest = hashlib.sha256(release.read_bytes()).hexdigest()
+    (root / "gambit-catalog-9.9.9.zip.sha256").write_text(digest)
+    _zip_catalog(root / f"{_SHA}.zip", "gambit-catalog-main", _manifest_of("9.9.9"), tmp_path)
+    (root / "ref-main").write_text(_SHA)
+    monkeypatch.setattr(
+        gbt.catalog,
+        "_ENDPOINTS",
+        {
+            "release_url": root.as_uri() + "/gambit-catalog-{version}.zip",
+            "commit_url": root.as_uri() + "/{sha}.zip",
+            "resolve_url": root.as_uri() + "/ref-{ref}",
+        },
+    )
+    return root
+
+
+def test_default_catalog_is_installed_release():
+    catalog = gbt.catalog.Catalog()
+    assert catalog.ref == gbt.catalog.version()
+    assert repr(catalog) == f"Catalog({gbt.catalog.version()!r})"
+    assert gbt.catalog.load(_SLUG).title == catalog.load(_SLUG).title
+
+
+def test_installed_release_is_not_downloaded(monkeypatch):
+    def no_fetch(*args, **kwargs):
+        raise AssertionError("fetched")
+
+    monkeypatch.setattr(gbt.catalog, "fetch", no_fetch)
+    catalog = gbt.catalog.Catalog(gbt.catalog.version())
+    assert catalog.ref == gbt.catalog.version()
+    assert str(catalog.path) == str(gbt.catalog._catalog_root())
+
+
+def test_catalog_of_release(upstream, tmp_path):
+    catalog = gbt.catalog.Catalog("9.9.9", cache_dir=tmp_path / "cache")
+    assert catalog.ref == "9.9.9"
+    assert list(catalog.games()["Game"]) == [_SLUG]
+    assert catalog.load(_SLUG).title == gbt.catalog.load(_SLUG).title
+
+
+def test_catalog_of_branch_reports_full_sha(upstream, tmp_path):
+    catalog = gbt.catalog.Catalog("main", cache_dir=tmp_path / "cache")
+    assert catalog.ref == _SHA
+    assert repr(catalog) == f"Catalog({_SHA!r})"
+    again = gbt.catalog.Catalog(catalog.ref, cache_dir=tmp_path / "cache")
+    assert again.path == catalog.path
+
+
+@pytest.mark.parametrize("games_dir", [False, True])
+def test_catalog_from_path(tmp_path, games_dir):
+    root = _write_catalog(tmp_path / "checkout", _manifest_of("0.0.1"))
+    catalog = gbt.catalog.Catalog(path=root / "games" if games_dir else root)
+    assert catalog.ref is None
+    assert catalog.path == root / "games"
+    assert catalog.load(_SLUG).title == gbt.catalog.load(_SLUG).title
+
+
+def test_catalog_from_path_without_catalog(tmp_path):
+    with pytest.raises(gbt.catalog.CatalogError, match="holds no games catalog"):
+        gbt.catalog.Catalog(path=tmp_path)
+
+
+def test_catalog_ref_and_path_exclusive(tmp_path):
+    with pytest.raises(ValueError):
+        gbt.catalog.Catalog("0.2.0", path=tmp_path)
+
+
+def test_catalog_dir_from_environment_has_no_ref(tmp_path, monkeypatch):
+    root = _write_catalog(tmp_path / "checkout", _manifest_of("0.0.1"))
+    monkeypatch.setenv("GAMBIT_CATALOG_DIR", str(root / "games"))
+    assert gbt.catalog.Catalog().ref is None
+
+
+def test_catalog_of_unsupported_schema(tmp_path):
+    root = _write_catalog(tmp_path / "checkout", _manifest_of("0.0.1", schema=99))
+    with pytest.raises(gbt.catalog.CatalogError, match="schema version 99.*upgrade pygambit"):
+        gbt.catalog.Catalog(path=root)
+
+
+@pytest.mark.parametrize(
+    "change,message",
+    [
+        (lambda m: m.update(schema_version=False), "no integer 'schema_version'"),
+        (lambda m: m.pop("catalog_version"), "no 'catalog_version'"),
+        (lambda m: m.update(catalog_version="main"), "no 'catalog_version'"),
+        (lambda m: m.update(games={}), "no list of 'games'"),
+        (lambda m: m["games"][0].update(format="txt"), "invalid game entry"),
+        (lambda m: m["games"][0].update(format="nfg"), "invalid game entry"),
+        (lambda m: m["games"][0].update(game="../x.efg"), "invalid game entry"),
+        (lambda m: m["games"][0].pop("slug"), "invalid game entry"),
+    ],
+)
+def test_catalog_of_malformed_manifest(tmp_path, change, message):
+    manifest = _manifest_of("0.0.1")
+    change(manifest)
+    root = _write_catalog(tmp_path / "checkout", _manifest_of("0.0.1"))
+    (root / "games" / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(gbt.catalog.CatalogError, match=message):
+        gbt.catalog.Catalog(path=root)
+
+
+def test_catalog_of_invalid_json(tmp_path):
+    root = _write_catalog(tmp_path / "checkout", _manifest_of("0.0.1"))
+    (root / "games" / "manifest.json").write_text("{")
+    with pytest.raises(gbt.catalog.CatalogError, match="cannot be read"):
+        gbt.catalog.Catalog(path=root)
 
 
 # ---------------------------------------------------------------------------

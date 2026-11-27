@@ -110,6 +110,7 @@ construction and analysis of finite extensive and strategic games.
    pygambit
    tools
    gui
+   catalog
    catalog_generators
    developer
    formats

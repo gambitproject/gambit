@@ -3,6 +3,7 @@ recursive-include src/games *.cc *.h *.imp
 recursive-include src/solvers *.cc *.h *.imp
 include build_support/catalog.toml
 include build_support/catalog_release.py
+include src/pygambit/_catalog_fetch.py
 include src/gambit.h
 include src/games.h
 include src/solvers.h
