@@ -55,7 +55,7 @@ def test_read_agg_zero_header():
 
 
 def test_read_bagg():
-    game_path = os.path.join("contrib", "games", "Bayesian-Coffee-3-2-2-3.bagg")
+    game_path = os.path.join("tests", "test_games", "Bayesian-Coffee-3-2-2-3.bagg")
     game = gbt.read_bagg(game_path)
     assert isinstance(game, gbt.Game)
 
