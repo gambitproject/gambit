@@ -52,7 +52,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/redo.h \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
-	contrib/games/2x2x2.efg \
 	contrib/games/4cards.efg \
 	contrib/games/artist1.efg \
 	contrib/games/artist2.efg \
@@ -60,51 +59,18 @@ EXTRA_DIST = \
 	contrib/games/badgame2.efg \
 	contrib/games/bayes1a.efg \
 	contrib/games/bayes2a.efg \
-	contrib/games/bcp2.efg \
-	contrib/games/bcp3.efg \
-	contrib/games/bcp4.efg \
-	contrib/games/bhg1.efg \
-	contrib/games/bhg2.efg \
-	contrib/games/bhg3.efg \
-	contrib/games/bhg4.efg \
-	contrib/games/bhg5.efg \
 	contrib/games/caro2.efg \
-	contrib/games/cent2.efg \
-	contrib/games/cent3.efg \
-	contrib/games/cent4.efg \
-	contrib/games/cent6.efg \
-	contrib/games/centcs10.efg \
-	contrib/games/centcs6.efg \
-	contrib/games/condjury.efg \
-	contrib/games/coord2.efg \
 	contrib/games/coord2ts.efg \
-	contrib/games/coord3.efg \
-	contrib/games/coord4.efg \
 	contrib/games/cs.efg \
-	contrib/games/e04.efg \
-	contrib/games/e05.efg \
-	contrib/games/e06.efg \
-	contrib/games/e07.efg \
 	contrib/games/e08.efg \
 	contrib/games/e09.efg \
 	contrib/games/e10a.efg \
 	contrib/games/e10.efg \
 	contrib/games/e13.efg \
 	contrib/games/e16.efg \
-	contrib/games/e17.efg \
-	contrib/games/e18.efg \
-	contrib/games/g1.efg \
-	contrib/games/g2.efg \
-	contrib/games/g3.efg \
 	contrib/games/holdout7.efg \
 	contrib/games/holdout.efg \
 	contrib/games/hs1.efg \
-	contrib/games/jury_mr.efg \
-	contrib/games/jury_un.efg \
-	contrib/games/km1.efg \
-	contrib/games/km2.efg \
-	contrib/games/km3.efg \
-	contrib/games/km6.efg \
 	contrib/games/montyhal.efg \
 	contrib/games/my_2-1.efg \
 	contrib/games/my_2-4.efg \
@@ -123,64 +89,37 @@ EXTRA_DIST = \
 	contrib/games/palf.efg \
 	contrib/games/pvw2.efg \
 	contrib/games/pvw.efg \
-	contrib/games/sh3.efg \
-	contrib/games/sww1.efg \
-	contrib/games/sww2.efg \
-	contrib/games/sww3.efg \
 	contrib/games/tim.efg \
-	contrib/games/ttt.efg \
-	contrib/games/vd.efg \
 	contrib/games/w_ex1.efg \
 	contrib/games/w_ex2.efg \
-	contrib/games/wilson1.efg \
 	contrib/games/work1.efg \
 	contrib/games/work2.efg \
 	contrib/games/work3.efg \
 	contrib/games/2smp.efg \
-	contrib/games/2x2a.nfg \
 	contrib/games/2x2const.nfg \
 	contrib/games/2x2.nfg \
 	contrib/games/2x2x2.nfg \
 	contrib/games/2x2x2x2.nfg \
 	contrib/games/2x2x2x2x2.nfg \
 	contrib/games/3x3x3.nfg \
-	contrib/games/5x4x3.nfg \
-	contrib/games/8x2x2.nfg \
-	contrib/games/8x8.nfg \
-	contrib/games/cent2.nfg \
-	contrib/games/coord2.nfg \
 	contrib/games/coord333.nfg \
-	contrib/games/coord3.nfg \
-	contrib/games/coord4.nfg \
 	contrib/games/csg1.nfg \
 	contrib/games/csg2.nfg \
 	contrib/games/csg3.nfg \
 	contrib/games/csg4.nfg \
 	contrib/games/deg1.nfg \
 	contrib/games/deg2.nfg \
-	contrib/games/e04.nfg \
-	contrib/games/e07.nfg \
-	contrib/games/g1.nfg \
-	contrib/games/g2.nfg \
-	contrib/games/g3.nfg \
 	contrib/games/loopback.nfg \
 	contrib/games/mixdom2.nfg \
 	contrib/games/mixdom.nfg \
-	contrib/games/oneill.nfg \
 	contrib/games/pd.nfg \
 	contrib/games/perfect1.nfg \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
-	contrib/games/sh3.nfg \
-	contrib/games/sww1.nfg \
 	contrib/games/todd1.nfg \
 	contrib/games/todd2.nfg \
 	contrib/games/todd3.nfg \
-	contrib/games/vd.nfg \
-	contrib/games/wink3.nfg \
-	contrib/games/winkels.nfg \
-	contrib/games/yamamoto.nfg \
-	contrib/games/zero.nfg
+	contrib/games/wink3.nfg
 
 core_SOURCES = \
     src/core/core.h \
